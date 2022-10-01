@@ -1,0 +1,16 @@
+{
+  "name": "testing-elm-open-api",
+  "version": "1.0.0",
+  "description": "A very basic template for an [Elm](https://elm-lang.org/) project, using [Nix](https://nixos.org/) and [direnv](https://direnv.net/).",
+  "main": "index.js",
+  "scripts": {
+    "dev": "http-server build & elm-watch hot"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@redocly/cli": "^1.0.0-beta.110",
+    "elm-watch": "^1.0.2",
+    "http-server": "^14.1.1"
+  }
+}

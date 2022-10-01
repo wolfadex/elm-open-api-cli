@@ -1,0 +1,3 @@
+[submodule "elm-vendored/elm-open-api"]
+	path = elm-vendored/elm-open-api
+	url = git@github.com:wolfadex/elm-open-api.git

@@ -80,190 +80,6 @@ function A9(fun, a, b, c, d, e, f, g, h, i) {
 console.warn('Compiled in DEV mode. Follow the advice at https://elm-lang.org/0.19.1/optimize for better performance and smaller assets.');
 
 
-// EQUALITY
-
-function _Utils_eq(x, y)
-{
-	for (
-		var pair, stack = [], isEqual = _Utils_eqHelp(x, y, 0, stack);
-		isEqual && (pair = stack.pop());
-		isEqual = _Utils_eqHelp(pair.a, pair.b, 0, stack)
-		)
-	{}
-
-	return isEqual;
-}
-
-function _Utils_eqHelp(x, y, depth, stack)
-{
-	if (x === y)
-	{
-		return true;
-	}
-
-	if (typeof x !== 'object' || x === null || y === null)
-	{
-		typeof x === 'function' && _Debug_crash(5);
-		return false;
-	}
-
-	if (depth > 100)
-	{
-		stack.push(_Utils_Tuple2(x,y));
-		return true;
-	}
-
-	/**/
-	if (x.$ === 'Set_elm_builtin')
-	{
-		x = $elm$core$Set$toList(x);
-		y = $elm$core$Set$toList(y);
-	}
-	if (x.$ === 'RBNode_elm_builtin' || x.$ === 'RBEmpty_elm_builtin')
-	{
-		x = $elm$core$Dict$toList(x);
-		y = $elm$core$Dict$toList(y);
-	}
-	//*/
-
-	/**_UNUSED/
-	if (x.$ < 0)
-	{
-		x = $elm$core$Dict$toList(x);
-		y = $elm$core$Dict$toList(y);
-	}
-	//*/
-
-	for (var key in x)
-	{
-		if (!_Utils_eqHelp(x[key], y[key], depth + 1, stack))
-		{
-			return false;
-		}
-	}
-	return true;
-}
-
-var _Utils_equal = F2(_Utils_eq);
-var _Utils_notEqual = F2(function(a, b) { return !_Utils_eq(a,b); });
-
-
-
-// COMPARISONS
-
-// Code in Generate/JavaScript.hs, Basics.js, and List.js depends on
-// the particular integer values assigned to LT, EQ, and GT.
-
-function _Utils_cmp(x, y, ord)
-{
-	if (typeof x !== 'object')
-	{
-		return x === y ? /*EQ*/ 0 : x < y ? /*LT*/ -1 : /*GT*/ 1;
-	}
-
-	/**/
-	if (x instanceof String)
-	{
-		var a = x.valueOf();
-		var b = y.valueOf();
-		return a === b ? 0 : a < b ? -1 : 1;
-	}
-	//*/
-
-	/**_UNUSED/
-	if (typeof x.$ === 'undefined')
-	//*/
-	/**/
-	if (x.$[0] === '#')
-	//*/
-	{
-		return (ord = _Utils_cmp(x.a, y.a))
-			? ord
-			: (ord = _Utils_cmp(x.b, y.b))
-				? ord
-				: _Utils_cmp(x.c, y.c);
-	}
-
-	// traverse conses until end of a list or a mismatch
-	for (; x.b && y.b && !(ord = _Utils_cmp(x.a, y.a)); x = x.b, y = y.b) {} // WHILE_CONSES
-	return ord || (x.b ? /*GT*/ 1 : y.b ? /*LT*/ -1 : /*EQ*/ 0);
-}
-
-var _Utils_lt = F2(function(a, b) { return _Utils_cmp(a, b) < 0; });
-var _Utils_le = F2(function(a, b) { return _Utils_cmp(a, b) < 1; });
-var _Utils_gt = F2(function(a, b) { return _Utils_cmp(a, b) > 0; });
-var _Utils_ge = F2(function(a, b) { return _Utils_cmp(a, b) >= 0; });
-
-var _Utils_compare = F2(function(x, y)
-{
-	var n = _Utils_cmp(x, y);
-	return n < 0 ? $elm$core$Basics$LT : n ? $elm$core$Basics$GT : $elm$core$Basics$EQ;
-});
-
-
-// COMMON VALUES
-
-var _Utils_Tuple0_UNUSED = 0;
-var _Utils_Tuple0 = { $: '#0' };
-
-function _Utils_Tuple2_UNUSED(a, b) { return { a: a, b: b }; }
-function _Utils_Tuple2(a, b) { return { $: '#2', a: a, b: b }; }
-
-function _Utils_Tuple3_UNUSED(a, b, c) { return { a: a, b: b, c: c }; }
-function _Utils_Tuple3(a, b, c) { return { $: '#3', a: a, b: b, c: c }; }
-
-function _Utils_chr_UNUSED(c) { return c; }
-function _Utils_chr(c) { return new String(c); }
-
-
-// RECORDS
-
-function _Utils_update(oldRecord, updatedFields)
-{
-	var newRecord = {};
-
-	for (var key in oldRecord)
-	{
-		newRecord[key] = oldRecord[key];
-	}
-
-	for (var key in updatedFields)
-	{
-		newRecord[key] = updatedFields[key];
-	}
-
-	return newRecord;
-}
-
-
-// APPEND
-
-var _Utils_append = F2(_Utils_ap);
-
-function _Utils_ap(xs, ys)
-{
-	// append Strings
-	if (typeof xs === 'string')
-	{
-		return xs + ys;
-	}
-
-	// append Lists
-	if (!xs.b)
-	{
-		return ys;
-	}
-	var root = _List_Cons(xs.a, ys);
-	xs = xs.b
-	for (var curr = root; xs.b; xs = xs.b) // WHILE_CONS
-	{
-		curr = curr.b = _List_Cons(xs.a, ys);
-	}
-	return root;
-}
-
-
-
 var _List_Nil_UNUSED = { $: 0 };
 var _List_Nil = { $: '[]' };
 
@@ -789,6 +605,190 @@ function _Debug_regionToString(region)
 		return 'on line ' + region.start.line;
 	}
 	return 'on lines ' + region.start.line + ' through ' + region.end.line;
+}
+
+
+
+// EQUALITY
+
+function _Utils_eq(x, y)
+{
+	for (
+		var pair, stack = [], isEqual = _Utils_eqHelp(x, y, 0, stack);
+		isEqual && (pair = stack.pop());
+		isEqual = _Utils_eqHelp(pair.a, pair.b, 0, stack)
+		)
+	{}
+
+	return isEqual;
+}
+
+function _Utils_eqHelp(x, y, depth, stack)
+{
+	if (x === y)
+	{
+		return true;
+	}
+
+	if (typeof x !== 'object' || x === null || y === null)
+	{
+		typeof x === 'function' && _Debug_crash(5);
+		return false;
+	}
+
+	if (depth > 100)
+	{
+		stack.push(_Utils_Tuple2(x,y));
+		return true;
+	}
+
+	/**/
+	if (x.$ === 'Set_elm_builtin')
+	{
+		x = $elm$core$Set$toList(x);
+		y = $elm$core$Set$toList(y);
+	}
+	if (x.$ === 'RBNode_elm_builtin' || x.$ === 'RBEmpty_elm_builtin')
+	{
+		x = $elm$core$Dict$toList(x);
+		y = $elm$core$Dict$toList(y);
+	}
+	//*/
+
+	/**_UNUSED/
+	if (x.$ < 0)
+	{
+		x = $elm$core$Dict$toList(x);
+		y = $elm$core$Dict$toList(y);
+	}
+	//*/
+
+	for (var key in x)
+	{
+		if (!_Utils_eqHelp(x[key], y[key], depth + 1, stack))
+		{
+			return false;
+		}
+	}
+	return true;
+}
+
+var _Utils_equal = F2(_Utils_eq);
+var _Utils_notEqual = F2(function(a, b) { return !_Utils_eq(a,b); });
+
+
+
+// COMPARISONS
+
+// Code in Generate/JavaScript.hs, Basics.js, and List.js depends on
+// the particular integer values assigned to LT, EQ, and GT.
+
+function _Utils_cmp(x, y, ord)
+{
+	if (typeof x !== 'object')
+	{
+		return x === y ? /*EQ*/ 0 : x < y ? /*LT*/ -1 : /*GT*/ 1;
+	}
+
+	/**/
+	if (x instanceof String)
+	{
+		var a = x.valueOf();
+		var b = y.valueOf();
+		return a === b ? 0 : a < b ? -1 : 1;
+	}
+	//*/
+
+	/**_UNUSED/
+	if (typeof x.$ === 'undefined')
+	//*/
+	/**/
+	if (x.$[0] === '#')
+	//*/
+	{
+		return (ord = _Utils_cmp(x.a, y.a))
+			? ord
+			: (ord = _Utils_cmp(x.b, y.b))
+				? ord
+				: _Utils_cmp(x.c, y.c);
+	}
+
+	// traverse conses until end of a list or a mismatch
+	for (; x.b && y.b && !(ord = _Utils_cmp(x.a, y.a)); x = x.b, y = y.b) {} // WHILE_CONSES
+	return ord || (x.b ? /*GT*/ 1 : y.b ? /*LT*/ -1 : /*EQ*/ 0);
+}
+
+var _Utils_lt = F2(function(a, b) { return _Utils_cmp(a, b) < 0; });
+var _Utils_le = F2(function(a, b) { return _Utils_cmp(a, b) < 1; });
+var _Utils_gt = F2(function(a, b) { return _Utils_cmp(a, b) > 0; });
+var _Utils_ge = F2(function(a, b) { return _Utils_cmp(a, b) >= 0; });
+
+var _Utils_compare = F2(function(x, y)
+{
+	var n = _Utils_cmp(x, y);
+	return n < 0 ? $elm$core$Basics$LT : n ? $elm$core$Basics$GT : $elm$core$Basics$EQ;
+});
+
+
+// COMMON VALUES
+
+var _Utils_Tuple0_UNUSED = 0;
+var _Utils_Tuple0 = { $: '#0' };
+
+function _Utils_Tuple2_UNUSED(a, b) { return { a: a, b: b }; }
+function _Utils_Tuple2(a, b) { return { $: '#2', a: a, b: b }; }
+
+function _Utils_Tuple3_UNUSED(a, b, c) { return { a: a, b: b, c: c }; }
+function _Utils_Tuple3(a, b, c) { return { $: '#3', a: a, b: b, c: c }; }
+
+function _Utils_chr_UNUSED(c) { return c; }
+function _Utils_chr(c) { return new String(c); }
+
+
+// RECORDS
+
+function _Utils_update(oldRecord, updatedFields)
+{
+	var newRecord = {};
+
+	for (var key in oldRecord)
+	{
+		newRecord[key] = oldRecord[key];
+	}
+
+	for (var key in updatedFields)
+	{
+		newRecord[key] = updatedFields[key];
+	}
+
+	return newRecord;
+}
+
+
+// APPEND
+
+var _Utils_append = F2(_Utils_ap);
+
+function _Utils_ap(xs, ys)
+{
+	// append Strings
+	if (typeof xs === 'string')
+	{
+		return xs + ys;
+	}
+
+	// append Lists
+	if (!xs.b)
+	{
+		return ys;
+	}
+	var root = _List_Cons(xs.a, ys);
+	xs = xs.b
+	for (var curr = root; xs.b; xs = xs.b) // WHILE_CONS
+	{
+		curr = curr.b = _List_Cons(xs.a, ys);
+	}
+	return root;
 }
 
 
@@ -2359,2017 +2359,141 @@ function _Platform_mergeExportsDebug(moduleName, obj, exports)
 
 
 
-
-// HELPERS
-
-
-var _VirtualDom_divertHrefToApp;
-
-var _VirtualDom_doc = typeof document !== 'undefined' ? document : {};
-
-
-function _VirtualDom_appendChild(parent, child)
+var _Bitwise_and = F2(function(a, b)
 {
-	parent.appendChild(child);
-}
+	return a & b;
+});
 
-var _VirtualDom_init = F4(function(virtualNode, flagDecoder, debugMetadata, args)
+var _Bitwise_or = F2(function(a, b)
 {
-	// NOTE: this function needs _Platform_export available to work
+	return a | b;
+});
 
-	/**_UNUSED/
-	var node = args['node'];
-	//*/
-	/**/
-	var node = args && args['node'] ? args['node'] : _Debug_crash(0);
-	//*/
+var _Bitwise_xor = F2(function(a, b)
+{
+	return a ^ b;
+});
 
-	node.parentNode.replaceChild(
-		_VirtualDom_render(virtualNode, function() {}),
-		node
-	);
+function _Bitwise_complement(a)
+{
+	return ~a;
+};
 
-	return {};
+var _Bitwise_shiftLeftBy = F2(function(offset, a)
+{
+	return a << offset;
+});
+
+var _Bitwise_shiftRightBy = F2(function(offset, a)
+{
+	return a >> offset;
+});
+
+var _Bitwise_shiftRightZfBy = F2(function(offset, a)
+{
+	return a >>> offset;
 });
 
 
+// CREATE
 
-// TEXT
+var _Regex_never = /.^/;
 
-
-function _VirtualDom_text(string)
+var _Regex_fromStringWith = F2(function(options, string)
 {
-	return {
-		$: 0,
-		a: string
-	};
-}
+	var flags = 'g';
+	if (options.multiline) { flags += 'm'; }
+	if (options.caseInsensitive) { flags += 'i'; }
 
-
-
-// NODE
-
-
-var _VirtualDom_nodeNS = F2(function(namespace, tag)
-{
-	return F2(function(factList, kidList)
+	try
 	{
-		for (var kids = [], descendantsCount = 0; kidList.b; kidList = kidList.b) // WHILE_CONS
-		{
-			var kid = kidList.a;
-			descendantsCount += (kid.b || 0);
-			kids.push(kid);
-		}
-		descendantsCount += kids.length;
-
-		return {
-			$: 1,
-			c: tag,
-			d: _VirtualDom_organizeFacts(factList),
-			e: kids,
-			f: namespace,
-			b: descendantsCount
-		};
-	});
-});
-
-
-var _VirtualDom_node = _VirtualDom_nodeNS(undefined);
-
-
-
-// KEYED NODE
-
-
-var _VirtualDom_keyedNodeNS = F2(function(namespace, tag)
-{
-	return F2(function(factList, kidList)
+		return $elm$core$Maybe$Just(new RegExp(string, flags));
+	}
+	catch(error)
 	{
-		for (var kids = [], descendantsCount = 0; kidList.b; kidList = kidList.b) // WHILE_CONS
-		{
-			var kid = kidList.a;
-			descendantsCount += (kid.b.b || 0);
-			kids.push(kid);
-		}
-		descendantsCount += kids.length;
-
-		return {
-			$: 2,
-			c: tag,
-			d: _VirtualDom_organizeFacts(factList),
-			e: kids,
-			f: namespace,
-			b: descendantsCount
-		};
-	});
-});
-
-
-var _VirtualDom_keyedNode = _VirtualDom_keyedNodeNS(undefined);
-
-
-
-// CUSTOM
-
-
-function _VirtualDom_custom(factList, model, render, diff)
-{
-	return {
-		$: 3,
-		d: _VirtualDom_organizeFacts(factList),
-		g: model,
-		h: render,
-		i: diff
-	};
-}
-
-
-
-// MAP
-
-
-var _VirtualDom_map = F2(function(tagger, node)
-{
-	return {
-		$: 4,
-		j: tagger,
-		k: node,
-		b: 1 + (node.b || 0)
-	};
-});
-
-
-
-// LAZY
-
-
-function _VirtualDom_thunk(refs, thunk)
-{
-	return {
-		$: 5,
-		l: refs,
-		m: thunk,
-		k: undefined
-	};
-}
-
-var _VirtualDom_lazy = F2(function(func, a)
-{
-	return _VirtualDom_thunk([func, a], function() {
-		return func(a);
-	});
-});
-
-var _VirtualDom_lazy2 = F3(function(func, a, b)
-{
-	return _VirtualDom_thunk([func, a, b], function() {
-		return A2(func, a, b);
-	});
-});
-
-var _VirtualDom_lazy3 = F4(function(func, a, b, c)
-{
-	return _VirtualDom_thunk([func, a, b, c], function() {
-		return A3(func, a, b, c);
-	});
-});
-
-var _VirtualDom_lazy4 = F5(function(func, a, b, c, d)
-{
-	return _VirtualDom_thunk([func, a, b, c, d], function() {
-		return A4(func, a, b, c, d);
-	});
-});
-
-var _VirtualDom_lazy5 = F6(function(func, a, b, c, d, e)
-{
-	return _VirtualDom_thunk([func, a, b, c, d, e], function() {
-		return A5(func, a, b, c, d, e);
-	});
-});
-
-var _VirtualDom_lazy6 = F7(function(func, a, b, c, d, e, f)
-{
-	return _VirtualDom_thunk([func, a, b, c, d, e, f], function() {
-		return A6(func, a, b, c, d, e, f);
-	});
-});
-
-var _VirtualDom_lazy7 = F8(function(func, a, b, c, d, e, f, g)
-{
-	return _VirtualDom_thunk([func, a, b, c, d, e, f, g], function() {
-		return A7(func, a, b, c, d, e, f, g);
-	});
-});
-
-var _VirtualDom_lazy8 = F9(function(func, a, b, c, d, e, f, g, h)
-{
-	return _VirtualDom_thunk([func, a, b, c, d, e, f, g, h], function() {
-		return A8(func, a, b, c, d, e, f, g, h);
-	});
-});
-
-
-
-// FACTS
-
-
-var _VirtualDom_on = F2(function(key, handler)
-{
-	return {
-		$: 'a0',
-		n: key,
-		o: handler
-	};
-});
-var _VirtualDom_style = F2(function(key, value)
-{
-	return {
-		$: 'a1',
-		n: key,
-		o: value
-	};
-});
-var _VirtualDom_property = F2(function(key, value)
-{
-	return {
-		$: 'a2',
-		n: key,
-		o: value
-	};
-});
-var _VirtualDom_attribute = F2(function(key, value)
-{
-	return {
-		$: 'a3',
-		n: key,
-		o: value
-	};
-});
-var _VirtualDom_attributeNS = F3(function(namespace, key, value)
-{
-	return {
-		$: 'a4',
-		n: key,
-		o: { f: namespace, o: value }
-	};
-});
-
-
-
-// XSS ATTACK VECTOR CHECKS
-//
-// For some reason, tabs can appear in href protocols and it still works.
-// So '\tjava\tSCRIPT:alert("!!!")' and 'javascript:alert("!!!")' are the same
-// in practice. That is why _VirtualDom_RE_js and _VirtualDom_RE_js_html look
-// so freaky.
-//
-// Pulling the regular expressions out to the top level gives a slight speed
-// boost in small benchmarks (4-10%) but hoisting values to reduce allocation
-// can be unpredictable in large programs where JIT may have a harder time with
-// functions are not fully self-contained. The benefit is more that the js and
-// js_html ones are so weird that I prefer to see them near each other.
-
-
-var _VirtualDom_RE_script = /^script$/i;
-var _VirtualDom_RE_on_formAction = /^(on|formAction$)/i;
-var _VirtualDom_RE_js = /^\s*j\s*a\s*v\s*a\s*s\s*c\s*r\s*i\s*p\s*t\s*:/i;
-var _VirtualDom_RE_js_html = /^\s*(j\s*a\s*v\s*a\s*s\s*c\s*r\s*i\s*p\s*t\s*:|d\s*a\s*t\s*a\s*:\s*t\s*e\s*x\s*t\s*\/\s*h\s*t\s*m\s*l\s*(,|;))/i;
-
-
-function _VirtualDom_noScript(tag)
-{
-	return _VirtualDom_RE_script.test(tag) ? 'p' : tag;
-}
-
-function _VirtualDom_noOnOrFormAction(key)
-{
-	return _VirtualDom_RE_on_formAction.test(key) ? 'data-' + key : key;
-}
-
-function _VirtualDom_noInnerHtmlOrFormAction(key)
-{
-	return key == 'innerHTML' || key == 'formAction' ? 'data-' + key : key;
-}
-
-function _VirtualDom_noJavaScriptUri(value)
-{
-	return _VirtualDom_RE_js.test(value)
-		? /**_UNUSED/''//*//**/'javascript:alert("This is an XSS vector. Please use ports or web components instead.")'//*/
-		: value;
-}
-
-function _VirtualDom_noJavaScriptOrHtmlUri(value)
-{
-	return _VirtualDom_RE_js_html.test(value)
-		? /**_UNUSED/''//*//**/'javascript:alert("This is an XSS vector. Please use ports or web components instead.")'//*/
-		: value;
-}
-
-function _VirtualDom_noJavaScriptOrHtmlJson(value)
-{
-	return (typeof _Json_unwrap(value) === 'string' && _VirtualDom_RE_js_html.test(_Json_unwrap(value)))
-		? _Json_wrap(
-			/**_UNUSED/''//*//**/'javascript:alert("This is an XSS vector. Please use ports or web components instead.")'//*/
-		) : value;
-}
-
-
-
-// MAP FACTS
-
-
-var _VirtualDom_mapAttribute = F2(function(func, attr)
-{
-	return (attr.$ === 'a0')
-		? A2(_VirtualDom_on, attr.n, _VirtualDom_mapHandler(func, attr.o))
-		: attr;
-});
-
-function _VirtualDom_mapHandler(func, handler)
-{
-	var tag = $elm$virtual_dom$VirtualDom$toHandlerInt(handler);
-
-	// 0 = Normal
-	// 1 = MayStopPropagation
-	// 2 = MayPreventDefault
-	// 3 = Custom
-
-	return {
-		$: handler.$,
-		a:
-			!tag
-				? A2($elm$json$Json$Decode$map, func, handler.a)
-				:
-			A3($elm$json$Json$Decode$map2,
-				tag < 3
-					? _VirtualDom_mapEventTuple
-					: _VirtualDom_mapEventRecord,
-				$elm$json$Json$Decode$succeed(func),
-				handler.a
-			)
-	};
-}
-
-var _VirtualDom_mapEventTuple = F2(function(func, tuple)
-{
-	return _Utils_Tuple2(func(tuple.a), tuple.b);
-});
-
-var _VirtualDom_mapEventRecord = F2(function(func, record)
-{
-	return {
-		message: func(record.message),
-		stopPropagation: record.stopPropagation,
-		preventDefault: record.preventDefault
+		return $elm$core$Maybe$Nothing;
 	}
 });
 
 
+// USE
 
-// ORGANIZE FACTS
-
-
-function _VirtualDom_organizeFacts(factList)
+var _Regex_contains = F2(function(re, string)
 {
-	for (var facts = {}; factList.b; factList = factList.b) // WHILE_CONS
-	{
-		var entry = factList.a;
-
-		var tag = entry.$;
-		var key = entry.n;
-		var value = entry.o;
-
-		if (tag === 'a2')
-		{
-			(key === 'className')
-				? _VirtualDom_addClass(facts, key, _Json_unwrap(value))
-				: facts[key] = _Json_unwrap(value);
-
-			continue;
-		}
-
-		var subFacts = facts[tag] || (facts[tag] = {});
-		(tag === 'a3' && key === 'class')
-			? _VirtualDom_addClass(subFacts, key, value)
-			: subFacts[key] = value;
-	}
-
-	return facts;
-}
-
-function _VirtualDom_addClass(object, key, newClass)
-{
-	var classes = object[key];
-	object[key] = classes ? classes + ' ' + newClass : newClass;
-}
-
-
-
-// RENDER
-
-
-function _VirtualDom_render(vNode, eventNode)
-{
-	var tag = vNode.$;
-
-	if (tag === 5)
-	{
-		return _VirtualDom_render(vNode.k || (vNode.k = vNode.m()), eventNode);
-	}
-
-	if (tag === 0)
-	{
-		return _VirtualDom_doc.createTextNode(vNode.a);
-	}
-
-	if (tag === 4)
-	{
-		var subNode = vNode.k;
-		var tagger = vNode.j;
-
-		while (subNode.$ === 4)
-		{
-			typeof tagger !== 'object'
-				? tagger = [tagger, subNode.j]
-				: tagger.push(subNode.j);
-
-			subNode = subNode.k;
-		}
-
-		var subEventRoot = { j: tagger, p: eventNode };
-		var domNode = _VirtualDom_render(subNode, subEventRoot);
-		domNode.elm_event_node_ref = subEventRoot;
-		return domNode;
-	}
-
-	if (tag === 3)
-	{
-		var domNode = vNode.h(vNode.g);
-		_VirtualDom_applyFacts(domNode, eventNode, vNode.d);
-		return domNode;
-	}
-
-	// at this point `tag` must be 1 or 2
-
-	var domNode = vNode.f
-		? _VirtualDom_doc.createElementNS(vNode.f, vNode.c)
-		: _VirtualDom_doc.createElement(vNode.c);
-
-	if (_VirtualDom_divertHrefToApp && vNode.c == 'a')
-	{
-		domNode.addEventListener('click', _VirtualDom_divertHrefToApp(domNode));
-	}
-
-	_VirtualDom_applyFacts(domNode, eventNode, vNode.d);
-
-	for (var kids = vNode.e, i = 0; i < kids.length; i++)
-	{
-		_VirtualDom_appendChild(domNode, _VirtualDom_render(tag === 1 ? kids[i] : kids[i].b, eventNode));
-	}
-
-	return domNode;
-}
-
-
-
-// APPLY FACTS
-
-
-function _VirtualDom_applyFacts(domNode, eventNode, facts)
-{
-	for (var key in facts)
-	{
-		var value = facts[key];
-
-		key === 'a1'
-			? _VirtualDom_applyStyles(domNode, value)
-			:
-		key === 'a0'
-			? _VirtualDom_applyEvents(domNode, eventNode, value)
-			:
-		key === 'a3'
-			? _VirtualDom_applyAttrs(domNode, value)
-			:
-		key === 'a4'
-			? _VirtualDom_applyAttrsNS(domNode, value)
-			:
-		((key !== 'value' && key !== 'checked') || domNode[key] !== value) && (domNode[key] = value);
-	}
-}
-
-
-
-// APPLY STYLES
-
-
-function _VirtualDom_applyStyles(domNode, styles)
-{
-	var domNodeStyle = domNode.style;
-
-	for (var key in styles)
-	{
-		domNodeStyle[key] = styles[key];
-	}
-}
-
-
-
-// APPLY ATTRS
-
-
-function _VirtualDom_applyAttrs(domNode, attrs)
-{
-	for (var key in attrs)
-	{
-		var value = attrs[key];
-		typeof value !== 'undefined'
-			? domNode.setAttribute(key, value)
-			: domNode.removeAttribute(key);
-	}
-}
-
-
-
-// APPLY NAMESPACED ATTRS
-
-
-function _VirtualDom_applyAttrsNS(domNode, nsAttrs)
-{
-	for (var key in nsAttrs)
-	{
-		var pair = nsAttrs[key];
-		var namespace = pair.f;
-		var value = pair.o;
-
-		typeof value !== 'undefined'
-			? domNode.setAttributeNS(namespace, key, value)
-			: domNode.removeAttributeNS(namespace, key);
-	}
-}
-
-
-
-// APPLY EVENTS
-
-
-function _VirtualDom_applyEvents(domNode, eventNode, events)
-{
-	var allCallbacks = domNode.elmFs || (domNode.elmFs = {});
-
-	for (var key in events)
-	{
-		var newHandler = events[key];
-		var oldCallback = allCallbacks[key];
-
-		if (!newHandler)
-		{
-			domNode.removeEventListener(key, oldCallback);
-			allCallbacks[key] = undefined;
-			continue;
-		}
-
-		if (oldCallback)
-		{
-			var oldHandler = oldCallback.q;
-			if (oldHandler.$ === newHandler.$)
-			{
-				oldCallback.q = newHandler;
-				continue;
-			}
-			domNode.removeEventListener(key, oldCallback);
-		}
-
-		oldCallback = _VirtualDom_makeCallback(eventNode, newHandler);
-		domNode.addEventListener(key, oldCallback,
-			_VirtualDom_passiveSupported
-			&& { passive: $elm$virtual_dom$VirtualDom$toHandlerInt(newHandler) < 2 }
-		);
-		allCallbacks[key] = oldCallback;
-	}
-}
-
-
-
-// PASSIVE EVENTS
-
-
-var _VirtualDom_passiveSupported;
-
-try
-{
-	window.addEventListener('t', null, Object.defineProperty({}, 'passive', {
-		get: function() { _VirtualDom_passiveSupported = true; }
-	}));
-}
-catch(e) {}
-
-
-
-// EVENT HANDLERS
-
-
-function _VirtualDom_makeCallback(eventNode, initialHandler)
-{
-	function callback(event)
-	{
-		var handler = callback.q;
-		var result = _Json_runHelp(handler.a, event);
-
-		if (!$elm$core$Result$isOk(result))
-		{
-			return;
-		}
-
-		var tag = $elm$virtual_dom$VirtualDom$toHandlerInt(handler);
-
-		// 0 = Normal
-		// 1 = MayStopPropagation
-		// 2 = MayPreventDefault
-		// 3 = Custom
-
-		var value = result.a;
-		var message = !tag ? value : tag < 3 ? value.a : value.message;
-		var stopPropagation = tag == 1 ? value.b : tag == 3 && value.stopPropagation;
-		var currentEventNode = (
-			stopPropagation && event.stopPropagation(),
-			(tag == 2 ? value.b : tag == 3 && value.preventDefault) && event.preventDefault(),
-			eventNode
-		);
-		var tagger;
-		var i;
-		while (tagger = currentEventNode.j)
-		{
-			if (typeof tagger == 'function')
-			{
-				message = tagger(message);
-			}
-			else
-			{
-				for (var i = tagger.length; i--; )
-				{
-					message = tagger[i](message);
-				}
-			}
-			currentEventNode = currentEventNode.p;
-		}
-		currentEventNode(message, stopPropagation); // stopPropagation implies isSync
-	}
-
-	callback.q = initialHandler;
-
-	return callback;
-}
-
-function _VirtualDom_equalEvents(x, y)
-{
-	return x.$ == y.$ && _Json_equality(x.a, y.a);
-}
-
-
-
-// DIFF
-
-
-// TODO: Should we do patches like in iOS?
-//
-// type Patch
-//   = At Int Patch
-//   | Batch (List Patch)
-//   | Change ...
-//
-// How could it not be better?
-//
-function _VirtualDom_diff(x, y)
-{
-	var patches = [];
-	_VirtualDom_diffHelp(x, y, patches, 0);
-	return patches;
-}
-
-
-function _VirtualDom_pushPatch(patches, type, index, data)
-{
-	var patch = {
-		$: type,
-		r: index,
-		s: data,
-		t: undefined,
-		u: undefined
-	};
-	patches.push(patch);
-	return patch;
-}
-
-
-function _VirtualDom_diffHelp(x, y, patches, index)
-{
-	if (x === y)
-	{
-		return;
-	}
-
-	var xType = x.$;
-	var yType = y.$;
-
-	// Bail if you run into different types of nodes. Implies that the
-	// structure has changed significantly and it's not worth a diff.
-	if (xType !== yType)
-	{
-		if (xType === 1 && yType === 2)
-		{
-			y = _VirtualDom_dekey(y);
-			yType = 1;
-		}
-		else
-		{
-			_VirtualDom_pushPatch(patches, 0, index, y);
-			return;
-		}
-	}
-
-	// Now we know that both nodes are the same $.
-	switch (yType)
-	{
-		case 5:
-			var xRefs = x.l;
-			var yRefs = y.l;
-			var i = xRefs.length;
-			var same = i === yRefs.length;
-			while (same && i--)
-			{
-				same = xRefs[i] === yRefs[i];
-			}
-			if (same)
-			{
-				y.k = x.k;
-				return;
-			}
-			y.k = y.m();
-			var subPatches = [];
-			_VirtualDom_diffHelp(x.k, y.k, subPatches, 0);
-			subPatches.length > 0 && _VirtualDom_pushPatch(patches, 1, index, subPatches);
-			return;
-
-		case 4:
-			// gather nested taggers
-			var xTaggers = x.j;
-			var yTaggers = y.j;
-			var nesting = false;
-
-			var xSubNode = x.k;
-			while (xSubNode.$ === 4)
-			{
-				nesting = true;
-
-				typeof xTaggers !== 'object'
-					? xTaggers = [xTaggers, xSubNode.j]
-					: xTaggers.push(xSubNode.j);
-
-				xSubNode = xSubNode.k;
-			}
-
-			var ySubNode = y.k;
-			while (ySubNode.$ === 4)
-			{
-				nesting = true;
-
-				typeof yTaggers !== 'object'
-					? yTaggers = [yTaggers, ySubNode.j]
-					: yTaggers.push(ySubNode.j);
-
-				ySubNode = ySubNode.k;
-			}
-
-			// Just bail if different numbers of taggers. This implies the
-			// structure of the virtual DOM has changed.
-			if (nesting && xTaggers.length !== yTaggers.length)
-			{
-				_VirtualDom_pushPatch(patches, 0, index, y);
-				return;
-			}
-
-			// check if taggers are "the same"
-			if (nesting ? !_VirtualDom_pairwiseRefEqual(xTaggers, yTaggers) : xTaggers !== yTaggers)
-			{
-				_VirtualDom_pushPatch(patches, 2, index, yTaggers);
-			}
-
-			// diff everything below the taggers
-			_VirtualDom_diffHelp(xSubNode, ySubNode, patches, index + 1);
-			return;
-
-		case 0:
-			if (x.a !== y.a)
-			{
-				_VirtualDom_pushPatch(patches, 3, index, y.a);
-			}
-			return;
-
-		case 1:
-			_VirtualDom_diffNodes(x, y, patches, index, _VirtualDom_diffKids);
-			return;
-
-		case 2:
-			_VirtualDom_diffNodes(x, y, patches, index, _VirtualDom_diffKeyedKids);
-			return;
-
-		case 3:
-			if (x.h !== y.h)
-			{
-				_VirtualDom_pushPatch(patches, 0, index, y);
-				return;
-			}
-
-			var factsDiff = _VirtualDom_diffFacts(x.d, y.d);
-			factsDiff && _VirtualDom_pushPatch(patches, 4, index, factsDiff);
-
-			var patch = y.i(x.g, y.g);
-			patch && _VirtualDom_pushPatch(patches, 5, index, patch);
-
-			return;
-	}
-}
-
-// assumes the incoming arrays are the same length
-function _VirtualDom_pairwiseRefEqual(as, bs)
-{
-	for (var i = 0; i < as.length; i++)
-	{
-		if (as[i] !== bs[i])
-		{
-			return false;
-		}
-	}
-
-	return true;
-}
-
-function _VirtualDom_diffNodes(x, y, patches, index, diffKids)
-{
-	// Bail if obvious indicators have changed. Implies more serious
-	// structural changes such that it's not worth it to diff.
-	if (x.c !== y.c || x.f !== y.f)
-	{
-		_VirtualDom_pushPatch(patches, 0, index, y);
-		return;
-	}
-
-	var factsDiff = _VirtualDom_diffFacts(x.d, y.d);
-	factsDiff && _VirtualDom_pushPatch(patches, 4, index, factsDiff);
-
-	diffKids(x, y, patches, index);
-}
-
-
-
-// DIFF FACTS
-
-
-// TODO Instead of creating a new diff object, it's possible to just test if
-// there *is* a diff. During the actual patch, do the diff again and make the
-// modifications directly. This way, there's no new allocations. Worth it?
-function _VirtualDom_diffFacts(x, y, category)
-{
-	var diff;
-
-	// look for changes and removals
-	for (var xKey in x)
-	{
-		if (xKey === 'a1' || xKey === 'a0' || xKey === 'a3' || xKey === 'a4')
-		{
-			var subDiff = _VirtualDom_diffFacts(x[xKey], y[xKey] || {}, xKey);
-			if (subDiff)
-			{
-				diff = diff || {};
-				diff[xKey] = subDiff;
-			}
-			continue;
-		}
-
-		// remove if not in the new facts
-		if (!(xKey in y))
-		{
-			diff = diff || {};
-			diff[xKey] =
-				!category
-					? (typeof x[xKey] === 'string' ? '' : null)
-					:
-				(category === 'a1')
-					? ''
-					:
-				(category === 'a0' || category === 'a3')
-					? undefined
-					:
-				{ f: x[xKey].f, o: undefined };
-
-			continue;
-		}
-
-		var xValue = x[xKey];
-		var yValue = y[xKey];
-
-		// reference equal, so don't worry about it
-		if (xValue === yValue && xKey !== 'value' && xKey !== 'checked'
-			|| category === 'a0' && _VirtualDom_equalEvents(xValue, yValue))
-		{
-			continue;
-		}
-
-		diff = diff || {};
-		diff[xKey] = yValue;
-	}
-
-	// add new stuff
-	for (var yKey in y)
-	{
-		if (!(yKey in x))
-		{
-			diff = diff || {};
-			diff[yKey] = y[yKey];
-		}
-	}
-
-	return diff;
-}
-
-
-
-// DIFF KIDS
-
-
-function _VirtualDom_diffKids(xParent, yParent, patches, index)
-{
-	var xKids = xParent.e;
-	var yKids = yParent.e;
-
-	var xLen = xKids.length;
-	var yLen = yKids.length;
-
-	// FIGURE OUT IF THERE ARE INSERTS OR REMOVALS
-
-	if (xLen > yLen)
-	{
-		_VirtualDom_pushPatch(patches, 6, index, {
-			v: yLen,
-			i: xLen - yLen
-		});
-	}
-	else if (xLen < yLen)
-	{
-		_VirtualDom_pushPatch(patches, 7, index, {
-			v: xLen,
-			e: yKids
-		});
-	}
-
-	// PAIRWISE DIFF EVERYTHING ELSE
-
-	for (var minLen = xLen < yLen ? xLen : yLen, i = 0; i < minLen; i++)
-	{
-		var xKid = xKids[i];
-		_VirtualDom_diffHelp(xKid, yKids[i], patches, ++index);
-		index += xKid.b || 0;
-	}
-}
-
-
-
-// KEYED DIFF
-
-
-function _VirtualDom_diffKeyedKids(xParent, yParent, patches, rootIndex)
-{
-	var localPatches = [];
-
-	var changes = {}; // Dict String Entry
-	var inserts = []; // Array { index : Int, entry : Entry }
-	// type Entry = { tag : String, vnode : VNode, index : Int, data : _ }
-
-	var xKids = xParent.e;
-	var yKids = yParent.e;
-	var xLen = xKids.length;
-	var yLen = yKids.length;
-	var xIndex = 0;
-	var yIndex = 0;
-
-	var index = rootIndex;
-
-	while (xIndex < xLen && yIndex < yLen)
-	{
-		var x = xKids[xIndex];
-		var y = yKids[yIndex];
-
-		var xKey = x.a;
-		var yKey = y.a;
-		var xNode = x.b;
-		var yNode = y.b;
-
-		var newMatch = undefined;
-		var oldMatch = undefined;
-
-		// check if keys match
-
-		if (xKey === yKey)
-		{
-			index++;
-			_VirtualDom_diffHelp(xNode, yNode, localPatches, index);
-			index += xNode.b || 0;
-
-			xIndex++;
-			yIndex++;
-			continue;
-		}
-
-		// look ahead 1 to detect insertions and removals.
-
-		var xNext = xKids[xIndex + 1];
-		var yNext = yKids[yIndex + 1];
-
-		if (xNext)
-		{
-			var xNextKey = xNext.a;
-			var xNextNode = xNext.b;
-			oldMatch = yKey === xNextKey;
-		}
-
-		if (yNext)
-		{
-			var yNextKey = yNext.a;
-			var yNextNode = yNext.b;
-			newMatch = xKey === yNextKey;
-		}
-
-
-		// swap x and y
-		if (newMatch && oldMatch)
-		{
-			index++;
-			_VirtualDom_diffHelp(xNode, yNextNode, localPatches, index);
-			_VirtualDom_insertNode(changes, localPatches, xKey, yNode, yIndex, inserts);
-			index += xNode.b || 0;
-
-			index++;
-			_VirtualDom_removeNode(changes, localPatches, xKey, xNextNode, index);
-			index += xNextNode.b || 0;
-
-			xIndex += 2;
-			yIndex += 2;
-			continue;
-		}
-
-		// insert y
-		if (newMatch)
-		{
-			index++;
-			_VirtualDom_insertNode(changes, localPatches, yKey, yNode, yIndex, inserts);
-			_VirtualDom_diffHelp(xNode, yNextNode, localPatches, index);
-			index += xNode.b || 0;
-
-			xIndex += 1;
-			yIndex += 2;
-			continue;
-		}
-
-		// remove x
-		if (oldMatch)
-		{
-			index++;
-			_VirtualDom_removeNode(changes, localPatches, xKey, xNode, index);
-			index += xNode.b || 0;
-
-			index++;
-			_VirtualDom_diffHelp(xNextNode, yNode, localPatches, index);
-			index += xNextNode.b || 0;
-
-			xIndex += 2;
-			yIndex += 1;
-			continue;
-		}
-
-		// remove x, insert y
-		if (xNext && xNextKey === yNextKey)
-		{
-			index++;
-			_VirtualDom_removeNode(changes, localPatches, xKey, xNode, index);
-			_VirtualDom_insertNode(changes, localPatches, yKey, yNode, yIndex, inserts);
-			index += xNode.b || 0;
-
-			index++;
-			_VirtualDom_diffHelp(xNextNode, yNextNode, localPatches, index);
-			index += xNextNode.b || 0;
-
-			xIndex += 2;
-			yIndex += 2;
-			continue;
-		}
-
-		break;
-	}
-
-	// eat up any remaining nodes with removeNode and insertNode
-
-	while (xIndex < xLen)
-	{
-		index++;
-		var x = xKids[xIndex];
-		var xNode = x.b;
-		_VirtualDom_removeNode(changes, localPatches, x.a, xNode, index);
-		index += xNode.b || 0;
-		xIndex++;
-	}
-
-	while (yIndex < yLen)
-	{
-		var endInserts = endInserts || [];
-		var y = yKids[yIndex];
-		_VirtualDom_insertNode(changes, localPatches, y.a, y.b, undefined, endInserts);
-		yIndex++;
-	}
-
-	if (localPatches.length > 0 || inserts.length > 0 || endInserts)
-	{
-		_VirtualDom_pushPatch(patches, 8, rootIndex, {
-			w: localPatches,
-			x: inserts,
-			y: endInserts
-		});
-	}
-}
-
-
-
-// CHANGES FROM KEYED DIFF
-
-
-var _VirtualDom_POSTFIX = '_elmW6BL';
-
-
-function _VirtualDom_insertNode(changes, localPatches, key, vnode, yIndex, inserts)
-{
-	var entry = changes[key];
-
-	// never seen this key before
-	if (!entry)
-	{
-		entry = {
-			c: 0,
-			z: vnode,
-			r: yIndex,
-			s: undefined
-		};
-
-		inserts.push({ r: yIndex, A: entry });
-		changes[key] = entry;
-
-		return;
-	}
-
-	// this key was removed earlier, a match!
-	if (entry.c === 1)
-	{
-		inserts.push({ r: yIndex, A: entry });
-
-		entry.c = 2;
-		var subPatches = [];
-		_VirtualDom_diffHelp(entry.z, vnode, subPatches, entry.r);
-		entry.r = yIndex;
-		entry.s.s = {
-			w: subPatches,
-			A: entry
-		};
-
-		return;
-	}
-
-	// this key has already been inserted or moved, a duplicate!
-	_VirtualDom_insertNode(changes, localPatches, key + _VirtualDom_POSTFIX, vnode, yIndex, inserts);
-}
-
-
-function _VirtualDom_removeNode(changes, localPatches, key, vnode, index)
-{
-	var entry = changes[key];
-
-	// never seen this key before
-	if (!entry)
-	{
-		var patch = _VirtualDom_pushPatch(localPatches, 9, index, undefined);
-
-		changes[key] = {
-			c: 1,
-			z: vnode,
-			r: index,
-			s: patch
-		};
-
-		return;
-	}
-
-	// this key was inserted earlier, a match!
-	if (entry.c === 0)
-	{
-		entry.c = 2;
-		var subPatches = [];
-		_VirtualDom_diffHelp(vnode, entry.z, subPatches, index);
-
-		_VirtualDom_pushPatch(localPatches, 9, index, {
-			w: subPatches,
-			A: entry
-		});
-
-		return;
-	}
-
-	// this key has already been removed or moved, a duplicate!
-	_VirtualDom_removeNode(changes, localPatches, key + _VirtualDom_POSTFIX, vnode, index);
-}
-
-
-
-// ADD DOM NODES
-//
-// Each DOM node has an "index" assigned in order of traversal. It is important
-// to minimize our crawl over the actual DOM, so these indexes (along with the
-// descendantsCount of virtual nodes) let us skip touching entire subtrees of
-// the DOM if we know there are no patches there.
-
-
-function _VirtualDom_addDomNodes(domNode, vNode, patches, eventNode)
-{
-	_VirtualDom_addDomNodesHelp(domNode, vNode, patches, 0, 0, vNode.b, eventNode);
-}
-
-
-// assumes `patches` is non-empty and indexes increase monotonically.
-function _VirtualDom_addDomNodesHelp(domNode, vNode, patches, i, low, high, eventNode)
-{
-	var patch = patches[i];
-	var index = patch.r;
-
-	while (index === low)
-	{
-		var patchType = patch.$;
-
-		if (patchType === 1)
-		{
-			_VirtualDom_addDomNodes(domNode, vNode.k, patch.s, eventNode);
-		}
-		else if (patchType === 8)
-		{
-			patch.t = domNode;
-			patch.u = eventNode;
-
-			var subPatches = patch.s.w;
-			if (subPatches.length > 0)
-			{
-				_VirtualDom_addDomNodesHelp(domNode, vNode, subPatches, 0, low, high, eventNode);
-			}
-		}
-		else if (patchType === 9)
-		{
-			patch.t = domNode;
-			patch.u = eventNode;
-
-			var data = patch.s;
-			if (data)
-			{
-				data.A.s = domNode;
-				var subPatches = data.w;
-				if (subPatches.length > 0)
-				{
-					_VirtualDom_addDomNodesHelp(domNode, vNode, subPatches, 0, low, high, eventNode);
-				}
-			}
-		}
-		else
-		{
-			patch.t = domNode;
-			patch.u = eventNode;
-		}
-
-		i++;
-
-		if (!(patch = patches[i]) || (index = patch.r) > high)
-		{
-			return i;
-		}
-	}
-
-	var tag = vNode.$;
-
-	if (tag === 4)
-	{
-		var subNode = vNode.k;
-
-		while (subNode.$ === 4)
-		{
-			subNode = subNode.k;
-		}
-
-		return _VirtualDom_addDomNodesHelp(domNode, subNode, patches, i, low + 1, high, domNode.elm_event_node_ref);
-	}
-
-	// tag must be 1 or 2 at this point
-
-	var vKids = vNode.e;
-	var childNodes = domNode.childNodes;
-	for (var j = 0; j < vKids.length; j++)
-	{
-		low++;
-		var vKid = tag === 1 ? vKids[j] : vKids[j].b;
-		var nextLow = low + (vKid.b || 0);
-		if (low <= index && index <= nextLow)
-		{
-			i = _VirtualDom_addDomNodesHelp(childNodes[j], vKid, patches, i, low, nextLow, eventNode);
-			if (!(patch = patches[i]) || (index = patch.r) > high)
-			{
-				return i;
-			}
-		}
-		low = nextLow;
-	}
-	return i;
-}
-
-
-
-// APPLY PATCHES
-
-
-function _VirtualDom_applyPatches(rootDomNode, oldVirtualNode, patches, eventNode)
-{
-	if (patches.length === 0)
-	{
-		return rootDomNode;
-	}
-
-	_VirtualDom_addDomNodes(rootDomNode, oldVirtualNode, patches, eventNode);
-	return _VirtualDom_applyPatchesHelp(rootDomNode, patches);
-}
-
-function _VirtualDom_applyPatchesHelp(rootDomNode, patches)
-{
-	for (var i = 0; i < patches.length; i++)
-	{
-		var patch = patches[i];
-		var localDomNode = patch.t
-		var newNode = _VirtualDom_applyPatch(localDomNode, patch);
-		if (localDomNode === rootDomNode)
-		{
-			rootDomNode = newNode;
-		}
-	}
-	return rootDomNode;
-}
-
-function _VirtualDom_applyPatch(domNode, patch)
-{
-	switch (patch.$)
-	{
-		case 0:
-			return _VirtualDom_applyPatchRedraw(domNode, patch.s, patch.u);
-
-		case 4:
-			_VirtualDom_applyFacts(domNode, patch.u, patch.s);
-			return domNode;
-
-		case 3:
-			domNode.replaceData(0, domNode.length, patch.s);
-			return domNode;
-
-		case 1:
-			return _VirtualDom_applyPatchesHelp(domNode, patch.s);
-
-		case 2:
-			if (domNode.elm_event_node_ref)
-			{
-				domNode.elm_event_node_ref.j = patch.s;
-			}
-			else
-			{
-				domNode.elm_event_node_ref = { j: patch.s, p: patch.u };
-			}
-			return domNode;
-
-		case 6:
-			var data = patch.s;
-			for (var i = 0; i < data.i; i++)
-			{
-				domNode.removeChild(domNode.childNodes[data.v]);
-			}
-			return domNode;
-
-		case 7:
-			var data = patch.s;
-			var kids = data.e;
-			var i = data.v;
-			var theEnd = domNode.childNodes[i];
-			for (; i < kids.length; i++)
-			{
-				domNode.insertBefore(_VirtualDom_render(kids[i], patch.u), theEnd);
-			}
-			return domNode;
-
-		case 9:
-			var data = patch.s;
-			if (!data)
-			{
-				domNode.parentNode.removeChild(domNode);
-				return domNode;
-			}
-			var entry = data.A;
-			if (typeof entry.r !== 'undefined')
-			{
-				domNode.parentNode.removeChild(domNode);
-			}
-			entry.s = _VirtualDom_applyPatchesHelp(domNode, data.w);
-			return domNode;
-
-		case 8:
-			return _VirtualDom_applyPatchReorder(domNode, patch);
-
-		case 5:
-			return patch.s(domNode);
-
-		default:
-			_Debug_crash(10); // 'Ran into an unknown patch!'
-	}
-}
-
-
-function _VirtualDom_applyPatchRedraw(domNode, vNode, eventNode)
-{
-	var parentNode = domNode.parentNode;
-	var newNode = _VirtualDom_render(vNode, eventNode);
-
-	if (!newNode.elm_event_node_ref)
-	{
-		newNode.elm_event_node_ref = domNode.elm_event_node_ref;
-	}
-
-	if (parentNode && newNode !== domNode)
-	{
-		parentNode.replaceChild(newNode, domNode);
-	}
-	return newNode;
-}
-
-
-function _VirtualDom_applyPatchReorder(domNode, patch)
-{
-	var data = patch.s;
-
-	// remove end inserts
-	var frag = _VirtualDom_applyPatchReorderEndInsertsHelp(data.y, patch);
-
-	// removals
-	domNode = _VirtualDom_applyPatchesHelp(domNode, data.w);
-
-	// inserts
-	var inserts = data.x;
-	for (var i = 0; i < inserts.length; i++)
-	{
-		var insert = inserts[i];
-		var entry = insert.A;
-		var node = entry.c === 2
-			? entry.s
-			: _VirtualDom_render(entry.z, patch.u);
-		domNode.insertBefore(node, domNode.childNodes[insert.r]);
-	}
-
-	// add end inserts
-	if (frag)
-	{
-		_VirtualDom_appendChild(domNode, frag);
-	}
-
-	return domNode;
-}
-
-
-function _VirtualDom_applyPatchReorderEndInsertsHelp(endInserts, patch)
-{
-	if (!endInserts)
-	{
-		return;
-	}
-
-	var frag = _VirtualDom_doc.createDocumentFragment();
-	for (var i = 0; i < endInserts.length; i++)
-	{
-		var insert = endInserts[i];
-		var entry = insert.A;
-		_VirtualDom_appendChild(frag, entry.c === 2
-			? entry.s
-			: _VirtualDom_render(entry.z, patch.u)
-		);
-	}
-	return frag;
-}
-
-
-function _VirtualDom_virtualize(node)
-{
-	// TEXT NODES
-
-	if (node.nodeType === 3)
-	{
-		return _VirtualDom_text(node.textContent);
-	}
-
-
-	// WEIRD NODES
-
-	if (node.nodeType !== 1)
-	{
-		return _VirtualDom_text('');
-	}
-
-
-	// ELEMENT NODES
-
-	var attrList = _List_Nil;
-	var attrs = node.attributes;
-	for (var i = attrs.length; i--; )
-	{
-		var attr = attrs[i];
-		var name = attr.name;
-		var value = attr.value;
-		attrList = _List_Cons( A2(_VirtualDom_attribute, name, value), attrList );
-	}
-
-	var tag = node.tagName.toLowerCase();
-	var kidList = _List_Nil;
-	var kids = node.childNodes;
-
-	for (var i = kids.length; i--; )
-	{
-		kidList = _List_Cons(_VirtualDom_virtualize(kids[i]), kidList);
-	}
-	return A3(_VirtualDom_node, tag, attrList, kidList);
-}
-
-function _VirtualDom_dekey(keyedNode)
-{
-	var keyedKids = keyedNode.e;
-	var len = keyedKids.length;
-	var kids = new Array(len);
-	for (var i = 0; i < len; i++)
-	{
-		kids[i] = keyedKids[i].b;
-	}
-
-	return {
-		$: 1,
-		c: keyedNode.c,
-		d: keyedNode.d,
-		e: kids,
-		f: keyedNode.f,
-		b: keyedNode.b
-	};
-}
-
-
-
-
-// ELEMENT
-
-
-var _Debugger_element;
-
-var _Browser_element = _Debugger_element || F4(function(impl, flagDecoder, debugMetadata, args)
-{
-	return _Platform_initialize(
-		flagDecoder,
-		args,
-		impl.init,
-		impl.update,
-		impl.subscriptions,
-		function(sendToApp, initialModel) {
-			var view = impl.view;
-			/**_UNUSED/
-			var domNode = args['node'];
-			//*/
-			/**/
-			var domNode = args && args['node'] ? args['node'] : _Debug_crash(0);
-			//*/
-			var currNode = _VirtualDom_virtualize(domNode);
-
-			return _Browser_makeAnimator(initialModel, function(model)
-			{
-				var nextNode = view(model);
-				var patches = _VirtualDom_diff(currNode, nextNode);
-				domNode = _VirtualDom_applyPatches(domNode, currNode, patches, sendToApp);
-				currNode = nextNode;
-			});
-		}
-	);
+	return string.match(re) !== null;
 });
 
 
-
-// DOCUMENT
-
-
-var _Debugger_document;
-
-var _Browser_document = _Debugger_document || F4(function(impl, flagDecoder, debugMetadata, args)
+var _Regex_findAtMost = F3(function(n, re, str)
 {
-	return _Platform_initialize(
-		flagDecoder,
-		args,
-		impl.init,
-		impl.update,
-		impl.subscriptions,
-		function(sendToApp, initialModel) {
-			var divertHrefToApp = impl.setup && impl.setup(sendToApp)
-			var view = impl.view;
-			var title = _VirtualDom_doc.title;
-			var bodyNode = _VirtualDom_doc.body;
-			var currNode = _VirtualDom_virtualize(bodyNode);
-			return _Browser_makeAnimator(initialModel, function(model)
-			{
-				_VirtualDom_divertHrefToApp = divertHrefToApp;
-				var doc = view(model);
-				var nextNode = _VirtualDom_node('body')(_List_Nil)(doc.body);
-				var patches = _VirtualDom_diff(currNode, nextNode);
-				bodyNode = _VirtualDom_applyPatches(bodyNode, currNode, patches, sendToApp);
-				currNode = nextNode;
-				_VirtualDom_divertHrefToApp = 0;
-				(title !== doc.title) && (_VirtualDom_doc.title = title = doc.title);
-			});
-		}
-	);
-});
-
-
-
-// ANIMATION
-
-
-var _Browser_cancelAnimationFrame =
-	typeof cancelAnimationFrame !== 'undefined'
-		? cancelAnimationFrame
-		: function(id) { clearTimeout(id); };
-
-var _Browser_requestAnimationFrame =
-	typeof requestAnimationFrame !== 'undefined'
-		? requestAnimationFrame
-		: function(callback) { return setTimeout(callback, 1000 / 60); };
-
-
-function _Browser_makeAnimator(model, draw)
-{
-	draw(model);
-
-	var state = 0;
-
-	function updateIfNeeded()
+	var out = [];
+	var number = 0;
+	var string = str;
+	var lastIndex = re.lastIndex;
+	var prevLastIndex = -1;
+	var result;
+	while (number++ < n && (result = re.exec(string)))
 	{
-		state = state === 1
-			? 0
-			: ( _Browser_requestAnimationFrame(updateIfNeeded), draw(model), 1 );
+		if (prevLastIndex == re.lastIndex) break;
+		var i = result.length - 1;
+		var subs = new Array(i);
+		while (i > 0)
+		{
+			var submatch = result[i];
+			subs[--i] = submatch
+				? $elm$core$Maybe$Just(submatch)
+				: $elm$core$Maybe$Nothing;
+		}
+		out.push(A4($elm$regex$Regex$Match, result[0], result.index, number, _List_fromArray(subs)));
+		prevLastIndex = re.lastIndex;
 	}
-
-	return function(nextModel, isSync)
-	{
-		model = nextModel;
-
-		isSync
-			? ( draw(model),
-				state === 2 && (state = 1)
-				)
-			: ( state === 0 && _Browser_requestAnimationFrame(updateIfNeeded),
-				state = 2
-				);
-	};
-}
+	re.lastIndex = lastIndex;
+	return _List_fromArray(out);
+});
 
 
-
-// APPLICATION
-
-
-function _Browser_application(impl)
+var _Regex_replaceAtMost = F4(function(n, re, replacer, string)
 {
-	var onUrlChange = impl.onUrlChange;
-	var onUrlRequest = impl.onUrlRequest;
-	var key = function() { key.a(onUrlChange(_Browser_getUrl())); };
-
-	return _Browser_document({
-		setup: function(sendToApp)
+	var count = 0;
+	function jsReplacer(match)
+	{
+		if (count++ >= n)
 		{
-			key.a = sendToApp;
-			_Browser_window.addEventListener('popstate', key);
-			_Browser_window.navigator.userAgent.indexOf('Trident') < 0 || _Browser_window.addEventListener('hashchange', key);
-
-			return F2(function(domNode, event)
-			{
-				if (!event.ctrlKey && !event.metaKey && !event.shiftKey && event.button < 1 && !domNode.target && !domNode.hasAttribute('download'))
-				{
-					event.preventDefault();
-					var href = domNode.href;
-					var curr = _Browser_getUrl();
-					var next = $elm$url$Url$fromString(href).a;
-					sendToApp(onUrlRequest(
-						(next
-							&& curr.protocol === next.protocol
-							&& curr.host === next.host
-							&& curr.port_.a === next.port_.a
-						)
-							? $elm$browser$Browser$Internal(next)
-							: $elm$browser$Browser$External(href)
-					));
-				}
-			});
-		},
-		init: function(flags)
-		{
-			return A3(impl.init, flags, _Browser_getUrl(), key);
-		},
-		view: impl.view,
-		update: impl.update,
-		subscriptions: impl.subscriptions
-	});
-}
-
-function _Browser_getUrl()
-{
-	return $elm$url$Url$fromString(_VirtualDom_doc.location.href).a || _Debug_crash(1);
-}
-
-var _Browser_go = F2(function(key, n)
-{
-	return A2($elm$core$Task$perform, $elm$core$Basics$never, _Scheduler_binding(function() {
-		n && history.go(n);
-		key();
-	}));
-});
-
-var _Browser_pushUrl = F2(function(key, url)
-{
-	return A2($elm$core$Task$perform, $elm$core$Basics$never, _Scheduler_binding(function() {
-		history.pushState({}, '', url);
-		key();
-	}));
-});
-
-var _Browser_replaceUrl = F2(function(key, url)
-{
-	return A2($elm$core$Task$perform, $elm$core$Basics$never, _Scheduler_binding(function() {
-		history.replaceState({}, '', url);
-		key();
-	}));
-});
-
-
-
-// GLOBAL EVENTS
-
-
-var _Browser_fakeNode = { addEventListener: function() {}, removeEventListener: function() {} };
-var _Browser_doc = typeof document !== 'undefined' ? document : _Browser_fakeNode;
-var _Browser_window = typeof window !== 'undefined' ? window : _Browser_fakeNode;
-
-var _Browser_on = F3(function(node, eventName, sendToSelf)
-{
-	return _Scheduler_spawn(_Scheduler_binding(function(callback)
-	{
-		function handler(event)	{ _Scheduler_rawSpawn(sendToSelf(event)); }
-		node.addEventListener(eventName, handler, _VirtualDom_passiveSupported && { passive: true });
-		return function() { node.removeEventListener(eventName, handler); };
-	}));
-});
-
-var _Browser_decodeEvent = F2(function(decoder, event)
-{
-	var result = _Json_runHelp(decoder, event);
-	return $elm$core$Result$isOk(result) ? $elm$core$Maybe$Just(result.a) : $elm$core$Maybe$Nothing;
-});
-
-
-
-// PAGE VISIBILITY
-
-
-function _Browser_visibilityInfo()
-{
-	return (typeof _VirtualDom_doc.hidden !== 'undefined')
-		? { hidden: 'hidden', change: 'visibilitychange' }
-		:
-	(typeof _VirtualDom_doc.mozHidden !== 'undefined')
-		? { hidden: 'mozHidden', change: 'mozvisibilitychange' }
-		:
-	(typeof _VirtualDom_doc.msHidden !== 'undefined')
-		? { hidden: 'msHidden', change: 'msvisibilitychange' }
-		:
-	(typeof _VirtualDom_doc.webkitHidden !== 'undefined')
-		? { hidden: 'webkitHidden', change: 'webkitvisibilitychange' }
-		: { hidden: 'hidden', change: 'visibilitychange' };
-}
-
-
-
-// ANIMATION FRAMES
-
-
-function _Browser_rAF()
-{
-	return _Scheduler_binding(function(callback)
-	{
-		var id = _Browser_requestAnimationFrame(function() {
-			callback(_Scheduler_succeed(Date.now()));
-		});
-
-		return function() {
-			_Browser_cancelAnimationFrame(id);
-		};
-	});
-}
-
-
-function _Browser_now()
-{
-	return _Scheduler_binding(function(callback)
-	{
-		callback(_Scheduler_succeed(Date.now()));
-	});
-}
-
-
-
-// DOM STUFF
-
-
-function _Browser_withNode(id, doStuff)
-{
-	return _Scheduler_binding(function(callback)
-	{
-		_Browser_requestAnimationFrame(function() {
-			var node = document.getElementById(id);
-			callback(node
-				? _Scheduler_succeed(doStuff(node))
-				: _Scheduler_fail($elm$browser$Browser$Dom$NotFound(id))
-			);
-		});
-	});
-}
-
-
-function _Browser_withWindow(doStuff)
-{
-	return _Scheduler_binding(function(callback)
-	{
-		_Browser_requestAnimationFrame(function() {
-			callback(_Scheduler_succeed(doStuff()));
-		});
-	});
-}
-
-
-// FOCUS and BLUR
-
-
-var _Browser_call = F2(function(functionName, id)
-{
-	return _Browser_withNode(id, function(node) {
-		node[functionName]();
-		return _Utils_Tuple0;
-	});
-});
-
-
-
-// WINDOW VIEWPORT
-
-
-function _Browser_getViewport()
-{
-	return {
-		scene: _Browser_getScene(),
-		viewport: {
-			x: _Browser_window.pageXOffset,
-			y: _Browser_window.pageYOffset,
-			width: _Browser_doc.documentElement.clientWidth,
-			height: _Browser_doc.documentElement.clientHeight
+			return match;
 		}
-	};
-}
-
-function _Browser_getScene()
-{
-	var body = _Browser_doc.body;
-	var elem = _Browser_doc.documentElement;
-	return {
-		width: Math.max(body.scrollWidth, body.offsetWidth, elem.scrollWidth, elem.offsetWidth, elem.clientWidth),
-		height: Math.max(body.scrollHeight, body.offsetHeight, elem.scrollHeight, elem.offsetHeight, elem.clientHeight)
-	};
-}
-
-var _Browser_setViewport = F2(function(x, y)
-{
-	return _Browser_withWindow(function()
-	{
-		_Browser_window.scroll(x, y);
-		return _Utils_Tuple0;
-	});
+		var i = arguments.length - 3;
+		var submatches = new Array(i);
+		while (i > 0)
+		{
+			var submatch = arguments[i];
+			submatches[--i] = submatch
+				? $elm$core$Maybe$Just(submatch)
+				: $elm$core$Maybe$Nothing;
+		}
+		return replacer(A4($elm$regex$Regex$Match, match, arguments[arguments.length - 2], count, _List_fromArray(submatches)));
+	}
+	return string.replace(re, jsReplacer);
 });
 
-
-
-// ELEMENT VIEWPORT
-
-
-function _Browser_getViewportOf(id)
+var _Regex_splitAtMost = F3(function(n, re, str)
 {
-	return _Browser_withNode(id, function(node)
+	var string = str;
+	var out = [];
+	var start = re.lastIndex;
+	var restoreLastIndex = re.lastIndex;
+	while (n--)
 	{
-		return {
-			scene: {
-				width: node.scrollWidth,
-				height: node.scrollHeight
-			},
-			viewport: {
-				x: node.scrollLeft,
-				y: node.scrollTop,
-				width: node.clientWidth,
-				height: node.clientHeight
-			}
-		};
-	});
-}
-
-
-var _Browser_setViewportOf = F3(function(id, x, y)
-{
-	return _Browser_withNode(id, function(node)
-	{
-		node.scrollLeft = x;
-		node.scrollTop = y;
-		return _Utils_Tuple0;
-	});
+		var result = re.exec(string);
+		if (!result) break;
+		out.push(string.slice(start, result.index));
+		start = re.lastIndex;
+	}
+	out.push(string.slice(start));
+	re.lastIndex = restoreLastIndex;
+	return _List_fromArray(out);
 });
 
-
-
-// ELEMENT
-
-
-function _Browser_getElement(id)
-{
-	return _Browser_withNode(id, function(node)
-	{
-		var rect = node.getBoundingClientRect();
-		var x = _Browser_window.pageXOffset;
-		var y = _Browser_window.pageYOffset;
-		return {
-			scene: _Browser_getScene(),
-			viewport: {
-				x: x,
-				y: y,
-				width: _Browser_doc.documentElement.clientWidth,
-				height: _Browser_doc.documentElement.clientHeight
-			},
-			element: {
-				x: x + rect.left,
-				y: y + rect.top,
-				width: rect.width,
-				height: rect.height
-			}
-		};
-	});
-}
-
-
-
-// LOAD and RELOAD
-
-
-function _Browser_reload(skipCache)
-{
-	return A2($elm$core$Task$perform, $elm$core$Basics$never, _Scheduler_binding(function(callback)
-	{
-		_VirtualDom_doc.location.reload(skipCache);
-	}));
-}
-
-function _Browser_load(url)
-{
-	return A2($elm$core$Task$perform, $elm$core$Basics$never, _Scheduler_binding(function(callback)
-	{
-		try
-		{
-			_Browser_window.location = url;
-		}
-		catch(err)
-		{
-			// Only Firefox can throw a NS_ERROR_MALFORMED_URI exception here.
-			// Other browsers reload the page, so let's be consistent about that.
-			_VirtualDom_doc.location.reload(false);
-		}
-	}));
-}
+var _Regex_infinity = Infinity;
 
 
 
@@ -4500,185 +2624,33 @@ var _Parser_findSubString = F5(function(smallString, offset, row, col, bigString
 
 	return _Utils_Tuple3(newOffset, row, col);
 });
-
-
-
-// SEND REQUEST
-
-var _Http_toTask = F3(function(router, toTask, request)
-{
-	return _Scheduler_binding(function(callback)
-	{
-		function done(response) {
-			callback(toTask(request.expect.a(response)));
-		}
-
-		var xhr = new XMLHttpRequest();
-		xhr.addEventListener('error', function() { done($elm$http$Http$NetworkError_); });
-		xhr.addEventListener('timeout', function() { done($elm$http$Http$Timeout_); });
-		xhr.addEventListener('load', function() { done(_Http_toResponse(request.expect.b, xhr)); });
-		$elm$core$Maybe$isJust(request.tracker) && _Http_track(router, xhr, request.tracker.a);
-
-		try {
-			xhr.open(request.method, request.url, true);
-		} catch (e) {
-			return done($elm$http$Http$BadUrl_(request.url));
-		}
-
-		_Http_configureRequest(xhr, request);
-
-		request.body.a && xhr.setRequestHeader('Content-Type', request.body.a);
-		xhr.send(request.body.b);
-
-		return function() { xhr.c = true; xhr.abort(); };
-	});
-});
-
-
-// CONFIGURE
-
-function _Http_configureRequest(xhr, request)
-{
-	for (var headers = request.headers; headers.b; headers = headers.b) // WHILE_CONS
-	{
-		xhr.setRequestHeader(headers.a.a, headers.a.b);
-	}
-	xhr.timeout = request.timeout.a || 0;
-	xhr.responseType = request.expect.d;
-	xhr.withCredentials = request.allowCookiesFromOtherDomains;
-}
-
-
-// RESPONSES
-
-function _Http_toResponse(toBody, xhr)
-{
-	return A2(
-		200 <= xhr.status && xhr.status < 300 ? $elm$http$Http$GoodStatus_ : $elm$http$Http$BadStatus_,
-		_Http_toMetadata(xhr),
-		toBody(xhr.response)
-	);
-}
-
-
-// METADATA
-
-function _Http_toMetadata(xhr)
-{
-	return {
-		url: xhr.responseURL,
-		statusCode: xhr.status,
-		statusText: xhr.statusText,
-		headers: _Http_parseHeaders(xhr.getAllResponseHeaders())
-	};
-}
-
-
-// HEADERS
-
-function _Http_parseHeaders(rawHeaders)
-{
-	if (!rawHeaders)
-	{
-		return $elm$core$Dict$empty;
-	}
-
-	var headers = $elm$core$Dict$empty;
-	var headerPairs = rawHeaders.split('\r\n');
-	for (var i = headerPairs.length; i--; )
-	{
-		var headerPair = headerPairs[i];
-		var index = headerPair.indexOf(': ');
-		if (index > 0)
-		{
-			var key = headerPair.substring(0, index);
-			var value = headerPair.substring(index + 2);
-
-			headers = A3($elm$core$Dict$update, key, function(oldValue) {
-				return $elm$core$Maybe$Just($elm$core$Maybe$isJust(oldValue)
-					? value + ', ' + oldValue.a
-					: value
-				);
-			}, headers);
-		}
-	}
-	return headers;
-}
-
-
-// EXPECT
-
-var _Http_expect = F3(function(type, toBody, toValue)
-{
-	return {
-		$: 0,
-		d: type,
-		b: toBody,
-		a: toValue
-	};
-});
-
-var _Http_mapExpect = F2(function(func, expect)
-{
-	return {
-		$: 0,
-		d: expect.d,
-		b: expect.b,
-		a: function(x) { return func(expect.a(x)); }
-	};
-});
-
-function _Http_toDataView(arrayBuffer)
-{
-	return new DataView(arrayBuffer);
-}
-
-
-// BODY and PARTS
-
-var _Http_emptyBody = { $: 0 };
-var _Http_pair = F2(function(a, b) { return { $: 0, a: a, b: b }; });
-
-function _Http_toFormData(parts)
-{
-	for (var formData = new FormData(); parts.b; parts = parts.b) // WHILE_CONS
-	{
-		var part = parts.a;
-		formData.append(part.a, part.b);
-	}
-	return formData;
-}
-
-var _Http_bytesToBlob = F2(function(mime, bytes)
-{
-	return new Blob([bytes], { type: mime });
-});
-
-
-// PROGRESS
-
-function _Http_track(router, xhr, tracker)
-{
-	// TODO check out lengthComputable on loadstart event
-
-	xhr.upload.addEventListener('progress', function(event) {
-		if (xhr.c) { return; }
-		_Scheduler_rawSpawn(A2($elm$core$Platform$sendToSelf, router, _Utils_Tuple2(tracker, $elm$http$Http$Sending({
-			sent: event.loaded,
-			size: event.total
-		}))));
-	});
-	xhr.addEventListener('progress', function(event) {
-		if (xhr.c) { return; }
-		_Scheduler_rawSpawn(A2($elm$core$Platform$sendToSelf, router, _Utils_Tuple2(tracker, $elm$http$Http$Receiving({
-			received: event.loaded,
-			size: event.lengthComputable ? $elm$core$Maybe$Just(event.total) : $elm$core$Maybe$Nothing
-		}))));
-	});
-}var $elm$core$Basics$EQ = {$: 'EQ'};
-var $elm$core$Basics$GT = {$: 'GT'};
+var $elm$core$Basics$EQ = {$: 'EQ'};
 var $elm$core$Basics$LT = {$: 'LT'};
 var $elm$core$List$cons = _List_cons;
+var $elm$core$Elm$JsArray$foldr = _JsArray_foldr;
+var $elm$core$Array$foldr = F3(
+	function (func, baseCase, _v0) {
+		var tree = _v0.c;
+		var tail = _v0.d;
+		var helper = F2(
+			function (node, acc) {
+				if (node.$ === 'SubTree') {
+					var subTree = node.a;
+					return A3($elm$core$Elm$JsArray$foldr, helper, acc, subTree);
+				} else {
+					var values = node.a;
+					return A3($elm$core$Elm$JsArray$foldr, func, acc, values);
+				}
+			});
+		return A3(
+			$elm$core$Elm$JsArray$foldr,
+			helper,
+			A3($elm$core$Elm$JsArray$foldr, func, baseCase, tail),
+			tree);
+	});
+var $elm$core$Array$toList = function (array) {
+	return A3($elm$core$Array$foldr, $elm$core$List$cons, _List_Nil, array);
+};
 var $elm$core$Dict$foldr = F3(
 	function (func, acc, t) {
 		foldr:
@@ -4731,30 +2703,7 @@ var $elm$core$Set$toList = function (_v0) {
 	var dict = _v0.a;
 	return $elm$core$Dict$keys(dict);
 };
-var $elm$core$Elm$JsArray$foldr = _JsArray_foldr;
-var $elm$core$Array$foldr = F3(
-	function (func, baseCase, _v0) {
-		var tree = _v0.c;
-		var tail = _v0.d;
-		var helper = F2(
-			function (node, acc) {
-				if (node.$ === 'SubTree') {
-					var subTree = node.a;
-					return A3($elm$core$Elm$JsArray$foldr, helper, acc, subTree);
-				} else {
-					var values = node.a;
-					return A3($elm$core$Elm$JsArray$foldr, func, acc, values);
-				}
-			});
-		return A3(
-			$elm$core$Elm$JsArray$foldr,
-			helper,
-			A3($elm$core$Elm$JsArray$foldr, func, baseCase, tail),
-			tree);
-	});
-var $elm$core$Array$toList = function (array) {
-	return A3($elm$core$Array$foldr, $elm$core$List$cons, _List_Nil, array);
-};
+var $elm$core$Basics$GT = {$: 'GT'};
 var $elm$core$Result$Err = function (a) {
 	return {$: 'Err', a: a};
 };
@@ -5150,176 +3099,756 @@ var $elm$core$Result$isOk = function (result) {
 		return false;
 	}
 };
-var $elm$json$Json$Decode$map = _Json_map1;
-var $elm$json$Json$Decode$map2 = _Json_map2;
-var $elm$json$Json$Decode$succeed = _Json_succeed;
-var $elm$virtual_dom$VirtualDom$toHandlerInt = function (handler) {
-	switch (handler.$) {
-		case 'Normal':
-			return 0;
-		case 'MayStopPropagation':
-			return 1;
-		case 'MayPreventDefault':
-			return 2;
-		default:
-			return 3;
-	}
-};
-var $elm$browser$Browser$External = function (a) {
-	return {$: 'External', a: a};
-};
-var $elm$browser$Browser$Internal = function (a) {
-	return {$: 'Internal', a: a};
+var $elm$core$Platform$Cmd$batch = _Platform_batch;
+var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
+var $author$project$Main$init = function (_v0) {
+	return _Utils_Tuple2(
+		{},
+		$elm$core$Platform$Cmd$none);
 };
 var $elm$core$Basics$identity = function (x) {
 	return x;
 };
-var $elm$browser$Browser$Dom$NotFound = function (a) {
-	return {$: 'NotFound', a: a};
+var $author$project$Main$GotSpec = function (a) {
+	return {$: 'GotSpec', a: a};
 };
-var $elm$url$Url$Http = {$: 'Http'};
-var $elm$url$Url$Https = {$: 'Https'};
-var $elm$url$Url$Url = F6(
-	function (protocol, host, port_, path, query, fragment) {
-		return {fragment: fragment, host: host, path: path, port_: port_, protocol: protocol, query: query};
-	});
-var $elm$core$String$contains = _String_contains;
-var $elm$core$String$length = _String_length;
-var $elm$core$String$slice = _String_slice;
-var $elm$core$String$dropLeft = F2(
-	function (n, string) {
-		return (n < 1) ? string : A3(
-			$elm$core$String$slice,
-			n,
-			$elm$core$String$length(string),
-			string);
-	});
-var $elm$core$String$indexes = _String_indexes;
-var $elm$core$String$isEmpty = function (string) {
-	return string === '';
+var $elm$json$Json$Decode$value = _Json_decodeValue;
+var $author$project$Main$gotSpec = _Platform_incomingPort('gotSpec', $elm$json$Json$Decode$value);
+var $author$project$Main$subscriptions = function (model) {
+	return $author$project$Main$gotSpec($author$project$Main$GotSpec);
 };
-var $elm$core$String$left = F2(
-	function (n, string) {
-		return (n < 1) ? '' : A3($elm$core$String$slice, 0, n, string);
+var $elm$json$Json$Decode$succeed = _Json_succeed;
+var $stil4m$elm_syntax$Elm$Syntax$Expression$Application = function (a) {
+	return {$: 'Application', a: a};
+};
+var $mdgriffith$elm_codegen$Internal$Compiler$FunctionAppliedToTooManyArgs = F2(
+	function (a, b) {
+		return {$: 'FunctionAppliedToTooManyArgs', a: a, b: b};
 	});
-var $elm$core$String$toInt = _String_toInt;
-var $elm$url$Url$chompBeforePath = F5(
-	function (protocol, path, params, frag, str) {
-		if ($elm$core$String$isEmpty(str) || A2($elm$core$String$contains, '@', str)) {
-			return $elm$core$Maybe$Nothing;
-		} else {
-			var _v0 = A2($elm$core$String$indexes, ':', str);
-			if (!_v0.b) {
-				return $elm$core$Maybe$Just(
-					A6($elm$url$Url$Url, protocol, str, $elm$core$Maybe$Nothing, path, params, frag));
+var $stil4m$elm_syntax$Elm$Syntax$TypeAnnotation$GenericType = function (a) {
+	return {$: 'GenericType', a: a};
+};
+var $stil4m$elm_syntax$Elm$Syntax$TypeAnnotation$GenericRecord = F2(
+	function (a, b) {
+		return {$: 'GenericRecord', a: a, b: b};
+	});
+var $stil4m$elm_syntax$Elm$Syntax$Node$Node = F2(
+	function (a, b) {
+		return {$: 'Node', a: a, b: b};
+	});
+var $elm$core$List$any = F2(
+	function (isOkay, list) {
+		any:
+		while (true) {
+			if (!list.b) {
+				return false;
 			} else {
-				if (!_v0.b.b) {
-					var i = _v0.a;
-					var _v1 = $elm$core$String$toInt(
-						A2($elm$core$String$dropLeft, i + 1, str));
-					if (_v1.$ === 'Nothing') {
-						return $elm$core$Maybe$Nothing;
-					} else {
-						var port_ = _v1;
-						return $elm$core$Maybe$Just(
-							A6(
-								$elm$url$Url$Url,
-								protocol,
-								A2($elm$core$String$left, i, str),
-								port_,
-								path,
-								params,
-								frag));
-					}
+				var x = list.a;
+				var xs = list.b;
+				if (isOkay(x)) {
+					return true;
 				} else {
-					return $elm$core$Maybe$Nothing;
+					var $temp$isOkay = isOkay,
+						$temp$list = xs;
+					isOkay = $temp$isOkay;
+					list = $temp$list;
+					continue any;
 				}
 			}
 		}
 	});
-var $elm$url$Url$chompBeforeQuery = F4(
-	function (protocol, params, frag, str) {
-		if ($elm$core$String$isEmpty(str)) {
-			return $elm$core$Maybe$Nothing;
-		} else {
-			var _v0 = A2($elm$core$String$indexes, '/', str);
-			if (!_v0.b) {
-				return A5($elm$url$Url$chompBeforePath, protocol, '/', params, frag, str);
-			} else {
-				var i = _v0.a;
-				return A5(
-					$elm$url$Url$chompBeforePath,
-					protocol,
-					A2($elm$core$String$dropLeft, i, str),
-					params,
-					frag,
-					A2($elm$core$String$left, i, str));
-			}
-		}
+var $elm$core$Basics$composeL = F3(
+	function (g, f, x) {
+		return g(
+			f(x));
 	});
-var $elm$url$Url$chompBeforeFragment = F3(
-	function (protocol, frag, str) {
-		if ($elm$core$String$isEmpty(str)) {
-			return $elm$core$Maybe$Nothing;
-		} else {
-			var _v0 = A2($elm$core$String$indexes, '?', str);
-			if (!_v0.b) {
-				return A4($elm$url$Url$chompBeforeQuery, protocol, $elm$core$Maybe$Nothing, frag, str);
-			} else {
-				var i = _v0.a;
-				return A4(
-					$elm$url$Url$chompBeforeQuery,
-					protocol,
-					$elm$core$Maybe$Just(
-						A2($elm$core$String$dropLeft, i + 1, str)),
-					frag,
-					A2($elm$core$String$left, i, str));
-			}
-		}
+var $mdgriffith$elm_codegen$Internal$Compiler$containsFieldByName = F2(
+	function (_v0, _v2) {
+		var _v1 = _v0.a;
+		var oneName = _v1.b;
+		var _v3 = _v2.a;
+		var twoName = _v3.b;
+		return _Utils_eq(oneName, twoName);
 	});
-var $elm$url$Url$chompAfterProtocol = F2(
-	function (protocol, str) {
-		if ($elm$core$String$isEmpty(str)) {
-			return $elm$core$Maybe$Nothing;
-		} else {
-			var _v0 = A2($elm$core$String$indexes, '#', str);
-			if (!_v0.b) {
-				return A3($elm$url$Url$chompBeforeFragment, protocol, $elm$core$Maybe$Nothing, str);
-			} else {
-				var i = _v0.a;
-				return A3(
-					$elm$url$Url$chompBeforeFragment,
-					protocol,
-					$elm$core$Maybe$Just(
-						A2($elm$core$String$dropLeft, i + 1, str)),
-					A2($elm$core$String$left, i, str));
-			}
-		}
-	});
-var $elm$core$String$startsWith = _String_startsWith;
-var $elm$url$Url$fromString = function (str) {
-	return A2($elm$core$String$startsWith, 'http://', str) ? A2(
-		$elm$url$Url$chompAfterProtocol,
-		$elm$url$Url$Http,
-		A2($elm$core$String$dropLeft, 7, str)) : (A2($elm$core$String$startsWith, 'https://', str) ? A2(
-		$elm$url$Url$chompAfterProtocol,
-		$elm$url$Url$Https,
-		A2($elm$core$String$dropLeft, 8, str)) : $elm$core$Maybe$Nothing);
+var $stil4m$elm_syntax$Elm$Syntax$Node$value = function (_v0) {
+	var v = _v0.b;
+	return v;
 };
-var $elm$core$Basics$never = function (_v0) {
-	never:
+var $mdgriffith$elm_codegen$Internal$Compiler$denode = $stil4m$elm_syntax$Elm$Syntax$Node$value;
+var $mdgriffith$elm_codegen$Internal$Compiler$mergeFieldLists = F2(
+	function (fieldOne, fieldTwo) {
+		return A3(
+			$elm$core$List$foldl,
+			F2(
+				function (_new, existing) {
+					var newField = _new.b;
+					return A2(
+						$elm$core$List$any,
+						A2(
+							$elm$core$Basics$composeL,
+							$mdgriffith$elm_codegen$Internal$Compiler$containsFieldByName(newField),
+							$mdgriffith$elm_codegen$Internal$Compiler$denode),
+						existing) ? existing : A2($elm$core$List$cons, _new, existing);
+				}),
+			fieldOne,
+			fieldTwo);
+	});
+var $elm$core$Basics$compare = _Utils_compare;
+var $elm$core$Dict$get = F2(
+	function (targetKey, dict) {
+		get:
+		while (true) {
+			if (dict.$ === 'RBEmpty_elm_builtin') {
+				return $elm$core$Maybe$Nothing;
+			} else {
+				var key = dict.b;
+				var value = dict.c;
+				var left = dict.d;
+				var right = dict.e;
+				var _v1 = A2($elm$core$Basics$compare, targetKey, key);
+				switch (_v1.$) {
+					case 'LT':
+						var $temp$targetKey = targetKey,
+							$temp$dict = left;
+						targetKey = $temp$targetKey;
+						dict = $temp$dict;
+						continue get;
+					case 'EQ':
+						return $elm$core$Maybe$Just(value);
+					default:
+						var $temp$targetKey = targetKey,
+							$temp$dict = right;
+						targetKey = $temp$targetKey;
+						dict = $temp$dict;
+						continue get;
+				}
+			}
+		}
+	});
+var $elm$core$Dict$Black = {$: 'Black'};
+var $elm$core$Dict$RBNode_elm_builtin = F5(
+	function (a, b, c, d, e) {
+		return {$: 'RBNode_elm_builtin', a: a, b: b, c: c, d: d, e: e};
+	});
+var $elm$core$Dict$RBEmpty_elm_builtin = {$: 'RBEmpty_elm_builtin'};
+var $elm$core$Dict$Red = {$: 'Red'};
+var $elm$core$Dict$balance = F5(
+	function (color, key, value, left, right) {
+		if ((right.$ === 'RBNode_elm_builtin') && (right.a.$ === 'Red')) {
+			var _v1 = right.a;
+			var rK = right.b;
+			var rV = right.c;
+			var rLeft = right.d;
+			var rRight = right.e;
+			if ((left.$ === 'RBNode_elm_builtin') && (left.a.$ === 'Red')) {
+				var _v3 = left.a;
+				var lK = left.b;
+				var lV = left.c;
+				var lLeft = left.d;
+				var lRight = left.e;
+				return A5(
+					$elm$core$Dict$RBNode_elm_builtin,
+					$elm$core$Dict$Red,
+					key,
+					value,
+					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Black, lK, lV, lLeft, lRight),
+					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Black, rK, rV, rLeft, rRight));
+			} else {
+				return A5(
+					$elm$core$Dict$RBNode_elm_builtin,
+					color,
+					rK,
+					rV,
+					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Red, key, value, left, rLeft),
+					rRight);
+			}
+		} else {
+			if ((((left.$ === 'RBNode_elm_builtin') && (left.a.$ === 'Red')) && (left.d.$ === 'RBNode_elm_builtin')) && (left.d.a.$ === 'Red')) {
+				var _v5 = left.a;
+				var lK = left.b;
+				var lV = left.c;
+				var _v6 = left.d;
+				var _v7 = _v6.a;
+				var llK = _v6.b;
+				var llV = _v6.c;
+				var llLeft = _v6.d;
+				var llRight = _v6.e;
+				var lRight = left.e;
+				return A5(
+					$elm$core$Dict$RBNode_elm_builtin,
+					$elm$core$Dict$Red,
+					lK,
+					lV,
+					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Black, llK, llV, llLeft, llRight),
+					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Black, key, value, lRight, right));
+			} else {
+				return A5($elm$core$Dict$RBNode_elm_builtin, color, key, value, left, right);
+			}
+		}
+	});
+var $elm$core$Dict$insertHelp = F3(
+	function (key, value, dict) {
+		if (dict.$ === 'RBEmpty_elm_builtin') {
+			return A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Red, key, value, $elm$core$Dict$RBEmpty_elm_builtin, $elm$core$Dict$RBEmpty_elm_builtin);
+		} else {
+			var nColor = dict.a;
+			var nKey = dict.b;
+			var nValue = dict.c;
+			var nLeft = dict.d;
+			var nRight = dict.e;
+			var _v1 = A2($elm$core$Basics$compare, key, nKey);
+			switch (_v1.$) {
+				case 'LT':
+					return A5(
+						$elm$core$Dict$balance,
+						nColor,
+						nKey,
+						nValue,
+						A3($elm$core$Dict$insertHelp, key, value, nLeft),
+						nRight);
+				case 'EQ':
+					return A5($elm$core$Dict$RBNode_elm_builtin, nColor, nKey, value, nLeft, nRight);
+				default:
+					return A5(
+						$elm$core$Dict$balance,
+						nColor,
+						nKey,
+						nValue,
+						nLeft,
+						A3($elm$core$Dict$insertHelp, key, value, nRight));
+			}
+		}
+	});
+var $elm$core$Dict$insert = F3(
+	function (key, value, dict) {
+		var _v0 = A3($elm$core$Dict$insertHelp, key, value, dict);
+		if ((_v0.$ === 'RBNode_elm_builtin') && (_v0.a.$ === 'Red')) {
+			var _v1 = _v0.a;
+			var k = _v0.b;
+			var v = _v0.c;
+			var l = _v0.d;
+			var r = _v0.e;
+			return A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Black, k, v, l, r);
+		} else {
+			var x = _v0;
+			return x;
+		}
+	});
+var $elm$core$Dict$getMin = function (dict) {
+	getMin:
 	while (true) {
-		var nvr = _v0.a;
-		var $temp$_v0 = nvr;
-		_v0 = $temp$_v0;
-		continue never;
+		if ((dict.$ === 'RBNode_elm_builtin') && (dict.d.$ === 'RBNode_elm_builtin')) {
+			var left = dict.d;
+			var $temp$dict = left;
+			dict = $temp$dict;
+			continue getMin;
+		} else {
+			return dict;
+		}
 	}
 };
-var $elm$core$Task$Perform = function (a) {
-	return {$: 'Perform', a: a};
+var $elm$core$Dict$moveRedLeft = function (dict) {
+	if (((dict.$ === 'RBNode_elm_builtin') && (dict.d.$ === 'RBNode_elm_builtin')) && (dict.e.$ === 'RBNode_elm_builtin')) {
+		if ((dict.e.d.$ === 'RBNode_elm_builtin') && (dict.e.d.a.$ === 'Red')) {
+			var clr = dict.a;
+			var k = dict.b;
+			var v = dict.c;
+			var _v1 = dict.d;
+			var lClr = _v1.a;
+			var lK = _v1.b;
+			var lV = _v1.c;
+			var lLeft = _v1.d;
+			var lRight = _v1.e;
+			var _v2 = dict.e;
+			var rClr = _v2.a;
+			var rK = _v2.b;
+			var rV = _v2.c;
+			var rLeft = _v2.d;
+			var _v3 = rLeft.a;
+			var rlK = rLeft.b;
+			var rlV = rLeft.c;
+			var rlL = rLeft.d;
+			var rlR = rLeft.e;
+			var rRight = _v2.e;
+			return A5(
+				$elm$core$Dict$RBNode_elm_builtin,
+				$elm$core$Dict$Red,
+				rlK,
+				rlV,
+				A5(
+					$elm$core$Dict$RBNode_elm_builtin,
+					$elm$core$Dict$Black,
+					k,
+					v,
+					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Red, lK, lV, lLeft, lRight),
+					rlL),
+				A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Black, rK, rV, rlR, rRight));
+		} else {
+			var clr = dict.a;
+			var k = dict.b;
+			var v = dict.c;
+			var _v4 = dict.d;
+			var lClr = _v4.a;
+			var lK = _v4.b;
+			var lV = _v4.c;
+			var lLeft = _v4.d;
+			var lRight = _v4.e;
+			var _v5 = dict.e;
+			var rClr = _v5.a;
+			var rK = _v5.b;
+			var rV = _v5.c;
+			var rLeft = _v5.d;
+			var rRight = _v5.e;
+			if (clr.$ === 'Black') {
+				return A5(
+					$elm$core$Dict$RBNode_elm_builtin,
+					$elm$core$Dict$Black,
+					k,
+					v,
+					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Red, lK, lV, lLeft, lRight),
+					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Red, rK, rV, rLeft, rRight));
+			} else {
+				return A5(
+					$elm$core$Dict$RBNode_elm_builtin,
+					$elm$core$Dict$Black,
+					k,
+					v,
+					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Red, lK, lV, lLeft, lRight),
+					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Red, rK, rV, rLeft, rRight));
+			}
+		}
+	} else {
+		return dict;
+	}
 };
-var $elm$core$Task$succeed = _Scheduler_succeed;
-var $elm$core$Task$init = $elm$core$Task$succeed(_Utils_Tuple0);
+var $elm$core$Dict$moveRedRight = function (dict) {
+	if (((dict.$ === 'RBNode_elm_builtin') && (dict.d.$ === 'RBNode_elm_builtin')) && (dict.e.$ === 'RBNode_elm_builtin')) {
+		if ((dict.d.d.$ === 'RBNode_elm_builtin') && (dict.d.d.a.$ === 'Red')) {
+			var clr = dict.a;
+			var k = dict.b;
+			var v = dict.c;
+			var _v1 = dict.d;
+			var lClr = _v1.a;
+			var lK = _v1.b;
+			var lV = _v1.c;
+			var _v2 = _v1.d;
+			var _v3 = _v2.a;
+			var llK = _v2.b;
+			var llV = _v2.c;
+			var llLeft = _v2.d;
+			var llRight = _v2.e;
+			var lRight = _v1.e;
+			var _v4 = dict.e;
+			var rClr = _v4.a;
+			var rK = _v4.b;
+			var rV = _v4.c;
+			var rLeft = _v4.d;
+			var rRight = _v4.e;
+			return A5(
+				$elm$core$Dict$RBNode_elm_builtin,
+				$elm$core$Dict$Red,
+				lK,
+				lV,
+				A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Black, llK, llV, llLeft, llRight),
+				A5(
+					$elm$core$Dict$RBNode_elm_builtin,
+					$elm$core$Dict$Black,
+					k,
+					v,
+					lRight,
+					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Red, rK, rV, rLeft, rRight)));
+		} else {
+			var clr = dict.a;
+			var k = dict.b;
+			var v = dict.c;
+			var _v5 = dict.d;
+			var lClr = _v5.a;
+			var lK = _v5.b;
+			var lV = _v5.c;
+			var lLeft = _v5.d;
+			var lRight = _v5.e;
+			var _v6 = dict.e;
+			var rClr = _v6.a;
+			var rK = _v6.b;
+			var rV = _v6.c;
+			var rLeft = _v6.d;
+			var rRight = _v6.e;
+			if (clr.$ === 'Black') {
+				return A5(
+					$elm$core$Dict$RBNode_elm_builtin,
+					$elm$core$Dict$Black,
+					k,
+					v,
+					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Red, lK, lV, lLeft, lRight),
+					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Red, rK, rV, rLeft, rRight));
+			} else {
+				return A5(
+					$elm$core$Dict$RBNode_elm_builtin,
+					$elm$core$Dict$Black,
+					k,
+					v,
+					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Red, lK, lV, lLeft, lRight),
+					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Red, rK, rV, rLeft, rRight));
+			}
+		}
+	} else {
+		return dict;
+	}
+};
+var $elm$core$Dict$removeHelpPrepEQGT = F7(
+	function (targetKey, dict, color, key, value, left, right) {
+		if ((left.$ === 'RBNode_elm_builtin') && (left.a.$ === 'Red')) {
+			var _v1 = left.a;
+			var lK = left.b;
+			var lV = left.c;
+			var lLeft = left.d;
+			var lRight = left.e;
+			return A5(
+				$elm$core$Dict$RBNode_elm_builtin,
+				color,
+				lK,
+				lV,
+				lLeft,
+				A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Red, key, value, lRight, right));
+		} else {
+			_v2$2:
+			while (true) {
+				if ((right.$ === 'RBNode_elm_builtin') && (right.a.$ === 'Black')) {
+					if (right.d.$ === 'RBNode_elm_builtin') {
+						if (right.d.a.$ === 'Black') {
+							var _v3 = right.a;
+							var _v4 = right.d;
+							var _v5 = _v4.a;
+							return $elm$core$Dict$moveRedRight(dict);
+						} else {
+							break _v2$2;
+						}
+					} else {
+						var _v6 = right.a;
+						var _v7 = right.d;
+						return $elm$core$Dict$moveRedRight(dict);
+					}
+				} else {
+					break _v2$2;
+				}
+			}
+			return dict;
+		}
+	});
+var $elm$core$Dict$removeMin = function (dict) {
+	if ((dict.$ === 'RBNode_elm_builtin') && (dict.d.$ === 'RBNode_elm_builtin')) {
+		var color = dict.a;
+		var key = dict.b;
+		var value = dict.c;
+		var left = dict.d;
+		var lColor = left.a;
+		var lLeft = left.d;
+		var right = dict.e;
+		if (lColor.$ === 'Black') {
+			if ((lLeft.$ === 'RBNode_elm_builtin') && (lLeft.a.$ === 'Red')) {
+				var _v3 = lLeft.a;
+				return A5(
+					$elm$core$Dict$RBNode_elm_builtin,
+					color,
+					key,
+					value,
+					$elm$core$Dict$removeMin(left),
+					right);
+			} else {
+				var _v4 = $elm$core$Dict$moveRedLeft(dict);
+				if (_v4.$ === 'RBNode_elm_builtin') {
+					var nColor = _v4.a;
+					var nKey = _v4.b;
+					var nValue = _v4.c;
+					var nLeft = _v4.d;
+					var nRight = _v4.e;
+					return A5(
+						$elm$core$Dict$balance,
+						nColor,
+						nKey,
+						nValue,
+						$elm$core$Dict$removeMin(nLeft),
+						nRight);
+				} else {
+					return $elm$core$Dict$RBEmpty_elm_builtin;
+				}
+			}
+		} else {
+			return A5(
+				$elm$core$Dict$RBNode_elm_builtin,
+				color,
+				key,
+				value,
+				$elm$core$Dict$removeMin(left),
+				right);
+		}
+	} else {
+		return $elm$core$Dict$RBEmpty_elm_builtin;
+	}
+};
+var $elm$core$Dict$removeHelp = F2(
+	function (targetKey, dict) {
+		if (dict.$ === 'RBEmpty_elm_builtin') {
+			return $elm$core$Dict$RBEmpty_elm_builtin;
+		} else {
+			var color = dict.a;
+			var key = dict.b;
+			var value = dict.c;
+			var left = dict.d;
+			var right = dict.e;
+			if (_Utils_cmp(targetKey, key) < 0) {
+				if ((left.$ === 'RBNode_elm_builtin') && (left.a.$ === 'Black')) {
+					var _v4 = left.a;
+					var lLeft = left.d;
+					if ((lLeft.$ === 'RBNode_elm_builtin') && (lLeft.a.$ === 'Red')) {
+						var _v6 = lLeft.a;
+						return A5(
+							$elm$core$Dict$RBNode_elm_builtin,
+							color,
+							key,
+							value,
+							A2($elm$core$Dict$removeHelp, targetKey, left),
+							right);
+					} else {
+						var _v7 = $elm$core$Dict$moveRedLeft(dict);
+						if (_v7.$ === 'RBNode_elm_builtin') {
+							var nColor = _v7.a;
+							var nKey = _v7.b;
+							var nValue = _v7.c;
+							var nLeft = _v7.d;
+							var nRight = _v7.e;
+							return A5(
+								$elm$core$Dict$balance,
+								nColor,
+								nKey,
+								nValue,
+								A2($elm$core$Dict$removeHelp, targetKey, nLeft),
+								nRight);
+						} else {
+							return $elm$core$Dict$RBEmpty_elm_builtin;
+						}
+					}
+				} else {
+					return A5(
+						$elm$core$Dict$RBNode_elm_builtin,
+						color,
+						key,
+						value,
+						A2($elm$core$Dict$removeHelp, targetKey, left),
+						right);
+				}
+			} else {
+				return A2(
+					$elm$core$Dict$removeHelpEQGT,
+					targetKey,
+					A7($elm$core$Dict$removeHelpPrepEQGT, targetKey, dict, color, key, value, left, right));
+			}
+		}
+	});
+var $elm$core$Dict$removeHelpEQGT = F2(
+	function (targetKey, dict) {
+		if (dict.$ === 'RBNode_elm_builtin') {
+			var color = dict.a;
+			var key = dict.b;
+			var value = dict.c;
+			var left = dict.d;
+			var right = dict.e;
+			if (_Utils_eq(targetKey, key)) {
+				var _v1 = $elm$core$Dict$getMin(right);
+				if (_v1.$ === 'RBNode_elm_builtin') {
+					var minKey = _v1.b;
+					var minValue = _v1.c;
+					return A5(
+						$elm$core$Dict$balance,
+						color,
+						minKey,
+						minValue,
+						left,
+						$elm$core$Dict$removeMin(right));
+				} else {
+					return $elm$core$Dict$RBEmpty_elm_builtin;
+				}
+			} else {
+				return A5(
+					$elm$core$Dict$balance,
+					color,
+					key,
+					value,
+					left,
+					A2($elm$core$Dict$removeHelp, targetKey, right));
+			}
+		} else {
+			return $elm$core$Dict$RBEmpty_elm_builtin;
+		}
+	});
+var $elm$core$Dict$remove = F2(
+	function (key, dict) {
+		var _v0 = A2($elm$core$Dict$removeHelp, key, dict);
+		if ((_v0.$ === 'RBNode_elm_builtin') && (_v0.a.$ === 'Red')) {
+			var _v1 = _v0.a;
+			var k = _v0.b;
+			var v = _v0.c;
+			var l = _v0.d;
+			var r = _v0.e;
+			return A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Black, k, v, l, r);
+		} else {
+			var x = _v0;
+			return x;
+		}
+	});
+var $elm$core$Dict$update = F3(
+	function (targetKey, alter, dictionary) {
+		var _v0 = alter(
+			A2($elm$core$Dict$get, targetKey, dictionary));
+		if (_v0.$ === 'Just') {
+			var value = _v0.a;
+			return A3($elm$core$Dict$insert, targetKey, value, dictionary);
+		} else {
+			return A2($elm$core$Dict$remove, targetKey, dictionary);
+		}
+	});
+var $mdgriffith$elm_codegen$Internal$Compiler$addInference = F3(
+	function (key, value, infs) {
+		return A3(
+			$elm$core$Dict$update,
+			key,
+			function (maybeValue) {
+				if (maybeValue.$ === 'Nothing') {
+					return $elm$core$Maybe$Just(value);
+				} else {
+					if (maybeValue.a.$ === 'GenericRecord') {
+						var _v1 = maybeValue.a;
+						var _v2 = _v1.a;
+						var range = _v2.a;
+						var recordName = _v2.b;
+						var _v3 = _v1.b;
+						var fieldRange = _v3.a;
+						var fields = _v3.b;
+						if (value.$ === 'GenericRecord') {
+							var _v5 = value.a;
+							var existingRange = _v5.a;
+							var existingRecordName = _v5.b;
+							var _v6 = value.b;
+							var existingFieldRange = _v6.a;
+							var existingFields = _v6.b;
+							return $elm$core$Maybe$Just(
+								A2(
+									$stil4m$elm_syntax$Elm$Syntax$TypeAnnotation$GenericRecord,
+									A2($stil4m$elm_syntax$Elm$Syntax$Node$Node, range, recordName),
+									A2(
+										$stil4m$elm_syntax$Elm$Syntax$Node$Node,
+										fieldRange,
+										A2($mdgriffith$elm_codegen$Internal$Compiler$mergeFieldLists, fields, existingFields))));
+						} else {
+							return maybeValue;
+						}
+					} else {
+						var existing = maybeValue.a;
+						return $elm$core$Maybe$Just(existing);
+					}
+				}
+			},
+			infs);
+	});
+var $elm$core$Dict$empty = $elm$core$Dict$RBEmpty_elm_builtin;
+var $mdgriffith$elm_codegen$Internal$Compiler$emptyAliases = $elm$core$Dict$empty;
+var $stil4m$elm_syntax$Elm$Syntax$TypeAnnotation$FunctionTypeAnnotation = F2(
+	function (a, b) {
+		return {$: 'FunctionTypeAnnotation', a: a, b: b};
+	});
+var $stil4m$elm_syntax$Elm$Syntax$Range$emptyRange = {
+	end: {column: 0, row: 0},
+	start: {column: 0, row: 0}
+};
+var $mdgriffith$elm_codegen$Internal$Compiler$makeFunctionReversedHelper = F2(
+	function (last, reversedArgs) {
+		makeFunctionReversedHelper:
+		while (true) {
+			if (!reversedArgs.b) {
+				return last;
+			} else {
+				if (!reversedArgs.b.b) {
+					var penUlt = reversedArgs.a;
+					return A2(
+						$stil4m$elm_syntax$Elm$Syntax$TypeAnnotation$FunctionTypeAnnotation,
+						A2($stil4m$elm_syntax$Elm$Syntax$Node$Node, $stil4m$elm_syntax$Elm$Syntax$Range$emptyRange, penUlt),
+						A2($stil4m$elm_syntax$Elm$Syntax$Node$Node, $stil4m$elm_syntax$Elm$Syntax$Range$emptyRange, last));
+				} else {
+					var penUlt = reversedArgs.a;
+					var remain = reversedArgs.b;
+					var $temp$last = A2(
+						$stil4m$elm_syntax$Elm$Syntax$TypeAnnotation$FunctionTypeAnnotation,
+						A2($stil4m$elm_syntax$Elm$Syntax$Node$Node, $stil4m$elm_syntax$Elm$Syntax$Range$emptyRange, penUlt),
+						A2($stil4m$elm_syntax$Elm$Syntax$Node$Node, $stil4m$elm_syntax$Elm$Syntax$Range$emptyRange, last)),
+						$temp$reversedArgs = remain;
+					last = $temp$last;
+					reversedArgs = $temp$reversedArgs;
+					continue makeFunctionReversedHelper;
+				}
+			}
+		}
+	});
+var $mdgriffith$elm_codegen$Internal$Compiler$makeFunction = F2(
+	function (result, args) {
+		return A2(
+			$mdgriffith$elm_codegen$Internal$Compiler$makeFunctionReversedHelper,
+			result,
+			$elm$core$List$reverse(args));
+	});
+var $mdgriffith$elm_codegen$Internal$Compiler$MismatchedTypeVariables = {$: 'MismatchedTypeVariables'};
+var $stil4m$elm_syntax$Elm$Syntax$TypeAnnotation$Record = function (a) {
+	return {$: 'Record', a: a};
+};
+var $stil4m$elm_syntax$Elm$Syntax$TypeAnnotation$Tupled = function (a) {
+	return {$: 'Tupled', a: a};
+};
+var $stil4m$elm_syntax$Elm$Syntax$TypeAnnotation$Typed = F2(
+	function (a, b) {
+		return {$: 'Typed', a: a, b: b};
+	});
+var $mdgriffith$elm_codegen$Internal$Compiler$UnableToUnify = F2(
+	function (a, b) {
+		return {$: 'UnableToUnify', a: a, b: b};
+	});
+var $stil4m$elm_syntax$Elm$Syntax$TypeAnnotation$Unit = {$: 'Unit'};
+var $elm$core$Set$Set_elm_builtin = function (a) {
+	return {$: 'Set_elm_builtin', a: a};
+};
+var $elm$core$Set$empty = $elm$core$Set$Set_elm_builtin($elm$core$Dict$empty);
+var $elm$core$Dict$fromList = function (assocs) {
+	return A3(
+		$elm$core$List$foldl,
+		F2(
+			function (_v0, dict) {
+				var key = _v0.a;
+				var value = _v0.b;
+				return A3($elm$core$Dict$insert, key, value, dict);
+			}),
+		$elm$core$Dict$empty,
+		assocs);
+};
+var $mdgriffith$elm_codegen$Internal$Compiler$formatAliasKey = F2(
+	function (mod, name) {
+		return A2($elm$core$String$join, '.', mod) + ('.' + name);
+	});
+var $mdgriffith$elm_codegen$Internal$Compiler$getAlias = F2(
+	function (_v0, cache) {
+		var _v1 = _v0.b;
+		var modName = _v1.a;
+		var name = _v1.b;
+		return A2(
+			$elm$core$Dict$get,
+			A2($mdgriffith$elm_codegen$Internal$Compiler$formatAliasKey, modName, name),
+			cache);
+	});
+var $mdgriffith$elm_codegen$Internal$Compiler$CouldNotFindField = function (a) {
+	return {$: 'CouldNotFindField', a: a};
+};
+var $elm$core$Basics$composeR = F3(
+	function (f, g, x) {
+		return g(
+			f(x));
+	});
 var $elm$core$List$foldrHelper = F4(
 	function (fn, acc, ctr, ls) {
 		if (!ls.b) {
@@ -5389,86 +3918,1968 @@ var $elm$core$List$map = F2(
 			_List_Nil,
 			xs);
 	});
-var $elm$core$Task$andThen = _Scheduler_andThen;
-var $elm$core$Task$map = F2(
-	function (func, taskA) {
-		return A2(
-			$elm$core$Task$andThen,
-			function (a) {
-				return $elm$core$Task$succeed(
-					func(a));
-			},
-			taskA);
+var $mdgriffith$elm_codegen$Internal$Compiler$getField = F4(
+	function (name, val, fields, captured) {
+		getField:
+		while (true) {
+			if (!fields.b) {
+				return $elm$core$Result$Err(
+					$mdgriffith$elm_codegen$Internal$Compiler$CouldNotFindField(
+						{
+							existingFields: A2(
+								$elm$core$List$map,
+								A2(
+									$elm$core$Basics$composeR,
+									$mdgriffith$elm_codegen$Internal$Compiler$denode,
+									A2($elm$core$Basics$composeR, $elm$core$Tuple$first, $mdgriffith$elm_codegen$Internal$Compiler$denode)),
+								captured),
+							field: name
+						}));
+			} else {
+				var top = fields.a;
+				var remain = fields.b;
+				var _v1 = $mdgriffith$elm_codegen$Internal$Compiler$denode(top);
+				var topFieldName = _v1.a;
+				var topFieldVal = _v1.b;
+				var topName = $mdgriffith$elm_codegen$Internal$Compiler$denode(topFieldName);
+				var topVal = $mdgriffith$elm_codegen$Internal$Compiler$denode(topFieldVal);
+				if (_Utils_eq(topName, name)) {
+					return $elm$core$Result$Ok(
+						_Utils_Tuple2(
+							topVal,
+							_Utils_ap(captured, remain)));
+				} else {
+					var $temp$name = name,
+						$temp$val = val,
+						$temp$fields = remain,
+						$temp$captured = A2($elm$core$List$cons, top, captured);
+					name = $temp$name;
+					val = $temp$val;
+					fields = $temp$fields;
+					captured = $temp$captured;
+					continue getField;
+				}
+			}
+		}
 	});
-var $elm$core$Task$map2 = F3(
-	function (func, taskA, taskB) {
-		return A2(
-			$elm$core$Task$andThen,
-			function (a) {
+var $mdgriffith$elm_codegen$Internal$Compiler$nodify = function (exp) {
+	return A2($stil4m$elm_syntax$Elm$Syntax$Node$Node, $stil4m$elm_syntax$Elm$Syntax$Range$emptyRange, exp);
+};
+var $mdgriffith$elm_codegen$Internal$Compiler$nodifyAll = $elm$core$List$map($mdgriffith$elm_codegen$Internal$Compiler$nodify);
+var $elm$core$List$append = F2(
+	function (xs, ys) {
+		if (!ys.b) {
+			return xs;
+		} else {
+			return A3($elm$core$List$foldr, $elm$core$List$cons, ys, xs);
+		}
+	});
+var $elm$core$List$concat = function (lists) {
+	return A3($elm$core$List$foldr, $elm$core$List$append, _List_Nil, lists);
+};
+var $elm$core$List$concatMap = F2(
+	function (f, list) {
+		return $elm$core$List$concat(
+			A2($elm$core$List$map, f, list));
+	});
+var $mdgriffith$elm_codegen$Internal$Compiler$isAppendable = function (annotation) {
+	_v0$2:
+	while (true) {
+		if ((annotation.$ === 'Typed') && (!annotation.a.b.a.b)) {
+			switch (annotation.a.b.b) {
+				case 'String':
+					var _v1 = annotation.a;
+					var _v2 = _v1.b;
+					return true;
+				case 'List':
+					if (annotation.b.b && (!annotation.b.b.b)) {
+						var _v3 = annotation.a;
+						var _v4 = _v3.b;
+						var _v5 = annotation.b;
+						var _v6 = _v5.a;
+						var inner = _v6.b;
+						return true;
+					} else {
+						break _v0$2;
+					}
+				default:
+					break _v0$2;
+			}
+		} else {
+			break _v0$2;
+		}
+	}
+	return false;
+};
+var $elm$core$Basics$not = _Basics_not;
+var $elm$core$List$all = F2(
+	function (isOkay, list) {
+		return !A2(
+			$elm$core$List$any,
+			A2($elm$core$Basics$composeL, $elm$core$Basics$not, isOkay),
+			list);
+	});
+var $mdgriffith$elm_codegen$Internal$Compiler$isComparable = function (annotation) {
+	isComparable:
+	while (true) {
+		_v0$6:
+		while (true) {
+			switch (annotation.$) {
+				case 'Typed':
+					if (annotation.a.b.a.b) {
+						if (((annotation.a.b.a.a === 'Char') && (!annotation.a.b.a.b.b)) && (annotation.a.b.b === 'Char')) {
+							var _v5 = annotation.a;
+							var _v6 = _v5.b;
+							var _v7 = _v6.a;
+							return true;
+						} else {
+							break _v0$6;
+						}
+					} else {
+						switch (annotation.a.b.b) {
+							case 'Int':
+								var _v1 = annotation.a;
+								var _v2 = _v1.b;
+								return true;
+							case 'Float':
+								var _v3 = annotation.a;
+								var _v4 = _v3.b;
+								return true;
+							case 'String':
+								var _v8 = annotation.a;
+								var _v9 = _v8.b;
+								return true;
+							case 'List':
+								if (annotation.b.b && (!annotation.b.b.b)) {
+									var _v10 = annotation.a;
+									var _v11 = _v10.b;
+									var _v12 = annotation.b;
+									var _v13 = _v12.a;
+									var inner = _v13.b;
+									var $temp$annotation = inner;
+									annotation = $temp$annotation;
+									continue isComparable;
+								} else {
+									break _v0$6;
+								}
+							default:
+								break _v0$6;
+						}
+					}
+				case 'Tupled':
+					var innerList = annotation.a;
+					return A2(
+						$elm$core$List$all,
+						A2($elm$core$Basics$composeL, $mdgriffith$elm_codegen$Internal$Compiler$isComparable, $mdgriffith$elm_codegen$Internal$Compiler$denode),
+						innerList);
+				default:
+					break _v0$6;
+			}
+		}
+		return false;
+	}
+};
+var $mdgriffith$elm_codegen$Internal$Compiler$isNumber = function (annotation) {
+	_v0$2:
+	while (true) {
+		if ((annotation.$ === 'Typed') && (!annotation.a.b.a.b)) {
+			switch (annotation.a.b.b) {
+				case 'Int':
+					var _v1 = annotation.a;
+					var _v2 = _v1.b;
+					return true;
+				case 'Float':
+					var _v3 = annotation.a;
+					var _v4 = _v3.b;
+					return true;
+				default:
+					break _v0$2;
+			}
+		} else {
+			break _v0$2;
+		}
+	}
+	return false;
+};
+var $elm$core$Bitwise$and = _Bitwise_and;
+var $elm$core$Bitwise$shiftRightBy = _Bitwise_shiftRightBy;
+var $elm$core$String$repeatHelp = F3(
+	function (n, chunk, result) {
+		return (n <= 0) ? result : A3(
+			$elm$core$String$repeatHelp,
+			n >> 1,
+			_Utils_ap(chunk, chunk),
+			(!(n & 1)) ? result : _Utils_ap(result, chunk));
+	});
+var $elm$core$String$repeat = F2(
+	function (n, chunk) {
+		return A3($elm$core$String$repeatHelp, n, chunk, '');
+	});
+var $stil4m$structured_writer$StructuredWriter$asIndent = function (amount) {
+	return A2($elm$core$String$repeat, amount, ' ');
+};
+var $elm$core$String$concat = function (strings) {
+	return A2($elm$core$String$join, '', strings);
+};
+var $stil4m$structured_writer$StructuredWriter$writeIndented = F2(
+	function (indent_, w) {
+		switch (w.$) {
+			case 'Sep':
+				var _v1 = w.a;
+				var pre = _v1.a;
+				var sep = _v1.b;
+				var post = _v1.c;
+				var differentLines = w.b;
+				var items = w.c;
+				var seperator = differentLines ? ('\n' + ($stil4m$structured_writer$StructuredWriter$asIndent(indent_) + sep)) : sep;
+				return $elm$core$String$concat(
+					_List_fromArray(
+						[
+							pre,
+							A2(
+							$elm$core$String$join,
+							seperator,
+							A2(
+								$elm$core$List$map,
+								A2(
+									$elm$core$Basics$composeR,
+									$elm$core$Basics$identity,
+									$stil4m$structured_writer$StructuredWriter$writeIndented(indent_)),
+								items)),
+							post
+						]));
+			case 'Breaked':
+				var items = w.a;
 				return A2(
-					$elm$core$Task$andThen,
-					function (b) {
-						return $elm$core$Task$succeed(
-							A2(func, a, b));
-					},
-					taskB);
-			},
-			taskA);
+					$elm$core$String$join,
+					'\n' + $stil4m$structured_writer$StructuredWriter$asIndent(indent_),
+					A2(
+						$elm$core$List$concatMap,
+						A2(
+							$elm$core$Basics$composeR,
+							$stil4m$structured_writer$StructuredWriter$writeIndented(0),
+							$elm$core$String$split('\n')),
+						items));
+			case 'Str':
+				var s = w.a;
+				return s;
+			case 'Indent':
+				var n = w.a;
+				var next = w.b;
+				return _Utils_ap(
+					$stil4m$structured_writer$StructuredWriter$asIndent(n + indent_),
+					A2($stil4m$structured_writer$StructuredWriter$writeIndented, n + indent_, next));
+			case 'Spaced':
+				var items = w.a;
+				return A2(
+					$elm$core$String$join,
+					' ',
+					A2(
+						$elm$core$List$map,
+						$stil4m$structured_writer$StructuredWriter$writeIndented(indent_),
+						items));
+			case 'Joined':
+				var items = w.a;
+				return $elm$core$String$concat(
+					A2(
+						$elm$core$List$map,
+						$stil4m$structured_writer$StructuredWriter$writeIndented(indent_),
+						items));
+			default:
+				var x = w.a;
+				var y = w.b;
+				return _Utils_ap(
+					A2($stil4m$structured_writer$StructuredWriter$writeIndented, indent_, x),
+					A2($stil4m$structured_writer$StructuredWriter$writeIndented, indent_, y));
+		}
 	});
-var $elm$core$Task$sequence = function (tasks) {
-	return A3(
-		$elm$core$List$foldr,
-		$elm$core$Task$map2($elm$core$List$cons),
-		$elm$core$Task$succeed(_List_Nil),
-		tasks);
+var $stil4m$structured_writer$StructuredWriter$write = $stil4m$structured_writer$StructuredWriter$writeIndented(0);
+var $stil4m$elm_syntax$Elm$Writer$write = $stil4m$structured_writer$StructuredWriter$write;
+var $stil4m$structured_writer$StructuredWriter$Sep = F3(
+	function (a, b, c) {
+		return {$: 'Sep', a: a, b: b, c: c};
+	});
+var $stil4m$structured_writer$StructuredWriter$bracesComma = $stil4m$structured_writer$StructuredWriter$Sep(
+	_Utils_Tuple3('{', ', ', '}'));
+var $stil4m$structured_writer$StructuredWriter$Joined = function (a) {
+	return {$: 'Joined', a: a};
 };
-var $elm$core$Platform$sendToApp = _Platform_sendToApp;
-var $elm$core$Task$spawnCmd = F2(
-	function (router, _v0) {
-		var task = _v0.a;
-		return _Scheduler_spawn(
-			A2(
-				$elm$core$Task$andThen,
-				$elm$core$Platform$sendToApp(router),
-				task));
-	});
-var $elm$core$Task$onEffects = F3(
-	function (router, commands, state) {
-		return A2(
-			$elm$core$Task$map,
-			function (_v0) {
-				return _Utils_Tuple0;
-			},
-			$elm$core$Task$sequence(
+var $stil4m$structured_writer$StructuredWriter$join = $stil4m$structured_writer$StructuredWriter$Joined;
+var $stil4m$structured_writer$StructuredWriter$parensComma = $stil4m$structured_writer$StructuredWriter$Sep(
+	_Utils_Tuple3('(', ', ', ')'));
+var $elm$core$String$contains = _String_contains;
+var $stil4m$structured_writer$StructuredWriter$Str = function (a) {
+	return {$: 'Str', a: a};
+};
+var $stil4m$structured_writer$StructuredWriter$string = $stil4m$structured_writer$StructuredWriter$Str;
+var $stil4m$elm_syntax$Elm$Writer$parensIfContainsSpaces = function (w) {
+	return A2(
+		$elm$core$String$contains,
+		' ',
+		$stil4m$structured_writer$StructuredWriter$write(w)) ? $stil4m$structured_writer$StructuredWriter$join(
+		_List_fromArray(
+			[
+				$stil4m$structured_writer$StructuredWriter$string('('),
+				w,
+				$stil4m$structured_writer$StructuredWriter$string(')')
+			])) : w;
+};
+var $elm$core$Tuple$second = function (_v0) {
+	var y = _v0.b;
+	return y;
+};
+var $stil4m$structured_writer$StructuredWriter$sepByComma = $stil4m$structured_writer$StructuredWriter$Sep(
+	_Utils_Tuple3('', ', ', ''));
+var $stil4m$structured_writer$StructuredWriter$Spaced = function (a) {
+	return {$: 'Spaced', a: a};
+};
+var $stil4m$structured_writer$StructuredWriter$spaced = $stil4m$structured_writer$StructuredWriter$Spaced;
+var $stil4m$elm_syntax$Elm$Writer$writeRecordField = function (_v4) {
+	var _v5 = _v4.b;
+	var name = _v5.a;
+	var ref = _v5.b;
+	return $stil4m$structured_writer$StructuredWriter$spaced(
+		_List_fromArray(
+			[
+				$stil4m$structured_writer$StructuredWriter$string(
+				$stil4m$elm_syntax$Elm$Syntax$Node$value(name)),
+				$stil4m$structured_writer$StructuredWriter$string(':'),
+				$stil4m$elm_syntax$Elm$Writer$writeTypeAnnotation(ref)
+			]));
+};
+var $stil4m$elm_syntax$Elm$Writer$writeTypeAnnotation = function (_v0) {
+	var typeAnnotation = _v0.b;
+	switch (typeAnnotation.$) {
+		case 'GenericType':
+			var s = typeAnnotation.a;
+			return $stil4m$structured_writer$StructuredWriter$string(s);
+		case 'Typed':
+			var moduleNameAndName = typeAnnotation.a;
+			var args = typeAnnotation.b;
+			var moduleName = $stil4m$elm_syntax$Elm$Syntax$Node$value(moduleNameAndName).a;
+			var k = $stil4m$elm_syntax$Elm$Syntax$Node$value(moduleNameAndName).b;
+			return $stil4m$structured_writer$StructuredWriter$spaced(
 				A2(
-					$elm$core$List$map,
-					$elm$core$Task$spawnCmd(router),
-					commands)));
-	});
-var $elm$core$Task$onSelfMsg = F3(
-	function (_v0, _v1, _v2) {
-		return $elm$core$Task$succeed(_Utils_Tuple0);
-	});
-var $elm$core$Task$cmdMap = F2(
-	function (tagger, _v0) {
-		var task = _v0.a;
-		return $elm$core$Task$Perform(
-			A2($elm$core$Task$map, tagger, task));
-	});
-_Platform_effectManagers['Task'] = _Platform_createManager($elm$core$Task$init, $elm$core$Task$onEffects, $elm$core$Task$onSelfMsg, $elm$core$Task$cmdMap);
-var $elm$core$Task$command = _Platform_leaf('Task');
-var $elm$core$Task$perform = F2(
-	function (toMessage, task) {
-		return $elm$core$Task$command(
-			$elm$core$Task$Perform(
-				A2($elm$core$Task$map, toMessage, task)));
-	});
-var $elm$browser$Browser$document = _Browser_document;
-var $elm$http$Http$BadStatus = function (a) {
-	return {$: 'BadStatus', a: a};
+					$elm$core$List$cons,
+					$stil4m$structured_writer$StructuredWriter$string(
+						A2(
+							$elm$core$String$join,
+							'.',
+							_Utils_ap(
+								moduleName,
+								_List_fromArray(
+									[k])))),
+					A2(
+						$elm$core$List$map,
+						A2($elm$core$Basics$composeR, $stil4m$elm_syntax$Elm$Writer$writeTypeAnnotation, $stil4m$elm_syntax$Elm$Writer$parensIfContainsSpaces),
+						args)));
+		case 'Unit':
+			return $stil4m$structured_writer$StructuredWriter$string('()');
+		case 'Tupled':
+			var xs = typeAnnotation.a;
+			return A2(
+				$stil4m$structured_writer$StructuredWriter$parensComma,
+				false,
+				A2($elm$core$List$map, $stil4m$elm_syntax$Elm$Writer$writeTypeAnnotation, xs));
+		case 'Record':
+			var xs = typeAnnotation.a;
+			return A2(
+				$stil4m$structured_writer$StructuredWriter$bracesComma,
+				false,
+				A2($elm$core$List$map, $stil4m$elm_syntax$Elm$Writer$writeRecordField, xs));
+		case 'GenericRecord':
+			var name = typeAnnotation.a;
+			var fields = typeAnnotation.b;
+			return $stil4m$structured_writer$StructuredWriter$spaced(
+				_List_fromArray(
+					[
+						$stil4m$structured_writer$StructuredWriter$string('{'),
+						$stil4m$structured_writer$StructuredWriter$string(
+						$stil4m$elm_syntax$Elm$Syntax$Node$value(name)),
+						$stil4m$structured_writer$StructuredWriter$string('|'),
+						A2(
+						$stil4m$structured_writer$StructuredWriter$sepByComma,
+						false,
+						A2(
+							$elm$core$List$map,
+							$stil4m$elm_syntax$Elm$Writer$writeRecordField,
+							$stil4m$elm_syntax$Elm$Syntax$Node$value(fields))),
+						$stil4m$structured_writer$StructuredWriter$string('}')
+					]));
+		default:
+			var left = typeAnnotation.a;
+			var right = typeAnnotation.b;
+			var addParensForSubTypeAnnotation = function (type_) {
+				if (type_.b.$ === 'FunctionTypeAnnotation') {
+					var _v3 = type_.b;
+					return $stil4m$structured_writer$StructuredWriter$join(
+						_List_fromArray(
+							[
+								$stil4m$structured_writer$StructuredWriter$string('('),
+								$stil4m$elm_syntax$Elm$Writer$writeTypeAnnotation(type_),
+								$stil4m$structured_writer$StructuredWriter$string(')')
+							]));
+				} else {
+					return $stil4m$elm_syntax$Elm$Writer$writeTypeAnnotation(type_);
+				}
+			};
+			return $stil4m$structured_writer$StructuredWriter$spaced(
+				_List_fromArray(
+					[
+						addParensForSubTypeAnnotation(left),
+						$stil4m$structured_writer$StructuredWriter$string('->'),
+						addParensForSubTypeAnnotation(right)
+					]));
+	}
 };
-var $author$project$Main$GitHubOpenApiSpecResponse = function (a) {
-	return {$: 'GitHubOpenApiSpecResponse', a: a};
+var $mdgriffith$elm_codegen$Internal$Compiler$checkRestrictions = F2(
+	function (restrictions, type_) {
+		switch (restrictions.$) {
+			case 'NoRestrictions':
+				return $elm$core$Result$Ok(type_);
+			case 'Overconstrainted':
+				var constraints = restrictions.a;
+				return $elm$core$Result$Err(
+					$stil4m$elm_syntax$Elm$Writer$write(
+						$stil4m$elm_syntax$Elm$Writer$writeTypeAnnotation(
+							$mdgriffith$elm_codegen$Internal$Compiler$nodify(type_))) + (' needs to be: ' + (A2(
+						$elm$core$String$join,
+						', ',
+						A2(
+							$elm$core$List$concatMap,
+							function (constraint) {
+								switch (constraint.$) {
+									case 'NoRestrictions':
+										return _List_Nil;
+									case 'Overconstrainted':
+										return _List_Nil;
+									case 'IsNumber':
+										return _List_fromArray(
+											['a number']);
+									case 'IsComparable':
+										return _List_fromArray(
+											['comparable']);
+									case 'IsAppendable':
+										return _List_fromArray(
+											['appendable']);
+									default:
+										return _List_fromArray(
+											['appendable and comparable']);
+								}
+							},
+							constraints)) + '\n\nbut that\'s impossible!  Or Elm Codegen\'s s typechecker is off.')));
+			case 'IsNumber':
+				return $mdgriffith$elm_codegen$Internal$Compiler$isNumber(type_) ? $elm$core$Result$Ok(type_) : $elm$core$Result$Err(
+					$stil4m$elm_syntax$Elm$Writer$write(
+						$stil4m$elm_syntax$Elm$Writer$writeTypeAnnotation(
+							$mdgriffith$elm_codegen$Internal$Compiler$nodify(type_))) + ' is not a number');
+			case 'IsComparable':
+				return $mdgriffith$elm_codegen$Internal$Compiler$isComparable(type_) ? $elm$core$Result$Ok(type_) : $elm$core$Result$Err(
+					$stil4m$elm_syntax$Elm$Writer$write(
+						$stil4m$elm_syntax$Elm$Writer$writeTypeAnnotation(
+							$mdgriffith$elm_codegen$Internal$Compiler$nodify(type_))) + ' is not comparable.  Only Ints, Floats, Chars, Strings and Lists and Tuples of those things are comparable.');
+			case 'IsAppendable':
+				return $mdgriffith$elm_codegen$Internal$Compiler$isAppendable(type_) ? $elm$core$Result$Ok(type_) : $elm$core$Result$Err(
+					$stil4m$elm_syntax$Elm$Writer$write(
+						$stil4m$elm_syntax$Elm$Writer$writeTypeAnnotation(
+							$mdgriffith$elm_codegen$Internal$Compiler$nodify(type_))) + ' is not appendable.  Only Strings and Lists are appendable.');
+			default:
+				return ($mdgriffith$elm_codegen$Internal$Compiler$isComparable(type_) || $mdgriffith$elm_codegen$Internal$Compiler$isAppendable(type_)) ? $elm$core$Result$Ok(type_) : $elm$core$Result$Err(
+					$stil4m$elm_syntax$Elm$Writer$write(
+						$stil4m$elm_syntax$Elm$Writer$writeTypeAnnotation(
+							$mdgriffith$elm_codegen$Internal$Compiler$nodify(type_))) + ' is not appendable/comparable.  Only Strings and Lists are allowed here.');
+		}
+	});
+var $mdgriffith$elm_codegen$Internal$Compiler$NoRestrictions = {$: 'NoRestrictions'};
+var $mdgriffith$elm_codegen$Internal$Compiler$IsAppendable = {$: 'IsAppendable'};
+var $mdgriffith$elm_codegen$Internal$Compiler$IsAppendableComparable = {$: 'IsAppendableComparable'};
+var $mdgriffith$elm_codegen$Internal$Compiler$IsComparable = {$: 'IsComparable'};
+var $mdgriffith$elm_codegen$Internal$Compiler$IsNumber = {$: 'IsNumber'};
+var $elm$core$String$startsWith = _String_startsWith;
+var $mdgriffith$elm_codegen$Internal$Compiler$nameToRestrictions = function (name) {
+	return A2($elm$core$String$startsWith, 'number', name) ? $mdgriffith$elm_codegen$Internal$Compiler$IsNumber : (A2($elm$core$String$startsWith, 'comparable', name) ? $mdgriffith$elm_codegen$Internal$Compiler$IsComparable : (A2($elm$core$String$startsWith, 'appendable', name) ? $mdgriffith$elm_codegen$Internal$Compiler$IsAppendable : (A2($elm$core$String$startsWith, 'compappend', name) ? $mdgriffith$elm_codegen$Internal$Compiler$IsAppendableComparable : $mdgriffith$elm_codegen$Internal$Compiler$NoRestrictions)));
+};
+var $mdgriffith$elm_codegen$Internal$Compiler$Overconstrainted = function (a) {
+	return {$: 'Overconstrainted', a: a};
+};
+var $mdgriffith$elm_codegen$Internal$Compiler$restrictFurther = F2(
+	function (restriction, newRestriction) {
+		switch (restriction.$) {
+			case 'NoRestrictions':
+				return newRestriction;
+			case 'Overconstrainted':
+				var constraints = restriction.a;
+				switch (newRestriction.$) {
+					case 'Overconstrainted':
+						var newConstraints = newRestriction.a;
+						return $mdgriffith$elm_codegen$Internal$Compiler$Overconstrainted(
+							_Utils_ap(constraints, newConstraints));
+					case 'NoRestrictions':
+						return restriction;
+					default:
+						return $mdgriffith$elm_codegen$Internal$Compiler$Overconstrainted(
+							A2($elm$core$List$cons, newRestriction, constraints));
+				}
+			case 'IsNumber':
+				switch (newRestriction.$) {
+					case 'IsNumber':
+						return newRestriction;
+					case 'NoRestrictions':
+						return restriction;
+					case 'Overconstrainted':
+						var constraints = newRestriction.a;
+						return $mdgriffith$elm_codegen$Internal$Compiler$Overconstrainted(
+							A2($elm$core$List$cons, restriction, constraints));
+					default:
+						return $mdgriffith$elm_codegen$Internal$Compiler$Overconstrainted(
+							_List_fromArray(
+								[restriction, newRestriction]));
+				}
+			case 'IsComparable':
+				switch (newRestriction.$) {
+					case 'NoRestrictions':
+						return restriction;
+					case 'IsAppendableComparable':
+						return newRestriction;
+					case 'IsComparable':
+						return newRestriction;
+					case 'Overconstrainted':
+						var constraints = newRestriction.a;
+						return $mdgriffith$elm_codegen$Internal$Compiler$Overconstrainted(
+							A2($elm$core$List$cons, restriction, constraints));
+					default:
+						return $mdgriffith$elm_codegen$Internal$Compiler$Overconstrainted(
+							_List_fromArray(
+								[restriction, newRestriction]));
+				}
+			case 'IsAppendable':
+				switch (newRestriction.$) {
+					case 'NoRestrictions':
+						return restriction;
+					case 'IsAppendableComparable':
+						return newRestriction;
+					case 'IsComparable':
+						return newRestriction;
+					case 'Overconstrainted':
+						var constraints = newRestriction.a;
+						return $mdgriffith$elm_codegen$Internal$Compiler$Overconstrainted(
+							A2($elm$core$List$cons, restriction, constraints));
+					default:
+						return $mdgriffith$elm_codegen$Internal$Compiler$Overconstrainted(
+							_List_fromArray(
+								[restriction, newRestriction]));
+				}
+			default:
+				switch (newRestriction.$) {
+					case 'NoRestrictions':
+						return restriction;
+					case 'IsAppendableComparable':
+						return newRestriction;
+					case 'IsComparable':
+						return newRestriction;
+					case 'IsAppendable':
+						return newRestriction;
+					case 'Overconstrainted':
+						var constraints = newRestriction.a;
+						return $mdgriffith$elm_codegen$Internal$Compiler$Overconstrainted(
+							A2($elm$core$List$cons, restriction, constraints));
+					default:
+						return $mdgriffith$elm_codegen$Internal$Compiler$Overconstrainted(
+							_List_fromArray(
+								[restriction, newRestriction]));
+				}
+		}
+	});
+var $elm$core$Maybe$withDefault = F2(
+	function (_default, maybe) {
+		if (maybe.$ === 'Just') {
+			var value = maybe.a;
+			return value;
+		} else {
+			return _default;
+		}
+	});
+var $mdgriffith$elm_codegen$Internal$Compiler$getRestrictionsHelper = F3(
+	function (existingRestrictions, notation, cache) {
+		getRestrictionsHelper:
+		while (true) {
+			switch (notation.$) {
+				case 'FunctionTypeAnnotation':
+					var _v1 = notation.a;
+					var oneCoords = _v1.a;
+					var one = _v1.b;
+					var _v2 = notation.b;
+					var twoCoords = _v2.a;
+					var two = _v2.b;
+					return existingRestrictions;
+				case 'GenericType':
+					var name = notation.a;
+					var $temp$existingRestrictions = A2(
+						$mdgriffith$elm_codegen$Internal$Compiler$restrictFurther,
+						existingRestrictions,
+						$mdgriffith$elm_codegen$Internal$Compiler$nameToRestrictions(name)),
+						$temp$notation = A2(
+						$elm$core$Maybe$withDefault,
+						$stil4m$elm_syntax$Elm$Syntax$TypeAnnotation$Unit,
+						A2($elm$core$Dict$get, name, cache)),
+						$temp$cache = cache;
+					existingRestrictions = $temp$existingRestrictions;
+					notation = $temp$notation;
+					cache = $temp$cache;
+					continue getRestrictionsHelper;
+				case 'Typed':
+					var nodedModuleName = notation.a;
+					var vars = notation.b;
+					return existingRestrictions;
+				case 'Unit':
+					return existingRestrictions;
+				case 'Tupled':
+					var nodes = notation.a;
+					return existingRestrictions;
+				case 'Record':
+					var fields = notation.a;
+					return existingRestrictions;
+				default:
+					var baseName = notation.a;
+					var _v3 = notation.b;
+					var recordNode = _v3.a;
+					var fields = _v3.b;
+					return existingRestrictions;
+			}
+		}
+	});
+var $mdgriffith$elm_codegen$Internal$Compiler$getRestrictions = F2(
+	function (notation, cache) {
+		return A3($mdgriffith$elm_codegen$Internal$Compiler$getRestrictionsHelper, $mdgriffith$elm_codegen$Internal$Compiler$NoRestrictions, notation, cache);
+	});
+var $elm$core$Set$insert = F2(
+	function (key, _v0) {
+		var dict = _v0.a;
+		return $elm$core$Set$Set_elm_builtin(
+			A3($elm$core$Dict$insert, key, _Utils_Tuple0, dict));
+	});
+var $elm$core$Result$map = F2(
+	function (func, ra) {
+		if (ra.$ === 'Ok') {
+			var a = ra.a;
+			return $elm$core$Result$Ok(
+				func(a));
+		} else {
+			var e = ra.a;
+			return $elm$core$Result$Err(e);
+		}
+	});
+var $elm$core$Result$map2 = F3(
+	function (func, ra, rb) {
+		if (ra.$ === 'Err') {
+			var x = ra.a;
+			return $elm$core$Result$Err(x);
+		} else {
+			var a = ra.a;
+			if (rb.$ === 'Err') {
+				var x = rb.a;
+				return $elm$core$Result$Err(x);
+			} else {
+				var b = rb.a;
+				return $elm$core$Result$Ok(
+					A2(func, a, b));
+			}
+		}
+	});
+var $elm$core$Dict$member = F2(
+	function (key, dict) {
+		var _v0 = A2($elm$core$Dict$get, key, dict);
+		if (_v0.$ === 'Just') {
+			return true;
+		} else {
+			return false;
+		}
+	});
+var $elm$core$Set$member = F2(
+	function (key, _v0) {
+		var dict = _v0.a;
+		return A2($elm$core$Dict$member, key, dict);
+	});
+var $mdgriffith$elm_codegen$Internal$Compiler$resolveVariableList = F4(
+	function (visited, cache, nodes, processed) {
+		resolveVariableList:
+		while (true) {
+			if (!nodes.b) {
+				return $elm$core$Result$Ok(
+					$elm$core$List$reverse(processed));
+			} else {
+				var _v17 = nodes.a;
+				var coords = _v17.a;
+				var top = _v17.b;
+				var remain = nodes.b;
+				var _v18 = A3($mdgriffith$elm_codegen$Internal$Compiler$resolveVariables, visited, cache, top);
+				if (_v18.$ === 'Ok') {
+					var resolved = _v18.a;
+					var $temp$visited = visited,
+						$temp$cache = cache,
+						$temp$nodes = remain,
+						$temp$processed = A2(
+						$elm$core$List$cons,
+						A2($stil4m$elm_syntax$Elm$Syntax$Node$Node, coords, resolved),
+						processed);
+					visited = $temp$visited;
+					cache = $temp$cache;
+					nodes = $temp$nodes;
+					processed = $temp$processed;
+					continue resolveVariableList;
+				} else {
+					var err = _v18.a;
+					return $elm$core$Result$Err(err);
+				}
+			}
+		}
+	});
+var $mdgriffith$elm_codegen$Internal$Compiler$resolveVariables = F3(
+	function (visited, cache, annotation) {
+		resolveVariables:
+		while (true) {
+			switch (annotation.$) {
+				case 'FunctionTypeAnnotation':
+					var _v1 = annotation.a;
+					var oneCoords = _v1.a;
+					var one = _v1.b;
+					var _v2 = annotation.b;
+					var twoCoords = _v2.a;
+					var two = _v2.b;
+					return A3(
+						$elm$core$Result$map2,
+						F2(
+							function (oneResolved, twoResolved) {
+								return A2(
+									$stil4m$elm_syntax$Elm$Syntax$TypeAnnotation$FunctionTypeAnnotation,
+									A2($stil4m$elm_syntax$Elm$Syntax$Node$Node, oneCoords, oneResolved),
+									A2($stil4m$elm_syntax$Elm$Syntax$Node$Node, twoCoords, twoResolved));
+							}),
+						A3($mdgriffith$elm_codegen$Internal$Compiler$resolveVariables, visited, cache, one),
+						A3($mdgriffith$elm_codegen$Internal$Compiler$resolveVariables, visited, cache, two));
+				case 'GenericType':
+					var name = annotation.a;
+					if (A2($elm$core$Set$member, name, visited)) {
+						return $elm$core$Result$Err('Infinite type inference loop!  Whoops.  This is an issue with elm-codegen.  If you can report this to the elm-codegen repo, that would be appreciated!');
+					} else {
+						var _v3 = A2($elm$core$Dict$get, name, cache);
+						if (_v3.$ === 'Nothing') {
+							return $elm$core$Result$Ok(annotation);
+						} else {
+							var newType = _v3.a;
+							var $temp$visited = A2($elm$core$Set$insert, name, visited),
+								$temp$cache = cache,
+								$temp$annotation = newType;
+							visited = $temp$visited;
+							cache = $temp$cache;
+							annotation = $temp$annotation;
+							continue resolveVariables;
+						}
+					}
+				case 'Typed':
+					var nodedModuleName = annotation.a;
+					var vars = annotation.b;
+					return A2(
+						$elm$core$Result$map,
+						$stil4m$elm_syntax$Elm$Syntax$TypeAnnotation$Typed(nodedModuleName),
+						A4($mdgriffith$elm_codegen$Internal$Compiler$resolveVariableList, visited, cache, vars, _List_Nil));
+				case 'Unit':
+					return $elm$core$Result$Ok($stil4m$elm_syntax$Elm$Syntax$TypeAnnotation$Unit);
+				case 'Tupled':
+					var nodes = annotation.a;
+					return A2(
+						$elm$core$Result$map,
+						$stil4m$elm_syntax$Elm$Syntax$TypeAnnotation$Tupled,
+						A4($mdgriffith$elm_codegen$Internal$Compiler$resolveVariableList, visited, cache, nodes, _List_Nil));
+				case 'Record':
+					var fields = annotation.a;
+					return A2(
+						$elm$core$Result$map,
+						A2($elm$core$Basics$composeL, $stil4m$elm_syntax$Elm$Syntax$TypeAnnotation$Record, $elm$core$List$reverse),
+						A3(
+							$elm$core$List$foldl,
+							F2(
+								function (_v4, found) {
+									var fieldRange = _v4.a;
+									var _v5 = _v4.b;
+									var name = _v5.a;
+									var _v6 = _v5.b;
+									var fieldTypeRange = _v6.a;
+									var fieldType = _v6.b;
+									if (found.$ === 'Err') {
+										var err = found.a;
+										return $elm$core$Result$Err(err);
+									} else {
+										var processedFields = found.a;
+										var _v8 = A3($mdgriffith$elm_codegen$Internal$Compiler$resolveVariables, visited, cache, fieldType);
+										if (_v8.$ === 'Err') {
+											var err = _v8.a;
+											return $elm$core$Result$Err(err);
+										} else {
+											var resolvedField = _v8.a;
+											var restrictions = A2($mdgriffith$elm_codegen$Internal$Compiler$getRestrictions, annotation, cache);
+											var _v9 = A2($mdgriffith$elm_codegen$Internal$Compiler$checkRestrictions, restrictions, resolvedField);
+											if (_v9.$ === 'Ok') {
+												return $elm$core$Result$Ok(
+													A2(
+														$elm$core$List$cons,
+														A2(
+															$stil4m$elm_syntax$Elm$Syntax$Node$Node,
+															fieldRange,
+															_Utils_Tuple2(
+																name,
+																A2($stil4m$elm_syntax$Elm$Syntax$Node$Node, fieldTypeRange, resolvedField))),
+														processedFields));
+											} else {
+												var err = _v9.a;
+												return $elm$core$Result$Err(err);
+											}
+										}
+									}
+								}),
+							$elm$core$Result$Ok(_List_Nil),
+							fields));
+				default:
+					var baseName = annotation.a;
+					var _v10 = annotation.b;
+					var recordNode = _v10.a;
+					var fields = _v10.b;
+					var newFieldResult = A3(
+						$elm$core$List$foldl,
+						F2(
+							function (_v11, found) {
+								var fieldRange = _v11.a;
+								var _v12 = _v11.b;
+								var name = _v12.a;
+								var _v13 = _v12.b;
+								var fieldTypeRange = _v13.a;
+								var fieldType = _v13.b;
+								if (found.$ === 'Err') {
+									var err = found.a;
+									return $elm$core$Result$Err(err);
+								} else {
+									var processedFields = found.a;
+									var _v15 = A3($mdgriffith$elm_codegen$Internal$Compiler$resolveVariables, visited, cache, fieldType);
+									if (_v15.$ === 'Err') {
+										var err = _v15.a;
+										return $elm$core$Result$Err(err);
+									} else {
+										var resolvedField = _v15.a;
+										var restrictions = A2($mdgriffith$elm_codegen$Internal$Compiler$getRestrictions, annotation, cache);
+										return $elm$core$Result$Ok(
+											A2(
+												$elm$core$List$cons,
+												A2(
+													$stil4m$elm_syntax$Elm$Syntax$Node$Node,
+													fieldRange,
+													_Utils_Tuple2(
+														name,
+														A2($stil4m$elm_syntax$Elm$Syntax$Node$Node, fieldTypeRange, resolvedField))),
+												processedFields));
+									}
+								}
+							}),
+						$elm$core$Result$Ok(_List_Nil),
+						fields);
+					return A2(
+						$elm$core$Result$map,
+						function (newFields) {
+							return A2(
+								$stil4m$elm_syntax$Elm$Syntax$TypeAnnotation$GenericRecord,
+								baseName,
+								A2(
+									$stil4m$elm_syntax$Elm$Syntax$Node$Node,
+									recordNode,
+									$elm$core$List$reverse(newFields)));
+						},
+						newFieldResult);
+			}
+		}
+	});
+var $mdgriffith$elm_codegen$Internal$Compiler$unifiable = F4(
+	function (aliases, vars, one, two) {
+		unifiable:
+		while (true) {
+			switch (one.$) {
+				case 'GenericType':
+					var varName = one.a;
+					var _v21 = A2($elm$core$Dict$get, varName, vars);
+					if (_v21.$ === 'Nothing') {
+						if (two.$ === 'GenericType') {
+							var varNameB = two.a;
+							return _Utils_eq(varNameB, varName) ? _Utils_Tuple2(
+								vars,
+								$elm$core$Result$Ok(one)) : _Utils_Tuple2(
+								A3($mdgriffith$elm_codegen$Internal$Compiler$addInference, varName, two, vars),
+								$elm$core$Result$Ok(two));
+						} else {
+							return _Utils_Tuple2(
+								A3($mdgriffith$elm_codegen$Internal$Compiler$addInference, varName, two, vars),
+								$elm$core$Result$Ok(two));
+						}
+					} else {
+						var found = _v21.a;
+						if (two.$ === 'GenericType') {
+							var varNameB = two.a;
+							if (_Utils_eq(varNameB, varName)) {
+								return _Utils_Tuple2(
+									vars,
+									$elm$core$Result$Ok(one));
+							} else {
+								var _v24 = A2($elm$core$Dict$get, varNameB, vars);
+								if (_v24.$ === 'Nothing') {
+									return _Utils_Tuple2(
+										A3($mdgriffith$elm_codegen$Internal$Compiler$addInference, varNameB, found, vars),
+										$elm$core$Result$Ok(two));
+								} else {
+									var foundTwo = _v24.a;
+									var $temp$aliases = aliases,
+										$temp$vars = vars,
+										$temp$one = found,
+										$temp$two = foundTwo;
+									aliases = $temp$aliases;
+									vars = $temp$vars;
+									one = $temp$one;
+									two = $temp$two;
+									continue unifiable;
+								}
+							}
+						} else {
+							var $temp$aliases = aliases,
+								$temp$vars = vars,
+								$temp$one = found,
+								$temp$two = two;
+							aliases = $temp$aliases;
+							vars = $temp$vars;
+							one = $temp$one;
+							two = $temp$two;
+							continue unifiable;
+						}
+					}
+				case 'Typed':
+					var oneName = one.a;
+					var oneVars = one.b;
+					switch (two.$) {
+						case 'Typed':
+							var twoName = two.a;
+							var twoContents = two.b;
+							if (_Utils_eq(
+								$mdgriffith$elm_codegen$Internal$Compiler$denode(oneName),
+								$mdgriffith$elm_codegen$Internal$Compiler$denode(twoName))) {
+								var _v26 = A5($mdgriffith$elm_codegen$Internal$Compiler$unifiableLists, aliases, vars, oneVars, twoContents, _List_Nil);
+								if (_v26.b.$ === 'Ok') {
+									var newVars = _v26.a;
+									var unifiedContent = _v26.b.a;
+									return _Utils_Tuple2(
+										newVars,
+										$elm$core$Result$Ok(
+											A2($stil4m$elm_syntax$Elm$Syntax$TypeAnnotation$Typed, twoName, unifiedContent)));
+								} else {
+									var newVars = _v26.a;
+									var err = _v26.b.a;
+									return _Utils_Tuple2(
+										newVars,
+										$elm$core$Result$Err(err));
+								}
+							} else {
+								return _Utils_Tuple2(
+									vars,
+									$elm$core$Result$Err(
+										A2($mdgriffith$elm_codegen$Internal$Compiler$UnableToUnify, one, two)));
+							}
+						case 'GenericType':
+							var b = two.a;
+							return _Utils_Tuple2(
+								A3($mdgriffith$elm_codegen$Internal$Compiler$addInference, b, one, vars),
+								$elm$core$Result$Ok(one));
+						default:
+							var _v27 = A5($mdgriffith$elm_codegen$Internal$Compiler$unifyWithAlias, aliases, vars, oneName, oneVars, two);
+							if (_v27.$ === 'Nothing') {
+								return _Utils_Tuple2(
+									vars,
+									$elm$core$Result$Err(
+										A2($mdgriffith$elm_codegen$Internal$Compiler$UnableToUnify, one, two)));
+							} else {
+								var unified = _v27.a;
+								return unified;
+							}
+					}
+				case 'Unit':
+					switch (two.$) {
+						case 'GenericType':
+							var b = two.a;
+							var _v29 = A2($elm$core$Dict$get, b, vars);
+							if (_v29.$ === 'Nothing') {
+								return _Utils_Tuple2(
+									A3($mdgriffith$elm_codegen$Internal$Compiler$addInference, b, one, vars),
+									$elm$core$Result$Ok(one));
+							} else {
+								var foundTwo = _v29.a;
+								var $temp$aliases = aliases,
+									$temp$vars = vars,
+									$temp$one = one,
+									$temp$two = foundTwo;
+								aliases = $temp$aliases;
+								vars = $temp$vars;
+								one = $temp$one;
+								two = $temp$two;
+								continue unifiable;
+							}
+						case 'Unit':
+							return _Utils_Tuple2(
+								vars,
+								$elm$core$Result$Ok($stil4m$elm_syntax$Elm$Syntax$TypeAnnotation$Unit));
+						default:
+							return _Utils_Tuple2(
+								vars,
+								$elm$core$Result$Err(
+									A2($mdgriffith$elm_codegen$Internal$Compiler$UnableToUnify, one, two)));
+					}
+				case 'Tupled':
+					var valsA = one.a;
+					switch (two.$) {
+						case 'GenericType':
+							var b = two.a;
+							var _v31 = A2($elm$core$Dict$get, b, vars);
+							if (_v31.$ === 'Nothing') {
+								return _Utils_Tuple2(
+									A3($mdgriffith$elm_codegen$Internal$Compiler$addInference, b, one, vars),
+									$elm$core$Result$Ok(one));
+							} else {
+								var foundTwo = _v31.a;
+								var $temp$aliases = aliases,
+									$temp$vars = vars,
+									$temp$one = one,
+									$temp$two = foundTwo;
+								aliases = $temp$aliases;
+								vars = $temp$vars;
+								one = $temp$one;
+								two = $temp$two;
+								continue unifiable;
+							}
+						case 'Tupled':
+							var valsB = two.a;
+							var _v32 = A5($mdgriffith$elm_codegen$Internal$Compiler$unifiableLists, aliases, vars, valsA, valsB, _List_Nil);
+							if (_v32.b.$ === 'Ok') {
+								var newVars = _v32.a;
+								var unified = _v32.b.a;
+								return _Utils_Tuple2(
+									newVars,
+									$elm$core$Result$Ok(
+										$stil4m$elm_syntax$Elm$Syntax$TypeAnnotation$Tupled(unified)));
+							} else {
+								var newVars = _v32.a;
+								var err = _v32.b.a;
+								return _Utils_Tuple2(
+									newVars,
+									$elm$core$Result$Err(err));
+							}
+						default:
+							return _Utils_Tuple2(
+								vars,
+								$elm$core$Result$Err(
+									A2($mdgriffith$elm_codegen$Internal$Compiler$UnableToUnify, one, two)));
+					}
+				case 'Record':
+					var fieldsA = one.a;
+					switch (two.$) {
+						case 'GenericType':
+							var b = two.a;
+							var _v34 = A2($elm$core$Dict$get, b, vars);
+							if (_v34.$ === 'Nothing') {
+								return _Utils_Tuple2(
+									A3($mdgriffith$elm_codegen$Internal$Compiler$addInference, b, one, vars),
+									$elm$core$Result$Ok(one));
+							} else {
+								var foundTwo = _v34.a;
+								var $temp$aliases = aliases,
+									$temp$vars = vars,
+									$temp$one = one,
+									$temp$two = foundTwo;
+								aliases = $temp$aliases;
+								vars = $temp$vars;
+								one = $temp$one;
+								two = $temp$two;
+								continue unifiable;
+							}
+						case 'GenericRecord':
+							var _v35 = two.a;
+							var twoRecName = _v35.b;
+							var _v36 = two.b;
+							var fieldsB = _v36.b;
+							var _v37 = A2($elm$core$Dict$get, twoRecName, vars);
+							if (_v37.$ === 'Nothing') {
+								var _v38 = A5($mdgriffith$elm_codegen$Internal$Compiler$unifiableFields, aliases, vars, fieldsA, fieldsB, _List_Nil);
+								if (_v38.b.$ === 'Ok') {
+									var newVars = _v38.a;
+									var unifiedFields = _v38.b.a;
+									return _Utils_Tuple2(
+										newVars,
+										$elm$core$Result$Ok(
+											$stil4m$elm_syntax$Elm$Syntax$TypeAnnotation$Record(unifiedFields)));
+								} else {
+									var newVars = _v38.a;
+									var err = _v38.b.a;
+									return _Utils_Tuple2(
+										newVars,
+										$elm$core$Result$Err(err));
+								}
+							} else {
+								var knownType = _v37.a;
+								var _v39 = A5($mdgriffith$elm_codegen$Internal$Compiler$unifiableFields, aliases, vars, fieldsA, fieldsB, _List_Nil);
+								if (_v39.b.$ === 'Ok') {
+									var newVars = _v39.a;
+									var unifiedFields = _v39.b.a;
+									return _Utils_Tuple2(
+										newVars,
+										$elm$core$Result$Ok(
+											$stil4m$elm_syntax$Elm$Syntax$TypeAnnotation$Record(unifiedFields)));
+								} else {
+									var newVars = _v39.a;
+									var err = _v39.b.a;
+									return _Utils_Tuple2(
+										newVars,
+										$elm$core$Result$Err(err));
+								}
+							}
+						case 'Record':
+							var fieldsB = two.a;
+							var _v40 = A5($mdgriffith$elm_codegen$Internal$Compiler$unifiableFields, aliases, vars, fieldsA, fieldsB, _List_Nil);
+							if (_v40.b.$ === 'Ok') {
+								var newVars = _v40.a;
+								var unifiedFields = _v40.b.a;
+								return _Utils_Tuple2(
+									newVars,
+									$elm$core$Result$Ok(
+										$stil4m$elm_syntax$Elm$Syntax$TypeAnnotation$Record(unifiedFields)));
+							} else {
+								var newVars = _v40.a;
+								var err = _v40.b.a;
+								return _Utils_Tuple2(
+									newVars,
+									$elm$core$Result$Err(err));
+							}
+						case 'Typed':
+							var twoName = two.a;
+							var twoVars = two.b;
+							var _v41 = A5($mdgriffith$elm_codegen$Internal$Compiler$unifyWithAlias, aliases, vars, twoName, twoVars, one);
+							if (_v41.$ === 'Nothing') {
+								return _Utils_Tuple2(
+									vars,
+									$elm$core$Result$Err(
+										A2($mdgriffith$elm_codegen$Internal$Compiler$UnableToUnify, one, two)));
+							} else {
+								var unified = _v41.a;
+								return unified;
+							}
+						default:
+							return _Utils_Tuple2(
+								vars,
+								$elm$core$Result$Err(
+									A2($mdgriffith$elm_codegen$Internal$Compiler$UnableToUnify, one, two)));
+					}
+				case 'GenericRecord':
+					var _v42 = one.a;
+					var reVarName = _v42.b;
+					var _v43 = one.b;
+					var fieldsARange = _v43.a;
+					var fieldsA = _v43.b;
+					switch (two.$) {
+						case 'GenericType':
+							var b = two.a;
+							var _v45 = A2($elm$core$Dict$get, b, vars);
+							if (_v45.$ === 'Nothing') {
+								return _Utils_Tuple2(
+									A3($mdgriffith$elm_codegen$Internal$Compiler$addInference, b, one, vars),
+									$elm$core$Result$Ok(one));
+							} else {
+								var foundTwo = _v45.a;
+								var $temp$aliases = aliases,
+									$temp$vars = vars,
+									$temp$one = one,
+									$temp$two = foundTwo;
+								aliases = $temp$aliases;
+								vars = $temp$vars;
+								one = $temp$one;
+								two = $temp$two;
+								continue unifiable;
+							}
+						case 'GenericRecord':
+							var _v46 = two.a;
+							var twoRecName = _v46.b;
+							var _v47 = two.b;
+							var fieldsB = _v47.b;
+							var _v48 = A2($elm$core$Dict$get, twoRecName, vars);
+							if (_v48.$ === 'Nothing') {
+								var _v49 = A5($mdgriffith$elm_codegen$Internal$Compiler$unifiableFields, aliases, vars, fieldsA, fieldsB, _List_Nil);
+								if (_v49.b.$ === 'Ok') {
+									var newVars = _v49.a;
+									var unifiedFields = _v49.b.a;
+									return _Utils_Tuple2(
+										newVars,
+										$elm$core$Result$Ok(
+											$stil4m$elm_syntax$Elm$Syntax$TypeAnnotation$Record(unifiedFields)));
+								} else {
+									var newVars = _v49.a;
+									var err = _v49.b.a;
+									return _Utils_Tuple2(
+										newVars,
+										$elm$core$Result$Err(err));
+								}
+							} else {
+								var knownType = _v48.a;
+								var _v50 = A5($mdgriffith$elm_codegen$Internal$Compiler$unifiableFields, aliases, vars, fieldsA, fieldsB, _List_Nil);
+								if (_v50.b.$ === 'Ok') {
+									var newVars = _v50.a;
+									var unifiedFields = _v50.b.a;
+									return _Utils_Tuple2(
+										newVars,
+										$elm$core$Result$Ok(
+											$stil4m$elm_syntax$Elm$Syntax$TypeAnnotation$Record(unifiedFields)));
+								} else {
+									var newVars = _v50.a;
+									var err = _v50.b.a;
+									return _Utils_Tuple2(
+										newVars,
+										$elm$core$Result$Err(err));
+								}
+							}
+						case 'Record':
+							var fieldsB = two.a;
+							var _v51 = A5($mdgriffith$elm_codegen$Internal$Compiler$unifiableFields, aliases, vars, fieldsA, fieldsB, _List_Nil);
+							if (_v51.b.$ === 'Ok') {
+								var newVars = _v51.a;
+								var unifiedFields = _v51.b.a;
+								return _Utils_Tuple2(
+									newVars,
+									$elm$core$Result$Ok(
+										$stil4m$elm_syntax$Elm$Syntax$TypeAnnotation$Record(unifiedFields)));
+							} else {
+								var newVars = _v51.a;
+								var err = _v51.b.a;
+								return _Utils_Tuple2(
+									newVars,
+									$elm$core$Result$Err(err));
+							}
+						case 'Typed':
+							var twoName = two.a;
+							var twoVars = two.b;
+							var _v52 = A5($mdgriffith$elm_codegen$Internal$Compiler$unifyWithAlias, aliases, vars, twoName, twoVars, one);
+							if (_v52.$ === 'Nothing') {
+								return _Utils_Tuple2(
+									vars,
+									$elm$core$Result$Err(
+										A2($mdgriffith$elm_codegen$Internal$Compiler$UnableToUnify, one, two)));
+							} else {
+								var unified = _v52.a;
+								return unified;
+							}
+						default:
+							return _Utils_Tuple2(
+								vars,
+								$elm$core$Result$Err(
+									A2($mdgriffith$elm_codegen$Internal$Compiler$UnableToUnify, one, two)));
+					}
+				default:
+					var oneA = one.a;
+					var oneB = one.b;
+					switch (two.$) {
+						case 'GenericType':
+							var b = two.a;
+							var _v54 = A2($elm$core$Dict$get, b, vars);
+							if (_v54.$ === 'Nothing') {
+								return _Utils_Tuple2(
+									A3($mdgriffith$elm_codegen$Internal$Compiler$addInference, b, one, vars),
+									$elm$core$Result$Ok(one));
+							} else {
+								var foundTwo = _v54.a;
+								var $temp$aliases = aliases,
+									$temp$vars = vars,
+									$temp$one = one,
+									$temp$two = foundTwo;
+								aliases = $temp$aliases;
+								vars = $temp$vars;
+								one = $temp$one;
+								two = $temp$two;
+								continue unifiable;
+							}
+						case 'FunctionTypeAnnotation':
+							var twoA = two.a;
+							var twoB = two.b;
+							var _v55 = A4(
+								$mdgriffith$elm_codegen$Internal$Compiler$unifiable,
+								aliases,
+								vars,
+								$mdgriffith$elm_codegen$Internal$Compiler$denode(oneA),
+								$mdgriffith$elm_codegen$Internal$Compiler$denode(twoA));
+							if (_v55.b.$ === 'Ok') {
+								var aVars = _v55.a;
+								var unifiedA = _v55.b.a;
+								var _v56 = A4(
+									$mdgriffith$elm_codegen$Internal$Compiler$unifiable,
+									aliases,
+									aVars,
+									$mdgriffith$elm_codegen$Internal$Compiler$denode(oneB),
+									$mdgriffith$elm_codegen$Internal$Compiler$denode(twoB));
+								if (_v56.b.$ === 'Ok') {
+									var bVars = _v56.a;
+									var unifiedB = _v56.b.a;
+									return _Utils_Tuple2(
+										bVars,
+										$elm$core$Result$Ok(
+											A2(
+												$stil4m$elm_syntax$Elm$Syntax$TypeAnnotation$FunctionTypeAnnotation,
+												$mdgriffith$elm_codegen$Internal$Compiler$nodify(unifiedA),
+												$mdgriffith$elm_codegen$Internal$Compiler$nodify(unifiedB))));
+								} else {
+									var otherwise = _v56;
+									return otherwise;
+								}
+							} else {
+								var otherwise = _v55;
+								return otherwise;
+							}
+						default:
+							return _Utils_Tuple2(
+								vars,
+								$elm$core$Result$Err(
+									A2($mdgriffith$elm_codegen$Internal$Compiler$UnableToUnify, one, two)));
+					}
+			}
+		}
+	});
+var $mdgriffith$elm_codegen$Internal$Compiler$unifiableFields = F5(
+	function (aliases, vars, one, two, unified) {
+		unifiableFields:
+		while (true) {
+			var _v13 = _Utils_Tuple2(one, two);
+			if (!_v13.a.b) {
+				if (!_v13.b.b) {
+					return _Utils_Tuple2(
+						vars,
+						$elm$core$Result$Ok(
+							$mdgriffith$elm_codegen$Internal$Compiler$nodifyAll(
+								$elm$core$List$reverse(unified))));
+				} else {
+					return _Utils_Tuple2(
+						vars,
+						$elm$core$Result$Err($mdgriffith$elm_codegen$Internal$Compiler$MismatchedTypeVariables));
+				}
+			} else {
+				var _v14 = _v13.a;
+				var oneX = _v14.a;
+				var oneRemain = _v14.b;
+				var twoFields = _v13.b;
+				var _v15 = $mdgriffith$elm_codegen$Internal$Compiler$denode(oneX);
+				var oneFieldName = _v15.a;
+				var oneFieldVal = _v15.b;
+				var oneName = $mdgriffith$elm_codegen$Internal$Compiler$denode(oneFieldName);
+				var oneVal = $mdgriffith$elm_codegen$Internal$Compiler$denode(oneFieldVal);
+				var _v16 = A4($mdgriffith$elm_codegen$Internal$Compiler$getField, oneName, oneVal, twoFields, _List_Nil);
+				if (_v16.$ === 'Ok') {
+					var _v17 = _v16.a;
+					var matchingFieldVal = _v17.a;
+					var remainingTwo = _v17.b;
+					var _v18 = A4($mdgriffith$elm_codegen$Internal$Compiler$unifiable, aliases, vars, oneVal, matchingFieldVal);
+					var newVars = _v18.a;
+					var unifiedFieldResult = _v18.b;
+					if (unifiedFieldResult.$ === 'Ok') {
+						var unifiedField = unifiedFieldResult.a;
+						var $temp$aliases = aliases,
+							$temp$vars = newVars,
+							$temp$one = oneRemain,
+							$temp$two = remainingTwo,
+							$temp$unified = A2(
+							$elm$core$List$cons,
+							_Utils_Tuple2(
+								$mdgriffith$elm_codegen$Internal$Compiler$nodify(oneName),
+								$mdgriffith$elm_codegen$Internal$Compiler$nodify(unifiedField)),
+							unified);
+						aliases = $temp$aliases;
+						vars = $temp$vars;
+						one = $temp$one;
+						two = $temp$two;
+						unified = $temp$unified;
+						continue unifiableFields;
+					} else {
+						var err = unifiedFieldResult.a;
+						return _Utils_Tuple2(
+							newVars,
+							$elm$core$Result$Err(err));
+					}
+				} else {
+					var notFound = _v16.a;
+					return _Utils_Tuple2(
+						vars,
+						$elm$core$Result$Err(notFound));
+				}
+			}
+		}
+	});
+var $mdgriffith$elm_codegen$Internal$Compiler$unifiableLists = F5(
+	function (aliases, vars, one, two, unified) {
+		unifiableLists:
+		while (true) {
+			var _v6 = _Utils_Tuple2(one, two);
+			_v6$3:
+			while (true) {
+				if (!_v6.a.b) {
+					if (!_v6.b.b) {
+						return _Utils_Tuple2(
+							vars,
+							$elm$core$Result$Ok(
+								$mdgriffith$elm_codegen$Internal$Compiler$nodifyAll(
+									$elm$core$List$reverse(unified))));
+					} else {
+						break _v6$3;
+					}
+				} else {
+					if (_v6.b.b) {
+						if ((!_v6.a.b.b) && (!_v6.b.b.b)) {
+							var _v7 = _v6.a;
+							var oneX = _v7.a;
+							var _v8 = _v6.b;
+							var twoX = _v8.a;
+							var _v9 = A4(
+								$mdgriffith$elm_codegen$Internal$Compiler$unifiable,
+								aliases,
+								vars,
+								$mdgriffith$elm_codegen$Internal$Compiler$denode(oneX),
+								$mdgriffith$elm_codegen$Internal$Compiler$denode(twoX));
+							if (_v9.b.$ === 'Ok') {
+								var newVars = _v9.a;
+								var un = _v9.b.a;
+								return _Utils_Tuple2(
+									newVars,
+									$elm$core$Result$Ok(
+										$mdgriffith$elm_codegen$Internal$Compiler$nodifyAll(
+											$elm$core$List$reverse(
+												A2($elm$core$List$cons, un, unified)))));
+							} else {
+								var newVars = _v9.a;
+								var err = _v9.b.a;
+								return _Utils_Tuple2(
+									newVars,
+									$elm$core$Result$Err(err));
+							}
+						} else {
+							var _v10 = _v6.a;
+							var oneX = _v10.a;
+							var oneRemain = _v10.b;
+							var _v11 = _v6.b;
+							var twoX = _v11.a;
+							var twoRemain = _v11.b;
+							var _v12 = A4(
+								$mdgriffith$elm_codegen$Internal$Compiler$unifiable,
+								aliases,
+								vars,
+								$mdgriffith$elm_codegen$Internal$Compiler$denode(oneX),
+								$mdgriffith$elm_codegen$Internal$Compiler$denode(twoX));
+							if (_v12.b.$ === 'Ok') {
+								var newVars = _v12.a;
+								var un = _v12.b.a;
+								var $temp$aliases = aliases,
+									$temp$vars = newVars,
+									$temp$one = oneRemain,
+									$temp$two = twoRemain,
+									$temp$unified = A2($elm$core$List$cons, un, unified);
+								aliases = $temp$aliases;
+								vars = $temp$vars;
+								one = $temp$one;
+								two = $temp$two;
+								unified = $temp$unified;
+								continue unifiableLists;
+							} else {
+								var newVars = _v12.a;
+								var err = _v12.b.a;
+								return _Utils_Tuple2(
+									vars,
+									$elm$core$Result$Err(err));
+							}
+						}
+					} else {
+						break _v6$3;
+					}
+				}
+			}
+			return _Utils_Tuple2(
+				vars,
+				$elm$core$Result$Err($mdgriffith$elm_codegen$Internal$Compiler$MismatchedTypeVariables));
+		}
+	});
+var $mdgriffith$elm_codegen$Internal$Compiler$unifyWithAlias = F5(
+	function (aliases, vars, typename, typeVars, typeToUnifyWith) {
+		var _v0 = A2($mdgriffith$elm_codegen$Internal$Compiler$getAlias, typename, aliases);
+		if (_v0.$ === 'Nothing') {
+			return $elm$core$Maybe$Nothing;
+		} else {
+			var foundAlias = _v0.a;
+			var fullAliasedType = function () {
+				var _v3 = foundAlias.variables;
+				if (!_v3.b) {
+					return foundAlias.target;
+				} else {
+					var makeAliasVarCache = F2(
+						function (varName, _v5) {
+							var varType = _v5.b;
+							return _Utils_Tuple2(varName, varType);
+						});
+					var _v4 = A3(
+						$mdgriffith$elm_codegen$Internal$Compiler$resolveVariables,
+						$elm$core$Set$empty,
+						$elm$core$Dict$fromList(
+							A3($elm$core$List$map2, makeAliasVarCache, foundAlias.variables, typeVars)),
+						foundAlias.target);
+					if (_v4.$ === 'Ok') {
+						var resolvedType = _v4.a;
+						return resolvedType;
+					} else {
+						return foundAlias.target;
+					}
+				}
+			}();
+			var _v1 = A4($mdgriffith$elm_codegen$Internal$Compiler$unifiable, aliases, vars, fullAliasedType, typeToUnifyWith);
+			var returnedVars = _v1.a;
+			var unifiedResult = _v1.b;
+			if (unifiedResult.$ === 'Ok') {
+				var finalInference = unifiedResult.a;
+				return $elm$core$Maybe$Just(
+					_Utils_Tuple2(
+						returnedVars,
+						$elm$core$Result$Ok(fullAliasedType)));
+			} else {
+				var err = unifiedResult.a;
+				return $elm$core$Maybe$Nothing;
+			}
+		}
+	});
+var $mdgriffith$elm_codegen$Internal$Compiler$applyTypeHelper = F4(
+	function (aliases, cache, fn, args) {
+		applyTypeHelper:
+		while (true) {
+			switch (fn.$) {
+				case 'FunctionTypeAnnotation':
+					var one = fn.a;
+					var two = fn.b;
+					if (!args.b) {
+						return $elm$core$Result$Ok(
+							{aliases: $mdgriffith$elm_codegen$Internal$Compiler$emptyAliases, inferences: cache, type_: fn});
+					} else {
+						var top = args.a;
+						var rest = args.b;
+						var _v2 = A4(
+							$mdgriffith$elm_codegen$Internal$Compiler$unifiable,
+							aliases,
+							cache,
+							$mdgriffith$elm_codegen$Internal$Compiler$denode(one),
+							top);
+						if (_v2.b.$ === 'Ok') {
+							var variableCache = _v2.a;
+							var $temp$aliases = aliases,
+								$temp$cache = variableCache,
+								$temp$fn = $mdgriffith$elm_codegen$Internal$Compiler$denode(two),
+								$temp$args = rest;
+							aliases = $temp$aliases;
+							cache = $temp$cache;
+							fn = $temp$fn;
+							args = $temp$args;
+							continue applyTypeHelper;
+						} else {
+							var varCache = _v2.a;
+							var err = _v2.b.a;
+							return $elm$core$Result$Err(
+								_List_fromArray(
+									[err]));
+						}
+					}
+				case 'GenericType':
+					var varName = fn.a;
+					if (!args.b) {
+						return $elm$core$Result$Ok(
+							{aliases: $mdgriffith$elm_codegen$Internal$Compiler$emptyAliases, inferences: cache, type_: fn});
+					} else {
+						var resultType = $stil4m$elm_syntax$Elm$Syntax$TypeAnnotation$GenericType(varName + '_result');
+						return $elm$core$Result$Ok(
+							{
+								aliases: $mdgriffith$elm_codegen$Internal$Compiler$emptyAliases,
+								inferences: A3(
+									$mdgriffith$elm_codegen$Internal$Compiler$addInference,
+									varName,
+									A2($mdgriffith$elm_codegen$Internal$Compiler$makeFunction, resultType, args),
+									cache),
+								type_: resultType
+							});
+					}
+				default:
+					var _final = fn;
+					if (!args.b) {
+						return $elm$core$Result$Ok(
+							{aliases: $mdgriffith$elm_codegen$Internal$Compiler$emptyAliases, inferences: cache, type_: fn});
+					} else {
+						return $elm$core$Result$Err(
+							_List_fromArray(
+								[
+									A2($mdgriffith$elm_codegen$Internal$Compiler$FunctionAppliedToTooManyArgs, _final, args)
+								]));
+					}
+			}
+		}
+	});
+var $elm$core$Dict$foldl = F3(
+	function (func, acc, dict) {
+		foldl:
+		while (true) {
+			if (dict.$ === 'RBEmpty_elm_builtin') {
+				return acc;
+			} else {
+				var key = dict.b;
+				var value = dict.c;
+				var left = dict.d;
+				var right = dict.e;
+				var $temp$func = func,
+					$temp$acc = A3(
+					func,
+					key,
+					value,
+					A3($elm$core$Dict$foldl, func, acc, left)),
+					$temp$dict = right;
+				func = $temp$func;
+				acc = $temp$acc;
+				dict = $temp$dict;
+				continue foldl;
+			}
+		}
+	});
+var $elm$core$Dict$merge = F6(
+	function (leftStep, bothStep, rightStep, leftDict, rightDict, initialResult) {
+		var stepState = F3(
+			function (rKey, rValue, _v0) {
+				stepState:
+				while (true) {
+					var list = _v0.a;
+					var result = _v0.b;
+					if (!list.b) {
+						return _Utils_Tuple2(
+							list,
+							A3(rightStep, rKey, rValue, result));
+					} else {
+						var _v2 = list.a;
+						var lKey = _v2.a;
+						var lValue = _v2.b;
+						var rest = list.b;
+						if (_Utils_cmp(lKey, rKey) < 0) {
+							var $temp$rKey = rKey,
+								$temp$rValue = rValue,
+								$temp$_v0 = _Utils_Tuple2(
+								rest,
+								A3(leftStep, lKey, lValue, result));
+							rKey = $temp$rKey;
+							rValue = $temp$rValue;
+							_v0 = $temp$_v0;
+							continue stepState;
+						} else {
+							if (_Utils_cmp(lKey, rKey) > 0) {
+								return _Utils_Tuple2(
+									list,
+									A3(rightStep, rKey, rValue, result));
+							} else {
+								return _Utils_Tuple2(
+									rest,
+									A4(bothStep, lKey, lValue, rValue, result));
+							}
+						}
+					}
+				}
+			});
+		var _v3 = A3(
+			$elm$core$Dict$foldl,
+			stepState,
+			_Utils_Tuple2(
+				$elm$core$Dict$toList(leftDict),
+				initialResult),
+			rightDict);
+		var leftovers = _v3.a;
+		var intermediateResult = _v3.b;
+		return A3(
+			$elm$core$List$foldl,
+			F2(
+				function (_v4, result) {
+					var k = _v4.a;
+					var v = _v4.b;
+					return A3(leftStep, k, v, result);
+				}),
+			intermediateResult,
+			leftovers);
+	});
+var $mdgriffith$elm_codegen$Internal$Compiler$mergeInferences = F2(
+	function (one, two) {
+		return A6(
+			$elm$core$Dict$merge,
+			$elm$core$Dict$insert,
+			F4(
+				function (key, oneVal, twoVal, d) {
+					if (oneVal.$ === 'GenericRecord') {
+						var recordName = oneVal.a;
+						var _v1 = oneVal.b;
+						var oneRange = _v1.a;
+						var recordDefinition = _v1.b;
+						if (twoVal.$ === 'GenericRecord') {
+							var twoRecordName = twoVal.a;
+							var _v3 = twoVal.b;
+							var twoRange = _v3.a;
+							var twoRecordDefinition = _v3.b;
+							return A3(
+								$elm$core$Dict$insert,
+								key,
+								A2(
+									$stil4m$elm_syntax$Elm$Syntax$TypeAnnotation$GenericRecord,
+									recordName,
+									A2(
+										$stil4m$elm_syntax$Elm$Syntax$Node$Node,
+										oneRange,
+										_Utils_ap(recordDefinition, twoRecordDefinition))),
+								d);
+						} else {
+							return A3($elm$core$Dict$insert, key, oneVal, d);
+						}
+					} else {
+						return A3($elm$core$Dict$insert, key, oneVal, d);
+					}
+				}),
+			$elm$core$Dict$insert,
+			one,
+			two,
+			$elm$core$Dict$empty);
+	});
+var $mdgriffith$elm_codegen$Internal$Compiler$mergeArgInferences = F3(
+	function (expressions, annotations, inferences) {
+		mergeArgInferences:
+		while (true) {
+			if (!expressions.b) {
+				return $elm$core$Result$Ok(
+					{
+						inferences: inferences,
+						types: $elm$core$List$reverse(annotations)
+					});
+			} else {
+				var top = expressions.a;
+				var remain = expressions.b;
+				var _v1 = top.annotation;
+				if (_v1.$ === 'Ok') {
+					var ann = _v1.a;
+					var $temp$expressions = remain,
+						$temp$annotations = A2($elm$core$List$cons, ann.type_, annotations),
+						$temp$inferences = A2($mdgriffith$elm_codegen$Internal$Compiler$mergeInferences, inferences, ann.inferences);
+					expressions = $temp$expressions;
+					annotations = $temp$annotations;
+					inferences = $temp$inferences;
+					continue mergeArgInferences;
+				} else {
+					var err = _v1.a;
+					return $elm$core$Result$Err(err);
+				}
+			}
+		}
+	});
+var $mdgriffith$elm_codegen$Internal$Index$typecheck = function (_v0) {
+	var top = _v0.a;
+	var tail = _v0.b;
+	var scope = _v0.c;
+	var check = _v0.d;
+	return check;
+};
+var $mdgriffith$elm_codegen$Internal$Compiler$applyType = F3(
+	function (index, annotation, args) {
+		if (annotation.$ === 'Err') {
+			var err = annotation.a;
+			return $elm$core$Result$Err(err);
+		} else {
+			var fnAnnotation = annotation.a;
+			if ($mdgriffith$elm_codegen$Internal$Index$typecheck(index)) {
+				var _v1 = A3($mdgriffith$elm_codegen$Internal$Compiler$mergeArgInferences, args, _List_Nil, fnAnnotation.inferences);
+				if (_v1.$ === 'Ok') {
+					var mergedArgs = _v1.a;
+					return A4($mdgriffith$elm_codegen$Internal$Compiler$applyTypeHelper, fnAnnotation.aliases, mergedArgs.inferences, fnAnnotation.type_, mergedArgs.types);
+				} else {
+					var err = _v1.a;
+					return $elm$core$Result$Err(err);
+				}
+			} else {
+				return $elm$core$Result$Err(_List_Nil);
+			}
+		}
+	});
+var $mdgriffith$elm_codegen$Internal$Compiler$Expression = function (a) {
+	return {$: 'Expression', a: a};
+};
+var $mdgriffith$elm_codegen$Internal$Index$Index = F4(
+	function (a, b, c, d) {
+		return {$: 'Index', a: a, b: b, c: c, d: d};
+	});
+var $mdgriffith$elm_codegen$Internal$Index$dive = function (_v0) {
+	var top = _v0.a;
+	var tail = _v0.b;
+	var scope = _v0.c;
+	var check = _v0.d;
+	return A4(
+		$mdgriffith$elm_codegen$Internal$Index$Index,
+		0,
+		A2($elm$core$List$cons, top, tail),
+		scope,
+		check);
+};
+var $mdgriffith$elm_codegen$Internal$Compiler$expression = function (toExp) {
+	return $mdgriffith$elm_codegen$Internal$Compiler$Expression(
+		function (index) {
+			return toExp(
+				$mdgriffith$elm_codegen$Internal$Index$dive(index));
+		});
+};
+var $mdgriffith$elm_codegen$Internal$Compiler$getImports = function (exp) {
+	return exp.imports;
+};
+var $stil4m$elm_syntax$Elm$Syntax$Expression$ParenthesizedExpression = function (a) {
+	return {$: 'ParenthesizedExpression', a: a};
+};
+var $mdgriffith$elm_codegen$Internal$Compiler$parens = function (expr) {
+	switch (expr.$) {
+		case 'UnitExpr':
+			return expr;
+		case 'Integer':
+			var i = expr.a;
+			return expr;
+		case 'Literal':
+			return expr;
+		case 'Hex':
+			return expr;
+		case 'Floatable':
+			return expr;
+		case 'TupledExpression':
+			return expr;
+		case 'ParenthesizedExpression':
+			return expr;
+		case 'CharLiteral':
+			return expr;
+		case 'ListExpr':
+			return expr;
+		case 'FunctionOrValue':
+			return expr;
+		case 'RecordAccessFunction':
+			return expr;
+		case 'RecordUpdateExpression':
+			return expr;
+		case 'RecordExpr':
+			return expr;
+		case 'LambdaExpression':
+			return expr;
+		default:
+			return $stil4m$elm_syntax$Elm$Syntax$Expression$ParenthesizedExpression(
+				$mdgriffith$elm_codegen$Internal$Compiler$nodify(expr));
+	}
+};
+var $mdgriffith$elm_codegen$Internal$Index$next = function (_v0) {
+	var top = _v0.a;
+	var tail = _v0.b;
+	var scope = _v0.c;
+	var check = _v0.d;
+	return A4($mdgriffith$elm_codegen$Internal$Index$Index, top + 1, tail, scope, check);
+};
+var $mdgriffith$elm_codegen$Internal$Compiler$threadHelper = F3(
+	function (index, exps, rendered) {
+		threadHelper:
+		while (true) {
+			if (!exps.b) {
+				return $elm$core$List$reverse(rendered);
+			} else {
+				var toExpDetails = exps.a.a;
+				var remain = exps.b;
+				var $temp$index = $mdgriffith$elm_codegen$Internal$Index$next(index),
+					$temp$exps = remain,
+					$temp$rendered = A2(
+					$elm$core$List$cons,
+					toExpDetails(index),
+					rendered);
+				index = $temp$index;
+				exps = $temp$exps;
+				rendered = $temp$rendered;
+				continue threadHelper;
+			}
+		}
+	});
+var $mdgriffith$elm_codegen$Internal$Compiler$thread = F2(
+	function (index, exps) {
+		return A3($mdgriffith$elm_codegen$Internal$Compiler$threadHelper, index, exps, _List_Nil);
+	});
+var $mdgriffith$elm_codegen$Internal$Compiler$toExpressionDetails = F2(
+	function (index, _v0) {
+		var toExp = _v0.a;
+		return _Utils_Tuple2(
+			$mdgriffith$elm_codegen$Internal$Index$next(index),
+			toExp(index));
+	});
+var $mdgriffith$elm_codegen$Elm$apply = F2(
+	function (fnExp, argExpressions) {
+		return $mdgriffith$elm_codegen$Internal$Compiler$expression(
+			function (index) {
+				var _v0 = A2($mdgriffith$elm_codegen$Internal$Compiler$toExpressionDetails, index, fnExp);
+				var annotationIndex = _v0.a;
+				var fnDetails = _v0.b;
+				var args = A2($mdgriffith$elm_codegen$Internal$Compiler$thread, annotationIndex, argExpressions);
+				return {
+					annotation: A3($mdgriffith$elm_codegen$Internal$Compiler$applyType, index, fnDetails.annotation, args),
+					expression: $stil4m$elm_syntax$Elm$Syntax$Expression$Application(
+						$mdgriffith$elm_codegen$Internal$Compiler$nodifyAll(
+							A2(
+								$elm$core$List$cons,
+								fnDetails.expression,
+								A2(
+									$elm$core$List$map,
+									A2(
+										$elm$core$Basics$composeL,
+										$mdgriffith$elm_codegen$Internal$Compiler$parens,
+										function ($) {
+											return $.expression;
+										}),
+									args)))),
+					imports: _Utils_ap(
+						fnDetails.imports,
+						A2($elm$core$List$concatMap, $mdgriffith$elm_codegen$Internal$Compiler$getImports, args))
+				};
+			});
+	});
+var $elm$regex$Regex$Match = F4(
+	function (match, index, number, submatches) {
+		return {index: index, match: match, number: number, submatches: submatches};
+	});
+var $elm$regex$Regex$fromStringWith = _Regex_fromStringWith;
+var $elm$regex$Regex$fromString = function (string) {
+	return A2(
+		$elm$regex$Regex$fromStringWith,
+		{caseInsensitive: false, multiline: false},
+		string);
+};
+var $elm$regex$Regex$never = _Regex_never;
+var $elm_community$string_extra$String$Extra$regexFromString = A2(
+	$elm$core$Basics$composeR,
+	$elm$regex$Regex$fromString,
+	$elm$core$Maybe$withDefault($elm$regex$Regex$never));
+var $elm$regex$Regex$replace = _Regex_replaceAtMost(_Regex_infinity);
+var $elm$core$String$toUpper = _String_toUpper;
+var $elm$core$String$trim = _String_trim;
+var $elm_community$string_extra$String$Extra$camelize = function (string) {
+	return A3(
+		$elm$regex$Regex$replace,
+		$elm_community$string_extra$String$Extra$regexFromString('[-_\\s]+(.)?'),
+		function (_v0) {
+			var submatches = _v0.submatches;
+			if (submatches.b && (submatches.a.$ === 'Just')) {
+				var match = submatches.a.a;
+				return $elm$core$String$toUpper(match);
+			} else {
+				return '';
+			}
+		},
+		$elm$core$String$trim(string));
 };
 var $author$project$OpenApi$OpenApi = function (a) {
 	return {$: 'OpenApi', a: a};
@@ -5504,6 +5915,7 @@ var $author$project$OpenApi$SecurityScheme$decodeSecuritySchemeIn = A2(
 	},
 	$elm$json$Json$Decode$string);
 var $elm$json$Json$Decode$field = _Json_decodeField;
+var $elm$json$Json$Decode$map2 = _Json_map2;
 var $author$project$OpenApi$SecurityScheme$decodeApiKey = A3(
 	$elm$json$Json$Decode$map2,
 	F2(
@@ -5517,7 +5929,7 @@ var $author$project$OpenApi$SecurityScheme$Http = function (a) {
 	return {$: 'Http', a: a};
 };
 var $elm$json$Json$Decode$decodeValue = _Json_run;
-var $elm$json$Json$Decode$value = _Json_decodeValue;
+var $elm$json$Json$Decode$map = _Json_map1;
 var $elm_community$json_extra$Json$Decode$Extra$optionalField = F2(
 	function (fieldName, decoder) {
 		var finishDecoding = function (json) {
@@ -5556,129 +5968,6 @@ var $author$project$OpenApi$OauthFlow$OauthFlows = function (a) {
 };
 var $author$project$OpenApi$OauthFlow$AuthorizationCodeFlow = function (a) {
 	return {$: 'AuthorizationCodeFlow', a: a};
-};
-var $elm$core$Dict$RBEmpty_elm_builtin = {$: 'RBEmpty_elm_builtin'};
-var $elm$core$Dict$empty = $elm$core$Dict$RBEmpty_elm_builtin;
-var $elm$core$Dict$Black = {$: 'Black'};
-var $elm$core$Dict$RBNode_elm_builtin = F5(
-	function (a, b, c, d, e) {
-		return {$: 'RBNode_elm_builtin', a: a, b: b, c: c, d: d, e: e};
-	});
-var $elm$core$Dict$Red = {$: 'Red'};
-var $elm$core$Dict$balance = F5(
-	function (color, key, value, left, right) {
-		if ((right.$ === 'RBNode_elm_builtin') && (right.a.$ === 'Red')) {
-			var _v1 = right.a;
-			var rK = right.b;
-			var rV = right.c;
-			var rLeft = right.d;
-			var rRight = right.e;
-			if ((left.$ === 'RBNode_elm_builtin') && (left.a.$ === 'Red')) {
-				var _v3 = left.a;
-				var lK = left.b;
-				var lV = left.c;
-				var lLeft = left.d;
-				var lRight = left.e;
-				return A5(
-					$elm$core$Dict$RBNode_elm_builtin,
-					$elm$core$Dict$Red,
-					key,
-					value,
-					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Black, lK, lV, lLeft, lRight),
-					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Black, rK, rV, rLeft, rRight));
-			} else {
-				return A5(
-					$elm$core$Dict$RBNode_elm_builtin,
-					color,
-					rK,
-					rV,
-					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Red, key, value, left, rLeft),
-					rRight);
-			}
-		} else {
-			if ((((left.$ === 'RBNode_elm_builtin') && (left.a.$ === 'Red')) && (left.d.$ === 'RBNode_elm_builtin')) && (left.d.a.$ === 'Red')) {
-				var _v5 = left.a;
-				var lK = left.b;
-				var lV = left.c;
-				var _v6 = left.d;
-				var _v7 = _v6.a;
-				var llK = _v6.b;
-				var llV = _v6.c;
-				var llLeft = _v6.d;
-				var llRight = _v6.e;
-				var lRight = left.e;
-				return A5(
-					$elm$core$Dict$RBNode_elm_builtin,
-					$elm$core$Dict$Red,
-					lK,
-					lV,
-					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Black, llK, llV, llLeft, llRight),
-					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Black, key, value, lRight, right));
-			} else {
-				return A5($elm$core$Dict$RBNode_elm_builtin, color, key, value, left, right);
-			}
-		}
-	});
-var $elm$core$Basics$compare = _Utils_compare;
-var $elm$core$Dict$insertHelp = F3(
-	function (key, value, dict) {
-		if (dict.$ === 'RBEmpty_elm_builtin') {
-			return A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Red, key, value, $elm$core$Dict$RBEmpty_elm_builtin, $elm$core$Dict$RBEmpty_elm_builtin);
-		} else {
-			var nColor = dict.a;
-			var nKey = dict.b;
-			var nValue = dict.c;
-			var nLeft = dict.d;
-			var nRight = dict.e;
-			var _v1 = A2($elm$core$Basics$compare, key, nKey);
-			switch (_v1.$) {
-				case 'LT':
-					return A5(
-						$elm$core$Dict$balance,
-						nColor,
-						nKey,
-						nValue,
-						A3($elm$core$Dict$insertHelp, key, value, nLeft),
-						nRight);
-				case 'EQ':
-					return A5($elm$core$Dict$RBNode_elm_builtin, nColor, nKey, value, nLeft, nRight);
-				default:
-					return A5(
-						$elm$core$Dict$balance,
-						nColor,
-						nKey,
-						nValue,
-						nLeft,
-						A3($elm$core$Dict$insertHelp, key, value, nRight));
-			}
-		}
-	});
-var $elm$core$Dict$insert = F3(
-	function (key, value, dict) {
-		var _v0 = A3($elm$core$Dict$insertHelp, key, value, dict);
-		if ((_v0.$ === 'RBNode_elm_builtin') && (_v0.a.$ === 'Red')) {
-			var _v1 = _v0.a;
-			var k = _v0.b;
-			var v = _v0.c;
-			var l = _v0.d;
-			var r = _v0.e;
-			return A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Black, k, v, l, r);
-		} else {
-			var x = _v0;
-			return x;
-		}
-	});
-var $elm$core$Dict$fromList = function (assocs) {
-	return A3(
-		$elm$core$List$foldl,
-		F2(
-			function (_v0, dict) {
-				var key = _v0.a;
-				var value = _v0.b;
-				return A3($elm$core$Dict$insert, key, value, dict);
-			}),
-		$elm$core$Dict$empty,
-		assocs);
 };
 var $elm$json$Json$Decode$keyValuePairs = _Json_decodeKeyValuePairs;
 var $elm$json$Json$Decode$dict = function (decoder) {
@@ -5901,15 +6190,6 @@ var $author$project$OpenApi$Types$decodeExample = A5(
 var $author$project$OpenApi$Types$LocCookie = function (a) {
 	return {$: 'LocCookie', a: a};
 };
-var $elm$core$Maybe$withDefault = F2(
-	function (_default, maybe) {
-		if (maybe.$ === 'Just') {
-			var value = maybe.a;
-			return value;
-		} else {
-			return _default;
-		}
-	});
 var $author$project$OpenApi$Types$decodeCookie = A4(
 	$elm$json$Json$Decode$map3,
 	F3(
@@ -6982,6 +7262,7 @@ var $elm$core$Basics$always = F2(
 	function (a, _v0) {
 		return a;
 	});
+var $elm$core$String$slice = _String_slice;
 var $elm$parser$Parser$Advanced$mapChompedString = F2(
 	function (func, _v0) {
 		var parse = _v0.a;
@@ -7140,6 +7421,7 @@ var $dividat$elm_semver$Semver$buildMetadataIdentifier = $elm$parser$Parser$oneO
 	_List_fromArray(
 		[$dividat$elm_semver$Semver$alphanumericIdentifier, $dividat$elm_semver$Semver$digits]));
 var $elm$parser$Parser$ExpectingEnd = {$: 'ExpectingEnd'};
+var $elm$core$String$length = _String_length;
 var $elm$parser$Parser$Advanced$end = function (x) {
 	return $elm$parser$Parser$Advanced$Parser(
 		function (s) {
@@ -7366,6 +7648,7 @@ var $elm$parser$Parser$problem = function (msg) {
 	return $elm$parser$Parser$Advanced$problem(
 		$elm$parser$Parser$Problem(msg));
 };
+var $elm$core$String$toInt = _String_toInt;
 var $dividat$elm_semver$Semver$nat = A2(
 	$elm$parser$Parser$andThen,
 	function (natStr) {
@@ -7391,8 +7674,10 @@ var $elm$parser$Parser$Advanced$Token = F2(
 	function (a, b) {
 		return {$: 'Token', a: a, b: b};
 	});
+var $elm$core$String$isEmpty = function (string) {
+	return string === '';
+};
 var $elm$parser$Parser$Advanced$isSubString = _Parser_isSubString;
-var $elm$core$Basics$not = _Basics_not;
 var $elm$parser$Parser$Advanced$token = function (_v0) {
 	var str = _v0.a;
 	var expecting = _v0.b;
@@ -7614,588 +7899,818 @@ var $author$project$OpenApi$decode = A4(
 													};
 												};
 											})))))))))));
-var $elm$json$Json$Decode$decodeString = _Json_runOnString;
-var $elm$http$Http$BadStatus_ = F2(
-	function (a, b) {
-		return {$: 'BadStatus_', a: a, b: b};
+var $mdgriffith$elm_codegen$Internal$Compiler$Annotation = function (a) {
+	return {$: 'Annotation', a: a};
+};
+var $mdgriffith$elm_codegen$Elm$Annotation$getAliases = function (_v0) {
+	var ann = _v0.a;
+	return ann.aliases;
+};
+var $mdgriffith$elm_codegen$Internal$Compiler$getAnnotationImports = function (_v0) {
+	var details = _v0.a;
+	return details.imports;
+};
+var $mdgriffith$elm_codegen$Internal$Compiler$getInnerAnnotation = function (_v0) {
+	var details = _v0.a;
+	return details.annotation;
+};
+var $elm$core$Dict$union = F2(
+	function (t1, t2) {
+		return A3($elm$core$Dict$foldl, $elm$core$Dict$insert, t2, t1);
 	});
-var $elm$http$Http$BadUrl_ = function (a) {
-	return {$: 'BadUrl_', a: a};
-};
-var $elm$http$Http$GoodStatus_ = F2(
-	function (a, b) {
-		return {$: 'GoodStatus_', a: a, b: b};
+var $mdgriffith$elm_codegen$Internal$Compiler$mergeAliases = $elm$core$Dict$union;
+var $mdgriffith$elm_codegen$Elm$Annotation$function = F2(
+	function (anns, _return) {
+		return $mdgriffith$elm_codegen$Internal$Compiler$Annotation(
+			{
+				aliases: A3(
+					$elm$core$List$foldl,
+					F2(
+						function (ann, aliases) {
+							return A2(
+								$mdgriffith$elm_codegen$Internal$Compiler$mergeAliases,
+								$mdgriffith$elm_codegen$Elm$Annotation$getAliases(ann),
+								aliases);
+						}),
+					$mdgriffith$elm_codegen$Internal$Compiler$emptyAliases,
+					A2($elm$core$List$cons, _return, anns)),
+				annotation: A3(
+					$elm$core$List$foldr,
+					F2(
+						function (ann, fn) {
+							return A2(
+								$stil4m$elm_syntax$Elm$Syntax$TypeAnnotation$FunctionTypeAnnotation,
+								$mdgriffith$elm_codegen$Internal$Compiler$nodify(ann),
+								$mdgriffith$elm_codegen$Internal$Compiler$nodify(fn));
+						}),
+					$mdgriffith$elm_codegen$Internal$Compiler$getInnerAnnotation(_return),
+					A2($elm$core$List$map, $mdgriffith$elm_codegen$Internal$Compiler$getInnerAnnotation, anns)),
+				imports: _Utils_ap(
+					$mdgriffith$elm_codegen$Internal$Compiler$getAnnotationImports(_return),
+					A2($elm$core$List$concatMap, $mdgriffith$elm_codegen$Internal$Compiler$getAnnotationImports, anns))
+			});
 	});
-var $elm$http$Http$NetworkError_ = {$: 'NetworkError_'};
-var $elm$http$Http$Receiving = function (a) {
-	return {$: 'Receiving', a: a};
+var $stil4m$elm_syntax$Elm$Syntax$Expression$LambdaExpression = function (a) {
+	return {$: 'LambdaExpression', a: a};
 };
-var $elm$http$Http$Sending = function (a) {
-	return {$: 'Sending', a: a};
+var $stil4m$elm_syntax$Elm$Syntax$Pattern$VarPattern = function (a) {
+	return {$: 'VarPattern', a: a};
 };
-var $elm$http$Http$Timeout_ = {$: 'Timeout_'};
-var $elm$core$Maybe$isJust = function (maybe) {
-	if (maybe.$ === 'Just') {
+var $stil4m$elm_syntax$Elm$Syntax$Expression$FunctionOrValue = F2(
+	function (a, b) {
+		return {$: 'FunctionOrValue', a: a, b: b};
+	});
+var $stil4m$elm_syntax$Elm$Syntax$Expression$RecordAccessFunction = function (a) {
+	return {$: 'RecordAccessFunction', a: a};
+};
+var $elm$core$List$isEmpty = function (xs) {
+	if (!xs.b) {
 		return true;
 	} else {
 		return false;
 	}
 };
-var $elm$core$Platform$sendToSelf = _Platform_sendToSelf;
-var $elm$core$Dict$get = F2(
-	function (targetKey, dict) {
-		get:
-		while (true) {
-			if (dict.$ === 'RBEmpty_elm_builtin') {
-				return $elm$core$Maybe$Nothing;
-			} else {
-				var key = dict.b;
-				var value = dict.c;
-				var left = dict.d;
-				var right = dict.e;
-				var _v1 = A2($elm$core$Basics$compare, targetKey, key);
-				switch (_v1.$) {
-					case 'LT':
-						var $temp$targetKey = targetKey,
-							$temp$dict = left;
-						targetKey = $temp$targetKey;
-						dict = $temp$dict;
-						continue get;
-					case 'EQ':
-						return $elm$core$Maybe$Just(value);
-					default:
-						var $temp$targetKey = targetKey,
-							$temp$dict = right;
-						targetKey = $temp$targetKey;
-						dict = $temp$dict;
-						continue get;
-				}
-			}
-		}
-	});
-var $elm$core$Dict$getMin = function (dict) {
-	getMin:
-	while (true) {
-		if ((dict.$ === 'RBNode_elm_builtin') && (dict.d.$ === 'RBNode_elm_builtin')) {
-			var left = dict.d;
-			var $temp$dict = left;
-			dict = $temp$dict;
-			continue getMin;
-		} else {
-			return dict;
-		}
-	}
-};
-var $elm$core$Dict$moveRedLeft = function (dict) {
-	if (((dict.$ === 'RBNode_elm_builtin') && (dict.d.$ === 'RBNode_elm_builtin')) && (dict.e.$ === 'RBNode_elm_builtin')) {
-		if ((dict.e.d.$ === 'RBNode_elm_builtin') && (dict.e.d.a.$ === 'Red')) {
-			var clr = dict.a;
-			var k = dict.b;
-			var v = dict.c;
-			var _v1 = dict.d;
-			var lClr = _v1.a;
-			var lK = _v1.b;
-			var lV = _v1.c;
-			var lLeft = _v1.d;
-			var lRight = _v1.e;
-			var _v2 = dict.e;
-			var rClr = _v2.a;
-			var rK = _v2.b;
-			var rV = _v2.c;
-			var rLeft = _v2.d;
-			var _v3 = rLeft.a;
-			var rlK = rLeft.b;
-			var rlV = rLeft.c;
-			var rlL = rLeft.d;
-			var rlR = rLeft.e;
-			var rRight = _v2.e;
-			return A5(
-				$elm$core$Dict$RBNode_elm_builtin,
-				$elm$core$Dict$Red,
-				rlK,
-				rlV,
-				A5(
-					$elm$core$Dict$RBNode_elm_builtin,
-					$elm$core$Dict$Black,
-					k,
-					v,
-					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Red, lK, lV, lLeft, lRight),
-					rlL),
-				A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Black, rK, rV, rlR, rRight));
-		} else {
-			var clr = dict.a;
-			var k = dict.b;
-			var v = dict.c;
-			var _v4 = dict.d;
-			var lClr = _v4.a;
-			var lK = _v4.b;
-			var lV = _v4.c;
-			var lLeft = _v4.d;
-			var lRight = _v4.e;
-			var _v5 = dict.e;
-			var rClr = _v5.a;
-			var rK = _v5.b;
-			var rV = _v5.c;
-			var rLeft = _v5.d;
-			var rRight = _v5.e;
-			if (clr.$ === 'Black') {
-				return A5(
-					$elm$core$Dict$RBNode_elm_builtin,
-					$elm$core$Dict$Black,
-					k,
-					v,
-					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Red, lK, lV, lLeft, lRight),
-					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Red, rK, rV, rLeft, rRight));
-			} else {
-				return A5(
-					$elm$core$Dict$RBNode_elm_builtin,
-					$elm$core$Dict$Black,
-					k,
-					v,
-					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Red, lK, lV, lLeft, lRight),
-					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Red, rK, rV, rLeft, rRight));
-			}
-		}
+var $mdgriffith$elm_codegen$Elm$popLastAndDenodeLast = function (lst) {
+	var _v0 = $elm$core$List$reverse(lst);
+	if (!_v0.b) {
+		return $elm$core$Maybe$Nothing;
 	} else {
-		return dict;
+		var last = _v0.a;
+		var initReverse = _v0.b;
+		return $elm$core$Maybe$Just(
+			_Utils_Tuple2(
+				$elm$core$List$reverse(initReverse),
+				$mdgriffith$elm_codegen$Internal$Compiler$denode(last)));
 	}
 };
-var $elm$core$Dict$moveRedRight = function (dict) {
-	if (((dict.$ === 'RBNode_elm_builtin') && (dict.d.$ === 'RBNode_elm_builtin')) && (dict.e.$ === 'RBNode_elm_builtin')) {
-		if ((dict.d.d.$ === 'RBNode_elm_builtin') && (dict.d.d.a.$ === 'Red')) {
-			var clr = dict.a;
-			var k = dict.b;
-			var v = dict.c;
-			var _v1 = dict.d;
-			var lClr = _v1.a;
-			var lK = _v1.b;
-			var lV = _v1.c;
-			var _v2 = _v1.d;
+var $mdgriffith$elm_codegen$Elm$betaReduce = function (e) {
+	var extractLastArg = function (arg) {
+		_v0$2:
+		while (true) {
+			switch (arg.$) {
+				case 'FunctionOrValue':
+					if (!arg.a.b) {
+						var n = arg.b;
+						return $elm$core$Maybe$Just(n);
+					} else {
+						break _v0$2;
+					}
+				case 'ParenthesizedExpression':
+					var p = arg.a;
+					return extractLastArg(
+						$mdgriffith$elm_codegen$Internal$Compiler$denode(p));
+				default:
+					break _v0$2;
+			}
+		}
+		return $elm$core$Maybe$Nothing;
+	};
+	if (e.$ === 'LambdaExpression') {
+		var args = e.a.args;
+		var expression = e.a.expression;
+		var _v2 = $mdgriffith$elm_codegen$Elm$popLastAndDenodeLast(args);
+		if ((_v2.$ === 'Just') && (_v2.a.b.$ === 'VarPattern')) {
 			var _v3 = _v2.a;
-			var llK = _v2.b;
-			var llV = _v2.c;
-			var llLeft = _v2.d;
-			var llRight = _v2.e;
-			var lRight = _v1.e;
-			var _v4 = dict.e;
-			var rClr = _v4.a;
-			var rK = _v4.b;
-			var rV = _v4.c;
-			var rLeft = _v4.d;
-			var rRight = _v4.e;
-			return A5(
-				$elm$core$Dict$RBNode_elm_builtin,
-				$elm$core$Dict$Red,
-				lK,
-				lV,
-				A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Black, llK, llV, llLeft, llRight),
-				A5(
-					$elm$core$Dict$RBNode_elm_builtin,
-					$elm$core$Dict$Black,
-					k,
-					v,
-					lRight,
-					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Red, rK, rV, rLeft, rRight)));
-		} else {
-			var clr = dict.a;
-			var k = dict.b;
-			var v = dict.c;
-			var _v5 = dict.d;
-			var lClr = _v5.a;
-			var lK = _v5.b;
-			var lV = _v5.c;
-			var lLeft = _v5.d;
-			var lRight = _v5.e;
-			var _v6 = dict.e;
-			var rClr = _v6.a;
-			var rK = _v6.b;
-			var rV = _v6.c;
-			var rLeft = _v6.d;
-			var rRight = _v6.e;
-			if (clr.$ === 'Black') {
-				return A5(
-					$elm$core$Dict$RBNode_elm_builtin,
-					$elm$core$Dict$Black,
-					k,
-					v,
-					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Red, lK, lV, lLeft, lRight),
-					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Red, rK, rV, rLeft, rRight));
-			} else {
-				return A5(
-					$elm$core$Dict$RBNode_elm_builtin,
-					$elm$core$Dict$Black,
-					k,
-					v,
-					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Red, lK, lV, lLeft, lRight),
-					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Red, rK, rV, rLeft, rRight));
-			}
-		}
-	} else {
-		return dict;
-	}
-};
-var $elm$core$Dict$removeHelpPrepEQGT = F7(
-	function (targetKey, dict, color, key, value, left, right) {
-		if ((left.$ === 'RBNode_elm_builtin') && (left.a.$ === 'Red')) {
-			var _v1 = left.a;
-			var lK = left.b;
-			var lV = left.c;
-			var lLeft = left.d;
-			var lRight = left.e;
-			return A5(
-				$elm$core$Dict$RBNode_elm_builtin,
-				color,
-				lK,
-				lV,
-				lLeft,
-				A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Red, key, value, lRight, right));
-		} else {
-			_v2$2:
-			while (true) {
-				if ((right.$ === 'RBNode_elm_builtin') && (right.a.$ === 'Black')) {
-					if (right.d.$ === 'RBNode_elm_builtin') {
-						if (right.d.a.$ === 'Black') {
-							var _v3 = right.a;
-							var _v4 = right.d;
-							var _v5 = _v4.a;
-							return $elm$core$Dict$moveRedRight(dict);
+			var initLambdaArgs = _v3.a;
+			var lastLambdaArg = _v3.b.a;
+			var _v4 = $mdgriffith$elm_codegen$Internal$Compiler$denode(expression);
+			switch (_v4.$) {
+				case 'RecordAccess':
+					var argNode = _v4.a;
+					var fieldNode = _v4.b;
+					var fieldName = $mdgriffith$elm_codegen$Internal$Compiler$denode(fieldNode);
+					var arg = $mdgriffith$elm_codegen$Internal$Compiler$denode(argNode);
+					if ((arg.$ === 'FunctionOrValue') && (!arg.a.b)) {
+						var argName = arg.b;
+						return _Utils_eq(argName, lastLambdaArg) ? $stil4m$elm_syntax$Elm$Syntax$Expression$RecordAccessFunction('.' + fieldName) : e;
+					} else {
+						return e;
+					}
+				case 'Application':
+					var applicationArgs = _v4.a;
+					var _v6 = $mdgriffith$elm_codegen$Elm$popLastAndDenodeLast(applicationArgs);
+					if (_v6.$ === 'Just') {
+						if (!_v6.a.a.b) {
+							var _v7 = _v6.a;
+							var uniqueApplicationArg = _v7.b;
+							return _Utils_eq(
+								extractLastArg(uniqueApplicationArg),
+								$elm$core$Maybe$Just(lastLambdaArg)) ? A2($stil4m$elm_syntax$Elm$Syntax$Expression$FunctionOrValue, _List_Nil, 'identity') : e;
 						} else {
-							break _v2$2;
-						}
-					} else {
-						var _v6 = right.a;
-						var _v7 = right.d;
-						return $elm$core$Dict$moveRedRight(dict);
-					}
-				} else {
-					break _v2$2;
-				}
-			}
-			return dict;
-		}
-	});
-var $elm$core$Dict$removeMin = function (dict) {
-	if ((dict.$ === 'RBNode_elm_builtin') && (dict.d.$ === 'RBNode_elm_builtin')) {
-		var color = dict.a;
-		var key = dict.b;
-		var value = dict.c;
-		var left = dict.d;
-		var lColor = left.a;
-		var lLeft = left.d;
-		var right = dict.e;
-		if (lColor.$ === 'Black') {
-			if ((lLeft.$ === 'RBNode_elm_builtin') && (lLeft.a.$ === 'Red')) {
-				var _v3 = lLeft.a;
-				return A5(
-					$elm$core$Dict$RBNode_elm_builtin,
-					color,
-					key,
-					value,
-					$elm$core$Dict$removeMin(left),
-					right);
-			} else {
-				var _v4 = $elm$core$Dict$moveRedLeft(dict);
-				if (_v4.$ === 'RBNode_elm_builtin') {
-					var nColor = _v4.a;
-					var nKey = _v4.b;
-					var nValue = _v4.c;
-					var nLeft = _v4.d;
-					var nRight = _v4.e;
-					return A5(
-						$elm$core$Dict$balance,
-						nColor,
-						nKey,
-						nValue,
-						$elm$core$Dict$removeMin(nLeft),
-						nRight);
-				} else {
-					return $elm$core$Dict$RBEmpty_elm_builtin;
-				}
-			}
-		} else {
-			return A5(
-				$elm$core$Dict$RBNode_elm_builtin,
-				color,
-				key,
-				value,
-				$elm$core$Dict$removeMin(left),
-				right);
-		}
-	} else {
-		return $elm$core$Dict$RBEmpty_elm_builtin;
-	}
-};
-var $elm$core$Dict$removeHelp = F2(
-	function (targetKey, dict) {
-		if (dict.$ === 'RBEmpty_elm_builtin') {
-			return $elm$core$Dict$RBEmpty_elm_builtin;
-		} else {
-			var color = dict.a;
-			var key = dict.b;
-			var value = dict.c;
-			var left = dict.d;
-			var right = dict.e;
-			if (_Utils_cmp(targetKey, key) < 0) {
-				if ((left.$ === 'RBNode_elm_builtin') && (left.a.$ === 'Black')) {
-					var _v4 = left.a;
-					var lLeft = left.d;
-					if ((lLeft.$ === 'RBNode_elm_builtin') && (lLeft.a.$ === 'Red')) {
-						var _v6 = lLeft.a;
-						return A5(
-							$elm$core$Dict$RBNode_elm_builtin,
-							color,
-							key,
-							value,
-							A2($elm$core$Dict$removeHelp, targetKey, left),
-							right);
-					} else {
-						var _v7 = $elm$core$Dict$moveRedLeft(dict);
-						if (_v7.$ === 'RBNode_elm_builtin') {
-							var nColor = _v7.a;
-							var nKey = _v7.b;
-							var nValue = _v7.c;
-							var nLeft = _v7.d;
-							var nRight = _v7.e;
-							return A5(
-								$elm$core$Dict$balance,
-								nColor,
-								nKey,
-								nValue,
-								A2($elm$core$Dict$removeHelp, targetKey, nLeft),
-								nRight);
-						} else {
-							return $elm$core$Dict$RBEmpty_elm_builtin;
-						}
-					}
-				} else {
-					return A5(
-						$elm$core$Dict$RBNode_elm_builtin,
-						color,
-						key,
-						value,
-						A2($elm$core$Dict$removeHelp, targetKey, left),
-						right);
-				}
-			} else {
-				return A2(
-					$elm$core$Dict$removeHelpEQGT,
-					targetKey,
-					A7($elm$core$Dict$removeHelpPrepEQGT, targetKey, dict, color, key, value, left, right));
-			}
-		}
-	});
-var $elm$core$Dict$removeHelpEQGT = F2(
-	function (targetKey, dict) {
-		if (dict.$ === 'RBNode_elm_builtin') {
-			var color = dict.a;
-			var key = dict.b;
-			var value = dict.c;
-			var left = dict.d;
-			var right = dict.e;
-			if (_Utils_eq(targetKey, key)) {
-				var _v1 = $elm$core$Dict$getMin(right);
-				if (_v1.$ === 'RBNode_elm_builtin') {
-					var minKey = _v1.b;
-					var minValue = _v1.c;
-					return A5(
-						$elm$core$Dict$balance,
-						color,
-						minKey,
-						minValue,
-						left,
-						$elm$core$Dict$removeMin(right));
-				} else {
-					return $elm$core$Dict$RBEmpty_elm_builtin;
-				}
-			} else {
-				return A5(
-					$elm$core$Dict$balance,
-					color,
-					key,
-					value,
-					left,
-					A2($elm$core$Dict$removeHelp, targetKey, right));
-			}
-		} else {
-			return $elm$core$Dict$RBEmpty_elm_builtin;
-		}
-	});
-var $elm$core$Dict$remove = F2(
-	function (key, dict) {
-		var _v0 = A2($elm$core$Dict$removeHelp, key, dict);
-		if ((_v0.$ === 'RBNode_elm_builtin') && (_v0.a.$ === 'Red')) {
-			var _v1 = _v0.a;
-			var k = _v0.b;
-			var v = _v0.c;
-			var l = _v0.d;
-			var r = _v0.e;
-			return A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Black, k, v, l, r);
-		} else {
-			var x = _v0;
-			return x;
-		}
-	});
-var $elm$core$Dict$update = F3(
-	function (targetKey, alter, dictionary) {
-		var _v0 = alter(
-			A2($elm$core$Dict$get, targetKey, dictionary));
-		if (_v0.$ === 'Just') {
-			var value = _v0.a;
-			return A3($elm$core$Dict$insert, targetKey, value, dictionary);
-		} else {
-			return A2($elm$core$Dict$remove, targetKey, dictionary);
-		}
-	});
-var $elm$core$Basics$composeR = F3(
-	function (f, g, x) {
-		return g(
-			f(x));
-	});
-var $elm$http$Http$expectStringResponse = F2(
-	function (toMsg, toResult) {
-		return A3(
-			_Http_expect,
-			'',
-			$elm$core$Basics$identity,
-			A2($elm$core$Basics$composeR, toResult, toMsg));
-	});
-var $elm$core$Result$mapError = F2(
-	function (f, result) {
-		if (result.$ === 'Ok') {
-			var v = result.a;
-			return $elm$core$Result$Ok(v);
-		} else {
-			var e = result.a;
-			return $elm$core$Result$Err(
-				f(e));
-		}
-	});
-var $elm$http$Http$BadBody = function (a) {
-	return {$: 'BadBody', a: a};
-};
-var $elm$http$Http$BadUrl = function (a) {
-	return {$: 'BadUrl', a: a};
-};
-var $elm$http$Http$NetworkError = {$: 'NetworkError'};
-var $elm$http$Http$Timeout = {$: 'Timeout'};
-var $elm$http$Http$resolve = F2(
-	function (toResult, response) {
-		switch (response.$) {
-			case 'BadUrl_':
-				var url = response.a;
-				return $elm$core$Result$Err(
-					$elm$http$Http$BadUrl(url));
-			case 'Timeout_':
-				return $elm$core$Result$Err($elm$http$Http$Timeout);
-			case 'NetworkError_':
-				return $elm$core$Result$Err($elm$http$Http$NetworkError);
-			case 'BadStatus_':
-				var metadata = response.a;
-				return $elm$core$Result$Err(
-					$elm$http$Http$BadStatus(metadata.statusCode));
-			default:
-				var body = response.b;
-				return A2(
-					$elm$core$Result$mapError,
-					$elm$http$Http$BadBody,
-					toResult(body));
-		}
-	});
-var $elm$http$Http$expectJson = F2(
-	function (toMsg, decoder) {
-		return A2(
-			$elm$http$Http$expectStringResponse,
-			toMsg,
-			$elm$http$Http$resolve(
-				function (string) {
-					return A2(
-						$elm$core$Result$mapError,
-						$elm$json$Json$Decode$errorToString,
-						A2($elm$json$Json$Decode$decodeString, decoder, string));
-				}));
-	});
-var $elm$http$Http$emptyBody = _Http_emptyBody;
-var $elm$http$Http$Request = function (a) {
-	return {$: 'Request', a: a};
-};
-var $elm$http$Http$State = F2(
-	function (reqs, subs) {
-		return {reqs: reqs, subs: subs};
-	});
-var $elm$http$Http$init = $elm$core$Task$succeed(
-	A2($elm$http$Http$State, $elm$core$Dict$empty, _List_Nil));
-var $elm$core$Process$kill = _Scheduler_kill;
-var $elm$core$Process$spawn = _Scheduler_spawn;
-var $elm$http$Http$updateReqs = F3(
-	function (router, cmds, reqs) {
-		updateReqs:
-		while (true) {
-			if (!cmds.b) {
-				return $elm$core$Task$succeed(reqs);
-			} else {
-				var cmd = cmds.a;
-				var otherCmds = cmds.b;
-				if (cmd.$ === 'Cancel') {
-					var tracker = cmd.a;
-					var _v2 = A2($elm$core$Dict$get, tracker, reqs);
-					if (_v2.$ === 'Nothing') {
-						var $temp$router = router,
-							$temp$cmds = otherCmds,
-							$temp$reqs = reqs;
-						router = $temp$router;
-						cmds = $temp$cmds;
-						reqs = $temp$reqs;
-						continue updateReqs;
-					} else {
-						var pid = _v2.a;
-						return A2(
-							$elm$core$Task$andThen,
-							function (_v3) {
-								return A3(
-									$elm$http$Http$updateReqs,
-									router,
-									otherCmds,
-									A2($elm$core$Dict$remove, tracker, reqs));
-							},
-							$elm$core$Process$kill(pid));
-					}
-				} else {
-					var req = cmd.a;
-					return A2(
-						$elm$core$Task$andThen,
-						function (pid) {
-							var _v4 = req.tracker;
-							if (_v4.$ === 'Nothing') {
-								return A3($elm$http$Http$updateReqs, router, otherCmds, reqs);
+							var _v8 = _v6.a;
+							var initApplicationArgs = _v8.a;
+							var lastApplicationArg = _v8.b;
+							if (_Utils_eq(
+								extractLastArg(lastApplicationArg),
+								$elm$core$Maybe$Just(lastLambdaArg))) {
+								if ($elm$core$List$isEmpty(initLambdaArgs)) {
+									if (initApplicationArgs.b && (!initApplicationArgs.b.b)) {
+										var s = initApplicationArgs.a;
+										return $mdgriffith$elm_codegen$Elm$betaReduce(
+											$mdgriffith$elm_codegen$Internal$Compiler$denode(s));
+									} else {
+										return $stil4m$elm_syntax$Elm$Syntax$Expression$Application(initApplicationArgs);
+									}
+								} else {
+									return $mdgriffith$elm_codegen$Elm$betaReduce(
+										$stil4m$elm_syntax$Elm$Syntax$Expression$LambdaExpression(
+											{
+												args: initLambdaArgs,
+												expression: $mdgriffith$elm_codegen$Internal$Compiler$nodify(
+													$stil4m$elm_syntax$Elm$Syntax$Expression$Application(initApplicationArgs))
+											}));
+								}
 							} else {
-								var tracker = _v4.a;
-								return A3(
-									$elm$http$Http$updateReqs,
-									router,
-									otherCmds,
-									A3($elm$core$Dict$insert, tracker, pid, reqs));
+								return e;
 							}
-						},
-						$elm$core$Process$spawn(
-							A3(
-								_Http_toTask,
-								router,
-								$elm$core$Platform$sendToApp(router),
-								req)));
+						}
+					} else {
+						return e;
+					}
+				default:
+					return e;
+			}
+		} else {
+			return e;
+		}
+	} else {
+		return e;
+	}
+};
+var $elm$core$String$dropLeft = F2(
+	function (n, string) {
+		return (n < 1) ? string : A3(
+			$elm$core$String$slice,
+			n,
+			$elm$core$String$length(string),
+			string);
+	});
+var $elm$core$String$left = F2(
+	function (n, string) {
+		return (n < 1) ? '' : A3($elm$core$String$slice, 0, n, string);
+	});
+var $mdgriffith$elm_codegen$Internal$Format$sanitize = function (str) {
+	switch (str) {
+		case 'in':
+			return 'in_';
+		case 'type':
+			return 'type_';
+		case 'case':
+			return 'case_';
+		case 'let':
+			return 'let_';
+		case 'module':
+			return 'module_';
+		case 'exposing':
+			return 'exposing_';
+		case 'where':
+			return 'where_';
+		case 'main':
+			return 'main_';
+		case 'port':
+			return 'port_';
+		case 'as':
+			return 'as_';
+		case 'if':
+			return 'if_';
+		case 'import':
+			return 'import_';
+		default:
+			return str;
+	}
+};
+var $elm$core$String$toLower = _String_toLower;
+var $mdgriffith$elm_codegen$Internal$Format$formatValue = function (str) {
+	var formatted = _Utils_ap(
+		$elm$core$String$toLower(
+			A2($elm$core$String$left, 1, str)),
+		A2($elm$core$String$dropLeft, 1, str));
+	return $mdgriffith$elm_codegen$Internal$Format$sanitize(formatted);
+};
+var $mdgriffith$elm_codegen$Internal$Index$indexToString = function (_v0) {
+	var top = _v0.a;
+	var tail = _v0.b;
+	var scope = _v0.c;
+	var check = _v0.d;
+	return _Utils_ap(
+		(!top) ? '' : ('_' + $elm$core$String$fromInt(top)),
+		function () {
+			if (!tail.b) {
+				return '';
+			} else {
+				if (!tail.b.b) {
+					var one = tail.a;
+					return '_' + $elm$core$String$fromInt(one);
+				} else {
+					if (!tail.b.b.b) {
+						var one = tail.a;
+						var _v2 = tail.b;
+						var two = _v2.a;
+						return '_' + ($elm$core$String$fromInt(one) + ('_' + $elm$core$String$fromInt(two)));
+					} else {
+						if (!tail.b.b.b.b) {
+							var one = tail.a;
+							var _v3 = tail.b;
+							var two = _v3.a;
+							var _v4 = _v3.b;
+							var three = _v4.a;
+							return '_' + ($elm$core$String$fromInt(one) + ('_' + ($elm$core$String$fromInt(two) + ('_' + $elm$core$String$fromInt(three)))));
+						} else {
+							return '_' + A2(
+								$elm$core$String$join,
+								'_',
+								A2($elm$core$List$map, $elm$core$String$fromInt, tail));
+						}
+					}
 				}
+			}
+		}());
+};
+var $mdgriffith$elm_codegen$Internal$Index$getName = F2(
+	function (desiredName, index) {
+		var top = index.a;
+		var tail = index.b;
+		var scope = index.c;
+		var check = index.d;
+		var formattedName = $mdgriffith$elm_codegen$Internal$Format$formatValue(desiredName);
+		if (!A2($elm$core$Set$member, formattedName, scope)) {
+			return _Utils_Tuple2(
+				formattedName,
+				A4(
+					$mdgriffith$elm_codegen$Internal$Index$Index,
+					top,
+					tail,
+					A2($elm$core$Set$insert, formattedName, scope),
+					check));
+		} else {
+			var protectedName = _Utils_ap(
+				formattedName,
+				$elm$core$String$fromInt(top));
+			if (!A2($elm$core$Set$member, protectedName, scope)) {
+				return _Utils_Tuple2(
+					protectedName,
+					A4(
+						$mdgriffith$elm_codegen$Internal$Index$Index,
+						top + 1,
+						tail,
+						A2($elm$core$Set$insert, protectedName, scope),
+						check));
+			} else {
+				var protectedNameLevel2 = _Utils_ap(
+					formattedName,
+					$mdgriffith$elm_codegen$Internal$Index$indexToString(index));
+				return _Utils_Tuple2(
+					protectedNameLevel2,
+					A4(
+						$mdgriffith$elm_codegen$Internal$Index$Index,
+						top + 1,
+						tail,
+						A2($elm$core$Set$insert, protectedNameLevel2, scope),
+						check));
 			}
 		}
 	});
-var $elm$http$Http$onEffects = F4(
-	function (router, cmds, subs, state) {
+var $mdgriffith$elm_codegen$Internal$Compiler$mapNode = F2(
+	function (fn, _v0) {
+		var range = _v0.a;
+		var n = _v0.b;
 		return A2(
-			$elm$core$Task$andThen,
-			function (reqs) {
-				return $elm$core$Task$succeed(
-					A2($elm$http$Http$State, reqs, subs));
-			},
-			A3($elm$http$Http$updateReqs, router, cmds, state.reqs));
+			$stil4m$elm_syntax$Elm$Syntax$Node$Node,
+			range,
+			fn(n));
 	});
+var $mdgriffith$elm_codegen$Internal$Compiler$protectAnnotation = F2(
+	function (index, ann) {
+		switch (ann.$) {
+			case 'GenericType':
+				var str = ann.a;
+				return $stil4m$elm_syntax$Elm$Syntax$TypeAnnotation$GenericType(
+					_Utils_ap(
+						str,
+						$mdgriffith$elm_codegen$Internal$Index$indexToString(index)));
+			case 'Typed':
+				var modName = ann.a;
+				var anns = ann.b;
+				return A2(
+					$stil4m$elm_syntax$Elm$Syntax$TypeAnnotation$Typed,
+					modName,
+					A2(
+						$elm$core$List$map,
+						$mdgriffith$elm_codegen$Internal$Compiler$mapNode(
+							$mdgriffith$elm_codegen$Internal$Compiler$protectAnnotation(index)),
+						anns));
+			case 'Unit':
+				return $stil4m$elm_syntax$Elm$Syntax$TypeAnnotation$Unit;
+			case 'Tupled':
+				var tupled = ann.a;
+				return $stil4m$elm_syntax$Elm$Syntax$TypeAnnotation$Tupled(
+					A2(
+						$elm$core$List$map,
+						$mdgriffith$elm_codegen$Internal$Compiler$mapNode(
+							$mdgriffith$elm_codegen$Internal$Compiler$protectAnnotation(index)),
+						tupled));
+			case 'Record':
+				var recordDefinition = ann.a;
+				return $stil4m$elm_syntax$Elm$Syntax$TypeAnnotation$Record(
+					A2(
+						$elm$core$List$map,
+						$mdgriffith$elm_codegen$Internal$Compiler$protectField(index),
+						recordDefinition));
+			case 'GenericRecord':
+				var recordName = ann.a;
+				var _v3 = ann.b;
+				var recordRange = _v3.a;
+				var recordDefinition = _v3.b;
+				return A2(
+					$stil4m$elm_syntax$Elm$Syntax$TypeAnnotation$GenericRecord,
+					A2(
+						$mdgriffith$elm_codegen$Internal$Compiler$mapNode,
+						function (n) {
+							return _Utils_ap(
+								n,
+								$mdgriffith$elm_codegen$Internal$Index$indexToString(index));
+						},
+						recordName),
+					A2(
+						$stil4m$elm_syntax$Elm$Syntax$Node$Node,
+						recordRange,
+						A2(
+							$elm$core$List$map,
+							$mdgriffith$elm_codegen$Internal$Compiler$protectField(index),
+							recordDefinition)));
+			default:
+				var one = ann.a;
+				var two = ann.b;
+				return A2(
+					$stil4m$elm_syntax$Elm$Syntax$TypeAnnotation$FunctionTypeAnnotation,
+					A2(
+						$mdgriffith$elm_codegen$Internal$Compiler$mapNode,
+						$mdgriffith$elm_codegen$Internal$Compiler$protectAnnotation(index),
+						one),
+					A2(
+						$mdgriffith$elm_codegen$Internal$Compiler$mapNode,
+						$mdgriffith$elm_codegen$Internal$Compiler$protectAnnotation(index),
+						two));
+		}
+	});
+var $mdgriffith$elm_codegen$Internal$Compiler$protectField = F2(
+	function (index, _v0) {
+		var nodeRange = _v0.a;
+		var _v1 = _v0.b;
+		var nodedName = _v1.a;
+		var nodedType = _v1.b;
+		return A2(
+			$stil4m$elm_syntax$Elm$Syntax$Node$Node,
+			nodeRange,
+			_Utils_Tuple2(
+				nodedName,
+				A2(
+					$mdgriffith$elm_codegen$Internal$Compiler$mapNode,
+					$mdgriffith$elm_codegen$Internal$Compiler$protectAnnotation(index),
+					nodedType)));
+	});
+var $mdgriffith$elm_codegen$Internal$Compiler$getInnerInference = F2(
+	function (index, _v0) {
+		var details = _v0.a;
+		return {
+			aliases: details.aliases,
+			inferences: $elm$core$Dict$empty,
+			type_: A2($mdgriffith$elm_codegen$Internal$Compiler$protectAnnotation, index, details.annotation)
+		};
+	});
+var $mdgriffith$elm_codegen$Internal$Index$protectTypeName = F2(
+	function (base, index) {
+		var top = index.a;
+		var tail = index.b;
+		var scope = index.c;
+		var check = index.d;
+		if (!tail.b) {
+			return $mdgriffith$elm_codegen$Internal$Format$formatValue(base);
+		} else {
+			return $mdgriffith$elm_codegen$Internal$Format$formatValue(
+				_Utils_ap(
+					base,
+					$mdgriffith$elm_codegen$Internal$Index$indexToString(index)));
+		}
+	});
+var $mdgriffith$elm_codegen$Elm$value = function (details) {
+	return $mdgriffith$elm_codegen$Internal$Compiler$Expression(
+		function (index) {
+			return {
+				annotation: function () {
+					var _v0 = details.annotation;
+					if (_v0.$ === 'Nothing') {
+						var typename = A2($mdgriffith$elm_codegen$Internal$Index$protectTypeName, details.name, index);
+						return $elm$core$Result$Ok(
+							{
+								aliases: $mdgriffith$elm_codegen$Internal$Compiler$emptyAliases,
+								inferences: $elm$core$Dict$empty,
+								type_: $stil4m$elm_syntax$Elm$Syntax$TypeAnnotation$GenericType(typename)
+							});
+					} else {
+						var ann = _v0.a;
+						return $elm$core$Result$Ok(
+							A2($mdgriffith$elm_codegen$Internal$Compiler$getInnerInference, index, ann));
+					}
+				}(),
+				expression: A2(
+					$stil4m$elm_syntax$Elm$Syntax$Expression$FunctionOrValue,
+					details.importFrom,
+					$mdgriffith$elm_codegen$Internal$Format$sanitize(details.name)),
+				imports: function () {
+					var _v1 = details.annotation;
+					if (_v1.$ === 'Nothing') {
+						var _v2 = details.importFrom;
+						if (!_v2.b) {
+							return _List_Nil;
+						} else {
+							return _List_fromArray(
+								[details.importFrom]);
+						}
+					} else {
+						var ann = _v1.a;
+						var _v3 = details.importFrom;
+						if (!_v3.b) {
+							return $mdgriffith$elm_codegen$Internal$Compiler$getAnnotationImports(ann);
+						} else {
+							return A2(
+								$elm$core$List$cons,
+								details.importFrom,
+								$mdgriffith$elm_codegen$Internal$Compiler$getAnnotationImports(ann));
+						}
+					}
+				}()
+			};
+		});
+};
+var $mdgriffith$elm_codegen$Elm$Annotation$var = function (a) {
+	return $mdgriffith$elm_codegen$Internal$Compiler$Annotation(
+		{
+			aliases: $mdgriffith$elm_codegen$Internal$Compiler$emptyAliases,
+			annotation: $stil4m$elm_syntax$Elm$Syntax$TypeAnnotation$GenericType(
+				$mdgriffith$elm_codegen$Internal$Format$formatValue(a)),
+			imports: _List_Nil
+		});
+};
+var $mdgriffith$elm_codegen$Elm$functionReduced = F2(
+	function (argBaseName, toExpression) {
+		return $mdgriffith$elm_codegen$Internal$Compiler$expression(
+			function (index) {
+				var _v0 = A2($mdgriffith$elm_codegen$Internal$Index$getName, argBaseName, index);
+				var arg1Name = _v0.a;
+				var newIndex = _v0.b;
+				var argType = $mdgriffith$elm_codegen$Elm$Annotation$var(arg1Name);
+				var arg1 = $mdgriffith$elm_codegen$Elm$value(
+					{
+						annotation: $elm$core$Maybe$Just(argType),
+						importFrom: _List_Nil,
+						name: arg1Name
+					});
+				var _v1 = toExpression(arg1);
+				var toExpr = _v1.a;
+				var _return = toExpr(newIndex);
+				return {
+					annotation: function () {
+						var _v2 = _return.annotation;
+						if (_v2.$ === 'Err') {
+							var err = _v2.a;
+							return _return.annotation;
+						} else {
+							var returnAnnotation = _v2.a;
+							return $elm$core$Result$Ok(
+								{
+									aliases: returnAnnotation.aliases,
+									inferences: returnAnnotation.inferences,
+									type_: A2(
+										$stil4m$elm_syntax$Elm$Syntax$TypeAnnotation$FunctionTypeAnnotation,
+										$mdgriffith$elm_codegen$Internal$Compiler$nodify(
+											$stil4m$elm_syntax$Elm$Syntax$TypeAnnotation$GenericType(arg1Name)),
+										$mdgriffith$elm_codegen$Internal$Compiler$nodify(returnAnnotation.type_))
+								});
+						}
+					}(),
+					expression: $mdgriffith$elm_codegen$Elm$betaReduce(
+						$stil4m$elm_syntax$Elm$Syntax$Expression$LambdaExpression(
+							{
+								args: _List_fromArray(
+									[
+										$mdgriffith$elm_codegen$Internal$Compiler$nodify(
+										$stil4m$elm_syntax$Elm$Syntax$Pattern$VarPattern(arg1Name))
+									]),
+								expression: $mdgriffith$elm_codegen$Internal$Compiler$nodify(_return.expression)
+							})),
+					imports: _return.imports
+				};
+			});
+	});
+var $mdgriffith$elm_codegen$Internal$Format$formatType = function (str) {
+	return _Utils_ap(
+		$elm$core$String$toUpper(
+			A2($elm$core$String$left, 1, str)),
+		A2($elm$core$String$dropLeft, 1, str));
+};
+var $mdgriffith$elm_codegen$Elm$Annotation$namedWith = F3(
+	function (mod, name, args) {
+		return $mdgriffith$elm_codegen$Internal$Compiler$Annotation(
+			{
+				aliases: A3(
+					$elm$core$List$foldl,
+					F2(
+						function (ann, aliases) {
+							return A2(
+								$mdgriffith$elm_codegen$Internal$Compiler$mergeAliases,
+								$mdgriffith$elm_codegen$Elm$Annotation$getAliases(ann),
+								aliases);
+						}),
+					$mdgriffith$elm_codegen$Internal$Compiler$emptyAliases,
+					args),
+				annotation: A2(
+					$stil4m$elm_syntax$Elm$Syntax$TypeAnnotation$Typed,
+					$mdgriffith$elm_codegen$Internal$Compiler$nodify(
+						_Utils_Tuple2(
+							mod,
+							$mdgriffith$elm_codegen$Internal$Format$formatType(name))),
+					$mdgriffith$elm_codegen$Internal$Compiler$nodifyAll(
+						A2($elm$core$List$map, $mdgriffith$elm_codegen$Internal$Compiler$getInnerAnnotation, args))),
+				imports: A2(
+					$elm$core$List$cons,
+					mod,
+					A2($elm$core$List$concatMap, $mdgriffith$elm_codegen$Internal$Compiler$getAnnotationImports, args))
+			});
+	});
+var $author$project$Gen$Http$expectJson = F2(
+	function (expectJsonArg, expectJsonArg0) {
+		return A2(
+			$mdgriffith$elm_codegen$Elm$apply,
+			$mdgriffith$elm_codegen$Elm$value(
+				{
+					annotation: $elm$core$Maybe$Just(
+						A2(
+							$mdgriffith$elm_codegen$Elm$Annotation$function,
+							_List_fromArray(
+								[
+									A2(
+									$mdgriffith$elm_codegen$Elm$Annotation$function,
+									_List_fromArray(
+										[
+											A3(
+											$mdgriffith$elm_codegen$Elm$Annotation$namedWith,
+											_List_fromArray(
+												['Result']),
+											'Result',
+											_List_fromArray(
+												[
+													A3(
+													$mdgriffith$elm_codegen$Elm$Annotation$namedWith,
+													_List_fromArray(
+														['Http']),
+													'Error',
+													_List_Nil),
+													$mdgriffith$elm_codegen$Elm$Annotation$var('a')
+												]))
+										]),
+									$mdgriffith$elm_codegen$Elm$Annotation$var('msg')),
+									A3(
+									$mdgriffith$elm_codegen$Elm$Annotation$namedWith,
+									_List_fromArray(
+										['Json', 'Decode']),
+									'Decoder',
+									_List_fromArray(
+										[
+											$mdgriffith$elm_codegen$Elm$Annotation$var('a')
+										]))
+								]),
+							A3(
+								$mdgriffith$elm_codegen$Elm$Annotation$namedWith,
+								_List_fromArray(
+									['Http']),
+								'Expect',
+								_List_fromArray(
+									[
+										$mdgriffith$elm_codegen$Elm$Annotation$var('msg')
+									])))),
+					importFrom: _List_fromArray(
+						['Http']),
+					name: 'expectJson'
+				}),
+			_List_fromArray(
+				[
+					A2($mdgriffith$elm_codegen$Elm$functionReduced, 'expectJsonUnpack', expectJsonArg),
+					expectJsonArg0
+				]));
+	});
+var $stil4m$elm_syntax$Elm$Syntax$Exposing$All = function (a) {
+	return {$: 'All', a: a};
+};
+var $stil4m$elm_syntax$Elm$Syntax$Exposing$Explicit = function (a) {
+	return {$: 'Explicit', a: a};
+};
+var $mdgriffith$elm_codegen$Internal$Comments$Markdown = function (a) {
+	return {$: 'Markdown', a: a};
+};
+var $stil4m$elm_syntax$Elm$Syntax$Module$NormalModule = function (a) {
+	return {$: 'NormalModule', a: a};
+};
+var $stil4m$elm_syntax$Elm$Syntax$Module$PortModule = function (a) {
+	return {$: 'PortModule', a: a};
+};
+var $mdgriffith$elm_codegen$Internal$Compiler$RenderedBlock = function (a) {
+	return {$: 'RenderedBlock', a: a};
+};
+var $mdgriffith$elm_codegen$Internal$Compiler$RenderedComment = function (a) {
+	return {$: 'RenderedComment', a: a};
+};
+var $mdgriffith$elm_codegen$Internal$Compiler$RenderedDecl = function (a) {
+	return {$: 'RenderedDecl', a: a};
+};
+var $stil4m$elm_syntax$Elm$Syntax$Declaration$AliasDeclaration = function (a) {
+	return {$: 'AliasDeclaration', a: a};
+};
+var $stil4m$elm_syntax$Elm$Syntax$Declaration$CustomTypeDeclaration = function (a) {
+	return {$: 'CustomTypeDeclaration', a: a};
+};
+var $stil4m$elm_syntax$Elm$Syntax$Declaration$FunctionDeclaration = function (a) {
+	return {$: 'FunctionDeclaration', a: a};
+};
+var $mdgriffith$elm_codegen$Internal$Render$addDocs = F2(
+	function (maybeDoc, decl) {
+		if (maybeDoc.$ === 'Nothing') {
+			return decl;
+		} else {
+			var doc = maybeDoc.a;
+			switch (decl.$) {
+				case 'FunctionDeclaration':
+					var func = decl.a;
+					return $stil4m$elm_syntax$Elm$Syntax$Declaration$FunctionDeclaration(
+						_Utils_update(
+							func,
+							{
+								documentation: $elm$core$Maybe$Just(
+									$mdgriffith$elm_codegen$Internal$Compiler$nodify(doc))
+							}));
+				case 'AliasDeclaration':
+					var typealias = decl.a;
+					return $stil4m$elm_syntax$Elm$Syntax$Declaration$AliasDeclaration(
+						_Utils_update(
+							typealias,
+							{
+								documentation: $elm$core$Maybe$Just(
+									$mdgriffith$elm_codegen$Internal$Compiler$nodify(doc))
+							}));
+				case 'CustomTypeDeclaration':
+					var typeDecl = decl.a;
+					return $stil4m$elm_syntax$Elm$Syntax$Declaration$CustomTypeDeclaration(
+						_Utils_update(
+							typeDecl,
+							{
+								documentation: $elm$core$Maybe$Just(
+									$mdgriffith$elm_codegen$Internal$Compiler$nodify(doc))
+							}));
+				case 'PortDeclaration':
+					var sig = decl.a;
+					return decl;
+				case 'InfixDeclaration':
+					return decl;
+				default:
+					return decl;
+			}
+		}
+	});
+var $stil4m$elm_syntax$Elm$Syntax$Exposing$FunctionExpose = function (a) {
+	return {$: 'FunctionExpose', a: a};
+};
+var $stil4m$elm_syntax$Elm$Syntax$Exposing$TypeExpose = function (a) {
+	return {$: 'TypeExpose', a: a};
+};
+var $stil4m$elm_syntax$Elm$Syntax$Exposing$TypeOrAliasExpose = function (a) {
+	return {$: 'TypeOrAliasExpose', a: a};
+};
+var $mdgriffith$elm_codegen$Internal$Render$addExposed = F3(
+	function (exposed, declaration, otherExposes) {
+		if (exposed.$ === 'NotExposed') {
+			return otherExposes;
+		} else {
+			var details = exposed.a;
+			switch (declaration.$) {
+				case 'FunctionDeclaration':
+					var fn = declaration.a;
+					var fnName = $mdgriffith$elm_codegen$Internal$Compiler$denode(
+						function ($) {
+							return $.name;
+						}(
+							$mdgriffith$elm_codegen$Internal$Compiler$denode(fn.declaration)));
+					return A2(
+						$elm$core$List$cons,
+						$stil4m$elm_syntax$Elm$Syntax$Exposing$FunctionExpose(fnName),
+						otherExposes);
+				case 'AliasDeclaration':
+					var synonym = declaration.a;
+					var aliasName = $mdgriffith$elm_codegen$Internal$Compiler$denode(synonym.name);
+					return A2(
+						$elm$core$List$cons,
+						$stil4m$elm_syntax$Elm$Syntax$Exposing$TypeOrAliasExpose(aliasName),
+						otherExposes);
+				case 'CustomTypeDeclaration':
+					var myType = declaration.a;
+					var typeName = $mdgriffith$elm_codegen$Internal$Compiler$denode(myType.name);
+					return details.exposeConstructor ? A2(
+						$elm$core$List$cons,
+						$stil4m$elm_syntax$Elm$Syntax$Exposing$TypeExpose(
+							{
+								name: typeName,
+								open: $elm$core$Maybe$Just($stil4m$elm_syntax$Elm$Syntax$Range$emptyRange)
+							}),
+						otherExposes) : A2(
+						$elm$core$List$cons,
+						$stil4m$elm_syntax$Elm$Syntax$Exposing$TypeOrAliasExpose(typeName),
+						otherExposes);
+				case 'PortDeclaration':
+					var myPort = declaration.a;
+					var typeName = $mdgriffith$elm_codegen$Internal$Compiler$denode(myPort.name);
+					return A2(
+						$elm$core$List$cons,
+						$stil4m$elm_syntax$Elm$Syntax$Exposing$FunctionExpose(typeName),
+						otherExposes);
+				case 'InfixDeclaration':
+					var inf = declaration.a;
+					return otherExposes;
+				default:
+					return otherExposes;
+			}
+		}
+	});
+var $mdgriffith$elm_codegen$Internal$Comments$Comment = function (a) {
+	return {$: 'Comment', a: a};
+};
+var $mdgriffith$elm_codegen$Internal$Comments$addPart = F2(
+	function (_v0, part) {
+		var parts = _v0.a;
+		return $mdgriffith$elm_codegen$Internal$Comments$Comment(
+			A2($elm$core$List$cons, part, parts));
+	});
+var $mdgriffith$elm_codegen$Internal$Compiler$fullModName = function (name) {
+	return A2($elm$core$String$join, '.', name);
+};
+var $elm$core$List$sortBy = _List_sortBy;
+var $mdgriffith$elm_codegen$Internal$Render$dedupImports = function (mods) {
+	return A2(
+		$elm$core$List$sortBy,
+		$mdgriffith$elm_codegen$Internal$Compiler$fullModName,
+		A3(
+			$elm$core$List$foldl,
+			F2(
+				function (mod, _v0) {
+					var set = _v0.a;
+					var gathered = _v0.b;
+					var stringName = $mdgriffith$elm_codegen$Internal$Compiler$fullModName(mod);
+					return A2($elm$core$Set$member, stringName, set) ? _Utils_Tuple2(set, gathered) : _Utils_Tuple2(
+						A2($elm$core$Set$insert, stringName, set),
+						A2($elm$core$List$cons, mod, gathered));
+				}),
+			_Utils_Tuple2($elm$core$Set$empty, _List_Nil),
+			mods).b);
+};
+var $mdgriffith$elm_codegen$Internal$Comments$emptyComment = $mdgriffith$elm_codegen$Internal$Comments$Comment(_List_Nil);
 var $elm$core$List$maybeCons = F3(
 	function (f, mx, xs) {
 		var _v0 = f(mx);
@@ -8214,147 +8729,4784 @@ var $elm$core$List$filterMap = F2(
 			_List_Nil,
 			xs);
 	});
-var $elm$http$Http$maybeSend = F4(
-	function (router, desiredTracker, progress, _v0) {
-		var actualTracker = _v0.a;
-		var toMsg = _v0.b;
-		return _Utils_eq(desiredTracker, actualTracker) ? $elm$core$Maybe$Just(
-			A2(
-				$elm$core$Platform$sendToApp,
-				router,
-				toMsg(progress))) : $elm$core$Maybe$Nothing;
-	});
-var $elm$http$Http$onSelfMsg = F3(
-	function (router, _v0, state) {
-		var tracker = _v0.a;
-		var progress = _v0.b;
-		return A2(
-			$elm$core$Task$andThen,
-			function (_v1) {
-				return $elm$core$Task$succeed(state);
-			},
-			$elm$core$Task$sequence(
-				A2(
-					$elm$core$List$filterMap,
-					A3($elm$http$Http$maybeSend, router, tracker, progress),
-					state.subs)));
-	});
-var $elm$http$Http$Cancel = function (a) {
-	return {$: 'Cancel', a: a};
-};
-var $elm$http$Http$cmdMap = F2(
-	function (func, cmd) {
-		if (cmd.$ === 'Cancel') {
-			var tracker = cmd.a;
-			return $elm$http$Http$Cancel(tracker);
+var $mdgriffith$elm_codegen$Internal$Render$matchName = F2(
+	function (one, two) {
+		if (one.$ === 'Nothing') {
+			if (two.$ === 'Nothing') {
+				return true;
+			} else {
+				return false;
+			}
 		} else {
-			var r = cmd.a;
-			return $elm$http$Http$Request(
-				{
-					allowCookiesFromOtherDomains: r.allowCookiesFromOtherDomains,
-					body: r.body,
-					expect: A2(_Http_mapExpect, func, r.expect),
-					headers: r.headers,
-					method: r.method,
-					timeout: r.timeout,
-					tracker: r.tracker,
-					url: r.url
-				});
+			var oneName = one.a;
+			if (two.$ === 'Nothing') {
+				return false;
+			} else {
+				var twoName = two.a;
+				return _Utils_eq(oneName, twoName);
+			}
 		}
 	});
-var $elm$http$Http$MySub = F2(
+var $mdgriffith$elm_codegen$Internal$Render$groupExposing = function (items) {
+	return A3(
+		$elm$core$List$foldr,
+		F2(
+			function (_v0, acc) {
+				var maybeGroup = _v0.a;
+				var name = _v0.b;
+				if (!acc.b) {
+					return _List_fromArray(
+						[
+							{
+							group: maybeGroup,
+							members: _List_fromArray(
+								[name])
+						}
+						]);
+				} else {
+					var top = acc.a;
+					var groups = acc.b;
+					return A2($mdgriffith$elm_codegen$Internal$Render$matchName, maybeGroup, top.group) ? A2(
+						$elm$core$List$cons,
+						{
+							group: top.group,
+							members: A2($elm$core$List$cons, name, top.members)
+						},
+						groups) : A2(
+						$elm$core$List$cons,
+						{
+							group: maybeGroup,
+							members: _List_fromArray(
+								[name])
+						},
+						acc);
+				}
+			}),
+		_List_Nil,
+		items);
+};
+var $mdgriffith$elm_codegen$Internal$Compiler$builtIn = function (name) {
+	_v0$4:
+	while (true) {
+		if (name.b && (!name.b.b)) {
+			switch (name.a) {
+				case 'List':
+					return true;
+				case 'Maybe':
+					return true;
+				case 'String':
+					return true;
+				case 'Basics':
+					return true;
+				default:
+					break _v0$4;
+			}
+		} else {
+			break _v0$4;
+		}
+	}
+	return false;
+};
+var $mdgriffith$elm_codegen$Internal$Compiler$findAlias = F2(
+	function (modName, aliases) {
+		findAlias:
+		while (true) {
+			if (!aliases.b) {
+				return $elm$core$Maybe$Nothing;
+			} else {
+				var _v1 = aliases.a;
+				var aliasModName = _v1.a;
+				var alias = _v1.b;
+				var remain = aliases.b;
+				if (_Utils_eq(modName, aliasModName)) {
+					return $elm$core$Maybe$Just(alias);
+				} else {
+					var $temp$modName = modName,
+						$temp$aliases = remain;
+					modName = $temp$modName;
+					aliases = $temp$aliases;
+					continue findAlias;
+				}
+			}
+		}
+	});
+var $mdgriffith$elm_codegen$Internal$Compiler$makeImport = F2(
+	function (aliases, name) {
+		if (!name.b) {
+			return $elm$core$Maybe$Nothing;
+		} else {
+			var _v1 = A2($mdgriffith$elm_codegen$Internal$Compiler$findAlias, name, aliases);
+			if (_v1.$ === 'Nothing') {
+				return $mdgriffith$elm_codegen$Internal$Compiler$builtIn(name) ? $elm$core$Maybe$Nothing : $elm$core$Maybe$Just(
+					{
+						exposingList: $elm$core$Maybe$Nothing,
+						moduleAlias: $elm$core$Maybe$Nothing,
+						moduleName: $mdgriffith$elm_codegen$Internal$Compiler$nodify(name)
+					});
+			} else {
+				var alias = _v1.a;
+				return $elm$core$Maybe$Just(
+					{
+						exposingList: $elm$core$Maybe$Nothing,
+						moduleAlias: $elm$core$Maybe$Just(
+							$mdgriffith$elm_codegen$Internal$Compiler$nodify(
+								_List_fromArray(
+									[alias]))),
+						moduleName: $mdgriffith$elm_codegen$Internal$Compiler$nodify(name)
+					});
+			}
+		}
+	});
+var $the_sett$elm_pretty_printer$Internals$Concatenate = F2(
 	function (a, b) {
-		return {$: 'MySub', a: a, b: b};
+		return {$: 'Concatenate', a: a, b: b};
 	});
-var $elm$http$Http$subMap = F2(
-	function (func, _v0) {
-		var tracker = _v0.a;
-		var toMsg = _v0.b;
+var $the_sett$elm_pretty_printer$Pretty$append = F2(
+	function (doc1, doc2) {
 		return A2(
-			$elm$http$Http$MySub,
-			tracker,
-			A2($elm$core$Basics$composeR, toMsg, func));
+			$the_sett$elm_pretty_printer$Internals$Concatenate,
+			function (_v0) {
+				return doc1;
+			},
+			function (_v1) {
+				return doc2;
+			});
 	});
-_Platform_effectManagers['Http'] = _Platform_createManager($elm$http$Http$init, $elm$http$Http$onEffects, $elm$http$Http$onSelfMsg, $elm$http$Http$cmdMap, $elm$http$Http$subMap);
-var $elm$http$Http$command = _Platform_leaf('Http');
-var $elm$http$Http$subscription = _Platform_leaf('Http');
-var $elm$http$Http$request = function (r) {
-	return $elm$http$Http$command(
-		$elm$http$Http$Request(
-			{allowCookiesFromOtherDomains: false, body: r.body, expect: r.expect, headers: r.headers, method: r.method, timeout: r.timeout, tracker: r.tracker, url: r.url}));
+var $elm_community$basics_extra$Basics$Extra$flip = F3(
+	function (f, b, a) {
+		return A2(f, a, b);
+	});
+var $the_sett$elm_pretty_printer$Pretty$a = $elm_community$basics_extra$Basics$Extra$flip($the_sett$elm_pretty_printer$Pretty$append);
+var $the_sett$elm_pretty_printer$Internals$Line = F2(
+	function (a, b) {
+		return {$: 'Line', a: a, b: b};
+	});
+var $the_sett$elm_pretty_printer$Pretty$line = A2($the_sett$elm_pretty_printer$Internals$Line, ' ', '');
+var $the_sett$elm_pretty_printer$Internals$Empty = {$: 'Empty'};
+var $the_sett$elm_pretty_printer$Pretty$empty = $the_sett$elm_pretty_printer$Internals$Empty;
+var $the_sett$elm_pretty_printer$Pretty$join = F2(
+	function (sep, docs) {
+		join:
+		while (true) {
+			if (!docs.b) {
+				return $the_sett$elm_pretty_printer$Pretty$empty;
+			} else {
+				if (docs.a.$ === 'Empty') {
+					var _v1 = docs.a;
+					var ds = docs.b;
+					var $temp$sep = sep,
+						$temp$docs = ds;
+					sep = $temp$sep;
+					docs = $temp$docs;
+					continue join;
+				} else {
+					var d = docs.a;
+					var ds = docs.b;
+					var step = F2(
+						function (x, rest) {
+							if (x.$ === 'Empty') {
+								return rest;
+							} else {
+								var doc = x;
+								return A2(
+									$the_sett$elm_pretty_printer$Pretty$append,
+									sep,
+									A2($the_sett$elm_pretty_printer$Pretty$append, doc, rest));
+							}
+						});
+					var spersed = A3($elm$core$List$foldr, step, $the_sett$elm_pretty_printer$Pretty$empty, ds);
+					return A2($the_sett$elm_pretty_printer$Pretty$append, d, spersed);
+				}
+			}
+		}
+	});
+var $the_sett$elm_pretty_printer$Pretty$lines = $the_sett$elm_pretty_printer$Pretty$join($the_sett$elm_pretty_printer$Pretty$line);
+var $elm$core$Maybe$map = F2(
+	function (f, maybe) {
+		if (maybe.$ === 'Just') {
+			var value = maybe.a;
+			return $elm$core$Maybe$Just(
+				f(value));
+		} else {
+			return $elm$core$Maybe$Nothing;
+		}
+	});
+var $mdgriffith$elm_codegen$Internal$Compiler$denodeMaybe = $elm$core$Maybe$map($mdgriffith$elm_codegen$Internal$Compiler$denode);
+var $mdgriffith$elm_codegen$Internal$Compiler$denodeAll = $elm$core$List$map($mdgriffith$elm_codegen$Internal$Compiler$denode);
+var $the_sett$elm_pretty_printer$Internals$Text = F2(
+	function (a, b) {
+		return {$: 'Text', a: a, b: b};
+	});
+var $elm$core$String$cons = _String_cons;
+var $elm$core$String$fromChar = function (_char) {
+	return A2($elm$core$String$cons, _char, '');
 };
-var $elm$http$Http$get = function (r) {
-	return $elm$http$Http$request(
-		{body: $elm$http$Http$emptyBody, expect: r.expect, headers: _List_Nil, method: 'GET', timeout: $elm$core$Maybe$Nothing, tracker: $elm$core$Maybe$Nothing, url: r.url});
+var $the_sett$elm_pretty_printer$Pretty$char = function (c) {
+	return A2(
+		$the_sett$elm_pretty_printer$Internals$Text,
+		$elm$core$String$fromChar(c),
+		$elm$core$Maybe$Nothing);
 };
-var $author$project$Main$init = function (_v0) {
-	return _Utils_Tuple2(
-		{
-			githubOpenApiSpec: $elm$core$Result$Err(
-				$elm$http$Http$BadStatus(-999))
-		},
-		$elm$http$Http$get(
+var $the_sett$elm_pretty_printer$Pretty$surround = F3(
+	function (left, right, doc) {
+		return A2(
+			$the_sett$elm_pretty_printer$Pretty$append,
+			A2($the_sett$elm_pretty_printer$Pretty$append, left, doc),
+			right);
+	});
+var $the_sett$elm_pretty_printer$Pretty$parens = function (doc) {
+	return A3(
+		$the_sett$elm_pretty_printer$Pretty$surround,
+		$the_sett$elm_pretty_printer$Pretty$char(
+			_Utils_chr('(')),
+		$the_sett$elm_pretty_printer$Pretty$char(
+			_Utils_chr(')')),
+		doc);
+};
+var $the_sett$elm_pretty_printer$Pretty$string = function (val) {
+	return A2($the_sett$elm_pretty_printer$Internals$Text, val, $elm$core$Maybe$Nothing);
+};
+var $mdgriffith$elm_codegen$Internal$Write$prettyTopLevelExpose = function (tlExpose) {
+	switch (tlExpose.$) {
+		case 'InfixExpose':
+			var val = tlExpose.a;
+			return $the_sett$elm_pretty_printer$Pretty$parens(
+				$the_sett$elm_pretty_printer$Pretty$string(val));
+		case 'FunctionExpose':
+			var val = tlExpose.a;
+			return $the_sett$elm_pretty_printer$Pretty$string(val);
+		case 'TypeOrAliasExpose':
+			var val = tlExpose.a;
+			return $the_sett$elm_pretty_printer$Pretty$string(val);
+		default:
+			var exposedType = tlExpose.a;
+			var _v1 = exposedType.open;
+			if (_v1.$ === 'Nothing') {
+				return $the_sett$elm_pretty_printer$Pretty$string(exposedType.name);
+			} else {
+				return A2(
+					$the_sett$elm_pretty_printer$Pretty$a,
+					$the_sett$elm_pretty_printer$Pretty$string('(..)'),
+					$the_sett$elm_pretty_printer$Pretty$string(exposedType.name));
+			}
+	}
+};
+var $mdgriffith$elm_codegen$Internal$Write$prettyTopLevelExposes = function (exposes) {
+	return A2(
+		$the_sett$elm_pretty_printer$Pretty$join,
+		$the_sett$elm_pretty_printer$Pretty$string(', '),
+		A2($elm$core$List$map, $mdgriffith$elm_codegen$Internal$Write$prettyTopLevelExpose, exposes));
+};
+var $stil4m$elm_syntax$Elm$Syntax$Exposing$InfixExpose = function (a) {
+	return {$: 'InfixExpose', a: a};
+};
+var $mdgriffith$elm_codegen$Internal$ImportsAndExposing$combineTopLevelExposes = function (exposes) {
+	if (!exposes.b) {
+		return $stil4m$elm_syntax$Elm$Syntax$Exposing$InfixExpose('');
+	} else {
+		var hd = exposes.a;
+		var tl = exposes.b;
+		return A3(
+			$elm$core$List$foldl,
+			F2(
+				function (exp, result) {
+					var _v1 = _Utils_Tuple2(exp, result);
+					if (_v1.a.$ === 'TypeExpose') {
+						var typeExpose = _v1.a.a;
+						var _v2 = typeExpose.open;
+						if (_v2.$ === 'Just') {
+							return exp;
+						} else {
+							return result;
+						}
+					} else {
+						if (_v1.b.$ === 'TypeExpose') {
+							var typeExpose = _v1.b.a;
+							var _v3 = typeExpose.open;
+							if (_v3.$ === 'Just') {
+								return result;
+							} else {
+								return exp;
+							}
+						} else {
+							return result;
+						}
+					}
+				}),
+			hd,
+			tl);
+	}
+};
+var $mdgriffith$elm_codegen$Internal$ImportsAndExposing$topLevelExposeName = function (tle) {
+	switch (tle.$) {
+		case 'InfixExpose':
+			var val = tle.a;
+			return val;
+		case 'FunctionExpose':
+			var val = tle.a;
+			return val;
+		case 'TypeOrAliasExpose':
+			var val = tle.a;
+			return val;
+		default:
+			var exposedType = tle.a;
+			return exposedType.name;
+	}
+};
+var $mdgriffith$elm_codegen$Internal$ImportsAndExposing$groupByExposingName = function (innerImports) {
+	var _v0 = function () {
+		if (!innerImports.b) {
+			return _Utils_Tuple3(
+				'',
+				_List_Nil,
+				_List_fromArray(
+					[_List_Nil]));
+		} else {
+			var hd = innerImports.a;
+			return A3(
+				$elm$core$List$foldl,
+				F2(
+					function (exp, _v2) {
+						var currName = _v2.a;
+						var currAccum = _v2.b;
+						var accum = _v2.c;
+						var nextName = $mdgriffith$elm_codegen$Internal$ImportsAndExposing$topLevelExposeName(exp);
+						return _Utils_eq(nextName, currName) ? _Utils_Tuple3(
+							currName,
+							A2($elm$core$List$cons, exp, currAccum),
+							accum) : _Utils_Tuple3(
+							nextName,
+							_List_fromArray(
+								[exp]),
+							A2($elm$core$List$cons, currAccum, accum));
+					}),
+				_Utils_Tuple3(
+					$mdgriffith$elm_codegen$Internal$ImportsAndExposing$topLevelExposeName(hd),
+					_List_Nil,
+					_List_Nil),
+				innerImports);
+		}
+	}();
+	var hdGroup = _v0.b;
+	var remGroups = _v0.c;
+	return $elm$core$List$reverse(
+		A2($elm$core$List$cons, hdGroup, remGroups));
+};
+var $elm$core$List$sortWith = _List_sortWith;
+var $mdgriffith$elm_codegen$Internal$ImportsAndExposing$topLevelExposeOrder = F2(
+	function (tlel, tler) {
+		var _v0 = _Utils_Tuple2(tlel, tler);
+		if (_v0.a.$ === 'InfixExpose') {
+			if (_v0.b.$ === 'InfixExpose') {
+				return A2(
+					$elm$core$Basics$compare,
+					$mdgriffith$elm_codegen$Internal$ImportsAndExposing$topLevelExposeName(tlel),
+					$mdgriffith$elm_codegen$Internal$ImportsAndExposing$topLevelExposeName(tler));
+			} else {
+				return $elm$core$Basics$LT;
+			}
+		} else {
+			if (_v0.b.$ === 'InfixExpose') {
+				return $elm$core$Basics$GT;
+			} else {
+				return A2(
+					$elm$core$Basics$compare,
+					$mdgriffith$elm_codegen$Internal$ImportsAndExposing$topLevelExposeName(tlel),
+					$mdgriffith$elm_codegen$Internal$ImportsAndExposing$topLevelExposeName(tler));
+			}
+		}
+	});
+var $mdgriffith$elm_codegen$Internal$ImportsAndExposing$sortAndDedupExposings = function (tlExposings) {
+	return A2(
+		$elm$core$List$map,
+		$mdgriffith$elm_codegen$Internal$ImportsAndExposing$combineTopLevelExposes,
+		$mdgriffith$elm_codegen$Internal$ImportsAndExposing$groupByExposingName(
+			A2($elm$core$List$sortWith, $mdgriffith$elm_codegen$Internal$ImportsAndExposing$topLevelExposeOrder, tlExposings)));
+};
+var $the_sett$elm_pretty_printer$Pretty$space = $the_sett$elm_pretty_printer$Pretty$char(
+	_Utils_chr(' '));
+var $mdgriffith$elm_codegen$Internal$Write$prettyExposing = function (exposing_) {
+	var exposings = function () {
+		if (exposing_.$ === 'All') {
+			return $the_sett$elm_pretty_printer$Pretty$parens(
+				$the_sett$elm_pretty_printer$Pretty$string('..'));
+		} else {
+			var tll = exposing_.a;
+			return $the_sett$elm_pretty_printer$Pretty$parens(
+				$mdgriffith$elm_codegen$Internal$Write$prettyTopLevelExposes(
+					$mdgriffith$elm_codegen$Internal$ImportsAndExposing$sortAndDedupExposings(
+						$mdgriffith$elm_codegen$Internal$Compiler$denodeAll(tll))));
+		}
+	}();
+	return A2(
+		$the_sett$elm_pretty_printer$Pretty$a,
+		exposings,
+		A2(
+			$the_sett$elm_pretty_printer$Pretty$a,
+			$the_sett$elm_pretty_printer$Pretty$space,
+			$the_sett$elm_pretty_printer$Pretty$string('exposing')));
+};
+var $mdgriffith$elm_codegen$Internal$Write$prettyMaybe = F2(
+	function (prettyFn, maybeVal) {
+		return A2(
+			$elm$core$Maybe$withDefault,
+			$the_sett$elm_pretty_printer$Pretty$empty,
+			A2($elm$core$Maybe$map, prettyFn, maybeVal));
+	});
+var $mdgriffith$elm_codegen$Internal$Write$dot = $the_sett$elm_pretty_printer$Pretty$string('.');
+var $mdgriffith$elm_codegen$Internal$Write$prettyModuleName = function (name) {
+	return A2(
+		$the_sett$elm_pretty_printer$Pretty$join,
+		$mdgriffith$elm_codegen$Internal$Write$dot,
+		A2($elm$core$List$map, $the_sett$elm_pretty_printer$Pretty$string, name));
+};
+var $mdgriffith$elm_codegen$Internal$Write$prettyModuleNameAlias = function (name) {
+	if (!name.b) {
+		return $the_sett$elm_pretty_printer$Pretty$empty;
+	} else {
+		return A2(
+			$the_sett$elm_pretty_printer$Pretty$a,
+			A2(
+				$the_sett$elm_pretty_printer$Pretty$join,
+				$mdgriffith$elm_codegen$Internal$Write$dot,
+				A2($elm$core$List$map, $the_sett$elm_pretty_printer$Pretty$string, name)),
+			$the_sett$elm_pretty_printer$Pretty$string('as '));
+	}
+};
+var $mdgriffith$elm_codegen$Internal$Write$prettyImport = function (import_) {
+	return A2(
+		$the_sett$elm_pretty_printer$Pretty$join,
+		$the_sett$elm_pretty_printer$Pretty$space,
+		_List_fromArray(
+			[
+				$the_sett$elm_pretty_printer$Pretty$string('import'),
+				$mdgriffith$elm_codegen$Internal$Write$prettyModuleName(
+				$mdgriffith$elm_codegen$Internal$Compiler$denode(import_.moduleName)),
+				A2(
+				$mdgriffith$elm_codegen$Internal$Write$prettyMaybe,
+				$mdgriffith$elm_codegen$Internal$Write$prettyModuleNameAlias,
+				$mdgriffith$elm_codegen$Internal$Compiler$denodeMaybe(import_.moduleAlias)),
+				A2(
+				$mdgriffith$elm_codegen$Internal$Write$prettyMaybe,
+				$mdgriffith$elm_codegen$Internal$Write$prettyExposing,
+				$mdgriffith$elm_codegen$Internal$Compiler$denodeMaybe(import_.exposingList))
+			]));
+};
+var $mdgriffith$elm_codegen$Internal$ImportsAndExposing$denode = $stil4m$elm_syntax$Elm$Syntax$Node$value;
+var $mdgriffith$elm_codegen$Internal$ImportsAndExposing$denodeMaybe = $elm$core$Maybe$map($mdgriffith$elm_codegen$Internal$ImportsAndExposing$denode);
+var $mdgriffith$elm_codegen$Internal$ImportsAndExposing$denodeAll = $elm$core$List$map($mdgriffith$elm_codegen$Internal$ImportsAndExposing$denode);
+var $mdgriffith$elm_codegen$Internal$ImportsAndExposing$nodify = function (exp) {
+	return A2($stil4m$elm_syntax$Elm$Syntax$Node$Node, $stil4m$elm_syntax$Elm$Syntax$Range$emptyRange, exp);
+};
+var $mdgriffith$elm_codegen$Internal$ImportsAndExposing$nodifyAll = $elm$core$List$map($mdgriffith$elm_codegen$Internal$ImportsAndExposing$nodify);
+var $mdgriffith$elm_codegen$Internal$ImportsAndExposing$joinExposings = F2(
+	function (left, right) {
+		var _v0 = _Utils_Tuple2(left, right);
+		if (_v0.a.$ === 'All') {
+			var range = _v0.a.a;
+			return $stil4m$elm_syntax$Elm$Syntax$Exposing$All(range);
+		} else {
+			if (_v0.b.$ === 'All') {
+				var range = _v0.b.a;
+				return $stil4m$elm_syntax$Elm$Syntax$Exposing$All(range);
+			} else {
+				var leftNodes = _v0.a.a;
+				var rightNodes = _v0.b.a;
+				return $stil4m$elm_syntax$Elm$Syntax$Exposing$Explicit(
+					$mdgriffith$elm_codegen$Internal$ImportsAndExposing$nodifyAll(
+						A2(
+							$elm$core$List$append,
+							$mdgriffith$elm_codegen$Internal$ImportsAndExposing$denodeAll(leftNodes),
+							$mdgriffith$elm_codegen$Internal$ImportsAndExposing$denodeAll(rightNodes))));
+			}
+		}
+	});
+var $mdgriffith$elm_codegen$Internal$ImportsAndExposing$joinMaybeExposings = F2(
+	function (maybeLeft, maybeRight) {
+		var _v0 = _Utils_Tuple2(maybeLeft, maybeRight);
+		if (_v0.a.$ === 'Nothing') {
+			if (_v0.b.$ === 'Nothing') {
+				var _v1 = _v0.a;
+				var _v2 = _v0.b;
+				return $elm$core$Maybe$Nothing;
+			} else {
+				var _v4 = _v0.a;
+				var right = _v0.b.a;
+				return $elm$core$Maybe$Just(right);
+			}
+		} else {
+			if (_v0.b.$ === 'Nothing') {
+				var left = _v0.a.a;
+				var _v3 = _v0.b;
+				return $elm$core$Maybe$Just(left);
+			} else {
+				var left = _v0.a.a;
+				var right = _v0.b.a;
+				return $elm$core$Maybe$Just(
+					A2($mdgriffith$elm_codegen$Internal$ImportsAndExposing$joinExposings, left, right));
+			}
+		}
+	});
+var $mdgriffith$elm_codegen$Internal$ImportsAndExposing$nodifyMaybe = $elm$core$Maybe$map($mdgriffith$elm_codegen$Internal$ImportsAndExposing$nodify);
+var $mdgriffith$elm_codegen$Internal$ImportsAndExposing$or = F2(
+	function (ma, mb) {
+		if (ma.$ === 'Nothing') {
+			return mb;
+		} else {
+			return ma;
+		}
+	});
+var $mdgriffith$elm_codegen$Internal$ImportsAndExposing$sortAndDedupExposing = function (exp) {
+	if (exp.$ === 'All') {
+		var range = exp.a;
+		return $stil4m$elm_syntax$Elm$Syntax$Exposing$All(range);
+	} else {
+		var nodes = exp.a;
+		return $stil4m$elm_syntax$Elm$Syntax$Exposing$Explicit(
+			$mdgriffith$elm_codegen$Internal$ImportsAndExposing$nodifyAll(
+				$mdgriffith$elm_codegen$Internal$ImportsAndExposing$sortAndDedupExposings(
+					$mdgriffith$elm_codegen$Internal$ImportsAndExposing$denodeAll(nodes))));
+	}
+};
+var $mdgriffith$elm_codegen$Internal$ImportsAndExposing$combineImports = function (innerImports) {
+	if (!innerImports.b) {
+		return {
+			exposingList: $elm$core$Maybe$Nothing,
+			moduleAlias: $elm$core$Maybe$Nothing,
+			moduleName: $mdgriffith$elm_codegen$Internal$ImportsAndExposing$nodify(_List_Nil)
+		};
+	} else {
+		var hd = innerImports.a;
+		var tl = innerImports.b;
+		var combinedImports = A3(
+			$elm$core$List$foldl,
+			F2(
+				function (imp, result) {
+					return {
+						exposingList: $mdgriffith$elm_codegen$Internal$ImportsAndExposing$nodifyMaybe(
+							A2(
+								$mdgriffith$elm_codegen$Internal$ImportsAndExposing$joinMaybeExposings,
+								$mdgriffith$elm_codegen$Internal$ImportsAndExposing$denodeMaybe(imp.exposingList),
+								$mdgriffith$elm_codegen$Internal$ImportsAndExposing$denodeMaybe(result.exposingList))),
+						moduleAlias: A2($mdgriffith$elm_codegen$Internal$ImportsAndExposing$or, imp.moduleAlias, result.moduleAlias),
+						moduleName: imp.moduleName
+					};
+				}),
+			hd,
+			tl);
+		return _Utils_update(
+			combinedImports,
 			{
-				expect: A2($elm$http$Http$expectJson, $author$project$Main$GitHubOpenApiSpecResponse, $author$project$OpenApi$decode),
-				url: 'https://raw.githubusercontent.com/github/rest-api-description/main/descriptions-next/api.github.com/api.github.com.json'
-			}));
+				exposingList: A2(
+					$elm$core$Maybe$map,
+					A2(
+						$elm$core$Basics$composeR,
+						$mdgriffith$elm_codegen$Internal$ImportsAndExposing$denode,
+						A2($elm$core$Basics$composeR, $mdgriffith$elm_codegen$Internal$ImportsAndExposing$sortAndDedupExposing, $mdgriffith$elm_codegen$Internal$ImportsAndExposing$nodify)),
+					combinedImports.exposingList)
+			});
+	}
 };
-var $elm$core$Platform$Sub$batch = _Platform_batch;
-var $elm$core$Platform$Sub$none = $elm$core$Platform$Sub$batch(_List_Nil);
-var $author$project$Main$subscriptions = function (model) {
-	return $elm$core$Platform$Sub$none;
+var $mdgriffith$elm_codegen$Internal$ImportsAndExposing$groupByModuleName = function (innerImports) {
+	var _v0 = function () {
+		if (!innerImports.b) {
+			return _Utils_Tuple3(
+				_List_Nil,
+				_List_Nil,
+				_List_fromArray(
+					[_List_Nil]));
+		} else {
+			var hd = innerImports.a;
+			return A3(
+				$elm$core$List$foldl,
+				F2(
+					function (imp, _v2) {
+						var currName = _v2.a;
+						var currAccum = _v2.b;
+						var accum = _v2.c;
+						var nextName = $mdgriffith$elm_codegen$Internal$ImportsAndExposing$denode(imp.moduleName);
+						return _Utils_eq(nextName, currName) ? _Utils_Tuple3(
+							currName,
+							A2($elm$core$List$cons, imp, currAccum),
+							accum) : _Utils_Tuple3(
+							nextName,
+							_List_fromArray(
+								[imp]),
+							A2($elm$core$List$cons, currAccum, accum));
+					}),
+				_Utils_Tuple3(
+					$mdgriffith$elm_codegen$Internal$ImportsAndExposing$denode(hd.moduleName),
+					_List_Nil,
+					_List_Nil),
+				innerImports);
+		}
+	}();
+	var hdGroup = _v0.b;
+	var remGroups = _v0.c;
+	return $elm$core$List$reverse(
+		A2($elm$core$List$cons, hdGroup, remGroups));
 };
-var $elm$core$Platform$Cmd$batch = _Platform_batch;
-var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
+var $mdgriffith$elm_codegen$Internal$ImportsAndExposing$sortAndDedupImports = function (imports) {
+	var impName = function (imp) {
+		return $mdgriffith$elm_codegen$Internal$ImportsAndExposing$denode(imp.moduleName);
+	};
+	return A2(
+		$elm$core$List$map,
+		$mdgriffith$elm_codegen$Internal$ImportsAndExposing$combineImports,
+		$mdgriffith$elm_codegen$Internal$ImportsAndExposing$groupByModuleName(
+			A2($elm$core$List$sortBy, impName, imports)));
+};
+var $mdgriffith$elm_codegen$Internal$Write$prettyImports = function (imports) {
+	return $the_sett$elm_pretty_printer$Pretty$lines(
+		A2(
+			$elm$core$List$map,
+			$mdgriffith$elm_codegen$Internal$Write$prettyImport,
+			$mdgriffith$elm_codegen$Internal$ImportsAndExposing$sortAndDedupImports(imports)));
+};
+var $mdgriffith$elm_codegen$Internal$Write$importsPretty = function (imports) {
+	if (!imports.b) {
+		return $the_sett$elm_pretty_printer$Pretty$line;
+	} else {
+		return A2(
+			$the_sett$elm_pretty_printer$Pretty$a,
+			$the_sett$elm_pretty_printer$Pretty$line,
+			A2(
+				$the_sett$elm_pretty_printer$Pretty$a,
+				$the_sett$elm_pretty_printer$Pretty$line,
+				A2(
+					$the_sett$elm_pretty_printer$Pretty$a,
+					$the_sett$elm_pretty_printer$Pretty$line,
+					$mdgriffith$elm_codegen$Internal$Write$prettyImports(imports))));
+	}
+};
+var $mdgriffith$elm_codegen$Internal$Write$prettyComments = function (comments) {
+	if (!comments.b) {
+		return $the_sett$elm_pretty_printer$Pretty$empty;
+	} else {
+		return A2(
+			$the_sett$elm_pretty_printer$Pretty$a,
+			$the_sett$elm_pretty_printer$Pretty$line,
+			A2(
+				$the_sett$elm_pretty_printer$Pretty$a,
+				$the_sett$elm_pretty_printer$Pretty$line,
+				$the_sett$elm_pretty_printer$Pretty$lines(
+					A2($elm$core$List$map, $the_sett$elm_pretty_printer$Pretty$string, comments))));
+	}
+};
+var $the_sett$elm_pretty_printer$Internals$Nest = F2(
+	function (a, b) {
+		return {$: 'Nest', a: a, b: b};
+	});
+var $the_sett$elm_pretty_printer$Pretty$nest = F2(
+	function (depth, doc) {
+		return A2(
+			$the_sett$elm_pretty_printer$Internals$Nest,
+			depth,
+			function (_v0) {
+				return doc;
+			});
+	});
+var $mdgriffith$elm_codegen$Internal$Write$prettyDocumentation = function (docs) {
+	return A2($elm$core$String$contains, '\n', docs) ? $the_sett$elm_pretty_printer$Pretty$string('{-| ' + (docs + '\n-}')) : $the_sett$elm_pretty_printer$Pretty$string('{-| ' + (docs + ' -}'));
+};
+var $the_sett$elm_pretty_printer$Internals$Union = F2(
+	function (a, b) {
+		return {$: 'Union', a: a, b: b};
+	});
+var $the_sett$elm_pretty_printer$Internals$flatten = function (doc) {
+	flatten:
+	while (true) {
+		switch (doc.$) {
+			case 'Concatenate':
+				var doc1 = doc.a;
+				var doc2 = doc.b;
+				return A2(
+					$the_sett$elm_pretty_printer$Internals$Concatenate,
+					function (_v1) {
+						return $the_sett$elm_pretty_printer$Internals$flatten(
+							doc1(_Utils_Tuple0));
+					},
+					function (_v2) {
+						return $the_sett$elm_pretty_printer$Internals$flatten(
+							doc2(_Utils_Tuple0));
+					});
+			case 'Nest':
+				var i = doc.a;
+				var doc1 = doc.b;
+				return A2(
+					$the_sett$elm_pretty_printer$Internals$Nest,
+					i,
+					function (_v3) {
+						return $the_sett$elm_pretty_printer$Internals$flatten(
+							doc1(_Utils_Tuple0));
+					});
+			case 'Union':
+				var doc1 = doc.a;
+				var doc2 = doc.b;
+				var $temp$doc = doc1;
+				doc = $temp$doc;
+				continue flatten;
+			case 'Line':
+				var hsep = doc.a;
+				return A2($the_sett$elm_pretty_printer$Internals$Text, hsep, $elm$core$Maybe$Nothing);
+			case 'Nesting':
+				var fn = doc.a;
+				var $temp$doc = fn(0);
+				doc = $temp$doc;
+				continue flatten;
+			case 'Column':
+				var fn = doc.a;
+				var $temp$doc = fn(0);
+				doc = $temp$doc;
+				continue flatten;
+			default:
+				var x = doc;
+				return x;
+		}
+	}
+};
+var $the_sett$elm_pretty_printer$Pretty$group = function (doc) {
+	return A2(
+		$the_sett$elm_pretty_printer$Internals$Union,
+		$the_sett$elm_pretty_printer$Internals$flatten(doc),
+		doc);
+};
+var $mdgriffith$elm_codegen$Internal$Write$isNakedCompound = function (typeAnn) {
+	switch (typeAnn.$) {
+		case 'Typed':
+			if (!typeAnn.b.b) {
+				return false;
+			} else {
+				var args = typeAnn.b;
+				return true;
+			}
+		case 'FunctionTypeAnnotation':
+			return true;
+		default:
+			return false;
+	}
+};
+var $elm$core$Tuple$mapBoth = F3(
+	function (funcA, funcB, _v0) {
+		var x = _v0.a;
+		var y = _v0.b;
+		return _Utils_Tuple2(
+			funcA(x),
+			funcB(y));
+	});
+var $mdgriffith$elm_codegen$Internal$Write$prettyModuleNameDot = F2(
+	function (aliases, name) {
+		if (!name.b) {
+			return $the_sett$elm_pretty_printer$Pretty$empty;
+		} else {
+			var _v1 = A2($mdgriffith$elm_codegen$Internal$Compiler$findAlias, name, aliases);
+			if (_v1.$ === 'Nothing') {
+				return A2(
+					$the_sett$elm_pretty_printer$Pretty$a,
+					$mdgriffith$elm_codegen$Internal$Write$dot,
+					A2(
+						$the_sett$elm_pretty_printer$Pretty$join,
+						$mdgriffith$elm_codegen$Internal$Write$dot,
+						A2($elm$core$List$map, $the_sett$elm_pretty_printer$Pretty$string, name)));
+			} else {
+				var alias = _v1.a;
+				return A2(
+					$the_sett$elm_pretty_printer$Pretty$a,
+					$mdgriffith$elm_codegen$Internal$Write$dot,
+					$the_sett$elm_pretty_printer$Pretty$string(alias));
+			}
+		}
+	});
+var $the_sett$elm_pretty_printer$Pretty$separators = function (sep) {
+	return $the_sett$elm_pretty_printer$Pretty$join(
+		A2($the_sett$elm_pretty_printer$Internals$Line, sep, sep));
+};
+var $the_sett$elm_pretty_printer$Pretty$words = $the_sett$elm_pretty_printer$Pretty$join($the_sett$elm_pretty_printer$Pretty$space);
+var $mdgriffith$elm_codegen$Internal$Write$prettyFieldTypeAnn = F2(
+	function (aliases, _v8) {
+		var name = _v8.a;
+		var ann = _v8.b;
+		return $the_sett$elm_pretty_printer$Pretty$group(
+			A2(
+				$the_sett$elm_pretty_printer$Pretty$nest,
+				4,
+				$the_sett$elm_pretty_printer$Pretty$lines(
+					_List_fromArray(
+						[
+							$the_sett$elm_pretty_printer$Pretty$words(
+							_List_fromArray(
+								[
+									$the_sett$elm_pretty_printer$Pretty$string(name),
+									$the_sett$elm_pretty_printer$Pretty$string(':')
+								])),
+							A2($mdgriffith$elm_codegen$Internal$Write$prettyTypeAnnotation, aliases, ann)
+						]))));
+	});
+var $mdgriffith$elm_codegen$Internal$Write$prettyFunctionTypeAnnotation = F3(
+	function (aliases, left, right) {
+		var expandLeft = function (ann) {
+			if (ann.$ === 'FunctionTypeAnnotation') {
+				return A2($mdgriffith$elm_codegen$Internal$Write$prettyTypeAnnotationParens, aliases, ann);
+			} else {
+				return A2($mdgriffith$elm_codegen$Internal$Write$prettyTypeAnnotation, aliases, ann);
+			}
+		};
+		var innerFnTypeAnn = F2(
+			function (innerLeft, innerRight) {
+				var rightSide = expandRight(
+					$mdgriffith$elm_codegen$Internal$Compiler$denode(innerRight));
+				if (rightSide.b) {
+					var hd = rightSide.a;
+					var tl = rightSide.b;
+					return A2(
+						$elm$core$List$cons,
+						expandLeft(
+							$mdgriffith$elm_codegen$Internal$Compiler$denode(innerLeft)),
+						A2(
+							$elm$core$List$cons,
+							$the_sett$elm_pretty_printer$Pretty$words(
+								_List_fromArray(
+									[
+										$the_sett$elm_pretty_printer$Pretty$string('->'),
+										hd
+									])),
+							tl));
+				} else {
+					return _List_Nil;
+				}
+			});
+		var expandRight = function (ann) {
+			if (ann.$ === 'FunctionTypeAnnotation') {
+				var innerLeft = ann.a;
+				var innerRight = ann.b;
+				return A2(innerFnTypeAnn, innerLeft, innerRight);
+			} else {
+				return _List_fromArray(
+					[
+						A2($mdgriffith$elm_codegen$Internal$Write$prettyTypeAnnotation, aliases, ann)
+					]);
+			}
+		};
+		return $the_sett$elm_pretty_printer$Pretty$group(
+			$the_sett$elm_pretty_printer$Pretty$lines(
+				A2(innerFnTypeAnn, left, right)));
+	});
+var $mdgriffith$elm_codegen$Internal$Write$prettyGenericRecord = F3(
+	function (aliases, paramName, fields) {
+		var open = A2(
+			$the_sett$elm_pretty_printer$Pretty$a,
+			$the_sett$elm_pretty_printer$Pretty$line,
+			$the_sett$elm_pretty_printer$Pretty$words(
+				_List_fromArray(
+					[
+						$the_sett$elm_pretty_printer$Pretty$string('{'),
+						$the_sett$elm_pretty_printer$Pretty$string(paramName)
+					])));
+		var close = A2(
+			$the_sett$elm_pretty_printer$Pretty$a,
+			$the_sett$elm_pretty_printer$Pretty$string('}'),
+			$the_sett$elm_pretty_printer$Pretty$line);
+		var addBarToFirst = function (exprs) {
+			if (!exprs.b) {
+				return _List_Nil;
+			} else {
+				var hd = exprs.a;
+				var tl = exprs.b;
+				return A2(
+					$elm$core$List$cons,
+					A2(
+						$the_sett$elm_pretty_printer$Pretty$a,
+						hd,
+						$the_sett$elm_pretty_printer$Pretty$string('| ')),
+					tl);
+			}
+		};
+		if (!fields.b) {
+			return $the_sett$elm_pretty_printer$Pretty$string('{}');
+		} else {
+			return $the_sett$elm_pretty_printer$Pretty$group(
+				A3(
+					$the_sett$elm_pretty_printer$Pretty$surround,
+					$the_sett$elm_pretty_printer$Pretty$empty,
+					close,
+					A2(
+						$the_sett$elm_pretty_printer$Pretty$nest,
+						4,
+						A2(
+							$the_sett$elm_pretty_printer$Pretty$a,
+							A2(
+								$the_sett$elm_pretty_printer$Pretty$separators,
+								', ',
+								addBarToFirst(
+									A2(
+										$elm$core$List$map,
+										$mdgriffith$elm_codegen$Internal$Write$prettyFieldTypeAnn(aliases),
+										A2(
+											$elm$core$List$map,
+											A2($elm$core$Tuple$mapBoth, $mdgriffith$elm_codegen$Internal$Compiler$denode, $mdgriffith$elm_codegen$Internal$Compiler$denode),
+											fields)))),
+							open))));
+		}
+	});
+var $mdgriffith$elm_codegen$Internal$Write$prettyRecord = F2(
+	function (aliases, fields) {
+		var open = A2(
+			$the_sett$elm_pretty_printer$Pretty$a,
+			$the_sett$elm_pretty_printer$Pretty$space,
+			$the_sett$elm_pretty_printer$Pretty$string('{'));
+		var close = A2(
+			$the_sett$elm_pretty_printer$Pretty$a,
+			$the_sett$elm_pretty_printer$Pretty$string('}'),
+			$the_sett$elm_pretty_printer$Pretty$line);
+		if (!fields.b) {
+			return $the_sett$elm_pretty_printer$Pretty$string('{}');
+		} else {
+			return $the_sett$elm_pretty_printer$Pretty$group(
+				A3(
+					$the_sett$elm_pretty_printer$Pretty$surround,
+					open,
+					close,
+					A2(
+						$the_sett$elm_pretty_printer$Pretty$separators,
+						', ',
+						A2(
+							$elm$core$List$map,
+							$mdgriffith$elm_codegen$Internal$Write$prettyFieldTypeAnn(aliases),
+							A2(
+								$elm$core$List$map,
+								A2($elm$core$Tuple$mapBoth, $mdgriffith$elm_codegen$Internal$Compiler$denode, $mdgriffith$elm_codegen$Internal$Compiler$denode),
+								fields)))));
+		}
+	});
+var $mdgriffith$elm_codegen$Internal$Write$prettyTupled = F2(
+	function (aliases, anns) {
+		return $the_sett$elm_pretty_printer$Pretty$parens(
+			A2(
+				$the_sett$elm_pretty_printer$Pretty$a,
+				$the_sett$elm_pretty_printer$Pretty$space,
+				A2(
+					$the_sett$elm_pretty_printer$Pretty$a,
+					A2(
+						$the_sett$elm_pretty_printer$Pretty$join,
+						$the_sett$elm_pretty_printer$Pretty$string(', '),
+						A2(
+							$elm$core$List$map,
+							$mdgriffith$elm_codegen$Internal$Write$prettyTypeAnnotation(aliases),
+							$mdgriffith$elm_codegen$Internal$Compiler$denodeAll(anns))),
+					$the_sett$elm_pretty_printer$Pretty$space)));
+	});
+var $mdgriffith$elm_codegen$Internal$Write$prettyTypeAnnotation = F2(
+	function (aliases, typeAnn) {
+		switch (typeAnn.$) {
+			case 'GenericType':
+				var val = typeAnn.a;
+				return $the_sett$elm_pretty_printer$Pretty$string(val);
+			case 'Typed':
+				var fqName = typeAnn.a;
+				var anns = typeAnn.b;
+				return A3($mdgriffith$elm_codegen$Internal$Write$prettyTyped, aliases, fqName, anns);
+			case 'Unit':
+				return $the_sett$elm_pretty_printer$Pretty$string('()');
+			case 'Tupled':
+				var anns = typeAnn.a;
+				return A2($mdgriffith$elm_codegen$Internal$Write$prettyTupled, aliases, anns);
+			case 'Record':
+				var recordDef = typeAnn.a;
+				return A2(
+					$mdgriffith$elm_codegen$Internal$Write$prettyRecord,
+					aliases,
+					$mdgriffith$elm_codegen$Internal$Compiler$denodeAll(recordDef));
+			case 'GenericRecord':
+				var paramName = typeAnn.a;
+				var recordDef = typeAnn.b;
+				return A3(
+					$mdgriffith$elm_codegen$Internal$Write$prettyGenericRecord,
+					aliases,
+					$mdgriffith$elm_codegen$Internal$Compiler$denode(paramName),
+					$mdgriffith$elm_codegen$Internal$Compiler$denodeAll(
+						$mdgriffith$elm_codegen$Internal$Compiler$denode(recordDef)));
+			default:
+				var fromAnn = typeAnn.a;
+				var toAnn = typeAnn.b;
+				return A3($mdgriffith$elm_codegen$Internal$Write$prettyFunctionTypeAnnotation, aliases, fromAnn, toAnn);
+		}
+	});
+var $mdgriffith$elm_codegen$Internal$Write$prettyTypeAnnotationParens = F2(
+	function (aliases, typeAnn) {
+		return $mdgriffith$elm_codegen$Internal$Write$isNakedCompound(typeAnn) ? $the_sett$elm_pretty_printer$Pretty$parens(
+			A2($mdgriffith$elm_codegen$Internal$Write$prettyTypeAnnotation, aliases, typeAnn)) : A2($mdgriffith$elm_codegen$Internal$Write$prettyTypeAnnotation, aliases, typeAnn);
+	});
+var $mdgriffith$elm_codegen$Internal$Write$prettyTyped = F3(
+	function (aliases, fqName, anns) {
+		var argsDoc = $the_sett$elm_pretty_printer$Pretty$words(
+			A2(
+				$elm$core$List$map,
+				$mdgriffith$elm_codegen$Internal$Write$prettyTypeAnnotationParens(aliases),
+				$mdgriffith$elm_codegen$Internal$Compiler$denodeAll(anns)));
+		var _v0 = $mdgriffith$elm_codegen$Internal$Compiler$denode(fqName);
+		var moduleName = _v0.a;
+		var typeName = _v0.b;
+		var typeDoc = A2(
+			$the_sett$elm_pretty_printer$Pretty$a,
+			$the_sett$elm_pretty_printer$Pretty$string(typeName),
+			A2($mdgriffith$elm_codegen$Internal$Write$prettyModuleNameDot, aliases, moduleName));
+		return $the_sett$elm_pretty_printer$Pretty$words(
+			_List_fromArray(
+				[typeDoc, argsDoc]));
+	});
+var $mdgriffith$elm_codegen$Internal$Write$prettyValueConstructor = F2(
+	function (aliases, cons) {
+		return A2(
+			$the_sett$elm_pretty_printer$Pretty$nest,
+			4,
+			$the_sett$elm_pretty_printer$Pretty$group(
+				$the_sett$elm_pretty_printer$Pretty$lines(
+					_List_fromArray(
+						[
+							$the_sett$elm_pretty_printer$Pretty$string(
+							$mdgriffith$elm_codegen$Internal$Compiler$denode(cons.name)),
+							$the_sett$elm_pretty_printer$Pretty$lines(
+							A2(
+								$elm$core$List$map,
+								$mdgriffith$elm_codegen$Internal$Write$prettyTypeAnnotationParens(aliases),
+								$mdgriffith$elm_codegen$Internal$Compiler$denodeAll(cons._arguments)))
+						]))));
+	});
+var $mdgriffith$elm_codegen$Internal$Write$prettyValueConstructors = F2(
+	function (aliases, constructors) {
+		return A2(
+			$the_sett$elm_pretty_printer$Pretty$join,
+			A2(
+				$the_sett$elm_pretty_printer$Pretty$a,
+				$the_sett$elm_pretty_printer$Pretty$string('| '),
+				$the_sett$elm_pretty_printer$Pretty$line),
+			A2(
+				$elm$core$List$map,
+				$mdgriffith$elm_codegen$Internal$Write$prettyValueConstructor(aliases),
+				constructors));
+	});
+var $mdgriffith$elm_codegen$Internal$Write$prettyCustomType = F2(
+	function (aliases, type_) {
+		var customTypePretty = A2(
+			$the_sett$elm_pretty_printer$Pretty$nest,
+			4,
+			A2(
+				$the_sett$elm_pretty_printer$Pretty$a,
+				A2(
+					$mdgriffith$elm_codegen$Internal$Write$prettyValueConstructors,
+					aliases,
+					$mdgriffith$elm_codegen$Internal$Compiler$denodeAll(type_.constructors)),
+				A2(
+					$the_sett$elm_pretty_printer$Pretty$a,
+					$the_sett$elm_pretty_printer$Pretty$string('= '),
+					A2(
+						$the_sett$elm_pretty_printer$Pretty$a,
+						$the_sett$elm_pretty_printer$Pretty$line,
+						$the_sett$elm_pretty_printer$Pretty$words(
+							_List_fromArray(
+								[
+									$the_sett$elm_pretty_printer$Pretty$string('type'),
+									$the_sett$elm_pretty_printer$Pretty$string(
+									$mdgriffith$elm_codegen$Internal$Compiler$denode(type_.name)),
+									$the_sett$elm_pretty_printer$Pretty$words(
+									A2(
+										$elm$core$List$map,
+										$the_sett$elm_pretty_printer$Pretty$string,
+										$mdgriffith$elm_codegen$Internal$Compiler$denodeAll(type_.generics)))
+								]))))));
+		return $the_sett$elm_pretty_printer$Pretty$lines(
+			_List_fromArray(
+				[
+					A2(
+					$mdgriffith$elm_codegen$Internal$Write$prettyMaybe,
+					$mdgriffith$elm_codegen$Internal$Write$prettyDocumentation,
+					$mdgriffith$elm_codegen$Internal$Compiler$denodeMaybe(type_.documentation)),
+					customTypePretty
+				]));
+	});
+var $mdgriffith$elm_codegen$Internal$Write$adjustExpressionParentheses = F2(
+	function (context, expression) {
+		var shouldRemove = function (expr) {
+			var _v3 = _Utils_Tuple3(context.isTop, context.isLeftPipe, expr);
+			_v3$1:
+			while (true) {
+				if (_v3.a) {
+					return true;
+				} else {
+					switch (_v3.c.$) {
+						case 'Application':
+							if (_v3.b) {
+								break _v3$1;
+							} else {
+								return (context.precedence < 11) ? true : false;
+							}
+						case 'FunctionOrValue':
+							if (_v3.b) {
+								break _v3$1;
+							} else {
+								var _v4 = _v3.c;
+								return true;
+							}
+						case 'Integer':
+							if (_v3.b) {
+								break _v3$1;
+							} else {
+								return true;
+							}
+						case 'Hex':
+							if (_v3.b) {
+								break _v3$1;
+							} else {
+								return true;
+							}
+						case 'Floatable':
+							if (_v3.b) {
+								break _v3$1;
+							} else {
+								return true;
+							}
+						case 'Negation':
+							if (_v3.b) {
+								break _v3$1;
+							} else {
+								return true;
+							}
+						case 'Literal':
+							if (_v3.b) {
+								break _v3$1;
+							} else {
+								return true;
+							}
+						case 'CharLiteral':
+							if (_v3.b) {
+								break _v3$1;
+							} else {
+								return true;
+							}
+						case 'TupledExpression':
+							if (_v3.b) {
+								break _v3$1;
+							} else {
+								return true;
+							}
+						case 'RecordExpr':
+							if (_v3.b) {
+								break _v3$1;
+							} else {
+								return true;
+							}
+						case 'ListExpr':
+							if (_v3.b) {
+								break _v3$1;
+							} else {
+								return true;
+							}
+						case 'RecordAccess':
+							if (_v3.b) {
+								break _v3$1;
+							} else {
+								var _v5 = _v3.c;
+								return true;
+							}
+						case 'RecordAccessFunction':
+							if (_v3.b) {
+								break _v3$1;
+							} else {
+								return true;
+							}
+						case 'RecordUpdateExpression':
+							if (_v3.b) {
+								break _v3$1;
+							} else {
+								var _v6 = _v3.c;
+								return true;
+							}
+						default:
+							if (_v3.b) {
+								break _v3$1;
+							} else {
+								return false;
+							}
+					}
+				}
+			}
+			return true;
+		};
+		var removeParens = function (expr) {
+			if (expr.$ === 'ParenthesizedExpression') {
+				var innerExpr = expr.a;
+				return shouldRemove(
+					$mdgriffith$elm_codegen$Internal$Compiler$denode(innerExpr)) ? removeParens(
+					$mdgriffith$elm_codegen$Internal$Compiler$denode(innerExpr)) : expr;
+			} else {
+				return expr;
+			}
+		};
+		var addParens = function (expr) {
+			var _v1 = _Utils_Tuple3(context.isTop, context.isLeftPipe, expr);
+			_v1$4:
+			while (true) {
+				if ((!_v1.a) && (!_v1.b)) {
+					switch (_v1.c.$) {
+						case 'LetExpression':
+							return $stil4m$elm_syntax$Elm$Syntax$Expression$ParenthesizedExpression(
+								$mdgriffith$elm_codegen$Internal$Compiler$nodify(expr));
+						case 'CaseExpression':
+							return $stil4m$elm_syntax$Elm$Syntax$Expression$ParenthesizedExpression(
+								$mdgriffith$elm_codegen$Internal$Compiler$nodify(expr));
+						case 'LambdaExpression':
+							return $stil4m$elm_syntax$Elm$Syntax$Expression$ParenthesizedExpression(
+								$mdgriffith$elm_codegen$Internal$Compiler$nodify(expr));
+						case 'IfBlock':
+							var _v2 = _v1.c;
+							return $stil4m$elm_syntax$Elm$Syntax$Expression$ParenthesizedExpression(
+								$mdgriffith$elm_codegen$Internal$Compiler$nodify(expr));
+						default:
+							break _v1$4;
+					}
+				} else {
+					break _v1$4;
+				}
+			}
+			return expr;
+		};
+		return addParens(
+			removeParens(expression));
+	});
+var $the_sett$elm_pretty_printer$Internals$Column = function (a) {
+	return {$: 'Column', a: a};
+};
+var $the_sett$elm_pretty_printer$Pretty$column = $the_sett$elm_pretty_printer$Internals$Column;
+var $the_sett$elm_pretty_printer$Internals$Nesting = function (a) {
+	return {$: 'Nesting', a: a};
+};
+var $the_sett$elm_pretty_printer$Pretty$nesting = $the_sett$elm_pretty_printer$Internals$Nesting;
+var $the_sett$elm_pretty_printer$Pretty$align = function (doc) {
+	return $the_sett$elm_pretty_printer$Pretty$column(
+		function (currentColumn) {
+			return $the_sett$elm_pretty_printer$Pretty$nesting(
+				function (indentLvl) {
+					return A2($the_sett$elm_pretty_printer$Pretty$nest, currentColumn - indentLvl, doc);
+				});
+		});
+};
+var $elm$core$Basics$modBy = _Basics_modBy;
+var $mdgriffith$elm_codegen$Internal$Write$decrementIndent = F2(
+	function (currentIndent, spaces) {
+		var modded = A2($elm$core$Basics$modBy, 4, currentIndent - spaces);
+		return (!modded) ? 4 : modded;
+	});
+var $mdgriffith$elm_codegen$Internal$Write$doubleLines = $the_sett$elm_pretty_printer$Pretty$join(
+	A2($the_sett$elm_pretty_printer$Pretty$a, $the_sett$elm_pretty_printer$Pretty$line, $the_sett$elm_pretty_printer$Pretty$line));
+var $mdgriffith$elm_codegen$Internal$Write$escapeChar = function (val) {
+	switch (val.valueOf()) {
+		case '\\':
+			return '\\\\';
+		case '\'':
+			return '\\\'';
+		case '\t':
+			return '\\t';
+		case '\n':
+			return '\\n';
+		default:
+			var c = val;
+			return $elm$core$String$fromChar(c);
+	}
+};
+var $elm$core$String$fromFloat = _String_fromNumber;
+var $the_sett$elm_pretty_printer$Internals$copy = F2(
+	function (i, s) {
+		return (!i) ? '' : _Utils_ap(
+			s,
+			A2($the_sett$elm_pretty_printer$Internals$copy, i - 1, s));
+	});
+var $the_sett$elm_pretty_printer$Pretty$hang = F2(
+	function (spaces, doc) {
+		return $the_sett$elm_pretty_printer$Pretty$align(
+			A2($the_sett$elm_pretty_printer$Pretty$nest, spaces, doc));
+	});
+var $the_sett$elm_pretty_printer$Pretty$indent = F2(
+	function (spaces, doc) {
+		return A2(
+			$the_sett$elm_pretty_printer$Pretty$hang,
+			spaces,
+			A2(
+				$the_sett$elm_pretty_printer$Pretty$append,
+				$the_sett$elm_pretty_printer$Pretty$string(
+					A2($the_sett$elm_pretty_printer$Internals$copy, spaces, ' ')),
+				doc));
+	});
+var $elm$core$Tuple$mapSecond = F2(
+	function (func, _v0) {
+		var x = _v0.a;
+		var y = _v0.b;
+		return _Utils_Tuple2(
+			x,
+			func(y));
+	});
+var $mdgriffith$elm_codegen$Internal$Write$optionalGroup = F2(
+	function (flag, doc) {
+		return flag ? doc : $the_sett$elm_pretty_printer$Pretty$group(doc);
+	});
+var $mdgriffith$elm_codegen$Internal$Write$precedence = function (symbol) {
+	switch (symbol) {
+		case '>>':
+			return 9;
+		case '<<':
+			return 9;
+		case '^':
+			return 8;
+		case '*':
+			return 7;
+		case '/':
+			return 7;
+		case '//':
+			return 7;
+		case '%':
+			return 7;
+		case 'rem':
+			return 7;
+		case '+':
+			return 6;
+		case '-':
+			return 6;
+		case '++':
+			return 5;
+		case '::':
+			return 5;
+		case '==':
+			return 4;
+		case '/=':
+			return 4;
+		case '<':
+			return 4;
+		case '>':
+			return 4;
+		case '<=':
+			return 4;
+		case '>=':
+			return 4;
+		case '&&':
+			return 3;
+		case '||':
+			return 2;
+		case '|>':
+			return 0;
+		case '<|':
+			return 0;
+		default:
+			return 0;
+	}
+};
+var $stil4m$elm_syntax$Elm$Syntax$Pattern$ParenthesizedPattern = function (a) {
+	return {$: 'ParenthesizedPattern', a: a};
+};
+var $mdgriffith$elm_codegen$Internal$Write$adjustPatternParentheses = F2(
+	function (isTop, pattern) {
+		var shouldRemove = function (pat) {
+			var _v5 = _Utils_Tuple2(isTop, pat);
+			_v5$2:
+			while (true) {
+				switch (_v5.b.$) {
+					case 'NamedPattern':
+						if (!_v5.a) {
+							var _v6 = _v5.b;
+							return false;
+						} else {
+							break _v5$2;
+						}
+					case 'AsPattern':
+						var _v7 = _v5.b;
+						return false;
+					default:
+						break _v5$2;
+				}
+			}
+			return isTop;
+		};
+		var removeParens = function (pat) {
+			if (pat.$ === 'ParenthesizedPattern') {
+				var innerPat = pat.a;
+				return shouldRemove(
+					$mdgriffith$elm_codegen$Internal$Compiler$denode(innerPat)) ? removeParens(
+					$mdgriffith$elm_codegen$Internal$Compiler$denode(innerPat)) : pat;
+			} else {
+				return pat;
+			}
+		};
+		var addParens = function (pat) {
+			var _v1 = _Utils_Tuple2(isTop, pat);
+			_v1$2:
+			while (true) {
+				if (!_v1.a) {
+					switch (_v1.b.$) {
+						case 'NamedPattern':
+							if (_v1.b.b.b) {
+								var _v2 = _v1.b;
+								var _v3 = _v2.b;
+								return $stil4m$elm_syntax$Elm$Syntax$Pattern$ParenthesizedPattern(
+									$mdgriffith$elm_codegen$Internal$Compiler$nodify(pat));
+							} else {
+								break _v1$2;
+							}
+						case 'AsPattern':
+							var _v4 = _v1.b;
+							return $stil4m$elm_syntax$Elm$Syntax$Pattern$ParenthesizedPattern(
+								$mdgriffith$elm_codegen$Internal$Compiler$nodify(pat));
+						default:
+							break _v1$2;
+					}
+				} else {
+					break _v1$2;
+				}
+			}
+			return pat;
+		};
+		return addParens(
+			removeParens(pattern));
+	});
+var $the_sett$elm_pretty_printer$Pretty$braces = function (doc) {
+	return A3(
+		$the_sett$elm_pretty_printer$Pretty$surround,
+		$the_sett$elm_pretty_printer$Pretty$char(
+			_Utils_chr('{')),
+		$the_sett$elm_pretty_printer$Pretty$char(
+			_Utils_chr('}')),
+		doc);
+};
+var $mdgriffith$elm_codegen$Internal$Write$quotes = function (doc) {
+	return A3(
+		$the_sett$elm_pretty_printer$Pretty$surround,
+		$the_sett$elm_pretty_printer$Pretty$char(
+			_Utils_chr('\"')),
+		$the_sett$elm_pretty_printer$Pretty$char(
+			_Utils_chr('\"')),
+		doc);
+};
+var $mdgriffith$elm_codegen$Internal$Write$singleQuotes = function (doc) {
+	return A3(
+		$the_sett$elm_pretty_printer$Pretty$surround,
+		$the_sett$elm_pretty_printer$Pretty$char(
+			_Utils_chr('\'')),
+		$the_sett$elm_pretty_printer$Pretty$char(
+			_Utils_chr('\'')),
+		doc);
+};
+var $elm$core$String$fromList = _String_fromList;
+var $rtfeldman$elm_hex$Hex$unsafeToDigit = function (num) {
+	unsafeToDigit:
+	while (true) {
+		switch (num) {
+			case 0:
+				return _Utils_chr('0');
+			case 1:
+				return _Utils_chr('1');
+			case 2:
+				return _Utils_chr('2');
+			case 3:
+				return _Utils_chr('3');
+			case 4:
+				return _Utils_chr('4');
+			case 5:
+				return _Utils_chr('5');
+			case 6:
+				return _Utils_chr('6');
+			case 7:
+				return _Utils_chr('7');
+			case 8:
+				return _Utils_chr('8');
+			case 9:
+				return _Utils_chr('9');
+			case 10:
+				return _Utils_chr('a');
+			case 11:
+				return _Utils_chr('b');
+			case 12:
+				return _Utils_chr('c');
+			case 13:
+				return _Utils_chr('d');
+			case 14:
+				return _Utils_chr('e');
+			case 15:
+				return _Utils_chr('f');
+			default:
+				var $temp$num = num;
+				num = $temp$num;
+				continue unsafeToDigit;
+		}
+	}
+};
+var $rtfeldman$elm_hex$Hex$unsafePositiveToDigits = F2(
+	function (digits, num) {
+		unsafePositiveToDigits:
+		while (true) {
+			if (num < 16) {
+				return A2(
+					$elm$core$List$cons,
+					$rtfeldman$elm_hex$Hex$unsafeToDigit(num),
+					digits);
+			} else {
+				var $temp$digits = A2(
+					$elm$core$List$cons,
+					$rtfeldman$elm_hex$Hex$unsafeToDigit(
+						A2($elm$core$Basics$modBy, 16, num)),
+					digits),
+					$temp$num = (num / 16) | 0;
+				digits = $temp$digits;
+				num = $temp$num;
+				continue unsafePositiveToDigits;
+			}
+		}
+	});
+var $rtfeldman$elm_hex$Hex$toString = function (num) {
+	return $elm$core$String$fromList(
+		(num < 0) ? A2(
+			$elm$core$List$cons,
+			_Utils_chr('-'),
+			A2($rtfeldman$elm_hex$Hex$unsafePositiveToDigits, _List_Nil, -num)) : A2($rtfeldman$elm_hex$Hex$unsafePositiveToDigits, _List_Nil, num));
+};
+var $mdgriffith$elm_codegen$Internal$Write$prettyPatternInner = F3(
+	function (aliases, isTop, pattern) {
+		var _v0 = A2($mdgriffith$elm_codegen$Internal$Write$adjustPatternParentheses, isTop, pattern);
+		switch (_v0.$) {
+			case 'AllPattern':
+				return $the_sett$elm_pretty_printer$Pretty$string('_');
+			case 'UnitPattern':
+				return $the_sett$elm_pretty_printer$Pretty$string('()');
+			case 'CharPattern':
+				var val = _v0.a;
+				return $mdgriffith$elm_codegen$Internal$Write$singleQuotes(
+					$the_sett$elm_pretty_printer$Pretty$string(
+						$mdgriffith$elm_codegen$Internal$Write$escapeChar(val)));
+			case 'StringPattern':
+				var val = _v0.a;
+				return $mdgriffith$elm_codegen$Internal$Write$quotes(
+					$the_sett$elm_pretty_printer$Pretty$string(val));
+			case 'IntPattern':
+				var val = _v0.a;
+				return $the_sett$elm_pretty_printer$Pretty$string(
+					$elm$core$String$fromInt(val));
+			case 'HexPattern':
+				var val = _v0.a;
+				return $the_sett$elm_pretty_printer$Pretty$string(
+					$rtfeldman$elm_hex$Hex$toString(val));
+			case 'FloatPattern':
+				var val = _v0.a;
+				return $the_sett$elm_pretty_printer$Pretty$string(
+					$elm$core$String$fromFloat(val));
+			case 'TuplePattern':
+				var vals = _v0.a;
+				return $the_sett$elm_pretty_printer$Pretty$parens(
+					A2(
+						$the_sett$elm_pretty_printer$Pretty$a,
+						$the_sett$elm_pretty_printer$Pretty$space,
+						A2(
+							$the_sett$elm_pretty_printer$Pretty$a,
+							A2(
+								$the_sett$elm_pretty_printer$Pretty$join,
+								$the_sett$elm_pretty_printer$Pretty$string(', '),
+								A2(
+									$elm$core$List$map,
+									A2($mdgriffith$elm_codegen$Internal$Write$prettyPatternInner, aliases, true),
+									$mdgriffith$elm_codegen$Internal$Compiler$denodeAll(vals))),
+							$the_sett$elm_pretty_printer$Pretty$space)));
+			case 'RecordPattern':
+				var fields = _v0.a;
+				return $the_sett$elm_pretty_printer$Pretty$braces(
+					A3(
+						$the_sett$elm_pretty_printer$Pretty$surround,
+						$the_sett$elm_pretty_printer$Pretty$space,
+						$the_sett$elm_pretty_printer$Pretty$space,
+						A2(
+							$the_sett$elm_pretty_printer$Pretty$join,
+							$the_sett$elm_pretty_printer$Pretty$string(', '),
+							A2(
+								$elm$core$List$map,
+								$the_sett$elm_pretty_printer$Pretty$string,
+								$mdgriffith$elm_codegen$Internal$Compiler$denodeAll(fields)))));
+			case 'UnConsPattern':
+				var hdPat = _v0.a;
+				var tlPat = _v0.b;
+				return $the_sett$elm_pretty_printer$Pretty$words(
+					_List_fromArray(
+						[
+							A3(
+							$mdgriffith$elm_codegen$Internal$Write$prettyPatternInner,
+							aliases,
+							false,
+							$mdgriffith$elm_codegen$Internal$Compiler$denode(hdPat)),
+							$the_sett$elm_pretty_printer$Pretty$string('::'),
+							A3(
+							$mdgriffith$elm_codegen$Internal$Write$prettyPatternInner,
+							aliases,
+							false,
+							$mdgriffith$elm_codegen$Internal$Compiler$denode(tlPat))
+						]));
+			case 'ListPattern':
+				var listPats = _v0.a;
+				if (!listPats.b) {
+					return $the_sett$elm_pretty_printer$Pretty$string('[]');
+				} else {
+					var open = A2(
+						$the_sett$elm_pretty_printer$Pretty$a,
+						$the_sett$elm_pretty_printer$Pretty$space,
+						$the_sett$elm_pretty_printer$Pretty$string('['));
+					var close = A2(
+						$the_sett$elm_pretty_printer$Pretty$a,
+						$the_sett$elm_pretty_printer$Pretty$string(']'),
+						$the_sett$elm_pretty_printer$Pretty$space);
+					return A3(
+						$the_sett$elm_pretty_printer$Pretty$surround,
+						open,
+						close,
+						A2(
+							$the_sett$elm_pretty_printer$Pretty$join,
+							$the_sett$elm_pretty_printer$Pretty$string(', '),
+							A2(
+								$elm$core$List$map,
+								A2($mdgriffith$elm_codegen$Internal$Write$prettyPatternInner, aliases, false),
+								$mdgriffith$elm_codegen$Internal$Compiler$denodeAll(listPats))));
+				}
+			case 'VarPattern':
+				var _var = _v0.a;
+				return $the_sett$elm_pretty_printer$Pretty$string(_var);
+			case 'NamedPattern':
+				var qnRef = _v0.a;
+				var listPats = _v0.b;
+				return $the_sett$elm_pretty_printer$Pretty$words(
+					A2(
+						$elm$core$List$cons,
+						A2(
+							$the_sett$elm_pretty_printer$Pretty$a,
+							$the_sett$elm_pretty_printer$Pretty$string(qnRef.name),
+							A2($mdgriffith$elm_codegen$Internal$Write$prettyModuleNameDot, aliases, qnRef.moduleName)),
+						A2(
+							$elm$core$List$map,
+							A2($mdgriffith$elm_codegen$Internal$Write$prettyPatternInner, aliases, false),
+							$mdgriffith$elm_codegen$Internal$Compiler$denodeAll(listPats))));
+			case 'AsPattern':
+				var pat = _v0.a;
+				var name = _v0.b;
+				return $the_sett$elm_pretty_printer$Pretty$words(
+					_List_fromArray(
+						[
+							A3(
+							$mdgriffith$elm_codegen$Internal$Write$prettyPatternInner,
+							aliases,
+							false,
+							$mdgriffith$elm_codegen$Internal$Compiler$denode(pat)),
+							$the_sett$elm_pretty_printer$Pretty$string('as'),
+							$the_sett$elm_pretty_printer$Pretty$string(
+							$mdgriffith$elm_codegen$Internal$Compiler$denode(name))
+						]));
+			default:
+				var pat = _v0.a;
+				return $the_sett$elm_pretty_printer$Pretty$parens(
+					A3(
+						$mdgriffith$elm_codegen$Internal$Write$prettyPatternInner,
+						aliases,
+						true,
+						$mdgriffith$elm_codegen$Internal$Compiler$denode(pat)));
+		}
+	});
+var $mdgriffith$elm_codegen$Internal$Write$prettyArgs = F2(
+	function (aliases, args) {
+		return $the_sett$elm_pretty_printer$Pretty$words(
+			A2(
+				$elm$core$List$map,
+				A2($mdgriffith$elm_codegen$Internal$Write$prettyPatternInner, aliases, false),
+				args));
+	});
+var $elm$core$String$replace = F3(
+	function (before, after, string) {
+		return A2(
+			$elm$core$String$join,
+			after,
+			A2($elm$core$String$split, before, string));
+	});
+var $mdgriffith$elm_codegen$Internal$Write$escape = function (val) {
+	return A3(
+		$elm$core$String$replace,
+		'\t',
+		'\\t',
+		A3(
+			$elm$core$String$replace,
+			'\n',
+			'\\n',
+			A3(
+				$elm$core$String$replace,
+				'\"',
+				'\\\"',
+				A3($elm$core$String$replace, '\\', '\\\\', val))));
+};
+var $mdgriffith$elm_codegen$Internal$Write$tripleQuotes = function (doc) {
+	return A3(
+		$the_sett$elm_pretty_printer$Pretty$surround,
+		$the_sett$elm_pretty_printer$Pretty$string('\"\"\"'),
+		$the_sett$elm_pretty_printer$Pretty$string('\"\"\"'),
+		doc);
+};
+var $mdgriffith$elm_codegen$Internal$Write$prettyLiteral = function (val) {
+	return A2($elm$core$String$contains, '\n', val) ? $mdgriffith$elm_codegen$Internal$Write$tripleQuotes(
+		$the_sett$elm_pretty_printer$Pretty$string(val)) : $mdgriffith$elm_codegen$Internal$Write$quotes(
+		$the_sett$elm_pretty_printer$Pretty$string(
+			$mdgriffith$elm_codegen$Internal$Write$escape(val)));
+};
+var $mdgriffith$elm_codegen$Internal$Write$prettyPattern = F2(
+	function (aliases, pattern) {
+		return A3($mdgriffith$elm_codegen$Internal$Write$prettyPatternInner, aliases, true, pattern);
+	});
+var $mdgriffith$elm_codegen$Internal$Write$prettySignature = F2(
+	function (aliases, sig) {
+		return $the_sett$elm_pretty_printer$Pretty$group(
+			A2(
+				$the_sett$elm_pretty_printer$Pretty$nest,
+				4,
+				$the_sett$elm_pretty_printer$Pretty$lines(
+					_List_fromArray(
+						[
+							$the_sett$elm_pretty_printer$Pretty$words(
+							_List_fromArray(
+								[
+									$the_sett$elm_pretty_printer$Pretty$string(
+									$mdgriffith$elm_codegen$Internal$Compiler$denode(sig.name)),
+									$the_sett$elm_pretty_printer$Pretty$string(':')
+								])),
+							A2(
+							$mdgriffith$elm_codegen$Internal$Write$prettyTypeAnnotation,
+							aliases,
+							$mdgriffith$elm_codegen$Internal$Compiler$denode(sig.typeAnnotation))
+						]))));
+	});
+var $the_sett$elm_pretty_printer$Pretty$tightline = A2($the_sett$elm_pretty_printer$Internals$Line, '', '');
+var $elm$core$String$padLeft = F3(
+	function (n, _char, string) {
+		return _Utils_ap(
+			A2(
+				$elm$core$String$repeat,
+				n - $elm$core$String$length(string),
+				$elm$core$String$fromChar(_char)),
+			string);
+	});
+var $mdgriffith$elm_codegen$Internal$Write$toHexString = function (val) {
+	var padWithZeros = function (str) {
+		var length = $elm$core$String$length(str);
+		return (length < 2) ? A3(
+			$elm$core$String$padLeft,
+			2,
+			_Utils_chr('0'),
+			str) : (((length > 2) && (length < 4)) ? A3(
+			$elm$core$String$padLeft,
+			4,
+			_Utils_chr('0'),
+			str) : (((length > 4) && (length < 8)) ? A3(
+			$elm$core$String$padLeft,
+			8,
+			_Utils_chr('0'),
+			str) : str));
+	};
+	return '0x' + padWithZeros(
+		$elm$core$String$toUpper(
+			$rtfeldman$elm_hex$Hex$toString(val)));
+};
+var $mdgriffith$elm_codegen$Internal$Write$topContext = {isLeftPipe: false, isTop: true, precedence: 11};
+var $elm$core$List$unzip = function (pairs) {
+	var step = F2(
+		function (_v0, _v1) {
+			var x = _v0.a;
+			var y = _v0.b;
+			var xs = _v1.a;
+			var ys = _v1.b;
+			return _Utils_Tuple2(
+				A2($elm$core$List$cons, x, xs),
+				A2($elm$core$List$cons, y, ys));
+		});
+	return A3(
+		$elm$core$List$foldr,
+		step,
+		_Utils_Tuple2(_List_Nil, _List_Nil),
+		pairs);
+};
+var $mdgriffith$elm_codegen$Internal$Write$prettyApplication = F3(
+	function (aliases, indent, exprs) {
+		var _v30 = A2(
+			$elm$core$Tuple$mapSecond,
+			$elm$core$List$any($elm$core$Basics$identity),
+			$elm$core$List$unzip(
+				A2(
+					$elm$core$List$map,
+					A3(
+						$mdgriffith$elm_codegen$Internal$Write$prettyExpressionInner,
+						aliases,
+						{isLeftPipe: false, isTop: false, precedence: 11},
+						4),
+					$mdgriffith$elm_codegen$Internal$Compiler$denodeAll(exprs))));
+		var prettyExpressions = _v30.a;
+		var alwaysBreak = _v30.b;
+		return _Utils_Tuple2(
+			A2(
+				$mdgriffith$elm_codegen$Internal$Write$optionalGroup,
+				alwaysBreak,
+				$the_sett$elm_pretty_printer$Pretty$align(
+					A2(
+						$the_sett$elm_pretty_printer$Pretty$nest,
+						indent,
+						$the_sett$elm_pretty_printer$Pretty$lines(prettyExpressions)))),
+			alwaysBreak);
+	});
+var $mdgriffith$elm_codegen$Internal$Write$prettyCaseBlock = F3(
+	function (aliases, indent, caseBlock) {
+		var prettyCase = function (_v29) {
+			var pattern = _v29.a;
+			var expr = _v29.b;
+			return A2(
+				$the_sett$elm_pretty_printer$Pretty$indent,
+				indent,
+				A2(
+					$the_sett$elm_pretty_printer$Pretty$a,
+					A2(
+						$the_sett$elm_pretty_printer$Pretty$indent,
+						4,
+						A4(
+							$mdgriffith$elm_codegen$Internal$Write$prettyExpressionInner,
+							aliases,
+							$mdgriffith$elm_codegen$Internal$Write$topContext,
+							4,
+							$mdgriffith$elm_codegen$Internal$Compiler$denode(expr)).a),
+					A2(
+						$the_sett$elm_pretty_printer$Pretty$a,
+						$the_sett$elm_pretty_printer$Pretty$line,
+						A2(
+							$the_sett$elm_pretty_printer$Pretty$a,
+							$the_sett$elm_pretty_printer$Pretty$string(' ->'),
+							A2(
+								$mdgriffith$elm_codegen$Internal$Write$prettyPattern,
+								aliases,
+								$mdgriffith$elm_codegen$Internal$Compiler$denode(pattern))))));
+		};
+		var patternsPart = $mdgriffith$elm_codegen$Internal$Write$doubleLines(
+			A2($elm$core$List$map, prettyCase, caseBlock.cases));
+		var casePart = function () {
+			var _v28 = A4(
+				$mdgriffith$elm_codegen$Internal$Write$prettyExpressionInner,
+				aliases,
+				$mdgriffith$elm_codegen$Internal$Write$topContext,
+				4,
+				$mdgriffith$elm_codegen$Internal$Compiler$denode(caseBlock.expression));
+			var caseExpression = _v28.a;
+			var alwaysBreak = _v28.b;
+			return A2(
+				$mdgriffith$elm_codegen$Internal$Write$optionalGroup,
+				alwaysBreak,
+				$the_sett$elm_pretty_printer$Pretty$lines(
+					_List_fromArray(
+						[
+							A2(
+							$the_sett$elm_pretty_printer$Pretty$nest,
+							indent,
+							A2(
+								$mdgriffith$elm_codegen$Internal$Write$optionalGroup,
+								alwaysBreak,
+								$the_sett$elm_pretty_printer$Pretty$lines(
+									_List_fromArray(
+										[
+											$the_sett$elm_pretty_printer$Pretty$string('case'),
+											caseExpression
+										])))),
+							$the_sett$elm_pretty_printer$Pretty$string('of')
+						])));
+		}();
+		return _Utils_Tuple2(
+			$the_sett$elm_pretty_printer$Pretty$align(
+				$the_sett$elm_pretty_printer$Pretty$lines(
+					_List_fromArray(
+						[casePart, patternsPart]))),
+			true);
+	});
+var $mdgriffith$elm_codegen$Internal$Write$prettyExpression = F2(
+	function (aliases, expression) {
+		return A4($mdgriffith$elm_codegen$Internal$Write$prettyExpressionInner, aliases, $mdgriffith$elm_codegen$Internal$Write$topContext, 4, expression).a;
+	});
+var $mdgriffith$elm_codegen$Internal$Write$prettyExpressionInner = F4(
+	function (aliases, context, indent, expression) {
+		var _v26 = A2($mdgriffith$elm_codegen$Internal$Write$adjustExpressionParentheses, context, expression);
+		switch (_v26.$) {
+			case 'UnitExpr':
+				return _Utils_Tuple2(
+					$the_sett$elm_pretty_printer$Pretty$string('()'),
+					false);
+			case 'Application':
+				var exprs = _v26.a;
+				return A3($mdgriffith$elm_codegen$Internal$Write$prettyApplication, aliases, indent, exprs);
+			case 'OperatorApplication':
+				var symbol = _v26.a;
+				var dir = _v26.b;
+				var exprl = _v26.c;
+				var exprr = _v26.d;
+				return A6($mdgriffith$elm_codegen$Internal$Write$prettyOperatorApplication, aliases, indent, symbol, dir, exprl, exprr);
+			case 'FunctionOrValue':
+				var modl = _v26.a;
+				var val = _v26.b;
+				return _Utils_Tuple2(
+					A2(
+						$the_sett$elm_pretty_printer$Pretty$a,
+						$the_sett$elm_pretty_printer$Pretty$string(val),
+						A2($mdgriffith$elm_codegen$Internal$Write$prettyModuleNameDot, aliases, modl)),
+					false);
+			case 'IfBlock':
+				var exprBool = _v26.a;
+				var exprTrue = _v26.b;
+				var exprFalse = _v26.c;
+				return A5($mdgriffith$elm_codegen$Internal$Write$prettyIfBlock, aliases, indent, exprBool, exprTrue, exprFalse);
+			case 'PrefixOperator':
+				var symbol = _v26.a;
+				return _Utils_Tuple2(
+					$the_sett$elm_pretty_printer$Pretty$parens(
+						$the_sett$elm_pretty_printer$Pretty$string(symbol)),
+					false);
+			case 'Operator':
+				var symbol = _v26.a;
+				return _Utils_Tuple2(
+					$the_sett$elm_pretty_printer$Pretty$string(symbol),
+					false);
+			case 'Integer':
+				var val = _v26.a;
+				return _Utils_Tuple2(
+					$the_sett$elm_pretty_printer$Pretty$string(
+						$elm$core$String$fromInt(val)),
+					false);
+			case 'Hex':
+				var val = _v26.a;
+				return _Utils_Tuple2(
+					$the_sett$elm_pretty_printer$Pretty$string(
+						$mdgriffith$elm_codegen$Internal$Write$toHexString(val)),
+					false);
+			case 'Floatable':
+				var val = _v26.a;
+				return _Utils_Tuple2(
+					$the_sett$elm_pretty_printer$Pretty$string(
+						$elm$core$String$fromFloat(val)),
+					false);
+			case 'Negation':
+				var expr = _v26.a;
+				var _v27 = A4(
+					$mdgriffith$elm_codegen$Internal$Write$prettyExpressionInner,
+					aliases,
+					$mdgriffith$elm_codegen$Internal$Write$topContext,
+					4,
+					$mdgriffith$elm_codegen$Internal$Compiler$denode(expr));
+				var prettyExpr = _v27.a;
+				var alwaysBreak = _v27.b;
+				return _Utils_Tuple2(
+					A2(
+						$the_sett$elm_pretty_printer$Pretty$a,
+						prettyExpr,
+						$the_sett$elm_pretty_printer$Pretty$string('-')),
+					alwaysBreak);
+			case 'Literal':
+				var val = _v26.a;
+				return _Utils_Tuple2(
+					$mdgriffith$elm_codegen$Internal$Write$prettyLiteral(val),
+					false);
+			case 'CharLiteral':
+				var val = _v26.a;
+				return _Utils_Tuple2(
+					$mdgriffith$elm_codegen$Internal$Write$singleQuotes(
+						$the_sett$elm_pretty_printer$Pretty$string(
+							$mdgriffith$elm_codegen$Internal$Write$escapeChar(val))),
+					false);
+			case 'TupledExpression':
+				var exprs = _v26.a;
+				return A3($mdgriffith$elm_codegen$Internal$Write$prettyTupledExpression, aliases, indent, exprs);
+			case 'ParenthesizedExpression':
+				var expr = _v26.a;
+				return A3($mdgriffith$elm_codegen$Internal$Write$prettyParenthesizedExpression, aliases, indent, expr);
+			case 'LetExpression':
+				var letBlock = _v26.a;
+				return A3($mdgriffith$elm_codegen$Internal$Write$prettyLetBlock, aliases, indent, letBlock);
+			case 'CaseExpression':
+				var caseBlock = _v26.a;
+				return A3($mdgriffith$elm_codegen$Internal$Write$prettyCaseBlock, aliases, indent, caseBlock);
+			case 'LambdaExpression':
+				var lambda = _v26.a;
+				return A3($mdgriffith$elm_codegen$Internal$Write$prettyLambdaExpression, aliases, indent, lambda);
+			case 'RecordExpr':
+				var setters = _v26.a;
+				return A2($mdgriffith$elm_codegen$Internal$Write$prettyRecordExpr, aliases, setters);
+			case 'ListExpr':
+				var exprs = _v26.a;
+				return A3($mdgriffith$elm_codegen$Internal$Write$prettyList, aliases, indent, exprs);
+			case 'RecordAccess':
+				var expr = _v26.a;
+				var field = _v26.b;
+				return A3($mdgriffith$elm_codegen$Internal$Write$prettyRecordAccess, aliases, expr, field);
+			case 'RecordAccessFunction':
+				var field = _v26.a;
+				return _Utils_Tuple2(
+					$the_sett$elm_pretty_printer$Pretty$string(field),
+					false);
+			case 'RecordUpdateExpression':
+				var _var = _v26.a;
+				var setters = _v26.b;
+				return A4($mdgriffith$elm_codegen$Internal$Write$prettyRecordUpdateExpression, aliases, indent, _var, setters);
+			default:
+				var val = _v26.a;
+				return _Utils_Tuple2(
+					$the_sett$elm_pretty_printer$Pretty$string('glsl'),
+					true);
+		}
+	});
+var $mdgriffith$elm_codegen$Internal$Write$prettyFun = F2(
+	function (aliases, fn) {
+		return $the_sett$elm_pretty_printer$Pretty$lines(
+			_List_fromArray(
+				[
+					A2(
+					$mdgriffith$elm_codegen$Internal$Write$prettyMaybe,
+					$mdgriffith$elm_codegen$Internal$Write$prettyDocumentation,
+					$mdgriffith$elm_codegen$Internal$Compiler$denodeMaybe(fn.documentation)),
+					A2(
+					$mdgriffith$elm_codegen$Internal$Write$prettyMaybe,
+					$mdgriffith$elm_codegen$Internal$Write$prettySignature(aliases),
+					$mdgriffith$elm_codegen$Internal$Compiler$denodeMaybe(fn.signature)),
+					A2(
+					$mdgriffith$elm_codegen$Internal$Write$prettyFunctionImplementation,
+					aliases,
+					$mdgriffith$elm_codegen$Internal$Compiler$denode(fn.declaration))
+				]));
+	});
+var $mdgriffith$elm_codegen$Internal$Write$prettyFunctionImplementation = F2(
+	function (aliases, impl) {
+		return A2(
+			$the_sett$elm_pretty_printer$Pretty$nest,
+			4,
+			A2(
+				$the_sett$elm_pretty_printer$Pretty$a,
+				A2(
+					$mdgriffith$elm_codegen$Internal$Write$prettyExpression,
+					aliases,
+					$mdgriffith$elm_codegen$Internal$Compiler$denode(impl.expression)),
+				A2(
+					$the_sett$elm_pretty_printer$Pretty$a,
+					$the_sett$elm_pretty_printer$Pretty$line,
+					$the_sett$elm_pretty_printer$Pretty$words(
+						_List_fromArray(
+							[
+								$the_sett$elm_pretty_printer$Pretty$string(
+								$mdgriffith$elm_codegen$Internal$Compiler$denode(impl.name)),
+								A2(
+								$mdgriffith$elm_codegen$Internal$Write$prettyArgs,
+								aliases,
+								$mdgriffith$elm_codegen$Internal$Compiler$denodeAll(impl._arguments)),
+								$the_sett$elm_pretty_printer$Pretty$string('=')
+							])))));
+	});
+var $mdgriffith$elm_codegen$Internal$Write$prettyIfBlock = F5(
+	function (aliases, indent, exprBool, exprTrue, exprFalse) {
+		var innerIfBlock = F3(
+			function (innerExprBool, innerExprTrue, innerExprFalse) {
+				var truePart = A2(
+					$the_sett$elm_pretty_printer$Pretty$indent,
+					indent,
+					A4(
+						$mdgriffith$elm_codegen$Internal$Write$prettyExpressionInner,
+						aliases,
+						$mdgriffith$elm_codegen$Internal$Write$topContext,
+						4,
+						$mdgriffith$elm_codegen$Internal$Compiler$denode(innerExprTrue)).a);
+				var ifPart = function () {
+					var _v25 = A4(
+						$mdgriffith$elm_codegen$Internal$Write$prettyExpressionInner,
+						aliases,
+						$mdgriffith$elm_codegen$Internal$Write$topContext,
+						4,
+						$mdgriffith$elm_codegen$Internal$Compiler$denode(innerExprBool));
+					var prettyBoolExpr = _v25.a;
+					var alwaysBreak = _v25.b;
+					return A2(
+						$mdgriffith$elm_codegen$Internal$Write$optionalGroup,
+						alwaysBreak,
+						$the_sett$elm_pretty_printer$Pretty$lines(
+							_List_fromArray(
+								[
+									A2(
+									$the_sett$elm_pretty_printer$Pretty$nest,
+									indent,
+									A2(
+										$mdgriffith$elm_codegen$Internal$Write$optionalGroup,
+										alwaysBreak,
+										$the_sett$elm_pretty_printer$Pretty$lines(
+											_List_fromArray(
+												[
+													$the_sett$elm_pretty_printer$Pretty$string('if'),
+													A4(
+													$mdgriffith$elm_codegen$Internal$Write$prettyExpressionInner,
+													aliases,
+													$mdgriffith$elm_codegen$Internal$Write$topContext,
+													4,
+													$mdgriffith$elm_codegen$Internal$Compiler$denode(innerExprBool)).a
+												])))),
+									$the_sett$elm_pretty_printer$Pretty$string('then')
+								])));
+				}();
+				var falsePart = function () {
+					var _v24 = $mdgriffith$elm_codegen$Internal$Compiler$denode(innerExprFalse);
+					if (_v24.$ === 'IfBlock') {
+						var nestedExprBool = _v24.a;
+						var nestedExprTrue = _v24.b;
+						var nestedExprFalse = _v24.c;
+						return A3(innerIfBlock, nestedExprBool, nestedExprTrue, nestedExprFalse);
+					} else {
+						return _List_fromArray(
+							[
+								A2(
+								$the_sett$elm_pretty_printer$Pretty$indent,
+								indent,
+								A4(
+									$mdgriffith$elm_codegen$Internal$Write$prettyExpressionInner,
+									aliases,
+									$mdgriffith$elm_codegen$Internal$Write$topContext,
+									4,
+									$mdgriffith$elm_codegen$Internal$Compiler$denode(innerExprFalse)).a)
+							]);
+					}
+				}();
+				var elsePart = A2(
+					$the_sett$elm_pretty_printer$Pretty$a,
+					$the_sett$elm_pretty_printer$Pretty$string('else'),
+					$the_sett$elm_pretty_printer$Pretty$line);
+				var context = $mdgriffith$elm_codegen$Internal$Write$topContext;
+				if (!falsePart.b) {
+					return _List_Nil;
+				} else {
+					if (!falsePart.b.b) {
+						var falseExpr = falsePart.a;
+						return _List_fromArray(
+							[ifPart, truePart, elsePart, falseExpr]);
+					} else {
+						var hd = falsePart.a;
+						var tl = falsePart.b;
+						return A2(
+							$elm$core$List$append,
+							_List_fromArray(
+								[
+									ifPart,
+									truePart,
+									$the_sett$elm_pretty_printer$Pretty$words(
+									_List_fromArray(
+										[elsePart, hd]))
+								]),
+							tl);
+					}
+				}
+			});
+		var prettyExpressions = A3(innerIfBlock, exprBool, exprTrue, exprFalse);
+		return _Utils_Tuple2(
+			$the_sett$elm_pretty_printer$Pretty$align(
+				$the_sett$elm_pretty_printer$Pretty$lines(prettyExpressions)),
+			true);
+	});
+var $mdgriffith$elm_codegen$Internal$Write$prettyLambdaExpression = F3(
+	function (aliases, indent, lambda) {
+		var _v22 = A4(
+			$mdgriffith$elm_codegen$Internal$Write$prettyExpressionInner,
+			aliases,
+			$mdgriffith$elm_codegen$Internal$Write$topContext,
+			4,
+			$mdgriffith$elm_codegen$Internal$Compiler$denode(lambda.expression));
+		var prettyExpr = _v22.a;
+		var alwaysBreak = _v22.b;
+		return _Utils_Tuple2(
+			A2(
+				$mdgriffith$elm_codegen$Internal$Write$optionalGroup,
+				alwaysBreak,
+				$the_sett$elm_pretty_printer$Pretty$align(
+					A2(
+						$the_sett$elm_pretty_printer$Pretty$nest,
+						indent,
+						$the_sett$elm_pretty_printer$Pretty$lines(
+							_List_fromArray(
+								[
+									A2(
+									$the_sett$elm_pretty_printer$Pretty$a,
+									$the_sett$elm_pretty_printer$Pretty$string(' ->'),
+									A2(
+										$the_sett$elm_pretty_printer$Pretty$a,
+										$the_sett$elm_pretty_printer$Pretty$words(
+											A2(
+												$elm$core$List$map,
+												A2($mdgriffith$elm_codegen$Internal$Write$prettyPatternInner, aliases, false),
+												$mdgriffith$elm_codegen$Internal$Compiler$denodeAll(lambda.args))),
+										$the_sett$elm_pretty_printer$Pretty$string('\\'))),
+									prettyExpr
+								]))))),
+			alwaysBreak);
+	});
+var $mdgriffith$elm_codegen$Internal$Write$prettyLetBlock = F3(
+	function (aliases, indent, letBlock) {
+		return _Utils_Tuple2(
+			$the_sett$elm_pretty_printer$Pretty$align(
+				$the_sett$elm_pretty_printer$Pretty$lines(
+					_List_fromArray(
+						[
+							$the_sett$elm_pretty_printer$Pretty$string('let'),
+							A2(
+							$the_sett$elm_pretty_printer$Pretty$indent,
+							indent,
+							$mdgriffith$elm_codegen$Internal$Write$doubleLines(
+								A2(
+									$elm$core$List$map,
+									A2($mdgriffith$elm_codegen$Internal$Write$prettyLetDeclaration, aliases, indent),
+									$mdgriffith$elm_codegen$Internal$Compiler$denodeAll(letBlock.declarations)))),
+							$the_sett$elm_pretty_printer$Pretty$string('in'),
+							A4(
+							$mdgriffith$elm_codegen$Internal$Write$prettyExpressionInner,
+							aliases,
+							$mdgriffith$elm_codegen$Internal$Write$topContext,
+							4,
+							$mdgriffith$elm_codegen$Internal$Compiler$denode(letBlock.expression)).a
+						]))),
+			true);
+	});
+var $mdgriffith$elm_codegen$Internal$Write$prettyLetDeclaration = F3(
+	function (aliases, indent, letDecl) {
+		if (letDecl.$ === 'LetFunction') {
+			var fn = letDecl.a;
+			return A2($mdgriffith$elm_codegen$Internal$Write$prettyFun, aliases, fn);
+		} else {
+			var pattern = letDecl.a;
+			var expr = letDecl.b;
+			return A2(
+				$the_sett$elm_pretty_printer$Pretty$a,
+				A2(
+					$the_sett$elm_pretty_printer$Pretty$indent,
+					indent,
+					A4(
+						$mdgriffith$elm_codegen$Internal$Write$prettyExpressionInner,
+						aliases,
+						$mdgriffith$elm_codegen$Internal$Write$topContext,
+						4,
+						$mdgriffith$elm_codegen$Internal$Compiler$denode(expr)).a),
+				A2(
+					$the_sett$elm_pretty_printer$Pretty$a,
+					$the_sett$elm_pretty_printer$Pretty$line,
+					$the_sett$elm_pretty_printer$Pretty$words(
+						_List_fromArray(
+							[
+								A3(
+								$mdgriffith$elm_codegen$Internal$Write$prettyPatternInner,
+								aliases,
+								false,
+								$mdgriffith$elm_codegen$Internal$Compiler$denode(pattern)),
+								$the_sett$elm_pretty_printer$Pretty$string('=')
+							]))));
+		}
+	});
+var $mdgriffith$elm_codegen$Internal$Write$prettyList = F3(
+	function (aliases, indent, exprs) {
+		var open = A2(
+			$the_sett$elm_pretty_printer$Pretty$a,
+			$the_sett$elm_pretty_printer$Pretty$space,
+			$the_sett$elm_pretty_printer$Pretty$string('['));
+		var close = A2(
+			$the_sett$elm_pretty_printer$Pretty$a,
+			$the_sett$elm_pretty_printer$Pretty$string(']'),
+			$the_sett$elm_pretty_printer$Pretty$line);
+		if (!exprs.b) {
+			return _Utils_Tuple2(
+				$the_sett$elm_pretty_printer$Pretty$string('[]'),
+				false);
+		} else {
+			var _v20 = A2(
+				$elm$core$Tuple$mapSecond,
+				$elm$core$List$any($elm$core$Basics$identity),
+				$elm$core$List$unzip(
+					A2(
+						$elm$core$List$map,
+						A3(
+							$mdgriffith$elm_codegen$Internal$Write$prettyExpressionInner,
+							aliases,
+							$mdgriffith$elm_codegen$Internal$Write$topContext,
+							A2($mdgriffith$elm_codegen$Internal$Write$decrementIndent, indent, 2)),
+						$mdgriffith$elm_codegen$Internal$Compiler$denodeAll(exprs))));
+			var prettyExpressions = _v20.a;
+			var alwaysBreak = _v20.b;
+			return _Utils_Tuple2(
+				A2(
+					$mdgriffith$elm_codegen$Internal$Write$optionalGroup,
+					alwaysBreak,
+					$the_sett$elm_pretty_printer$Pretty$align(
+						A3(
+							$the_sett$elm_pretty_printer$Pretty$surround,
+							open,
+							close,
+							A2($the_sett$elm_pretty_printer$Pretty$separators, ', ', prettyExpressions)))),
+				alwaysBreak);
+		}
+	});
+var $mdgriffith$elm_codegen$Internal$Write$prettyOperatorApplication = F6(
+	function (aliases, indent, symbol, dir, exprl, exprr) {
+		return (symbol === '<|') ? A6($mdgriffith$elm_codegen$Internal$Write$prettyOperatorApplicationLeft, aliases, indent, symbol, dir, exprl, exprr) : A6($mdgriffith$elm_codegen$Internal$Write$prettyOperatorApplicationRight, aliases, indent, symbol, dir, exprl, exprr);
+	});
+var $mdgriffith$elm_codegen$Internal$Write$prettyOperatorApplicationLeft = F6(
+	function (aliases, indent, symbol, _v16, exprl, exprr) {
+		var context = {
+			isLeftPipe: true,
+			isTop: false,
+			precedence: $mdgriffith$elm_codegen$Internal$Write$precedence(symbol)
+		};
+		var _v17 = A4(
+			$mdgriffith$elm_codegen$Internal$Write$prettyExpressionInner,
+			aliases,
+			context,
+			4,
+			$mdgriffith$elm_codegen$Internal$Compiler$denode(exprr));
+		var prettyExpressionRight = _v17.a;
+		var alwaysBreakRight = _v17.b;
+		var _v18 = A4(
+			$mdgriffith$elm_codegen$Internal$Write$prettyExpressionInner,
+			aliases,
+			context,
+			4,
+			$mdgriffith$elm_codegen$Internal$Compiler$denode(exprl));
+		var prettyExpressionLeft = _v18.a;
+		var alwaysBreakLeft = _v18.b;
+		var alwaysBreak = alwaysBreakLeft || alwaysBreakRight;
+		return _Utils_Tuple2(
+			A2(
+				$the_sett$elm_pretty_printer$Pretty$nest,
+				4,
+				A2(
+					$mdgriffith$elm_codegen$Internal$Write$optionalGroup,
+					alwaysBreak,
+					$the_sett$elm_pretty_printer$Pretty$lines(
+						_List_fromArray(
+							[
+								$the_sett$elm_pretty_printer$Pretty$words(
+								_List_fromArray(
+									[
+										prettyExpressionLeft,
+										$the_sett$elm_pretty_printer$Pretty$string(symbol)
+									])),
+								prettyExpressionRight
+							])))),
+			alwaysBreak);
+	});
+var $mdgriffith$elm_codegen$Internal$Write$prettyOperatorApplicationRight = F6(
+	function (aliases, indent, symbol, _v11, exprl, exprr) {
+		var expandExpr = F3(
+			function (innerIndent, context, expr) {
+				if (expr.$ === 'OperatorApplication') {
+					var sym = expr.a;
+					var left = expr.c;
+					var right = expr.d;
+					return A4(innerOpApply, false, sym, left, right);
+				} else {
+					return _List_fromArray(
+						[
+							A4($mdgriffith$elm_codegen$Internal$Write$prettyExpressionInner, aliases, context, innerIndent, expr)
+						]);
+				}
+			});
+		var innerOpApply = F4(
+			function (isTop, sym, left, right) {
+				var innerIndent = A2(
+					$mdgriffith$elm_codegen$Internal$Write$decrementIndent,
+					4,
+					$elm$core$String$length(symbol) + 1);
+				var leftIndent = isTop ? indent : innerIndent;
+				var context = {
+					isLeftPipe: '<|' === sym,
+					isTop: false,
+					precedence: $mdgriffith$elm_codegen$Internal$Write$precedence(sym)
+				};
+				var rightSide = A3(
+					expandExpr,
+					innerIndent,
+					context,
+					$mdgriffith$elm_codegen$Internal$Compiler$denode(right));
+				if (rightSide.b) {
+					var _v14 = rightSide.a;
+					var hdExpr = _v14.a;
+					var hdBreak = _v14.b;
+					var tl = rightSide.b;
+					return A2(
+						$elm$core$List$append,
+						A3(
+							expandExpr,
+							leftIndent,
+							context,
+							$mdgriffith$elm_codegen$Internal$Compiler$denode(left)),
+						A2(
+							$elm$core$List$cons,
+							_Utils_Tuple2(
+								A2(
+									$the_sett$elm_pretty_printer$Pretty$a,
+									hdExpr,
+									A2(
+										$the_sett$elm_pretty_printer$Pretty$a,
+										$the_sett$elm_pretty_printer$Pretty$space,
+										$the_sett$elm_pretty_printer$Pretty$string(sym))),
+								hdBreak),
+							tl));
+				} else {
+					return _List_Nil;
+				}
+			});
+		var _v12 = A2(
+			$elm$core$Tuple$mapSecond,
+			$elm$core$List$any($elm$core$Basics$identity),
+			$elm$core$List$unzip(
+				A4(innerOpApply, true, symbol, exprl, exprr)));
+		var prettyExpressions = _v12.a;
+		var alwaysBreak = _v12.b;
+		return _Utils_Tuple2(
+			A2(
+				$mdgriffith$elm_codegen$Internal$Write$optionalGroup,
+				alwaysBreak,
+				$the_sett$elm_pretty_printer$Pretty$align(
+					A2(
+						$the_sett$elm_pretty_printer$Pretty$join,
+						A2($the_sett$elm_pretty_printer$Pretty$nest, indent, $the_sett$elm_pretty_printer$Pretty$line),
+						prettyExpressions))),
+			alwaysBreak);
+	});
+var $mdgriffith$elm_codegen$Internal$Write$prettyParenthesizedExpression = F3(
+	function (aliases, indent, expr) {
+		var open = $the_sett$elm_pretty_printer$Pretty$string('(');
+		var close = A2(
+			$the_sett$elm_pretty_printer$Pretty$a,
+			$the_sett$elm_pretty_printer$Pretty$string(')'),
+			$the_sett$elm_pretty_printer$Pretty$tightline);
+		var _v10 = A4(
+			$mdgriffith$elm_codegen$Internal$Write$prettyExpressionInner,
+			aliases,
+			$mdgriffith$elm_codegen$Internal$Write$topContext,
+			A2($mdgriffith$elm_codegen$Internal$Write$decrementIndent, indent, 1),
+			$mdgriffith$elm_codegen$Internal$Compiler$denode(expr));
+		var prettyExpr = _v10.a;
+		var alwaysBreak = _v10.b;
+		return _Utils_Tuple2(
+			A2(
+				$mdgriffith$elm_codegen$Internal$Write$optionalGroup,
+				alwaysBreak,
+				$the_sett$elm_pretty_printer$Pretty$align(
+					A3(
+						$the_sett$elm_pretty_printer$Pretty$surround,
+						open,
+						close,
+						A2($the_sett$elm_pretty_printer$Pretty$nest, 1, prettyExpr)))),
+			alwaysBreak);
+	});
+var $mdgriffith$elm_codegen$Internal$Write$prettyRecordAccess = F3(
+	function (aliases, expr, field) {
+		var _v9 = A4(
+			$mdgriffith$elm_codegen$Internal$Write$prettyExpressionInner,
+			aliases,
+			$mdgriffith$elm_codegen$Internal$Write$topContext,
+			4,
+			$mdgriffith$elm_codegen$Internal$Compiler$denode(expr));
+		var prettyExpr = _v9.a;
+		var alwaysBreak = _v9.b;
+		return _Utils_Tuple2(
+			A2(
+				$the_sett$elm_pretty_printer$Pretty$a,
+				$the_sett$elm_pretty_printer$Pretty$string(
+					$mdgriffith$elm_codegen$Internal$Compiler$denode(field)),
+				A2($the_sett$elm_pretty_printer$Pretty$a, $mdgriffith$elm_codegen$Internal$Write$dot, prettyExpr)),
+			alwaysBreak);
+	});
+var $mdgriffith$elm_codegen$Internal$Write$prettyRecordExpr = F2(
+	function (aliases, setters) {
+		var open = A2(
+			$the_sett$elm_pretty_printer$Pretty$a,
+			$the_sett$elm_pretty_printer$Pretty$space,
+			$the_sett$elm_pretty_printer$Pretty$string('{'));
+		var close = A2(
+			$the_sett$elm_pretty_printer$Pretty$a,
+			$the_sett$elm_pretty_printer$Pretty$string('}'),
+			$the_sett$elm_pretty_printer$Pretty$line);
+		if (!setters.b) {
+			return _Utils_Tuple2(
+				$the_sett$elm_pretty_printer$Pretty$string('{}'),
+				false);
+		} else {
+			var _v8 = A2(
+				$elm$core$Tuple$mapSecond,
+				$elm$core$List$any($elm$core$Basics$identity),
+				$elm$core$List$unzip(
+					A2(
+						$elm$core$List$map,
+						$mdgriffith$elm_codegen$Internal$Write$prettySetter(aliases),
+						$mdgriffith$elm_codegen$Internal$Compiler$denodeAll(setters))));
+			var prettyExpressions = _v8.a;
+			var alwaysBreak = _v8.b;
+			return _Utils_Tuple2(
+				A2(
+					$mdgriffith$elm_codegen$Internal$Write$optionalGroup,
+					alwaysBreak,
+					$the_sett$elm_pretty_printer$Pretty$align(
+						A3(
+							$the_sett$elm_pretty_printer$Pretty$surround,
+							open,
+							close,
+							A2($the_sett$elm_pretty_printer$Pretty$separators, ', ', prettyExpressions)))),
+				alwaysBreak);
+		}
+	});
+var $mdgriffith$elm_codegen$Internal$Write$prettyRecordUpdateExpression = F4(
+	function (aliases, indent, _var, setters) {
+		var open = A2(
+			$the_sett$elm_pretty_printer$Pretty$a,
+			$the_sett$elm_pretty_printer$Pretty$line,
+			$the_sett$elm_pretty_printer$Pretty$words(
+				_List_fromArray(
+					[
+						$the_sett$elm_pretty_printer$Pretty$string('{'),
+						$the_sett$elm_pretty_printer$Pretty$string(
+						$mdgriffith$elm_codegen$Internal$Compiler$denode(_var))
+					])));
+		var close = A2(
+			$the_sett$elm_pretty_printer$Pretty$a,
+			$the_sett$elm_pretty_printer$Pretty$string('}'),
+			$the_sett$elm_pretty_printer$Pretty$line);
+		var addBarToFirst = function (exprs) {
+			if (!exprs.b) {
+				return _List_Nil;
+			} else {
+				var hd = exprs.a;
+				var tl = exprs.b;
+				return A2(
+					$elm$core$List$cons,
+					A2(
+						$the_sett$elm_pretty_printer$Pretty$a,
+						hd,
+						$the_sett$elm_pretty_printer$Pretty$string('| ')),
+					tl);
+			}
+		};
+		if (!setters.b) {
+			return _Utils_Tuple2(
+				$the_sett$elm_pretty_printer$Pretty$string('{}'),
+				false);
+		} else {
+			var _v5 = A2(
+				$elm$core$Tuple$mapSecond,
+				$elm$core$List$any($elm$core$Basics$identity),
+				$elm$core$List$unzip(
+					A2(
+						$elm$core$List$map,
+						$mdgriffith$elm_codegen$Internal$Write$prettySetter(aliases),
+						$mdgriffith$elm_codegen$Internal$Compiler$denodeAll(setters))));
+			var prettyExpressions = _v5.a;
+			var alwaysBreak = _v5.b;
+			return _Utils_Tuple2(
+				A2(
+					$mdgriffith$elm_codegen$Internal$Write$optionalGroup,
+					alwaysBreak,
+					$the_sett$elm_pretty_printer$Pretty$align(
+						A3(
+							$the_sett$elm_pretty_printer$Pretty$surround,
+							$the_sett$elm_pretty_printer$Pretty$empty,
+							close,
+							A2(
+								$the_sett$elm_pretty_printer$Pretty$nest,
+								indent,
+								A2(
+									$the_sett$elm_pretty_printer$Pretty$a,
+									A2(
+										$the_sett$elm_pretty_printer$Pretty$separators,
+										', ',
+										addBarToFirst(prettyExpressions)),
+									open))))),
+				alwaysBreak);
+		}
+	});
+var $mdgriffith$elm_codegen$Internal$Write$prettySetter = F2(
+	function (aliases, _v2) {
+		var fld = _v2.a;
+		var val = _v2.b;
+		var _v3 = A4(
+			$mdgriffith$elm_codegen$Internal$Write$prettyExpressionInner,
+			aliases,
+			$mdgriffith$elm_codegen$Internal$Write$topContext,
+			4,
+			$mdgriffith$elm_codegen$Internal$Compiler$denode(val));
+		var prettyExpr = _v3.a;
+		var alwaysBreak = _v3.b;
+		return _Utils_Tuple2(
+			A2(
+				$the_sett$elm_pretty_printer$Pretty$nest,
+				4,
+				A2(
+					$mdgriffith$elm_codegen$Internal$Write$optionalGroup,
+					alwaysBreak,
+					$the_sett$elm_pretty_printer$Pretty$lines(
+						_List_fromArray(
+							[
+								$the_sett$elm_pretty_printer$Pretty$words(
+								_List_fromArray(
+									[
+										$the_sett$elm_pretty_printer$Pretty$string(
+										$mdgriffith$elm_codegen$Internal$Compiler$denode(fld)),
+										$the_sett$elm_pretty_printer$Pretty$string('=')
+									])),
+								prettyExpr
+							])))),
+			alwaysBreak);
+	});
+var $mdgriffith$elm_codegen$Internal$Write$prettyTupledExpression = F3(
+	function (aliases, indent, exprs) {
+		var open = A2(
+			$the_sett$elm_pretty_printer$Pretty$a,
+			$the_sett$elm_pretty_printer$Pretty$space,
+			$the_sett$elm_pretty_printer$Pretty$string('('));
+		var close = A2(
+			$the_sett$elm_pretty_printer$Pretty$a,
+			$the_sett$elm_pretty_printer$Pretty$string(')'),
+			$the_sett$elm_pretty_printer$Pretty$line);
+		if (!exprs.b) {
+			return _Utils_Tuple2(
+				$the_sett$elm_pretty_printer$Pretty$string('()'),
+				false);
+		} else {
+			var _v1 = A2(
+				$elm$core$Tuple$mapSecond,
+				$elm$core$List$any($elm$core$Basics$identity),
+				$elm$core$List$unzip(
+					A2(
+						$elm$core$List$map,
+						A3(
+							$mdgriffith$elm_codegen$Internal$Write$prettyExpressionInner,
+							aliases,
+							$mdgriffith$elm_codegen$Internal$Write$topContext,
+							A2($mdgriffith$elm_codegen$Internal$Write$decrementIndent, indent, 2)),
+						$mdgriffith$elm_codegen$Internal$Compiler$denodeAll(exprs))));
+			var prettyExpressions = _v1.a;
+			var alwaysBreak = _v1.b;
+			return _Utils_Tuple2(
+				A2(
+					$mdgriffith$elm_codegen$Internal$Write$optionalGroup,
+					alwaysBreak,
+					$the_sett$elm_pretty_printer$Pretty$align(
+						A3(
+							$the_sett$elm_pretty_printer$Pretty$surround,
+							open,
+							close,
+							A2($the_sett$elm_pretty_printer$Pretty$separators, ', ', prettyExpressions)))),
+				alwaysBreak);
+		}
+	});
+var $mdgriffith$elm_codegen$Internal$Write$prettyDestructuring = F3(
+	function (aliases, pattern, expr) {
+		return A2(
+			$the_sett$elm_pretty_printer$Pretty$nest,
+			4,
+			$the_sett$elm_pretty_printer$Pretty$lines(
+				_List_fromArray(
+					[
+						$the_sett$elm_pretty_printer$Pretty$words(
+						_List_fromArray(
+							[
+								A2($mdgriffith$elm_codegen$Internal$Write$prettyPattern, aliases, pattern),
+								$the_sett$elm_pretty_printer$Pretty$string('=')
+							])),
+						A2($mdgriffith$elm_codegen$Internal$Write$prettyExpression, aliases, expr)
+					])));
+	});
+var $mdgriffith$elm_codegen$Internal$Write$prettyInfix = function (infix_) {
+	var dirToString = function (direction) {
+		switch (direction.$) {
+			case 'Left':
+				return 'left';
+			case 'Right':
+				return 'right';
+			default:
+				return 'non';
+		}
+	};
+	return $the_sett$elm_pretty_printer$Pretty$words(
+		_List_fromArray(
+			[
+				$the_sett$elm_pretty_printer$Pretty$string('infix'),
+				$the_sett$elm_pretty_printer$Pretty$string(
+				dirToString(
+					$mdgriffith$elm_codegen$Internal$Compiler$denode(infix_.direction))),
+				$the_sett$elm_pretty_printer$Pretty$string(
+				$elm$core$String$fromInt(
+					$mdgriffith$elm_codegen$Internal$Compiler$denode(infix_.precedence))),
+				$the_sett$elm_pretty_printer$Pretty$parens(
+				$the_sett$elm_pretty_printer$Pretty$string(
+					$mdgriffith$elm_codegen$Internal$Compiler$denode(infix_.operator))),
+				$the_sett$elm_pretty_printer$Pretty$string('='),
+				$the_sett$elm_pretty_printer$Pretty$string(
+				$mdgriffith$elm_codegen$Internal$Compiler$denode(infix_._function))
+			]));
+};
+var $mdgriffith$elm_codegen$Internal$Write$prettyPortDeclaration = F2(
+	function (aliases, sig) {
+		return $the_sett$elm_pretty_printer$Pretty$words(
+			_List_fromArray(
+				[
+					$the_sett$elm_pretty_printer$Pretty$string('port'),
+					A2($mdgriffith$elm_codegen$Internal$Write$prettySignature, aliases, sig)
+				]));
+	});
+var $mdgriffith$elm_codegen$Internal$Write$prettyTypeAlias = F2(
+	function (aliases, tAlias) {
+		var typeAliasPretty = A2(
+			$the_sett$elm_pretty_printer$Pretty$nest,
+			4,
+			A2(
+				$the_sett$elm_pretty_printer$Pretty$a,
+				A2(
+					$mdgriffith$elm_codegen$Internal$Write$prettyTypeAnnotation,
+					aliases,
+					$mdgriffith$elm_codegen$Internal$Compiler$denode(tAlias.typeAnnotation)),
+				A2(
+					$the_sett$elm_pretty_printer$Pretty$a,
+					$the_sett$elm_pretty_printer$Pretty$line,
+					$the_sett$elm_pretty_printer$Pretty$words(
+						_List_fromArray(
+							[
+								$the_sett$elm_pretty_printer$Pretty$string('type alias'),
+								$the_sett$elm_pretty_printer$Pretty$string(
+								$mdgriffith$elm_codegen$Internal$Compiler$denode(tAlias.name)),
+								$the_sett$elm_pretty_printer$Pretty$words(
+								A2(
+									$elm$core$List$map,
+									$the_sett$elm_pretty_printer$Pretty$string,
+									$mdgriffith$elm_codegen$Internal$Compiler$denodeAll(tAlias.generics))),
+								$the_sett$elm_pretty_printer$Pretty$string('=')
+							])))));
+		return $the_sett$elm_pretty_printer$Pretty$lines(
+			_List_fromArray(
+				[
+					A2(
+					$mdgriffith$elm_codegen$Internal$Write$prettyMaybe,
+					$mdgriffith$elm_codegen$Internal$Write$prettyDocumentation,
+					$mdgriffith$elm_codegen$Internal$Compiler$denodeMaybe(tAlias.documentation)),
+					typeAliasPretty
+				]));
+	});
+var $mdgriffith$elm_codegen$Internal$Write$prettyElmSyntaxDeclaration = F2(
+	function (aliases, decl) {
+		switch (decl.$) {
+			case 'FunctionDeclaration':
+				var fn = decl.a;
+				return A2($mdgriffith$elm_codegen$Internal$Write$prettyFun, aliases, fn);
+			case 'AliasDeclaration':
+				var tAlias = decl.a;
+				return A2($mdgriffith$elm_codegen$Internal$Write$prettyTypeAlias, aliases, tAlias);
+			case 'CustomTypeDeclaration':
+				var type_ = decl.a;
+				return A2($mdgriffith$elm_codegen$Internal$Write$prettyCustomType, aliases, type_);
+			case 'PortDeclaration':
+				var sig = decl.a;
+				return A2($mdgriffith$elm_codegen$Internal$Write$prettyPortDeclaration, aliases, sig);
+			case 'InfixDeclaration':
+				var infix_ = decl.a;
+				return $mdgriffith$elm_codegen$Internal$Write$prettyInfix(infix_);
+			default:
+				var pattern = decl.a;
+				var expr = decl.b;
+				return A3(
+					$mdgriffith$elm_codegen$Internal$Write$prettyDestructuring,
+					aliases,
+					$mdgriffith$elm_codegen$Internal$Compiler$denode(pattern),
+					$mdgriffith$elm_codegen$Internal$Compiler$denode(expr));
+		}
+	});
+var $mdgriffith$elm_codegen$Internal$Write$prettyDeclarations = F2(
+	function (aliases, decls) {
+		return A3(
+			$elm$core$List$foldl,
+			F2(
+				function (decl, doc) {
+					switch (decl.$) {
+						case 'RenderedComment':
+							var content = decl.a;
+							return A2(
+								$the_sett$elm_pretty_printer$Pretty$a,
+								$the_sett$elm_pretty_printer$Pretty$line,
+								A2(
+									$the_sett$elm_pretty_printer$Pretty$a,
+									$the_sett$elm_pretty_printer$Pretty$line,
+									A2(
+										$the_sett$elm_pretty_printer$Pretty$a,
+										$the_sett$elm_pretty_printer$Pretty$string(content + '\n'),
+										doc)));
+						case 'RenderedBlock':
+							var source = decl.a;
+							return A2(
+								$the_sett$elm_pretty_printer$Pretty$a,
+								$the_sett$elm_pretty_printer$Pretty$line,
+								A2(
+									$the_sett$elm_pretty_printer$Pretty$a,
+									$the_sett$elm_pretty_printer$Pretty$line,
+									A2(
+										$the_sett$elm_pretty_printer$Pretty$a,
+										$the_sett$elm_pretty_printer$Pretty$line,
+										A2(
+											$the_sett$elm_pretty_printer$Pretty$a,
+											$the_sett$elm_pretty_printer$Pretty$string(source),
+											doc))));
+						default:
+							var innerDecl = decl.a;
+							return A2(
+								$the_sett$elm_pretty_printer$Pretty$a,
+								$the_sett$elm_pretty_printer$Pretty$line,
+								A2(
+									$the_sett$elm_pretty_printer$Pretty$a,
+									$the_sett$elm_pretty_printer$Pretty$line,
+									A2(
+										$the_sett$elm_pretty_printer$Pretty$a,
+										$the_sett$elm_pretty_printer$Pretty$line,
+										A2(
+											$the_sett$elm_pretty_printer$Pretty$a,
+											A2($mdgriffith$elm_codegen$Internal$Write$prettyElmSyntaxDeclaration, aliases, innerDecl),
+											doc))));
+					}
+				}),
+			$the_sett$elm_pretty_printer$Pretty$empty,
+			decls);
+	});
+var $mdgriffith$elm_codegen$Internal$Comments$delimeters = function (doc) {
+	return A2(
+		$the_sett$elm_pretty_printer$Pretty$a,
+		$the_sett$elm_pretty_printer$Pretty$string('-}'),
+		A2(
+			$the_sett$elm_pretty_printer$Pretty$a,
+			$the_sett$elm_pretty_printer$Pretty$line,
+			A2(
+				$the_sett$elm_pretty_printer$Pretty$a,
+				doc,
+				$the_sett$elm_pretty_printer$Pretty$string('{-| '))));
+};
+var $mdgriffith$elm_codegen$Internal$Comments$getParts = function (_v0) {
+	var parts = _v0.a;
+	return $elm$core$List$reverse(parts);
+};
+var $mdgriffith$elm_codegen$Internal$Comments$DocTags = function (a) {
+	return {$: 'DocTags', a: a};
+};
+var $mdgriffith$elm_codegen$Internal$Comments$fitAndSplit = F2(
+	function (width, tags) {
+		if (!tags.b) {
+			return _List_Nil;
+		} else {
+			var t = tags.a;
+			var ts = tags.b;
+			var _v1 = A3(
+				$elm$core$List$foldl,
+				F2(
+					function (tag, _v2) {
+						var allSplits = _v2.a;
+						var curSplit = _v2.b;
+						var remaining = _v2.c;
+						return (_Utils_cmp(
+							$elm$core$String$length(tag),
+							remaining) < 1) ? _Utils_Tuple3(
+							allSplits,
+							A2($elm$core$List$cons, tag, curSplit),
+							remaining - $elm$core$String$length(tag)) : _Utils_Tuple3(
+							_Utils_ap(
+								allSplits,
+								_List_fromArray(
+									[
+										$elm$core$List$reverse(curSplit)
+									])),
+							_List_fromArray(
+								[tag]),
+							width - $elm$core$String$length(tag));
+					}),
+				_Utils_Tuple3(
+					_List_Nil,
+					_List_fromArray(
+						[t]),
+					width - $elm$core$String$length(t)),
+				ts);
+			var splitsExceptLast = _v1.a;
+			var lastSplit = _v1.b;
+			return _Utils_ap(
+				splitsExceptLast,
+				_List_fromArray(
+					[
+						$elm$core$List$reverse(lastSplit)
+					]));
+		}
+	});
+var $elm$core$List$sort = function (xs) {
+	return A2($elm$core$List$sortBy, $elm$core$Basics$identity, xs);
+};
+var $mdgriffith$elm_codegen$Internal$Comments$mergeDocTags = function (innerParts) {
+	var _v0 = A3(
+		$elm$core$List$foldr,
+		F2(
+			function (part, _v1) {
+				var accum = _v1.a;
+				var context = _v1.b;
+				if (context.$ === 'Nothing') {
+					if (part.$ === 'DocTags') {
+						var tags = part.a;
+						return _Utils_Tuple2(
+							accum,
+							$elm$core$Maybe$Just(tags));
+					} else {
+						var otherPart = part;
+						return _Utils_Tuple2(
+							A2($elm$core$List$cons, otherPart, accum),
+							$elm$core$Maybe$Nothing);
+					}
+				} else {
+					var contextTags = context.a;
+					if (part.$ === 'DocTags') {
+						var tags = part.a;
+						return _Utils_Tuple2(
+							accum,
+							$elm$core$Maybe$Just(
+								_Utils_ap(contextTags, tags)));
+					} else {
+						var otherPart = part;
+						return _Utils_Tuple2(
+							A2(
+								$elm$core$List$cons,
+								otherPart,
+								A2(
+									$elm$core$List$cons,
+									$mdgriffith$elm_codegen$Internal$Comments$DocTags(
+										$elm$core$List$sort(contextTags)),
+									accum)),
+							$elm$core$Maybe$Nothing);
+					}
+				}
+			}),
+		_Utils_Tuple2(_List_Nil, $elm$core$Maybe$Nothing),
+		innerParts);
+	var partsExceptMaybeFirst = _v0.a;
+	var maybeFirstPart = _v0.b;
+	if (maybeFirstPart.$ === 'Nothing') {
+		return partsExceptMaybeFirst;
+	} else {
+		var tags = maybeFirstPart.a;
+		return A2(
+			$elm$core$List$cons,
+			$mdgriffith$elm_codegen$Internal$Comments$DocTags(
+				$elm$core$List$sort(tags)),
+			partsExceptMaybeFirst);
+	}
+};
+var $mdgriffith$elm_codegen$Internal$Comments$layoutTags = F2(
+	function (width, parts) {
+		return A3(
+			$elm$core$List$foldr,
+			F2(
+				function (part, _v0) {
+					var accumParts = _v0.a;
+					var accumDocTags = _v0.b;
+					if (part.$ === 'DocTags') {
+						var tags = part.a;
+						var splits = A2($mdgriffith$elm_codegen$Internal$Comments$fitAndSplit, width, tags);
+						return _Utils_Tuple2(
+							_Utils_ap(
+								A2($elm$core$List$map, $mdgriffith$elm_codegen$Internal$Comments$DocTags, splits),
+								accumParts),
+							_Utils_ap(accumDocTags, splits));
+					} else {
+						var otherPart = part;
+						return _Utils_Tuple2(
+							A2($elm$core$List$cons, otherPart, accumParts),
+							accumDocTags);
+					}
+				}),
+			_Utils_Tuple2(_List_Nil, _List_Nil),
+			$mdgriffith$elm_codegen$Internal$Comments$mergeDocTags(parts));
+	});
+var $the_sett$elm_pretty_printer$Internals$NLine = F3(
+	function (a, b, c) {
+		return {$: 'NLine', a: a, b: b, c: c};
+	});
+var $the_sett$elm_pretty_printer$Internals$NNil = {$: 'NNil'};
+var $the_sett$elm_pretty_printer$Internals$NText = F3(
+	function (a, b, c) {
+		return {$: 'NText', a: a, b: b, c: c};
+	});
+var $the_sett$elm_pretty_printer$Internals$fits = F2(
+	function (w, normal) {
+		fits:
+		while (true) {
+			if (w < 0) {
+				return false;
+			} else {
+				switch (normal.$) {
+					case 'NNil':
+						return true;
+					case 'NText':
+						var text = normal.a;
+						var innerNormal = normal.b;
+						var $temp$w = w - $elm$core$String$length(text),
+							$temp$normal = innerNormal(_Utils_Tuple0);
+						w = $temp$w;
+						normal = $temp$normal;
+						continue fits;
+					default:
+						return true;
+				}
+			}
+		}
+	});
+var $the_sett$elm_pretty_printer$Internals$better = F4(
+	function (w, k, doc, doc2Fn) {
+		return A2($the_sett$elm_pretty_printer$Internals$fits, w - k, doc) ? doc : doc2Fn(_Utils_Tuple0);
+	});
+var $the_sett$elm_pretty_printer$Internals$best = F3(
+	function (width, startCol, x) {
+		var be = F3(
+			function (w, k, docs) {
+				be:
+				while (true) {
+					if (!docs.b) {
+						return $the_sett$elm_pretty_printer$Internals$NNil;
+					} else {
+						switch (docs.a.b.$) {
+							case 'Empty':
+								var _v1 = docs.a;
+								var i = _v1.a;
+								var _v2 = _v1.b;
+								var ds = docs.b;
+								var $temp$w = w,
+									$temp$k = k,
+									$temp$docs = ds;
+								w = $temp$w;
+								k = $temp$k;
+								docs = $temp$docs;
+								continue be;
+							case 'Concatenate':
+								var _v3 = docs.a;
+								var i = _v3.a;
+								var _v4 = _v3.b;
+								var doc = _v4.a;
+								var doc2 = _v4.b;
+								var ds = docs.b;
+								var $temp$w = w,
+									$temp$k = k,
+									$temp$docs = A2(
+									$elm$core$List$cons,
+									_Utils_Tuple2(
+										i,
+										doc(_Utils_Tuple0)),
+									A2(
+										$elm$core$List$cons,
+										_Utils_Tuple2(
+											i,
+											doc2(_Utils_Tuple0)),
+										ds));
+								w = $temp$w;
+								k = $temp$k;
+								docs = $temp$docs;
+								continue be;
+							case 'Nest':
+								var _v5 = docs.a;
+								var i = _v5.a;
+								var _v6 = _v5.b;
+								var j = _v6.a;
+								var doc = _v6.b;
+								var ds = docs.b;
+								var $temp$w = w,
+									$temp$k = k,
+									$temp$docs = A2(
+									$elm$core$List$cons,
+									_Utils_Tuple2(
+										i + j,
+										doc(_Utils_Tuple0)),
+									ds);
+								w = $temp$w;
+								k = $temp$k;
+								docs = $temp$docs;
+								continue be;
+							case 'Text':
+								var _v7 = docs.a;
+								var i = _v7.a;
+								var _v8 = _v7.b;
+								var text = _v8.a;
+								var maybeTag = _v8.b;
+								var ds = docs.b;
+								return A3(
+									$the_sett$elm_pretty_printer$Internals$NText,
+									text,
+									function (_v9) {
+										return A3(
+											be,
+											w,
+											k + $elm$core$String$length(text),
+											ds);
+									},
+									maybeTag);
+							case 'Line':
+								var _v10 = docs.a;
+								var i = _v10.a;
+								var _v11 = _v10.b;
+								var vsep = _v11.b;
+								var ds = docs.b;
+								return A3(
+									$the_sett$elm_pretty_printer$Internals$NLine,
+									i,
+									vsep,
+									function (_v12) {
+										return A3(
+											be,
+											w,
+											i + $elm$core$String$length(vsep),
+											ds);
+									});
+							case 'Union':
+								var _v13 = docs.a;
+								var i = _v13.a;
+								var _v14 = _v13.b;
+								var doc = _v14.a;
+								var doc2 = _v14.b;
+								var ds = docs.b;
+								return A4(
+									$the_sett$elm_pretty_printer$Internals$better,
+									w,
+									k,
+									A3(
+										be,
+										w,
+										k,
+										A2(
+											$elm$core$List$cons,
+											_Utils_Tuple2(i, doc),
+											ds)),
+									function (_v15) {
+										return A3(
+											be,
+											w,
+											k,
+											A2(
+												$elm$core$List$cons,
+												_Utils_Tuple2(i, doc2),
+												ds));
+									});
+							case 'Nesting':
+								var _v16 = docs.a;
+								var i = _v16.a;
+								var fn = _v16.b.a;
+								var ds = docs.b;
+								var $temp$w = w,
+									$temp$k = k,
+									$temp$docs = A2(
+									$elm$core$List$cons,
+									_Utils_Tuple2(
+										i,
+										fn(i)),
+									ds);
+								w = $temp$w;
+								k = $temp$k;
+								docs = $temp$docs;
+								continue be;
+							default:
+								var _v17 = docs.a;
+								var i = _v17.a;
+								var fn = _v17.b.a;
+								var ds = docs.b;
+								var $temp$w = w,
+									$temp$k = k,
+									$temp$docs = A2(
+									$elm$core$List$cons,
+									_Utils_Tuple2(
+										i,
+										fn(k)),
+									ds);
+								w = $temp$w;
+								k = $temp$k;
+								docs = $temp$docs;
+								continue be;
+						}
+					}
+				}
+			});
+		return A3(
+			be,
+			width,
+			startCol,
+			_List_fromArray(
+				[
+					_Utils_Tuple2(0, x)
+				]));
+	});
+var $the_sett$elm_pretty_printer$Internals$layout = function (normal) {
+	var layoutInner = F2(
+		function (normal2, acc) {
+			layoutInner:
+			while (true) {
+				switch (normal2.$) {
+					case 'NNil':
+						return acc;
+					case 'NText':
+						var text = normal2.a;
+						var innerNormal = normal2.b;
+						var maybeTag = normal2.c;
+						var $temp$normal2 = innerNormal(_Utils_Tuple0),
+							$temp$acc = A2($elm$core$List$cons, text, acc);
+						normal2 = $temp$normal2;
+						acc = $temp$acc;
+						continue layoutInner;
+					default:
+						var i = normal2.a;
+						var sep = normal2.b;
+						var innerNormal = normal2.c;
+						var norm = innerNormal(_Utils_Tuple0);
+						if (norm.$ === 'NLine') {
+							var $temp$normal2 = innerNormal(_Utils_Tuple0),
+								$temp$acc = A2($elm$core$List$cons, '\n' + sep, acc);
+							normal2 = $temp$normal2;
+							acc = $temp$acc;
+							continue layoutInner;
+						} else {
+							var $temp$normal2 = innerNormal(_Utils_Tuple0),
+								$temp$acc = A2(
+								$elm$core$List$cons,
+								'\n' + (A2($the_sett$elm_pretty_printer$Internals$copy, i, ' ') + sep),
+								acc);
+							normal2 = $temp$normal2;
+							acc = $temp$acc;
+							continue layoutInner;
+						}
+				}
+			}
+		});
+	return $elm$core$String$concat(
+		$elm$core$List$reverse(
+			A2(layoutInner, normal, _List_Nil)));
+};
+var $the_sett$elm_pretty_printer$Pretty$pretty = F2(
+	function (w, doc) {
+		return $the_sett$elm_pretty_printer$Internals$layout(
+			A3($the_sett$elm_pretty_printer$Internals$best, w, 0, doc));
+	});
+var $mdgriffith$elm_codegen$Internal$Comments$prettyCode = function (val) {
+	return A2(
+		$the_sett$elm_pretty_printer$Pretty$indent,
+		4,
+		$the_sett$elm_pretty_printer$Pretty$string(val));
+};
+var $mdgriffith$elm_codegen$Internal$Comments$prettyMarkdown = function (val) {
+	return $the_sett$elm_pretty_printer$Pretty$string(val);
+};
+var $mdgriffith$elm_codegen$Internal$Comments$prettyTags = function (tags) {
+	return $the_sett$elm_pretty_printer$Pretty$words(
+		_List_fromArray(
+			[
+				$the_sett$elm_pretty_printer$Pretty$string('@docs'),
+				A2(
+				$the_sett$elm_pretty_printer$Pretty$join,
+				$the_sett$elm_pretty_printer$Pretty$string(', '),
+				A2($elm$core$List$map, $the_sett$elm_pretty_printer$Pretty$string, tags))
+			]));
+};
+var $mdgriffith$elm_codegen$Internal$Comments$prettyCommentPart = function (part) {
+	switch (part.$) {
+		case 'Markdown':
+			var val = part.a;
+			return $mdgriffith$elm_codegen$Internal$Comments$prettyMarkdown(val);
+		case 'Code':
+			var val = part.a;
+			return $mdgriffith$elm_codegen$Internal$Comments$prettyCode(val);
+		default:
+			var tags = part.a;
+			return $mdgriffith$elm_codegen$Internal$Comments$prettyTags(tags);
+	}
+};
+var $mdgriffith$elm_codegen$Internal$Comments$prettyFileComment = F2(
+	function (width, comment) {
+		var _v0 = A2(
+			$mdgriffith$elm_codegen$Internal$Comments$layoutTags,
+			width,
+			$mdgriffith$elm_codegen$Internal$Comments$getParts(comment));
+		var parts = _v0.a;
+		var splits = _v0.b;
+		return _Utils_Tuple2(
+			A2(
+				$the_sett$elm_pretty_printer$Pretty$pretty,
+				width,
+				$mdgriffith$elm_codegen$Internal$Comments$delimeters(
+					$the_sett$elm_pretty_printer$Pretty$lines(
+						A2($elm$core$List$map, $mdgriffith$elm_codegen$Internal$Comments$prettyCommentPart, parts)))),
+			splits);
+	});
+var $mdgriffith$elm_codegen$Internal$Write$prettyDefaultModuleData = function (moduleData) {
+	return $the_sett$elm_pretty_printer$Pretty$words(
+		_List_fromArray(
+			[
+				$the_sett$elm_pretty_printer$Pretty$string('module'),
+				$mdgriffith$elm_codegen$Internal$Write$prettyModuleName(
+				$mdgriffith$elm_codegen$Internal$Compiler$denode(moduleData.moduleName)),
+				$mdgriffith$elm_codegen$Internal$Write$prettyExposing(
+				$mdgriffith$elm_codegen$Internal$Compiler$denode(moduleData.exposingList))
+			]));
+};
+var $mdgriffith$elm_codegen$Internal$Write$prettyEffectModuleData = function (moduleData) {
+	var prettyCmdAndSub = F2(
+		function (maybeCmd, maybeSub) {
+			var _v0 = _Utils_Tuple2(maybeCmd, maybeSub);
+			if (_v0.a.$ === 'Just') {
+				if (_v0.b.$ === 'Just') {
+					var cmdName = _v0.a.a;
+					var subName = _v0.b.a;
+					return $elm$core$Maybe$Just(
+						$the_sett$elm_pretty_printer$Pretty$words(
+							_List_fromArray(
+								[
+									$the_sett$elm_pretty_printer$Pretty$string('where { command ='),
+									$the_sett$elm_pretty_printer$Pretty$string(cmdName),
+									$the_sett$elm_pretty_printer$Pretty$string(','),
+									$the_sett$elm_pretty_printer$Pretty$string('subscription ='),
+									$the_sett$elm_pretty_printer$Pretty$string(subName),
+									$the_sett$elm_pretty_printer$Pretty$string('}')
+								])));
+				} else {
+					var cmdName = _v0.a.a;
+					var _v3 = _v0.b;
+					return $elm$core$Maybe$Just(
+						$the_sett$elm_pretty_printer$Pretty$words(
+							_List_fromArray(
+								[
+									$the_sett$elm_pretty_printer$Pretty$string('where { command ='),
+									$the_sett$elm_pretty_printer$Pretty$string(cmdName),
+									$the_sett$elm_pretty_printer$Pretty$string('}')
+								])));
+				}
+			} else {
+				if (_v0.b.$ === 'Nothing') {
+					var _v1 = _v0.a;
+					var _v2 = _v0.b;
+					return $elm$core$Maybe$Nothing;
+				} else {
+					var _v4 = _v0.a;
+					var subName = _v0.b.a;
+					return $elm$core$Maybe$Just(
+						$the_sett$elm_pretty_printer$Pretty$words(
+							_List_fromArray(
+								[
+									$the_sett$elm_pretty_printer$Pretty$string('where { subscription ='),
+									$the_sett$elm_pretty_printer$Pretty$string(subName),
+									$the_sett$elm_pretty_printer$Pretty$string('}')
+								])));
+				}
+			}
+		});
+	return $the_sett$elm_pretty_printer$Pretty$words(
+		_List_fromArray(
+			[
+				$the_sett$elm_pretty_printer$Pretty$string('effect module'),
+				$mdgriffith$elm_codegen$Internal$Write$prettyModuleName(
+				$mdgriffith$elm_codegen$Internal$Compiler$denode(moduleData.moduleName)),
+				A2(
+				$mdgriffith$elm_codegen$Internal$Write$prettyMaybe,
+				$elm$core$Basics$identity,
+				A2(
+					prettyCmdAndSub,
+					$mdgriffith$elm_codegen$Internal$Compiler$denodeMaybe(moduleData.command),
+					$mdgriffith$elm_codegen$Internal$Compiler$denodeMaybe(moduleData.subscription))),
+				$mdgriffith$elm_codegen$Internal$Write$prettyExposing(
+				$mdgriffith$elm_codegen$Internal$Compiler$denode(moduleData.exposingList))
+			]));
+};
+var $mdgriffith$elm_codegen$Internal$Write$prettyPortModuleData = function (moduleData) {
+	return $the_sett$elm_pretty_printer$Pretty$words(
+		_List_fromArray(
+			[
+				$the_sett$elm_pretty_printer$Pretty$string('port module'),
+				$mdgriffith$elm_codegen$Internal$Write$prettyModuleName(
+				$mdgriffith$elm_codegen$Internal$Compiler$denode(moduleData.moduleName)),
+				$mdgriffith$elm_codegen$Internal$Write$prettyExposing(
+				$mdgriffith$elm_codegen$Internal$Compiler$denode(moduleData.exposingList))
+			]));
+};
+var $mdgriffith$elm_codegen$Internal$Write$prettyModule = function (mod) {
+	switch (mod.$) {
+		case 'NormalModule':
+			var defaultModuleData = mod.a;
+			return $mdgriffith$elm_codegen$Internal$Write$prettyDefaultModuleData(defaultModuleData);
+		case 'PortModule':
+			var defaultModuleData = mod.a;
+			return $mdgriffith$elm_codegen$Internal$Write$prettyPortModuleData(defaultModuleData);
+		default:
+			var effectModuleData = mod.a;
+			return $mdgriffith$elm_codegen$Internal$Write$prettyEffectModuleData(effectModuleData);
+	}
+};
+var $mdgriffith$elm_codegen$Internal$Write$prepareLayout = F2(
+	function (width, file) {
+		return A2(
+			$the_sett$elm_pretty_printer$Pretty$a,
+			A2($mdgriffith$elm_codegen$Internal$Write$prettyDeclarations, file.aliases, file.declarations),
+			A2(
+				$the_sett$elm_pretty_printer$Pretty$a,
+				$mdgriffith$elm_codegen$Internal$Write$importsPretty(file.imports),
+				function (doc) {
+					var _v0 = file.comments;
+					if (_v0.$ === 'Nothing') {
+						return doc;
+					} else {
+						var fileComment = _v0.a;
+						var _v1 = A2($mdgriffith$elm_codegen$Internal$Comments$prettyFileComment, width, fileComment);
+						var fileCommentStr = _v1.a;
+						var innerTags = _v1.b;
+						return A2(
+							$the_sett$elm_pretty_printer$Pretty$a,
+							$the_sett$elm_pretty_printer$Pretty$line,
+							A2(
+								$the_sett$elm_pretty_printer$Pretty$a,
+								$mdgriffith$elm_codegen$Internal$Write$prettyComments(
+									_List_fromArray(
+										[fileCommentStr])),
+								doc));
+					}
+				}(
+					A2(
+						$the_sett$elm_pretty_printer$Pretty$a,
+						$the_sett$elm_pretty_printer$Pretty$line,
+						A2(
+							$the_sett$elm_pretty_printer$Pretty$a,
+							$the_sett$elm_pretty_printer$Pretty$line,
+							$mdgriffith$elm_codegen$Internal$Write$prettyModule(file.moduleDefinition))))));
+	});
+var $mdgriffith$elm_codegen$Internal$Write$pretty = F2(
+	function (width, file) {
+		return A2(
+			$the_sett$elm_pretty_printer$Pretty$pretty,
+			width,
+			A2($mdgriffith$elm_codegen$Internal$Write$prepareLayout, width, file));
+	});
+var $mdgriffith$elm_codegen$Internal$Write$write = $mdgriffith$elm_codegen$Internal$Write$pretty(80);
+var $mdgriffith$elm_codegen$Internal$Render$render = F2(
+	function (toDocComment, fileDetails) {
+		var rendered = A3(
+			$elm$core$List$foldl,
+			F2(
+				function (decl, gathered) {
+					switch (decl.$) {
+						case 'Comment':
+							var comm = decl.a;
+							return _Utils_update(
+								gathered,
+								{
+									declarations: A2(
+										$elm$core$List$cons,
+										$mdgriffith$elm_codegen$Internal$Compiler$RenderedComment(comm),
+										gathered.declarations)
+								});
+						case 'Block':
+							var block = decl.a;
+							return _Utils_update(
+								gathered,
+								{
+									declarations: A2(
+										$elm$core$List$cons,
+										$mdgriffith$elm_codegen$Internal$Compiler$RenderedBlock(block),
+										gathered.declarations)
+								});
+						default:
+							var decDetails = decl.a;
+							var result = decDetails.toBody(fileDetails.index);
+							return {
+								declarations: A2(
+									$elm$core$List$cons,
+									$mdgriffith$elm_codegen$Internal$Compiler$RenderedDecl(
+										A2($mdgriffith$elm_codegen$Internal$Render$addDocs, decDetails.docs, result.declaration)),
+									gathered.declarations),
+								exposed: A3($mdgriffith$elm_codegen$Internal$Render$addExposed, decDetails.exposed, result.declaration, gathered.exposed),
+								exposedGroups: function () {
+									var _v5 = decDetails.exposed;
+									if (_v5.$ === 'NotExposed') {
+										return gathered.exposedGroups;
+									} else {
+										var details = _v5.a;
+										return A2(
+											$elm$core$List$cons,
+											_Utils_Tuple2(details.group, decDetails.name),
+											gathered.exposedGroups);
+									}
+								}(),
+								hasPorts: function () {
+									if (gathered.hasPorts) {
+										return gathered.hasPorts;
+									} else {
+										var _v6 = result.declaration;
+										if (_v6.$ === 'PortDeclaration') {
+											return true;
+										} else {
+											return false;
+										}
+									}
+								}(),
+								imports: _Utils_ap(
+									result.additionalImports,
+									_Utils_ap(decDetails.imports, gathered.imports)),
+								warnings: function () {
+									var _v7 = result.warning;
+									if (_v7.$ === 'Nothing') {
+										return gathered.warnings;
+									} else {
+										var warn = _v7.a;
+										return A2($elm$core$List$cons, warn, gathered.warnings);
+									}
+								}()
+							};
+					}
+				}),
+			{declarations: _List_Nil, exposed: _List_Nil, exposedGroups: _List_Nil, hasPorts: false, imports: _List_Nil, warnings: _List_Nil},
+			fileDetails.declarations);
+		var body = $mdgriffith$elm_codegen$Internal$Write$write(
+			{
+				aliases: fileDetails.aliases,
+				comments: $elm$core$Maybe$Just(
+					A2(
+						$mdgriffith$elm_codegen$Internal$Comments$addPart,
+						$mdgriffith$elm_codegen$Internal$Comments$emptyComment,
+						$mdgriffith$elm_codegen$Internal$Comments$Markdown(
+							function () {
+								var _v0 = rendered.exposedGroups;
+								if (!_v0.b) {
+									return '';
+								} else {
+									return '\n' + A2(
+										$elm$core$String$join,
+										'\n\n',
+										toDocComment(
+											$mdgriffith$elm_codegen$Internal$Render$groupExposing(
+												A2(
+													$elm$core$List$sortBy,
+													function (_v1) {
+														var group = _v1.a;
+														if (group.$ === 'Nothing') {
+															return 'zzzzzzzzz';
+														} else {
+															var name = group.a;
+															return name;
+														}
+													},
+													rendered.exposedGroups))));
+								}
+							}()))),
+				declarations: $elm$core$List$reverse(rendered.declarations),
+				imports: A2(
+					$elm$core$List$filterMap,
+					$mdgriffith$elm_codegen$Internal$Compiler$makeImport(fileDetails.aliases),
+					$mdgriffith$elm_codegen$Internal$Render$dedupImports(rendered.imports)),
+				moduleDefinition: (rendered.hasPorts ? $stil4m$elm_syntax$Elm$Syntax$Module$PortModule : $stil4m$elm_syntax$Elm$Syntax$Module$NormalModule)(
+					{
+						exposingList: function () {
+							var _v3 = rendered.exposed;
+							if (!_v3.b) {
+								return $mdgriffith$elm_codegen$Internal$Compiler$nodify(
+									$stil4m$elm_syntax$Elm$Syntax$Exposing$All($stil4m$elm_syntax$Elm$Syntax$Range$emptyRange));
+							} else {
+								return $mdgriffith$elm_codegen$Internal$Compiler$nodify(
+									$stil4m$elm_syntax$Elm$Syntax$Exposing$Explicit(
+										$mdgriffith$elm_codegen$Internal$Compiler$nodifyAll(rendered.exposed)));
+							}
+						}(),
+						moduleName: $mdgriffith$elm_codegen$Internal$Compiler$nodify(fileDetails.moduleName)
+					})
+			});
+		return {
+			contents: body,
+			path: A2($elm$core$String$join, '/', fileDetails.moduleName) + '.elm',
+			warnings: rendered.warnings
+		};
+	});
+var $mdgriffith$elm_codegen$Elm$docs = function (group) {
+	var _v0 = group.group;
+	if (_v0.$ === 'Nothing') {
+		return '@docs ' + A2($elm$core$String$join, ', ', group.members);
+	} else {
+		var groupName = _v0.a;
+		return '## ' + (groupName + ('\n\n@docs ' + A2($elm$core$String$join, ', ', group.members)));
+	}
+};
+var $mdgriffith$elm_codegen$Elm$renderStandardComment = function (groups) {
+	return $elm$core$List$isEmpty(groups) ? _List_Nil : A2($elm$core$List$map, $mdgriffith$elm_codegen$Elm$docs, groups);
+};
+var $mdgriffith$elm_codegen$Internal$Index$startIndex = A4($mdgriffith$elm_codegen$Internal$Index$Index, 0, _List_Nil, $elm$core$Set$empty, true);
+var $mdgriffith$elm_codegen$Elm$file = F2(
+	function (mod, decs) {
+		return A2(
+			$mdgriffith$elm_codegen$Internal$Render$render,
+			$mdgriffith$elm_codegen$Elm$renderStandardComment,
+			{aliases: _List_Nil, declarations: decs, index: $mdgriffith$elm_codegen$Internal$Index$startIndex, moduleName: mod});
+	});
+var $mdgriffith$elm_codegen$Internal$Compiler$Declaration = function (a) {
+	return {$: 'Declaration', a: a};
+};
+var $mdgriffith$elm_codegen$Internal$Compiler$NotExposed = {$: 'NotExposed'};
+var $elm$core$Result$andThen = F2(
+	function (callback, result) {
+		if (result.$ === 'Ok') {
+			var value = result.a;
+			return callback(value);
+		} else {
+			var msg = result.a;
+			return $elm$core$Result$Err(msg);
+		}
+	});
+var $stil4m$elm_syntax$Elm$Syntax$Node$map = F2(
+	function (f, _v0) {
+		var r = _v0.a;
+		var a = _v0.b;
+		return A2(
+			$stil4m$elm_syntax$Elm$Syntax$Node$Node,
+			r,
+			f(a));
+	});
+var $mdgriffith$elm_codegen$Internal$Clean$doRename = F2(
+	function (dict, ann) {
+		switch (ann.$) {
+			case 'GenericType':
+				var generic = ann.a;
+				var _v1 = A2($elm$core$Dict$get, generic, dict);
+				if (_v1.$ === 'Nothing') {
+					return ann;
+				} else {
+					var renamed = _v1.a;
+					return $stil4m$elm_syntax$Elm$Syntax$TypeAnnotation$GenericType(renamed);
+				}
+			case 'Typed':
+				var name = ann.a;
+				var nodedVars = ann.b;
+				return A2(
+					$stil4m$elm_syntax$Elm$Syntax$TypeAnnotation$Typed,
+					name,
+					A2(
+						$elm$core$List$map,
+						$stil4m$elm_syntax$Elm$Syntax$Node$map(
+							$mdgriffith$elm_codegen$Internal$Clean$doRename(dict)),
+						nodedVars));
+			case 'Unit':
+				return ann;
+			case 'Tupled':
+				var nodedVars = ann.a;
+				return $stil4m$elm_syntax$Elm$Syntax$TypeAnnotation$Tupled(
+					A2(
+						$elm$core$List$map,
+						$stil4m$elm_syntax$Elm$Syntax$Node$map(
+							$mdgriffith$elm_codegen$Internal$Clean$doRename(dict)),
+						nodedVars));
+			case 'Record':
+				var record = ann.a;
+				return $stil4m$elm_syntax$Elm$Syntax$TypeAnnotation$Record(
+					A2(
+						$elm$core$List$map,
+						$stil4m$elm_syntax$Elm$Syntax$Node$map(
+							$elm$core$Tuple$mapSecond(
+								$stil4m$elm_syntax$Elm$Syntax$Node$map(
+									$mdgriffith$elm_codegen$Internal$Clean$doRename(dict)))),
+						record));
+			case 'GenericRecord':
+				var name = ann.a;
+				var _v2 = ann.b;
+				var range = _v2.a;
+				var record = _v2.b;
+				return A2(
+					$stil4m$elm_syntax$Elm$Syntax$TypeAnnotation$GenericRecord,
+					name,
+					A2(
+						$stil4m$elm_syntax$Elm$Syntax$Node$Node,
+						range,
+						A2(
+							$elm$core$List$map,
+							$stil4m$elm_syntax$Elm$Syntax$Node$map(
+								$elm$core$Tuple$mapSecond(
+									$stil4m$elm_syntax$Elm$Syntax$Node$map(
+										$mdgriffith$elm_codegen$Internal$Clean$doRename(dict)))),
+							record)));
+			default:
+				var nodeOne = ann.a;
+				var nodeTwo = ann.b;
+				return A2(
+					$stil4m$elm_syntax$Elm$Syntax$TypeAnnotation$FunctionTypeAnnotation,
+					A2(
+						$stil4m$elm_syntax$Elm$Syntax$Node$map,
+						$mdgriffith$elm_codegen$Internal$Clean$doRename(dict),
+						nodeOne),
+					A2(
+						$stil4m$elm_syntax$Elm$Syntax$Node$map,
+						$mdgriffith$elm_codegen$Internal$Clean$doRename(dict),
+						nodeTwo));
+		}
+	});
+var $mdgriffith$elm_codegen$Internal$Clean$prepareRename = F2(
+	function (ann, dict) {
+		switch (ann.$) {
+			case 'GenericType':
+				var generic = ann.a;
+				return A2($elm$core$Set$insert, generic, dict);
+			case 'Typed':
+				var name = ann.a;
+				var nodedVars = ann.b;
+				return A3(
+					$elm$core$List$foldl,
+					F2(
+						function (_v1, d) {
+							var tipe = _v1.b;
+							return A2($mdgriffith$elm_codegen$Internal$Clean$prepareRename, tipe, d);
+						}),
+					dict,
+					nodedVars);
+			case 'Unit':
+				return dict;
+			case 'Tupled':
+				var nodedVars = ann.a;
+				return A3(
+					$elm$core$List$foldl,
+					F2(
+						function (_v2, d) {
+							var tipe = _v2.b;
+							return A2($mdgriffith$elm_codegen$Internal$Clean$prepareRename, tipe, d);
+						}),
+					dict,
+					nodedVars);
+			case 'Record':
+				var record = ann.a;
+				return A3(
+					$elm$core$List$foldl,
+					F2(
+						function (_v3, d) {
+							var _v4 = _v3.b;
+							var _v5 = _v4.b;
+							var field = _v5.b;
+							return A2($mdgriffith$elm_codegen$Internal$Clean$prepareRename, field, d);
+						}),
+					dict,
+					record);
+			case 'GenericRecord':
+				var name = ann.a;
+				var _v6 = ann.b;
+				var range = _v6.a;
+				var record = _v6.b;
+				return A3(
+					$elm$core$List$foldl,
+					F2(
+						function (_v7, d) {
+							var _v8 = _v7.b;
+							var _v9 = _v8.b;
+							var field = _v9.b;
+							return A2($mdgriffith$elm_codegen$Internal$Clean$prepareRename, field, d);
+						}),
+					dict,
+					record);
+			default:
+				var _v10 = ann.a;
+				var one = _v10.b;
+				var _v11 = ann.b;
+				var two = _v11.b;
+				return A2(
+					$mdgriffith$elm_codegen$Internal$Clean$prepareRename,
+					two,
+					A2($mdgriffith$elm_codegen$Internal$Clean$prepareRename, one, dict));
+		}
+	});
+var $mdgriffith$elm_codegen$Internal$Clean$findClean = F3(
+	function (i, name, set) {
+		findClean:
+		while (true) {
+			var newName = (!i) ? name : _Utils_ap(
+				name,
+				$elm$core$String$fromInt(i));
+			if (A2($elm$core$Set$member, newName, set)) {
+				var $temp$i = i + 1,
+					$temp$name = name,
+					$temp$set = set;
+				i = $temp$i;
+				name = $temp$name;
+				set = $temp$set;
+				continue findClean;
+			} else {
+				return name;
+			}
+		}
+	});
+var $elm$core$Set$foldl = F3(
+	function (func, initialState, _v0) {
+		var dict = _v0.a;
+		return A3(
+			$elm$core$Dict$foldl,
+			F3(
+				function (key, _v1, state) {
+					return A2(func, key, state);
+				}),
+			initialState,
+			dict);
+	});
+var $mdgriffith$elm_codegen$Internal$Clean$sanitized = function (str) {
+	var _v0 = A2($elm$core$String$split, '_', str);
+	if (!_v0.b) {
+		return str;
+	} else {
+		var top = _v0.a;
+		var remain = _v0.b;
+		return top;
+	}
+};
+var $mdgriffith$elm_codegen$Internal$Clean$verify = function (set) {
+	return A3(
+		$elm$core$Set$foldl,
+		F2(
+			function (name, gathered) {
+				var newName = A3(
+					$mdgriffith$elm_codegen$Internal$Clean$findClean,
+					0,
+					$mdgriffith$elm_codegen$Internal$Clean$sanitized(name),
+					set);
+				return A3($elm$core$Dict$insert, name, newName, gathered);
+			}),
+		$elm$core$Dict$empty,
+		set);
+};
+var $mdgriffith$elm_codegen$Internal$Clean$clean = function (ann) {
+	var renames = $mdgriffith$elm_codegen$Internal$Clean$verify(
+		A2($mdgriffith$elm_codegen$Internal$Clean$prepareRename, ann, $elm$core$Set$empty));
+	return A2($mdgriffith$elm_codegen$Internal$Clean$doRename, renames, ann);
+};
+var $mdgriffith$elm_codegen$Internal$Format$formatDeclarationName = function (str) {
+	if (str === 'main') {
+		return 'main';
+	} else {
+		return $mdgriffith$elm_codegen$Internal$Format$formatValue(str);
+	}
+};
+var $elm$core$Result$mapError = F2(
+	function (f, result) {
+		if (result.$ === 'Ok') {
+			var v = result.a;
+			return $elm$core$Result$Ok(v);
+		} else {
+			var e = result.a;
+			return $elm$core$Result$Err(
+				f(e));
+		}
+	});
+var $mdgriffith$elm_codegen$Internal$Compiler$inferenceErrorToString = function (inf) {
+	switch (inf.$) {
+		case 'Todo':
+			var str = inf.a;
+			return 'Todo ' + str;
+		case 'MismatchedList':
+			var one = inf.a;
+			var two = inf.b;
+			return 'There are multiple different types in a list: \n\n' + ('    ' + ($stil4m$elm_syntax$Elm$Writer$write(
+				$stil4m$elm_syntax$Elm$Writer$writeTypeAnnotation(
+					$mdgriffith$elm_codegen$Internal$Compiler$nodify(one))) + ('\n\n    ' + $stil4m$elm_syntax$Elm$Writer$write(
+				$stil4m$elm_syntax$Elm$Writer$writeTypeAnnotation(
+					$mdgriffith$elm_codegen$Internal$Compiler$nodify(two))))));
+		case 'RecordUpdateIncorrectFields':
+			var details = inf.a;
+			return 'Mismatched record update';
+		case 'EmptyCaseStatement':
+			return 'Case statement is empty';
+		case 'FunctionAppliedToTooManyArgs':
+			var fn = inf.a;
+			var args = inf.b;
+			return 'The following is being called as a function\n\n    ' + ($stil4m$elm_syntax$Elm$Writer$write(
+				$stil4m$elm_syntax$Elm$Writer$writeTypeAnnotation(
+					$mdgriffith$elm_codegen$Internal$Compiler$nodify(fn))) + ('\n\nwith these arguments:\n\n    ' + (A2(
+				$elm$core$String$join,
+				' -> ',
+				A2(
+					$elm$core$List$map,
+					function (arg) {
+						return $stil4m$elm_syntax$Elm$Writer$write(
+							$stil4m$elm_syntax$Elm$Writer$writeTypeAnnotation(
+								$mdgriffith$elm_codegen$Internal$Compiler$nodify(arg)));
+					},
+					args)) + '\n\nbut that\'s wrong, right?')));
+		case 'DuplicateFieldInRecord':
+			var fieldName = inf.a;
+			return 'There is a duplicate field in a record: ' + fieldName;
+		case 'CaseBranchesReturnDifferentTypes':
+			return 'Case returns different types.';
+		case 'CouldNotFindField':
+			var found = inf.a;
+			return 'I can\'t find .' + (found.field + (', this record only has these fields:\n\n    ' + A2($elm$core$String$join, '\n    ', found.existingFields)));
+		case 'AttemptingToGetOnIncorrectType':
+			var attempting = inf.a;
+			return 'You\'re trying to access\n\n    .' + (attempting.field + ('\n\nbut this value isn\'t a record. It\'s a\n\n    ' + $stil4m$elm_syntax$Elm$Writer$write(
+				$stil4m$elm_syntax$Elm$Writer$writeTypeAnnotation(
+					$mdgriffith$elm_codegen$Internal$Compiler$nodify(attempting.on)))));
+		case 'AttemptingGetOnTypeNameNotAnAlias':
+			var attempting = inf.a;
+			return 'You\'re trying to access\n\n    .' + (attempting.field + ('\n\nbut this value isn\'t a record, it\'s a\n\n    ' + ($stil4m$elm_syntax$Elm$Writer$write(
+				$stil4m$elm_syntax$Elm$Writer$writeTypeAnnotation(
+					$mdgriffith$elm_codegen$Internal$Compiler$nodify(attempting.on))) + '\n\nIs this value supposed to be an alias for a record? If so, check out Elm.alias!')));
+		case 'LetFieldNotFound':
+			var details = inf.a;
+			return details.desiredField + ' not found, though I was trying to unpack it in a let expression.';
+		case 'NotAppendable':
+			var type_ = inf.a;
+			return $stil4m$elm_syntax$Elm$Writer$write(
+				$stil4m$elm_syntax$Elm$Writer$writeTypeAnnotation(
+					$mdgriffith$elm_codegen$Internal$Compiler$nodify(type_))) + ' is not appendable.  Only Strings and Lists are appendable';
+		case 'NotComparable':
+			var type_ = inf.a;
+			return $stil4m$elm_syntax$Elm$Writer$write(
+				$stil4m$elm_syntax$Elm$Writer$writeTypeAnnotation(
+					$mdgriffith$elm_codegen$Internal$Compiler$nodify(type_))) + ' is not appendable.  Only Strings and Lists are appendable';
+		case 'UnableToUnify':
+			var one = inf.a;
+			var two = inf.b;
+			return 'I found\n\n    ' + ($stil4m$elm_syntax$Elm$Writer$write(
+				$stil4m$elm_syntax$Elm$Writer$writeTypeAnnotation(
+					$mdgriffith$elm_codegen$Internal$Compiler$nodify(one))) + ('\n\nBut I was expecting:\n\n    ' + $stil4m$elm_syntax$Elm$Writer$write(
+				$stil4m$elm_syntax$Elm$Writer$writeTypeAnnotation(
+					$mdgriffith$elm_codegen$Internal$Compiler$nodify(two)))));
+		default:
+			return 'Different lists of type variables';
+	}
+};
+var $mdgriffith$elm_codegen$Elm$renderError = function (err) {
+	if (!err.b) {
+		return '';
+	} else {
+		return A2(
+			$elm$core$String$join,
+			'\n\n',
+			A2($elm$core$List$map, $mdgriffith$elm_codegen$Internal$Compiler$inferenceErrorToString, err));
+	}
+};
+var $elm$core$Set$fromList = function (list) {
+	return A3($elm$core$List$foldl, $elm$core$Set$insert, $elm$core$Set$empty, list);
+};
+var $mdgriffith$elm_codegen$Internal$Compiler$getGenericsHelper = function (ann) {
+	switch (ann.$) {
+		case 'GenericType':
+			var str = ann.a;
+			return _List_fromArray(
+				[str]);
+		case 'Typed':
+			var modName = ann.a;
+			var anns = ann.b;
+			return A2(
+				$elm$core$List$concatMap,
+				A2($elm$core$Basics$composeL, $mdgriffith$elm_codegen$Internal$Compiler$getGenericsHelper, $mdgriffith$elm_codegen$Internal$Compiler$denode),
+				anns);
+		case 'Unit':
+			return _List_Nil;
+		case 'Tupled':
+			var tupled = ann.a;
+			return A2(
+				$elm$core$List$concatMap,
+				A2($elm$core$Basics$composeL, $mdgriffith$elm_codegen$Internal$Compiler$getGenericsHelper, $mdgriffith$elm_codegen$Internal$Compiler$denode),
+				tupled);
+		case 'Record':
+			var recordDefinition = ann.a;
+			return A2(
+				$elm$core$List$concatMap,
+				function (nodedField) {
+					var _v1 = $mdgriffith$elm_codegen$Internal$Compiler$denode(nodedField);
+					var name = _v1.a;
+					var field = _v1.b;
+					return $mdgriffith$elm_codegen$Internal$Compiler$getGenericsHelper(
+						$mdgriffith$elm_codegen$Internal$Compiler$denode(field));
+				},
+				recordDefinition);
+		case 'GenericRecord':
+			var recordName = ann.a;
+			var recordDefinition = ann.b;
+			return A2(
+				$elm$core$List$concatMap,
+				function (nodedField) {
+					var _v2 = $mdgriffith$elm_codegen$Internal$Compiler$denode(nodedField);
+					var name = _v2.a;
+					var field = _v2.b;
+					return $mdgriffith$elm_codegen$Internal$Compiler$getGenericsHelper(
+						$mdgriffith$elm_codegen$Internal$Compiler$denode(field));
+				},
+				$mdgriffith$elm_codegen$Internal$Compiler$denode(recordDefinition));
+		default:
+			var one = ann.a;
+			var two = ann.b;
+			return A2(
+				$elm$core$List$concatMap,
+				$mdgriffith$elm_codegen$Internal$Compiler$getGenericsHelper,
+				_List_fromArray(
+					[
+						$mdgriffith$elm_codegen$Internal$Compiler$denode(one),
+						$mdgriffith$elm_codegen$Internal$Compiler$denode(two)
+					]));
+	}
+};
+var $elm$core$Basics$neq = _Utils_notEqual;
+var $mdgriffith$elm_codegen$Internal$Compiler$simplify = function (fullStr) {
+	return A3(
+		$elm$core$List$foldl,
+		F2(
+			function (piece, str) {
+				var isDigit = A2($elm$core$String$all, $elm$core$Char$isDigit, piece);
+				if (isDigit) {
+					return str;
+				} else {
+					if (str === '') {
+						return piece;
+					} else {
+						return str + ('_' + piece);
+					}
+				}
+			}),
+		'',
+		A2($elm$core$String$split, '_', fullStr));
+};
+var $mdgriffith$elm_codegen$Internal$Compiler$rewriteTypeVariablesHelper = F3(
+	function (existing, renames, type_) {
+		switch (type_.$) {
+			case 'GenericType':
+				var varName = type_.a;
+				var _v1 = A2($elm$core$Dict$get, varName, renames);
+				if (_v1.$ === 'Nothing') {
+					var simplified = $mdgriffith$elm_codegen$Internal$Compiler$simplify(varName);
+					return (A2($elm$core$Set$member, simplified, existing) && (!_Utils_eq(varName, simplified))) ? _Utils_Tuple2(
+						renames,
+						$stil4m$elm_syntax$Elm$Syntax$TypeAnnotation$GenericType(simplified)) : _Utils_Tuple2(
+						A3($elm$core$Dict$insert, varName, simplified, renames),
+						$stil4m$elm_syntax$Elm$Syntax$TypeAnnotation$GenericType(simplified));
+				} else {
+					var rename = _v1.a;
+					return _Utils_Tuple2(
+						renames,
+						$stil4m$elm_syntax$Elm$Syntax$TypeAnnotation$GenericType(rename));
+				}
+			case 'Typed':
+				var name = type_.a;
+				var vars = type_.b;
+				var _v2 = A3(
+					$elm$core$List$foldl,
+					F2(
+						function (typevar, _v3) {
+							var varUsed = _v3.a;
+							var varList = _v3.b;
+							var _v4 = A3(
+								$mdgriffith$elm_codegen$Internal$Compiler$rewriteTypeVariablesHelper,
+								existing,
+								varUsed,
+								$mdgriffith$elm_codegen$Internal$Compiler$denode(typevar));
+							var oneUsed = _v4.a;
+							var oneType = _v4.b;
+							return _Utils_Tuple2(
+								oneUsed,
+								A2(
+									$elm$core$List$cons,
+									$mdgriffith$elm_codegen$Internal$Compiler$nodify(oneType),
+									varList));
+						}),
+					_Utils_Tuple2(renames, _List_Nil),
+					vars);
+				var newUsed = _v2.a;
+				var newVars = _v2.b;
+				return _Utils_Tuple2(
+					newUsed,
+					A2(
+						$stil4m$elm_syntax$Elm$Syntax$TypeAnnotation$Typed,
+						name,
+						$elm$core$List$reverse(newVars)));
+			case 'Unit':
+				return _Utils_Tuple2(renames, type_);
+			case 'Tupled':
+				var valsA = type_.a;
+				return _Utils_Tuple2(renames, type_);
+			case 'Record':
+				var fieldsA = type_.a;
+				return _Utils_Tuple2(renames, type_);
+			case 'GenericRecord':
+				var _v5 = type_.a;
+				var reVarName = _v5.b;
+				var _v6 = type_.b;
+				var fieldsARange = _v6.a;
+				var fieldsA = _v6.b;
+				return _Utils_Tuple2(renames, type_);
+			default:
+				var one = type_.a;
+				var two = type_.b;
+				var _v7 = A3(
+					$mdgriffith$elm_codegen$Internal$Compiler$rewriteTypeVariablesHelper,
+					existing,
+					renames,
+					$mdgriffith$elm_codegen$Internal$Compiler$denode(one));
+				var oneUsed = _v7.a;
+				var oneType = _v7.b;
+				var _v8 = A3(
+					$mdgriffith$elm_codegen$Internal$Compiler$rewriteTypeVariablesHelper,
+					existing,
+					oneUsed,
+					$mdgriffith$elm_codegen$Internal$Compiler$denode(two));
+				var twoUsed = _v8.a;
+				var twoType = _v8.b;
+				return _Utils_Tuple2(
+					twoUsed,
+					A2(
+						$stil4m$elm_syntax$Elm$Syntax$TypeAnnotation$FunctionTypeAnnotation,
+						$mdgriffith$elm_codegen$Internal$Compiler$nodify(oneType),
+						$mdgriffith$elm_codegen$Internal$Compiler$nodify(twoType)));
+		}
+	});
+var $mdgriffith$elm_codegen$Internal$Compiler$rewriteTypeVariables = function (type_) {
+	var existing = $elm$core$Set$fromList(
+		$mdgriffith$elm_codegen$Internal$Compiler$getGenericsHelper(type_));
+	return A3($mdgriffith$elm_codegen$Internal$Compiler$rewriteTypeVariablesHelper, existing, $elm$core$Dict$empty, type_).b;
+};
+var $mdgriffith$elm_codegen$Internal$Compiler$resolve = F3(
+	function (index, cache, annotation) {
+		if ($mdgriffith$elm_codegen$Internal$Index$typecheck(index)) {
+			var restrictions = A2($mdgriffith$elm_codegen$Internal$Compiler$getRestrictions, annotation, cache);
+			var _v0 = A3($mdgriffith$elm_codegen$Internal$Compiler$resolveVariables, $elm$core$Set$empty, cache, annotation);
+			if (_v0.$ === 'Ok') {
+				var newAnnotation = _v0.a;
+				return A2(
+					$mdgriffith$elm_codegen$Internal$Compiler$checkRestrictions,
+					restrictions,
+					$mdgriffith$elm_codegen$Internal$Compiler$rewriteTypeVariables(newAnnotation));
+			} else {
+				var err = _v0.a;
+				return $elm$core$Result$Err(err);
+			}
+		} else {
+			return $elm$core$Result$Err('Type inference skipped.');
+		}
+	});
+var $mdgriffith$elm_codegen$Elm$declaration = F2(
+	function (nameStr, _v0) {
+		var toBody = _v0.a;
+		var name = $mdgriffith$elm_codegen$Internal$Format$formatDeclarationName(nameStr);
+		return $mdgriffith$elm_codegen$Internal$Compiler$Declaration(
+			{
+				docs: $elm$core$Maybe$Nothing,
+				exposed: $mdgriffith$elm_codegen$Internal$Compiler$NotExposed,
+				imports: _List_Nil,
+				name: name,
+				toBody: function (index) {
+					var body = toBody(index);
+					var resolvedType = A2(
+						$elm$core$Result$andThen,
+						function (sig) {
+							return A3($mdgriffith$elm_codegen$Internal$Compiler$resolve, index, sig.inferences, sig.type_);
+						},
+						A2($elm$core$Result$mapError, $mdgriffith$elm_codegen$Elm$renderError, body.annotation));
+					var maybeWarning = function () {
+						if (resolvedType.$ === 'Ok') {
+							var sig = resolvedType.a;
+							var _v5 = body.annotation;
+							if (_v5.$ === 'Ok') {
+								var inference = _v5.a;
+								return $elm$core$Maybe$Nothing;
+							} else {
+								if (!_v5.a.b) {
+									return $elm$core$Maybe$Nothing;
+								} else {
+									var err = _v5.a;
+									return $elm$core$Maybe$Just(
+										{
+											declaration: name,
+											warning: $mdgriffith$elm_codegen$Elm$renderError(err)
+										});
+								}
+							}
+						} else {
+							if (resolvedType.a === '') {
+								return $elm$core$Maybe$Nothing;
+							} else {
+								var err = resolvedType.a;
+								return $elm$core$Maybe$Just(
+									{declaration: name, warning: err});
+							}
+						}
+					}();
+					return {
+						additionalImports: body.imports,
+						declaration: $stil4m$elm_syntax$Elm$Syntax$Declaration$FunctionDeclaration(
+							{
+								declaration: function () {
+									var _v1 = body.expression;
+									if (_v1.$ === 'LambdaExpression') {
+										var lam = _v1.a;
+										return $mdgriffith$elm_codegen$Internal$Compiler$nodify(
+											{
+												_arguments: lam.args,
+												expression: lam.expression,
+												name: $mdgriffith$elm_codegen$Internal$Compiler$nodify(name)
+											});
+									} else {
+										return $mdgriffith$elm_codegen$Internal$Compiler$nodify(
+											{
+												_arguments: _List_Nil,
+												expression: $mdgriffith$elm_codegen$Internal$Compiler$nodify(body.expression),
+												name: $mdgriffith$elm_codegen$Internal$Compiler$nodify(name)
+											});
+									}
+								}(),
+								documentation: $elm$core$Maybe$Nothing,
+								signature: function () {
+									var _v2 = body.annotation;
+									if (_v2.$ === 'Ok') {
+										var sig = _v2.a;
+										if (resolvedType.$ === 'Ok') {
+											if (resolvedType.a.$ === 'GenericType') {
+												var generic = resolvedType.a.a;
+												return $elm$core$Maybe$Nothing;
+											} else {
+												var finalType = resolvedType.a;
+												return $elm$core$Maybe$Just(
+													$mdgriffith$elm_codegen$Internal$Compiler$nodify(
+														{
+															name: $mdgriffith$elm_codegen$Internal$Compiler$nodify(name),
+															typeAnnotation: $mdgriffith$elm_codegen$Internal$Compiler$nodify(
+																$mdgriffith$elm_codegen$Internal$Clean$clean(finalType))
+														}));
+											}
+										} else {
+											var errMsg = resolvedType.a;
+											return $elm$core$Maybe$Nothing;
+										}
+									} else {
+										return $elm$core$Maybe$Nothing;
+									}
+								}()
+							}),
+						warning: maybeWarning
+					};
+				}
+			});
+	});
+var $mdgriffith$elm_codegen$Internal$Compiler$toVarMaybeType = F3(
+	function (index, desiredName, maybeAnnotation) {
+		var _v0 = A2($mdgriffith$elm_codegen$Internal$Index$getName, desiredName, index);
+		var name = _v0.a;
+		var newIndex = _v0.b;
+		var _v1 = function () {
+			if (maybeAnnotation.$ === 'Nothing') {
+				return {
+					aliases: $mdgriffith$elm_codegen$Internal$Compiler$emptyAliases,
+					annotation: $stil4m$elm_syntax$Elm$Syntax$TypeAnnotation$GenericType(
+						A2($mdgriffith$elm_codegen$Internal$Index$protectTypeName, desiredName, index)),
+					imports: _List_Nil
+				};
+			} else {
+				var ann = maybeAnnotation.a.a;
+				return ann;
+			}
+		}();
+		var imports = _v1.imports;
+		var annotation = _v1.annotation;
+		var aliases = _v1.aliases;
+		return {
+			index: newIndex,
+			name: name,
+			type_: annotation,
+			val: $mdgriffith$elm_codegen$Internal$Compiler$Expression(
+				function (ignoredIndex_) {
+					return {
+						annotation: $elm$core$Result$Ok(
+							{aliases: aliases, inferences: $elm$core$Dict$empty, type_: annotation}),
+						expression: A2($stil4m$elm_syntax$Elm$Syntax$Expression$FunctionOrValue, _List_Nil, name),
+						imports: imports
+					};
+				})
+		};
+	});
+var $mdgriffith$elm_codegen$Elm$fn = F2(
+	function (_v0, toExpression) {
+		var oneBaseName = _v0.a;
+		var maybeAnnotation = _v0.b;
+		return $mdgriffith$elm_codegen$Internal$Compiler$expression(
+			function (index) {
+				var one = A3($mdgriffith$elm_codegen$Internal$Compiler$toVarMaybeType, index, oneBaseName, maybeAnnotation);
+				var _v1 = toExpression(one.val);
+				var toExpr = _v1.a;
+				var _return = toExpr(one.index);
+				return {
+					annotation: function () {
+						var _v2 = _return.annotation;
+						if (_v2.$ === 'Err') {
+							var err = _v2.a;
+							return _return.annotation;
+						} else {
+							var returnAnnotation = _v2.a;
+							return $elm$core$Result$Ok(
+								{
+									aliases: returnAnnotation.aliases,
+									inferences: returnAnnotation.inferences,
+									type_: A2(
+										$stil4m$elm_syntax$Elm$Syntax$TypeAnnotation$FunctionTypeAnnotation,
+										$mdgriffith$elm_codegen$Internal$Compiler$nodify(one.type_),
+										$mdgriffith$elm_codegen$Internal$Compiler$nodify(returnAnnotation.type_))
+								});
+						}
+					}(),
+					expression: $stil4m$elm_syntax$Elm$Syntax$Expression$LambdaExpression(
+						{
+							args: _List_fromArray(
+								[
+									$mdgriffith$elm_codegen$Internal$Compiler$nodify(
+									$stil4m$elm_syntax$Elm$Syntax$Pattern$VarPattern(one.name))
+								]),
+							expression: $mdgriffith$elm_codegen$Internal$Compiler$nodify(_return.expression)
+						}),
+					imports: _return.imports
+				};
+			});
+	});
+var $mdgriffith$elm_codegen$Elm$Declare$fn = F3(
+	function (name, one, toExp) {
+		var funcExp = A2($mdgriffith$elm_codegen$Elm$fn, one, toExp);
+		var call = F2(
+			function (importFrom, argOne) {
+				return A2(
+					$mdgriffith$elm_codegen$Elm$apply,
+					$mdgriffith$elm_codegen$Internal$Compiler$Expression(
+						function (index) {
+							var toFnExp = funcExp.a;
+							var fnExp = toFnExp(index);
+							return {
+								annotation: fnExp.annotation,
+								expression: A2(
+									$stil4m$elm_syntax$Elm$Syntax$Expression$FunctionOrValue,
+									importFrom,
+									$mdgriffith$elm_codegen$Internal$Format$sanitize(name)),
+								imports: fnExp.imports
+							};
+						}),
+					_List_fromArray(
+						[argOne]));
+			});
+		return {
+			call: call(_List_Nil),
+			callFrom: call,
+			declaration: A2($mdgriffith$elm_codegen$Elm$declaration, name, funcExp)
+		};
+	});
+var $mdgriffith$elm_codegen$Internal$Compiler$DuplicateFieldInRecord = function (a) {
+	return {$: 'DuplicateFieldInRecord', a: a};
+};
+var $stil4m$elm_syntax$Elm$Syntax$Expression$RecordExpr = function (a) {
+	return {$: 'RecordExpr', a: a};
+};
+var $mdgriffith$elm_codegen$Elm$record = function (fields) {
+	return $mdgriffith$elm_codegen$Internal$Compiler$expression(
+		function (index) {
+			var unified = A3(
+				$elm$core$List$foldl,
+				F2(
+					function (_v4, found) {
+						var unformattedFieldName = _v4.a;
+						var fieldExpression = _v4.b;
+						var fieldName = $mdgriffith$elm_codegen$Internal$Format$formatValue(unformattedFieldName);
+						var _v5 = A2($mdgriffith$elm_codegen$Internal$Compiler$toExpressionDetails, found.index, fieldExpression);
+						var newIndex = _v5.a;
+						var exp = _v5.b;
+						return {
+							errors: function () {
+								if (A2($elm$core$Set$member, fieldName, found.passed)) {
+									return A2(
+										$elm$core$List$cons,
+										$mdgriffith$elm_codegen$Internal$Compiler$DuplicateFieldInRecord(fieldName),
+										found.errors);
+								} else {
+									var _v6 = exp.annotation;
+									if (_v6.$ === 'Err') {
+										if (!_v6.a.b) {
+											return found.errors;
+										} else {
+											var errs = _v6.a;
+											return _Utils_ap(errs, found.errors);
+										}
+									} else {
+										var ann = _v6.a;
+										return found.errors;
+									}
+								}
+							}(),
+							fieldAnnotations: function () {
+								var _v7 = exp.annotation;
+								if (_v7.$ === 'Err') {
+									var err = _v7.a;
+									return found.fieldAnnotations;
+								} else {
+									var ann = _v7.a;
+									return A2(
+										$elm$core$List$cons,
+										_Utils_Tuple2(
+											$mdgriffith$elm_codegen$Internal$Format$formatValue(fieldName),
+											ann),
+										found.fieldAnnotations);
+								}
+							}(),
+							fields: A2(
+								$elm$core$List$cons,
+								_Utils_Tuple2(
+									$mdgriffith$elm_codegen$Internal$Compiler$nodify(fieldName),
+									$mdgriffith$elm_codegen$Internal$Compiler$nodify(exp.expression)),
+								found.fields),
+							imports: _Utils_ap(exp.imports, found.imports),
+							index: newIndex,
+							passed: A2($elm$core$Set$insert, fieldName, found.passed)
+						};
+					}),
+				{errors: _List_Nil, fieldAnnotations: _List_Nil, fields: _List_Nil, imports: _List_Nil, index: index, passed: $elm$core$Set$empty},
+				fields);
+			return {
+				annotation: function () {
+					var _v0 = unified.errors;
+					if (!_v0.b) {
+						return $elm$core$Result$Ok(
+							{
+								aliases: A3(
+									$elm$core$List$foldl,
+									F2(
+										function (_v1, gathered) {
+											var name = _v1.a;
+											var ann = _v1.b;
+											return A2($mdgriffith$elm_codegen$Internal$Compiler$mergeAliases, ann.aliases, gathered);
+										}),
+									$mdgriffith$elm_codegen$Internal$Compiler$emptyAliases,
+									unified.fieldAnnotations),
+								inferences: A3(
+									$elm$core$List$foldl,
+									F2(
+										function (_v2, gathered) {
+											var name = _v2.a;
+											var ann = _v2.b;
+											return A2($mdgriffith$elm_codegen$Internal$Compiler$mergeInferences, ann.inferences, gathered);
+										}),
+									$elm$core$Dict$empty,
+									unified.fieldAnnotations),
+								type_: $stil4m$elm_syntax$Elm$Syntax$TypeAnnotation$Record(
+									$mdgriffith$elm_codegen$Internal$Compiler$nodifyAll(
+										A2(
+											$elm$core$List$map,
+											function (_v3) {
+												var name = _v3.a;
+												var ann = _v3.b;
+												return _Utils_Tuple2(
+													$mdgriffith$elm_codegen$Internal$Compiler$nodify(name),
+													$mdgriffith$elm_codegen$Internal$Compiler$nodify(ann.type_));
+											},
+											$elm$core$List$reverse(unified.fieldAnnotations))))
+							});
+					} else {
+						var errs = _v0;
+						return $elm$core$Result$Err(errs);
+					}
+				}(),
+				expression: $stil4m$elm_syntax$Elm$Syntax$Expression$RecordExpr(
+					$mdgriffith$elm_codegen$Internal$Compiler$nodifyAll(
+						$elm$core$List$reverse(unified.fields))),
+				imports: unified.imports
+			};
+		});
+};
+var $mdgriffith$elm_codegen$Elm$Annotation$record = function (fields) {
+	return $mdgriffith$elm_codegen$Internal$Compiler$Annotation(
+		{
+			aliases: A3(
+				$elm$core$List$foldl,
+				F2(
+					function (_v0, aliases) {
+						var ann = _v0.b;
+						return A2(
+							$mdgriffith$elm_codegen$Internal$Compiler$mergeAliases,
+							$mdgriffith$elm_codegen$Elm$Annotation$getAliases(ann),
+							aliases);
+					}),
+				$mdgriffith$elm_codegen$Internal$Compiler$emptyAliases,
+				fields),
+			annotation: $stil4m$elm_syntax$Elm$Syntax$TypeAnnotation$Record(
+				$mdgriffith$elm_codegen$Internal$Compiler$nodifyAll(
+					A2(
+						$elm$core$List$map,
+						function (_v1) {
+							var name = _v1.a;
+							var ann = _v1.b;
+							return _Utils_Tuple2(
+								$mdgriffith$elm_codegen$Internal$Compiler$nodify(
+									$mdgriffith$elm_codegen$Internal$Format$formatValue(name)),
+								$mdgriffith$elm_codegen$Internal$Compiler$nodify(
+									$mdgriffith$elm_codegen$Internal$Compiler$getInnerAnnotation(ann)));
+						},
+						fields))),
+			imports: A2(
+				$elm$core$List$concatMap,
+				A2($elm$core$Basics$composeR, $elm$core$Tuple$second, $mdgriffith$elm_codegen$Internal$Compiler$getAnnotationImports),
+				fields)
+		});
+};
+var $stil4m$elm_syntax$Elm$Syntax$Expression$Literal = function (a) {
+	return {$: 'Literal', a: a};
+};
+var $mdgriffith$elm_codegen$Internal$Types$nodify = function (exp) {
+	return A2($stil4m$elm_syntax$Elm$Syntax$Node$Node, $stil4m$elm_syntax$Elm$Syntax$Range$emptyRange, exp);
+};
+var $mdgriffith$elm_codegen$Internal$Types$string = A2(
+	$stil4m$elm_syntax$Elm$Syntax$TypeAnnotation$Typed,
+	$mdgriffith$elm_codegen$Internal$Types$nodify(
+		_Utils_Tuple2(_List_Nil, 'String')),
+	_List_Nil);
+var $mdgriffith$elm_codegen$Elm$string = function (literal) {
+	return $mdgriffith$elm_codegen$Internal$Compiler$Expression(
+		function (_v0) {
+			return {
+				annotation: $elm$core$Result$Ok(
+					{aliases: $mdgriffith$elm_codegen$Internal$Compiler$emptyAliases, inferences: $elm$core$Dict$empty, type_: $mdgriffith$elm_codegen$Internal$Types$string}),
+				expression: $stil4m$elm_syntax$Elm$Syntax$Expression$Literal(literal),
+				imports: _List_Nil
+			};
+		});
+};
+var $mdgriffith$elm_codegen$Elm$Annotation$typed = F3(
+	function (mod, name, args) {
+		return $mdgriffith$elm_codegen$Internal$Compiler$Annotation(
+			{
+				aliases: A3(
+					$elm$core$List$foldl,
+					F2(
+						function (ann, aliases) {
+							return A2(
+								$mdgriffith$elm_codegen$Internal$Compiler$mergeAliases,
+								$mdgriffith$elm_codegen$Elm$Annotation$getAliases(ann),
+								aliases);
+						}),
+					$mdgriffith$elm_codegen$Internal$Compiler$emptyAliases,
+					args),
+				annotation: A2(
+					$stil4m$elm_syntax$Elm$Syntax$TypeAnnotation$Typed,
+					$mdgriffith$elm_codegen$Internal$Compiler$nodify(
+						_Utils_Tuple2(mod, name)),
+					$mdgriffith$elm_codegen$Internal$Compiler$nodifyAll(
+						A2($elm$core$List$map, $mdgriffith$elm_codegen$Internal$Compiler$getInnerAnnotation, args))),
+				imports: A2($elm$core$List$concatMap, $mdgriffith$elm_codegen$Internal$Compiler$getAnnotationImports, args)
+			});
+	});
+var $mdgriffith$elm_codegen$Elm$Annotation$string = A3($mdgriffith$elm_codegen$Elm$Annotation$typed, _List_Nil, 'String', _List_Nil);
+var $author$project$Gen$Http$get = function (getArg) {
+	return A2(
+		$mdgriffith$elm_codegen$Elm$apply,
+		$mdgriffith$elm_codegen$Elm$value(
+			{
+				annotation: $elm$core$Maybe$Just(
+					A2(
+						$mdgriffith$elm_codegen$Elm$Annotation$function,
+						_List_fromArray(
+							[
+								$mdgriffith$elm_codegen$Elm$Annotation$record(
+								_List_fromArray(
+									[
+										_Utils_Tuple2('url', $mdgriffith$elm_codegen$Elm$Annotation$string),
+										_Utils_Tuple2(
+										'expect',
+										A3(
+											$mdgriffith$elm_codegen$Elm$Annotation$namedWith,
+											_List_fromArray(
+												['Http']),
+											'Expect',
+											_List_fromArray(
+												[
+													$mdgriffith$elm_codegen$Elm$Annotation$var('msg')
+												])))
+									]))
+							]),
+						A3(
+							$mdgriffith$elm_codegen$Elm$Annotation$namedWith,
+							_List_Nil,
+							'Cmd',
+							_List_fromArray(
+								[
+									$mdgriffith$elm_codegen$Elm$Annotation$var('msg')
+								])))),
+				importFrom: _List_fromArray(
+					['Http']),
+				name: 'get'
+			}),
+		_List_fromArray(
+			[
+				$mdgriffith$elm_codegen$Elm$record(
+				_List_fromArray(
+					[
+						A2(
+						$elm$core$Tuple$pair,
+						'url',
+						$mdgriffith$elm_codegen$Elm$string(getArg.url)),
+						A2($elm$core$Tuple$pair, 'expect', getArg.expect)
+					]))
+			]));
+};
+var $author$project$OpenApi$Path$get = function (_v0) {
+	var path_ = _v0.a;
+	return path_.get;
+};
+var $author$project$OpenApi$info = function (_v0) {
+	var openApi = _v0.a;
+	return openApi.info;
+};
+var $stil4m$elm_syntax$Elm$Syntax$Expression$Integer = function (a) {
+	return {$: 'Integer', a: a};
+};
+var $mdgriffith$elm_codegen$Internal$Types$int = A2(
+	$stil4m$elm_syntax$Elm$Syntax$TypeAnnotation$Typed,
+	$mdgriffith$elm_codegen$Internal$Types$nodify(
+		_Utils_Tuple2(_List_Nil, 'Int')),
+	_List_Nil);
+var $mdgriffith$elm_codegen$Elm$int = function (intVal) {
+	return $mdgriffith$elm_codegen$Internal$Compiler$Expression(
+		function (_v0) {
+			return {
+				annotation: $elm$core$Result$Ok(
+					{aliases: $mdgriffith$elm_codegen$Internal$Compiler$emptyAliases, inferences: $elm$core$Dict$empty, type_: $mdgriffith$elm_codegen$Internal$Types$int}),
+				expression: $stil4m$elm_syntax$Elm$Syntax$Expression$Integer(intVal),
+				imports: _List_Nil
+			};
+		});
+};
+var $author$project$Main$invalidModuleNameChars = _List_fromArray(
+	[
+		_Utils_chr(' '),
+		_Utils_chr('.'),
+		_Utils_chr('/'),
+		_Utils_chr('{'),
+		_Utils_chr('}')
+	]);
+var $elm$core$String$map = _String_map;
+var $elm$core$List$member = F2(
+	function (x, xs) {
+		return A2(
+			$elm$core$List$any,
+			function (a) {
+				return _Utils_eq(a, x);
+			},
+			xs);
+	});
+var $author$project$Main$makeNamespaceValid = function (str) {
+	return A2(
+		$elm$core$String$map,
+		function (_char) {
+			return A2($elm$core$List$member, _char, $author$project$Main$invalidModuleNameChars) ? _Utils_chr('_') : _char;
+		},
+		str);
+};
+var $author$project$OpenApi$paths = function (_v0) {
+	var openApi = _v0.a;
+	return openApi.paths;
+};
+var $elm$core$String$filter = _String_filter;
+var $author$project$Main$removeInvlidChars = function (str) {
+	return A2(
+		$elm$core$String$filter,
+		function (_char) {
+			return !_Utils_eq(
+				_char,
+				_Utils_chr('\''));
+		},
+		str);
+};
+var $author$project$OpenApi$Info$title = function (_v0) {
+	var info = _v0.a;
+	return info.title;
+};
+var $elm$json$Json$Encode$list = F2(
+	function (func, entries) {
+		return _Json_wrap(
+			A3(
+				$elm$core$List$foldl,
+				_Json_addEntry(func),
+				_Json_emptyArray(_Utils_Tuple0),
+				entries));
+	});
+var $elm$json$Json$Encode$string = _Json_wrap;
+var $author$project$Main$writeFile = _Platform_outgoingPort(
+	'writeFile',
+	function ($) {
+		var a = $.a;
+		var b = $.b;
+		return A2(
+			$elm$json$Json$Encode$list,
+			$elm$core$Basics$identity,
+			_List_fromArray(
+				[
+					$elm$json$Json$Encode$string(a),
+					$elm$json$Json$Encode$string(b)
+				]));
+	});
+var $author$project$Main$writeMsg = _Platform_outgoingPort('writeMsg', $elm$json$Json$Encode$string);
 var $author$project$Main$update = F2(
 	function (msg, model) {
-		if (msg.$ === 'NoOp') {
-			return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
-		} else {
-			var response = msg.a;
+		var specValue = msg.a;
+		var _v1 = A2($elm$json$Json$Decode$decodeValue, $author$project$OpenApi$decode, specValue);
+		if (_v1.$ === 'Ok') {
+			var apiSpec = _v1.a;
 			return _Utils_Tuple2(
-				_Utils_update(
-					model,
-					{githubOpenApiSpec: response}),
-				$elm$core$Platform$Cmd$none);
+				model,
+				function () {
+					var pathDeclarations = A3(
+						$elm$core$Dict$foldl,
+						F3(
+							function (url, path, res) {
+								return _Utils_ap(
+									res,
+									A2(
+										$elm$core$List$filterMap,
+										$elm$core$Basics$identity,
+										_List_fromArray(
+											[
+												A2(
+												$elm$core$Maybe$map,
+												function (operation) {
+													return A3(
+														$mdgriffith$elm_codegen$Elm$Declare$fn,
+														$elm_community$string_extra$String$Extra$camelize(
+															$author$project$Main$removeInvlidChars(
+																$author$project$Main$makeNamespaceValid('get' + url))),
+														_Utils_Tuple2('toMsg', $elm$core$Maybe$Nothing),
+														function (toMsg) {
+															return $author$project$Gen$Http$get(
+																{
+																	expect: A2(
+																		$author$project$Gen$Http$expectJson,
+																		function (result) {
+																			return A2(
+																				$mdgriffith$elm_codegen$Elm$apply,
+																				toMsg,
+																				_List_fromArray(
+																					[result]));
+																		},
+																		$mdgriffith$elm_codegen$Elm$int(55)),
+																	url: url
+																});
+														}).declaration;
+												},
+												$author$project$OpenApi$Path$get(path))
+											])));
+							}),
+						_List_Nil,
+						$author$project$OpenApi$paths(apiSpec));
+					var namespace = $author$project$Main$removeInvlidChars(
+						$author$project$Main$makeNamespaceValid(
+							$author$project$OpenApi$Info$title(
+								$author$project$OpenApi$info(apiSpec))));
+					var file = A2(
+						$mdgriffith$elm_codegen$Elm$file,
+						_List_fromArray(
+							[namespace]),
+						pathDeclarations);
+					return $author$project$Main$writeFile(
+						_Utils_Tuple2(file.path, file.contents));
+				}());
+		} else {
+			var err = _v1.a;
+			return _Utils_Tuple2(
+				model,
+				$author$project$Main$writeMsg(
+					$elm$json$Json$Decode$errorToString(err)));
 		}
 	});
-var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
-var $elm$html$Html$text = $elm$virtual_dom$VirtualDom$text;
-var $author$project$Main$view = function (model) {
-	return {
-		body: _List_fromArray(
-			[
-				function () {
-				var _v0 = model.githubOpenApiSpec;
-				if (_v0.$ === 'Ok') {
-					var api = _v0.a;
-					return $elm$html$Html$text('Success!');
-				} else {
-					var err = _v0.a;
-					return $elm$html$Html$text(
-						function () {
-							switch (err.$) {
-								case 'BadStatus':
-									return 'bad status';
-								case 'BadUrl':
-									return 'bad url';
-								case 'NetworkError':
-									return 'network error';
-								case 'Timeout':
-									return 'timeout';
-								default:
-									var body = err.a;
-									return body;
-							}
-						}());
-				}
-			}()
-			]),
-		title: 'Elm Nix'
-	};
-};
-var $author$project$Main$main = $elm$browser$Browser$document(
-	{init: $author$project$Main$init, subscriptions: $author$project$Main$subscriptions, update: $author$project$Main$update, view: $author$project$Main$view});
+var $elm$core$Platform$worker = _Platform_worker;
+var $author$project$Main$main = $elm$core$Platform$worker(
+	{init: $author$project$Main$init, subscriptions: $author$project$Main$subscriptions, update: $author$project$Main$update});
 _Platform_export({'Main':{'init':$author$project$Main$main(
 	$elm$json$Json$Decode$succeed(_Utils_Tuple0))(0)}});}(this));

@@ -1,15 +1,17 @@
 {
-  "name": "testing-elm-open-api",
-  "version": "1.0.0",
-  "description": "A very basic template for an [Elm](https://elm-lang.org/) project, using [Nix](https://nixos.org/) and [direnv](https://direnv.net/).",
+  "name": "elm-api-sdk-generator",
+  "version": "0.1.0",
+  "description": "A tool for generating Elm SDKs from OpenAPI specs.",
   "main": "index.js",
   "scripts": {
-    "dev": "http-server build & elm-watch hot"
+    "dev": "elm make src/Main.elm --output build/main.js && node index.js"
   },
-  "author": "",
+  "author": "Wolfgang Schuster",
   "license": "ISC",
   "devDependencies": {
+    "@openapitools/openapi-generator-cli": "^2.5.2",
     "@redocly/cli": "^1.0.0-beta.110",
+    "elm-codegen": "^0.2.0",
     "elm-watch": "^1.0.2",
     "http-server": "^14.1.1"
   }

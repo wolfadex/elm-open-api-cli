@@ -79,7 +79,9 @@ update msg model =
                                             |> Maybe.map
                                                 (\operation ->
                                                     Elm.Declare.fn
-                                                        (("get" ++ url)
+                                                        ((OpenApi.Operation.operationId operation
+                                                            |> Maybe.withDefault url
+                                                         )
                                                             |> makeNamespaceValid
                                                             |> removeInvlidChars
                                                             |> String.Extra.camelize

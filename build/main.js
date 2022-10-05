@@ -5881,6 +5881,10 @@ var $elm_community$string_extra$String$Extra$camelize = function (string) {
 		},
 		$elm$core$String$trim(string));
 };
+var $author$project$OpenApi$components = function (_v0) {
+	var openApi = _v0.a;
+	return openApi.components;
+};
 var $author$project$OpenApi$OpenApi = function (a) {
 	return {$: 'OpenApi', a: a};
 };
@@ -13390,6 +13394,10 @@ var $author$project$Main$makeNamespaceValid = function (str) {
 		},
 		str);
 };
+var $author$project$OpenApi$Operation$operationId = function (_v0) {
+	var operation_ = _v0.a;
+	return operation_.operationId;
+};
 var $author$project$OpenApi$paths = function (_v0) {
 	var openApi = _v0.a;
 	return openApi.paths;
@@ -13404,6 +13412,10 @@ var $author$project$Main$removeInvlidChars = function (str) {
 				_Utils_chr('\''));
 		},
 		str);
+};
+var $author$project$OpenApi$Components$schemas = function (_v0) {
+	var contact = _v0.a;
+	return contact.schemas;
 };
 var $author$project$OpenApi$Info$title = function (_v0) {
 	var info = _v0.a;
@@ -13461,7 +13473,11 @@ var $author$project$Main$update = F2(
 														$mdgriffith$elm_codegen$Elm$Declare$fn,
 														$elm_community$string_extra$String$Extra$camelize(
 															$author$project$Main$removeInvlidChars(
-																$author$project$Main$makeNamespaceValid('get' + url))),
+																$author$project$Main$makeNamespaceValid(
+																	A2(
+																		$elm$core$Maybe$withDefault,
+																		url,
+																		$author$project$OpenApi$Operation$operationId(operation))))),
 														_Utils_Tuple2('toMsg', $elm$core$Maybe$Nothing),
 														function (toMsg) {
 															return $author$project$Gen$Http$get(
@@ -13494,6 +13510,13 @@ var $author$project$Main$update = F2(
 						_List_fromArray(
 							[namespace]),
 						pathDeclarations);
+					var componentsDeclarations = A2(
+						$elm$core$Maybe$withDefault,
+						$elm$core$Dict$empty,
+						A2(
+							$elm$core$Maybe$map,
+							$author$project$OpenApi$Components$schemas,
+							$author$project$OpenApi$components(apiSpec)));
 					return $author$project$Main$writeFile(
 						_Utils_Tuple2(file.path, file.contents));
 				}());

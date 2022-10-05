@@ -9,107 +9,107 @@ import Json.Decode
 import Result
 
 
-get toMsg =
+metaRoot toMsg =
     Http.get { url = "/", expect = Http.expectJson toMsg 55 }
 
 
-getApp toMsg =
+appsGetAuthenticated toMsg =
     Http.get { url = "/app", expect = Http.expectJson toMsg 55 }
 
 
-getAppHookConfig toMsg =
+appsGetWebhookConfigForApp toMsg =
     Http.get { url = "/app/hook/config", expect = Http.expectJson toMsg 55 }
 
 
-getAppHookDeliveries toMsg =
+appsListWebhookDeliveries toMsg =
     Http.get { url = "/app/hook/deliveries", expect = Http.expectJson toMsg 55 }
 
 
-getAppHookDeliveriesDeliveryId toMsg =
+appsGetWebhookDelivery toMsg =
     Http.get
         { url = "/app/hook/deliveries/{delivery_id}"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getAppInstallations toMsg =
+appsListInstallations toMsg =
     Http.get { url = "/app/installations", expect = Http.expectJson toMsg 55 }
 
 
-getAppInstallationsInstallationId toMsg =
+appsGetInstallation toMsg =
     Http.get
         { url = "/app/installations/{installation_id}"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getAppsAppSlug toMsg =
+appsGetBySlug toMsg =
     Http.get { url = "/apps/{app_slug}", expect = Http.expectJson toMsg 55 }
 
 
-getCodesOfConduct toMsg =
+codesOfConductGetAllCodesOfConduct toMsg =
     Http.get { url = "/codes_of_conduct", expect = Http.expectJson toMsg 55 }
 
 
-getCodesOfConductKey toMsg =
+codesOfConductGetConductCode toMsg =
     Http.get
         { url = "/codes_of_conduct/{key}", expect = Http.expectJson toMsg 55 }
 
 
-getEmojis toMsg =
+emojisGet toMsg =
     Http.get { url = "/emojis", expect = Http.expectJson toMsg 55 }
 
 
-getEnterpriseInstallationEnterpriseOrOrgServerStatistics toMsg =
+enterpriseAdminGetServerStatistics toMsg =
     Http.get
         { url = "/enterprise-installation/{enterprise_or_org}/server-statistics"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getEnterprisesEnterpriseActionsCacheUsage toMsg =
+actionsGetActionsCacheUsageForEnterprise toMsg =
     Http.get
         { url = "/enterprises/{enterprise}/actions/cache/usage"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getEnterprisesEnterpriseActionsPermissions toMsg =
+enterpriseAdminGetGithubActionsPermissionsEnterprise toMsg =
     Http.get
         { url = "/enterprises/{enterprise}/actions/permissions"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getEnterprisesEnterpriseActionsPermissionsOrganizations toMsg =
+enterpriseAdminListSelectedOrganizationsEnabledGithubActionsEnterprise toMsg =
     Http.get
         { url = "/enterprises/{enterprise}/actions/permissions/organizations"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getEnterprisesEnterpriseActionsPermissionsSelectedActions toMsg =
+enterpriseAdminGetAllowedActionsEnterprise toMsg =
     Http.get
         { url = "/enterprises/{enterprise}/actions/permissions/selected-actions"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getEnterprisesEnterpriseActionsPermissionsWorkflow toMsg =
+actionsGetGithubActionsDefaultWorkflowPermissionsEnterprise toMsg =
     Http.get
         { url = "/enterprises/{enterprise}/actions/permissions/workflow"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getEnterprisesEnterpriseActionsRunnerGroups toMsg =
+enterpriseAdminListSelfHostedRunnerGroupsForEnterprise toMsg =
     Http.get
         { url = "/enterprises/{enterprise}/actions/runner-groups"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getEnterprisesEnterpriseActionsRunnerGroupsRunnerGroupId toMsg =
+enterpriseAdminGetSelfHostedRunnerGroupForEnterprise toMsg =
     Http.get
         { url =
             "/enterprises/{enterprise}/actions/runner-groups/{runner_group_id}"
@@ -117,7 +117,7 @@ getEnterprisesEnterpriseActionsRunnerGroupsRunnerGroupId toMsg =
         }
 
 
-getEnterprisesEnterpriseActionsRunnerGroupsRunnerGroupIdOrganizations toMsg =
+enterpriseAdminListOrgAccessToSelfHostedRunnerGroupInEnterprise toMsg =
     Http.get
         { url =
             "/enterprises/{enterprise}/actions/runner-groups/{runner_group_id}/organizations"
@@ -125,7 +125,7 @@ getEnterprisesEnterpriseActionsRunnerGroupsRunnerGroupIdOrganizations toMsg =
         }
 
 
-getEnterprisesEnterpriseActionsRunnerGroupsRunnerGroupIdRunners toMsg =
+enterpriseAdminListSelfHostedRunnersInGroupForEnterprise toMsg =
     Http.get
         { url =
             "/enterprises/{enterprise}/actions/runner-groups/{runner_group_id}/runners"
@@ -133,288 +133,288 @@ getEnterprisesEnterpriseActionsRunnerGroupsRunnerGroupIdRunners toMsg =
         }
 
 
-getEnterprisesEnterpriseActionsRunners toMsg =
+enterpriseAdminListSelfHostedRunnersForEnterprise toMsg =
     Http.get
         { url = "/enterprises/{enterprise}/actions/runners"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getEnterprisesEnterpriseActionsRunnersDownloads toMsg =
+enterpriseAdminListRunnerApplicationsForEnterprise toMsg =
     Http.get
         { url = "/enterprises/{enterprise}/actions/runners/downloads"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getEnterprisesEnterpriseActionsRunnersRunnerId toMsg =
+enterpriseAdminGetSelfHostedRunnerForEnterprise toMsg =
     Http.get
         { url = "/enterprises/{enterprise}/actions/runners/{runner_id}"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getEnterprisesEnterpriseActionsRunnersRunnerIdLabels toMsg =
+enterpriseAdminListLabelsForSelfHostedRunnerForEnterprise toMsg =
     Http.get
         { url = "/enterprises/{enterprise}/actions/runners/{runner_id}/labels"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getEnterprisesEnterpriseCodeScanningAlerts toMsg =
+codeScanningListAlertsForEnterprise toMsg =
     Http.get
         { url = "/enterprises/{enterprise}/code-scanning/alerts"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getEnterprisesEnterpriseSecretScanningAlerts toMsg =
+secretScanningListAlertsForEnterprise toMsg =
     Http.get
         { url = "/enterprises/{enterprise}/secret-scanning/alerts"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getEnterprisesEnterpriseSettingsBillingAdvancedSecurity toMsg =
+billingGetGithubAdvancedSecurityBillingGhe toMsg =
     Http.get
         { url = "/enterprises/{enterprise}/settings/billing/advanced-security"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getEvents toMsg =
+activityListPublicEvents toMsg =
     Http.get { url = "/events", expect = Http.expectJson toMsg 55 }
 
 
-getFeeds toMsg =
+activityGetFeeds toMsg =
     Http.get { url = "/feeds", expect = Http.expectJson toMsg 55 }
 
 
-getGists toMsg =
+gistsList toMsg =
     Http.get { url = "/gists", expect = Http.expectJson toMsg 55 }
 
 
-getGistsPublic toMsg =
+gistsListPublic toMsg =
     Http.get { url = "/gists/public", expect = Http.expectJson toMsg 55 }
 
 
-getGistsStarred toMsg =
+gistsListStarred toMsg =
     Http.get { url = "/gists/starred", expect = Http.expectJson toMsg 55 }
 
 
-getGistsGistId toMsg =
+gistsGet toMsg =
     Http.get { url = "/gists/{gist_id}", expect = Http.expectJson toMsg 55 }
 
 
-getGistsGistIdComments toMsg =
+gistsListComments toMsg =
     Http.get
         { url = "/gists/{gist_id}/comments", expect = Http.expectJson toMsg 55 }
 
 
-getGistsGistIdCommentsCommentId toMsg =
+gistsGetComment toMsg =
     Http.get
         { url = "/gists/{gist_id}/comments/{comment_id}"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getGistsGistIdCommits toMsg =
+gistsListCommits toMsg =
     Http.get
         { url = "/gists/{gist_id}/commits", expect = Http.expectJson toMsg 55 }
 
 
-getGistsGistIdForks toMsg =
+gistsListForks toMsg =
     Http.get
         { url = "/gists/{gist_id}/forks", expect = Http.expectJson toMsg 55 }
 
 
-getGistsGistIdStar toMsg =
+gistsCheckIsStarred toMsg =
     Http.get
         { url = "/gists/{gist_id}/star", expect = Http.expectJson toMsg 55 }
 
 
-getGistsGistIdSha toMsg =
+gistsGetRevision toMsg =
     Http.get
         { url = "/gists/{gist_id}/{sha}", expect = Http.expectJson toMsg 55 }
 
 
-getGitignoreTemplates toMsg =
+gitignoreGetAllTemplates toMsg =
     Http.get { url = "/gitignore/templates", expect = Http.expectJson toMsg 55 }
 
 
-getGitignoreTemplatesName toMsg =
+gitignoreGetTemplate toMsg =
     Http.get
         { url = "/gitignore/templates/{name}"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getInstallationRepositories toMsg =
+appsListReposAccessibleToInstallation toMsg =
     Http.get
         { url = "/installation/repositories"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getIssues toMsg =
+issuesList toMsg =
     Http.get { url = "/issues", expect = Http.expectJson toMsg 55 }
 
 
-getLicenses toMsg =
+licensesGetAllCommonlyUsed toMsg =
     Http.get { url = "/licenses", expect = Http.expectJson toMsg 55 }
 
 
-getLicensesLicense toMsg =
+licensesGet toMsg =
     Http.get { url = "/licenses/{license}", expect = Http.expectJson toMsg 55 }
 
 
-getMarketplaceListingAccountsAccountId toMsg =
+appsGetSubscriptionPlanForAccount toMsg =
     Http.get
         { url = "/marketplace_listing/accounts/{account_id}"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getMarketplaceListingPlans toMsg =
+appsListPlans toMsg =
     Http.get
         { url = "/marketplace_listing/plans"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getMarketplaceListingPlansPlanIdAccounts toMsg =
+appsListAccountsForPlan toMsg =
     Http.get
         { url = "/marketplace_listing/plans/{plan_id}/accounts"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getMarketplaceListingStubbedAccountsAccountId toMsg =
+appsGetSubscriptionPlanForAccountStubbed toMsg =
     Http.get
         { url = "/marketplace_listing/stubbed/accounts/{account_id}"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getMarketplaceListingStubbedPlans toMsg =
+appsListPlansStubbed toMsg =
     Http.get
         { url = "/marketplace_listing/stubbed/plans"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getMarketplaceListingStubbedPlansPlanIdAccounts toMsg =
+appsListAccountsForPlanStubbed toMsg =
     Http.get
         { url = "/marketplace_listing/stubbed/plans/{plan_id}/accounts"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getMeta toMsg =
+metaGet toMsg =
     Http.get { url = "/meta", expect = Http.expectJson toMsg 55 }
 
 
-getNetworksOwnerRepoEvents toMsg =
+activityListPublicEventsForRepoNetwork toMsg =
     Http.get
         { url = "/networks/{owner}/{repo}/events"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getNotifications toMsg =
+activityListNotificationsForAuthenticatedUser toMsg =
     Http.get { url = "/notifications", expect = Http.expectJson toMsg 55 }
 
 
-getNotificationsThreadsThreadId toMsg =
+activityGetThread toMsg =
     Http.get
         { url = "/notifications/threads/{thread_id}"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getNotificationsThreadsThreadIdSubscription toMsg =
+activityGetThreadSubscriptionForAuthenticatedUser toMsg =
     Http.get
         { url = "/notifications/threads/{thread_id}/subscription"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getOctocat toMsg =
+metaGetOctocat toMsg =
     Http.get { url = "/octocat", expect = Http.expectJson toMsg 55 }
 
 
-getOrganizations toMsg =
+orgsList toMsg =
     Http.get { url = "/organizations", expect = Http.expectJson toMsg 55 }
 
 
-getOrganizationsOrganizationIdCustomRoles toMsg =
+orgsListCustomRoles toMsg =
     Http.get
         { url = "/organizations/{organization_id}/custom_roles"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getOrgsOrg toMsg =
+orgsGet toMsg =
     Http.get { url = "/orgs/{org}", expect = Http.expectJson toMsg 55 }
 
 
-getOrgsOrgActionsCacheUsage toMsg =
+actionsGetActionsCacheUsageForOrg toMsg =
     Http.get
         { url = "/orgs/{org}/actions/cache/usage"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getOrgsOrgActionsCacheUsageByRepository toMsg =
+actionsGetActionsCacheUsageByRepoForOrg toMsg =
     Http.get
         { url = "/orgs/{org}/actions/cache/usage-by-repository"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getOrgsOrgActionsPermissions toMsg =
+actionsGetGithubActionsPermissionsOrganization toMsg =
     Http.get
         { url = "/orgs/{org}/actions/permissions"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getOrgsOrgActionsPermissionsRepositories toMsg =
+actionsListSelectedRepositoriesEnabledGithubActionsOrganization toMsg =
     Http.get
         { url = "/orgs/{org}/actions/permissions/repositories"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getOrgsOrgActionsPermissionsSelectedActions toMsg =
+actionsGetAllowedActionsOrganization toMsg =
     Http.get
         { url = "/orgs/{org}/actions/permissions/selected-actions"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getOrgsOrgActionsPermissionsWorkflow toMsg =
+actionsGetGithubActionsDefaultWorkflowPermissionsOrganization toMsg =
     Http.get
         { url = "/orgs/{org}/actions/permissions/workflow"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getOrgsOrgActionsRunnerGroups toMsg =
+actionsListSelfHostedRunnerGroupsForOrg toMsg =
     Http.get
         { url = "/orgs/{org}/actions/runner-groups"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getOrgsOrgActionsRunnerGroupsRunnerGroupId toMsg =
+actionsGetSelfHostedRunnerGroupForOrg toMsg =
     Http.get
         { url = "/orgs/{org}/actions/runner-groups/{runner_group_id}"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getOrgsOrgActionsRunnerGroupsRunnerGroupIdRepositories toMsg =
+actionsListRepoAccessToSelfHostedRunnerGroupInOrg toMsg =
     Http.get
         { url =
             "/orgs/{org}/actions/runner-groups/{runner_group_id}/repositories"
@@ -422,308 +422,308 @@ getOrgsOrgActionsRunnerGroupsRunnerGroupIdRepositories toMsg =
         }
 
 
-getOrgsOrgActionsRunnerGroupsRunnerGroupIdRunners toMsg =
+actionsListSelfHostedRunnersInGroupForOrg toMsg =
     Http.get
         { url = "/orgs/{org}/actions/runner-groups/{runner_group_id}/runners"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getOrgsOrgActionsRunners toMsg =
+actionsListSelfHostedRunnersForOrg toMsg =
     Http.get
         { url = "/orgs/{org}/actions/runners"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getOrgsOrgActionsRunnersDownloads toMsg =
+actionsListRunnerApplicationsForOrg toMsg =
     Http.get
         { url = "/orgs/{org}/actions/runners/downloads"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getOrgsOrgActionsRunnersRunnerId toMsg =
+actionsGetSelfHostedRunnerForOrg toMsg =
     Http.get
         { url = "/orgs/{org}/actions/runners/{runner_id}"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getOrgsOrgActionsRunnersRunnerIdLabels toMsg =
+actionsListLabelsForSelfHostedRunnerForOrg toMsg =
     Http.get
         { url = "/orgs/{org}/actions/runners/{runner_id}/labels"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getOrgsOrgActionsSecrets toMsg =
+actionsListOrgSecrets toMsg =
     Http.get
         { url = "/orgs/{org}/actions/secrets"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getOrgsOrgActionsSecretsPublicKey toMsg =
+actionsGetOrgPublicKey toMsg =
     Http.get
         { url = "/orgs/{org}/actions/secrets/public-key"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getOrgsOrgActionsSecretsSecretName toMsg =
+actionsGetOrgSecret toMsg =
     Http.get
         { url = "/orgs/{org}/actions/secrets/{secret_name}"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getOrgsOrgActionsSecretsSecretNameRepositories toMsg =
+actionsListSelectedReposForOrgSecret toMsg =
     Http.get
         { url = "/orgs/{org}/actions/secrets/{secret_name}/repositories"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getOrgsOrgBlocks toMsg =
+orgsListBlockedUsers toMsg =
     Http.get { url = "/orgs/{org}/blocks", expect = Http.expectJson toMsg 55 }
 
 
-getOrgsOrgBlocksUsername toMsg =
+orgsCheckBlockedUser toMsg =
     Http.get
         { url = "/orgs/{org}/blocks/{username}"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getOrgsOrgCodeScanningAlerts toMsg =
+codeScanningListAlertsForOrg toMsg =
     Http.get
         { url = "/orgs/{org}/code-scanning/alerts"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getOrgsOrgCodespaces toMsg =
+codespacesListInOrganization toMsg =
     Http.get
         { url = "/orgs/{org}/codespaces", expect = Http.expectJson toMsg 55 }
 
 
-getOrgsOrgCodespacesSecrets toMsg =
+codespacesListOrgSecrets toMsg =
     Http.get
         { url = "/orgs/{org}/codespaces/secrets"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getOrgsOrgCodespacesSecretsPublicKey toMsg =
+codespacesGetOrgPublicKey toMsg =
     Http.get
         { url = "/orgs/{org}/codespaces/secrets/public-key"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getOrgsOrgCodespacesSecretsSecretName toMsg =
+codespacesGetOrgSecret toMsg =
     Http.get
         { url = "/orgs/{org}/codespaces/secrets/{secret_name}"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getOrgsOrgCodespacesSecretsSecretNameRepositories toMsg =
+codespacesListSelectedReposForOrgSecret toMsg =
     Http.get
         { url = "/orgs/{org}/codespaces/secrets/{secret_name}/repositories"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getOrgsOrgDependabotSecrets toMsg =
+dependabotListOrgSecrets toMsg =
     Http.get
         { url = "/orgs/{org}/dependabot/secrets"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getOrgsOrgDependabotSecretsPublicKey toMsg =
+dependabotGetOrgPublicKey toMsg =
     Http.get
         { url = "/orgs/{org}/dependabot/secrets/public-key"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getOrgsOrgDependabotSecretsSecretName toMsg =
+dependabotGetOrgSecret toMsg =
     Http.get
         { url = "/orgs/{org}/dependabot/secrets/{secret_name}"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getOrgsOrgDependabotSecretsSecretNameRepositories toMsg =
+dependabotListSelectedReposForOrgSecret toMsg =
     Http.get
         { url = "/orgs/{org}/dependabot/secrets/{secret_name}/repositories"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getOrgsOrgEvents toMsg =
+activityListPublicOrgEvents toMsg =
     Http.get { url = "/orgs/{org}/events", expect = Http.expectJson toMsg 55 }
 
 
-getOrgsOrgFailedInvitations toMsg =
+orgsListFailedInvitations toMsg =
     Http.get
         { url = "/orgs/{org}/failed_invitations"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getOrgsOrgFineGrainedPermissions toMsg =
+orgsListFineGrainedPermissions toMsg =
     Http.get
         { url = "/orgs/{org}/fine_grained_permissions"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getOrgsOrgHooks toMsg =
+orgsListWebhooks toMsg =
     Http.get { url = "/orgs/{org}/hooks", expect = Http.expectJson toMsg 55 }
 
 
-getOrgsOrgHooksHookId toMsg =
+orgsGetWebhook toMsg =
     Http.get
         { url = "/orgs/{org}/hooks/{hook_id}"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getOrgsOrgHooksHookIdConfig toMsg =
+orgsGetWebhookConfigForOrg toMsg =
     Http.get
         { url = "/orgs/{org}/hooks/{hook_id}/config"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getOrgsOrgHooksHookIdDeliveries toMsg =
+orgsListWebhookDeliveries toMsg =
     Http.get
         { url = "/orgs/{org}/hooks/{hook_id}/deliveries"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getOrgsOrgHooksHookIdDeliveriesDeliveryId toMsg =
+orgsGetWebhookDelivery toMsg =
     Http.get
         { url = "/orgs/{org}/hooks/{hook_id}/deliveries/{delivery_id}"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getOrgsOrgInstallation toMsg =
+appsGetOrgInstallation toMsg =
     Http.get
         { url = "/orgs/{org}/installation", expect = Http.expectJson toMsg 55 }
 
 
-getOrgsOrgInstallations toMsg =
+orgsListAppInstallations toMsg =
     Http.get
         { url = "/orgs/{org}/installations", expect = Http.expectJson toMsg 55 }
 
 
-getOrgsOrgInteractionLimits toMsg =
+interactionsGetRestrictionsForOrg toMsg =
     Http.get
         { url = "/orgs/{org}/interaction-limits"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getOrgsOrgInvitations toMsg =
+orgsListPendingInvitations toMsg =
     Http.get
         { url = "/orgs/{org}/invitations", expect = Http.expectJson toMsg 55 }
 
 
-getOrgsOrgInvitationsInvitationIdTeams toMsg =
+orgsListInvitationTeams toMsg =
     Http.get
         { url = "/orgs/{org}/invitations/{invitation_id}/teams"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getOrgsOrgIssues toMsg =
+issuesListForOrg toMsg =
     Http.get { url = "/orgs/{org}/issues", expect = Http.expectJson toMsg 55 }
 
 
-getOrgsOrgMembers toMsg =
+orgsListMembers toMsg =
     Http.get { url = "/orgs/{org}/members", expect = Http.expectJson toMsg 55 }
 
 
-getOrgsOrgMembersUsername toMsg =
+orgsCheckMembershipForUser toMsg =
     Http.get
         { url = "/orgs/{org}/members/{username}"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getOrgsOrgMembersUsernameCodespaces toMsg =
+codespacesGetCodespacesForUserInOrg toMsg =
     Http.get
         { url = "/orgs/{org}/members/{username}/codespaces"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getOrgsOrgMembershipsUsername toMsg =
+orgsGetMembershipForUser toMsg =
     Http.get
         { url = "/orgs/{org}/memberships/{username}"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getOrgsOrgMigrations toMsg =
+migrationsListForOrg toMsg =
     Http.get
         { url = "/orgs/{org}/migrations", expect = Http.expectJson toMsg 55 }
 
 
-getOrgsOrgMigrationsMigrationId toMsg =
+migrationsGetStatusForOrg toMsg =
     Http.get
         { url = "/orgs/{org}/migrations/{migration_id}"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getOrgsOrgMigrationsMigrationIdArchive toMsg =
+migrationsDownloadArchiveForOrg toMsg =
     Http.get
         { url = "/orgs/{org}/migrations/{migration_id}/archive"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getOrgsOrgMigrationsMigrationIdRepositories toMsg =
+migrationsListReposForOrg toMsg =
     Http.get
         { url = "/orgs/{org}/migrations/{migration_id}/repositories"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getOrgsOrgOutsideCollaborators toMsg =
+orgsListOutsideCollaborators toMsg =
     Http.get
         { url = "/orgs/{org}/outside_collaborators"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getOrgsOrgPackages toMsg =
+packagesListPackagesForOrganization toMsg =
     Http.get { url = "/orgs/{org}/packages", expect = Http.expectJson toMsg 55 }
 
 
-getOrgsOrgPackagesPackageTypePackageName toMsg =
+packagesGetPackageForOrganization toMsg =
     Http.get
         { url = "/orgs/{org}/packages/{package_type}/{package_name}"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getOrgsOrgPackagesPackageTypePackageNameVersions toMsg =
+packagesGetAllPackageVersionsForPackageOwnedByOrg toMsg =
     Http.get
         { url = "/orgs/{org}/packages/{package_type}/{package_name}/versions"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getOrgsOrgPackagesPackageTypePackageNameVersionsPackageVersionId toMsg =
+packagesGetPackageVersionForOrganization toMsg =
     Http.get
         { url =
             "/orgs/{org}/packages/{package_type}/{package_name}/versions/{package_version_id}"
@@ -731,96 +731,96 @@ getOrgsOrgPackagesPackageTypePackageNameVersionsPackageVersionId toMsg =
         }
 
 
-getOrgsOrgProjects toMsg =
+projectsListForOrg toMsg =
     Http.get { url = "/orgs/{org}/projects", expect = Http.expectJson toMsg 55 }
 
 
-getOrgsOrgPublicMembers toMsg =
+orgsListPublicMembers toMsg =
     Http.get
         { url = "/orgs/{org}/public_members"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getOrgsOrgPublicMembersUsername toMsg =
+orgsCheckPublicMembershipForUser toMsg =
     Http.get
         { url = "/orgs/{org}/public_members/{username}"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getOrgsOrgRepos toMsg =
+reposListForOrg toMsg =
     Http.get { url = "/orgs/{org}/repos", expect = Http.expectJson toMsg 55 }
 
 
-getOrgsOrgSecretScanningAlerts toMsg =
+secretScanningListAlertsForOrg toMsg =
     Http.get
         { url = "/orgs/{org}/secret-scanning/alerts"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getOrgsOrgSecurityManagers toMsg =
+orgsListSecurityManagerTeams toMsg =
     Http.get
         { url = "/orgs/{org}/security-managers"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getOrgsOrgSettingsBillingActions toMsg =
+billingGetGithubActionsBillingOrg toMsg =
     Http.get
         { url = "/orgs/{org}/settings/billing/actions"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getOrgsOrgSettingsBillingAdvancedSecurity toMsg =
+billingGetGithubAdvancedSecurityBillingOrg toMsg =
     Http.get
         { url = "/orgs/{org}/settings/billing/advanced-security"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getOrgsOrgSettingsBillingPackages toMsg =
+billingGetGithubPackagesBillingOrg toMsg =
     Http.get
         { url = "/orgs/{org}/settings/billing/packages"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getOrgsOrgSettingsBillingSharedStorage toMsg =
+billingGetSharedStorageBillingOrg toMsg =
     Http.get
         { url = "/orgs/{org}/settings/billing/shared-storage"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getOrgsOrgTeams toMsg =
+teamsList toMsg =
     Http.get { url = "/orgs/{org}/teams", expect = Http.expectJson toMsg 55 }
 
 
-getOrgsOrgTeamsTeamSlug toMsg =
+teamsGetByName toMsg =
     Http.get
         { url = "/orgs/{org}/teams/{team_slug}"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getOrgsOrgTeamsTeamSlugDiscussions toMsg =
+teamsListDiscussionsInOrg toMsg =
     Http.get
         { url = "/orgs/{org}/teams/{team_slug}/discussions"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getOrgsOrgTeamsTeamSlugDiscussionsDiscussionNumber toMsg =
+teamsGetDiscussionInOrg toMsg =
     Http.get
         { url = "/orgs/{org}/teams/{team_slug}/discussions/{discussion_number}"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getOrgsOrgTeamsTeamSlugDiscussionsDiscussionNumberComments toMsg =
+teamsListDiscussionCommentsInOrg toMsg =
     Http.get
         { url =
             "/orgs/{org}/teams/{team_slug}/discussions/{discussion_number}/comments"
@@ -828,7 +828,7 @@ getOrgsOrgTeamsTeamSlugDiscussionsDiscussionNumberComments toMsg =
         }
 
 
-getOrgsOrgTeamsTeamSlugDiscussionsDiscussionNumberCommentsCommentNumber toMsg =
+teamsGetDiscussionCommentInOrg toMsg =
     Http.get
         { url =
             "/orgs/{org}/teams/{team_slug}/discussions/{discussion_number}/comments/{comment_number}"
@@ -836,7 +836,7 @@ getOrgsOrgTeamsTeamSlugDiscussionsDiscussionNumberCommentsCommentNumber toMsg =
         }
 
 
-getOrgsOrgTeamsTeamSlugDiscussionsDiscussionNumberCommentsCommentNumberReactions toMsg =
+reactionsListForTeamDiscussionCommentInOrg toMsg =
     Http.get
         { url =
             "/orgs/{org}/teams/{team_slug}/discussions/{discussion_number}/comments/{comment_number}/reactions"
@@ -844,7 +844,7 @@ getOrgsOrgTeamsTeamSlugDiscussionsDiscussionNumberCommentsCommentNumberReactions
         }
 
 
-getOrgsOrgTeamsTeamSlugDiscussionsDiscussionNumberReactions toMsg =
+reactionsListForTeamDiscussionInOrg toMsg =
     Http.get
         { url =
             "/orgs/{org}/teams/{team_slug}/discussions/{discussion_number}/reactions"
@@ -852,133 +852,133 @@ getOrgsOrgTeamsTeamSlugDiscussionsDiscussionNumberReactions toMsg =
         }
 
 
-getOrgsOrgTeamsTeamSlugInvitations toMsg =
+teamsListPendingInvitationsInOrg toMsg =
     Http.get
         { url = "/orgs/{org}/teams/{team_slug}/invitations"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getOrgsOrgTeamsTeamSlugMembers toMsg =
+teamsListMembersInOrg toMsg =
     Http.get
         { url = "/orgs/{org}/teams/{team_slug}/members"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getOrgsOrgTeamsTeamSlugMembershipsUsername toMsg =
+teamsGetMembershipForUserInOrg toMsg =
     Http.get
         { url = "/orgs/{org}/teams/{team_slug}/memberships/{username}"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getOrgsOrgTeamsTeamSlugProjects toMsg =
+teamsListProjectsInOrg toMsg =
     Http.get
         { url = "/orgs/{org}/teams/{team_slug}/projects"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getOrgsOrgTeamsTeamSlugProjectsProjectId toMsg =
+teamsCheckPermissionsForProjectInOrg toMsg =
     Http.get
         { url = "/orgs/{org}/teams/{team_slug}/projects/{project_id}"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getOrgsOrgTeamsTeamSlugRepos toMsg =
+teamsListReposInOrg toMsg =
     Http.get
         { url = "/orgs/{org}/teams/{team_slug}/repos"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getOrgsOrgTeamsTeamSlugReposOwnerRepo toMsg =
+teamsCheckPermissionsForRepoInOrg toMsg =
     Http.get
         { url = "/orgs/{org}/teams/{team_slug}/repos/{owner}/{repo}"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getOrgsOrgTeamsTeamSlugTeams toMsg =
+teamsListChildInOrg toMsg =
     Http.get
         { url = "/orgs/{org}/teams/{team_slug}/teams"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getProjectsColumnsCardsCardId toMsg =
+projectsGetCard toMsg =
     Http.get
         { url = "/projects/columns/cards/{card_id}"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getProjectsColumnsColumnId toMsg =
+projectsGetColumn toMsg =
     Http.get
         { url = "/projects/columns/{column_id}"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getProjectsColumnsColumnIdCards toMsg =
+projectsListCards toMsg =
     Http.get
         { url = "/projects/columns/{column_id}/cards"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getProjectsProjectId toMsg =
+projectsGet toMsg =
     Http.get
         { url = "/projects/{project_id}", expect = Http.expectJson toMsg 55 }
 
 
-getProjectsProjectIdCollaborators toMsg =
+projectsListCollaborators toMsg =
     Http.get
         { url = "/projects/{project_id}/collaborators"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getProjectsProjectIdCollaboratorsUsernamePermission toMsg =
+projectsGetPermissionForUser toMsg =
     Http.get
         { url = "/projects/{project_id}/collaborators/{username}/permission"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getProjectsProjectIdColumns toMsg =
+projectsListColumns toMsg =
     Http.get
         { url = "/projects/{project_id}/columns"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getRateLimit toMsg =
+rateLimitGet toMsg =
     Http.get { url = "/rate_limit", expect = Http.expectJson toMsg 55 }
 
 
-getReposOwnerRepo toMsg =
+reposGet toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}", expect = Http.expectJson toMsg 55 }
 
 
-getReposOwnerRepoActionsArtifacts toMsg =
+actionsListArtifactsForRepo toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/actions/artifacts"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoActionsArtifactsArtifactId toMsg =
+actionsGetArtifact toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/actions/artifacts/{artifact_id}"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoActionsArtifactsArtifactIdArchiveFormat toMsg =
+actionsDownloadArtifact toMsg =
     Http.get
         { url =
             "/repos/{owner}/{repo}/actions/artifacts/{artifact_id}/{archive_format}"
@@ -986,119 +986,119 @@ getReposOwnerRepoActionsArtifactsArtifactIdArchiveFormat toMsg =
         }
 
 
-getReposOwnerRepoActionsCacheUsage toMsg =
+actionsGetActionsCacheUsage toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/actions/cache/usage"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoActionsCaches toMsg =
+actionsGetActionsCacheList toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/actions/caches"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoActionsJobsJobId toMsg =
+actionsGetJobForWorkflowRun toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/actions/jobs/{job_id}"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoActionsJobsJobIdLogs toMsg =
+actionsDownloadJobLogsForWorkflowRun toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/actions/jobs/{job_id}/logs"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoActionsPermissions toMsg =
+actionsGetGithubActionsPermissionsRepository toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/actions/permissions"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoActionsPermissionsAccess toMsg =
+actionsGetWorkflowAccessToRepository toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/actions/permissions/access"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoActionsPermissionsSelectedActions toMsg =
+actionsGetAllowedActionsRepository toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/actions/permissions/selected-actions"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoActionsPermissionsWorkflow toMsg =
+actionsGetGithubActionsDefaultWorkflowPermissionsRepository toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/actions/permissions/workflow"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoActionsRunners toMsg =
+actionsListSelfHostedRunnersForRepo toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/actions/runners"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoActionsRunnersDownloads toMsg =
+actionsListRunnerApplicationsForRepo toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/actions/runners/downloads"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoActionsRunnersRunnerId toMsg =
+actionsGetSelfHostedRunnerForRepo toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/actions/runners/{runner_id}"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoActionsRunnersRunnerIdLabels toMsg =
+actionsListLabelsForSelfHostedRunnerForRepo toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/actions/runners/{runner_id}/labels"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoActionsRuns toMsg =
+actionsListWorkflowRunsForRepo toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/actions/runs"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoActionsRunsRunId toMsg =
+actionsGetWorkflowRun toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/actions/runs/{run_id}"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoActionsRunsRunIdApprovals toMsg =
+actionsGetReviewsForRun toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/actions/runs/{run_id}/approvals"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoActionsRunsRunIdArtifacts toMsg =
+actionsListWorkflowRunArtifacts toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/actions/runs/{run_id}/artifacts"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoActionsRunsRunIdAttemptsAttemptNumber toMsg =
+actionsGetWorkflowRunAttempt toMsg =
     Http.get
         { url =
             "/repos/{owner}/{repo}/actions/runs/{run_id}/attempts/{attempt_number}"
@@ -1106,7 +1106,7 @@ getReposOwnerRepoActionsRunsRunIdAttemptsAttemptNumber toMsg =
         }
 
 
-getReposOwnerRepoActionsRunsRunIdAttemptsAttemptNumberJobs toMsg =
+actionsListJobsForWorkflowRunAttempt toMsg =
     Http.get
         { url =
             "/repos/{owner}/{repo}/actions/runs/{run_id}/attempts/{attempt_number}/jobs"
@@ -1114,7 +1114,7 @@ getReposOwnerRepoActionsRunsRunIdAttemptsAttemptNumberJobs toMsg =
         }
 
 
-getReposOwnerRepoActionsRunsRunIdAttemptsAttemptNumberLogs toMsg =
+actionsDownloadWorkflowRunAttemptLogs toMsg =
     Http.get
         { url =
             "/repos/{owner}/{repo}/actions/runs/{run_id}/attempts/{attempt_number}/logs"
@@ -1122,21 +1122,21 @@ getReposOwnerRepoActionsRunsRunIdAttemptsAttemptNumberLogs toMsg =
         }
 
 
-getReposOwnerRepoActionsRunsRunIdJobs toMsg =
+actionsListJobsForWorkflowRun toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/actions/runs/{run_id}/jobs"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoActionsRunsRunIdLogs toMsg =
+actionsDownloadWorkflowRunLogs toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/actions/runs/{run_id}/logs"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoActionsRunsRunIdPendingDeployments toMsg =
+actionsGetPendingDeploymentsForRun toMsg =
     Http.get
         { url =
             "/repos/{owner}/{repo}/actions/runs/{run_id}/pending_deployments"
@@ -1144,112 +1144,112 @@ getReposOwnerRepoActionsRunsRunIdPendingDeployments toMsg =
         }
 
 
-getReposOwnerRepoActionsRunsRunIdTiming toMsg =
+actionsGetWorkflowRunUsage toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/actions/runs/{run_id}/timing"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoActionsSecrets toMsg =
+actionsListRepoSecrets toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/actions/secrets"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoActionsSecretsPublicKey toMsg =
+actionsGetRepoPublicKey toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/actions/secrets/public-key"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoActionsSecretsSecretName toMsg =
+actionsGetRepoSecret toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/actions/secrets/{secret_name}"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoActionsWorkflows toMsg =
+actionsListRepoWorkflows toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/actions/workflows"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoActionsWorkflowsWorkflowId toMsg =
+actionsGetWorkflow toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/actions/workflows/{workflow_id}"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoActionsWorkflowsWorkflowIdRuns toMsg =
+actionsListWorkflowRuns toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/actions/workflows/{workflow_id}/runs"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoActionsWorkflowsWorkflowIdTiming toMsg =
+actionsGetWorkflowUsage toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/actions/workflows/{workflow_id}/timing"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoAssignees toMsg =
+issuesListAssignees toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/assignees"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoAssigneesAssignee toMsg =
+issuesCheckUserCanBeAssigned toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/assignees/{assignee}"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoAutolinks toMsg =
+reposListAutolinks toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/autolinks"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoAutolinksAutolinkId toMsg =
+reposGetAutolink toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/autolinks/{autolink_id}"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoBranches toMsg =
+reposListBranches toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/branches"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoBranchesBranch toMsg =
+reposGetBranch toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/branches/{branch}"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoBranchesBranchProtection toMsg =
+reposGetBranchProtection toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/branches/{branch}/protection"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoBranchesBranchProtectionEnforceAdmins toMsg =
+reposGetAdminBranchProtection toMsg =
     Http.get
         { url =
             "/repos/{owner}/{repo}/branches/{branch}/protection/enforce_admins"
@@ -1257,7 +1257,7 @@ getReposOwnerRepoBranchesBranchProtectionEnforceAdmins toMsg =
         }
 
 
-getReposOwnerRepoBranchesBranchProtectionRequiredPullRequestReviews toMsg =
+reposGetPullRequestReviewProtection toMsg =
     Http.get
         { url =
             "/repos/{owner}/{repo}/branches/{branch}/protection/required_pull_request_reviews"
@@ -1265,7 +1265,7 @@ getReposOwnerRepoBranchesBranchProtectionRequiredPullRequestReviews toMsg =
         }
 
 
-getReposOwnerRepoBranchesBranchProtectionRequiredSignatures toMsg =
+reposGetCommitSignatureProtection toMsg =
     Http.get
         { url =
             "/repos/{owner}/{repo}/branches/{branch}/protection/required_signatures"
@@ -1273,7 +1273,7 @@ getReposOwnerRepoBranchesBranchProtectionRequiredSignatures toMsg =
         }
 
 
-getReposOwnerRepoBranchesBranchProtectionRequiredStatusChecks toMsg =
+reposGetStatusChecksProtection toMsg =
     Http.get
         { url =
             "/repos/{owner}/{repo}/branches/{branch}/protection/required_status_checks"
@@ -1281,7 +1281,7 @@ getReposOwnerRepoBranchesBranchProtectionRequiredStatusChecks toMsg =
         }
 
 
-getReposOwnerRepoBranchesBranchProtectionRequiredStatusChecksContexts toMsg =
+reposGetAllStatusCheckContexts toMsg =
     Http.get
         { url =
             "/repos/{owner}/{repo}/branches/{branch}/protection/required_status_checks/contexts"
@@ -1289,7 +1289,7 @@ getReposOwnerRepoBranchesBranchProtectionRequiredStatusChecksContexts toMsg =
         }
 
 
-getReposOwnerRepoBranchesBranchProtectionRestrictions toMsg =
+reposGetAccessRestrictions toMsg =
     Http.get
         { url =
             "/repos/{owner}/{repo}/branches/{branch}/protection/restrictions"
@@ -1297,7 +1297,7 @@ getReposOwnerRepoBranchesBranchProtectionRestrictions toMsg =
         }
 
 
-getReposOwnerRepoBranchesBranchProtectionRestrictionsApps toMsg =
+reposGetAppsWithAccessToProtectedBranch toMsg =
     Http.get
         { url =
             "/repos/{owner}/{repo}/branches/{branch}/protection/restrictions/apps"
@@ -1305,7 +1305,7 @@ getReposOwnerRepoBranchesBranchProtectionRestrictionsApps toMsg =
         }
 
 
-getReposOwnerRepoBranchesBranchProtectionRestrictionsTeams toMsg =
+reposGetTeamsWithAccessToProtectedBranch toMsg =
     Http.get
         { url =
             "/repos/{owner}/{repo}/branches/{branch}/protection/restrictions/teams"
@@ -1313,7 +1313,7 @@ getReposOwnerRepoBranchesBranchProtectionRestrictionsTeams toMsg =
         }
 
 
-getReposOwnerRepoBranchesBranchProtectionRestrictionsUsers toMsg =
+reposGetUsersWithAccessToProtectedBranch toMsg =
     Http.get
         { url =
             "/repos/{owner}/{repo}/branches/{branch}/protection/restrictions/users"
@@ -1321,49 +1321,49 @@ getReposOwnerRepoBranchesBranchProtectionRestrictionsUsers toMsg =
         }
 
 
-getReposOwnerRepoCheckRunsCheckRunId toMsg =
+checksGet toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/check-runs/{check_run_id}"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoCheckRunsCheckRunIdAnnotations toMsg =
+checksListAnnotations toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/check-runs/{check_run_id}/annotations"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoCheckSuitesCheckSuiteId toMsg =
+checksGetSuite toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/check-suites/{check_suite_id}"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoCheckSuitesCheckSuiteIdCheckRuns toMsg =
+checksListForSuite toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/check-suites/{check_suite_id}/check-runs"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoCodeScanningAlerts toMsg =
+codeScanningListAlertsForRepo toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/code-scanning/alerts"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoCodeScanningAlertsAlertNumber toMsg =
+codeScanningGetAlert toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/code-scanning/alerts/{alert_number}"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoCodeScanningAlertsAlertNumberInstances toMsg =
+codeScanningListAlertInstances toMsg =
     Http.get
         { url =
             "/repos/{owner}/{repo}/code-scanning/alerts/{alert_number}/instances"
@@ -1371,28 +1371,28 @@ getReposOwnerRepoCodeScanningAlertsAlertNumberInstances toMsg =
         }
 
 
-getReposOwnerRepoCodeScanningAnalyses toMsg =
+codeScanningListRecentAnalyses toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/code-scanning/analyses"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoCodeScanningAnalysesAnalysisId toMsg =
+codeScanningGetAnalysis toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/code-scanning/analyses/{analysis_id}"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoCodeScanningCodeqlDatabases toMsg =
+codeScanningListCodeqlDatabases toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/code-scanning/codeql/databases"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoCodeScanningCodeqlDatabasesLanguage toMsg =
+codeScanningGetCodeqlDatabase toMsg =
     Http.get
         { url =
             "/repos/{owner}/{repo}/code-scanning/codeql/databases/{language}"
@@ -1400,266 +1400,266 @@ getReposOwnerRepoCodeScanningCodeqlDatabasesLanguage toMsg =
         }
 
 
-getReposOwnerRepoCodeScanningSarifsSarifId toMsg =
+codeScanningGetSarif toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/code-scanning/sarifs/{sarif_id}"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoCodeownersErrors toMsg =
+reposCodeownersErrors toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/codeowners/errors"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoCodespaces toMsg =
+codespacesListInRepositoryForAuthenticatedUser toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/codespaces"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoCodespacesDevcontainers toMsg =
+codespacesListDevcontainersInRepositoryForAuthenticatedUser toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/codespaces/devcontainers"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoCodespacesMachines toMsg =
+codespacesRepoMachinesForAuthenticatedUser toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/codespaces/machines"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoCodespacesNew toMsg =
+codespacesPreFlightWithRepoForAuthenticatedUser toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/codespaces/new"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoCodespacesSecrets toMsg =
+codespacesListRepoSecrets toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/codespaces/secrets"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoCodespacesSecretsPublicKey toMsg =
+codespacesGetRepoPublicKey toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/codespaces/secrets/public-key"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoCodespacesSecretsSecretName toMsg =
+codespacesGetRepoSecret toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/codespaces/secrets/{secret_name}"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoCollaborators toMsg =
+reposListCollaborators toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/collaborators"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoCollaboratorsUsername toMsg =
+reposCheckCollaborator toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/collaborators/{username}"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoCollaboratorsUsernamePermission toMsg =
+reposGetCollaboratorPermissionLevel toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/collaborators/{username}/permission"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoComments toMsg =
+reposListCommitCommentsForRepo toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/comments"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoCommentsCommentId toMsg =
+reposGetCommitComment toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/comments/{comment_id}"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoCommentsCommentIdReactions toMsg =
+reactionsListForCommitComment toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/comments/{comment_id}/reactions"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoCommits toMsg =
+reposListCommits toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/commits"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoCommitsCommitShaBranchesWhereHead toMsg =
+reposListBranchesForHeadCommit toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/commits/{commit_sha}/branches-where-head"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoCommitsCommitShaComments toMsg =
+reposListCommentsForCommit toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/commits/{commit_sha}/comments"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoCommitsCommitShaPulls toMsg =
+reposListPullRequestsAssociatedWithCommit toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/commits/{commit_sha}/pulls"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoCommitsRef toMsg =
+reposGetCommit toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/commits/{ref}"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoCommitsRefCheckRuns toMsg =
+checksListForRef toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/commits/{ref}/check-runs"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoCommitsRefCheckSuites toMsg =
+checksListSuitesForRef toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/commits/{ref}/check-suites"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoCommitsRefStatus toMsg =
+reposGetCombinedStatusForRef toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/commits/{ref}/status"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoCommitsRefStatuses toMsg =
+reposListCommitStatusesForRef toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/commits/{ref}/statuses"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoCommunityProfile toMsg =
+reposGetCommunityProfileMetrics toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/community/profile"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoCompareBasehead toMsg =
+reposCompareCommits toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/compare/{basehead}"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoContentsPath toMsg =
+reposGetContent toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/contents/{path}"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoContributors toMsg =
+reposListContributors toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/contributors"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoDependabotAlerts toMsg =
+dependabotListAlertsForRepo toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/dependabot/alerts"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoDependabotAlertsAlertNumber toMsg =
+dependabotGetAlert toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/dependabot/alerts/{alert_number}"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoDependabotSecrets toMsg =
+dependabotListRepoSecrets toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/dependabot/secrets"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoDependabotSecretsPublicKey toMsg =
+dependabotGetRepoPublicKey toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/dependabot/secrets/public-key"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoDependabotSecretsSecretName toMsg =
+dependabotGetRepoSecret toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/dependabot/secrets/{secret_name}"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoDependencyGraphCompareBasehead toMsg =
+dependencyGraphDiffRange toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/dependency-graph/compare/{basehead}"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoDeployments toMsg =
+reposListDeployments toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/deployments"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoDeploymentsDeploymentId toMsg =
+reposGetDeployment toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/deployments/{deployment_id}"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoDeploymentsDeploymentIdStatuses toMsg =
+reposListDeploymentStatuses toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/deployments/{deployment_id}/statuses"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoDeploymentsDeploymentIdStatusesStatusId toMsg =
+reposGetDeploymentStatus toMsg =
     Http.get
         { url =
             "/repos/{owner}/{repo}/deployments/{deployment_id}/statuses/{status_id}"
@@ -1667,21 +1667,21 @@ getReposOwnerRepoDeploymentsDeploymentIdStatusesStatusId toMsg =
         }
 
 
-getReposOwnerRepoEnvironments toMsg =
+reposGetAllEnvironments toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/environments"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoEnvironmentsEnvironmentName toMsg =
+reposGetEnvironment toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/environments/{environment_name}"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoEnvironmentsEnvironmentNameDeploymentBranchPolicies toMsg =
+reposListDeploymentBranchPolicies toMsg =
     Http.get
         { url =
             "/repos/{owner}/{repo}/environments/{environment_name}/deployment-branch-policies"
@@ -1689,7 +1689,7 @@ getReposOwnerRepoEnvironmentsEnvironmentNameDeploymentBranchPolicies toMsg =
         }
 
 
-getReposOwnerRepoEnvironmentsEnvironmentNameDeploymentBranchPoliciesBranchPolicyId toMsg =
+reposGetDeploymentBranchPolicy toMsg =
     Http.get
         { url =
             "/repos/{owner}/{repo}/environments/{environment_name}/deployment-branch-policies/{branch_policy_id}"
@@ -1697,420 +1697,420 @@ getReposOwnerRepoEnvironmentsEnvironmentNameDeploymentBranchPoliciesBranchPolicy
         }
 
 
-getReposOwnerRepoEvents toMsg =
+activityListRepoEvents toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/events"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoForks toMsg =
+reposListForks toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/forks"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoGitBlobsFileSha toMsg =
+gitGetBlob toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/git/blobs/{file_sha}"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoGitCommitsCommitSha toMsg =
+gitGetCommit toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/git/commits/{commit_sha}"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoGitMatchingRefsRef toMsg =
+gitListMatchingRefs toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/git/matching-refs/{ref}"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoGitRefRef toMsg =
+gitGetRef toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/git/ref/{ref}"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoGitTagsTagSha toMsg =
+gitGetTag toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/git/tags/{tag_sha}"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoGitTreesTreeSha toMsg =
+gitGetTree toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/git/trees/{tree_sha}"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoHooks toMsg =
+reposListWebhooks toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/hooks"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoHooksHookId toMsg =
+reposGetWebhook toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/hooks/{hook_id}"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoHooksHookIdConfig toMsg =
+reposGetWebhookConfigForRepo toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/hooks/{hook_id}/config"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoHooksHookIdDeliveries toMsg =
+reposListWebhookDeliveries toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/hooks/{hook_id}/deliveries"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoHooksHookIdDeliveriesDeliveryId toMsg =
+reposGetWebhookDelivery toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/hooks/{hook_id}/deliveries/{delivery_id}"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoImport toMsg =
+migrationsGetImportStatus toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/import"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoImportAuthors toMsg =
+migrationsGetCommitAuthors toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/import/authors"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoImportLargeFiles toMsg =
+migrationsGetLargeFiles toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/import/large_files"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoInstallation toMsg =
+appsGetRepoInstallation toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/installation"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoInteractionLimits toMsg =
+interactionsGetRestrictionsForRepo toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/interaction-limits"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoInvitations toMsg =
+reposListInvitations toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/invitations"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoIssues toMsg =
+issuesListForRepo toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/issues"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoIssuesComments toMsg =
+issuesListCommentsForRepo toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/issues/comments"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoIssuesCommentsCommentId toMsg =
+issuesGetComment toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/issues/comments/{comment_id}"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoIssuesCommentsCommentIdReactions toMsg =
+reactionsListForIssueComment toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/issues/comments/{comment_id}/reactions"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoIssuesEvents toMsg =
+issuesListEventsForRepo toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/issues/events"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoIssuesEventsEventId toMsg =
+issuesGetEvent toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/issues/events/{event_id}"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoIssuesIssueNumber toMsg =
+issuesGet toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/issues/{issue_number}"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoIssuesIssueNumberComments toMsg =
+issuesListComments toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/issues/{issue_number}/comments"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoIssuesIssueNumberEvents toMsg =
+issuesListEvents toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/issues/{issue_number}/events"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoIssuesIssueNumberLabels toMsg =
+issuesListLabelsOnIssue toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/issues/{issue_number}/labels"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoIssuesIssueNumberReactions toMsg =
+reactionsListForIssue toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/issues/{issue_number}/reactions"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoIssuesIssueNumberTimeline toMsg =
+issuesListEventsForTimeline toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/issues/{issue_number}/timeline"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoKeys toMsg =
+reposListDeployKeys toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/keys"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoKeysKeyId toMsg =
+reposGetDeployKey toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/keys/{key_id}"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoLabels toMsg =
+issuesListLabelsForRepo toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/labels"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoLabelsName toMsg =
+issuesGetLabel toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/labels/{name}"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoLanguages toMsg =
+reposListLanguages toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/languages"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoLicense toMsg =
+licensesGetForRepo toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/license"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoMilestones toMsg =
+issuesListMilestones toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/milestones"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoMilestonesMilestoneNumber toMsg =
+issuesGetMilestone toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/milestones/{milestone_number}"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoMilestonesMilestoneNumberLabels toMsg =
+issuesListLabelsForMilestone toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/milestones/{milestone_number}/labels"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoNotifications toMsg =
+activityListRepoNotificationsForAuthenticatedUser toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/notifications"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoPages toMsg =
+reposGetPages toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/pages"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoPagesBuilds toMsg =
+reposListPagesBuilds toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/pages/builds"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoPagesBuildsLatest toMsg =
+reposGetLatestPagesBuild toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/pages/builds/latest"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoPagesBuildsBuildId toMsg =
+reposGetPagesBuild toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/pages/builds/{build_id}"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoPagesHealth toMsg =
+reposGetPagesHealthCheck toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/pages/health"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoProjects toMsg =
+projectsListForRepo toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/projects"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoPulls toMsg =
+pullsList toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/pulls"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoPullsComments toMsg =
+pullsListReviewCommentsForRepo toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/pulls/comments"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoPullsCommentsCommentId toMsg =
+pullsGetReviewComment toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/pulls/comments/{comment_id}"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoPullsCommentsCommentIdReactions toMsg =
+reactionsListForPullRequestReviewComment toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/pulls/comments/{comment_id}/reactions"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoPullsPullNumber toMsg =
+pullsGet toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/pulls/{pull_number}"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoPullsPullNumberComments toMsg =
+pullsListReviewComments toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/pulls/{pull_number}/comments"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoPullsPullNumberCommits toMsg =
+pullsListCommits toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/pulls/{pull_number}/commits"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoPullsPullNumberFiles toMsg =
+pullsListFiles toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/pulls/{pull_number}/files"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoPullsPullNumberMerge toMsg =
+pullsCheckIfMerged toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/pulls/{pull_number}/merge"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoPullsPullNumberRequestedReviewers toMsg =
+pullsListRequestedReviewers toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/pulls/{pull_number}/requested_reviewers"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoPullsPullNumberReviews toMsg =
+pullsListReviews toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/pulls/{pull_number}/reviews"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoPullsPullNumberReviewsReviewId toMsg =
+pullsGetReview toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/pulls/{pull_number}/reviews/{review_id}"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoPullsPullNumberReviewsReviewIdComments toMsg =
+pullsListCommentsForReview toMsg =
     Http.get
         { url =
             "/repos/{owner}/{repo}/pulls/{pull_number}/reviews/{review_id}/comments"
@@ -2118,84 +2118,84 @@ getReposOwnerRepoPullsPullNumberReviewsReviewIdComments toMsg =
         }
 
 
-getReposOwnerRepoReadme toMsg =
+reposGetReadme toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/readme"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoReadmeDir toMsg =
+reposGetReadmeInDirectory toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/readme/{dir}"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoReleases toMsg =
+reposListReleases toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/releases"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoReleasesAssetsAssetId toMsg =
+reposGetReleaseAsset toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/releases/assets/{asset_id}"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoReleasesLatest toMsg =
+reposGetLatestRelease toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/releases/latest"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoReleasesTagsTag toMsg =
+reposGetReleaseByTag toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/releases/tags/{tag}"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoReleasesReleaseId toMsg =
+reposGetRelease toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/releases/{release_id}"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoReleasesReleaseIdAssets toMsg =
+reposListReleaseAssets toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/releases/{release_id}/assets"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoReleasesReleaseIdReactions toMsg =
+reactionsListForRelease toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/releases/{release_id}/reactions"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoSecretScanningAlerts toMsg =
+secretScanningListAlertsForRepo toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/secret-scanning/alerts"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoSecretScanningAlertsAlertNumber toMsg =
+secretScanningGetAlert toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/secret-scanning/alerts/{alert_number}"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoSecretScanningAlertsAlertNumberLocations toMsg =
+secretScanningListLocationsForAlert toMsg =
     Http.get
         { url =
             "/repos/{owner}/{repo}/secret-scanning/alerts/{alert_number}/locations"
@@ -2203,144 +2203,144 @@ getReposOwnerRepoSecretScanningAlertsAlertNumberLocations toMsg =
         }
 
 
-getReposOwnerRepoStargazers toMsg =
+activityListStargazersForRepo toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/stargazers"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoStatsCodeFrequency toMsg =
+reposGetCodeFrequencyStats toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/stats/code_frequency"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoStatsCommitActivity toMsg =
+reposGetCommitActivityStats toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/stats/commit_activity"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoStatsContributors toMsg =
+reposGetContributorsStats toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/stats/contributors"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoStatsParticipation toMsg =
+reposGetParticipationStats toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/stats/participation"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoStatsPunchCard toMsg =
+reposGetPunchCardStats toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/stats/punch_card"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoSubscribers toMsg =
+activityListWatchersForRepo toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/subscribers"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoSubscription toMsg =
+activityGetRepoSubscription toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/subscription"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoTags toMsg =
+reposListTags toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/tags"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoTagsProtection toMsg =
+reposListTagProtection toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/tags/protection"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoTarballRef toMsg =
+reposDownloadTarballArchive toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/tarball/{ref}"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoTeams toMsg =
+reposListTeams toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/teams"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoTopics toMsg =
+reposGetAllTopics toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/topics"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoTrafficClones toMsg =
+reposGetClones toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/traffic/clones"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoTrafficPopularPaths toMsg =
+reposGetTopPaths toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/traffic/popular/paths"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoTrafficPopularReferrers toMsg =
+reposGetTopReferrers toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/traffic/popular/referrers"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoTrafficViews toMsg =
+reposGetViews toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/traffic/views"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoVulnerabilityAlerts toMsg =
+reposCheckVulnerabilityAlerts toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/vulnerability-alerts"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getReposOwnerRepoZipballRef toMsg =
+reposDownloadZipballArchive toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/zipball/{ref}"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getRepositories toMsg =
+reposListPublic toMsg =
     Http.get { url = "/repositories", expect = Http.expectJson toMsg 55 }
 
 
-getRepositoriesRepositoryIdEnvironmentsEnvironmentNameSecrets toMsg =
+actionsListEnvironmentSecrets toMsg =
     Http.get
         { url =
             "/repositories/{repository_id}/environments/{environment_name}/secrets"
@@ -2348,7 +2348,7 @@ getRepositoriesRepositoryIdEnvironmentsEnvironmentNameSecrets toMsg =
         }
 
 
-getRepositoriesRepositoryIdEnvironmentsEnvironmentNameSecretsPublicKey toMsg =
+actionsGetEnvironmentPublicKey toMsg =
     Http.get
         { url =
             "/repositories/{repository_id}/environments/{environment_name}/secrets/public-key"
@@ -2356,7 +2356,7 @@ getRepositoriesRepositoryIdEnvironmentsEnvironmentNameSecretsPublicKey toMsg =
         }
 
 
-getRepositoriesRepositoryIdEnvironmentsEnvironmentNameSecretsSecretName toMsg =
+actionsGetEnvironmentSecret toMsg =
     Http.get
         { url =
             "/repositories/{repository_id}/environments/{environment_name}/secrets/{secret_name}"
@@ -2364,60 +2364,60 @@ getRepositoriesRepositoryIdEnvironmentsEnvironmentNameSecretsSecretName toMsg =
         }
 
 
-getSearchCode toMsg =
+searchCode toMsg =
     Http.get { url = "/search/code", expect = Http.expectJson toMsg 55 }
 
 
-getSearchCommits toMsg =
+searchCommits toMsg =
     Http.get { url = "/search/commits", expect = Http.expectJson toMsg 55 }
 
 
-getSearchIssues toMsg =
+searchIssuesAndPullRequests toMsg =
     Http.get { url = "/search/issues", expect = Http.expectJson toMsg 55 }
 
 
-getSearchLabels toMsg =
+searchLabels toMsg =
     Http.get { url = "/search/labels", expect = Http.expectJson toMsg 55 }
 
 
-getSearchRepositories toMsg =
+searchRepos toMsg =
     Http.get { url = "/search/repositories", expect = Http.expectJson toMsg 55 }
 
 
-getSearchTopics toMsg =
+searchTopics toMsg =
     Http.get { url = "/search/topics", expect = Http.expectJson toMsg 55 }
 
 
-getSearchUsers toMsg =
+searchUsers toMsg =
     Http.get { url = "/search/users", expect = Http.expectJson toMsg 55 }
 
 
-getTeamsTeamId toMsg =
+teamsGetLegacy toMsg =
     Http.get { url = "/teams/{team_id}", expect = Http.expectJson toMsg 55 }
 
 
-getTeamsTeamIdDiscussions toMsg =
+teamsListDiscussionsLegacy toMsg =
     Http.get
         { url = "/teams/{team_id}/discussions"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getTeamsTeamIdDiscussionsDiscussionNumber toMsg =
+teamsGetDiscussionLegacy toMsg =
     Http.get
         { url = "/teams/{team_id}/discussions/{discussion_number}"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getTeamsTeamIdDiscussionsDiscussionNumberComments toMsg =
+teamsListDiscussionCommentsLegacy toMsg =
     Http.get
         { url = "/teams/{team_id}/discussions/{discussion_number}/comments"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getTeamsTeamIdDiscussionsDiscussionNumberCommentsCommentNumber toMsg =
+teamsGetDiscussionCommentLegacy toMsg =
     Http.get
         { url =
             "/teams/{team_id}/discussions/{discussion_number}/comments/{comment_number}"
@@ -2425,7 +2425,7 @@ getTeamsTeamIdDiscussionsDiscussionNumberCommentsCommentNumber toMsg =
         }
 
 
-getTeamsTeamIdDiscussionsDiscussionNumberCommentsCommentNumberReactions toMsg =
+reactionsListForTeamDiscussionCommentLegacy toMsg =
     Http.get
         { url =
             "/teams/{team_id}/discussions/{discussion_number}/comments/{comment_number}/reactions"
@@ -2433,264 +2433,264 @@ getTeamsTeamIdDiscussionsDiscussionNumberCommentsCommentNumberReactions toMsg =
         }
 
 
-getTeamsTeamIdDiscussionsDiscussionNumberReactions toMsg =
+reactionsListForTeamDiscussionLegacy toMsg =
     Http.get
         { url = "/teams/{team_id}/discussions/{discussion_number}/reactions"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getTeamsTeamIdInvitations toMsg =
+teamsListPendingInvitationsLegacy toMsg =
     Http.get
         { url = "/teams/{team_id}/invitations"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getTeamsTeamIdMembers toMsg =
+teamsListMembersLegacy toMsg =
     Http.get
         { url = "/teams/{team_id}/members", expect = Http.expectJson toMsg 55 }
 
 
-getTeamsTeamIdMembersUsername toMsg =
+teamsGetMemberLegacy toMsg =
     Http.get
         { url = "/teams/{team_id}/members/{username}"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getTeamsTeamIdMembershipsUsername toMsg =
+teamsGetMembershipForUserLegacy toMsg =
     Http.get
         { url = "/teams/{team_id}/memberships/{username}"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getTeamsTeamIdProjects toMsg =
+teamsListProjectsLegacy toMsg =
     Http.get
         { url = "/teams/{team_id}/projects", expect = Http.expectJson toMsg 55 }
 
 
-getTeamsTeamIdProjectsProjectId toMsg =
+teamsCheckPermissionsForProjectLegacy toMsg =
     Http.get
         { url = "/teams/{team_id}/projects/{project_id}"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getTeamsTeamIdRepos toMsg =
+teamsListReposLegacy toMsg =
     Http.get
         { url = "/teams/{team_id}/repos", expect = Http.expectJson toMsg 55 }
 
 
-getTeamsTeamIdReposOwnerRepo toMsg =
+teamsCheckPermissionsForRepoLegacy toMsg =
     Http.get
         { url = "/teams/{team_id}/repos/{owner}/{repo}"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getTeamsTeamIdTeams toMsg =
+teamsListChildLegacy toMsg =
     Http.get
         { url = "/teams/{team_id}/teams", expect = Http.expectJson toMsg 55 }
 
 
-getUser toMsg =
+usersGetAuthenticated toMsg =
     Http.get { url = "/user", expect = Http.expectJson toMsg 55 }
 
 
-getUserBlocks toMsg =
+usersListBlockedByAuthenticatedUser toMsg =
     Http.get { url = "/user/blocks", expect = Http.expectJson toMsg 55 }
 
 
-getUserBlocksUsername toMsg =
+usersCheckBlocked toMsg =
     Http.get
         { url = "/user/blocks/{username}", expect = Http.expectJson toMsg 55 }
 
 
-getUserCodespaces toMsg =
+codespacesListForAuthenticatedUser toMsg =
     Http.get { url = "/user/codespaces", expect = Http.expectJson toMsg 55 }
 
 
-getUserCodespacesSecrets toMsg =
+codespacesListSecretsForAuthenticatedUser toMsg =
     Http.get
         { url = "/user/codespaces/secrets", expect = Http.expectJson toMsg 55 }
 
 
-getUserCodespacesSecretsPublicKey toMsg =
+codespacesGetPublicKeyForAuthenticatedUser toMsg =
     Http.get
         { url = "/user/codespaces/secrets/public-key"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getUserCodespacesSecretsSecretName toMsg =
+codespacesGetSecretForAuthenticatedUser toMsg =
     Http.get
         { url = "/user/codespaces/secrets/{secret_name}"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getUserCodespacesSecretsSecretNameRepositories toMsg =
+codespacesListRepositoriesForSecretForAuthenticatedUser toMsg =
     Http.get
         { url = "/user/codespaces/secrets/{secret_name}/repositories"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getUserCodespacesCodespaceName toMsg =
+codespacesGetForAuthenticatedUser toMsg =
     Http.get
         { url = "/user/codespaces/{codespace_name}"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getUserCodespacesCodespaceNameExportsExportId toMsg =
+codespacesGetExportDetailsForAuthenticatedUser toMsg =
     Http.get
         { url = "/user/codespaces/{codespace_name}/exports/{export_id}"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getUserCodespacesCodespaceNameMachines toMsg =
+codespacesCodespaceMachinesForAuthenticatedUser toMsg =
     Http.get
         { url = "/user/codespaces/{codespace_name}/machines"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getUserEmails toMsg =
+usersListEmailsForAuthenticatedUser toMsg =
     Http.get { url = "/user/emails", expect = Http.expectJson toMsg 55 }
 
 
-getUserFollowers toMsg =
+usersListFollowersForAuthenticatedUser toMsg =
     Http.get { url = "/user/followers", expect = Http.expectJson toMsg 55 }
 
 
-getUserFollowing toMsg =
+usersListFollowedByAuthenticatedUser toMsg =
     Http.get { url = "/user/following", expect = Http.expectJson toMsg 55 }
 
 
-getUserFollowingUsername toMsg =
+usersCheckPersonIsFollowedByAuthenticated toMsg =
     Http.get
         { url = "/user/following/{username}"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getUserGpgKeys toMsg =
+usersListGpgKeysForAuthenticatedUser toMsg =
     Http.get { url = "/user/gpg_keys", expect = Http.expectJson toMsg 55 }
 
 
-getUserGpgKeysGpgKeyId toMsg =
+usersGetGpgKeyForAuthenticatedUser toMsg =
     Http.get
         { url = "/user/gpg_keys/{gpg_key_id}"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getUserInstallations toMsg =
+appsListInstallationsForAuthenticatedUser toMsg =
     Http.get { url = "/user/installations", expect = Http.expectJson toMsg 55 }
 
 
-getUserInstallationsInstallationIdRepositories toMsg =
+appsListInstallationReposForAuthenticatedUser toMsg =
     Http.get
         { url = "/user/installations/{installation_id}/repositories"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getUserInteractionLimits toMsg =
+interactionsGetRestrictionsForAuthenticatedUser toMsg =
     Http.get
         { url = "/user/interaction-limits", expect = Http.expectJson toMsg 55 }
 
 
-getUserIssues toMsg =
+issuesListForAuthenticatedUser toMsg =
     Http.get { url = "/user/issues", expect = Http.expectJson toMsg 55 }
 
 
-getUserKeys toMsg =
+usersListPublicSshKeysForAuthenticatedUser toMsg =
     Http.get { url = "/user/keys", expect = Http.expectJson toMsg 55 }
 
 
-getUserKeysKeyId toMsg =
+usersGetPublicSshKeyForAuthenticatedUser toMsg =
     Http.get { url = "/user/keys/{key_id}", expect = Http.expectJson toMsg 55 }
 
 
-getUserMarketplacePurchases toMsg =
+appsListSubscriptionsForAuthenticatedUser toMsg =
     Http.get
         { url = "/user/marketplace_purchases"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getUserMarketplacePurchasesStubbed toMsg =
+appsListSubscriptionsForAuthenticatedUserStubbed toMsg =
     Http.get
         { url = "/user/marketplace_purchases/stubbed"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getUserMembershipsOrgs toMsg =
+orgsListMembershipsForAuthenticatedUser toMsg =
     Http.get
         { url = "/user/memberships/orgs", expect = Http.expectJson toMsg 55 }
 
 
-getUserMembershipsOrgsOrg toMsg =
+orgsGetMembershipForAuthenticatedUser toMsg =
     Http.get
         { url = "/user/memberships/orgs/{org}"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getUserMigrations toMsg =
+migrationsListForAuthenticatedUser toMsg =
     Http.get { url = "/user/migrations", expect = Http.expectJson toMsg 55 }
 
 
-getUserMigrationsMigrationId toMsg =
+migrationsGetStatusForAuthenticatedUser toMsg =
     Http.get
         { url = "/user/migrations/{migration_id}"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getUserMigrationsMigrationIdArchive toMsg =
+migrationsGetArchiveForAuthenticatedUser toMsg =
     Http.get
         { url = "/user/migrations/{migration_id}/archive"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getUserMigrationsMigrationIdRepositories toMsg =
+migrationsListReposForAuthenticatedUser toMsg =
     Http.get
         { url = "/user/migrations/{migration_id}/repositories"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getUserOrgs toMsg =
+orgsListForAuthenticatedUser toMsg =
     Http.get { url = "/user/orgs", expect = Http.expectJson toMsg 55 }
 
 
-getUserPackages toMsg =
+packagesListPackagesForAuthenticatedUser toMsg =
     Http.get { url = "/user/packages", expect = Http.expectJson toMsg 55 }
 
 
-getUserPackagesPackageTypePackageName toMsg =
+packagesGetPackageForAuthenticatedUser toMsg =
     Http.get
         { url = "/user/packages/{package_type}/{package_name}"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getUserPackagesPackageTypePackageNameVersions toMsg =
+packagesGetAllPackageVersionsForPackageOwnedByAuthenticatedUser toMsg =
     Http.get
         { url = "/user/packages/{package_type}/{package_name}/versions"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getUserPackagesPackageTypePackageNameVersionsPackageVersionId toMsg =
+packagesGetPackageVersionForAuthenticatedUser toMsg =
     Http.get
         { url =
             "/user/packages/{package_type}/{package_name}/versions/{package_version_id}"
@@ -2698,151 +2698,151 @@ getUserPackagesPackageTypePackageNameVersionsPackageVersionId toMsg =
         }
 
 
-getUserPublicEmails toMsg =
+usersListPublicEmailsForAuthenticatedUser toMsg =
     Http.get { url = "/user/public_emails", expect = Http.expectJson toMsg 55 }
 
 
-getUserRepos toMsg =
+reposListForAuthenticatedUser toMsg =
     Http.get { url = "/user/repos", expect = Http.expectJson toMsg 55 }
 
 
-getUserRepositoryInvitations toMsg =
+reposListInvitationsForAuthenticatedUser toMsg =
     Http.get
         { url = "/user/repository_invitations"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getUserSshSigningKeys toMsg =
+usersListSshSigningKeysForAuthenticatedUser toMsg =
     Http.get
         { url = "/user/ssh_signing_keys", expect = Http.expectJson toMsg 55 }
 
 
-getUserSshSigningKeysSshSigningKeyId toMsg =
+usersGetSshSigningKeyForAuthenticatedUser toMsg =
     Http.get
         { url = "/user/ssh_signing_keys/{ssh_signing_key_id}"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getUserStarred toMsg =
+activityListReposStarredByAuthenticatedUser toMsg =
     Http.get { url = "/user/starred", expect = Http.expectJson toMsg 55 }
 
 
-getUserStarredOwnerRepo toMsg =
+activityCheckRepoIsStarredByAuthenticatedUser toMsg =
     Http.get
         { url = "/user/starred/{owner}/{repo}"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getUserSubscriptions toMsg =
+activityListWatchedReposForAuthenticatedUser toMsg =
     Http.get { url = "/user/subscriptions", expect = Http.expectJson toMsg 55 }
 
 
-getUserTeams toMsg =
+teamsListForAuthenticatedUser toMsg =
     Http.get { url = "/user/teams", expect = Http.expectJson toMsg 55 }
 
 
-getUsers toMsg =
+usersList toMsg =
     Http.get { url = "/users", expect = Http.expectJson toMsg 55 }
 
 
-getUsersUsername toMsg =
+usersGetByUsername toMsg =
     Http.get { url = "/users/{username}", expect = Http.expectJson toMsg 55 }
 
 
-getUsersUsernameEvents toMsg =
+activityListEventsForAuthenticatedUser toMsg =
     Http.get
         { url = "/users/{username}/events", expect = Http.expectJson toMsg 55 }
 
 
-getUsersUsernameEventsOrgsOrg toMsg =
+activityListOrgEventsForAuthenticatedUser toMsg =
     Http.get
         { url = "/users/{username}/events/orgs/{org}"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getUsersUsernameEventsPublic toMsg =
+activityListPublicEventsForUser toMsg =
     Http.get
         { url = "/users/{username}/events/public"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getUsersUsernameFollowers toMsg =
+usersListFollowersForUser toMsg =
     Http.get
         { url = "/users/{username}/followers"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getUsersUsernameFollowing toMsg =
+usersListFollowingForUser toMsg =
     Http.get
         { url = "/users/{username}/following"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getUsersUsernameFollowingTargetUser toMsg =
+usersCheckFollowingForUser toMsg =
     Http.get
         { url = "/users/{username}/following/{target_user}"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getUsersUsernameGists toMsg =
+gistsListForUser toMsg =
     Http.get
         { url = "/users/{username}/gists", expect = Http.expectJson toMsg 55 }
 
 
-getUsersUsernameGpgKeys toMsg =
+usersListGpgKeysForUser toMsg =
     Http.get
         { url = "/users/{username}/gpg_keys"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getUsersUsernameHovercard toMsg =
+usersGetContextForUser toMsg =
     Http.get
         { url = "/users/{username}/hovercard"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getUsersUsernameInstallation toMsg =
+appsGetUserInstallation toMsg =
     Http.get
         { url = "/users/{username}/installation"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getUsersUsernameKeys toMsg =
+usersListPublicKeysForUser toMsg =
     Http.get
         { url = "/users/{username}/keys", expect = Http.expectJson toMsg 55 }
 
 
-getUsersUsernameOrgs toMsg =
+orgsListForUser toMsg =
     Http.get
         { url = "/users/{username}/orgs", expect = Http.expectJson toMsg 55 }
 
 
-getUsersUsernamePackages toMsg =
+packagesListPackagesForUser toMsg =
     Http.get
         { url = "/users/{username}/packages"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getUsersUsernamePackagesPackageTypePackageName toMsg =
+packagesGetPackageForUser toMsg =
     Http.get
         { url = "/users/{username}/packages/{package_type}/{package_name}"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getUsersUsernamePackagesPackageTypePackageNameVersions toMsg =
+packagesGetAllPackageVersionsForPackageOwnedByUser toMsg =
     Http.get
         { url =
             "/users/{username}/packages/{package_type}/{package_name}/versions"
@@ -2850,7 +2850,7 @@ getUsersUsernamePackagesPackageTypePackageNameVersions toMsg =
         }
 
 
-getUsersUsernamePackagesPackageTypePackageNameVersionsPackageVersionId toMsg =
+packagesGetPackageVersionForUser toMsg =
     Http.get
         { url =
             "/users/{username}/packages/{package_type}/{package_name}/versions/{package_version_id}"
@@ -2858,73 +2858,73 @@ getUsersUsernamePackagesPackageTypePackageNameVersionsPackageVersionId toMsg =
         }
 
 
-getUsersUsernameProjects toMsg =
+projectsListForUser toMsg =
     Http.get
         { url = "/users/{username}/projects"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getUsersUsernameReceivedEvents toMsg =
+activityListReceivedEventsForUser toMsg =
     Http.get
         { url = "/users/{username}/received_events"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getUsersUsernameReceivedEventsPublic toMsg =
+activityListReceivedPublicEventsForUser toMsg =
     Http.get
         { url = "/users/{username}/received_events/public"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getUsersUsernameRepos toMsg =
+reposListForUser toMsg =
     Http.get
         { url = "/users/{username}/repos", expect = Http.expectJson toMsg 55 }
 
 
-getUsersUsernameSettingsBillingActions toMsg =
+billingGetGithubActionsBillingUser toMsg =
     Http.get
         { url = "/users/{username}/settings/billing/actions"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getUsersUsernameSettingsBillingPackages toMsg =
+billingGetGithubPackagesBillingUser toMsg =
     Http.get
         { url = "/users/{username}/settings/billing/packages"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getUsersUsernameSettingsBillingSharedStorage toMsg =
+billingGetSharedStorageBillingUser toMsg =
     Http.get
         { url = "/users/{username}/settings/billing/shared-storage"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getUsersUsernameSshSigningKeys toMsg =
+usersListSshSigningKeysForUser toMsg =
     Http.get
         { url = "/users/{username}/ssh_signing_keys"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getUsersUsernameStarred toMsg =
+activityListReposStarredByUser toMsg =
     Http.get
         { url = "/users/{username}/starred", expect = Http.expectJson toMsg 55 }
 
 
-getUsersUsernameSubscriptions toMsg =
+activityListReposWatchedByUser toMsg =
     Http.get
         { url = "/users/{username}/subscriptions"
         , expect = Http.expectJson toMsg 55
         }
 
 
-getZen toMsg =
+metaGetZen toMsg =
     Http.get { url = "/zen", expect = Http.expectJson toMsg 55 }
 
 

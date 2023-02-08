@@ -3118,24 +3118,192 @@ var $author$project$Main$subscriptions = function (model) {
 	return $author$project$Main$gotSpec($author$project$Main$GotSpec);
 };
 var $elm$json$Json$Decode$succeed = _Json_succeed;
-var $stil4m$elm_syntax$Elm$Syntax$Expression$Application = function (a) {
-	return {$: 'Application', a: a};
+var $stil4m$elm_syntax$Elm$Syntax$Declaration$AliasDeclaration = function (a) {
+	return {$: 'AliasDeclaration', a: a};
 };
-var $mdgriffith$elm_codegen$Internal$Compiler$FunctionAppliedToTooManyArgs = F2(
-	function (a, b) {
-		return {$: 'FunctionAppliedToTooManyArgs', a: a, b: b};
-	});
-var $stil4m$elm_syntax$Elm$Syntax$TypeAnnotation$GenericType = function (a) {
-	return {$: 'GenericType', a: a};
+var $mdgriffith$elm_codegen$Internal$Compiler$Declaration = function (a) {
+	return {$: 'Declaration', a: a};
 };
-var $stil4m$elm_syntax$Elm$Syntax$TypeAnnotation$GenericRecord = F2(
-	function (a, b) {
-		return {$: 'GenericRecord', a: a, b: b};
+var $mdgriffith$elm_codegen$Internal$Compiler$NotExposed = {$: 'NotExposed'};
+var $elm$core$String$length = _String_length;
+var $elm$core$String$slice = _String_slice;
+var $elm$core$String$dropLeft = F2(
+	function (n, string) {
+		return (n < 1) ? string : A3(
+			$elm$core$String$slice,
+			n,
+			$elm$core$String$length(string),
+			string);
 	});
-var $stil4m$elm_syntax$Elm$Syntax$Node$Node = F2(
-	function (a, b) {
-		return {$: 'Node', a: a, b: b};
+var $elm$core$String$left = F2(
+	function (n, string) {
+		return (n < 1) ? '' : A3($elm$core$String$slice, 0, n, string);
 	});
+var $elm$core$String$toUpper = _String_toUpper;
+var $mdgriffith$elm_codegen$Internal$Format$formatType = function (str) {
+	return _Utils_ap(
+		$elm$core$String$toUpper(
+			A2($elm$core$String$left, 1, str)),
+		A2($elm$core$String$dropLeft, 1, str));
+};
+var $mdgriffith$elm_codegen$Internal$Compiler$getAnnotationImports = function (_v0) {
+	var details = _v0.a;
+	return details.imports;
+};
+var $elm$core$Basics$composeL = F3(
+	function (g, f, x) {
+		return g(
+			f(x));
+	});
+var $elm$core$List$foldrHelper = F4(
+	function (fn, acc, ctr, ls) {
+		if (!ls.b) {
+			return acc;
+		} else {
+			var a = ls.a;
+			var r1 = ls.b;
+			if (!r1.b) {
+				return A2(fn, a, acc);
+			} else {
+				var b = r1.a;
+				var r2 = r1.b;
+				if (!r2.b) {
+					return A2(
+						fn,
+						a,
+						A2(fn, b, acc));
+				} else {
+					var c = r2.a;
+					var r3 = r2.b;
+					if (!r3.b) {
+						return A2(
+							fn,
+							a,
+							A2(
+								fn,
+								b,
+								A2(fn, c, acc)));
+					} else {
+						var d = r3.a;
+						var r4 = r3.b;
+						var res = (ctr > 500) ? A3(
+							$elm$core$List$foldl,
+							fn,
+							acc,
+							$elm$core$List$reverse(r4)) : A4($elm$core$List$foldrHelper, fn, acc, ctr + 1, r4);
+						return A2(
+							fn,
+							a,
+							A2(
+								fn,
+								b,
+								A2(
+									fn,
+									c,
+									A2(fn, d, res))));
+					}
+				}
+			}
+		}
+	});
+var $elm$core$List$foldr = F3(
+	function (fn, acc, ls) {
+		return A4($elm$core$List$foldrHelper, fn, acc, 0, ls);
+	});
+var $elm$core$List$append = F2(
+	function (xs, ys) {
+		if (!ys.b) {
+			return xs;
+		} else {
+			return A3($elm$core$List$foldr, $elm$core$List$cons, ys, xs);
+		}
+	});
+var $elm$core$List$concat = function (lists) {
+	return A3($elm$core$List$foldr, $elm$core$List$append, _List_Nil, lists);
+};
+var $elm$core$List$map = F2(
+	function (f, xs) {
+		return A3(
+			$elm$core$List$foldr,
+			F2(
+				function (x, acc) {
+					return A2(
+						$elm$core$List$cons,
+						f(x),
+						acc);
+				}),
+			_List_Nil,
+			xs);
+	});
+var $elm$core$List$concatMap = F2(
+	function (f, list) {
+		return $elm$core$List$concat(
+			A2($elm$core$List$map, f, list));
+	});
+var $stil4m$elm_syntax$Elm$Syntax$Node$value = function (_v0) {
+	var v = _v0.b;
+	return v;
+};
+var $mdgriffith$elm_codegen$Internal$Compiler$denode = $stil4m$elm_syntax$Elm$Syntax$Node$value;
+var $mdgriffith$elm_codegen$Internal$Compiler$getGenericsHelper = function (ann) {
+	switch (ann.$) {
+		case 'GenericType':
+			var str = ann.a;
+			return _List_fromArray(
+				[str]);
+		case 'Typed':
+			var modName = ann.a;
+			var anns = ann.b;
+			return A2(
+				$elm$core$List$concatMap,
+				A2($elm$core$Basics$composeL, $mdgriffith$elm_codegen$Internal$Compiler$getGenericsHelper, $mdgriffith$elm_codegen$Internal$Compiler$denode),
+				anns);
+		case 'Unit':
+			return _List_Nil;
+		case 'Tupled':
+			var tupled = ann.a;
+			return A2(
+				$elm$core$List$concatMap,
+				A2($elm$core$Basics$composeL, $mdgriffith$elm_codegen$Internal$Compiler$getGenericsHelper, $mdgriffith$elm_codegen$Internal$Compiler$denode),
+				tupled);
+		case 'Record':
+			var recordDefinition = ann.a;
+			return A2(
+				$elm$core$List$concatMap,
+				function (nodedField) {
+					var _v1 = $mdgriffith$elm_codegen$Internal$Compiler$denode(nodedField);
+					var name = _v1.a;
+					var field = _v1.b;
+					return $mdgriffith$elm_codegen$Internal$Compiler$getGenericsHelper(
+						$mdgriffith$elm_codegen$Internal$Compiler$denode(field));
+				},
+				recordDefinition);
+		case 'GenericRecord':
+			var recordName = ann.a;
+			var recordDefinition = ann.b;
+			return A2(
+				$elm$core$List$concatMap,
+				function (nodedField) {
+					var _v2 = $mdgriffith$elm_codegen$Internal$Compiler$denode(nodedField);
+					var name = _v2.a;
+					var field = _v2.b;
+					return $mdgriffith$elm_codegen$Internal$Compiler$getGenericsHelper(
+						$mdgriffith$elm_codegen$Internal$Compiler$denode(field));
+				},
+				$mdgriffith$elm_codegen$Internal$Compiler$denode(recordDefinition));
+		default:
+			var one = ann.a;
+			var two = ann.b;
+			return A2(
+				$elm$core$List$concatMap,
+				$mdgriffith$elm_codegen$Internal$Compiler$getGenericsHelper,
+				_List_fromArray(
+					[
+						$mdgriffith$elm_codegen$Internal$Compiler$denode(one),
+						$mdgriffith$elm_codegen$Internal$Compiler$denode(two)
+					]));
+	}
+};
 var $elm$core$List$any = F2(
 	function (isOkay, list) {
 		any:
@@ -3157,10 +3325,113 @@ var $elm$core$List$any = F2(
 			}
 		}
 	});
-var $elm$core$Basics$composeL = F3(
-	function (g, f, x) {
-		return g(
-			f(x));
+var $elm$core$List$member = F2(
+	function (x, xs) {
+		return A2(
+			$elm$core$List$any,
+			function (a) {
+				return _Utils_eq(a, x);
+			},
+			xs);
+	});
+var $mdgriffith$elm_codegen$Internal$Compiler$uniqueHelp = F4(
+	function (f, existing, remaining, accumulator) {
+		uniqueHelp:
+		while (true) {
+			if (!remaining.b) {
+				return $elm$core$List$reverse(accumulator);
+			} else {
+				var first = remaining.a;
+				var rest = remaining.b;
+				var computedFirst = f(first);
+				if (A2($elm$core$List$member, computedFirst, existing)) {
+					var $temp$f = f,
+						$temp$existing = existing,
+						$temp$remaining = rest,
+						$temp$accumulator = accumulator;
+					f = $temp$f;
+					existing = $temp$existing;
+					remaining = $temp$remaining;
+					accumulator = $temp$accumulator;
+					continue uniqueHelp;
+				} else {
+					var $temp$f = f,
+						$temp$existing = A2($elm$core$List$cons, computedFirst, existing),
+						$temp$remaining = rest,
+						$temp$accumulator = A2($elm$core$List$cons, first, accumulator);
+					f = $temp$f;
+					existing = $temp$existing;
+					remaining = $temp$remaining;
+					accumulator = $temp$accumulator;
+					continue uniqueHelp;
+				}
+			}
+		}
+	});
+var $mdgriffith$elm_codegen$Internal$Compiler$unique = function (list) {
+	return A4($mdgriffith$elm_codegen$Internal$Compiler$uniqueHelp, $elm$core$Basics$identity, _List_Nil, list, _List_Nil);
+};
+var $mdgriffith$elm_codegen$Internal$Compiler$getGenerics = function (_v0) {
+	var details = _v0.a;
+	return $mdgriffith$elm_codegen$Internal$Compiler$unique(
+		$mdgriffith$elm_codegen$Internal$Compiler$getGenericsHelper(details.annotation));
+};
+var $mdgriffith$elm_codegen$Internal$Compiler$getInnerAnnotation = function (_v0) {
+	var details = _v0.a;
+	return details.annotation;
+};
+var $stil4m$elm_syntax$Elm$Syntax$Node$Node = F2(
+	function (a, b) {
+		return {$: 'Node', a: a, b: b};
+	});
+var $stil4m$elm_syntax$Elm$Syntax$Range$emptyRange = {
+	end: {column: 0, row: 0},
+	start: {column: 0, row: 0}
+};
+var $mdgriffith$elm_codegen$Internal$Compiler$nodify = function (exp) {
+	return A2($stil4m$elm_syntax$Elm$Syntax$Node$Node, $stil4m$elm_syntax$Elm$Syntax$Range$emptyRange, exp);
+};
+var $mdgriffith$elm_codegen$Elm$alias = F2(
+	function (name, innerAnnotation) {
+		return $mdgriffith$elm_codegen$Internal$Compiler$Declaration(
+			{
+				docs: $elm$core$Maybe$Nothing,
+				exposed: $mdgriffith$elm_codegen$Internal$Compiler$NotExposed,
+				imports: $mdgriffith$elm_codegen$Internal$Compiler$getAnnotationImports(innerAnnotation),
+				name: name,
+				toBody: function (index) {
+					return {
+						additionalImports: _List_Nil,
+						declaration: $stil4m$elm_syntax$Elm$Syntax$Declaration$AliasDeclaration(
+							{
+								documentation: $elm$core$Maybe$Nothing,
+								generics: A2(
+									$elm$core$List$map,
+									$mdgriffith$elm_codegen$Internal$Compiler$nodify,
+									$mdgriffith$elm_codegen$Internal$Compiler$getGenerics(innerAnnotation)),
+								name: $mdgriffith$elm_codegen$Internal$Compiler$nodify(
+									$mdgriffith$elm_codegen$Internal$Format$formatType(name)),
+								typeAnnotation: $mdgriffith$elm_codegen$Internal$Compiler$nodify(
+									$mdgriffith$elm_codegen$Internal$Compiler$getInnerAnnotation(innerAnnotation))
+							}),
+						warning: $elm$core$Maybe$Nothing
+					};
+				}
+			});
+	});
+var $stil4m$elm_syntax$Elm$Syntax$Expression$Application = function (a) {
+	return {$: 'Application', a: a};
+};
+var $mdgriffith$elm_codegen$Internal$Compiler$FunctionAppliedToTooManyArgs = F2(
+	function (a, b) {
+		return {$: 'FunctionAppliedToTooManyArgs', a: a, b: b};
+	});
+var $stil4m$elm_syntax$Elm$Syntax$TypeAnnotation$GenericType = function (a) {
+	return {$: 'GenericType', a: a};
+};
+var $stil4m$elm_syntax$Elm$Syntax$TypeAnnotation$GenericRecord = F2(
+	function (a, b) {
+		return {$: 'GenericRecord', a: a, b: b};
 	});
 var $mdgriffith$elm_codegen$Internal$Compiler$containsFieldByName = F2(
 	function (_v0, _v2) {
@@ -3170,11 +3441,6 @@ var $mdgriffith$elm_codegen$Internal$Compiler$containsFieldByName = F2(
 		var twoName = _v3.b;
 		return _Utils_eq(oneName, twoName);
 	});
-var $stil4m$elm_syntax$Elm$Syntax$Node$value = function (_v0) {
-	var v = _v0.b;
-	return v;
-};
-var $mdgriffith$elm_codegen$Internal$Compiler$denode = $stil4m$elm_syntax$Elm$Syntax$Node$value;
 var $mdgriffith$elm_codegen$Internal$Compiler$mergeFieldLists = F2(
 	function (fieldOne, fieldTwo) {
 		return A3(
@@ -3756,10 +4022,6 @@ var $stil4m$elm_syntax$Elm$Syntax$TypeAnnotation$FunctionTypeAnnotation = F2(
 	function (a, b) {
 		return {$: 'FunctionTypeAnnotation', a: a, b: b};
 	});
-var $stil4m$elm_syntax$Elm$Syntax$Range$emptyRange = {
-	end: {column: 0, row: 0},
-	start: {column: 0, row: 0}
-};
 var $mdgriffith$elm_codegen$Internal$Compiler$makeFunctionReversedHelper = F2(
 	function (last, reversedArgs) {
 		makeFunctionReversedHelper:
@@ -3849,75 +4111,6 @@ var $elm$core$Basics$composeR = F3(
 		return g(
 			f(x));
 	});
-var $elm$core$List$foldrHelper = F4(
-	function (fn, acc, ctr, ls) {
-		if (!ls.b) {
-			return acc;
-		} else {
-			var a = ls.a;
-			var r1 = ls.b;
-			if (!r1.b) {
-				return A2(fn, a, acc);
-			} else {
-				var b = r1.a;
-				var r2 = r1.b;
-				if (!r2.b) {
-					return A2(
-						fn,
-						a,
-						A2(fn, b, acc));
-				} else {
-					var c = r2.a;
-					var r3 = r2.b;
-					if (!r3.b) {
-						return A2(
-							fn,
-							a,
-							A2(
-								fn,
-								b,
-								A2(fn, c, acc)));
-					} else {
-						var d = r3.a;
-						var r4 = r3.b;
-						var res = (ctr > 500) ? A3(
-							$elm$core$List$foldl,
-							fn,
-							acc,
-							$elm$core$List$reverse(r4)) : A4($elm$core$List$foldrHelper, fn, acc, ctr + 1, r4);
-						return A2(
-							fn,
-							a,
-							A2(
-								fn,
-								b,
-								A2(
-									fn,
-									c,
-									A2(fn, d, res))));
-					}
-				}
-			}
-		}
-	});
-var $elm$core$List$foldr = F3(
-	function (fn, acc, ls) {
-		return A4($elm$core$List$foldrHelper, fn, acc, 0, ls);
-	});
-var $elm$core$List$map = F2(
-	function (f, xs) {
-		return A3(
-			$elm$core$List$foldr,
-			F2(
-				function (x, acc) {
-					return A2(
-						$elm$core$List$cons,
-						f(x),
-						acc);
-				}),
-			_List_Nil,
-			xs);
-	});
 var $mdgriffith$elm_codegen$Internal$Compiler$getField = F4(
 	function (name, val, fields, captured) {
 		getField:
@@ -3962,26 +4155,7 @@ var $mdgriffith$elm_codegen$Internal$Compiler$getField = F4(
 			}
 		}
 	});
-var $mdgriffith$elm_codegen$Internal$Compiler$nodify = function (exp) {
-	return A2($stil4m$elm_syntax$Elm$Syntax$Node$Node, $stil4m$elm_syntax$Elm$Syntax$Range$emptyRange, exp);
-};
 var $mdgriffith$elm_codegen$Internal$Compiler$nodifyAll = $elm$core$List$map($mdgriffith$elm_codegen$Internal$Compiler$nodify);
-var $elm$core$List$append = F2(
-	function (xs, ys) {
-		if (!ys.b) {
-			return xs;
-		} else {
-			return A3($elm$core$List$foldr, $elm$core$List$cons, ys, xs);
-		}
-	});
-var $elm$core$List$concat = function (lists) {
-	return A3($elm$core$List$foldr, $elm$core$List$append, _List_Nil, lists);
-};
-var $elm$core$List$concatMap = F2(
-	function (f, list) {
-		return $elm$core$List$concat(
-			A2($elm$core$List$map, f, list));
-	});
 var $mdgriffith$elm_codegen$Internal$Compiler$isAppendable = function (annotation) {
 	_v0$2:
 	while (true) {
@@ -5864,7 +6038,6 @@ var $elm_community$string_extra$String$Extra$regexFromString = A2(
 	$elm$regex$Regex$fromString,
 	$elm$core$Maybe$withDefault($elm$regex$Regex$never));
 var $elm$regex$Regex$replace = _Regex_replaceAtMost(_Regex_infinity);
-var $elm$core$String$toUpper = _String_toUpper;
 var $elm$core$String$trim = _String_trim;
 var $elm_community$string_extra$String$Extra$camelize = function (string) {
 	return A3(
@@ -6350,14 +6523,133 @@ var $author$project$OpenApi$Types$decodeRefOr = function (decoder) {
 var $author$project$OpenApi$Types$Schema = function (a) {
 	return {$: 'Schema', a: a};
 };
-var $author$project$OpenApi$Types$decodeSchema = A2($elm$json$Json$Decode$map, $author$project$OpenApi$Types$Schema, $elm$json$Json$Decode$value);
+var $json_tools$json_schema$Json$Schema$Definitions$AnyType = {$: 'AnyType'};
+var $json_tools$json_schema$Json$Schema$Definitions$ArrayOfItems = function (a) {
+	return {$: 'ArrayOfItems', a: a};
+};
+var $json_tools$json_schema$Json$Schema$Definitions$ArrayPropNames = function (a) {
+	return {$: 'ArrayPropNames', a: a};
+};
+var $json_tools$json_schema$Json$Schema$Definitions$BoolBoundary = function (a) {
+	return {$: 'BoolBoundary', a: a};
+};
+var $json_tools$json_schema$Json$Schema$Definitions$BooleanSchema = function (a) {
+	return {$: 'BooleanSchema', a: a};
+};
+var $json_tools$json_schema$Json$Schema$Definitions$ItemDefinition = function (a) {
+	return {$: 'ItemDefinition', a: a};
+};
+var $json_tools$json_schema$Json$Schema$Definitions$NoItems = {$: 'NoItems'};
+var $json_tools$json_schema$Json$Schema$Definitions$NumberBoundary = function (a) {
+	return {$: 'NumberBoundary', a: a};
+};
+var $json_tools$json_schema$Json$Schema$Definitions$ObjectSchema = function (a) {
+	return {$: 'ObjectSchema', a: a};
+};
+var $json_tools$json_schema$Json$Schema$Definitions$PropSchema = function (a) {
+	return {$: 'PropSchema', a: a};
+};
+var $json_tools$json_schema$Json$Schema$Definitions$Schemata = function (a) {
+	return {$: 'Schemata', a: a};
+};
+var $json_tools$json_schema$Json$Schema$Definitions$SingleType = function (a) {
+	return {$: 'SingleType', a: a};
+};
+var $json_tools$json_schema$Json$Schema$Definitions$SubSchema = function (type_) {
+	return function (id) {
+		return function (ref) {
+			return function (title) {
+				return function (description) {
+					return function (_default) {
+						return function (examples) {
+							return function (definitions) {
+								return function (multipleOf) {
+									return function (maximum) {
+										return function (exclusiveMaximum) {
+											return function (minimum) {
+												return function (exclusiveMinimum) {
+													return function (maxLength) {
+														return function (minLength) {
+															return function (pattern) {
+																return function (format) {
+																	return function (items) {
+																		return function (additionalItems) {
+																			return function (maxItems) {
+																				return function (minItems) {
+																					return function (uniqueItems) {
+																						return function (contains) {
+																							return function (maxProperties) {
+																								return function (minProperties) {
+																									return function (required) {
+																										return function (properties) {
+																											return function (patternProperties) {
+																												return function (additionalProperties) {
+																													return function (dependencies) {
+																														return function (propertyNames) {
+																															return function (_enum) {
+																																return function (_const) {
+																																	return function (allOf) {
+																																		return function (anyOf) {
+																																			return function (oneOf) {
+																																				return function (not) {
+																																					return function (source) {
+																																						return {additionalItems: additionalItems, additionalProperties: additionalProperties, allOf: allOf, anyOf: anyOf, _const: _const, contains: contains, _default: _default, definitions: definitions, dependencies: dependencies, description: description, _enum: _enum, examples: examples, exclusiveMaximum: exclusiveMaximum, exclusiveMinimum: exclusiveMinimum, format: format, id: id, items: items, maxItems: maxItems, maxLength: maxLength, maxProperties: maxProperties, maximum: maximum, minItems: minItems, minLength: minLength, minProperties: minProperties, minimum: minimum, multipleOf: multipleOf, not: not, oneOf: oneOf, pattern: pattern, patternProperties: patternProperties, properties: properties, propertyNames: propertyNames, ref: ref, required: required, source: source, title: title, type_: type_, uniqueItems: uniqueItems};
+																																					};
+																																				};
+																																			};
+																																		};
+																																	};
+																																};
+																															};
+																														};
+																													};
+																												};
+																											};
+																										};
+																									};
+																								};
+																							};
+																						};
+																					};
+																				};
+																			};
+																		};
+																	};
+																};
+															};
+														};
+													};
+												};
+											};
+										};
+									};
+								};
+							};
+						};
+					};
+				};
+			};
+		};
+	};
+};
+var $elm$core$List$isEmpty = function (xs) {
+	if (!xs.b) {
+		return true;
+	} else {
+		return false;
+	}
+};
+var $json_tools$json_schema$Json$Schema$Definitions$failIfEmpty = function (l) {
+	return $elm$core$List$isEmpty(l) ? $elm$json$Json$Decode$fail('List is empty') : $elm$json$Json$Decode$succeed(l);
+};
+var $elm$json$Json$Decode$float = _Json_decodeFloat;
 var $elm$json$Json$Decode$lazy = function (thunk) {
 	return A2(
 		$elm$json$Json$Decode$andThen,
 		thunk,
 		$elm$json$Json$Decode$succeed(_Utils_Tuple0));
 };
-var $elm$json$Json$Decode$map5 = _Json_map5;
+var $elm$json$Json$Decode$list = _Json_decodeList;
 var $elm$json$Json$Decode$maybe = function (decoder) {
 	return $elm$json$Json$Decode$oneOf(
 		_List_fromArray(
@@ -6366,6 +6658,537 @@ var $elm$json$Json$Decode$maybe = function (decoder) {
 				$elm$json$Json$Decode$succeed($elm$core$Maybe$Nothing)
 			]));
 };
+var $json_tools$json_schema$Json$Schema$Definitions$NullableType = function (a) {
+	return {$: 'NullableType', a: a};
+};
+var $json_tools$json_schema$Json$Schema$Definitions$UnionType = function (a) {
+	return {$: 'UnionType', a: a};
+};
+var $elm$core$Result$andThen = F2(
+	function (callback, result) {
+		if (result.$ === 'Ok') {
+			var value = result.a;
+			return callback(value);
+		} else {
+			var msg = result.a;
+			return $elm$core$Result$Err(msg);
+		}
+	});
+var $json_tools$json_schema$Util$foldResults = function (results) {
+	return A2(
+		$elm$core$Result$map,
+		$elm$core$List$reverse,
+		A3(
+			$elm$core$List$foldl,
+			function (t) {
+				return $elm$core$Result$andThen(
+					function (r) {
+						return A2(
+							$elm$core$Result$map,
+							function (a) {
+								return A2($elm$core$List$cons, a, r);
+							},
+							t);
+					});
+			},
+			$elm$core$Result$Ok(_List_Nil),
+			results));
+};
+var $json_tools$json_schema$Util$resultToDecoder = function (res) {
+	if (res.$ === 'Ok') {
+		var a = res.a;
+		return $elm$json$Json$Decode$succeed(a);
+	} else {
+		var e = res.a;
+		return $elm$json$Json$Decode$fail(e);
+	}
+};
+var $json_tools$json_schema$Json$Schema$Definitions$ArrayType = {$: 'ArrayType'};
+var $json_tools$json_schema$Json$Schema$Definitions$BooleanType = {$: 'BooleanType'};
+var $json_tools$json_schema$Json$Schema$Definitions$IntegerType = {$: 'IntegerType'};
+var $json_tools$json_schema$Json$Schema$Definitions$NullType = {$: 'NullType'};
+var $json_tools$json_schema$Json$Schema$Definitions$NumberType = {$: 'NumberType'};
+var $json_tools$json_schema$Json$Schema$Definitions$ObjectType = {$: 'ObjectType'};
+var $json_tools$json_schema$Json$Schema$Definitions$StringType = {$: 'StringType'};
+var $json_tools$json_schema$Json$Schema$Definitions$stringToType = function (s) {
+	switch (s) {
+		case 'integer':
+			return $elm$core$Result$Ok($json_tools$json_schema$Json$Schema$Definitions$IntegerType);
+		case 'number':
+			return $elm$core$Result$Ok($json_tools$json_schema$Json$Schema$Definitions$NumberType);
+		case 'string':
+			return $elm$core$Result$Ok($json_tools$json_schema$Json$Schema$Definitions$StringType);
+		case 'boolean':
+			return $elm$core$Result$Ok($json_tools$json_schema$Json$Schema$Definitions$BooleanType);
+		case 'array':
+			return $elm$core$Result$Ok($json_tools$json_schema$Json$Schema$Definitions$ArrayType);
+		case 'object':
+			return $elm$core$Result$Ok($json_tools$json_schema$Json$Schema$Definitions$ObjectType);
+		case 'null':
+			return $elm$core$Result$Ok($json_tools$json_schema$Json$Schema$Definitions$NullType);
+		default:
+			return $elm$core$Result$Err('Unknown type: ' + s);
+	}
+};
+var $json_tools$json_schema$Json$Schema$Definitions$singleTypeDecoder = function (s) {
+	var _v0 = $json_tools$json_schema$Json$Schema$Definitions$stringToType(s);
+	if (_v0.$ === 'Ok') {
+		var st = _v0.a;
+		return $elm$json$Json$Decode$succeed(st);
+	} else {
+		var msg = _v0.a;
+		return $elm$json$Json$Decode$fail(msg);
+	}
+};
+var $elm$core$List$sortBy = _List_sortBy;
+var $elm$core$List$sort = function (xs) {
+	return A2($elm$core$List$sortBy, $elm$core$Basics$identity, xs);
+};
+var $json_tools$json_schema$Json$Schema$Definitions$multipleTypesDecoder = function (lst) {
+	_v0$3:
+	while (true) {
+		if (lst.b) {
+			if (lst.b.b) {
+				if (!lst.b.b.b) {
+					if (lst.b.a === 'null') {
+						var x = lst.a;
+						var _v1 = lst.b;
+						return A2(
+							$elm$json$Json$Decode$map,
+							$json_tools$json_schema$Json$Schema$Definitions$NullableType,
+							$json_tools$json_schema$Json$Schema$Definitions$singleTypeDecoder(x));
+					} else {
+						if (lst.a === 'null') {
+							var _v2 = lst.b;
+							var x = _v2.a;
+							return A2(
+								$elm$json$Json$Decode$map,
+								$json_tools$json_schema$Json$Schema$Definitions$NullableType,
+								$json_tools$json_schema$Json$Schema$Definitions$singleTypeDecoder(x));
+						} else {
+							break _v0$3;
+						}
+					}
+				} else {
+					break _v0$3;
+				}
+			} else {
+				var x = lst.a;
+				return A2(
+					$elm$json$Json$Decode$map,
+					$json_tools$json_schema$Json$Schema$Definitions$SingleType,
+					$json_tools$json_schema$Json$Schema$Definitions$singleTypeDecoder(x));
+			}
+		} else {
+			break _v0$3;
+		}
+	}
+	var otherList = lst;
+	return $json_tools$json_schema$Util$resultToDecoder(
+		A2(
+			$elm$core$Result$andThen,
+			A2($elm$core$Basics$composeL, $elm$core$Result$Ok, $json_tools$json_schema$Json$Schema$Definitions$UnionType),
+			$json_tools$json_schema$Util$foldResults(
+				A2(
+					$elm$core$List$map,
+					$json_tools$json_schema$Json$Schema$Definitions$stringToType,
+					$elm$core$List$sort(otherList)))));
+};
+var $json_tools$json_schema$Json$Schema$Definitions$failIfValuesAreNotUnique = function (l) {
+	return $elm$json$Json$Decode$succeed(l);
+};
+var $json_tools$json_schema$Json$Schema$Definitions$nonEmptyUniqueArrayOfValuesDecoder = A2(
+	$elm$json$Json$Decode$andThen,
+	$json_tools$json_schema$Json$Schema$Definitions$failIfEmpty,
+	A2(
+		$elm$json$Json$Decode$andThen,
+		$json_tools$json_schema$Json$Schema$Definitions$failIfValuesAreNotUnique,
+		$elm$json$Json$Decode$list($elm$json$Json$Decode$value)));
+var $elm$core$Basics$ge = _Utils_ge;
+var $elm$json$Json$Decode$int = _Json_decodeInt;
+var $json_tools$json_schema$Json$Schema$Definitions$nonNegativeInt = A2(
+	$elm$json$Json$Decode$andThen,
+	function (x) {
+		return (x >= 0) ? $elm$json$Json$Decode$succeed(x) : $elm$json$Json$Decode$fail('Expected non-negative int');
+	},
+	$elm$json$Json$Decode$int);
+var $elm$json$Json$Decode$nullable = function (decoder) {
+	return $elm$json$Json$Decode$oneOf(
+		_List_fromArray(
+			[
+				$elm$json$Json$Decode$null($elm$core$Maybe$Nothing),
+				A2($elm$json$Json$Decode$map, $elm$core$Maybe$Just, decoder)
+			]));
+};
+var $NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$requiredAt = F3(
+	function (path, valDecoder, decoder) {
+		return A2(
+			$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$custom,
+			A2($elm$json$Json$Decode$at, path, valDecoder),
+			decoder);
+	});
+function $json_tools$json_schema$Json$Schema$Definitions$cyclic$itemsDecoder() {
+	return $elm$json$Json$Decode$oneOf(
+		_List_fromArray(
+			[
+				A2(
+				$elm$json$Json$Decode$map,
+				$json_tools$json_schema$Json$Schema$Definitions$ArrayOfItems,
+				$elm$json$Json$Decode$list(
+					$json_tools$json_schema$Json$Schema$Definitions$cyclic$decoder())),
+				A2(
+				$elm$json$Json$Decode$map,
+				$json_tools$json_schema$Json$Schema$Definitions$ItemDefinition,
+				$json_tools$json_schema$Json$Schema$Definitions$cyclic$decoder())
+			]));
+}
+function $json_tools$json_schema$Json$Schema$Definitions$cyclic$dependenciesDecoder() {
+	return $elm$json$Json$Decode$keyValuePairs(
+		$elm$json$Json$Decode$oneOf(
+			_List_fromArray(
+				[
+					A2(
+					$elm$json$Json$Decode$map,
+					$json_tools$json_schema$Json$Schema$Definitions$ArrayPropNames,
+					$elm$json$Json$Decode$list($elm$json$Json$Decode$string)),
+					A2(
+					$elm$json$Json$Decode$map,
+					$json_tools$json_schema$Json$Schema$Definitions$PropSchema,
+					$json_tools$json_schema$Json$Schema$Definitions$cyclic$decoder())
+				])));
+}
+function $json_tools$json_schema$Json$Schema$Definitions$cyclic$decoder() {
+	var singleType = A2($elm$json$Json$Decode$andThen, $json_tools$json_schema$Json$Schema$Definitions$singleTypeDecoder, $elm$json$Json$Decode$string);
+	var multipleTypes = A2(
+		$elm$json$Json$Decode$andThen,
+		$json_tools$json_schema$Json$Schema$Definitions$multipleTypesDecoder,
+		$elm$json$Json$Decode$list($elm$json$Json$Decode$string));
+	var exclusiveBoundaryDecoder = $elm$json$Json$Decode$oneOf(
+		_List_fromArray(
+			[
+				A2($elm$json$Json$Decode$map, $json_tools$json_schema$Json$Schema$Definitions$BoolBoundary, $elm$json$Json$Decode$bool),
+				A2($elm$json$Json$Decode$map, $json_tools$json_schema$Json$Schema$Definitions$NumberBoundary, $elm$json$Json$Decode$float)
+			]));
+	var objectSchemaDecoder = A3(
+		$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$requiredAt,
+		_List_Nil,
+		$elm$json$Json$Decode$value,
+		A4(
+			$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
+			'not',
+			$elm$json$Json$Decode$nullable(
+				$elm$json$Json$Decode$lazy(
+					function (_v14) {
+						return $json_tools$json_schema$Json$Schema$Definitions$cyclic$decoder();
+					})),
+			$elm$core$Maybe$Nothing,
+			A4(
+				$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
+				'oneOf',
+				$elm$json$Json$Decode$nullable(
+					$elm$json$Json$Decode$lazy(
+						function (_v13) {
+							return $json_tools$json_schema$Json$Schema$Definitions$cyclic$nonEmptyListOfSchemas();
+						})),
+				$elm$core$Maybe$Nothing,
+				A4(
+					$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
+					'anyOf',
+					$elm$json$Json$Decode$nullable(
+						$elm$json$Json$Decode$lazy(
+							function (_v12) {
+								return $json_tools$json_schema$Json$Schema$Definitions$cyclic$nonEmptyListOfSchemas();
+							})),
+					$elm$core$Maybe$Nothing,
+					A4(
+						$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
+						'allOf',
+						$elm$json$Json$Decode$nullable(
+							$elm$json$Json$Decode$lazy(
+								function (_v11) {
+									return $json_tools$json_schema$Json$Schema$Definitions$cyclic$nonEmptyListOfSchemas();
+								})),
+						$elm$core$Maybe$Nothing,
+						A4(
+							$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
+							'const',
+							A2($elm$json$Json$Decode$map, $elm$core$Maybe$Just, $elm$json$Json$Decode$value),
+							$elm$core$Maybe$Nothing,
+							A4(
+								$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
+								'enum',
+								$elm$json$Json$Decode$nullable($json_tools$json_schema$Json$Schema$Definitions$nonEmptyUniqueArrayOfValuesDecoder),
+								$elm$core$Maybe$Nothing,
+								A4(
+									$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
+									'propertyNames',
+									$elm$json$Json$Decode$nullable(
+										$elm$json$Json$Decode$lazy(
+											function (_v10) {
+												return $json_tools$json_schema$Json$Schema$Definitions$cyclic$decoder();
+											})),
+									$elm$core$Maybe$Nothing,
+									A4(
+										$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
+										'dependencies',
+										$elm$json$Json$Decode$lazy(
+											function (_v9) {
+												return $json_tools$json_schema$Json$Schema$Definitions$cyclic$dependenciesDecoder();
+											}),
+										_List_Nil,
+										A4(
+											$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
+											'additionalProperties',
+											$elm$json$Json$Decode$nullable(
+												$elm$json$Json$Decode$lazy(
+													function (_v8) {
+														return $json_tools$json_schema$Json$Schema$Definitions$cyclic$decoder();
+													})),
+											$elm$core$Maybe$Nothing,
+											A4(
+												$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
+												'patternProperties',
+												$elm$json$Json$Decode$nullable(
+													$elm$json$Json$Decode$lazy(
+														function (_v7) {
+															return $json_tools$json_schema$Json$Schema$Definitions$cyclic$schemataDecoder();
+														})),
+												$elm$core$Maybe$Nothing,
+												A4(
+													$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
+													'properties',
+													$elm$json$Json$Decode$nullable(
+														$elm$json$Json$Decode$lazy(
+															function (_v6) {
+																return $json_tools$json_schema$Json$Schema$Definitions$cyclic$schemataDecoder();
+															})),
+													$elm$core$Maybe$Nothing,
+													A4(
+														$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
+														'required',
+														$elm$json$Json$Decode$nullable(
+															$elm$json$Json$Decode$list($elm$json$Json$Decode$string)),
+														$elm$core$Maybe$Nothing,
+														A4(
+															$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
+															'minProperties',
+															$elm$json$Json$Decode$nullable($json_tools$json_schema$Json$Schema$Definitions$nonNegativeInt),
+															$elm$core$Maybe$Nothing,
+															A4(
+																$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
+																'maxProperties',
+																$elm$json$Json$Decode$nullable($json_tools$json_schema$Json$Schema$Definitions$nonNegativeInt),
+																$elm$core$Maybe$Nothing,
+																A4(
+																	$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
+																	'contains',
+																	$elm$json$Json$Decode$nullable(
+																		$elm$json$Json$Decode$lazy(
+																			function (_v5) {
+																				return $json_tools$json_schema$Json$Schema$Definitions$cyclic$decoder();
+																			})),
+																	$elm$core$Maybe$Nothing,
+																	A4(
+																		$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
+																		'uniqueItems',
+																		$elm$json$Json$Decode$nullable($elm$json$Json$Decode$bool),
+																		$elm$core$Maybe$Nothing,
+																		A4(
+																			$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
+																			'minItems',
+																			$elm$json$Json$Decode$nullable($json_tools$json_schema$Json$Schema$Definitions$nonNegativeInt),
+																			$elm$core$Maybe$Nothing,
+																			A4(
+																				$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
+																				'maxItems',
+																				$elm$json$Json$Decode$nullable($json_tools$json_schema$Json$Schema$Definitions$nonNegativeInt),
+																				$elm$core$Maybe$Nothing,
+																				A4(
+																					$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
+																					'additionalItems',
+																					$elm$json$Json$Decode$nullable(
+																						$elm$json$Json$Decode$lazy(
+																							function (_v4) {
+																								return $json_tools$json_schema$Json$Schema$Definitions$cyclic$decoder();
+																							})),
+																					$elm$core$Maybe$Nothing,
+																					A4(
+																						$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
+																						'items',
+																						$elm$json$Json$Decode$lazy(
+																							function (_v3) {
+																								return $json_tools$json_schema$Json$Schema$Definitions$cyclic$itemsDecoder();
+																							}),
+																						$json_tools$json_schema$Json$Schema$Definitions$NoItems,
+																						A4(
+																							$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
+																							'format',
+																							$elm$json$Json$Decode$nullable($elm$json$Json$Decode$string),
+																							$elm$core$Maybe$Nothing,
+																							A4(
+																								$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
+																								'pattern',
+																								$elm$json$Json$Decode$nullable($elm$json$Json$Decode$string),
+																								$elm$core$Maybe$Nothing,
+																								A4(
+																									$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
+																									'minLength',
+																									$elm$json$Json$Decode$nullable($json_tools$json_schema$Json$Schema$Definitions$nonNegativeInt),
+																									$elm$core$Maybe$Nothing,
+																									A4(
+																										$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
+																										'maxLength',
+																										$elm$json$Json$Decode$nullable($json_tools$json_schema$Json$Schema$Definitions$nonNegativeInt),
+																										$elm$core$Maybe$Nothing,
+																										A4(
+																											$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
+																											'exclusiveMinimum',
+																											$elm$json$Json$Decode$nullable(exclusiveBoundaryDecoder),
+																											$elm$core$Maybe$Nothing,
+																											A4(
+																												$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
+																												'minimum',
+																												$elm$json$Json$Decode$nullable($elm$json$Json$Decode$float),
+																												$elm$core$Maybe$Nothing,
+																												A4(
+																													$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
+																													'exclusiveMaximum',
+																													$elm$json$Json$Decode$nullable(exclusiveBoundaryDecoder),
+																													$elm$core$Maybe$Nothing,
+																													A4(
+																														$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
+																														'maximum',
+																														$elm$json$Json$Decode$nullable($elm$json$Json$Decode$float),
+																														$elm$core$Maybe$Nothing,
+																														A4(
+																															$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
+																															'multipleOf',
+																															$elm$json$Json$Decode$nullable($elm$json$Json$Decode$float),
+																															$elm$core$Maybe$Nothing,
+																															A4(
+																																$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
+																																'definitions',
+																																$elm$json$Json$Decode$nullable(
+																																	$elm$json$Json$Decode$lazy(
+																																		function (_v2) {
+																																			return $json_tools$json_schema$Json$Schema$Definitions$cyclic$schemataDecoder();
+																																		})),
+																																$elm$core$Maybe$Nothing,
+																																A4(
+																																	$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
+																																	'examples',
+																																	$elm$json$Json$Decode$nullable(
+																																		$elm$json$Json$Decode$list($elm$json$Json$Decode$value)),
+																																	$elm$core$Maybe$Nothing,
+																																	A4(
+																																		$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
+																																		'default',
+																																		A2($elm$json$Json$Decode$map, $elm$core$Maybe$Just, $elm$json$Json$Decode$value),
+																																		$elm$core$Maybe$Nothing,
+																																		A4(
+																																			$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
+																																			'description',
+																																			$elm$json$Json$Decode$nullable($elm$json$Json$Decode$string),
+																																			$elm$core$Maybe$Nothing,
+																																			A4(
+																																				$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
+																																				'title',
+																																				$elm$json$Json$Decode$nullable($elm$json$Json$Decode$string),
+																																				$elm$core$Maybe$Nothing,
+																																				A4(
+																																					$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
+																																					'$ref',
+																																					$elm$json$Json$Decode$nullable($elm$json$Json$Decode$string),
+																																					$elm$core$Maybe$Nothing,
+																																					A2(
+																																						$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$custom,
+																																						A3(
+																																							$elm$json$Json$Decode$map2,
+																																							F2(
+																																								function (a, b) {
+																																									return _Utils_eq(a, $elm$core$Maybe$Nothing) ? b : a;
+																																								}),
+																																							$elm$json$Json$Decode$maybe(
+																																								A2($elm$json$Json$Decode$field, '$id', $elm$json$Json$Decode$string)),
+																																							$elm$json$Json$Decode$maybe(
+																																								A2($elm$json$Json$Decode$field, 'id', $elm$json$Json$Decode$string))),
+																																						A4(
+																																							$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
+																																							'type',
+																																							$elm$json$Json$Decode$oneOf(
+																																								_List_fromArray(
+																																									[
+																																										multipleTypes,
+																																										A2($elm$json$Json$Decode$map, $json_tools$json_schema$Json$Schema$Definitions$SingleType, singleType)
+																																									])),
+																																							$json_tools$json_schema$Json$Schema$Definitions$AnyType,
+																																							$elm$json$Json$Decode$succeed($json_tools$json_schema$Json$Schema$Definitions$SubSchema)))))))))))))))))))))))))))))))))))))));
+	var booleanSchemaDecoder = A2(
+		$elm$json$Json$Decode$andThen,
+		function (b) {
+			return b ? $elm$json$Json$Decode$succeed(
+				$json_tools$json_schema$Json$Schema$Definitions$BooleanSchema(true)) : $elm$json$Json$Decode$succeed(
+				$json_tools$json_schema$Json$Schema$Definitions$BooleanSchema(false));
+		},
+		$elm$json$Json$Decode$bool);
+	return $elm$json$Json$Decode$oneOf(
+		_List_fromArray(
+			[
+				booleanSchemaDecoder,
+				A2(
+				$elm$json$Json$Decode$andThen,
+				function (b) {
+					return $elm$json$Json$Decode$succeed(
+						$json_tools$json_schema$Json$Schema$Definitions$ObjectSchema(b));
+				},
+				objectSchemaDecoder)
+			]));
+}
+function $json_tools$json_schema$Json$Schema$Definitions$cyclic$nonEmptyListOfSchemas() {
+	return A2(
+		$elm$json$Json$Decode$andThen,
+		$json_tools$json_schema$Json$Schema$Definitions$failIfEmpty,
+		$elm$json$Json$Decode$list(
+			$elm$json$Json$Decode$lazy(
+				function (_v1) {
+					return $json_tools$json_schema$Json$Schema$Definitions$cyclic$decoder();
+				})));
+}
+function $json_tools$json_schema$Json$Schema$Definitions$cyclic$schemataDecoder() {
+	return A2(
+		$elm$json$Json$Decode$map,
+		$json_tools$json_schema$Json$Schema$Definitions$Schemata,
+		$elm$json$Json$Decode$keyValuePairs(
+			$elm$json$Json$Decode$lazy(
+				function (_v0) {
+					return $json_tools$json_schema$Json$Schema$Definitions$cyclic$decoder();
+				})));
+}
+try {
+	var $json_tools$json_schema$Json$Schema$Definitions$itemsDecoder = $json_tools$json_schema$Json$Schema$Definitions$cyclic$itemsDecoder();
+	$json_tools$json_schema$Json$Schema$Definitions$cyclic$itemsDecoder = function () {
+		return $json_tools$json_schema$Json$Schema$Definitions$itemsDecoder;
+	};
+	var $json_tools$json_schema$Json$Schema$Definitions$dependenciesDecoder = $json_tools$json_schema$Json$Schema$Definitions$cyclic$dependenciesDecoder();
+	$json_tools$json_schema$Json$Schema$Definitions$cyclic$dependenciesDecoder = function () {
+		return $json_tools$json_schema$Json$Schema$Definitions$dependenciesDecoder;
+	};
+	var $json_tools$json_schema$Json$Schema$Definitions$decoder = $json_tools$json_schema$Json$Schema$Definitions$cyclic$decoder();
+	$json_tools$json_schema$Json$Schema$Definitions$cyclic$decoder = function () {
+		return $json_tools$json_schema$Json$Schema$Definitions$decoder;
+	};
+	var $json_tools$json_schema$Json$Schema$Definitions$nonEmptyListOfSchemas = $json_tools$json_schema$Json$Schema$Definitions$cyclic$nonEmptyListOfSchemas();
+	$json_tools$json_schema$Json$Schema$Definitions$cyclic$nonEmptyListOfSchemas = function () {
+		return $json_tools$json_schema$Json$Schema$Definitions$nonEmptyListOfSchemas;
+	};
+	var $json_tools$json_schema$Json$Schema$Definitions$schemataDecoder = $json_tools$json_schema$Json$Schema$Definitions$cyclic$schemataDecoder();
+	$json_tools$json_schema$Json$Schema$Definitions$cyclic$schemataDecoder = function () {
+		return $json_tools$json_schema$Json$Schema$Definitions$schemataDecoder;
+	};
+} catch ($) {
+	throw 'Some top-level definitions from `Json.Schema.Definitions` are causing infinite recursion:\n\n  ┌─────┐\n  │    itemsDecoder\n  │     ↓\n  │    dependenciesDecoder\n  │     ↓\n  │    decoder\n  │     ↓\n  │    nonEmptyListOfSchemas\n  │     ↓\n  │    schemataDecoder\n  └─────┘\n\nThese errors are very tricky, so read https://elm-lang.org/0.19.1/bad-recursion to learn how to fix it!';}
+var $author$project$OpenApi$Types$decodeSchema = A2($elm$json$Json$Decode$map, $author$project$OpenApi$Types$Schema, $json_tools$json_schema$Json$Schema$Definitions$decoder);
+var $elm$json$Json$Decode$map5 = _Json_map5;
 var $author$project$OpenApi$Types$optionalNothing = F2(
 	function (fieldName, decoder) {
 		return A3(
@@ -6678,7 +7501,6 @@ var $author$project$OpenApi$Types$Server = function (a) {
 var $author$project$OpenApi$Types$Variable = function (a) {
 	return {$: 'Variable', a: a};
 };
-var $elm$json$Json$Decode$list = _Json_decodeList;
 var $author$project$OpenApi$Types$decodeServerVariable = A4(
 	$elm$json$Json$Decode$map3,
 	F3(
@@ -7266,7 +8088,6 @@ var $elm$core$Basics$always = F2(
 	function (a, _v0) {
 		return a;
 	});
-var $elm$core$String$slice = _String_slice;
 var $elm$parser$Parser$Advanced$mapChompedString = F2(
 	function (func, _v0) {
 		var parse = _v0.a;
@@ -7334,7 +8155,6 @@ var $elm$parser$Parser$Advanced$ignorer = F2(
 		return A3($elm$parser$Parser$Advanced$map2, $elm$core$Basics$always, keepParser, ignoreParser);
 	});
 var $elm$parser$Parser$ignorer = $elm$parser$Parser$Advanced$ignorer;
-var $elm$core$Basics$ge = _Utils_ge;
 var $dividat$elm_semver$Semver$isBetween = F3(
 	function (low, high, _char) {
 		var code = $elm$core$Char$toCode(_char);
@@ -7425,7 +8245,6 @@ var $dividat$elm_semver$Semver$buildMetadataIdentifier = $elm$parser$Parser$oneO
 	_List_fromArray(
 		[$dividat$elm_semver$Semver$alphanumericIdentifier, $dividat$elm_semver$Semver$digits]));
 var $elm$parser$Parser$ExpectingEnd = {$: 'ExpectingEnd'};
-var $elm$core$String$length = _String_length;
 var $elm$parser$Parser$Advanced$end = function (x) {
 	return $elm$parser$Parser$Advanced$Parser(
 		function (s) {
@@ -7910,14 +8729,6 @@ var $mdgriffith$elm_codegen$Elm$Annotation$getAliases = function (_v0) {
 	var ann = _v0.a;
 	return ann.aliases;
 };
-var $mdgriffith$elm_codegen$Internal$Compiler$getAnnotationImports = function (_v0) {
-	var details = _v0.a;
-	return details.imports;
-};
-var $mdgriffith$elm_codegen$Internal$Compiler$getInnerAnnotation = function (_v0) {
-	var details = _v0.a;
-	return details.annotation;
-};
 var $elm$core$Dict$union = F2(
 	function (t1, t2) {
 		return A3($elm$core$Dict$foldl, $elm$core$Dict$insert, t2, t1);
@@ -7967,13 +8778,6 @@ var $stil4m$elm_syntax$Elm$Syntax$Expression$FunctionOrValue = F2(
 var $stil4m$elm_syntax$Elm$Syntax$Expression$RecordAccessFunction = function (a) {
 	return {$: 'RecordAccessFunction', a: a};
 };
-var $elm$core$List$isEmpty = function (xs) {
-	if (!xs.b) {
-		return true;
-	} else {
-		return false;
-	}
-};
 var $mdgriffith$elm_codegen$Elm$popLastAndDenodeLast = function (lst) {
 	var _v0 = $elm$core$List$reverse(lst);
 	if (!_v0.b) {
@@ -8010,8 +8814,8 @@ var $mdgriffith$elm_codegen$Elm$betaReduce = function (e) {
 		return $elm$core$Maybe$Nothing;
 	};
 	if (e.$ === 'LambdaExpression') {
-		var args = e.a.args;
 		var expression = e.a.expression;
+		var args = e.a.args;
 		var _v2 = $mdgriffith$elm_codegen$Elm$popLastAndDenodeLast(args);
 		if ((_v2.$ === 'Just') && (_v2.a.b.$ === 'VarPattern')) {
 			var _v3 = _v2.a;
@@ -8081,18 +8885,6 @@ var $mdgriffith$elm_codegen$Elm$betaReduce = function (e) {
 		return e;
 	}
 };
-var $elm$core$String$dropLeft = F2(
-	function (n, string) {
-		return (n < 1) ? string : A3(
-			$elm$core$String$slice,
-			n,
-			$elm$core$String$length(string),
-			string);
-	});
-var $elm$core$String$left = F2(
-	function (n, string) {
-		return (n < 1) ? '' : A3($elm$core$String$slice, 0, n, string);
-	});
 var $mdgriffith$elm_codegen$Internal$Format$sanitize = function (str) {
 	switch (str) {
 		case 'in':
@@ -8447,12 +9239,6 @@ var $mdgriffith$elm_codegen$Elm$functionReduced = F2(
 				};
 			});
 	});
-var $mdgriffith$elm_codegen$Internal$Format$formatType = function (str) {
-	return _Utils_ap(
-		$elm$core$String$toUpper(
-			A2($elm$core$String$left, 1, str)),
-		A2($elm$core$String$dropLeft, 1, str));
-};
 var $mdgriffith$elm_codegen$Elm$Annotation$namedWith = F3(
 	function (mod, name, args) {
 		return $mdgriffith$elm_codegen$Internal$Compiler$Annotation(
@@ -8566,9 +9352,6 @@ var $mdgriffith$elm_codegen$Internal$Compiler$RenderedComment = function (a) {
 };
 var $mdgriffith$elm_codegen$Internal$Compiler$RenderedDecl = function (a) {
 	return {$: 'RenderedDecl', a: a};
-};
-var $stil4m$elm_syntax$Elm$Syntax$Declaration$AliasDeclaration = function (a) {
-	return {$: 'AliasDeclaration', a: a};
 };
 var $stil4m$elm_syntax$Elm$Syntax$Declaration$CustomTypeDeclaration = function (a) {
 	return {$: 'CustomTypeDeclaration', a: a};
@@ -8695,7 +9478,6 @@ var $mdgriffith$elm_codegen$Internal$Comments$addPart = F2(
 var $mdgriffith$elm_codegen$Internal$Compiler$fullModName = function (name) {
 	return A2($elm$core$String$join, '.', name);
 };
-var $elm$core$List$sortBy = _List_sortBy;
 var $mdgriffith$elm_codegen$Internal$Render$dedupImports = function (mods) {
 	return A2(
 		$elm$core$List$sortBy,
@@ -11640,9 +12422,6 @@ var $mdgriffith$elm_codegen$Internal$Comments$fitAndSplit = F2(
 					]));
 		}
 	});
-var $elm$core$List$sort = function (xs) {
-	return A2($elm$core$List$sortBy, $elm$core$Basics$identity, xs);
-};
 var $mdgriffith$elm_codegen$Internal$Comments$mergeDocTags = function (innerParts) {
 	var _v0 = A3(
 		$elm$core$List$foldr,
@@ -12342,20 +13121,6 @@ var $mdgriffith$elm_codegen$Elm$file = F2(
 			$mdgriffith$elm_codegen$Elm$renderStandardComment,
 			{aliases: _List_Nil, declarations: decs, index: $mdgriffith$elm_codegen$Internal$Index$startIndex, moduleName: mod});
 	});
-var $mdgriffith$elm_codegen$Internal$Compiler$Declaration = function (a) {
-	return {$: 'Declaration', a: a};
-};
-var $mdgriffith$elm_codegen$Internal$Compiler$NotExposed = {$: 'NotExposed'};
-var $elm$core$Result$andThen = F2(
-	function (callback, result) {
-		if (result.$ === 'Ok') {
-			var value = result.a;
-			return callback(value);
-		} else {
-			var msg = result.a;
-			return $elm$core$Result$Err(msg);
-		}
-	});
 var $stil4m$elm_syntax$Elm$Syntax$Node$map = F2(
 	function (f, _v0) {
 		var r = _v0.a;
@@ -12682,65 +13447,6 @@ var $mdgriffith$elm_codegen$Elm$renderError = function (err) {
 var $elm$core$Set$fromList = function (list) {
 	return A3($elm$core$List$foldl, $elm$core$Set$insert, $elm$core$Set$empty, list);
 };
-var $mdgriffith$elm_codegen$Internal$Compiler$getGenericsHelper = function (ann) {
-	switch (ann.$) {
-		case 'GenericType':
-			var str = ann.a;
-			return _List_fromArray(
-				[str]);
-		case 'Typed':
-			var modName = ann.a;
-			var anns = ann.b;
-			return A2(
-				$elm$core$List$concatMap,
-				A2($elm$core$Basics$composeL, $mdgriffith$elm_codegen$Internal$Compiler$getGenericsHelper, $mdgriffith$elm_codegen$Internal$Compiler$denode),
-				anns);
-		case 'Unit':
-			return _List_Nil;
-		case 'Tupled':
-			var tupled = ann.a;
-			return A2(
-				$elm$core$List$concatMap,
-				A2($elm$core$Basics$composeL, $mdgriffith$elm_codegen$Internal$Compiler$getGenericsHelper, $mdgriffith$elm_codegen$Internal$Compiler$denode),
-				tupled);
-		case 'Record':
-			var recordDefinition = ann.a;
-			return A2(
-				$elm$core$List$concatMap,
-				function (nodedField) {
-					var _v1 = $mdgriffith$elm_codegen$Internal$Compiler$denode(nodedField);
-					var name = _v1.a;
-					var field = _v1.b;
-					return $mdgriffith$elm_codegen$Internal$Compiler$getGenericsHelper(
-						$mdgriffith$elm_codegen$Internal$Compiler$denode(field));
-				},
-				recordDefinition);
-		case 'GenericRecord':
-			var recordName = ann.a;
-			var recordDefinition = ann.b;
-			return A2(
-				$elm$core$List$concatMap,
-				function (nodedField) {
-					var _v2 = $mdgriffith$elm_codegen$Internal$Compiler$denode(nodedField);
-					var name = _v2.a;
-					var field = _v2.b;
-					return $mdgriffith$elm_codegen$Internal$Compiler$getGenericsHelper(
-						$mdgriffith$elm_codegen$Internal$Compiler$denode(field));
-				},
-				$mdgriffith$elm_codegen$Internal$Compiler$denode(recordDefinition));
-		default:
-			var one = ann.a;
-			var two = ann.b;
-			return A2(
-				$elm$core$List$concatMap,
-				$mdgriffith$elm_codegen$Internal$Compiler$getGenericsHelper,
-				_List_fromArray(
-					[
-						$mdgriffith$elm_codegen$Internal$Compiler$denode(one),
-						$mdgriffith$elm_codegen$Internal$Compiler$denode(two)
-					]));
-	}
-};
 var $elm$core$Basics$neq = _Utils_notEqual;
 var $mdgriffith$elm_codegen$Internal$Compiler$simplify = function (fullStr) {
 	return A3(
@@ -12998,9 +13704,9 @@ var $mdgriffith$elm_codegen$Internal$Compiler$toVarMaybeType = F3(
 				return ann;
 			}
 		}();
-		var imports = _v1.imports;
-		var annotation = _v1.annotation;
 		var aliases = _v1.aliases;
+		var annotation = _v1.annotation;
+		var imports = _v1.imports;
 		return {
 			index: newIndex,
 			name: name,
@@ -13345,6 +14051,10 @@ var $author$project$OpenApi$Path$get = function (_v0) {
 	var path_ = _v0.a;
 	return path_.get;
 };
+var $author$project$OpenApi$Schema$get = function (_v0) {
+	var schema_ = _v0.a;
+	return schema_;
+};
 var $author$project$OpenApi$info = function (_v0) {
 	var openApi = _v0.a;
 	return openApi.info;
@@ -13377,15 +14087,6 @@ var $author$project$Main$invalidModuleNameChars = _List_fromArray(
 		_Utils_chr('}')
 	]);
 var $elm$core$String$map = _String_map;
-var $elm$core$List$member = F2(
-	function (x, xs) {
-		return A2(
-			$elm$core$List$any,
-			function (a) {
-				return _Utils_eq(a, x);
-			},
-			xs);
-	});
 var $author$project$Main$makeNamespaceValid = function (str) {
 	return A2(
 		$elm$core$String$map,
@@ -13412,6 +14113,234 @@ var $author$project$Main$removeInvlidChars = function (str) {
 				_Utils_chr('\''));
 		},
 		str);
+};
+var $mdgriffith$elm_codegen$Elm$Annotation$bool = A3($mdgriffith$elm_codegen$Elm$Annotation$typed, _List_Nil, 'Bool', _List_Nil);
+var $mdgriffith$elm_codegen$Elm$Annotation$float = A3($mdgriffith$elm_codegen$Elm$Annotation$typed, _List_Nil, 'Float', _List_Nil);
+var $mdgriffith$elm_codegen$Elm$Annotation$int = A3($mdgriffith$elm_codegen$Elm$Annotation$typed, _List_Nil, 'Int', _List_Nil);
+var $mdgriffith$elm_codegen$Elm$Annotation$list = function (inner) {
+	return A3(
+		$mdgriffith$elm_codegen$Elm$Annotation$typed,
+		_List_Nil,
+		'List',
+		_List_fromArray(
+			[inner]));
+};
+var $mdgriffith$elm_codegen$Elm$Annotation$maybe = function (maybeArg) {
+	return A3(
+		$mdgriffith$elm_codegen$Elm$Annotation$typed,
+		_List_Nil,
+		'Maybe',
+		_List_fromArray(
+			[maybeArg]));
+};
+var $mdgriffith$elm_codegen$Elm$Annotation$named = F2(
+	function (mod, name) {
+		return $mdgriffith$elm_codegen$Internal$Compiler$Annotation(
+			{
+				aliases: $mdgriffith$elm_codegen$Internal$Compiler$emptyAliases,
+				annotation: A2(
+					$stil4m$elm_syntax$Elm$Syntax$TypeAnnotation$Typed,
+					$mdgriffith$elm_codegen$Internal$Compiler$nodify(
+						_Utils_Tuple2(
+							mod,
+							$mdgriffith$elm_codegen$Internal$Format$formatType(name))),
+					_List_Nil),
+				imports: function () {
+					if (!mod.b) {
+						return _List_Nil;
+					} else {
+						return _List_fromArray(
+							[mod]);
+					}
+				}()
+			});
+	});
+var $elm$core$Debug$todo = _Debug_todo;
+var $elm_community$string_extra$String$Extra$changeCase = F2(
+	function (mutator, word) {
+		return A2(
+			$elm$core$Maybe$withDefault,
+			'',
+			A2(
+				$elm$core$Maybe$map,
+				function (_v0) {
+					var head = _v0.a;
+					var tail = _v0.b;
+					return A2(
+						$elm$core$String$cons,
+						mutator(head),
+						tail);
+				},
+				$elm$core$String$uncons(word)));
+	});
+var $elm$core$Char$toUpper = _Char_toUpper;
+var $elm_community$string_extra$String$Extra$toSentenceCase = function (word) {
+	return A2($elm_community$string_extra$String$Extra$changeCase, $elm$core$Char$toUpper, word);
+};
+var $elm_community$string_extra$String$Extra$toTitleCase = function (ws) {
+	var uppercaseMatch = A2(
+		$elm$regex$Regex$replace,
+		$elm_community$string_extra$String$Extra$regexFromString('\\w+'),
+		A2(
+			$elm$core$Basics$composeR,
+			function ($) {
+				return $.match;
+			},
+			$elm_community$string_extra$String$Extra$toSentenceCase));
+	return A3(
+		$elm$regex$Regex$replace,
+		$elm_community$string_extra$String$Extra$regexFromString('^([a-z])|\\s+([a-z])'),
+		A2(
+			$elm$core$Basics$composeR,
+			function ($) {
+				return $.match;
+			},
+			uppercaseMatch),
+		ws);
+};
+var $author$project$Main$typifyName = function (name) {
+	return A3(
+		$elm$core$String$replace,
+		' ',
+		'',
+		$elm_community$string_extra$String$Extra$toTitleCase(
+			A3(
+				$elm$core$String$replace,
+				'_',
+				' ',
+				A3($elm$core$String$replace, '-', ' ', name))));
+};
+var $author$project$Main$schemaToAnnotation = function (schema) {
+	if (schema.$ === 'BooleanSchema') {
+		var bool = schema.a;
+		return _Debug_todo(
+			'Main',
+			{
+				start: {line: 151, column: 13},
+				end: {line: 151, column: 23}
+			})('');
+	} else {
+		var subSchema = schema.a;
+		var singleTypeToAnnotation = function (singleType) {
+			switch (singleType.$) {
+				case 'ObjectType':
+					return $mdgriffith$elm_codegen$Elm$Annotation$record(
+						A2(
+							$elm$core$List$map,
+							function (_v10) {
+								var key = _v10.a;
+								var valueSchema = _v10.b;
+								return _Utils_Tuple2(
+									key,
+									$author$project$Main$schemaToAnnotation(valueSchema));
+							},
+							A2(
+								$elm$core$Maybe$withDefault,
+								_List_Nil,
+								A2(
+									$elm$core$Maybe$map,
+									function (_v9) {
+										var schemata = _v9.a;
+										return schemata;
+									},
+									subSchema.properties))));
+				case 'StringType':
+					return $mdgriffith$elm_codegen$Elm$Annotation$string;
+				case 'IntegerType':
+					return $mdgriffith$elm_codegen$Elm$Annotation$int;
+				case 'NumberType':
+					return $mdgriffith$elm_codegen$Elm$Annotation$float;
+				case 'BooleanType':
+					return $mdgriffith$elm_codegen$Elm$Annotation$bool;
+				case 'NullType':
+					return _Debug_todo(
+						'Main',
+						{
+							start: {line: 180, column: 29},
+							end: {line: 180, column: 39}
+						})('');
+				default:
+					var _v11 = subSchema.items;
+					switch (_v11.$) {
+						case 'NoItems':
+							return _Debug_todo(
+								'Main',
+								{
+									start: {line: 185, column: 37},
+									end: {line: 185, column: 47}
+								})('err');
+						case 'ArrayOfItems':
+							return _Debug_todo(
+								'Main',
+								{
+									start: {line: 188, column: 37},
+									end: {line: 188, column: 47}
+								})('');
+						default:
+							var itemSchema = _v11.a;
+							return $mdgriffith$elm_codegen$Elm$Annotation$list(
+								$author$project$Main$schemaToAnnotation(itemSchema));
+					}
+			}
+		};
+		var _v1 = subSchema.type_;
+		switch (_v1.$) {
+			case 'SingleType':
+				var singleType = _v1.a;
+				return singleTypeToAnnotation(singleType);
+			case 'AnyType':
+				var _v2 = subSchema.ref;
+				if (_v2.$ === 'Nothing') {
+					var _v3 = subSchema.anyOf;
+					if (_v3.$ === 'Nothing') {
+						return A2(
+							$mdgriffith$elm_codegen$Elm$Annotation$named,
+							_List_fromArray(
+								['Json', 'Encode']),
+							'Value');
+					} else {
+						var anyOf = _v3.a;
+						return A2(
+							$mdgriffith$elm_codegen$Elm$Annotation$named,
+							_List_fromArray(
+								['Debug']),
+							'Todo');
+					}
+				} else {
+					var ref = _v2.a;
+					var _v4 = A2($elm$core$String$split, '/', ref);
+					if (((((((_v4.b && (_v4.a === '#')) && _v4.b.b) && (_v4.b.a === 'components')) && _v4.b.b.b) && (_v4.b.b.a === 'schemas')) && _v4.b.b.b.b) && (!_v4.b.b.b.b.b)) {
+						var _v5 = _v4.b;
+						var _v6 = _v5.b;
+						var _v7 = _v6.b;
+						var schemaName = _v7.a;
+						return A2(
+							$mdgriffith$elm_codegen$Elm$Annotation$named,
+							_List_Nil,
+							$author$project$Main$typifyName(schemaName));
+					} else {
+						return _Debug_todo(
+							'Main',
+							{
+								start: {line: 213, column: 37},
+								end: {line: 213, column: 47}
+							})('other ref: ' + ref);
+					}
+				}
+			case 'NullableType':
+				var singleType = _v1.a;
+				return $mdgriffith$elm_codegen$Elm$Annotation$maybe(
+					singleTypeToAnnotation(singleType));
+			default:
+				var singleTypes = _v1.a;
+				return _Debug_todo(
+					'Main',
+					{
+						start: {line: 219, column: 21},
+						end: {line: 219, column: 31}
+					})('union type');
+		}
+	}
 };
 var $author$project$OpenApi$Components$schemas = function (_v0) {
 	var contact = _v0.a;
@@ -13505,18 +14434,32 @@ var $author$project$Main$update = F2(
 						$author$project$Main$makeNamespaceValid(
 							$author$project$OpenApi$Info$title(
 								$author$project$OpenApi$info(apiSpec))));
+					var componentDeclarations = A3(
+						$elm$core$Dict$foldl,
+						F3(
+							function (name, schema, res) {
+								return A2(
+									$elm$core$List$cons,
+									A2(
+										$mdgriffith$elm_codegen$Elm$alias,
+										$author$project$Main$typifyName(name),
+										$author$project$Main$schemaToAnnotation(
+											$author$project$OpenApi$Schema$get(schema))),
+									res);
+							}),
+						_List_Nil,
+						A2(
+							$elm$core$Maybe$withDefault,
+							$elm$core$Dict$empty,
+							A2(
+								$elm$core$Maybe$map,
+								$author$project$OpenApi$Components$schemas,
+								$author$project$OpenApi$components(apiSpec))));
 					var file = A2(
 						$mdgriffith$elm_codegen$Elm$file,
 						_List_fromArray(
 							[namespace]),
-						pathDeclarations);
-					var componentsDeclarations = A2(
-						$elm$core$Maybe$withDefault,
-						$elm$core$Dict$empty,
-						A2(
-							$elm$core$Maybe$map,
-							$author$project$OpenApi$Components$schemas,
-							$author$project$OpenApi$components(apiSpec)));
+						_Utils_ap(pathDeclarations, componentDeclarations));
 					return $author$project$Main$writeFile(
 						_Utils_Tuple2(file.path, file.contents));
 				}());

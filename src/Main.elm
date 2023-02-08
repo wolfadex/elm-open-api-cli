@@ -7,11 +7,14 @@ import Elm.Declare
 import Gen.Http
 import Json.Decode
 import Json.Encode exposing (Value)
+import Json.Schema
+import Json.Schema.Definitions
 import OpenApi exposing (OpenApi)
-import OpenApi.Components exposing (schemas)
+import OpenApi.Components
 import OpenApi.Info
 import OpenApi.Operation
 import OpenApi.Path
+import OpenApi.Schema
 import String.Extra
 
 
@@ -104,15 +107,22 @@ update msg model =
                                     )
                                     []
 
-                        componentsDeclarations =
+                        componentDeclarations =
                             apiSpec
                                 |> OpenApi.components
                                 |> Maybe.map OpenApi.Components.schemas
                                 |> Maybe.withDefault Dict.empty
+                                |> Dict.foldl
+                                    (\name schema res ->
+                                        Elm.alias (typifyName name)
+                                            (schemaToAnnotation (OpenApi.Schema.get schema))
+                                            :: res
+                                    )
+                                    []
 
                         file =
                             Elm.file [ namespace ]
-                                pathDeclarations
+                                (pathDeclarations ++ componentDeclarations)
                       in
                       writeFile ( file.path, file.contents )
                     )
@@ -123,6 +133,90 @@ update msg model =
                         |> Json.Decode.errorToString
                         |> writeMsg
                     )
+
+
+typifyName : String -> String
+typifyName name =
+    name
+        |> String.replace "-" " "
+        |> String.replace "_" " "
+        |> String.Extra.toTitleCase
+        |> String.replace " " ""
+
+
+schemaToAnnotation : Json.Schema.Definitions.Schema -> Elm.Annotation.Annotation
+schemaToAnnotation schema =
+    case schema of
+        Json.Schema.Definitions.BooleanSchema bool ->
+            Debug.todo ""
+
+        Json.Schema.Definitions.ObjectSchema subSchema ->
+            let
+                singleTypeToAnnotation singleType =
+                    case singleType of
+                        Json.Schema.Definitions.ObjectType ->
+                            subSchema.properties
+                                |> Maybe.map (\(Json.Schema.Definitions.Schemata schemata) -> schemata)
+                                |> Maybe.withDefault []
+                                |> List.map
+                                    (\( key, valueSchema ) ->
+                                        ( key, schemaToAnnotation valueSchema )
+                                    )
+                                |> Elm.Annotation.record
+
+                        Json.Schema.Definitions.StringType ->
+                            Elm.Annotation.string
+
+                        Json.Schema.Definitions.IntegerType ->
+                            Elm.Annotation.int
+
+                        Json.Schema.Definitions.NumberType ->
+                            Elm.Annotation.float
+
+                        Json.Schema.Definitions.BooleanType ->
+                            Elm.Annotation.bool
+
+                        Json.Schema.Definitions.NullType ->
+                            Debug.todo ""
+
+                        Json.Schema.Definitions.ArrayType ->
+                            case subSchema.items of
+                                Json.Schema.Definitions.NoItems ->
+                                    Debug.todo "err"
+
+                                Json.Schema.Definitions.ArrayOfItems _ ->
+                                    Debug.todo ""
+
+                                Json.Schema.Definitions.ItemDefinition itemSchema ->
+                                    Elm.Annotation.list (schemaToAnnotation itemSchema)
+            in
+            case subSchema.type_ of
+                Json.Schema.Definitions.SingleType singleType ->
+                    singleTypeToAnnotation singleType
+
+                Json.Schema.Definitions.AnyType ->
+                    case subSchema.ref of
+                        Nothing ->
+                            case subSchema.anyOf of
+                                Nothing ->
+                                    Elm.Annotation.named [ "Json", "Encode" ] "Value"
+
+                                Just anyOf ->
+                                    Elm.Annotation.named [ "Debug" ] "Todo"
+
+                        Just ref ->
+                            case String.split "/" ref of
+                                [ "#", "components", "schemas", schemaName ] ->
+                                    Elm.Annotation.named [] (typifyName schemaName)
+
+                                _ ->
+                                    Debug.todo ("other ref: " ++ ref)
+
+                Json.Schema.Definitions.NullableType singleType ->
+                    Elm.Annotation.maybe (singleTypeToAnnotation singleType)
+
+                Json.Schema.Definitions.UnionType singleTypes ->
+                    Debug.todo "union type"
 
 
 makeNamespaceValid : String -> String

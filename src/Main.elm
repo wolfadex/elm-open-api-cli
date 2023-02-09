@@ -3,6 +3,7 @@ port module Main exposing (main)
 import Dict
 import Elm
 import Elm.Annotation
+import Elm.Case
 import Elm.Declare
 import Elm.Op
 import Gen.Debug
@@ -281,19 +282,18 @@ schemaToEncoder schema =
                                     Debug.todo ("other ref: " ++ ref)
 
                 Json.Schema.Definitions.NullableType singleType ->
-                    Gen.Json.Decode.oneOf
-                        [ Elm.apply
-                            (Elm.value
-                                { importFrom = [ "Json", "Decode" ]
-                                , name = "map"
-                                , annotation = Nothing
-                                }
-                            )
-                            [ Elm.val "Present", singleTypeToDecoder singleType ]
-                        , Gen.Json.Decode.null (Elm.val "Null")
-                        ]
+                    Elm.fn ( "nullableValue", Nothing )
+                        (\nullableValue ->
+                            Elm.Case.custom
+                                nullableValue
+                                (Elm.Annotation.namedWith [] "Nullable" [ Elm.Annotation.var "value" ])
+                                [ Elm.Case.branch0 "Null" Gen.Json.Encode.null
+                                , Elm.Case.branch1 "Present"
+                                    ( "value", Elm.Annotation.var "value" )
+                                    (\value -> Elm.apply (singleTypeToDecoder singleType) [ value ])
+                                ]
+                        )
 
-                -- Gen.Json.Decode.maybe (singleTypeToDecoder singleType)
                 Json.Schema.Definitions.UnionType singleTypes ->
                     Debug.todo "union type"
 
@@ -394,7 +394,17 @@ schemaToDecoder schema =
                                     Debug.todo ("other ref: " ++ ref)
 
                 Json.Schema.Definitions.NullableType singleType ->
-                    Gen.Json.Decode.maybe (singleTypeToDecoder singleType)
+                    Gen.Json.Decode.oneOf
+                        [ Elm.apply
+                            (Elm.value
+                                { importFrom = [ "Json", "Decode" ]
+                                , name = "map"
+                                , annotation = Nothing
+                                }
+                            )
+                            [ Elm.val "Present", singleTypeToDecoder singleType ]
+                        , Gen.Json.Decode.null (Elm.val "Null")
+                        ]
 
                 Json.Schema.Definitions.UnionType singleTypes ->
                     Debug.todo "union type"
@@ -469,7 +479,9 @@ schemaToAnnotation schema =
                                     Debug.todo ("other ref: " ++ ref)
 
                 Json.Schema.Definitions.NullableType singleType ->
-                    Elm.Annotation.maybe (singleTypeToAnnotation singleType)
+                    Elm.Annotation.namedWith []
+                        "Nullable"
+                        [ singleTypeToAnnotation singleType ]
 
                 Json.Schema.Definitions.UnionType singleTypes ->
                     Debug.todo "union type"

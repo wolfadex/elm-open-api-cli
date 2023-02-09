@@ -143,7 +143,9 @@ update msg model =
 
                         file =
                             Elm.file [ namespace ]
-                                (pathDeclarations ++ componentDeclarations)
+                                (pathDeclarations
+                                    ++ (nullableType :: componentDeclarations)
+                                )
                       in
                       writeFile ( file.path, file.contents )
                     )
@@ -154,6 +156,13 @@ update msg model =
                         |> Json.Decode.errorToString
                         |> writeMsg
                     )
+
+
+nullableType =
+    Elm.customType "Nullable"
+        [ Elm.variant "Null"
+        , Elm.variantWith "Present" [ Elm.Annotation.var "value" ]
+        ]
 
 
 typifyName : String -> String
@@ -266,15 +275,25 @@ schemaToEncoder schema =
                         Just ref ->
                             case String.split "/" ref of
                                 [ "#", "components", "schemas", schemaName ] ->
-                                    Elm.val ("decode" ++ typifyName schemaName)
+                                    Elm.val ("encode" ++ typifyName schemaName)
 
                                 _ ->
                                     Debug.todo ("other ref: " ++ ref)
 
                 Json.Schema.Definitions.NullableType singleType ->
-                    -- Gen.Json.Decode.maybe (singleTypeToDecoder singleType)
-                    Gen.Debug.todo "encode nullable"
+                    Gen.Json.Decode.oneOf
+                        [ Elm.apply
+                            (Elm.value
+                                { importFrom = [ "Json", "Decode" ]
+                                , name = "map"
+                                , annotation = Nothing
+                                }
+                            )
+                            [ Elm.val "Present", singleTypeToDecoder singleType ]
+                        , Gen.Json.Decode.null (Elm.val "Null")
+                        ]
 
+                -- Gen.Json.Decode.maybe (singleTypeToDecoder singleType)
                 Json.Schema.Definitions.UnionType singleTypes ->
                     Debug.todo "union type"
 

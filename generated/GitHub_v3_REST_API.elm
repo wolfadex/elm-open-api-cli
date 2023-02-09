@@ -3681,6 +3681,11 @@ metaGetZen toMsg =
         { url = "/zen", expect = Http.expectJson toMsg (Debug.todo "todo") }
 
 
+type Nullable value
+    = Null
+    | Present value
+
+
 type alias WorkflowUsage =
     { billable :
         { uBUNTU : { totalMs : Int }
@@ -4229,29 +4234,67 @@ encodeWorkflowRun : WorkflowRun -> Json.Encode.Value
 encodeWorkflowRun rec =
     Json.Encode.object
         [ ( "id", Json.Encode.int rec.id )
-        , ( "name", Debug.todo "encode nullable" rec.name )
+        , ( "name"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.name
+          )
         , ( "node_id", Json.Encode.string rec.nodeId )
         , ( "check_suite_id", Json.Encode.int rec.checkSuiteId )
         , ( "check_suite_node_id", Json.Encode.string rec.checkSuiteNodeId )
-        , ( "head_branch", Debug.todo "encode nullable" rec.headBranch )
+        , ( "head_branch"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.headBranch
+          )
         , ( "head_sha", Json.Encode.string rec.headSha )
         , ( "path", Json.Encode.string rec.path )
         , ( "run_number", Json.Encode.int rec.runNumber )
         , ( "run_attempt", Json.Encode.int rec.runAttempt )
         , ( "referenced_workflows"
-          , Debug.todo "encode nullable" rec.referencedWorkflows
+          , Json.Decode.oneOf
+                [ Json.Decode.map
+                    Present
+                    (Json.Encode.list encodeReferencedWorkflow)
+                , Json.Decode.null Null
+                ]
+                rec.referencedWorkflows
           )
         , ( "event", Json.Encode.string rec.event )
-        , ( "status", Debug.todo "encode nullable" rec.status )
-        , ( "conclusion", Debug.todo "encode nullable" rec.conclusion )
+        , ( "status"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.status
+          )
+        , ( "conclusion"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.conclusion
+          )
         , ( "workflow_id", Json.Encode.int rec.workflowId )
         , ( "url", Json.Encode.string rec.url )
         , ( "html_url", Json.Encode.string rec.htmlUrl )
-        , ( "pull_requests", Debug.todo "encode nullable" rec.pullRequests )
+        , ( "pull_requests"
+          , Json.Decode.oneOf
+                [ Json.Decode.map
+                    Present
+                    (Json.Encode.list encodePullRequestMinimal)
+                , Json.Decode.null Null
+                ]
+                rec.pullRequests
+          )
         , ( "created_at", Json.Encode.string rec.createdAt )
         , ( "updated_at", Json.Encode.string rec.updatedAt )
-        , ( "actor", decodeSimpleUser rec.actor )
-        , ( "triggering_actor", decodeSimpleUser rec.triggeringActor )
+        , ( "actor", encodeSimpleUser rec.actor )
+        , ( "triggering_actor", encodeSimpleUser rec.triggeringActor )
         , ( "run_started_at", Json.Encode.string rec.runStartedAt )
         , ( "jobs_url", Json.Encode.string rec.jobsUrl )
         , ( "logs_url", Json.Encode.string rec.logsUrl )
@@ -4260,12 +4303,16 @@ encodeWorkflowRun rec =
         , ( "cancel_url", Json.Encode.string rec.cancelUrl )
         , ( "rerun_url", Json.Encode.string rec.rerunUrl )
         , ( "previous_attempt_url"
-          , Debug.todo "encode nullable" rec.previousAttemptUrl
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.previousAttemptUrl
           )
         , ( "workflow_url", Json.Encode.string rec.workflowUrl )
         , ( "head_commit", Debug.todo "decode anyOf" rec.headCommit )
-        , ( "repository", decodeMinimalRepository rec.repository )
-        , ( "head_repository", decodeMinimalRepository rec.headRepository )
+        , ( "repository", encodeMinimalRepository rec.repository )
+        , ( "head_repository", encodeMinimalRepository rec.headRepository )
         , ( "head_repository_id", Json.Encode.int rec.headRepositoryId )
         , ( "display_title", Json.Encode.string rec.displayTitle )
         ]
@@ -4400,7 +4447,7 @@ encodeWebhookMergeGroupChecksRequested :
 encodeWebhookMergeGroupChecksRequested rec =
     Json.Encode.object
         [ ( "action", Json.Encode.string rec.action )
-        , ( "installation", decodeSimpleInstallation rec.installation )
+        , ( "installation", encodeSimpleInstallation rec.installation )
         , ( "merge_group"
           , (\rec0 ->
                 Json.Encode.object
@@ -4411,9 +4458,9 @@ encodeWebhookMergeGroupChecksRequested rec =
             )
                 rec.mergeGroup
           )
-        , ( "organization", decodeOrganizationSimple rec.organization )
-        , ( "repository", decodeRepository rec.repository )
-        , ( "sender", decodeSimpleUser rec.sender )
+        , ( "organization", encodeOrganizationSimple rec.organization )
+        , ( "repository", encodeRepository rec.repository )
+        , ( "sender", encodeSimpleUser rec.sender )
         ]
 
 
@@ -4463,12 +4510,12 @@ encodeWebhookDependabotAlertReopened :
 encodeWebhookDependabotAlertReopened rec =
     Json.Encode.object
         [ ( "action", Json.Encode.string rec.action )
-        , ( "alert", decodeDependabotAlert rec.alert )
-        , ( "installation", decodeSimpleInstallation rec.installation )
-        , ( "organization", decodeOrganizationSimple rec.organization )
-        , ( "enterprise", decodeEnterprise rec.enterprise )
-        , ( "repository", decodeRepository rec.repository )
-        , ( "sender", decodeSimpleUser rec.sender )
+        , ( "alert", encodeDependabotAlert rec.alert )
+        , ( "installation", encodeSimpleInstallation rec.installation )
+        , ( "organization", encodeOrganizationSimple rec.organization )
+        , ( "enterprise", encodeEnterprise rec.enterprise )
+        , ( "repository", encodeRepository rec.repository )
+        , ( "sender", encodeSimpleUser rec.sender )
         ]
 
 
@@ -4518,12 +4565,12 @@ encodeWebhookDependabotAlertReintroduced :
 encodeWebhookDependabotAlertReintroduced rec =
     Json.Encode.object
         [ ( "action", Json.Encode.string rec.action )
-        , ( "alert", decodeDependabotAlert rec.alert )
-        , ( "installation", decodeSimpleInstallation rec.installation )
-        , ( "organization", decodeOrganizationSimple rec.organization )
-        , ( "enterprise", decodeEnterprise rec.enterprise )
-        , ( "repository", decodeRepository rec.repository )
-        , ( "sender", decodeSimpleUser rec.sender )
+        , ( "alert", encodeDependabotAlert rec.alert )
+        , ( "installation", encodeSimpleInstallation rec.installation )
+        , ( "organization", encodeOrganizationSimple rec.organization )
+        , ( "enterprise", encodeEnterprise rec.enterprise )
+        , ( "repository", encodeRepository rec.repository )
+        , ( "sender", encodeSimpleUser rec.sender )
         ]
 
 
@@ -4573,12 +4620,12 @@ encodeWebhookDependabotAlertFixed :
 encodeWebhookDependabotAlertFixed rec =
     Json.Encode.object
         [ ( "action", Json.Encode.string rec.action )
-        , ( "alert", decodeDependabotAlert rec.alert )
-        , ( "installation", decodeSimpleInstallation rec.installation )
-        , ( "organization", decodeOrganizationSimple rec.organization )
-        , ( "enterprise", decodeEnterprise rec.enterprise )
-        , ( "repository", decodeRepository rec.repository )
-        , ( "sender", decodeSimpleUser rec.sender )
+        , ( "alert", encodeDependabotAlert rec.alert )
+        , ( "installation", encodeSimpleInstallation rec.installation )
+        , ( "organization", encodeOrganizationSimple rec.organization )
+        , ( "enterprise", encodeEnterprise rec.enterprise )
+        , ( "repository", encodeRepository rec.repository )
+        , ( "sender", encodeSimpleUser rec.sender )
         ]
 
 
@@ -4628,12 +4675,12 @@ encodeWebhookDependabotAlertDismissed :
 encodeWebhookDependabotAlertDismissed rec =
     Json.Encode.object
         [ ( "action", Json.Encode.string rec.action )
-        , ( "alert", decodeDependabotAlert rec.alert )
-        , ( "installation", decodeSimpleInstallation rec.installation )
-        , ( "organization", decodeOrganizationSimple rec.organization )
-        , ( "enterprise", decodeEnterprise rec.enterprise )
-        , ( "repository", decodeRepository rec.repository )
-        , ( "sender", decodeSimpleUser rec.sender )
+        , ( "alert", encodeDependabotAlert rec.alert )
+        , ( "installation", encodeSimpleInstallation rec.installation )
+        , ( "organization", encodeOrganizationSimple rec.organization )
+        , ( "enterprise", encodeEnterprise rec.enterprise )
+        , ( "repository", encodeRepository rec.repository )
+        , ( "sender", encodeSimpleUser rec.sender )
         ]
 
 
@@ -4683,12 +4730,12 @@ encodeWebhookDependabotAlertCreated :
 encodeWebhookDependabotAlertCreated rec =
     Json.Encode.object
         [ ( "action", Json.Encode.string rec.action )
-        , ( "alert", decodeDependabotAlert rec.alert )
-        , ( "installation", decodeSimpleInstallation rec.installation )
-        , ( "organization", decodeOrganizationSimple rec.organization )
-        , ( "enterprise", decodeEnterprise rec.enterprise )
-        , ( "repository", decodeRepository rec.repository )
-        , ( "sender", decodeSimpleUser rec.sender )
+        , ( "alert", encodeDependabotAlert rec.alert )
+        , ( "installation", encodeSimpleInstallation rec.installation )
+        , ( "organization", encodeOrganizationSimple rec.organization )
+        , ( "enterprise", encodeEnterprise rec.enterprise )
+        , ( "repository", encodeRepository rec.repository )
+        , ( "sender", encodeSimpleUser rec.sender )
         ]
 
 
@@ -4779,10 +4826,10 @@ decodeWebhookConfig =
 encodeWebhookConfig : WebhookConfig -> Json.Encode.Value
 encodeWebhookConfig rec =
     Json.Encode.object
-        [ ( "url", decodeWebhookConfigUrl rec.url )
-        , ( "content_type", decodeWebhookConfigContentType rec.contentType )
-        , ( "secret", decodeWebhookConfigSecret rec.secret )
-        , ( "insecure_ssl", decodeWebhookConfigInsecureSsl rec.insecureSsl )
+        [ ( "url", encodeWebhookConfigUrl rec.url )
+        , ( "content_type", encodeWebhookConfigContentType rec.contentType )
+        , ( "secret", encodeWebhookConfigSecret rec.secret )
+        , ( "insecure_ssl", encodeWebhookConfigInsecureSsl rec.insecureSsl )
         ]
 
 
@@ -4822,7 +4869,7 @@ encodeViewTraffic rec =
     Json.Encode.object
         [ ( "count", Json.Encode.int rec.count )
         , ( "uniques", Json.Encode.int rec.uniques )
-        , ( "views", Json.Encode.list decodeTraffic rec.views )
+        , ( "views", Json.Encode.list encodeTraffic rec.views )
         ]
 
 
@@ -4862,8 +4909,20 @@ encodeVerification rec =
     Json.Encode.object
         [ ( "verified", Json.Encode.bool rec.verified )
         , ( "reason", Json.Encode.string rec.reason )
-        , ( "payload", Debug.todo "encode nullable" rec.payload )
-        , ( "signature", Debug.todo "encode nullable" rec.signature )
+        , ( "payload"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.payload
+          )
+        , ( "signature"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.signature
+          )
         ]
 
 
@@ -5137,7 +5196,13 @@ encodeUserSearchResultItem rec =
         , ( "id", Json.Encode.int rec.id )
         , ( "node_id", Json.Encode.string rec.nodeId )
         , ( "avatar_url", Json.Encode.string rec.avatarUrl )
-        , ( "gravatar_id", Debug.todo "encode nullable" rec.gravatarId )
+        , ( "gravatar_id"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.gravatarId
+          )
         , ( "url", Json.Encode.string rec.url )
         , ( "html_url", Json.Encode.string rec.htmlUrl )
         , ( "followers_url", Json.Encode.string rec.followersUrl )
@@ -5157,16 +5222,64 @@ encodeUserSearchResultItem rec =
         , ( "following", Json.Encode.int rec.following )
         , ( "created_at", Json.Encode.string rec.createdAt )
         , ( "updated_at", Json.Encode.string rec.updatedAt )
-        , ( "name", Debug.todo "encode nullable" rec.name )
-        , ( "bio", Debug.todo "encode nullable" rec.bio )
-        , ( "email", Debug.todo "encode nullable" rec.email )
-        , ( "location", Debug.todo "encode nullable" rec.location )
+        , ( "name"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.name
+          )
+        , ( "bio"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.bio
+          )
+        , ( "email"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.email
+          )
+        , ( "location"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.location
+          )
         , ( "site_admin", Json.Encode.bool rec.siteAdmin )
-        , ( "hireable", Debug.todo "encode nullable" rec.hireable )
-        , ( "text_matches", decodeSearchResultTextMatches rec.textMatches )
-        , ( "blog", Debug.todo "encode nullable" rec.blog )
-        , ( "company", Debug.todo "encode nullable" rec.company )
-        , ( "suspended_at", Debug.todo "encode nullable" rec.suspendedAt )
+        , ( "hireable"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.bool
+                , Json.Decode.null Null
+                ]
+                rec.hireable
+          )
+        , ( "text_matches", encodeSearchResultTextMatches rec.textMatches )
+        , ( "blog"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.blog
+          )
+        , ( "company"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.company
+          )
+        , ( "suspended_at"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.suspendedAt
+          )
         ]
 
 
@@ -5228,16 +5341,36 @@ encodeUserMarketplacePurchase rec =
     Json.Encode.object
         [ ( "billing_cycle", Json.Encode.string rec.billingCycle )
         , ( "next_billing_date"
-          , Debug.todo "encode nullable" rec.nextBillingDate
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.nextBillingDate
           )
-        , ( "unit_count", Debug.todo "encode nullable" rec.unitCount )
+        , ( "unit_count"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.int
+                , Json.Decode.null Null
+                ]
+                rec.unitCount
+          )
         , ( "on_free_trial", Json.Encode.bool rec.onFreeTrial )
         , ( "free_trial_ends_on"
-          , Debug.todo "encode nullable" rec.freeTrialEndsOn
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.freeTrialEndsOn
           )
-        , ( "updated_at", Debug.todo "encode nullable" rec.updatedAt )
-        , ( "account", decodeMarketplaceAccount rec.account )
-        , ( "plan", decodeMarketplaceListingPlan rec.plan )
+        , ( "updated_at"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.updatedAt
+          )
+        , ( "account", encodeMarketplaceAccount rec.account )
+        , ( "plan", encodeMarketplaceListingPlan rec.plan )
         ]
 
 
@@ -5314,10 +5447,22 @@ encodeUnlabeledIssueEvent rec =
         [ ( "id", Json.Encode.int rec.id )
         , ( "node_id", Json.Encode.string rec.nodeId )
         , ( "url", Json.Encode.string rec.url )
-        , ( "actor", decodeSimpleUser rec.actor )
+        , ( "actor", encodeSimpleUser rec.actor )
         , ( "event", Json.Encode.string rec.event )
-        , ( "commit_id", Debug.todo "encode nullable" rec.commitId )
-        , ( "commit_url", Debug.todo "encode nullable" rec.commitUrl )
+        , ( "commit_id"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.commitId
+          )
+        , ( "commit_url"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.commitUrl
+          )
         , ( "created_at", Json.Encode.string rec.createdAt )
         , ( "performed_via_github_app"
           , Debug.todo "decode anyOf" rec.performedViaGithubApp
@@ -5402,16 +5547,28 @@ encodeUnassignedIssueEvent rec =
         [ ( "id", Json.Encode.int rec.id )
         , ( "node_id", Json.Encode.string rec.nodeId )
         , ( "url", Json.Encode.string rec.url )
-        , ( "actor", decodeSimpleUser rec.actor )
+        , ( "actor", encodeSimpleUser rec.actor )
         , ( "event", Json.Encode.string rec.event )
-        , ( "commit_id", Debug.todo "encode nullable" rec.commitId )
-        , ( "commit_url", Debug.todo "encode nullable" rec.commitUrl )
+        , ( "commit_id"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.commitId
+          )
+        , ( "commit_url"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.commitUrl
+          )
         , ( "created_at", Json.Encode.string rec.createdAt )
         , ( "performed_via_github_app"
           , Debug.todo "decode anyOf" rec.performedViaGithubApp
           )
-        , ( "assignee", decodeSimpleUser rec.assignee )
-        , ( "assigner", decodeSimpleUser rec.assigner )
+        , ( "assignee", encodeSimpleUser rec.assignee )
+        , ( "assigner", encodeSimpleUser rec.assigner )
         ]
 
 
@@ -5630,25 +5787,135 @@ encodeTopicSearchResultItem : TopicSearchResultItem -> Json.Encode.Value
 encodeTopicSearchResultItem rec =
     Json.Encode.object
         [ ( "name", Json.Encode.string rec.name )
-        , ( "display_name", Debug.todo "encode nullable" rec.displayName )
-        , ( "short_description"
-          , Debug.todo "encode nullable" rec.shortDescription
+        , ( "display_name"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.displayName
           )
-        , ( "description", Debug.todo "encode nullable" rec.description )
-        , ( "created_by", Debug.todo "encode nullable" rec.createdBy )
-        , ( "released", Debug.todo "encode nullable" rec.released )
+        , ( "short_description"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.shortDescription
+          )
+        , ( "description"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.description
+          )
+        , ( "created_by"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.createdBy
+          )
+        , ( "released"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.released
+          )
         , ( "created_at", Json.Encode.string rec.createdAt )
         , ( "updated_at", Json.Encode.string rec.updatedAt )
         , ( "featured", Json.Encode.bool rec.featured )
         , ( "curated", Json.Encode.bool rec.curated )
         , ( "score", Json.Encode.float rec.score )
         , ( "repository_count"
-          , Debug.todo "encode nullable" rec.repositoryCount
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.int
+                , Json.Decode.null Null
+                ]
+                rec.repositoryCount
           )
-        , ( "logo_url", Debug.todo "encode nullable" rec.logoUrl )
-        , ( "text_matches", decodeSearchResultTextMatches rec.textMatches )
-        , ( "related", Debug.todo "encode nullable" rec.related )
-        , ( "aliases", Debug.todo "encode nullable" rec.aliases )
+        , ( "logo_url"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.logoUrl
+          )
+        , ( "text_matches", encodeSearchResultTextMatches rec.textMatches )
+        , ( "related"
+          , Json.Decode.oneOf
+                [ Json.Decode.map
+                    Present
+                    (Json.Encode.list
+                        (\rec0 ->
+                            Json.Encode.object
+                                [ ( "topic_relation"
+                                  , (\rec_0_1_1_1_1_2_0_1_0_15_1_0_0 ->
+                                        Json.Encode.object
+                                            [ ( "id"
+                                              , Json.Encode.int
+                                                    rec_0_1_1_1_1_2_0_1_0_15_1_0_0.id
+                                              )
+                                            , ( "name"
+                                              , Json.Encode.string
+                                                    rec_0_1_1_1_1_2_0_1_0_15_1_0_0.name
+                                              )
+                                            , ( "topic_id"
+                                              , Json.Encode.int
+                                                    rec_0_1_1_1_1_2_0_1_0_15_1_0_0.topicId
+                                              )
+                                            , ( "relation_type"
+                                              , Json.Encode.string
+                                                    rec_0_1_1_1_1_2_0_1_0_15_1_0_0.relationType
+                                              )
+                                            ]
+                                    )
+                                        rec0.topicRelation
+                                  )
+                                ]
+                        )
+                    )
+                , Json.Decode.null Null
+                ]
+                rec.related
+          )
+        , ( "aliases"
+          , Json.Decode.oneOf
+                [ Json.Decode.map
+                    Present
+                    (Json.Encode.list
+                        (\rec0 ->
+                            Json.Encode.object
+                                [ ( "topic_relation"
+                                  , (\rec_0_1_1_1_1_2_0_1_0_16_1_0_0 ->
+                                        Json.Encode.object
+                                            [ ( "id"
+                                              , Json.Encode.int
+                                                    rec_0_1_1_1_1_2_0_1_0_16_1_0_0.id
+                                              )
+                                            , ( "name"
+                                              , Json.Encode.string
+                                                    rec_0_1_1_1_1_2_0_1_0_16_1_0_0.name
+                                              )
+                                            , ( "topic_id"
+                                              , Json.Encode.int
+                                                    rec_0_1_1_1_1_2_0_1_0_16_1_0_0.topicId
+                                              )
+                                            , ( "relation_type"
+                                              , Json.Encode.string
+                                                    rec_0_1_1_1_1_2_0_1_0_16_1_0_0.relationType
+                                              )
+                                            ]
+                                    )
+                                        rec0.topicRelation
+                                  )
+                                ]
+                        )
+                    )
+                , Json.Decode.null Null
+                ]
+                rec.aliases
+          )
         ]
 
 
@@ -5735,15 +6002,27 @@ encodeTimelineUnassignedIssueEvent rec =
         [ ( "id", Json.Encode.int rec.id )
         , ( "node_id", Json.Encode.string rec.nodeId )
         , ( "url", Json.Encode.string rec.url )
-        , ( "actor", decodeSimpleUser rec.actor )
+        , ( "actor", encodeSimpleUser rec.actor )
         , ( "event", Json.Encode.string rec.event )
-        , ( "commit_id", Debug.todo "encode nullable" rec.commitId )
-        , ( "commit_url", Debug.todo "encode nullable" rec.commitUrl )
+        , ( "commit_id"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.commitId
+          )
+        , ( "commit_url"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.commitUrl
+          )
         , ( "created_at", Json.Encode.string rec.createdAt )
         , ( "performed_via_github_app"
           , Debug.todo "decode anyOf" rec.performedViaGithubApp
           )
-        , ( "assignee", decodeSimpleUser rec.assignee )
+        , ( "assignee", encodeSimpleUser rec.assignee )
         ]
 
 
@@ -5844,8 +6123,14 @@ encodeTimelineReviewedEvent rec =
         [ ( "event", Json.Encode.string rec.event )
         , ( "id", Json.Encode.int rec.id )
         , ( "node_id", Json.Encode.string rec.nodeId )
-        , ( "user", decodeSimpleUser rec.user )
-        , ( "body", Debug.todo "encode nullable" rec.body )
+        , ( "user", encodeSimpleUser rec.user )
+        , ( "body"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.body
+          )
         , ( "state", Json.Encode.string rec.state )
         , ( "html_url", Json.Encode.string rec.htmlUrl )
         , ( "pull_request_url", Json.Encode.string rec.pullRequestUrl )
@@ -5883,7 +6168,7 @@ encodeTimelineReviewedEvent rec =
         , ( "body_html", Json.Encode.string rec.bodyHtml )
         , ( "body_text", Json.Encode.string rec.bodyText )
         , ( "author_association"
-          , decodeAuthorAssociation rec.authorAssociation
+          , encodeAuthorAssociation rec.authorAssociation
           )
         ]
 
@@ -5920,7 +6205,7 @@ encodeTimelineLineCommentedEvent rec =
         [ ( "event", Json.Encode.string rec.event )
         , ( "node_id", Json.Encode.string rec.nodeId )
         , ( "comments"
-          , Json.Encode.list decodePullRequestReviewComment rec.comments
+          , Json.Encode.list encodePullRequestReviewComment rec.comments
           )
         ]
 
@@ -5985,14 +6270,14 @@ encodeTimelineCrossReferencedEvent :
 encodeTimelineCrossReferencedEvent rec =
     Json.Encode.object
         [ ( "event", Json.Encode.string rec.event )
-        , ( "actor", decodeSimpleUser rec.actor )
+        , ( "actor", encodeSimpleUser rec.actor )
         , ( "created_at", Json.Encode.string rec.createdAt )
         , ( "updated_at", Json.Encode.string rec.updatedAt )
         , ( "source"
           , (\rec0 ->
                 Json.Encode.object
                     [ ( "type", Json.Encode.string rec0.type_ )
-                    , ( "issue", decodeIssue rec0.issue )
+                    , ( "issue", encodeIssue rec0.issue )
                     ]
             )
                 rec.source
@@ -6187,9 +6472,19 @@ encodeTimelineCommittedEvent rec =
                     [ ( "verified", Json.Encode.bool rec0.verified )
                     , ( "reason", Json.Encode.string rec0.reason )
                     , ( "signature"
-                      , Debug.todo "encode nullable" rec0.signature
+                      , Json.Decode.oneOf
+                            [ Json.Decode.map Present Json.Encode.string
+                            , Json.Decode.null Null
+                            ]
+                            rec0.signature
                       )
-                    , ( "payload", Debug.todo "encode nullable" rec0.payload )
+                    , ( "payload"
+                      , Json.Decode.oneOf
+                            [ Json.Decode.map Present Json.Encode.string
+                            , Json.Decode.null Null
+                            ]
+                            rec0.payload
+                      )
                     ]
             )
                 rec.verification
@@ -6235,7 +6530,7 @@ encodeTimelineCommitCommentedEvent rec =
         [ ( "event", Json.Encode.string rec.event )
         , ( "node_id", Json.Encode.string rec.nodeId )
         , ( "commit_id", Json.Encode.string rec.commitId )
-        , ( "comments", Json.Encode.list decodeCommitComment rec.comments )
+        , ( "comments", Json.Encode.list encodeCommitComment rec.comments )
         ]
 
 
@@ -6318,7 +6613,7 @@ encodeTimelineCommentEvent : TimelineCommentEvent -> Json.Encode.Value
 encodeTimelineCommentEvent rec =
     Json.Encode.object
         [ ( "event", Json.Encode.string rec.event )
-        , ( "actor", decodeSimpleUser rec.actor )
+        , ( "actor", encodeSimpleUser rec.actor )
         , ( "id", Json.Encode.int rec.id )
         , ( "node_id", Json.Encode.string rec.nodeId )
         , ( "url", Json.Encode.string rec.url )
@@ -6326,17 +6621,17 @@ encodeTimelineCommentEvent rec =
         , ( "body_text", Json.Encode.string rec.bodyText )
         , ( "body_html", Json.Encode.string rec.bodyHtml )
         , ( "html_url", Json.Encode.string rec.htmlUrl )
-        , ( "user", decodeSimpleUser rec.user )
+        , ( "user", encodeSimpleUser rec.user )
         , ( "created_at", Json.Encode.string rec.createdAt )
         , ( "updated_at", Json.Encode.string rec.updatedAt )
         , ( "issue_url", Json.Encode.string rec.issueUrl )
         , ( "author_association"
-          , decodeAuthorAssociation rec.authorAssociation
+          , encodeAuthorAssociation rec.authorAssociation
           )
         , ( "performed_via_github_app"
           , Debug.todo "decode anyOf" rec.performedViaGithubApp
           )
-        , ( "reactions", decodeReactionRollup rec.reactions )
+        , ( "reactions", encodeReactionRollup rec.reactions )
         ]
 
 
@@ -6406,15 +6701,27 @@ encodeTimelineAssignedIssueEvent rec =
         [ ( "id", Json.Encode.int rec.id )
         , ( "node_id", Json.Encode.string rec.nodeId )
         , ( "url", Json.Encode.string rec.url )
-        , ( "actor", decodeSimpleUser rec.actor )
+        , ( "actor", encodeSimpleUser rec.actor )
         , ( "event", Json.Encode.string rec.event )
-        , ( "commit_id", Debug.todo "encode nullable" rec.commitId )
-        , ( "commit_url", Debug.todo "encode nullable" rec.commitUrl )
+        , ( "commit_id"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.commitId
+          )
+        , ( "commit_url"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.commitUrl
+          )
         , ( "created_at", Json.Encode.string rec.createdAt )
         , ( "performed_via_github_app"
           , Debug.todo "decode anyOf" rec.performedViaGithubApp
           )
-        , ( "assignee", decodeSimpleUser rec.assignee )
+        , ( "assignee", encodeSimpleUser rec.assignee )
         ]
 
 
@@ -6465,8 +6772,20 @@ encodeThreadSubscription rec =
     Json.Encode.object
         [ ( "subscribed", Json.Encode.bool rec.subscribed )
         , ( "ignored", Json.Encode.bool rec.ignored )
-        , ( "reason", Debug.todo "encode nullable" rec.reason )
-        , ( "created_at", Debug.todo "encode nullable" rec.createdAt )
+        , ( "reason"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.reason
+          )
+        , ( "created_at"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.createdAt
+          )
         , ( "url", Json.Encode.string rec.url )
         , ( "thread_url", Json.Encode.string rec.threadUrl )
         , ( "repository_url", Json.Encode.string rec.repositoryUrl )
@@ -6553,7 +6872,7 @@ encodeThread : Thread -> Json.Encode.Value
 encodeThread rec =
     Json.Encode.object
         [ ( "id", Json.Encode.string rec.id )
-        , ( "repository", decodeMinimalRepository rec.repository )
+        , ( "repository", encodeMinimalRepository rec.repository )
         , ( "subject"
           , (\rec0 ->
                 Json.Encode.object
@@ -6570,7 +6889,13 @@ encodeThread rec =
         , ( "reason", Json.Encode.string rec.reason )
         , ( "unread", Json.Encode.bool rec.unread )
         , ( "updated_at", Json.Encode.string rec.updatedAt )
-        , ( "last_read_at", Debug.todo "encode nullable" rec.lastReadAt )
+        , ( "last_read_at"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.lastReadAt
+          )
         , ( "url", Json.Encode.string rec.url )
         , ( "subscription_url", Json.Encode.string rec.subscriptionUrl )
         ]
@@ -6645,7 +6970,13 @@ encodeTeamSimple rec =
         , ( "url", Json.Encode.string rec.url )
         , ( "members_url", Json.Encode.string rec.membersUrl )
         , ( "name", Json.Encode.string rec.name )
-        , ( "description", Debug.todo "encode nullable" rec.description )
+        , ( "description"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.description
+          )
         , ( "permission", Json.Encode.string rec.permission )
         , ( "privacy", Json.Encode.string rec.privacy )
         , ( "html_url", Json.Encode.string rec.htmlUrl )
@@ -7093,7 +7424,13 @@ encodeTeamRepository rec =
         , ( "owner", Debug.todo "decode anyOf" rec.owner )
         , ( "private", Json.Encode.bool rec.private )
         , ( "html_url", Json.Encode.string rec.htmlUrl )
-        , ( "description", Debug.todo "encode nullable" rec.description )
+        , ( "description"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.description
+          )
         , ( "fork", Json.Encode.bool rec.fork )
         , ( "url", Json.Encode.string rec.url )
         , ( "archive_url", Json.Encode.string rec.archiveUrl )
@@ -7134,11 +7471,29 @@ encodeTeamRepository rec =
         , ( "teams_url", Json.Encode.string rec.teamsUrl )
         , ( "trees_url", Json.Encode.string rec.treesUrl )
         , ( "clone_url", Json.Encode.string rec.cloneUrl )
-        , ( "mirror_url", Debug.todo "encode nullable" rec.mirrorUrl )
+        , ( "mirror_url"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.mirrorUrl
+          )
         , ( "hooks_url", Json.Encode.string rec.hooksUrl )
         , ( "svn_url", Json.Encode.string rec.svnUrl )
-        , ( "homepage", Debug.todo "encode nullable" rec.homepage )
-        , ( "language", Debug.todo "encode nullable" rec.language )
+        , ( "homepage"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.homepage
+          )
+        , ( "language"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.language
+          )
         , ( "forks_count", Json.Encode.int rec.forksCount )
         , ( "stargazers_count", Json.Encode.int rec.stargazersCount )
         , ( "watchers_count", Json.Encode.int rec.watchersCount )
@@ -7155,9 +7510,27 @@ encodeTeamRepository rec =
         , ( "archived", Json.Encode.bool rec.archived )
         , ( "disabled", Json.Encode.bool rec.disabled )
         , ( "visibility", Json.Encode.string rec.visibility )
-        , ( "pushed_at", Debug.todo "encode nullable" rec.pushedAt )
-        , ( "created_at", Debug.todo "encode nullable" rec.createdAt )
-        , ( "updated_at", Debug.todo "encode nullable" rec.updatedAt )
+        , ( "pushed_at"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.pushedAt
+          )
+        , ( "created_at"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.createdAt
+          )
+        , ( "updated_at"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.updatedAt
+          )
         , ( "allow_rebase_merge", Json.Encode.bool rec.allowRebaseMerge )
         , ( "template_repository"
           , Debug.todo "decode anyOf" rec.templateRepository
@@ -7275,10 +7648,16 @@ encodeTeamProject rec =
         , ( "id", Json.Encode.int rec.id )
         , ( "node_id", Json.Encode.string rec.nodeId )
         , ( "name", Json.Encode.string rec.name )
-        , ( "body", Debug.todo "encode nullable" rec.body )
+        , ( "body"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.body
+          )
         , ( "number", Json.Encode.int rec.number )
         , ( "state", Json.Encode.string rec.state )
-        , ( "creator", decodeSimpleUser rec.creator )
+        , ( "creator", encodeSimpleUser rec.creator )
         , ( "created_at", Json.Encode.string rec.createdAt )
         , ( "updated_at", Json.Encode.string rec.updatedAt )
         , ( "organization_permission"
@@ -7591,14 +7970,24 @@ encodeTeamOrganization rec =
         , ( "members_url", Json.Encode.string rec.membersUrl )
         , ( "public_members_url", Json.Encode.string rec.publicMembersUrl )
         , ( "avatar_url", Json.Encode.string rec.avatarUrl )
-        , ( "description", Debug.todo "encode nullable" rec.description )
+        , ( "description"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.description
+          )
         , ( "name", Json.Encode.string rec.name )
         , ( "company", Json.Encode.string rec.company )
         , ( "blog", Json.Encode.string rec.blog )
         , ( "location", Json.Encode.string rec.location )
         , ( "email", Json.Encode.string rec.email )
         , ( "twitter_username"
-          , Debug.todo "encode nullable" rec.twitterUsername
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.twitterUsername
           )
         , ( "is_verified", Json.Encode.bool rec.isVerified )
         , ( "has_organization_projects"
@@ -7616,10 +8005,34 @@ encodeTeamOrganization rec =
         , ( "type", Json.Encode.string rec.type_ )
         , ( "total_private_repos", Json.Encode.int rec.totalPrivateRepos )
         , ( "owned_private_repos", Json.Encode.int rec.ownedPrivateRepos )
-        , ( "private_gists", Debug.todo "encode nullable" rec.privateGists )
-        , ( "disk_usage", Debug.todo "encode nullable" rec.diskUsage )
-        , ( "collaborators", Debug.todo "encode nullable" rec.collaborators )
-        , ( "billing_email", Debug.todo "encode nullable" rec.billingEmail )
+        , ( "private_gists"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.int
+                , Json.Decode.null Null
+                ]
+                rec.privateGists
+          )
+        , ( "disk_usage"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.int
+                , Json.Decode.null Null
+                ]
+                rec.diskUsage
+          )
+        , ( "collaborators"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.int
+                , Json.Decode.null Null
+                ]
+                rec.collaborators
+          )
+        , ( "billing_email"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.billingEmail
+          )
         , ( "plan"
           , (\rec0 ->
                 Json.Encode.object
@@ -7633,13 +8046,25 @@ encodeTeamOrganization rec =
                 rec.plan
           )
         , ( "default_repository_permission"
-          , Debug.todo "encode nullable" rec.defaultRepositoryPermission
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.defaultRepositoryPermission
           )
         , ( "members_can_create_repositories"
-          , Debug.todo "encode nullable" rec.membersCanCreateRepositories
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.bool
+                , Json.Decode.null Null
+                ]
+                rec.membersCanCreateRepositories
           )
         , ( "two_factor_requirement_enabled"
-          , Debug.todo "encode nullable" rec.twoFactorRequirementEnabled
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.bool
+                , Json.Decode.null Null
+                ]
+                rec.twoFactorRequirementEnabled
           )
         , ( "members_allowed_repository_creation_type"
           , Json.Encode.string rec.membersAllowedRepositoryCreationType
@@ -7663,7 +8088,11 @@ encodeTeamOrganization rec =
           , Json.Encode.bool rec.membersCanCreatePrivatePages
           )
         , ( "members_can_fork_private_repositories"
-          , Debug.todo "encode nullable" rec.membersCanForkPrivateRepositories
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.bool
+                , Json.Decode.null Null
+                ]
+                rec.membersCanForkPrivateRepositories
           )
         , ( "web_commit_signoff_required"
           , Json.Encode.bool rec.webCommitSignoffRequired
@@ -7790,7 +8219,13 @@ encodeTeamFull rec =
         , ( "html_url", Json.Encode.string rec.htmlUrl )
         , ( "name", Json.Encode.string rec.name )
         , ( "slug", Json.Encode.string rec.slug )
-        , ( "description", Debug.todo "encode nullable" rec.description )
+        , ( "description"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.description
+          )
         , ( "privacy", Json.Encode.string rec.privacy )
         , ( "permission", Json.Encode.string rec.permission )
         , ( "members_url", Json.Encode.string rec.membersUrl )
@@ -7800,7 +8235,7 @@ encodeTeamFull rec =
         , ( "repos_count", Json.Encode.int rec.reposCount )
         , ( "created_at", Json.Encode.string rec.createdAt )
         , ( "updated_at", Json.Encode.string rec.updatedAt )
-        , ( "organization", decodeTeamOrganization rec.organization )
+        , ( "organization", encodeTeamOrganization rec.organization )
         , ( "ldap_dn", Json.Encode.string rec.ldapDn )
         ]
 
@@ -7878,14 +8313,20 @@ encodeTeamDiscussionComment rec =
         , ( "body_html", Json.Encode.string rec.bodyHtml )
         , ( "body_version", Json.Encode.string rec.bodyVersion )
         , ( "created_at", Json.Encode.string rec.createdAt )
-        , ( "last_edited_at", Debug.todo "encode nullable" rec.lastEditedAt )
+        , ( "last_edited_at"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.lastEditedAt
+          )
         , ( "discussion_url", Json.Encode.string rec.discussionUrl )
         , ( "html_url", Json.Encode.string rec.htmlUrl )
         , ( "node_id", Json.Encode.string rec.nodeId )
         , ( "number", Json.Encode.int rec.number )
         , ( "updated_at", Json.Encode.string rec.updatedAt )
         , ( "url", Json.Encode.string rec.url )
-        , ( "reactions", decodeReactionRollup rec.reactions )
+        , ( "reactions", encodeReactionRollup rec.reactions )
         ]
 
 
@@ -7984,7 +8425,13 @@ encodeTeamDiscussion rec =
         , ( "comments_count", Json.Encode.int rec.commentsCount )
         , ( "comments_url", Json.Encode.string rec.commentsUrl )
         , ( "created_at", Json.Encode.string rec.createdAt )
-        , ( "last_edited_at", Debug.todo "encode nullable" rec.lastEditedAt )
+        , ( "last_edited_at"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.lastEditedAt
+          )
         , ( "html_url", Json.Encode.string rec.htmlUrl )
         , ( "node_id", Json.Encode.string rec.nodeId )
         , ( "number", Json.Encode.int rec.number )
@@ -7994,7 +8441,7 @@ encodeTeamDiscussion rec =
         , ( "title", Json.Encode.string rec.title )
         , ( "updated_at", Json.Encode.string rec.updatedAt )
         , ( "url", Json.Encode.string rec.url )
-        , ( "reactions", decodeReactionRollup rec.reactions )
+        , ( "reactions", encodeReactionRollup rec.reactions )
         ]
 
 
@@ -8098,7 +8545,13 @@ encodeTeam rec =
         , ( "node_id", Json.Encode.string rec.nodeId )
         , ( "name", Json.Encode.string rec.name )
         , ( "slug", Json.Encode.string rec.slug )
-        , ( "description", Debug.todo "encode nullable" rec.description )
+        , ( "description"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.description
+          )
         , ( "privacy", Json.Encode.string rec.privacy )
         , ( "permission", Json.Encode.string rec.permission )
         , ( "permissions"
@@ -8278,7 +8731,13 @@ encodeStatusCheckPolicy rec =
                 (\rec0 ->
                     Json.Encode.object
                         [ ( "context", Json.Encode.string rec0.context )
-                        , ( "app_id", Debug.todo "encode nullable" rec0.appId )
+                        , ( "app_id"
+                          , Json.Decode.oneOf
+                                [ Json.Decode.map Present Json.Encode.int
+                                , Json.Decode.null Null
+                                ]
+                                rec0.appId
+                          )
                         ]
                 )
                 rec.checks
@@ -8354,12 +8813,30 @@ encodeStatus : Status -> Json.Encode.Value
 encodeStatus rec =
     Json.Encode.object
         [ ( "url", Json.Encode.string rec.url )
-        , ( "avatar_url", Debug.todo "encode nullable" rec.avatarUrl )
+        , ( "avatar_url"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.avatarUrl
+          )
         , ( "id", Json.Encode.int rec.id )
         , ( "node_id", Json.Encode.string rec.nodeId )
         , ( "state", Json.Encode.string rec.state )
-        , ( "description", Debug.todo "encode nullable" rec.description )
-        , ( "target_url", Debug.todo "encode nullable" rec.targetUrl )
+        , ( "description"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.description
+          )
+        , ( "target_url"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.targetUrl
+          )
         , ( "context", Json.Encode.string rec.context )
         , ( "created_at", Json.Encode.string rec.createdAt )
         , ( "updated_at", Json.Encode.string rec.updatedAt )
@@ -8434,15 +8911,33 @@ encodeStateChangeIssueEvent rec =
         [ ( "id", Json.Encode.int rec.id )
         , ( "node_id", Json.Encode.string rec.nodeId )
         , ( "url", Json.Encode.string rec.url )
-        , ( "actor", decodeSimpleUser rec.actor )
+        , ( "actor", encodeSimpleUser rec.actor )
         , ( "event", Json.Encode.string rec.event )
-        , ( "commit_id", Debug.todo "encode nullable" rec.commitId )
-        , ( "commit_url", Debug.todo "encode nullable" rec.commitUrl )
+        , ( "commit_id"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.commitId
+          )
+        , ( "commit_url"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.commitUrl
+          )
         , ( "created_at", Json.Encode.string rec.createdAt )
         , ( "performed_via_github_app"
           , Debug.todo "decode anyOf" rec.performedViaGithubApp
           )
-        , ( "state_reason", Debug.todo "encode nullable" rec.stateReason )
+        , ( "state_reason"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.stateReason
+          )
         ]
 
 
@@ -8463,7 +8958,7 @@ encodeStarredRepository : StarredRepository -> Json.Encode.Value
 encodeStarredRepository rec =
     Json.Encode.object
         [ ( "starred_at", Json.Encode.string rec.starredAt )
-        , ( "repo", decodeRepository rec.repo )
+        , ( "repo", encodeRepository rec.repo )
         ]
 
 
@@ -8611,7 +9106,7 @@ encodeSnapshot rec =
             )
                 rec.detector
           )
-        , ( "metadata", decodeMetadata rec.metadata )
+        , ( "metadata", encodeMetadata rec.metadata )
         , ( "manifests", (\rec0 -> Json.Encode.object []) rec.manifests )
         , ( "scanned", Json.Encode.string rec.scanned )
         ]
@@ -8717,13 +9212,31 @@ decodeSimpleUser =
 encodeSimpleUser : SimpleUser -> Json.Encode.Value
 encodeSimpleUser rec =
     Json.Encode.object
-        [ ( "name", Debug.todo "encode nullable" rec.name )
-        , ( "email", Debug.todo "encode nullable" rec.email )
+        [ ( "name"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.name
+          )
+        , ( "email"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.email
+          )
         , ( "login", Json.Encode.string rec.login )
         , ( "id", Json.Encode.int rec.id )
         , ( "node_id", Json.Encode.string rec.nodeId )
         , ( "avatar_url", Json.Encode.string rec.avatarUrl )
-        , ( "gravatar_id", Debug.todo "encode nullable" rec.gravatarId )
+        , ( "gravatar_id"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.gravatarId
+          )
         , ( "url", Json.Encode.string rec.url )
         , ( "html_url", Json.Encode.string rec.htmlUrl )
         , ( "followers_url", Json.Encode.string rec.followersUrl )
@@ -8943,10 +9456,16 @@ encodeSimpleRepository rec =
         , ( "node_id", Json.Encode.string rec.nodeId )
         , ( "name", Json.Encode.string rec.name )
         , ( "full_name", Json.Encode.string rec.fullName )
-        , ( "owner", decodeSimpleUser rec.owner )
+        , ( "owner", encodeSimpleUser rec.owner )
         , ( "private", Json.Encode.bool rec.private )
         , ( "html_url", Json.Encode.string rec.htmlUrl )
-        , ( "description", Debug.todo "encode nullable" rec.description )
+        , ( "description"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.description
+          )
         , ( "fork", Json.Encode.bool rec.fork )
         , ( "url", Json.Encode.string rec.url )
         , ( "archive_url", Json.Encode.string rec.archiveUrl )
@@ -9074,14 +9593,38 @@ decodeSimpleCommitStatus =
 encodeSimpleCommitStatus : SimpleCommitStatus -> Json.Encode.Value
 encodeSimpleCommitStatus rec =
     Json.Encode.object
-        [ ( "description", Debug.todo "encode nullable" rec.description )
+        [ ( "description"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.description
+          )
         , ( "id", Json.Encode.int rec.id )
         , ( "node_id", Json.Encode.string rec.nodeId )
         , ( "state", Json.Encode.string rec.state )
         , ( "context", Json.Encode.string rec.context )
-        , ( "target_url", Debug.todo "encode nullable" rec.targetUrl )
-        , ( "required", Debug.todo "encode nullable" rec.required )
-        , ( "avatar_url", Debug.todo "encode nullable" rec.avatarUrl )
+        , ( "target_url"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.targetUrl
+          )
+        , ( "required"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.bool
+                , Json.Decode.null Null
+                ]
+                rec.required
+          )
+        , ( "avatar_url"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.avatarUrl
+          )
         , ( "url", Json.Encode.string rec.url )
         , ( "created_at", Json.Encode.string rec.createdAt )
         , ( "updated_at", Json.Encode.string rec.updatedAt )
@@ -9152,8 +9695,34 @@ encodeSimpleCommit rec =
         , ( "tree_id", Json.Encode.string rec.treeId )
         , ( "message", Json.Encode.string rec.message )
         , ( "timestamp", Json.Encode.string rec.timestamp )
-        , ( "author", Debug.todo "encode nullable" rec.author )
-        , ( "committer", Debug.todo "encode nullable" rec.committer )
+        , ( "author"
+          , Json.Decode.oneOf
+                [ Json.Decode.map
+                    Present
+                    (\rec0 ->
+                        Json.Encode.object
+                            [ ( "name", Json.Encode.string rec0.name )
+                            , ( "email", Json.Encode.string rec0.email )
+                            ]
+                    )
+                , Json.Decode.null Null
+                ]
+                rec.author
+          )
+        , ( "committer"
+          , Json.Decode.oneOf
+                [ Json.Decode.map
+                    Present
+                    (\rec0 ->
+                        Json.Encode.object
+                            [ ( "name", Json.Encode.string rec0.name )
+                            , ( "email", Json.Encode.string rec0.email )
+                            ]
+                    )
+                , Json.Decode.null Null
+                ]
+                rec.committer
+          )
         ]
 
 
@@ -9211,7 +9780,7 @@ encodeShortBranch rec =
                 rec.commit
           )
         , ( "protected", Json.Encode.bool rec.protected )
-        , ( "protection", decodeBranchProtection rec.protection )
+        , ( "protection", encodeBranchProtection rec.protection )
         , ( "protection_url", Json.Encode.string rec.protectionUrl )
         ]
 
@@ -10008,7 +10577,36 @@ decodeSecurityAndAnalysis =
 
 encodeSecurityAndAnalysis : SecurityAndAnalysis -> Json.Encode.Value
 encodeSecurityAndAnalysis =
-    Debug.todo "encode nullable"
+    Json.Decode.oneOf
+        [ Json.Decode.map
+            Present
+            (\rec ->
+                Json.Encode.object
+                    [ ( "advanced_security"
+                      , (\rec0 ->
+                            Json.Encode.object
+                                [ ( "status", Json.Encode.string rec0.status ) ]
+                        )
+                            rec.advancedSecurity
+                      )
+                    , ( "secret_scanning"
+                      , (\rec0 ->
+                            Json.Encode.object
+                                [ ( "status", Json.Encode.string rec0.status ) ]
+                        )
+                            rec.secretScanning
+                      )
+                    , ( "secret_scanning_push_protection"
+                      , (\rec0 ->
+                            Json.Encode.object
+                                [ ( "status", Json.Encode.string rec0.status ) ]
+                        )
+                            rec.secretScanningPushProtection
+                      )
+                    ]
+            )
+        , Json.Decode.null Null
+        ]
 
 
 type alias SecretScanningLocationCommit =
@@ -10124,7 +10722,8 @@ decodeSecretScanningAlertResolutionComment =
 encodeSecretScanningAlertResolutionComment :
     SecretScanningAlertResolutionComment -> Json.Encode.Value
 encodeSecretScanningAlertResolutionComment =
-    Debug.todo "encode nullable"
+    Json.Decode.oneOf
+        [ Json.Decode.map Present Json.Encode.string, Json.Decode.null Null ]
 
 
 type alias SecretScanningAlertResolution =
@@ -10140,7 +10739,8 @@ decodeSecretScanningAlertResolution =
 encodeSecretScanningAlertResolution :
     SecretScanningAlertResolution -> Json.Encode.Value
 encodeSecretScanningAlertResolution =
-    Debug.todo "encode nullable"
+    Json.Decode.oneOf
+        [ Json.Decode.map Present Json.Encode.string, Json.Decode.null Null ]
 
 
 type alias SecretScanningAlert =
@@ -10240,15 +10840,21 @@ decodeSecretScanningAlert =
 encodeSecretScanningAlert : SecretScanningAlert -> Json.Encode.Value
 encodeSecretScanningAlert rec =
     Json.Encode.object
-        [ ( "number", decodeAlertNumber rec.number )
-        , ( "created_at", decodeAlertCreatedAt rec.createdAt )
-        , ( "updated_at", decodeAlertUpdatedAt rec.updatedAt )
-        , ( "url", decodeAlertUrl rec.url )
-        , ( "html_url", decodeAlertHtmlUrl rec.htmlUrl )
+        [ ( "number", encodeAlertNumber rec.number )
+        , ( "created_at", encodeAlertCreatedAt rec.createdAt )
+        , ( "updated_at", encodeAlertUpdatedAt rec.updatedAt )
+        , ( "url", encodeAlertUrl rec.url )
+        , ( "html_url", encodeAlertHtmlUrl rec.htmlUrl )
         , ( "locations_url", Json.Encode.string rec.locationsUrl )
-        , ( "state", decodeSecretScanningAlertState rec.state )
-        , ( "resolution", decodeSecretScanningAlertResolution rec.resolution )
-        , ( "resolved_at", Debug.todo "encode nullable" rec.resolvedAt )
+        , ( "state", encodeSecretScanningAlertState rec.state )
+        , ( "resolution", encodeSecretScanningAlertResolution rec.resolution )
+        , ( "resolved_at"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.resolvedAt
+          )
         , ( "resolved_by", Debug.todo "decode anyOf" rec.resolvedBy )
         , ( "secret_type", Json.Encode.string rec.secretType )
         , ( "secret_type_display_name"
@@ -10256,16 +10862,28 @@ encodeSecretScanningAlert rec =
           )
         , ( "secret", Json.Encode.string rec.secret )
         , ( "push_protection_bypassed"
-          , Debug.todo "encode nullable" rec.pushProtectionBypassed
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.bool
+                , Json.Decode.null Null
+                ]
+                rec.pushProtectionBypassed
           )
         , ( "push_protection_bypassed_by"
           , Debug.todo "decode anyOf" rec.pushProtectionBypassedBy
           )
         , ( "push_protection_bypassed_at"
-          , Debug.todo "encode nullable" rec.pushProtectionBypassedAt
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.pushProtectionBypassedAt
           )
         , ( "resolution_comment"
-          , Debug.todo "encode nullable" rec.resolutionComment
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.resolutionComment
           )
         ]
 
@@ -10327,7 +10945,13 @@ encodeSearchResultTextMatches =
         (\rec ->
             Json.Encode.object
                 [ ( "object_url", Json.Encode.string rec.objectUrl )
-                , ( "object_type", Debug.todo "encode nullable" rec.objectType )
+                , ( "object_type"
+                  , Json.Decode.oneOf
+                        [ Json.Decode.map Present Json.Encode.string
+                        , Json.Decode.null Null
+                        ]
+                        rec.objectType
+                  )
                 , ( "property", Json.Encode.string rec.property )
                 , ( "fragment", Json.Encode.string rec.fragment )
                 , ( "matches"
@@ -10396,10 +11020,14 @@ decodeScopedInstallation =
 encodeScopedInstallation : ScopedInstallation -> Json.Encode.Value
 encodeScopedInstallation rec =
     Json.Encode.object
-        [ ( "permissions", decodeAppPermissions rec.permissions )
+        [ ( "permissions", encodeAppPermissions rec.permissions )
         , ( "repository_selection", Json.Encode.string rec.repositorySelection )
         , ( "single_file_name"
-          , Debug.todo "encode nullable" rec.singleFileName
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.singleFileName
           )
         , ( "has_multiple_single_files"
           , Json.Encode.bool rec.hasMultipleSingleFiles
@@ -10408,7 +11036,7 @@ encodeScopedInstallation rec =
           , Json.Encode.list Json.Encode.string rec.singleFilePaths
           )
         , ( "repositories_url", Json.Encode.string rec.repositoriesUrl )
-        , ( "account", decodeSimpleUser rec.account )
+        , ( "account", encodeSimpleUser rec.account )
         ]
 
 
@@ -10454,13 +11082,35 @@ decodeScimError =
 encodeScimError : ScimError -> Json.Encode.Value
 encodeScimError rec =
     Json.Encode.object
-        [ ( "message", Debug.todo "encode nullable" rec.message )
-        , ( "documentation_url"
-          , Debug.todo "encode nullable" rec.documentationUrl
+        [ ( "message"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.message
           )
-        , ( "detail", Debug.todo "encode nullable" rec.detail )
+        , ( "documentation_url"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.documentationUrl
+          )
+        , ( "detail"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.detail
+          )
         , ( "status", Json.Encode.int rec.status )
-        , ( "scimType", Debug.todo "encode nullable" rec.scimType )
+        , ( "scimType"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.scimType
+          )
         , ( "schemas", Json.Encode.list Json.Encode.string rec.schemas )
         ]
 
@@ -10758,7 +11408,7 @@ encodeRunner rec =
         , ( "os", Json.Encode.string rec.os )
         , ( "status", Json.Encode.string rec.status )
         , ( "busy", Json.Encode.bool rec.busy )
-        , ( "labels", Json.Encode.list decodeRunnerLabel rec.labels )
+        , ( "labels", Json.Encode.list encodeRunnerLabel rec.labels )
         ]
 
 
@@ -11040,17 +11690,29 @@ encodeReviewRequestedIssueEvent rec =
         [ ( "id", Json.Encode.int rec.id )
         , ( "node_id", Json.Encode.string rec.nodeId )
         , ( "url", Json.Encode.string rec.url )
-        , ( "actor", decodeSimpleUser rec.actor )
+        , ( "actor", encodeSimpleUser rec.actor )
         , ( "event", Json.Encode.string rec.event )
-        , ( "commit_id", Debug.todo "encode nullable" rec.commitId )
-        , ( "commit_url", Debug.todo "encode nullable" rec.commitUrl )
+        , ( "commit_id"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.commitId
+          )
+        , ( "commit_url"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.commitUrl
+          )
         , ( "created_at", Json.Encode.string rec.createdAt )
         , ( "performed_via_github_app"
           , Debug.todo "decode anyOf" rec.performedViaGithubApp
           )
-        , ( "review_requester", decodeSimpleUser rec.reviewRequester )
-        , ( "requested_team", decodeTeam rec.requestedTeam )
-        , ( "requested_reviewer", decodeSimpleUser rec.requestedReviewer )
+        , ( "review_requester", encodeSimpleUser rec.reviewRequester )
+        , ( "requested_team", encodeTeam rec.requestedTeam )
+        , ( "requested_reviewer", encodeSimpleUser rec.requestedReviewer )
         ]
 
 
@@ -11128,17 +11790,29 @@ encodeReviewRequestRemovedIssueEvent rec =
         [ ( "id", Json.Encode.int rec.id )
         , ( "node_id", Json.Encode.string rec.nodeId )
         , ( "url", Json.Encode.string rec.url )
-        , ( "actor", decodeSimpleUser rec.actor )
+        , ( "actor", encodeSimpleUser rec.actor )
         , ( "event", Json.Encode.string rec.event )
-        , ( "commit_id", Debug.todo "encode nullable" rec.commitId )
-        , ( "commit_url", Debug.todo "encode nullable" rec.commitUrl )
+        , ( "commit_id"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.commitId
+          )
+        , ( "commit_url"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.commitUrl
+          )
         , ( "created_at", Json.Encode.string rec.createdAt )
         , ( "performed_via_github_app"
           , Debug.todo "decode anyOf" rec.performedViaGithubApp
           )
-        , ( "review_requester", decodeSimpleUser rec.reviewRequester )
-        , ( "requested_team", decodeTeam rec.requestedTeam )
-        , ( "requested_reviewer", decodeSimpleUser rec.requestedReviewer )
+        , ( "review_requester", encodeSimpleUser rec.reviewRequester )
+        , ( "requested_team", encodeTeam rec.requestedTeam )
+        , ( "requested_reviewer", encodeSimpleUser rec.requestedReviewer )
         ]
 
 
@@ -11236,10 +11910,22 @@ encodeReviewDismissedIssueEvent rec =
         [ ( "id", Json.Encode.int rec.id )
         , ( "node_id", Json.Encode.string rec.nodeId )
         , ( "url", Json.Encode.string rec.url )
-        , ( "actor", decodeSimpleUser rec.actor )
+        , ( "actor", encodeSimpleUser rec.actor )
         , ( "event", Json.Encode.string rec.event )
-        , ( "commit_id", Debug.todo "encode nullable" rec.commitId )
-        , ( "commit_url", Debug.todo "encode nullable" rec.commitUrl )
+        , ( "commit_id"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.commitId
+          )
+        , ( "commit_url"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.commitUrl
+          )
         , ( "created_at", Json.Encode.string rec.createdAt )
         , ( "performed_via_github_app"
           , Debug.todo "decode anyOf" rec.performedViaGithubApp
@@ -11250,7 +11936,11 @@ encodeReviewDismissedIssueEvent rec =
                     [ ( "state", Json.Encode.string rec0.state )
                     , ( "review_id", Json.Encode.int rec0.reviewId )
                     , ( "dismissal_message"
-                      , Debug.todo "encode nullable" rec0.dismissalMessage
+                      , Json.Decode.oneOf
+                            [ Json.Decode.map Present Json.Encode.string
+                            , Json.Decode.null Null
+                            ]
+                            rec0.dismissalMessage
                       )
                     , ( "dismissal_commit_id"
                       , Json.Encode.string rec0.dismissalCommitId
@@ -11410,13 +12100,23 @@ encodeReviewComment rec =
     Json.Encode.object
         [ ( "url", Json.Encode.string rec.url )
         , ( "pull_request_review_id"
-          , Debug.todo "encode nullable" rec.pullRequestReviewId
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.int
+                , Json.Decode.null Null
+                ]
+                rec.pullRequestReviewId
           )
         , ( "id", Json.Encode.int rec.id )
         , ( "node_id", Json.Encode.string rec.nodeId )
         , ( "diff_hunk", Json.Encode.string rec.diffHunk )
         , ( "path", Json.Encode.string rec.path )
-        , ( "position", Debug.todo "encode nullable" rec.position )
+        , ( "position"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.int
+                , Json.Decode.null Null
+                ]
+                rec.position
+          )
         , ( "original_position", Json.Encode.int rec.originalPosition )
         , ( "commit_id", Json.Encode.string rec.commitId )
         , ( "original_commit_id", Json.Encode.string rec.originalCommitId )
@@ -11428,28 +12128,44 @@ encodeReviewComment rec =
         , ( "html_url", Json.Encode.string rec.htmlUrl )
         , ( "pull_request_url", Json.Encode.string rec.pullRequestUrl )
         , ( "author_association"
-          , decodeAuthorAssociation rec.authorAssociation
+          , encodeAuthorAssociation rec.authorAssociation
           )
         , ( "_links"
           , (\rec0 ->
                 Json.Encode.object
-                    [ ( "self", decodeLink rec0.self )
-                    , ( "html", decodeLink rec0.html )
-                    , ( "pull_request", decodeLink rec0.pullRequest )
+                    [ ( "self", encodeLink rec0.self )
+                    , ( "html", encodeLink rec0.html )
+                    , ( "pull_request", encodeLink rec0.pullRequest )
                     ]
             )
                 rec.links
           )
         , ( "body_text", Json.Encode.string rec.bodyText )
         , ( "body_html", Json.Encode.string rec.bodyHtml )
-        , ( "reactions", decodeReactionRollup rec.reactions )
+        , ( "reactions", encodeReactionRollup rec.reactions )
         , ( "side", Json.Encode.string rec.side )
-        , ( "start_side", Debug.todo "encode nullable" rec.startSide )
+        , ( "start_side"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.startSide
+          )
         , ( "line", Json.Encode.int rec.line )
         , ( "original_line", Json.Encode.int rec.originalLine )
-        , ( "start_line", Debug.todo "encode nullable" rec.startLine )
+        , ( "start_line"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.int
+                , Json.Decode.null Null
+                ]
+                rec.startLine
+          )
         , ( "original_start_line"
-          , Debug.todo "encode nullable" rec.originalStartLine
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.int
+                , Json.Decode.null Null
+                ]
+                rec.originalStartLine
           )
         ]
 
@@ -11494,7 +12210,13 @@ encodeRepositorySubscription rec =
     Json.Encode.object
         [ ( "subscribed", Json.Encode.bool rec.subscribed )
         , ( "ignored", Json.Encode.bool rec.ignored )
-        , ( "reason", Debug.todo "encode nullable" rec.reason )
+        , ( "reason"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.reason
+          )
         , ( "created_at", Json.Encode.string rec.createdAt )
         , ( "url", Json.Encode.string rec.url )
         , ( "repository_url", Json.Encode.string rec.repositoryUrl )
@@ -11555,7 +12277,7 @@ encodeRepositoryInvitation : RepositoryInvitation -> Json.Encode.Value
 encodeRepositoryInvitation rec =
     Json.Encode.object
         [ ( "id", Json.Encode.int rec.id )
-        , ( "repository", decodeMinimalRepository rec.repository )
+        , ( "repository", encodeMinimalRepository rec.repository )
         , ( "invitee", Debug.todo "decode anyOf" rec.invitee )
         , ( "inviter", Debug.todo "decode anyOf" rec.inviter )
         , ( "permissions", Json.Encode.string rec.permissions )
@@ -12695,10 +13417,16 @@ encodeRepository rec =
             )
                 rec.permissions
           )
-        , ( "owner", decodeSimpleUser rec.owner )
+        , ( "owner", encodeSimpleUser rec.owner )
         , ( "private", Json.Encode.bool rec.private )
         , ( "html_url", Json.Encode.string rec.htmlUrl )
-        , ( "description", Debug.todo "encode nullable" rec.description )
+        , ( "description"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.description
+          )
         , ( "fork", Json.Encode.bool rec.fork )
         , ( "url", Json.Encode.string rec.url )
         , ( "archive_url", Json.Encode.string rec.archiveUrl )
@@ -12739,11 +13467,29 @@ encodeRepository rec =
         , ( "teams_url", Json.Encode.string rec.teamsUrl )
         , ( "trees_url", Json.Encode.string rec.treesUrl )
         , ( "clone_url", Json.Encode.string rec.cloneUrl )
-        , ( "mirror_url", Debug.todo "encode nullable" rec.mirrorUrl )
+        , ( "mirror_url"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.mirrorUrl
+          )
         , ( "hooks_url", Json.Encode.string rec.hooksUrl )
         , ( "svn_url", Json.Encode.string rec.svnUrl )
-        , ( "homepage", Debug.todo "encode nullable" rec.homepage )
-        , ( "language", Debug.todo "encode nullable" rec.language )
+        , ( "homepage"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.homepage
+          )
+        , ( "language"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.language
+          )
         , ( "forks_count", Json.Encode.int rec.forksCount )
         , ( "stargazers_count", Json.Encode.int rec.stargazersCount )
         , ( "watchers_count", Json.Encode.int rec.watchersCount )
@@ -12760,12 +13506,340 @@ encodeRepository rec =
         , ( "archived", Json.Encode.bool rec.archived )
         , ( "disabled", Json.Encode.bool rec.disabled )
         , ( "visibility", Json.Encode.string rec.visibility )
-        , ( "pushed_at", Debug.todo "encode nullable" rec.pushedAt )
-        , ( "created_at", Debug.todo "encode nullable" rec.createdAt )
-        , ( "updated_at", Debug.todo "encode nullable" rec.updatedAt )
+        , ( "pushed_at"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.pushedAt
+          )
+        , ( "created_at"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.createdAt
+          )
+        , ( "updated_at"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.updatedAt
+          )
         , ( "allow_rebase_merge", Json.Encode.bool rec.allowRebaseMerge )
         , ( "template_repository"
-          , Debug.todo "encode nullable" rec.templateRepository
+          , Json.Decode.oneOf
+                [ Json.Decode.map
+                    Present
+                    (\rec0 ->
+                        Json.Encode.object
+                            [ ( "id", Json.Encode.int rec0.id )
+                            , ( "node_id", Json.Encode.string rec0.nodeId )
+                            , ( "name", Json.Encode.string rec0.name )
+                            , ( "full_name", Json.Encode.string rec0.fullName )
+                            , ( "owner"
+                              , (\rec_0_5_1_1_2_0_1_0_78_1_0_0 ->
+                                    Json.Encode.object
+                                        [ ( "login"
+                                          , Json.Encode.string
+                                                rec_0_5_1_1_2_0_1_0_78_1_0_0.login
+                                          )
+                                        , ( "id"
+                                          , Json.Encode.int
+                                                rec_0_5_1_1_2_0_1_0_78_1_0_0.id
+                                          )
+                                        , ( "node_id"
+                                          , Json.Encode.string
+                                                rec_0_5_1_1_2_0_1_0_78_1_0_0.nodeId
+                                          )
+                                        , ( "avatar_url"
+                                          , Json.Encode.string
+                                                rec_0_5_1_1_2_0_1_0_78_1_0_0.avatarUrl
+                                          )
+                                        , ( "gravatar_id"
+                                          , Json.Encode.string
+                                                rec_0_5_1_1_2_0_1_0_78_1_0_0.gravatarId
+                                          )
+                                        , ( "url"
+                                          , Json.Encode.string
+                                                rec_0_5_1_1_2_0_1_0_78_1_0_0.url
+                                          )
+                                        , ( "html_url"
+                                          , Json.Encode.string
+                                                rec_0_5_1_1_2_0_1_0_78_1_0_0.htmlUrl
+                                          )
+                                        , ( "followers_url"
+                                          , Json.Encode.string
+                                                rec_0_5_1_1_2_0_1_0_78_1_0_0.followersUrl
+                                          )
+                                        , ( "following_url"
+                                          , Json.Encode.string
+                                                rec_0_5_1_1_2_0_1_0_78_1_0_0.followingUrl
+                                          )
+                                        , ( "gists_url"
+                                          , Json.Encode.string
+                                                rec_0_5_1_1_2_0_1_0_78_1_0_0.gistsUrl
+                                          )
+                                        , ( "starred_url"
+                                          , Json.Encode.string
+                                                rec_0_5_1_1_2_0_1_0_78_1_0_0.starredUrl
+                                          )
+                                        , ( "subscriptions_url"
+                                          , Json.Encode.string
+                                                rec_0_5_1_1_2_0_1_0_78_1_0_0.subscriptionsUrl
+                                          )
+                                        , ( "organizations_url"
+                                          , Json.Encode.string
+                                                rec_0_5_1_1_2_0_1_0_78_1_0_0.organizationsUrl
+                                          )
+                                        , ( "repos_url"
+                                          , Json.Encode.string
+                                                rec_0_5_1_1_2_0_1_0_78_1_0_0.reposUrl
+                                          )
+                                        , ( "events_url"
+                                          , Json.Encode.string
+                                                rec_0_5_1_1_2_0_1_0_78_1_0_0.eventsUrl
+                                          )
+                                        , ( "received_events_url"
+                                          , Json.Encode.string
+                                                rec_0_5_1_1_2_0_1_0_78_1_0_0.receivedEventsUrl
+                                          )
+                                        , ( "type"
+                                          , Json.Encode.string
+                                                rec_0_5_1_1_2_0_1_0_78_1_0_0.type_
+                                          )
+                                        , ( "site_admin"
+                                          , Json.Encode.bool
+                                                rec_0_5_1_1_2_0_1_0_78_1_0_0.siteAdmin
+                                          )
+                                        ]
+                                )
+                                    rec0.owner
+                              )
+                            , ( "private", Json.Encode.bool rec0.private )
+                            , ( "html_url", Json.Encode.string rec0.htmlUrl )
+                            , ( "description"
+                              , Json.Encode.string rec0.description
+                              )
+                            , ( "fork", Json.Encode.bool rec0.fork )
+                            , ( "url", Json.Encode.string rec0.url )
+                            , ( "archive_url"
+                              , Json.Encode.string rec0.archiveUrl
+                              )
+                            , ( "assignees_url"
+                              , Json.Encode.string rec0.assigneesUrl
+                              )
+                            , ( "blobs_url", Json.Encode.string rec0.blobsUrl )
+                            , ( "branches_url"
+                              , Json.Encode.string rec0.branchesUrl
+                              )
+                            , ( "collaborators_url"
+                              , Json.Encode.string rec0.collaboratorsUrl
+                              )
+                            , ( "comments_url"
+                              , Json.Encode.string rec0.commentsUrl
+                              )
+                            , ( "commits_url"
+                              , Json.Encode.string rec0.commitsUrl
+                              )
+                            , ( "compare_url"
+                              , Json.Encode.string rec0.compareUrl
+                              )
+                            , ( "contents_url"
+                              , Json.Encode.string rec0.contentsUrl
+                              )
+                            , ( "contributors_url"
+                              , Json.Encode.string rec0.contributorsUrl
+                              )
+                            , ( "deployments_url"
+                              , Json.Encode.string rec0.deploymentsUrl
+                              )
+                            , ( "downloads_url"
+                              , Json.Encode.string rec0.downloadsUrl
+                              )
+                            , ( "events_url"
+                              , Json.Encode.string rec0.eventsUrl
+                              )
+                            , ( "forks_url", Json.Encode.string rec0.forksUrl )
+                            , ( "git_commits_url"
+                              , Json.Encode.string rec0.gitCommitsUrl
+                              )
+                            , ( "git_refs_url"
+                              , Json.Encode.string rec0.gitRefsUrl
+                              )
+                            , ( "git_tags_url"
+                              , Json.Encode.string rec0.gitTagsUrl
+                              )
+                            , ( "git_url", Json.Encode.string rec0.gitUrl )
+                            , ( "issue_comment_url"
+                              , Json.Encode.string rec0.issueCommentUrl
+                              )
+                            , ( "issue_events_url"
+                              , Json.Encode.string rec0.issueEventsUrl
+                              )
+                            , ( "issues_url"
+                              , Json.Encode.string rec0.issuesUrl
+                              )
+                            , ( "keys_url", Json.Encode.string rec0.keysUrl )
+                            , ( "labels_url"
+                              , Json.Encode.string rec0.labelsUrl
+                              )
+                            , ( "languages_url"
+                              , Json.Encode.string rec0.languagesUrl
+                              )
+                            , ( "merges_url"
+                              , Json.Encode.string rec0.mergesUrl
+                              )
+                            , ( "milestones_url"
+                              , Json.Encode.string rec0.milestonesUrl
+                              )
+                            , ( "notifications_url"
+                              , Json.Encode.string rec0.notificationsUrl
+                              )
+                            , ( "pulls_url", Json.Encode.string rec0.pullsUrl )
+                            , ( "releases_url"
+                              , Json.Encode.string rec0.releasesUrl
+                              )
+                            , ( "ssh_url", Json.Encode.string rec0.sshUrl )
+                            , ( "stargazers_url"
+                              , Json.Encode.string rec0.stargazersUrl
+                              )
+                            , ( "statuses_url"
+                              , Json.Encode.string rec0.statusesUrl
+                              )
+                            , ( "subscribers_url"
+                              , Json.Encode.string rec0.subscribersUrl
+                              )
+                            , ( "subscription_url"
+                              , Json.Encode.string rec0.subscriptionUrl
+                              )
+                            , ( "tags_url", Json.Encode.string rec0.tagsUrl )
+                            , ( "teams_url", Json.Encode.string rec0.teamsUrl )
+                            , ( "trees_url", Json.Encode.string rec0.treesUrl )
+                            , ( "clone_url", Json.Encode.string rec0.cloneUrl )
+                            , ( "mirror_url"
+                              , Json.Encode.string rec0.mirrorUrl
+                              )
+                            , ( "hooks_url", Json.Encode.string rec0.hooksUrl )
+                            , ( "svn_url", Json.Encode.string rec0.svnUrl )
+                            , ( "homepage", Json.Encode.string rec0.homepage )
+                            , ( "language", Json.Encode.string rec0.language )
+                            , ( "forks_count", Json.Encode.int rec0.forksCount )
+                            , ( "stargazers_count"
+                              , Json.Encode.int rec0.stargazersCount
+                              )
+                            , ( "watchers_count"
+                              , Json.Encode.int rec0.watchersCount
+                              )
+                            , ( "size", Json.Encode.int rec0.size )
+                            , ( "default_branch"
+                              , Json.Encode.string rec0.defaultBranch
+                              )
+                            , ( "open_issues_count"
+                              , Json.Encode.int rec0.openIssuesCount
+                              )
+                            , ( "is_template"
+                              , Json.Encode.bool rec0.isTemplate
+                              )
+                            , ( "topics"
+                              , Json.Encode.list Json.Encode.string rec0.topics
+                              )
+                            , ( "has_issues", Json.Encode.bool rec0.hasIssues )
+                            , ( "has_projects"
+                              , Json.Encode.bool rec0.hasProjects
+                              )
+                            , ( "has_wiki", Json.Encode.bool rec0.hasWiki )
+                            , ( "has_pages", Json.Encode.bool rec0.hasPages )
+                            , ( "has_downloads"
+                              , Json.Encode.bool rec0.hasDownloads
+                              )
+                            , ( "archived", Json.Encode.bool rec0.archived )
+                            , ( "disabled", Json.Encode.bool rec0.disabled )
+                            , ( "visibility"
+                              , Json.Encode.string rec0.visibility
+                              )
+                            , ( "pushed_at", Json.Encode.string rec0.pushedAt )
+                            , ( "created_at"
+                              , Json.Encode.string rec0.createdAt
+                              )
+                            , ( "updated_at"
+                              , Json.Encode.string rec0.updatedAt
+                              )
+                            , ( "permissions"
+                              , (\rec_0_73_1_1_2_0_1_0_78_1_0_0 ->
+                                    Json.Encode.object
+                                        [ ( "admin"
+                                          , Json.Encode.bool
+                                                rec_0_73_1_1_2_0_1_0_78_1_0_0.admin
+                                          )
+                                        , ( "maintain"
+                                          , Json.Encode.bool
+                                                rec_0_73_1_1_2_0_1_0_78_1_0_0.maintain
+                                          )
+                                        , ( "push"
+                                          , Json.Encode.bool
+                                                rec_0_73_1_1_2_0_1_0_78_1_0_0.push
+                                          )
+                                        , ( "triage"
+                                          , Json.Encode.bool
+                                                rec_0_73_1_1_2_0_1_0_78_1_0_0.triage
+                                          )
+                                        , ( "pull"
+                                          , Json.Encode.bool
+                                                rec_0_73_1_1_2_0_1_0_78_1_0_0.pull
+                                          )
+                                        ]
+                                )
+                                    rec0.permissions
+                              )
+                            , ( "allow_rebase_merge"
+                              , Json.Encode.bool rec0.allowRebaseMerge
+                              )
+                            , ( "temp_clone_token"
+                              , Json.Encode.string rec0.tempCloneToken
+                              )
+                            , ( "allow_squash_merge"
+                              , Json.Encode.bool rec0.allowSquashMerge
+                              )
+                            , ( "allow_auto_merge"
+                              , Json.Encode.bool rec0.allowAutoMerge
+                              )
+                            , ( "delete_branch_on_merge"
+                              , Json.Encode.bool rec0.deleteBranchOnMerge
+                              )
+                            , ( "allow_update_branch"
+                              , Json.Encode.bool rec0.allowUpdateBranch
+                              )
+                            , ( "use_squash_pr_title_as_default"
+                              , Json.Encode.bool rec0.useSquashPrTitleAsDefault
+                              )
+                            , ( "squash_merge_commit_title"
+                              , Json.Encode.string rec0.squashMergeCommitTitle
+                              )
+                            , ( "squash_merge_commit_message"
+                              , Json.Encode.string rec0.squashMergeCommitMessage
+                              )
+                            , ( "merge_commit_title"
+                              , Json.Encode.string rec0.mergeCommitTitle
+                              )
+                            , ( "merge_commit_message"
+                              , Json.Encode.string rec0.mergeCommitMessage
+                              )
+                            , ( "allow_merge_commit"
+                              , Json.Encode.bool rec0.allowMergeCommit
+                              )
+                            , ( "subscribers_count"
+                              , Json.Encode.int rec0.subscribersCount
+                              )
+                            , ( "network_count"
+                              , Json.Encode.int rec0.networkCount
+                              )
+                            ]
+                    )
+                , Json.Decode.null Null
+                ]
+                rec.templateRepository
           )
         , ( "temp_clone_token", Json.Encode.string rec.tempCloneToken )
         , ( "allow_squash_merge", Json.Encode.bool rec.allowSquashMerge )
@@ -13205,17 +14279,35 @@ encodeRepoSearchResultItem rec =
         , ( "owner", Debug.todo "decode anyOf" rec.owner )
         , ( "private", Json.Encode.bool rec.private )
         , ( "html_url", Json.Encode.string rec.htmlUrl )
-        , ( "description", Debug.todo "encode nullable" rec.description )
+        , ( "description"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.description
+          )
         , ( "fork", Json.Encode.bool rec.fork )
         , ( "url", Json.Encode.string rec.url )
         , ( "created_at", Json.Encode.string rec.createdAt )
         , ( "updated_at", Json.Encode.string rec.updatedAt )
         , ( "pushed_at", Json.Encode.string rec.pushedAt )
-        , ( "homepage", Debug.todo "encode nullable" rec.homepage )
+        , ( "homepage"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.homepage
+          )
         , ( "size", Json.Encode.int rec.size )
         , ( "stargazers_count", Json.Encode.int rec.stargazersCount )
         , ( "watchers_count", Json.Encode.int rec.watchersCount )
-        , ( "language", Debug.todo "encode nullable" rec.language )
+        , ( "language"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.language
+          )
         , ( "forks_count", Json.Encode.int rec.forksCount )
         , ( "open_issues_count", Json.Encode.int rec.openIssuesCount )
         , ( "master_branch", Json.Encode.string rec.masterBranch )
@@ -13265,7 +14357,13 @@ encodeRepoSearchResultItem rec =
         , ( "open_issues", Json.Encode.int rec.openIssues )
         , ( "watchers", Json.Encode.int rec.watchers )
         , ( "topics", Json.Encode.list Json.Encode.string rec.topics )
-        , ( "mirror_url", Debug.todo "encode nullable" rec.mirrorUrl )
+        , ( "mirror_url"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.mirrorUrl
+          )
         , ( "has_issues", Json.Encode.bool rec.hasIssues )
         , ( "has_projects", Json.Encode.bool rec.hasProjects )
         , ( "has_pages", Json.Encode.bool rec.hasPages )
@@ -13287,7 +14385,7 @@ encodeRepoSearchResultItem rec =
             )
                 rec.permissions
           )
-        , ( "text_matches", decodeSearchResultTextMatches rec.textMatches )
+        , ( "text_matches", encodeSearchResultTextMatches rec.textMatches )
         , ( "temp_clone_token", Json.Encode.string rec.tempCloneToken )
         , ( "allow_merge_commit", Json.Encode.bool rec.allowMergeCommit )
         , ( "allow_squash_merge", Json.Encode.bool rec.allowSquashMerge )
@@ -13401,10 +14499,22 @@ encodeRenamedIssueEvent rec =
         [ ( "id", Json.Encode.int rec.id )
         , ( "node_id", Json.Encode.string rec.nodeId )
         , ( "url", Json.Encode.string rec.url )
-        , ( "actor", decodeSimpleUser rec.actor )
+        , ( "actor", encodeSimpleUser rec.actor )
         , ( "event", Json.Encode.string rec.event )
-        , ( "commit_id", Debug.todo "encode nullable" rec.commitId )
-        , ( "commit_url", Debug.todo "encode nullable" rec.commitUrl )
+        , ( "commit_id"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.commitId
+          )
+        , ( "commit_url"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.commitUrl
+          )
         , ( "created_at", Json.Encode.string rec.createdAt )
         , ( "performed_via_github_app"
           , Debug.todo "decode anyOf" rec.performedViaGithubApp
@@ -13522,10 +14632,22 @@ encodeRemovedFromProjectIssueEvent rec =
         [ ( "id", Json.Encode.int rec.id )
         , ( "node_id", Json.Encode.string rec.nodeId )
         , ( "url", Json.Encode.string rec.url )
-        , ( "actor", decodeSimpleUser rec.actor )
+        , ( "actor", encodeSimpleUser rec.actor )
         , ( "event", Json.Encode.string rec.event )
-        , ( "commit_id", Debug.todo "encode nullable" rec.commitId )
-        , ( "commit_url", Debug.todo "encode nullable" rec.commitUrl )
+        , ( "commit_id"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.commitId
+          )
+        , ( "commit_url"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.commitUrl
+          )
         , ( "created_at", Json.Encode.string rec.createdAt )
         , ( "performed_via_github_app"
           , Debug.todo "decode anyOf" rec.performedViaGithubApp
@@ -13638,7 +14760,13 @@ encodeReleaseAsset rec =
         , ( "id", Json.Encode.int rec.id )
         , ( "node_id", Json.Encode.string rec.nodeId )
         , ( "name", Json.Encode.string rec.name )
-        , ( "label", Debug.todo "encode nullable" rec.label )
+        , ( "label"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.label
+          )
         , ( "state", Json.Encode.string rec.state )
         , ( "content_type", Json.Encode.string rec.contentType )
         , ( "size", Json.Encode.int rec.size )
@@ -13766,25 +14894,55 @@ encodeRelease rec =
         , ( "html_url", Json.Encode.string rec.htmlUrl )
         , ( "assets_url", Json.Encode.string rec.assetsUrl )
         , ( "upload_url", Json.Encode.string rec.uploadUrl )
-        , ( "tarball_url", Debug.todo "encode nullable" rec.tarballUrl )
-        , ( "zipball_url", Debug.todo "encode nullable" rec.zipballUrl )
+        , ( "tarball_url"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.tarballUrl
+          )
+        , ( "zipball_url"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.zipballUrl
+          )
         , ( "id", Json.Encode.int rec.id )
         , ( "node_id", Json.Encode.string rec.nodeId )
         , ( "tag_name", Json.Encode.string rec.tagName )
         , ( "target_commitish", Json.Encode.string rec.targetCommitish )
-        , ( "name", Debug.todo "encode nullable" rec.name )
-        , ( "body", Debug.todo "encode nullable" rec.body )
+        , ( "name"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.name
+          )
+        , ( "body"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.body
+          )
         , ( "draft", Json.Encode.bool rec.draft )
         , ( "prerelease", Json.Encode.bool rec.prerelease )
         , ( "created_at", Json.Encode.string rec.createdAt )
-        , ( "published_at", Debug.todo "encode nullable" rec.publishedAt )
-        , ( "author", decodeSimpleUser rec.author )
-        , ( "assets", Json.Encode.list decodeReleaseAsset rec.assets )
+        , ( "published_at"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.publishedAt
+          )
+        , ( "author", encodeSimpleUser rec.author )
+        , ( "assets", Json.Encode.list encodeReleaseAsset rec.assets )
         , ( "body_html", Json.Encode.string rec.bodyHtml )
         , ( "body_text", Json.Encode.string rec.bodyText )
         , ( "mentions_count", Json.Encode.int rec.mentionsCount )
         , ( "discussion_url", Json.Encode.string rec.discussionUrl )
-        , ( "reactions", decodeReactionRollup rec.reactions )
+        , ( "reactions", encodeReactionRollup rec.reactions )
         ]
 
 
@@ -14015,28 +15173,28 @@ encodeRateLimitOverview rec =
         [ ( "resources"
           , (\rec0 ->
                 Json.Encode.object
-                    [ ( "core", decodeRateLimit rec0.core )
-                    , ( "graphql", decodeRateLimit rec0.graphql )
-                    , ( "search", decodeRateLimit rec0.search )
-                    , ( "source_import", decodeRateLimit rec0.sourceImport )
+                    [ ( "core", encodeRateLimit rec0.core )
+                    , ( "graphql", encodeRateLimit rec0.graphql )
+                    , ( "search", encodeRateLimit rec0.search )
+                    , ( "source_import", encodeRateLimit rec0.sourceImport )
                     , ( "integration_manifest"
-                      , decodeRateLimit rec0.integrationManifest
+                      , encodeRateLimit rec0.integrationManifest
                       )
                     , ( "code_scanning_upload"
-                      , decodeRateLimit rec0.codeScanningUpload
+                      , encodeRateLimit rec0.codeScanningUpload
                       )
                     , ( "actions_runner_registration"
-                      , decodeRateLimit rec0.actionsRunnerRegistration
+                      , encodeRateLimit rec0.actionsRunnerRegistration
                       )
-                    , ( "scim", decodeRateLimit rec0.scim )
+                    , ( "scim", encodeRateLimit rec0.scim )
                     , ( "dependency_snapshots"
-                      , decodeRateLimit rec0.dependencySnapshots
+                      , encodeRateLimit rec0.dependencySnapshots
                       )
                     ]
             )
                 rec.resources
           )
-        , ( "rate", decodeRateLimit rec.rate )
+        , ( "rate", encodeRateLimit rec.rate )
         ]
 
 
@@ -14394,7 +15552,13 @@ encodePullRequestSimple rec =
         , ( "locked", Json.Encode.bool rec.locked )
         , ( "title", Json.Encode.string rec.title )
         , ( "user", Debug.todo "decode anyOf" rec.user )
-        , ( "body", Debug.todo "encode nullable" rec.body )
+        , ( "body"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.body
+          )
         , ( "labels"
           , Json.Encode.list
                 (\rec0 ->
@@ -14412,27 +15576,63 @@ encodePullRequestSimple rec =
           )
         , ( "milestone", Debug.todo "decode anyOf" rec.milestone )
         , ( "active_lock_reason"
-          , Debug.todo "encode nullable" rec.activeLockReason
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.activeLockReason
           )
         , ( "created_at", Json.Encode.string rec.createdAt )
         , ( "updated_at", Json.Encode.string rec.updatedAt )
-        , ( "closed_at", Debug.todo "encode nullable" rec.closedAt )
-        , ( "merged_at", Debug.todo "encode nullable" rec.mergedAt )
+        , ( "closed_at"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.closedAt
+          )
+        , ( "merged_at"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.mergedAt
+          )
         , ( "merge_commit_sha"
-          , Debug.todo "encode nullable" rec.mergeCommitSha
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.mergeCommitSha
           )
         , ( "assignee", Debug.todo "decode anyOf" rec.assignee )
-        , ( "assignees", Debug.todo "encode nullable" rec.assignees )
-        , ( "requested_reviewers"
-          , Debug.todo "encode nullable" rec.requestedReviewers
+        , ( "assignees"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present (Json.Encode.list encodeSimpleUser)
+                , Json.Decode.null Null
+                ]
+                rec.assignees
           )
-        , ( "requested_teams", Debug.todo "encode nullable" rec.requestedTeams )
+        , ( "requested_reviewers"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present (Json.Encode.list encodeSimpleUser)
+                , Json.Decode.null Null
+                ]
+                rec.requestedReviewers
+          )
+        , ( "requested_teams"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present (Json.Encode.list encodeTeam)
+                , Json.Decode.null Null
+                ]
+                rec.requestedTeams
+          )
         , ( "head"
           , (\rec0 ->
                 Json.Encode.object
                     [ ( "label", Json.Encode.string rec0.label )
                     , ( "ref", Json.Encode.string rec0.ref )
-                    , ( "repo", decodeRepository rec0.repo )
+                    , ( "repo", encodeRepository rec0.repo )
                     , ( "sha", Json.Encode.string rec0.sha )
                     , ( "user", Debug.todo "decode anyOf" rec0.user )
                     ]
@@ -14444,7 +15644,7 @@ encodePullRequestSimple rec =
                 Json.Encode.object
                     [ ( "label", Json.Encode.string rec0.label )
                     , ( "ref", Json.Encode.string rec0.ref )
-                    , ( "repo", decodeRepository rec0.repo )
+                    , ( "repo", encodeRepository rec0.repo )
                     , ( "sha", Json.Encode.string rec0.sha )
                     , ( "user", Debug.todo "decode anyOf" rec0.user )
                     ]
@@ -14454,22 +15654,22 @@ encodePullRequestSimple rec =
         , ( "_links"
           , (\rec0 ->
                 Json.Encode.object
-                    [ ( "comments", decodeLink rec0.comments )
-                    , ( "commits", decodeLink rec0.commits )
-                    , ( "statuses", decodeLink rec0.statuses )
-                    , ( "html", decodeLink rec0.html )
-                    , ( "issue", decodeLink rec0.issue )
-                    , ( "review_comments", decodeLink rec0.reviewComments )
-                    , ( "review_comment", decodeLink rec0.reviewComment )
-                    , ( "self", decodeLink rec0.self )
+                    [ ( "comments", encodeLink rec0.comments )
+                    , ( "commits", encodeLink rec0.commits )
+                    , ( "statuses", encodeLink rec0.statuses )
+                    , ( "html", encodeLink rec0.html )
+                    , ( "issue", encodeLink rec0.issue )
+                    , ( "review_comments", encodeLink rec0.reviewComments )
+                    , ( "review_comment", encodeLink rec0.reviewComment )
+                    , ( "self", encodeLink rec0.self )
                     ]
             )
                 rec.links
           )
         , ( "author_association"
-          , decodeAuthorAssociation rec.authorAssociation
+          , encodeAuthorAssociation rec.authorAssociation
           )
-        , ( "auto_merge", decodeAutoMerge rec.autoMerge )
+        , ( "auto_merge", encodeAutoMerge rec.autoMerge )
         , ( "draft", Json.Encode.bool rec.draft )
         ]
 
@@ -14490,8 +15690,8 @@ decodePullRequestReviewRequest =
 encodePullRequestReviewRequest : PullRequestReviewRequest -> Json.Encode.Value
 encodePullRequestReviewRequest rec =
     Json.Encode.object
-        [ ( "users", Json.Encode.list decodeSimpleUser rec.users )
-        , ( "teams", Json.Encode.list decodeTeam rec.teams )
+        [ ( "users", Json.Encode.list encodeSimpleUser rec.users )
+        , ( "teams", Json.Encode.list encodeTeam rec.teams )
         ]
 
 
@@ -14667,7 +15867,11 @@ encodePullRequestReviewComment rec =
     Json.Encode.object
         [ ( "url", Json.Encode.string rec.url )
         , ( "pull_request_review_id"
-          , Debug.todo "encode nullable" rec.pullRequestReviewId
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.int
+                , Json.Decode.null Null
+                ]
+                rec.pullRequestReviewId
           )
         , ( "id", Json.Encode.int rec.id )
         , ( "node_id", Json.Encode.string rec.nodeId )
@@ -14678,14 +15882,14 @@ encodePullRequestReviewComment rec =
         , ( "commit_id", Json.Encode.string rec.commitId )
         , ( "original_commit_id", Json.Encode.string rec.originalCommitId )
         , ( "in_reply_to_id", Json.Encode.int rec.inReplyToId )
-        , ( "user", decodeSimpleUser rec.user )
+        , ( "user", encodeSimpleUser rec.user )
         , ( "body", Json.Encode.string rec.body )
         , ( "created_at", Json.Encode.string rec.createdAt )
         , ( "updated_at", Json.Encode.string rec.updatedAt )
         , ( "html_url", Json.Encode.string rec.htmlUrl )
         , ( "pull_request_url", Json.Encode.string rec.pullRequestUrl )
         , ( "author_association"
-          , decodeAuthorAssociation rec.authorAssociation
+          , encodeAuthorAssociation rec.authorAssociation
           )
         , ( "_links"
           , (\rec0 ->
@@ -14727,15 +15931,31 @@ encodePullRequestReviewComment rec =
             )
                 rec.links
           )
-        , ( "start_line", Debug.todo "encode nullable" rec.startLine )
-        , ( "original_start_line"
-          , Debug.todo "encode nullable" rec.originalStartLine
+        , ( "start_line"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.int
+                , Json.Decode.null Null
+                ]
+                rec.startLine
           )
-        , ( "start_side", Debug.todo "encode nullable" rec.startSide )
+        , ( "original_start_line"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.int
+                , Json.Decode.null Null
+                ]
+                rec.originalStartLine
+          )
+        , ( "start_side"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.startSide
+          )
         , ( "line", Json.Encode.int rec.line )
         , ( "original_line", Json.Encode.int rec.originalLine )
         , ( "side", Json.Encode.string rec.side )
-        , ( "reactions", decodeReactionRollup rec.reactions )
+        , ( "reactions", encodeReactionRollup rec.reactions )
         , ( "body_html", Json.Encode.string rec.bodyHtml )
         , ( "body_text", Json.Encode.string rec.bodyText )
         ]
@@ -14873,7 +16093,7 @@ encodePullRequestReview rec =
         , ( "body_html", Json.Encode.string rec.bodyHtml )
         , ( "body_text", Json.Encode.string rec.bodyText )
         , ( "author_association"
-          , decodeAuthorAssociation rec.authorAssociation
+          , encodeAuthorAssociation rec.authorAssociation
           )
         ]
 
@@ -17259,7 +18479,13 @@ encodePullRequest rec =
         , ( "locked", Json.Encode.bool rec.locked )
         , ( "title", Json.Encode.string rec.title )
         , ( "user", Debug.todo "decode anyOf" rec.user )
-        , ( "body", Debug.todo "encode nullable" rec.body )
+        , ( "body"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.body
+          )
         , ( "labels"
           , Json.Encode.list
                 (\rec0 ->
@@ -17269,7 +18495,11 @@ encodePullRequest rec =
                         , ( "url", Json.Encode.string rec0.url )
                         , ( "name", Json.Encode.string rec0.name )
                         , ( "description"
-                          , Debug.todo "encode nullable" rec0.description
+                          , Json.Decode.oneOf
+                                [ Json.Decode.map Present Json.Encode.string
+                                , Json.Decode.null Null
+                                ]
+                                rec0.description
                           )
                         , ( "color", Json.Encode.string rec0.color )
                         , ( "default", Json.Encode.bool rec0.default )
@@ -17279,27 +18509,574 @@ encodePullRequest rec =
           )
         , ( "milestone", Debug.todo "decode anyOf" rec.milestone )
         , ( "active_lock_reason"
-          , Debug.todo "encode nullable" rec.activeLockReason
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.activeLockReason
           )
         , ( "created_at", Json.Encode.string rec.createdAt )
         , ( "updated_at", Json.Encode.string rec.updatedAt )
-        , ( "closed_at", Debug.todo "encode nullable" rec.closedAt )
-        , ( "merged_at", Debug.todo "encode nullable" rec.mergedAt )
+        , ( "closed_at"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.closedAt
+          )
+        , ( "merged_at"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.mergedAt
+          )
         , ( "merge_commit_sha"
-          , Debug.todo "encode nullable" rec.mergeCommitSha
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.mergeCommitSha
           )
         , ( "assignee", Debug.todo "decode anyOf" rec.assignee )
-        , ( "assignees", Debug.todo "encode nullable" rec.assignees )
-        , ( "requested_reviewers"
-          , Debug.todo "encode nullable" rec.requestedReviewers
+        , ( "assignees"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present (Json.Encode.list encodeSimpleUser)
+                , Json.Decode.null Null
+                ]
+                rec.assignees
           )
-        , ( "requested_teams", Debug.todo "encode nullable" rec.requestedTeams )
+        , ( "requested_reviewers"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present (Json.Encode.list encodeSimpleUser)
+                , Json.Decode.null Null
+                ]
+                rec.requestedReviewers
+          )
+        , ( "requested_teams"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present (Json.Encode.list encodeTeamSimple)
+                , Json.Decode.null Null
+                ]
+                rec.requestedTeams
+          )
         , ( "head"
           , (\rec0 ->
                 Json.Encode.object
                     [ ( "label", Json.Encode.string rec0.label )
                     , ( "ref", Json.Encode.string rec0.ref )
-                    , ( "repo", Debug.todo "encode nullable" rec0.repo )
+                    , ( "repo"
+                      , Json.Decode.oneOf
+                            [ Json.Decode.map
+                                Present
+                                (\rec_2_0_1_0_3_1_1_0_31_1_0_0 ->
+                                    Json.Encode.object
+                                        [ ( "archive_url"
+                                          , Json.Encode.string
+                                                rec_2_0_1_0_3_1_1_0_31_1_0_0.archiveUrl
+                                          )
+                                        , ( "assignees_url"
+                                          , Json.Encode.string
+                                                rec_2_0_1_0_3_1_1_0_31_1_0_0.assigneesUrl
+                                          )
+                                        , ( "blobs_url"
+                                          , Json.Encode.string
+                                                rec_2_0_1_0_3_1_1_0_31_1_0_0.blobsUrl
+                                          )
+                                        , ( "branches_url"
+                                          , Json.Encode.string
+                                                rec_2_0_1_0_3_1_1_0_31_1_0_0.branchesUrl
+                                          )
+                                        , ( "collaborators_url"
+                                          , Json.Encode.string
+                                                rec_2_0_1_0_3_1_1_0_31_1_0_0.collaboratorsUrl
+                                          )
+                                        , ( "comments_url"
+                                          , Json.Encode.string
+                                                rec_2_0_1_0_3_1_1_0_31_1_0_0.commentsUrl
+                                          )
+                                        , ( "commits_url"
+                                          , Json.Encode.string
+                                                rec_2_0_1_0_3_1_1_0_31_1_0_0.commitsUrl
+                                          )
+                                        , ( "compare_url"
+                                          , Json.Encode.string
+                                                rec_2_0_1_0_3_1_1_0_31_1_0_0.compareUrl
+                                          )
+                                        , ( "contents_url"
+                                          , Json.Encode.string
+                                                rec_2_0_1_0_3_1_1_0_31_1_0_0.contentsUrl
+                                          )
+                                        , ( "contributors_url"
+                                          , Json.Encode.string
+                                                rec_2_0_1_0_3_1_1_0_31_1_0_0.contributorsUrl
+                                          )
+                                        , ( "deployments_url"
+                                          , Json.Encode.string
+                                                rec_2_0_1_0_3_1_1_0_31_1_0_0.deploymentsUrl
+                                          )
+                                        , ( "description"
+                                          , Json.Decode.oneOf
+                                                [ Json.Decode.map
+                                                    Present
+                                                    Json.Encode.string
+                                                , Json.Decode.null Null
+                                                ]
+                                                rec_2_0_1_0_3_1_1_0_31_1_0_0.description
+                                          )
+                                        , ( "downloads_url"
+                                          , Json.Encode.string
+                                                rec_2_0_1_0_3_1_1_0_31_1_0_0.downloadsUrl
+                                          )
+                                        , ( "events_url"
+                                          , Json.Encode.string
+                                                rec_2_0_1_0_3_1_1_0_31_1_0_0.eventsUrl
+                                          )
+                                        , ( "fork"
+                                          , Json.Encode.bool
+                                                rec_2_0_1_0_3_1_1_0_31_1_0_0.fork
+                                          )
+                                        , ( "forks_url"
+                                          , Json.Encode.string
+                                                rec_2_0_1_0_3_1_1_0_31_1_0_0.forksUrl
+                                          )
+                                        , ( "full_name"
+                                          , Json.Encode.string
+                                                rec_2_0_1_0_3_1_1_0_31_1_0_0.fullName
+                                          )
+                                        , ( "git_commits_url"
+                                          , Json.Encode.string
+                                                rec_2_0_1_0_3_1_1_0_31_1_0_0.gitCommitsUrl
+                                          )
+                                        , ( "git_refs_url"
+                                          , Json.Encode.string
+                                                rec_2_0_1_0_3_1_1_0_31_1_0_0.gitRefsUrl
+                                          )
+                                        , ( "git_tags_url"
+                                          , Json.Encode.string
+                                                rec_2_0_1_0_3_1_1_0_31_1_0_0.gitTagsUrl
+                                          )
+                                        , ( "hooks_url"
+                                          , Json.Encode.string
+                                                rec_2_0_1_0_3_1_1_0_31_1_0_0.hooksUrl
+                                          )
+                                        , ( "html_url"
+                                          , Json.Encode.string
+                                                rec_2_0_1_0_3_1_1_0_31_1_0_0.htmlUrl
+                                          )
+                                        , ( "id"
+                                          , Json.Encode.int
+                                                rec_2_0_1_0_3_1_1_0_31_1_0_0.id
+                                          )
+                                        , ( "node_id"
+                                          , Json.Encode.string
+                                                rec_2_0_1_0_3_1_1_0_31_1_0_0.nodeId
+                                          )
+                                        , ( "issue_comment_url"
+                                          , Json.Encode.string
+                                                rec_2_0_1_0_3_1_1_0_31_1_0_0.issueCommentUrl
+                                          )
+                                        , ( "issue_events_url"
+                                          , Json.Encode.string
+                                                rec_2_0_1_0_3_1_1_0_31_1_0_0.issueEventsUrl
+                                          )
+                                        , ( "issues_url"
+                                          , Json.Encode.string
+                                                rec_2_0_1_0_3_1_1_0_31_1_0_0.issuesUrl
+                                          )
+                                        , ( "keys_url"
+                                          , Json.Encode.string
+                                                rec_2_0_1_0_3_1_1_0_31_1_0_0.keysUrl
+                                          )
+                                        , ( "labels_url"
+                                          , Json.Encode.string
+                                                rec_2_0_1_0_3_1_1_0_31_1_0_0.labelsUrl
+                                          )
+                                        , ( "languages_url"
+                                          , Json.Encode.string
+                                                rec_2_0_1_0_3_1_1_0_31_1_0_0.languagesUrl
+                                          )
+                                        , ( "merges_url"
+                                          , Json.Encode.string
+                                                rec_2_0_1_0_3_1_1_0_31_1_0_0.mergesUrl
+                                          )
+                                        , ( "milestones_url"
+                                          , Json.Encode.string
+                                                rec_2_0_1_0_3_1_1_0_31_1_0_0.milestonesUrl
+                                          )
+                                        , ( "name"
+                                          , Json.Encode.string
+                                                rec_2_0_1_0_3_1_1_0_31_1_0_0.name
+                                          )
+                                        , ( "notifications_url"
+                                          , Json.Encode.string
+                                                rec_2_0_1_0_3_1_1_0_31_1_0_0.notificationsUrl
+                                          )
+                                        , ( "owner"
+                                          , (\rec_0_35_1_1_2_0_1_0_3_1_1_0_31_1_0_0 ->
+                                                Json.Encode.object
+                                                    [ ( "avatar_url"
+                                                      , Json.Encode.string
+                                                            rec_0_35_1_1_2_0_1_0_3_1_1_0_31_1_0_0.avatarUrl
+                                                      )
+                                                    , ( "events_url"
+                                                      , Json.Encode.string
+                                                            rec_0_35_1_1_2_0_1_0_3_1_1_0_31_1_0_0.eventsUrl
+                                                      )
+                                                    , ( "followers_url"
+                                                      , Json.Encode.string
+                                                            rec_0_35_1_1_2_0_1_0_3_1_1_0_31_1_0_0.followersUrl
+                                                      )
+                                                    , ( "following_url"
+                                                      , Json.Encode.string
+                                                            rec_0_35_1_1_2_0_1_0_3_1_1_0_31_1_0_0.followingUrl
+                                                      )
+                                                    , ( "gists_url"
+                                                      , Json.Encode.string
+                                                            rec_0_35_1_1_2_0_1_0_3_1_1_0_31_1_0_0.gistsUrl
+                                                      )
+                                                    , ( "gravatar_id"
+                                                      , Json.Decode.oneOf
+                                                            [ Json.Decode.map
+                                                                Present
+                                                                Json.Encode.string
+                                                            , Json.Decode.null
+                                                                Null
+                                                            ]
+                                                            rec_0_35_1_1_2_0_1_0_3_1_1_0_31_1_0_0.gravatarId
+                                                      )
+                                                    , ( "html_url"
+                                                      , Json.Encode.string
+                                                            rec_0_35_1_1_2_0_1_0_3_1_1_0_31_1_0_0.htmlUrl
+                                                      )
+                                                    , ( "id"
+                                                      , Json.Encode.int
+                                                            rec_0_35_1_1_2_0_1_0_3_1_1_0_31_1_0_0.id
+                                                      )
+                                                    , ( "node_id"
+                                                      , Json.Encode.string
+                                                            rec_0_35_1_1_2_0_1_0_3_1_1_0_31_1_0_0.nodeId
+                                                      )
+                                                    , ( "login"
+                                                      , Json.Encode.string
+                                                            rec_0_35_1_1_2_0_1_0_3_1_1_0_31_1_0_0.login
+                                                      )
+                                                    , ( "organizations_url"
+                                                      , Json.Encode.string
+                                                            rec_0_35_1_1_2_0_1_0_3_1_1_0_31_1_0_0.organizationsUrl
+                                                      )
+                                                    , ( "received_events_url"
+                                                      , Json.Encode.string
+                                                            rec_0_35_1_1_2_0_1_0_3_1_1_0_31_1_0_0.receivedEventsUrl
+                                                      )
+                                                    , ( "repos_url"
+                                                      , Json.Encode.string
+                                                            rec_0_35_1_1_2_0_1_0_3_1_1_0_31_1_0_0.reposUrl
+                                                      )
+                                                    , ( "site_admin"
+                                                      , Json.Encode.bool
+                                                            rec_0_35_1_1_2_0_1_0_3_1_1_0_31_1_0_0.siteAdmin
+                                                      )
+                                                    , ( "starred_url"
+                                                      , Json.Encode.string
+                                                            rec_0_35_1_1_2_0_1_0_3_1_1_0_31_1_0_0.starredUrl
+                                                      )
+                                                    , ( "subscriptions_url"
+                                                      , Json.Encode.string
+                                                            rec_0_35_1_1_2_0_1_0_3_1_1_0_31_1_0_0.subscriptionsUrl
+                                                      )
+                                                    , ( "type"
+                                                      , Json.Encode.string
+                                                            rec_0_35_1_1_2_0_1_0_3_1_1_0_31_1_0_0.type_
+                                                      )
+                                                    , ( "url"
+                                                      , Json.Encode.string
+                                                            rec_0_35_1_1_2_0_1_0_3_1_1_0_31_1_0_0.url
+                                                      )
+                                                    ]
+                                            )
+                                                rec_2_0_1_0_3_1_1_0_31_1_0_0.owner
+                                          )
+                                        , ( "private"
+                                          , Json.Encode.bool
+                                                rec_2_0_1_0_3_1_1_0_31_1_0_0.private
+                                          )
+                                        , ( "pulls_url"
+                                          , Json.Encode.string
+                                                rec_2_0_1_0_3_1_1_0_31_1_0_0.pullsUrl
+                                          )
+                                        , ( "releases_url"
+                                          , Json.Encode.string
+                                                rec_2_0_1_0_3_1_1_0_31_1_0_0.releasesUrl
+                                          )
+                                        , ( "stargazers_url"
+                                          , Json.Encode.string
+                                                rec_2_0_1_0_3_1_1_0_31_1_0_0.stargazersUrl
+                                          )
+                                        , ( "statuses_url"
+                                          , Json.Encode.string
+                                                rec_2_0_1_0_3_1_1_0_31_1_0_0.statusesUrl
+                                          )
+                                        , ( "subscribers_url"
+                                          , Json.Encode.string
+                                                rec_2_0_1_0_3_1_1_0_31_1_0_0.subscribersUrl
+                                          )
+                                        , ( "subscription_url"
+                                          , Json.Encode.string
+                                                rec_2_0_1_0_3_1_1_0_31_1_0_0.subscriptionUrl
+                                          )
+                                        , ( "tags_url"
+                                          , Json.Encode.string
+                                                rec_2_0_1_0_3_1_1_0_31_1_0_0.tagsUrl
+                                          )
+                                        , ( "teams_url"
+                                          , Json.Encode.string
+                                                rec_2_0_1_0_3_1_1_0_31_1_0_0.teamsUrl
+                                          )
+                                        , ( "trees_url"
+                                          , Json.Encode.string
+                                                rec_2_0_1_0_3_1_1_0_31_1_0_0.treesUrl
+                                          )
+                                        , ( "url"
+                                          , Json.Encode.string
+                                                rec_2_0_1_0_3_1_1_0_31_1_0_0.url
+                                          )
+                                        , ( "clone_url"
+                                          , Json.Encode.string
+                                                rec_2_0_1_0_3_1_1_0_31_1_0_0.cloneUrl
+                                          )
+                                        , ( "default_branch"
+                                          , Json.Encode.string
+                                                rec_2_0_1_0_3_1_1_0_31_1_0_0.defaultBranch
+                                          )
+                                        , ( "forks"
+                                          , Json.Encode.int
+                                                rec_2_0_1_0_3_1_1_0_31_1_0_0.forks
+                                          )
+                                        , ( "forks_count"
+                                          , Json.Encode.int
+                                                rec_2_0_1_0_3_1_1_0_31_1_0_0.forksCount
+                                          )
+                                        , ( "git_url"
+                                          , Json.Encode.string
+                                                rec_2_0_1_0_3_1_1_0_31_1_0_0.gitUrl
+                                          )
+                                        , ( "has_downloads"
+                                          , Json.Encode.bool
+                                                rec_2_0_1_0_3_1_1_0_31_1_0_0.hasDownloads
+                                          )
+                                        , ( "has_issues"
+                                          , Json.Encode.bool
+                                                rec_2_0_1_0_3_1_1_0_31_1_0_0.hasIssues
+                                          )
+                                        , ( "has_projects"
+                                          , Json.Encode.bool
+                                                rec_2_0_1_0_3_1_1_0_31_1_0_0.hasProjects
+                                          )
+                                        , ( "has_wiki"
+                                          , Json.Encode.bool
+                                                rec_2_0_1_0_3_1_1_0_31_1_0_0.hasWiki
+                                          )
+                                        , ( "has_pages"
+                                          , Json.Encode.bool
+                                                rec_2_0_1_0_3_1_1_0_31_1_0_0.hasPages
+                                          )
+                                        , ( "homepage"
+                                          , Json.Decode.oneOf
+                                                [ Json.Decode.map
+                                                    Present
+                                                    Json.Encode.string
+                                                , Json.Decode.null Null
+                                                ]
+                                                rec_2_0_1_0_3_1_1_0_31_1_0_0.homepage
+                                          )
+                                        , ( "language"
+                                          , Json.Decode.oneOf
+                                                [ Json.Decode.map
+                                                    Present
+                                                    Json.Encode.string
+                                                , Json.Decode.null Null
+                                                ]
+                                                rec_2_0_1_0_3_1_1_0_31_1_0_0.language
+                                          )
+                                        , ( "master_branch"
+                                          , Json.Encode.string
+                                                rec_2_0_1_0_3_1_1_0_31_1_0_0.masterBranch
+                                          )
+                                        , ( "archived"
+                                          , Json.Encode.bool
+                                                rec_2_0_1_0_3_1_1_0_31_1_0_0.archived
+                                          )
+                                        , ( "disabled"
+                                          , Json.Encode.bool
+                                                rec_2_0_1_0_3_1_1_0_31_1_0_0.disabled
+                                          )
+                                        , ( "visibility"
+                                          , Json.Encode.string
+                                                rec_2_0_1_0_3_1_1_0_31_1_0_0.visibility
+                                          )
+                                        , ( "mirror_url"
+                                          , Json.Decode.oneOf
+                                                [ Json.Decode.map
+                                                    Present
+                                                    Json.Encode.string
+                                                , Json.Decode.null Null
+                                                ]
+                                                rec_2_0_1_0_3_1_1_0_31_1_0_0.mirrorUrl
+                                          )
+                                        , ( "open_issues"
+                                          , Json.Encode.int
+                                                rec_2_0_1_0_3_1_1_0_31_1_0_0.openIssues
+                                          )
+                                        , ( "open_issues_count"
+                                          , Json.Encode.int
+                                                rec_2_0_1_0_3_1_1_0_31_1_0_0.openIssuesCount
+                                          )
+                                        , ( "permissions"
+                                          , (\rec_0_66_1_1_2_0_1_0_3_1_1_0_31_1_0_0 ->
+                                                Json.Encode.object
+                                                    [ ( "admin"
+                                                      , Json.Encode.bool
+                                                            rec_0_66_1_1_2_0_1_0_3_1_1_0_31_1_0_0.admin
+                                                      )
+                                                    , ( "maintain"
+                                                      , Json.Encode.bool
+                                                            rec_0_66_1_1_2_0_1_0_3_1_1_0_31_1_0_0.maintain
+                                                      )
+                                                    , ( "push"
+                                                      , Json.Encode.bool
+                                                            rec_0_66_1_1_2_0_1_0_3_1_1_0_31_1_0_0.push
+                                                      )
+                                                    , ( "triage"
+                                                      , Json.Encode.bool
+                                                            rec_0_66_1_1_2_0_1_0_3_1_1_0_31_1_0_0.triage
+                                                      )
+                                                    , ( "pull"
+                                                      , Json.Encode.bool
+                                                            rec_0_66_1_1_2_0_1_0_3_1_1_0_31_1_0_0.pull
+                                                      )
+                                                    ]
+                                            )
+                                                rec_2_0_1_0_3_1_1_0_31_1_0_0.permissions
+                                          )
+                                        , ( "temp_clone_token"
+                                          , Json.Encode.string
+                                                rec_2_0_1_0_3_1_1_0_31_1_0_0.tempCloneToken
+                                          )
+                                        , ( "allow_merge_commit"
+                                          , Json.Encode.bool
+                                                rec_2_0_1_0_3_1_1_0_31_1_0_0.allowMergeCommit
+                                          )
+                                        , ( "allow_squash_merge"
+                                          , Json.Encode.bool
+                                                rec_2_0_1_0_3_1_1_0_31_1_0_0.allowSquashMerge
+                                          )
+                                        , ( "allow_rebase_merge"
+                                          , Json.Encode.bool
+                                                rec_2_0_1_0_3_1_1_0_31_1_0_0.allowRebaseMerge
+                                          )
+                                        , ( "license"
+                                          , Json.Decode.oneOf
+                                                [ Json.Decode.map
+                                                    Present
+                                                    (\rec_2_0_1_0_71_1_1_2_0_1_0_3_1_1_0_31_1_0_0 ->
+                                                        Json.Encode.object
+                                                            [ ( "key"
+                                                              , Json.Encode.string
+                                                                    rec_2_0_1_0_71_1_1_2_0_1_0_3_1_1_0_31_1_0_0.key
+                                                              )
+                                                            , ( "name"
+                                                              , Json.Encode.string
+                                                                    rec_2_0_1_0_71_1_1_2_0_1_0_3_1_1_0_31_1_0_0.name
+                                                              )
+                                                            , ( "url"
+                                                              , Json.Decode.oneOf
+                                                                    [ Json.Decode.map
+                                                                        Present
+                                                                        Json.Encode.string
+                                                                    , Json.Decode.null
+                                                                        Null
+                                                                    ]
+                                                                    rec_2_0_1_0_71_1_1_2_0_1_0_3_1_1_0_31_1_0_0.url
+                                                              )
+                                                            , ( "spdx_id"
+                                                              , Json.Decode.oneOf
+                                                                    [ Json.Decode.map
+                                                                        Present
+                                                                        Json.Encode.string
+                                                                    , Json.Decode.null
+                                                                        Null
+                                                                    ]
+                                                                    rec_2_0_1_0_71_1_1_2_0_1_0_3_1_1_0_31_1_0_0.spdxId
+                                                              )
+                                                            , ( "node_id"
+                                                              , Json.Encode.string
+                                                                    rec_2_0_1_0_71_1_1_2_0_1_0_3_1_1_0_31_1_0_0.nodeId
+                                                              )
+                                                            ]
+                                                    )
+                                                , Json.Decode.null Null
+                                                ]
+                                                rec_2_0_1_0_3_1_1_0_31_1_0_0.license
+                                          )
+                                        , ( "pushed_at"
+                                          , Json.Encode.string
+                                                rec_2_0_1_0_3_1_1_0_31_1_0_0.pushedAt
+                                          )
+                                        , ( "size"
+                                          , Json.Encode.int
+                                                rec_2_0_1_0_3_1_1_0_31_1_0_0.size
+                                          )
+                                        , ( "ssh_url"
+                                          , Json.Encode.string
+                                                rec_2_0_1_0_3_1_1_0_31_1_0_0.sshUrl
+                                          )
+                                        , ( "stargazers_count"
+                                          , Json.Encode.int
+                                                rec_2_0_1_0_3_1_1_0_31_1_0_0.stargazersCount
+                                          )
+                                        , ( "svn_url"
+                                          , Json.Encode.string
+                                                rec_2_0_1_0_3_1_1_0_31_1_0_0.svnUrl
+                                          )
+                                        , ( "topics"
+                                          , Json.Encode.list Json.Encode.string
+                                                rec_2_0_1_0_3_1_1_0_31_1_0_0.topics
+                                          )
+                                        , ( "watchers"
+                                          , Json.Encode.int
+                                                rec_2_0_1_0_3_1_1_0_31_1_0_0.watchers
+                                          )
+                                        , ( "watchers_count"
+                                          , Json.Encode.int
+                                                rec_2_0_1_0_3_1_1_0_31_1_0_0.watchersCount
+                                          )
+                                        , ( "created_at"
+                                          , Json.Encode.string
+                                                rec_2_0_1_0_3_1_1_0_31_1_0_0.createdAt
+                                          )
+                                        , ( "updated_at"
+                                          , Json.Encode.string
+                                                rec_2_0_1_0_3_1_1_0_31_1_0_0.updatedAt
+                                          )
+                                        , ( "allow_forking"
+                                          , Json.Encode.bool
+                                                rec_2_0_1_0_3_1_1_0_31_1_0_0.allowForking
+                                          )
+                                        , ( "is_template"
+                                          , Json.Encode.bool
+                                                rec_2_0_1_0_3_1_1_0_31_1_0_0.isTemplate
+                                          )
+                                        , ( "web_commit_signoff_required"
+                                          , Json.Encode.bool
+                                                rec_2_0_1_0_3_1_1_0_31_1_0_0.webCommitSignoffRequired
+                                          )
+                                        ]
+                                )
+                            , Json.Decode.null Null
+                            ]
+                            rec0.repo
+                      )
                     , ( "sha", Json.Encode.string rec0.sha )
                     , ( "user"
                       , (\rec_0_5_1_1_0_31_1_0_0 ->
@@ -17325,7 +19102,12 @@ encodePullRequest rec =
                                         rec_0_5_1_1_0_31_1_0_0.gistsUrl
                                   )
                                 , ( "gravatar_id"
-                                  , Debug.todo "encode nullable"
+                                  , Json.Decode.oneOf
+                                        [ Json.Decode.map
+                                            Present
+                                            Json.Encode.string
+                                        , Json.Decode.null Null
+                                        ]
                                         rec_0_5_1_1_0_31_1_0_0.gravatarId
                                   )
                                 , ( "html_url"
@@ -17436,7 +19218,12 @@ encodePullRequest rec =
                                         rec_0_3_1_1_0_32_1_0_0.deploymentsUrl
                                   )
                                 , ( "description"
-                                  , Debug.todo "encode nullable"
+                                  , Json.Decode.oneOf
+                                        [ Json.Decode.map
+                                            Present
+                                            Json.Encode.string
+                                        , Json.Decode.null Null
+                                        ]
                                         rec_0_3_1_1_0_32_1_0_0.description
                                   )
                                 , ( "downloads_url"
@@ -17553,7 +19340,12 @@ encodePullRequest rec =
                                                     rec_0_36_1_1_0_3_1_1_0_32_1_0_0.gistsUrl
                                               )
                                             , ( "gravatar_id"
-                                              , Debug.todo "encode nullable"
+                                              , Json.Decode.oneOf
+                                                    [ Json.Decode.map
+                                                        Present
+                                                        Json.Encode.string
+                                                    , Json.Decode.null Null
+                                                    ]
                                                     rec_0_36_1_1_0_3_1_1_0_32_1_0_0.gravatarId
                                               )
                                             , ( "html_url"
@@ -17692,11 +19484,21 @@ encodePullRequest rec =
                                         rec_0_3_1_1_0_32_1_0_0.hasPages
                                   )
                                 , ( "homepage"
-                                  , Debug.todo "encode nullable"
+                                  , Json.Decode.oneOf
+                                        [ Json.Decode.map
+                                            Present
+                                            Json.Encode.string
+                                        , Json.Decode.null Null
+                                        ]
                                         rec_0_3_1_1_0_32_1_0_0.homepage
                                   )
                                 , ( "language"
-                                  , Debug.todo "encode nullable"
+                                  , Json.Decode.oneOf
+                                        [ Json.Decode.map
+                                            Present
+                                            Json.Encode.string
+                                        , Json.Decode.null Null
+                                        ]
                                         rec_0_3_1_1_0_32_1_0_0.language
                                   )
                                 , ( "master_branch"
@@ -17716,7 +19518,12 @@ encodePullRequest rec =
                                         rec_0_3_1_1_0_32_1_0_0.visibility
                                   )
                                 , ( "mirror_url"
-                                  , Debug.todo "encode nullable"
+                                  , Json.Decode.oneOf
+                                        [ Json.Decode.map
+                                            Present
+                                            Json.Encode.string
+                                        , Json.Decode.null Null
+                                        ]
                                         rec_0_3_1_1_0_32_1_0_0.mirrorUrl
                                   )
                                 , ( "open_issues"
@@ -17850,7 +19657,12 @@ encodePullRequest rec =
                                         rec_0_5_1_1_0_32_1_0_0.gistsUrl
                                   )
                                 , ( "gravatar_id"
-                                  , Debug.todo "encode nullable"
+                                  , Json.Decode.oneOf
+                                        [ Json.Decode.map
+                                            Present
+                                            Json.Encode.string
+                                        , Json.Decode.null Null
+                                        ]
                                         rec_0_5_1_1_0_32_1_0_0.gravatarId
                                   )
                                 , ( "html_url"
@@ -17911,26 +19723,38 @@ encodePullRequest rec =
         , ( "_links"
           , (\rec0 ->
                 Json.Encode.object
-                    [ ( "comments", decodeLink rec0.comments )
-                    , ( "commits", decodeLink rec0.commits )
-                    , ( "statuses", decodeLink rec0.statuses )
-                    , ( "html", decodeLink rec0.html )
-                    , ( "issue", decodeLink rec0.issue )
-                    , ( "review_comments", decodeLink rec0.reviewComments )
-                    , ( "review_comment", decodeLink rec0.reviewComment )
-                    , ( "self", decodeLink rec0.self )
+                    [ ( "comments", encodeLink rec0.comments )
+                    , ( "commits", encodeLink rec0.commits )
+                    , ( "statuses", encodeLink rec0.statuses )
+                    , ( "html", encodeLink rec0.html )
+                    , ( "issue", encodeLink rec0.issue )
+                    , ( "review_comments", encodeLink rec0.reviewComments )
+                    , ( "review_comment", encodeLink rec0.reviewComment )
+                    , ( "self", encodeLink rec0.self )
                     ]
             )
                 rec.links
           )
         , ( "author_association"
-          , decodeAuthorAssociation rec.authorAssociation
+          , encodeAuthorAssociation rec.authorAssociation
           )
-        , ( "auto_merge", decodeAutoMerge rec.autoMerge )
+        , ( "auto_merge", encodeAutoMerge rec.autoMerge )
         , ( "draft", Json.Encode.bool rec.draft )
         , ( "merged", Json.Encode.bool rec.merged )
-        , ( "mergeable", Debug.todo "encode nullable" rec.mergeable )
-        , ( "rebaseable", Debug.todo "encode nullable" rec.rebaseable )
+        , ( "mergeable"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.bool
+                , Json.Decode.null Null
+                ]
+                rec.mergeable
+          )
+        , ( "rebaseable"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.bool
+                , Json.Decode.null Null
+                ]
+                rec.rebaseable
+          )
         , ( "mergeable_state", Json.Encode.string rec.mergeableState )
         , ( "merged_by", Debug.todo "decode anyOf" rec.mergedBy )
         , ( "comments", Json.Encode.int rec.comments )
@@ -18146,7 +19970,13 @@ encodePublicUser rec =
         , ( "id", Json.Encode.int rec.id )
         , ( "node_id", Json.Encode.string rec.nodeId )
         , ( "avatar_url", Json.Encode.string rec.avatarUrl )
-        , ( "gravatar_id", Debug.todo "encode nullable" rec.gravatarId )
+        , ( "gravatar_id"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.gravatarId
+          )
         , ( "url", Json.Encode.string rec.url )
         , ( "html_url", Json.Encode.string rec.htmlUrl )
         , ( "followers_url", Json.Encode.string rec.followersUrl )
@@ -18160,15 +19990,61 @@ encodePublicUser rec =
         , ( "received_events_url", Json.Encode.string rec.receivedEventsUrl )
         , ( "type", Json.Encode.string rec.type_ )
         , ( "site_admin", Json.Encode.bool rec.siteAdmin )
-        , ( "name", Debug.todo "encode nullable" rec.name )
-        , ( "company", Debug.todo "encode nullable" rec.company )
-        , ( "blog", Debug.todo "encode nullable" rec.blog )
-        , ( "location", Debug.todo "encode nullable" rec.location )
-        , ( "email", Debug.todo "encode nullable" rec.email )
-        , ( "hireable", Debug.todo "encode nullable" rec.hireable )
-        , ( "bio", Debug.todo "encode nullable" rec.bio )
+        , ( "name"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.name
+          )
+        , ( "company"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.company
+          )
+        , ( "blog"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.blog
+          )
+        , ( "location"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.location
+          )
+        , ( "email"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.email
+          )
+        , ( "hireable"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.bool
+                , Json.Decode.null Null
+                ]
+                rec.hireable
+          )
+        , ( "bio"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.bio
+          )
         , ( "twitter_username"
-          , Debug.todo "encode nullable" rec.twitterUsername
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.twitterUsername
           )
         , ( "public_repos", Json.Encode.int rec.publicRepos )
         , ( "public_gists", Json.Encode.int rec.publicGists )
@@ -18187,7 +20063,13 @@ encodePublicUser rec =
             )
                 rec.plan
           )
-        , ( "suspended_at", Debug.todo "encode nullable" rec.suspendedAt )
+        , ( "suspended_at"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.suspendedAt
+          )
         , ( "private_gists", Json.Encode.int rec.privateGists )
         , ( "total_private_repos", Json.Encode.int rec.totalPrivateRepos )
         , ( "owned_private_repos", Json.Encode.int rec.ownedPrivateRepos )
@@ -18258,7 +20140,13 @@ encodeProtectedBranchRequiredStatusCheck rec =
                 (\rec0 ->
                     Json.Encode.object
                         [ ( "context", Json.Encode.string rec0.context )
-                        , ( "app_id", Debug.todo "encode nullable" rec0.appId )
+                        , ( "app_id"
+                          , Json.Decode.oneOf
+                                [ Json.Decode.map Present Json.Encode.int
+                                , Json.Decode.null Null
+                                ]
+                                rec0.appId
+                          )
                         ]
                 )
                 rec.checks
@@ -18373,9 +20261,9 @@ encodeProtectedBranchPullRequestReview rec =
         , ( "dismissal_restrictions"
           , (\rec0 ->
                 Json.Encode.object
-                    [ ( "users", Json.Encode.list decodeSimpleUser rec0.users )
-                    , ( "teams", Json.Encode.list decodeTeam rec0.teams )
-                    , ( "apps", Json.Encode.list decodeIntegration rec0.apps )
+                    [ ( "users", Json.Encode.list encodeSimpleUser rec0.users )
+                    , ( "teams", Json.Encode.list encodeTeam rec0.teams )
+                    , ( "apps", Json.Encode.list encodeIntegration rec0.apps )
                     , ( "url", Json.Encode.string rec0.url )
                     , ( "users_url", Json.Encode.string rec0.usersUrl )
                     , ( "teams_url", Json.Encode.string rec0.teamsUrl )
@@ -18386,9 +20274,9 @@ encodeProtectedBranchPullRequestReview rec =
         , ( "bypass_pull_request_allowances"
           , (\rec0 ->
                 Json.Encode.object
-                    [ ( "users", Json.Encode.list decodeSimpleUser rec0.users )
-                    , ( "teams", Json.Encode.list decodeTeam rec0.teams )
-                    , ( "apps", Json.Encode.list decodeIntegration rec0.apps )
+                    [ ( "users", Json.Encode.list encodeSimpleUser rec0.users )
+                    , ( "teams", Json.Encode.list encodeTeam rec0.teams )
+                    , ( "apps", Json.Encode.list encodeIntegration rec0.apps )
                     ]
             )
                 rec.bypassPullRequestAllowances
@@ -18649,7 +20537,7 @@ encodeProtectedBranch rec =
     Json.Encode.object
         [ ( "url", Json.Encode.string rec.url )
         , ( "required_status_checks"
-          , decodeStatusCheckPolicy rec.requiredStatusChecks
+          , encodeStatusCheckPolicy rec.requiredStatusChecks
           )
         , ( "required_pull_request_reviews"
           , (\rec0 ->
@@ -18679,15 +20567,15 @@ encodeProtectedBranch rec =
                                         rec_0_5_1_1_0_3_1_0_0.teamsUrl
                                   )
                                 , ( "users"
-                                  , Json.Encode.list decodeSimpleUser
+                                  , Json.Encode.list encodeSimpleUser
                                         rec_0_5_1_1_0_3_1_0_0.users
                                   )
                                 , ( "teams"
-                                  , Json.Encode.list decodeTeam
+                                  , Json.Encode.list encodeTeam
                                         rec_0_5_1_1_0_3_1_0_0.teams
                                   )
                                 , ( "apps"
-                                  , Json.Encode.list decodeIntegration
+                                  , Json.Encode.list encodeIntegration
                                         rec_0_5_1_1_0_3_1_0_0.apps
                                   )
                                 ]
@@ -18698,15 +20586,15 @@ encodeProtectedBranch rec =
                       , (\rec_0_6_1_1_0_3_1_0_0 ->
                             Json.Encode.object
                                 [ ( "users"
-                                  , Json.Encode.list decodeSimpleUser
+                                  , Json.Encode.list encodeSimpleUser
                                         rec_0_6_1_1_0_3_1_0_0.users
                                   )
                                 , ( "teams"
-                                  , Json.Encode.list decodeTeam
+                                  , Json.Encode.list encodeTeam
                                         rec_0_6_1_1_0_3_1_0_0.teams
                                   )
                                 , ( "apps"
-                                  , Json.Encode.list decodeIntegration
+                                  , Json.Encode.list encodeIntegration
                                         rec_0_6_1_1_0_3_1_0_0.apps
                                   )
                                 ]
@@ -18756,7 +20644,7 @@ encodeProtectedBranch rec =
             )
                 rec.allowDeletions
           )
-        , ( "restrictions", decodeBranchRestrictionPolicy rec.restrictions )
+        , ( "restrictions", encodeBranchRestrictionPolicy rec.restrictions )
         , ( "required_conversation_resolution"
           , (\rec0 ->
                 Json.Encode.object
@@ -18922,7 +20810,13 @@ encodeProjectCard rec =
         [ ( "url", Json.Encode.string rec.url )
         , ( "id", Json.Encode.int rec.id )
         , ( "node_id", Json.Encode.string rec.nodeId )
-        , ( "note", Debug.todo "encode nullable" rec.note )
+        , ( "note"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.note
+          )
         , ( "creator", Debug.todo "decode anyOf" rec.creator )
         , ( "created_at", Json.Encode.string rec.createdAt )
         , ( "updated_at", Json.Encode.string rec.updatedAt )
@@ -19014,7 +20908,13 @@ encodeProject rec =
         , ( "id", Json.Encode.int rec.id )
         , ( "node_id", Json.Encode.string rec.nodeId )
         , ( "name", Json.Encode.string rec.name )
-        , ( "body", Debug.todo "encode nullable" rec.body )
+        , ( "body"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.body
+          )
         , ( "number", Json.Encode.int rec.number )
         , ( "state", Json.Encode.string rec.state )
         , ( "creator", Debug.todo "decode anyOf" rec.creator )
@@ -19242,7 +21142,13 @@ encodePrivateUser rec =
         , ( "id", Json.Encode.int rec.id )
         , ( "node_id", Json.Encode.string rec.nodeId )
         , ( "avatar_url", Json.Encode.string rec.avatarUrl )
-        , ( "gravatar_id", Debug.todo "encode nullable" rec.gravatarId )
+        , ( "gravatar_id"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.gravatarId
+          )
         , ( "url", Json.Encode.string rec.url )
         , ( "html_url", Json.Encode.string rec.htmlUrl )
         , ( "followers_url", Json.Encode.string rec.followersUrl )
@@ -19256,15 +21162,61 @@ encodePrivateUser rec =
         , ( "received_events_url", Json.Encode.string rec.receivedEventsUrl )
         , ( "type", Json.Encode.string rec.type_ )
         , ( "site_admin", Json.Encode.bool rec.siteAdmin )
-        , ( "name", Debug.todo "encode nullable" rec.name )
-        , ( "company", Debug.todo "encode nullable" rec.company )
-        , ( "blog", Debug.todo "encode nullable" rec.blog )
-        , ( "location", Debug.todo "encode nullable" rec.location )
-        , ( "email", Debug.todo "encode nullable" rec.email )
-        , ( "hireable", Debug.todo "encode nullable" rec.hireable )
-        , ( "bio", Debug.todo "encode nullable" rec.bio )
+        , ( "name"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.name
+          )
+        , ( "company"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.company
+          )
+        , ( "blog"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.blog
+          )
+        , ( "location"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.location
+          )
+        , ( "email"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.email
+          )
+        , ( "hireable"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.bool
+                , Json.Decode.null Null
+                ]
+                rec.hireable
+          )
+        , ( "bio"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.bio
+          )
         , ( "twitter_username"
-          , Debug.todo "encode nullable" rec.twitterUsername
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.twitterUsername
           )
         , ( "public_repos", Json.Encode.int rec.publicRepos )
         , ( "public_gists", Json.Encode.int rec.publicGists )
@@ -19291,7 +21243,13 @@ encodePrivateUser rec =
             )
                 rec.plan
           )
-        , ( "suspended_at", Debug.todo "encode nullable" rec.suspendedAt )
+        , ( "suspended_at"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.suspendedAt
+          )
         , ( "business_plus", Json.Encode.bool rec.businessPlus )
         , ( "ldap_dn", Json.Encode.string rec.ldapDn )
         ]
@@ -19474,7 +21432,11 @@ encodePendingDeployment rec =
           )
         , ( "wait_timer", Json.Encode.int rec.waitTimer )
         , ( "wait_timer_started_at"
-          , Debug.todo "encode nullable" rec.waitTimerStartedAt
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.waitTimerStartedAt
           )
         , ( "current_user_can_approve"
           , Json.Encode.bool rec.currentUserCanApprove
@@ -19483,7 +21445,7 @@ encodePendingDeployment rec =
           , Json.Encode.list
                 (\rec0 ->
                     Json.Encode.object
-                        [ ( "type", decodeDeploymentReviewerType rec0.type_ )
+                        [ ( "type", encodeDeploymentReviewerType rec0.type_ )
                         , ( "reviewer"
                           , Debug.todo "decode anyOf" rec0.reviewer
                           )
@@ -19966,74 +21928,305 @@ encodePagesHealthCheck rec =
                     , ( "nameservers", Json.Encode.string rec0.nameservers )
                     , ( "dns_resolves", Json.Encode.bool rec0.dnsResolves )
                     , ( "is_proxied"
-                      , Debug.todo "encode nullable" rec0.isProxied
+                      , Json.Decode.oneOf
+                            [ Json.Decode.map Present Json.Encode.bool
+                            , Json.Decode.null Null
+                            ]
+                            rec0.isProxied
                       )
                     , ( "is_cloudflare_ip"
-                      , Debug.todo "encode nullable" rec0.isCloudflareIp
+                      , Json.Decode.oneOf
+                            [ Json.Decode.map Present Json.Encode.bool
+                            , Json.Decode.null Null
+                            ]
+                            rec0.isCloudflareIp
                       )
                     , ( "is_fastly_ip"
-                      , Debug.todo "encode nullable" rec0.isFastlyIp
+                      , Json.Decode.oneOf
+                            [ Json.Decode.map Present Json.Encode.bool
+                            , Json.Decode.null Null
+                            ]
+                            rec0.isFastlyIp
                       )
                     , ( "is_old_ip_address"
-                      , Debug.todo "encode nullable" rec0.isOldIpAddress
+                      , Json.Decode.oneOf
+                            [ Json.Decode.map Present Json.Encode.bool
+                            , Json.Decode.null Null
+                            ]
+                            rec0.isOldIpAddress
                       )
                     , ( "is_a_record"
-                      , Debug.todo "encode nullable" rec0.isARecord
+                      , Json.Decode.oneOf
+                            [ Json.Decode.map Present Json.Encode.bool
+                            , Json.Decode.null Null
+                            ]
+                            rec0.isARecord
                       )
                     , ( "has_cname_record"
-                      , Debug.todo "encode nullable" rec0.hasCnameRecord
+                      , Json.Decode.oneOf
+                            [ Json.Decode.map Present Json.Encode.bool
+                            , Json.Decode.null Null
+                            ]
+                            rec0.hasCnameRecord
                       )
                     , ( "has_mx_records_present"
-                      , Debug.todo "encode nullable" rec0.hasMxRecordsPresent
+                      , Json.Decode.oneOf
+                            [ Json.Decode.map Present Json.Encode.bool
+                            , Json.Decode.null Null
+                            ]
+                            rec0.hasMxRecordsPresent
                       )
                     , ( "is_valid_domain", Json.Encode.bool rec0.isValidDomain )
                     , ( "is_apex_domain", Json.Encode.bool rec0.isApexDomain )
                     , ( "should_be_a_record"
-                      , Debug.todo "encode nullable" rec0.shouldBeARecord
+                      , Json.Decode.oneOf
+                            [ Json.Decode.map Present Json.Encode.bool
+                            , Json.Decode.null Null
+                            ]
+                            rec0.shouldBeARecord
                       )
                     , ( "is_cname_to_github_user_domain"
-                      , Debug.todo "encode nullable"
+                      , Json.Decode.oneOf
+                            [ Json.Decode.map Present Json.Encode.bool
+                            , Json.Decode.null Null
+                            ]
                             rec0.isCnameToGithubUserDomain
                       )
                     , ( "is_cname_to_pages_dot_github_dot_com"
-                      , Debug.todo "encode nullable"
+                      , Json.Decode.oneOf
+                            [ Json.Decode.map Present Json.Encode.bool
+                            , Json.Decode.null Null
+                            ]
                             rec0.isCnameToPagesDotGithubDotCom
                       )
                     , ( "is_cname_to_fastly"
-                      , Debug.todo "encode nullable" rec0.isCnameToFastly
+                      , Json.Decode.oneOf
+                            [ Json.Decode.map Present Json.Encode.bool
+                            , Json.Decode.null Null
+                            ]
+                            rec0.isCnameToFastly
                       )
                     , ( "is_pointed_to_github_pages_ip"
-                      , Debug.todo "encode nullable"
+                      , Json.Decode.oneOf
+                            [ Json.Decode.map Present Json.Encode.bool
+                            , Json.Decode.null Null
+                            ]
                             rec0.isPointedToGithubPagesIp
                       )
                     , ( "is_non_github_pages_ip_present"
-                      , Debug.todo "encode nullable"
+                      , Json.Decode.oneOf
+                            [ Json.Decode.map Present Json.Encode.bool
+                            , Json.Decode.null Null
+                            ]
                             rec0.isNonGithubPagesIpPresent
                       )
                     , ( "is_pages_domain", Json.Encode.bool rec0.isPagesDomain )
                     , ( "is_served_by_pages"
-                      , Debug.todo "encode nullable" rec0.isServedByPages
+                      , Json.Decode.oneOf
+                            [ Json.Decode.map Present Json.Encode.bool
+                            , Json.Decode.null Null
+                            ]
+                            rec0.isServedByPages
                       )
                     , ( "is_valid", Json.Encode.bool rec0.isValid )
-                    , ( "reason", Debug.todo "encode nullable" rec0.reason )
+                    , ( "reason"
+                      , Json.Decode.oneOf
+                            [ Json.Decode.map Present Json.Encode.string
+                            , Json.Decode.null Null
+                            ]
+                            rec0.reason
+                      )
                     , ( "responds_to_https"
                       , Json.Encode.bool rec0.respondsToHttps
                       )
                     , ( "enforces_https", Json.Encode.bool rec0.enforcesHttps )
                     , ( "https_error"
-                      , Debug.todo "encode nullable" rec0.httpsError
+                      , Json.Decode.oneOf
+                            [ Json.Decode.map Present Json.Encode.string
+                            , Json.Decode.null Null
+                            ]
+                            rec0.httpsError
                       )
                     , ( "is_https_eligible"
-                      , Debug.todo "encode nullable" rec0.isHttpsEligible
+                      , Json.Decode.oneOf
+                            [ Json.Decode.map Present Json.Encode.bool
+                            , Json.Decode.null Null
+                            ]
+                            rec0.isHttpsEligible
                       )
                     , ( "caa_error"
-                      , Debug.todo "encode nullable" rec0.caaError
+                      , Json.Decode.oneOf
+                            [ Json.Decode.map Present Json.Encode.string
+                            , Json.Decode.null Null
+                            ]
+                            rec0.caaError
                       )
                     ]
             )
                 rec.domain
           )
-        , ( "alt_domain", Debug.todo "encode nullable" rec.altDomain )
+        , ( "alt_domain"
+          , Json.Decode.oneOf
+                [ Json.Decode.map
+                    Present
+                    (\rec0 ->
+                        Json.Encode.object
+                            [ ( "host", Json.Encode.string rec0.host )
+                            , ( "uri", Json.Encode.string rec0.uri )
+                            , ( "nameservers"
+                              , Json.Encode.string rec0.nameservers
+                              )
+                            , ( "dns_resolves"
+                              , Json.Encode.bool rec0.dnsResolves
+                              )
+                            , ( "is_proxied"
+                              , Json.Decode.oneOf
+                                    [ Json.Decode.map Present Json.Encode.bool
+                                    , Json.Decode.null Null
+                                    ]
+                                    rec0.isProxied
+                              )
+                            , ( "is_cloudflare_ip"
+                              , Json.Decode.oneOf
+                                    [ Json.Decode.map Present Json.Encode.bool
+                                    , Json.Decode.null Null
+                                    ]
+                                    rec0.isCloudflareIp
+                              )
+                            , ( "is_fastly_ip"
+                              , Json.Decode.oneOf
+                                    [ Json.Decode.map Present Json.Encode.bool
+                                    , Json.Decode.null Null
+                                    ]
+                                    rec0.isFastlyIp
+                              )
+                            , ( "is_old_ip_address"
+                              , Json.Decode.oneOf
+                                    [ Json.Decode.map Present Json.Encode.bool
+                                    , Json.Decode.null Null
+                                    ]
+                                    rec0.isOldIpAddress
+                              )
+                            , ( "is_a_record"
+                              , Json.Decode.oneOf
+                                    [ Json.Decode.map Present Json.Encode.bool
+                                    , Json.Decode.null Null
+                                    ]
+                                    rec0.isARecord
+                              )
+                            , ( "has_cname_record"
+                              , Json.Decode.oneOf
+                                    [ Json.Decode.map Present Json.Encode.bool
+                                    , Json.Decode.null Null
+                                    ]
+                                    rec0.hasCnameRecord
+                              )
+                            , ( "has_mx_records_present"
+                              , Json.Decode.oneOf
+                                    [ Json.Decode.map Present Json.Encode.bool
+                                    , Json.Decode.null Null
+                                    ]
+                                    rec0.hasMxRecordsPresent
+                              )
+                            , ( "is_valid_domain"
+                              , Json.Encode.bool rec0.isValidDomain
+                              )
+                            , ( "is_apex_domain"
+                              , Json.Encode.bool rec0.isApexDomain
+                              )
+                            , ( "should_be_a_record"
+                              , Json.Decode.oneOf
+                                    [ Json.Decode.map Present Json.Encode.bool
+                                    , Json.Decode.null Null
+                                    ]
+                                    rec0.shouldBeARecord
+                              )
+                            , ( "is_cname_to_github_user_domain"
+                              , Json.Decode.oneOf
+                                    [ Json.Decode.map Present Json.Encode.bool
+                                    , Json.Decode.null Null
+                                    ]
+                                    rec0.isCnameToGithubUserDomain
+                              )
+                            , ( "is_cname_to_pages_dot_github_dot_com"
+                              , Json.Decode.oneOf
+                                    [ Json.Decode.map Present Json.Encode.bool
+                                    , Json.Decode.null Null
+                                    ]
+                                    rec0.isCnameToPagesDotGithubDotCom
+                              )
+                            , ( "is_cname_to_fastly"
+                              , Json.Decode.oneOf
+                                    [ Json.Decode.map Present Json.Encode.bool
+                                    , Json.Decode.null Null
+                                    ]
+                                    rec0.isCnameToFastly
+                              )
+                            , ( "is_pointed_to_github_pages_ip"
+                              , Json.Decode.oneOf
+                                    [ Json.Decode.map Present Json.Encode.bool
+                                    , Json.Decode.null Null
+                                    ]
+                                    rec0.isPointedToGithubPagesIp
+                              )
+                            , ( "is_non_github_pages_ip_present"
+                              , Json.Decode.oneOf
+                                    [ Json.Decode.map Present Json.Encode.bool
+                                    , Json.Decode.null Null
+                                    ]
+                                    rec0.isNonGithubPagesIpPresent
+                              )
+                            , ( "is_pages_domain"
+                              , Json.Encode.bool rec0.isPagesDomain
+                              )
+                            , ( "is_served_by_pages"
+                              , Json.Decode.oneOf
+                                    [ Json.Decode.map Present Json.Encode.bool
+                                    , Json.Decode.null Null
+                                    ]
+                                    rec0.isServedByPages
+                              )
+                            , ( "is_valid", Json.Encode.bool rec0.isValid )
+                            , ( "reason"
+                              , Json.Decode.oneOf
+                                    [ Json.Decode.map Present Json.Encode.string
+                                    , Json.Decode.null Null
+                                    ]
+                                    rec0.reason
+                              )
+                            , ( "responds_to_https"
+                              , Json.Encode.bool rec0.respondsToHttps
+                              )
+                            , ( "enforces_https"
+                              , Json.Encode.bool rec0.enforcesHttps
+                              )
+                            , ( "https_error"
+                              , Json.Decode.oneOf
+                                    [ Json.Decode.map Present Json.Encode.string
+                                    , Json.Decode.null Null
+                                    ]
+                                    rec0.httpsError
+                              )
+                            , ( "is_https_eligible"
+                              , Json.Decode.oneOf
+                                    [ Json.Decode.map Present Json.Encode.bool
+                                    , Json.Decode.null Null
+                                    ]
+                                    rec0.isHttpsEligible
+                              )
+                            , ( "caa_error"
+                              , Json.Decode.oneOf
+                                    [ Json.Decode.map Present Json.Encode.string
+                                    , Json.Decode.null Null
+                                    ]
+                                    rec0.caaError
+                              )
+                            ]
+                    )
+                , Json.Decode.null Null
+                ]
+                rec.altDomain
+          )
         ]
 
 
@@ -20144,7 +22337,14 @@ encodePageBuild rec =
         , ( "error"
           , (\rec0 ->
                 Json.Encode.object
-                    [ ( "message", Debug.todo "encode nullable" rec0.message ) ]
+                    [ ( "message"
+                      , Json.Decode.oneOf
+                            [ Json.Decode.map Present Json.Encode.string
+                            , Json.Decode.null Null
+                            ]
+                            rec0.message
+                      )
+                    ]
             )
                 rec.error
           )
@@ -20228,21 +22428,47 @@ encodePage : Page -> Json.Encode.Value
 encodePage rec =
     Json.Encode.object
         [ ( "url", Json.Encode.string rec.url )
-        , ( "status", Debug.todo "encode nullable" rec.status )
-        , ( "cname", Debug.todo "encode nullable" rec.cname )
+        , ( "status"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.status
+          )
+        , ( "cname"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.cname
+          )
         , ( "protected_domain_state"
-          , Debug.todo "encode nullable" rec.protectedDomainState
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.protectedDomainState
           )
         , ( "pending_domain_unverified_at"
-          , Debug.todo "encode nullable" rec.pendingDomainUnverifiedAt
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.pendingDomainUnverifiedAt
           )
         , ( "custom_404", Json.Encode.bool rec.custom404 )
         , ( "html_url", Json.Encode.string rec.htmlUrl )
-        , ( "build_type", Debug.todo "encode nullable" rec.buildType )
-        , ( "source", decodePagesSourceHash rec.source )
+        , ( "build_type"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.buildType
+          )
+        , ( "source", encodePagesSourceHash rec.source )
         , ( "public", Json.Encode.bool rec.public )
         , ( "https_certificate"
-          , decodePagesHttpsCertificate rec.httpsCertificate
+          , encodePagesHttpsCertificate rec.httpsCertificate
           )
         , ( "https_enforced", Json.Encode.bool rec.httpsEnforced )
         ]
@@ -20574,7 +22800,13 @@ encodeOrganizationSimple rec =
         , ( "members_url", Json.Encode.string rec.membersUrl )
         , ( "public_members_url", Json.Encode.string rec.publicMembersUrl )
         , ( "avatar_url", Json.Encode.string rec.avatarUrl )
-        , ( "description", Debug.todo "encode nullable" rec.description )
+        , ( "description"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.description
+          )
         ]
 
 
@@ -20681,33 +22913,51 @@ encodeOrganizationSecretScanningAlert :
     OrganizationSecretScanningAlert -> Json.Encode.Value
 encodeOrganizationSecretScanningAlert rec =
     Json.Encode.object
-        [ ( "number", decodeAlertNumber rec.number )
-        , ( "created_at", decodeAlertCreatedAt rec.createdAt )
+        [ ( "number", encodeAlertNumber rec.number )
+        , ( "created_at", encodeAlertCreatedAt rec.createdAt )
         , ( "updated_at", Debug.todo "decode anyOf" rec.updatedAt )
-        , ( "url", decodeAlertUrl rec.url )
-        , ( "html_url", decodeAlertHtmlUrl rec.htmlUrl )
+        , ( "url", encodeAlertUrl rec.url )
+        , ( "html_url", encodeAlertHtmlUrl rec.htmlUrl )
         , ( "locations_url", Json.Encode.string rec.locationsUrl )
-        , ( "state", decodeSecretScanningAlertState rec.state )
-        , ( "resolution", decodeSecretScanningAlertResolution rec.resolution )
-        , ( "resolved_at", Debug.todo "encode nullable" rec.resolvedAt )
+        , ( "state", encodeSecretScanningAlertState rec.state )
+        , ( "resolution", encodeSecretScanningAlertResolution rec.resolution )
+        , ( "resolved_at"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.resolvedAt
+          )
         , ( "resolved_by", Debug.todo "decode anyOf" rec.resolvedBy )
         , ( "secret_type", Json.Encode.string rec.secretType )
         , ( "secret_type_display_name"
           , Json.Encode.string rec.secretTypeDisplayName
           )
         , ( "secret", Json.Encode.string rec.secret )
-        , ( "repository", decodeSimpleRepository rec.repository )
+        , ( "repository", encodeSimpleRepository rec.repository )
         , ( "push_protection_bypassed"
-          , Debug.todo "encode nullable" rec.pushProtectionBypassed
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.bool
+                , Json.Decode.null Null
+                ]
+                rec.pushProtectionBypassed
           )
         , ( "push_protection_bypassed_by"
           , Debug.todo "decode anyOf" rec.pushProtectionBypassedBy
           )
         , ( "push_protection_bypassed_at"
-          , Debug.todo "encode nullable" rec.pushProtectionBypassedAt
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.pushProtectionBypassedAt
           )
         , ( "resolution_comment"
-          , Debug.todo "encode nullable" rec.resolutionComment
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.resolutionComment
           )
         ]
 
@@ -20777,13 +23027,37 @@ encodeOrganizationInvitation : OrganizationInvitation -> Json.Encode.Value
 encodeOrganizationInvitation rec =
     Json.Encode.object
         [ ( "id", Json.Encode.int rec.id )
-        , ( "login", Debug.todo "encode nullable" rec.login )
-        , ( "email", Debug.todo "encode nullable" rec.email )
+        , ( "login"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.login
+          )
+        , ( "email"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.email
+          )
         , ( "role", Json.Encode.string rec.role )
         , ( "created_at", Json.Encode.string rec.createdAt )
-        , ( "failed_at", Debug.todo "encode nullable" rec.failedAt )
-        , ( "failed_reason", Debug.todo "encode nullable" rec.failedReason )
-        , ( "inviter", decodeSimpleUser rec.inviter )
+        , ( "failed_at"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.failedAt
+          )
+        , ( "failed_reason"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.failedReason
+          )
+        , ( "inviter", encodeSimpleUser rec.inviter )
         , ( "team_count", Json.Encode.int rec.teamCount )
         , ( "node_id", Json.Encode.string rec.nodeId )
         , ( "invitation_teams_url", Json.Encode.string rec.invitationTeamsUrl )
@@ -21131,14 +23405,24 @@ encodeOrganizationFull rec =
         , ( "members_url", Json.Encode.string rec.membersUrl )
         , ( "public_members_url", Json.Encode.string rec.publicMembersUrl )
         , ( "avatar_url", Json.Encode.string rec.avatarUrl )
-        , ( "description", Debug.todo "encode nullable" rec.description )
+        , ( "description"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.description
+          )
         , ( "name", Json.Encode.string rec.name )
         , ( "company", Json.Encode.string rec.company )
         , ( "blog", Json.Encode.string rec.blog )
         , ( "location", Json.Encode.string rec.location )
         , ( "email", Json.Encode.string rec.email )
         , ( "twitter_username"
-          , Debug.todo "encode nullable" rec.twitterUsername
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.twitterUsername
           )
         , ( "is_verified", Json.Encode.bool rec.isVerified )
         , ( "has_organization_projects"
@@ -21156,10 +23440,34 @@ encodeOrganizationFull rec =
         , ( "type", Json.Encode.string rec.type_ )
         , ( "total_private_repos", Json.Encode.int rec.totalPrivateRepos )
         , ( "owned_private_repos", Json.Encode.int rec.ownedPrivateRepos )
-        , ( "private_gists", Debug.todo "encode nullable" rec.privateGists )
-        , ( "disk_usage", Debug.todo "encode nullable" rec.diskUsage )
-        , ( "collaborators", Debug.todo "encode nullable" rec.collaborators )
-        , ( "billing_email", Debug.todo "encode nullable" rec.billingEmail )
+        , ( "private_gists"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.int
+                , Json.Decode.null Null
+                ]
+                rec.privateGists
+          )
+        , ( "disk_usage"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.int
+                , Json.Decode.null Null
+                ]
+                rec.diskUsage
+          )
+        , ( "collaborators"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.int
+                , Json.Decode.null Null
+                ]
+                rec.collaborators
+          )
+        , ( "billing_email"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.billingEmail
+          )
         , ( "plan"
           , (\rec0 ->
                 Json.Encode.object
@@ -21173,13 +23481,25 @@ encodeOrganizationFull rec =
                 rec.plan
           )
         , ( "default_repository_permission"
-          , Debug.todo "encode nullable" rec.defaultRepositoryPermission
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.defaultRepositoryPermission
           )
         , ( "members_can_create_repositories"
-          , Debug.todo "encode nullable" rec.membersCanCreateRepositories
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.bool
+                , Json.Decode.null Null
+                ]
+                rec.membersCanCreateRepositories
           )
         , ( "two_factor_requirement_enabled"
-          , Debug.todo "encode nullable" rec.twoFactorRequirementEnabled
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.bool
+                , Json.Decode.null Null
+                ]
+                rec.twoFactorRequirementEnabled
           )
         , ( "members_allowed_repository_creation_type"
           , Json.Encode.string rec.membersAllowedRepositoryCreationType
@@ -21203,7 +23523,11 @@ encodeOrganizationFull rec =
           , Json.Encode.bool rec.membersCanCreatePrivatePages
           )
         , ( "members_can_fork_private_repositories"
-          , Debug.todo "encode nullable" rec.membersCanForkPrivateRepositories
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.bool
+                , Json.Decode.null Null
+                ]
+                rec.membersCanForkPrivateRepositories
           )
         , ( "web_commit_signoff_required"
           , Json.Encode.bool rec.webCommitSignoffRequired
@@ -21359,10 +23683,16 @@ encodeOrganizationCustomRepositoryRole rec =
     Json.Encode.object
         [ ( "id", Json.Encode.int rec.id )
         , ( "name", Json.Encode.string rec.name )
-        , ( "description", Debug.todo "encode nullable" rec.description )
+        , ( "description"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.description
+          )
         , ( "base_role", Json.Encode.string rec.baseRole )
         , ( "permissions", Json.Encode.list Json.Encode.string rec.permissions )
-        , ( "organization", decodeSimpleUser rec.organization )
+        , ( "organization", encodeSimpleUser rec.organization )
         , ( "created_at", Json.Encode.string rec.createdAt )
         , ( "updated_at", Json.Encode.string rec.updatedAt )
         ]
@@ -21471,7 +23801,7 @@ encodeOrgMembership rec =
         , ( "state", Json.Encode.string rec.state )
         , ( "role", Json.Encode.string rec.role )
         , ( "organization_url", Json.Encode.string rec.organizationUrl )
-        , ( "organization", decodeOrganizationSimple rec.organization )
+        , ( "organization", encodeOrganizationSimple rec.organization )
         , ( "user", Debug.todo "decode anyOf" rec.user )
         , ( "permissions"
           , (\rec0 ->
@@ -21692,10 +24022,22 @@ encodeMovedColumnInProjectIssueEvent rec =
         [ ( "id", Json.Encode.int rec.id )
         , ( "node_id", Json.Encode.string rec.nodeId )
         , ( "url", Json.Encode.string rec.url )
-        , ( "actor", decodeSimpleUser rec.actor )
+        , ( "actor", encodeSimpleUser rec.actor )
         , ( "event", Json.Encode.string rec.event )
-        , ( "commit_id", Debug.todo "encode nullable" rec.commitId )
-        , ( "commit_url", Debug.todo "encode nullable" rec.commitUrl )
+        , ( "commit_id"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.commitId
+          )
+        , ( "commit_url"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.commitUrl
+          )
         , ( "created_at", Json.Encode.string rec.createdAt )
         , ( "performed_via_github_app"
           , Debug.todo "decode anyOf" rec.performedViaGithubApp
@@ -22146,10 +24488,16 @@ encodeMinimalRepository rec =
         , ( "node_id", Json.Encode.string rec.nodeId )
         , ( "name", Json.Encode.string rec.name )
         , ( "full_name", Json.Encode.string rec.fullName )
-        , ( "owner", decodeSimpleUser rec.owner )
+        , ( "owner", encodeSimpleUser rec.owner )
         , ( "private", Json.Encode.bool rec.private )
         , ( "html_url", Json.Encode.string rec.htmlUrl )
-        , ( "description", Debug.todo "encode nullable" rec.description )
+        , ( "description"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.description
+          )
         , ( "fork", Json.Encode.bool rec.fork )
         , ( "url", Json.Encode.string rec.url )
         , ( "archive_url", Json.Encode.string rec.archiveUrl )
@@ -22190,11 +24538,29 @@ encodeMinimalRepository rec =
         , ( "teams_url", Json.Encode.string rec.teamsUrl )
         , ( "trees_url", Json.Encode.string rec.treesUrl )
         , ( "clone_url", Json.Encode.string rec.cloneUrl )
-        , ( "mirror_url", Debug.todo "encode nullable" rec.mirrorUrl )
+        , ( "mirror_url"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.mirrorUrl
+          )
         , ( "hooks_url", Json.Encode.string rec.hooksUrl )
         , ( "svn_url", Json.Encode.string rec.svnUrl )
-        , ( "homepage", Debug.todo "encode nullable" rec.homepage )
-        , ( "language", Debug.todo "encode nullable" rec.language )
+        , ( "homepage"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.homepage
+          )
+        , ( "language"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.language
+          )
         , ( "forks_count", Json.Encode.int rec.forksCount )
         , ( "stargazers_count", Json.Encode.int rec.stargazersCount )
         , ( "watchers_count", Json.Encode.int rec.watchersCount )
@@ -22211,9 +24577,27 @@ encodeMinimalRepository rec =
         , ( "archived", Json.Encode.bool rec.archived )
         , ( "disabled", Json.Encode.bool rec.disabled )
         , ( "visibility", Json.Encode.string rec.visibility )
-        , ( "pushed_at", Debug.todo "encode nullable" rec.pushedAt )
-        , ( "created_at", Debug.todo "encode nullable" rec.createdAt )
-        , ( "updated_at", Debug.todo "encode nullable" rec.updatedAt )
+        , ( "pushed_at"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.pushedAt
+          )
+        , ( "created_at"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.createdAt
+          )
+        , ( "updated_at"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.updatedAt
+          )
         , ( "permissions"
           , (\rec0 ->
                 Json.Encode.object
@@ -22231,8 +24615,24 @@ encodeMinimalRepository rec =
         , ( "delete_branch_on_merge", Json.Encode.bool rec.deleteBranchOnMerge )
         , ( "subscribers_count", Json.Encode.int rec.subscribersCount )
         , ( "network_count", Json.Encode.int rec.networkCount )
-        , ( "code_of_conduct", decodeCodeOfConduct rec.codeOfConduct )
-        , ( "license", Debug.todo "encode nullable" rec.license )
+        , ( "code_of_conduct", encodeCodeOfConduct rec.codeOfConduct )
+        , ( "license"
+          , Json.Decode.oneOf
+                [ Json.Decode.map
+                    Present
+                    (\rec0 ->
+                        Json.Encode.object
+                            [ ( "key", Json.Encode.string rec0.key )
+                            , ( "name", Json.Encode.string rec0.name )
+                            , ( "spdx_id", Json.Encode.string rec0.spdxId )
+                            , ( "url", Json.Encode.string rec0.url )
+                            , ( "node_id", Json.Encode.string rec0.nodeId )
+                            ]
+                    )
+                , Json.Decode.null Null
+                ]
+                rec.license
+          )
         , ( "forks", Json.Encode.int rec.forks )
         , ( "open_issues", Json.Encode.int rec.openIssues )
         , ( "watchers", Json.Encode.int rec.watchers )
@@ -22313,10 +24713,22 @@ encodeMilestonedIssueEvent rec =
         [ ( "id", Json.Encode.int rec.id )
         , ( "node_id", Json.Encode.string rec.nodeId )
         , ( "url", Json.Encode.string rec.url )
-        , ( "actor", decodeSimpleUser rec.actor )
+        , ( "actor", encodeSimpleUser rec.actor )
         , ( "event", Json.Encode.string rec.event )
-        , ( "commit_id", Debug.todo "encode nullable" rec.commitId )
-        , ( "commit_url", Debug.todo "encode nullable" rec.commitUrl )
+        , ( "commit_id"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.commitId
+          )
+        , ( "commit_url"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.commitUrl
+          )
         , ( "created_at", Json.Encode.string rec.createdAt )
         , ( "performed_via_github_app"
           , Debug.todo "decode anyOf" rec.performedViaGithubApp
@@ -22421,14 +24833,32 @@ encodeMilestone rec =
         , ( "number", Json.Encode.int rec.number )
         , ( "state", Json.Encode.string rec.state )
         , ( "title", Json.Encode.string rec.title )
-        , ( "description", Debug.todo "encode nullable" rec.description )
+        , ( "description"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.description
+          )
         , ( "creator", Debug.todo "decode anyOf" rec.creator )
         , ( "open_issues", Json.Encode.int rec.openIssues )
         , ( "closed_issues", Json.Encode.int rec.closedIssues )
         , ( "created_at", Json.Encode.string rec.createdAt )
         , ( "updated_at", Json.Encode.string rec.updatedAt )
-        , ( "closed_at", Debug.todo "encode nullable" rec.closedAt )
-        , ( "due_on", Debug.todo "encode nullable" rec.dueOn )
+        , ( "closed_at"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.closedAt
+          )
+        , ( "due_on"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.dueOn
+          )
         ]
 
 
@@ -22533,7 +24963,7 @@ encodeMigration rec =
           , Json.Encode.bool rec.excludeOwnerProjects
           )
         , ( "org_metadata_only", Json.Encode.bool rec.orgMetadataOnly )
-        , ( "repositories", Json.Encode.list decodeRepository rec.repositories )
+        , ( "repositories", Json.Encode.list encodeRepository rec.repositories )
         , ( "url", Json.Encode.string rec.url )
         , ( "created_at", Json.Encode.string rec.createdAt )
         , ( "updated_at", Json.Encode.string rec.updatedAt )
@@ -22724,27 +25154,69 @@ encodeMarketplacePurchase rec =
         , ( "organization_billing_email"
           , Json.Encode.string rec.organizationBillingEmail
           )
-        , ( "email", Debug.todo "encode nullable" rec.email )
+        , ( "email"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.email
+          )
         , ( "marketplace_pending_change"
-          , Debug.todo "encode nullable" rec.marketplacePendingChange
+          , Json.Decode.oneOf
+                [ Json.Decode.map
+                    Present
+                    (\rec0 ->
+                        Json.Encode.object
+                            [ ( "is_installed"
+                              , Json.Encode.bool rec0.isInstalled
+                              )
+                            , ( "effective_date"
+                              , Json.Encode.string rec0.effectiveDate
+                              )
+                            , ( "unit_count"
+                              , Json.Decode.oneOf
+                                    [ Json.Decode.map Present Json.Encode.int
+                                    , Json.Decode.null Null
+                                    ]
+                                    rec0.unitCount
+                              )
+                            , ( "id", Json.Encode.int rec0.id )
+                            , ( "plan", encodeMarketplaceListingPlan rec0.plan )
+                            ]
+                    )
+                , Json.Decode.null Null
+                ]
+                rec.marketplacePendingChange
           )
         , ( "marketplace_purchase"
           , (\rec0 ->
                 Json.Encode.object
                     [ ( "billing_cycle", Json.Encode.string rec0.billingCycle )
                     , ( "next_billing_date"
-                      , Debug.todo "encode nullable" rec0.nextBillingDate
+                      , Json.Decode.oneOf
+                            [ Json.Decode.map Present Json.Encode.string
+                            , Json.Decode.null Null
+                            ]
+                            rec0.nextBillingDate
                       )
                     , ( "is_installed", Json.Encode.bool rec0.isInstalled )
                     , ( "unit_count"
-                      , Debug.todo "encode nullable" rec0.unitCount
+                      , Json.Decode.oneOf
+                            [ Json.Decode.map Present Json.Encode.int
+                            , Json.Decode.null Null
+                            ]
+                            rec0.unitCount
                       )
                     , ( "on_free_trial", Json.Encode.bool rec0.onFreeTrial )
                     , ( "free_trial_ends_on"
-                      , Debug.todo "encode nullable" rec0.freeTrialEndsOn
+                      , Json.Decode.oneOf
+                            [ Json.Decode.map Present Json.Encode.string
+                            , Json.Decode.null Null
+                            ]
+                            rec0.freeTrialEndsOn
                       )
                     , ( "updated_at", Json.Encode.string rec0.updatedAt )
-                    , ( "plan", decodeMarketplaceListingPlan rec0.plan )
+                    , ( "plan", encodeMarketplaceListingPlan rec0.plan )
                     ]
             )
                 rec.marketplacePurchase
@@ -22829,7 +25301,13 @@ encodeMarketplaceListingPlan rec =
         , ( "yearly_price_in_cents", Json.Encode.int rec.yearlyPriceInCents )
         , ( "price_model", Json.Encode.string rec.priceModel )
         , ( "has_free_trial", Json.Encode.bool rec.hasFreeTrial )
-        , ( "unit_name", Debug.todo "encode nullable" rec.unitName )
+        , ( "unit_name"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.unitName
+          )
         , ( "state", Json.Encode.string rec.state )
         , ( "bullets", Json.Encode.list Json.Encode.string rec.bullets )
         ]
@@ -22884,9 +25362,19 @@ encodeMarketplaceAccount rec =
         , ( "type", Json.Encode.string rec.type_ )
         , ( "node_id", Json.Encode.string rec.nodeId )
         , ( "login", Json.Encode.string rec.login )
-        , ( "email", Debug.todo "encode nullable" rec.email )
+        , ( "email"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.email
+          )
         , ( "organization_billing_email"
-          , Debug.todo "encode nullable" rec.organizationBillingEmail
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.organizationBillingEmail
           )
         ]
 
@@ -22936,7 +25424,7 @@ encodeManifest rec =
             )
                 rec.file
           )
-        , ( "metadata", decodeMetadata rec.metadata )
+        , ( "metadata", encodeMetadata rec.metadata )
         , ( "resolved", (\rec0 -> Json.Encode.object []) rec.resolved )
         ]
 
@@ -23008,15 +25496,33 @@ encodeLockedIssueEvent rec =
         [ ( "id", Json.Encode.int rec.id )
         , ( "node_id", Json.Encode.string rec.nodeId )
         , ( "url", Json.Encode.string rec.url )
-        , ( "actor", decodeSimpleUser rec.actor )
+        , ( "actor", encodeSimpleUser rec.actor )
         , ( "event", Json.Encode.string rec.event )
-        , ( "commit_id", Debug.todo "encode nullable" rec.commitId )
-        , ( "commit_url", Debug.todo "encode nullable" rec.commitUrl )
+        , ( "commit_id"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.commitId
+          )
+        , ( "commit_url"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.commitUrl
+          )
         , ( "created_at", Json.Encode.string rec.createdAt )
         , ( "performed_via_github_app"
           , Debug.todo "decode anyOf" rec.performedViaGithubApp
           )
-        , ( "lock_reason", Debug.todo "encode nullable" rec.lockReason )
+        , ( "lock_reason"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.lockReason
+          )
         ]
 
 
@@ -23097,8 +25603,20 @@ encodeLicenseSimple rec =
     Json.Encode.object
         [ ( "key", Json.Encode.string rec.key )
         , ( "name", Json.Encode.string rec.name )
-        , ( "url", Debug.todo "encode nullable" rec.url )
-        , ( "spdx_id", Debug.todo "encode nullable" rec.spdxId )
+        , ( "url"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.url
+          )
+        , ( "spdx_id"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.spdxId
+          )
         , ( "node_id", Json.Encode.string rec.nodeId )
         , ( "html_url", Json.Encode.string rec.htmlUrl )
         ]
@@ -23194,17 +25712,47 @@ encodeLicenseContent rec =
         , ( "sha", Json.Encode.string rec.sha )
         , ( "size", Json.Encode.int rec.size )
         , ( "url", Json.Encode.string rec.url )
-        , ( "html_url", Debug.todo "encode nullable" rec.htmlUrl )
-        , ( "git_url", Debug.todo "encode nullable" rec.gitUrl )
-        , ( "download_url", Debug.todo "encode nullable" rec.downloadUrl )
+        , ( "html_url"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.htmlUrl
+          )
+        , ( "git_url"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.gitUrl
+          )
+        , ( "download_url"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.downloadUrl
+          )
         , ( "type", Json.Encode.string rec.type_ )
         , ( "content", Json.Encode.string rec.content )
         , ( "encoding", Json.Encode.string rec.encoding )
         , ( "_links"
           , (\rec0 ->
                 Json.Encode.object
-                    [ ( "git", Debug.todo "encode nullable" rec0.git )
-                    , ( "html", Debug.todo "encode nullable" rec0.html )
+                    [ ( "git"
+                      , Json.Decode.oneOf
+                            [ Json.Decode.map Present Json.Encode.string
+                            , Json.Decode.null Null
+                            ]
+                            rec0.git
+                      )
+                    , ( "html"
+                      , Json.Decode.oneOf
+                            [ Json.Decode.map Present Json.Encode.string
+                            , Json.Decode.null Null
+                            ]
+                            rec0.html
+                      )
                     , ( "self", Json.Encode.string rec0.self )
                     ]
             )
@@ -23291,8 +25839,20 @@ encodeLicense rec =
     Json.Encode.object
         [ ( "key", Json.Encode.string rec.key )
         , ( "name", Json.Encode.string rec.name )
-        , ( "spdx_id", Debug.todo "encode nullable" rec.spdxId )
-        , ( "url", Debug.todo "encode nullable" rec.url )
+        , ( "spdx_id"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.spdxId
+          )
+        , ( "url"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.url
+          )
         , ( "node_id", Json.Encode.string rec.nodeId )
         , ( "html_url", Json.Encode.string rec.htmlUrl )
         , ( "description", Json.Encode.string rec.description )
@@ -23392,10 +25952,22 @@ encodeLabeledIssueEvent rec =
         [ ( "id", Json.Encode.int rec.id )
         , ( "node_id", Json.Encode.string rec.nodeId )
         , ( "url", Json.Encode.string rec.url )
-        , ( "actor", decodeSimpleUser rec.actor )
+        , ( "actor", encodeSimpleUser rec.actor )
         , ( "event", Json.Encode.string rec.event )
-        , ( "commit_id", Debug.todo "encode nullable" rec.commitId )
-        , ( "commit_url", Debug.todo "encode nullable" rec.commitUrl )
+        , ( "commit_id"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.commitId
+          )
+        , ( "commit_url"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.commitUrl
+          )
         , ( "created_at", Json.Encode.string rec.createdAt )
         , ( "performed_via_github_app"
           , Debug.todo "decode anyOf" rec.performedViaGithubApp
@@ -23470,9 +26042,15 @@ encodeLabelSearchResultItem rec =
         , ( "name", Json.Encode.string rec.name )
         , ( "color", Json.Encode.string rec.color )
         , ( "default", Json.Encode.bool rec.default )
-        , ( "description", Debug.todo "encode nullable" rec.description )
+        , ( "description"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.description
+          )
         , ( "score", Json.Encode.float rec.score )
-        , ( "text_matches", decodeSearchResultTextMatches rec.textMatches )
+        , ( "text_matches", encodeSearchResultTextMatches rec.textMatches )
         ]
 
 
@@ -23524,7 +26102,13 @@ encodeLabel rec =
         , ( "node_id", Json.Encode.string rec.nodeId )
         , ( "url", Json.Encode.string rec.url )
         , ( "name", Json.Encode.string rec.name )
-        , ( "description", Debug.todo "encode nullable" rec.description )
+        , ( "description"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.description
+          )
         , ( "color", Json.Encode.string rec.color )
         , ( "default", Json.Encode.bool rec.default )
         ]
@@ -23757,11 +26341,29 @@ encodeJob rec =
         , ( "node_id", Json.Encode.string rec.nodeId )
         , ( "head_sha", Json.Encode.string rec.headSha )
         , ( "url", Json.Encode.string rec.url )
-        , ( "html_url", Debug.todo "encode nullable" rec.htmlUrl )
+        , ( "html_url"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.htmlUrl
+          )
         , ( "status", Json.Encode.string rec.status )
-        , ( "conclusion", Debug.todo "encode nullable" rec.conclusion )
+        , ( "conclusion"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.conclusion
+          )
         , ( "started_at", Json.Encode.string rec.startedAt )
-        , ( "completed_at", Debug.todo "encode nullable" rec.completedAt )
+        , ( "completed_at"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.completedAt
+          )
         , ( "name", Json.Encode.string rec.name )
         , ( "steps"
           , Json.Encode.list
@@ -23769,15 +26371,27 @@ encodeJob rec =
                     Json.Encode.object
                         [ ( "status", Json.Encode.string rec0.status )
                         , ( "conclusion"
-                          , Debug.todo "encode nullable" rec0.conclusion
+                          , Json.Decode.oneOf
+                                [ Json.Decode.map Present Json.Encode.string
+                                , Json.Decode.null Null
+                                ]
+                                rec0.conclusion
                           )
                         , ( "name", Json.Encode.string rec0.name )
                         , ( "number", Json.Encode.int rec0.number )
                         , ( "started_at"
-                          , Debug.todo "encode nullable" rec0.startedAt
+                          , Json.Decode.oneOf
+                                [ Json.Decode.map Present Json.Encode.string
+                                , Json.Decode.null Null
+                                ]
+                                rec0.startedAt
                           )
                         , ( "completed_at"
-                          , Debug.todo "encode nullable" rec0.completedAt
+                          , Json.Decode.oneOf
+                                [ Json.Decode.map Present Json.Encode.string
+                                , Json.Decode.null Null
+                                ]
+                                rec0.completedAt
                           )
                         ]
                 )
@@ -23785,11 +26399,33 @@ encodeJob rec =
           )
         , ( "check_run_url", Json.Encode.string rec.checkRunUrl )
         , ( "labels", Json.Encode.list Json.Encode.string rec.labels )
-        , ( "runner_id", Debug.todo "encode nullable" rec.runnerId )
-        , ( "runner_name", Debug.todo "encode nullable" rec.runnerName )
-        , ( "runner_group_id", Debug.todo "encode nullable" rec.runnerGroupId )
+        , ( "runner_id"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.int
+                , Json.Decode.null Null
+                ]
+                rec.runnerId
+          )
+        , ( "runner_name"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.runnerName
+          )
+        , ( "runner_group_id"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.int
+                , Json.Decode.null Null
+                ]
+                rec.runnerGroupId
+          )
         , ( "runner_group_name"
-          , Debug.todo "encode nullable" rec.runnerGroupName
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.runnerGroupName
           )
         ]
 
@@ -24056,9 +26692,19 @@ encodeIssueSearchResultItem rec =
         , ( "title", Json.Encode.string rec.title )
         , ( "locked", Json.Encode.bool rec.locked )
         , ( "active_lock_reason"
-          , Debug.todo "encode nullable" rec.activeLockReason
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.activeLockReason
           )
-        , ( "assignees", Debug.todo "encode nullable" rec.assignees )
+        , ( "assignees"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present (Json.Encode.list encodeSimpleUser)
+                , Json.Decode.null Null
+                ]
+                rec.assignees
+          )
         , ( "user", Debug.todo "decode anyOf" rec.user )
         , ( "labels"
           , Json.Encode.list
@@ -24071,33 +26717,75 @@ encodeIssueSearchResultItem rec =
                         , ( "color", Json.Encode.string rec0.color )
                         , ( "default", Json.Encode.bool rec0.default )
                         , ( "description"
-                          , Debug.todo "encode nullable" rec0.description
+                          , Json.Decode.oneOf
+                                [ Json.Decode.map Present Json.Encode.string
+                                , Json.Decode.null Null
+                                ]
+                                rec0.description
                           )
                         ]
                 )
                 rec.labels
           )
         , ( "state", Json.Encode.string rec.state )
-        , ( "state_reason", Debug.todo "encode nullable" rec.stateReason )
+        , ( "state_reason"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.stateReason
+          )
         , ( "assignee", Debug.todo "decode anyOf" rec.assignee )
         , ( "milestone", Debug.todo "decode anyOf" rec.milestone )
         , ( "comments", Json.Encode.int rec.comments )
         , ( "created_at", Json.Encode.string rec.createdAt )
         , ( "updated_at", Json.Encode.string rec.updatedAt )
-        , ( "closed_at", Debug.todo "encode nullable" rec.closedAt )
-        , ( "text_matches", decodeSearchResultTextMatches rec.textMatches )
+        , ( "closed_at"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.closedAt
+          )
+        , ( "text_matches", encodeSearchResultTextMatches rec.textMatches )
         , ( "pull_request"
           , (\rec0 ->
                 Json.Encode.object
                     [ ( "merged_at"
-                      , Debug.todo "encode nullable" rec0.mergedAt
+                      , Json.Decode.oneOf
+                            [ Json.Decode.map Present Json.Encode.string
+                            , Json.Decode.null Null
+                            ]
+                            rec0.mergedAt
                       )
-                    , ( "diff_url", Debug.todo "encode nullable" rec0.diffUrl )
-                    , ( "html_url", Debug.todo "encode nullable" rec0.htmlUrl )
+                    , ( "diff_url"
+                      , Json.Decode.oneOf
+                            [ Json.Decode.map Present Json.Encode.string
+                            , Json.Decode.null Null
+                            ]
+                            rec0.diffUrl
+                      )
+                    , ( "html_url"
+                      , Json.Decode.oneOf
+                            [ Json.Decode.map Present Json.Encode.string
+                            , Json.Decode.null Null
+                            ]
+                            rec0.htmlUrl
+                      )
                     , ( "patch_url"
-                      , Debug.todo "encode nullable" rec0.patchUrl
+                      , Json.Decode.oneOf
+                            [ Json.Decode.map Present Json.Encode.string
+                            , Json.Decode.null Null
+                            ]
+                            rec0.patchUrl
                       )
-                    , ( "url", Debug.todo "encode nullable" rec0.url )
+                    , ( "url"
+                      , Json.Decode.oneOf
+                            [ Json.Decode.map Present Json.Encode.string
+                            , Json.Decode.null Null
+                            ]
+                            rec0.url
+                      )
                     ]
             )
                 rec.pullRequest
@@ -24105,17 +26793,17 @@ encodeIssueSearchResultItem rec =
         , ( "body", Json.Encode.string rec.body )
         , ( "score", Json.Encode.float rec.score )
         , ( "author_association"
-          , decodeAuthorAssociation rec.authorAssociation
+          , encodeAuthorAssociation rec.authorAssociation
           )
         , ( "draft", Json.Encode.bool rec.draft )
-        , ( "repository", decodeRepository rec.repository )
+        , ( "repository", encodeRepository rec.repository )
         , ( "body_html", Json.Encode.string rec.bodyHtml )
         , ( "body_text", Json.Encode.string rec.bodyText )
         , ( "timeline_url", Json.Encode.string rec.timelineUrl )
         , ( "performed_via_github_app"
           , Debug.todo "decode anyOf" rec.performedViaGithubApp
           )
-        , ( "reactions", decodeReactionRollup rec.reactions )
+        , ( "reactions", encodeReactionRollup rec.reactions )
         ]
 
 
@@ -24217,8 +26905,20 @@ decodeIssueEventLabel =
 encodeIssueEventLabel : IssueEventLabel -> Json.Encode.Value
 encodeIssueEventLabel rec =
     Json.Encode.object
-        [ ( "name", Debug.todo "encode nullable" rec.name )
-        , ( "color", Debug.todo "encode nullable" rec.color )
+        [ ( "name"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.name
+          )
+        , ( "color"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.color
+          )
         ]
 
 
@@ -24276,10 +26976,18 @@ encodeIssueEventDismissedReview rec =
         [ ( "state", Json.Encode.string rec.state )
         , ( "review_id", Json.Encode.int rec.reviewId )
         , ( "dismissal_message"
-          , Debug.todo "encode nullable" rec.dismissalMessage
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.dismissalMessage
           )
         , ( "dismissal_commit_id"
-          , Debug.todo "encode nullable" rec.dismissalCommitId
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.dismissalCommitId
           )
         ]
 
@@ -24405,28 +27113,46 @@ encodeIssueEvent rec =
         , ( "url", Json.Encode.string rec.url )
         , ( "actor", Debug.todo "decode anyOf" rec.actor )
         , ( "event", Json.Encode.string rec.event )
-        , ( "commit_id", Debug.todo "encode nullable" rec.commitId )
-        , ( "commit_url", Debug.todo "encode nullable" rec.commitUrl )
+        , ( "commit_id"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.commitId
+          )
+        , ( "commit_url"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.commitUrl
+          )
         , ( "created_at", Json.Encode.string rec.createdAt )
         , ( "issue", Debug.todo "decode anyOf" rec.issue )
-        , ( "label", decodeIssueEventLabel rec.label )
+        , ( "label", encodeIssueEventLabel rec.label )
         , ( "assignee", Debug.todo "decode anyOf" rec.assignee )
         , ( "assigner", Debug.todo "decode anyOf" rec.assigner )
         , ( "review_requester", Debug.todo "decode anyOf" rec.reviewRequester )
         , ( "requested_reviewer"
           , Debug.todo "decode anyOf" rec.requestedReviewer
           )
-        , ( "requested_team", decodeTeam rec.requestedTeam )
+        , ( "requested_team", encodeTeam rec.requestedTeam )
         , ( "dismissed_review"
-          , decodeIssueEventDismissedReview rec.dismissedReview
+          , encodeIssueEventDismissedReview rec.dismissedReview
           )
-        , ( "milestone", decodeIssueEventMilestone rec.milestone )
-        , ( "project_card", decodeIssueEventProjectCard rec.projectCard )
-        , ( "rename", decodeIssueEventRename rec.rename )
+        , ( "milestone", encodeIssueEventMilestone rec.milestone )
+        , ( "project_card", encodeIssueEventProjectCard rec.projectCard )
+        , ( "rename", encodeIssueEventRename rec.rename )
         , ( "author_association"
-          , decodeAuthorAssociation rec.authorAssociation
+          , encodeAuthorAssociation rec.authorAssociation
           )
-        , ( "lock_reason", Debug.todo "encode nullable" rec.lockReason )
+        , ( "lock_reason"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.lockReason
+          )
         , ( "performed_via_github_app"
           , Debug.todo "decode anyOf" rec.performedViaGithubApp
           )
@@ -24517,12 +27243,12 @@ encodeIssueComment rec =
         , ( "updated_at", Json.Encode.string rec.updatedAt )
         , ( "issue_url", Json.Encode.string rec.issueUrl )
         , ( "author_association"
-          , decodeAuthorAssociation rec.authorAssociation
+          , encodeAuthorAssociation rec.authorAssociation
           )
         , ( "performed_via_github_app"
           , Debug.todo "decode anyOf" rec.performedViaGithubApp
           )
-        , ( "reactions", decodeReactionRollup rec.reactions )
+        , ( "reactions", encodeReactionRollup rec.reactions )
         ]
 
 
@@ -24741,36 +27467,90 @@ encodeIssue rec =
         , ( "html_url", Json.Encode.string rec.htmlUrl )
         , ( "number", Json.Encode.int rec.number )
         , ( "state", Json.Encode.string rec.state )
-        , ( "state_reason", Debug.todo "encode nullable" rec.stateReason )
+        , ( "state_reason"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.stateReason
+          )
         , ( "title", Json.Encode.string rec.title )
-        , ( "body", Debug.todo "encode nullable" rec.body )
+        , ( "body"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.body
+          )
         , ( "user", Debug.todo "decode anyOf" rec.user )
         , ( "labels", Json.Encode.list Json.Decode.value rec.labels )
         , ( "assignee", Debug.todo "decode anyOf" rec.assignee )
-        , ( "assignees", Debug.todo "encode nullable" rec.assignees )
+        , ( "assignees"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present (Json.Encode.list encodeSimpleUser)
+                , Json.Decode.null Null
+                ]
+                rec.assignees
+          )
         , ( "milestone", Debug.todo "decode anyOf" rec.milestone )
         , ( "locked", Json.Encode.bool rec.locked )
         , ( "active_lock_reason"
-          , Debug.todo "encode nullable" rec.activeLockReason
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.activeLockReason
           )
         , ( "comments", Json.Encode.int rec.comments )
         , ( "pull_request"
           , (\rec0 ->
                 Json.Encode.object
                     [ ( "merged_at"
-                      , Debug.todo "encode nullable" rec0.mergedAt
+                      , Json.Decode.oneOf
+                            [ Json.Decode.map Present Json.Encode.string
+                            , Json.Decode.null Null
+                            ]
+                            rec0.mergedAt
                       )
-                    , ( "diff_url", Debug.todo "encode nullable" rec0.diffUrl )
-                    , ( "html_url", Debug.todo "encode nullable" rec0.htmlUrl )
+                    , ( "diff_url"
+                      , Json.Decode.oneOf
+                            [ Json.Decode.map Present Json.Encode.string
+                            , Json.Decode.null Null
+                            ]
+                            rec0.diffUrl
+                      )
+                    , ( "html_url"
+                      , Json.Decode.oneOf
+                            [ Json.Decode.map Present Json.Encode.string
+                            , Json.Decode.null Null
+                            ]
+                            rec0.htmlUrl
+                      )
                     , ( "patch_url"
-                      , Debug.todo "encode nullable" rec0.patchUrl
+                      , Json.Decode.oneOf
+                            [ Json.Decode.map Present Json.Encode.string
+                            , Json.Decode.null Null
+                            ]
+                            rec0.patchUrl
                       )
-                    , ( "url", Debug.todo "encode nullable" rec0.url )
+                    , ( "url"
+                      , Json.Decode.oneOf
+                            [ Json.Decode.map Present Json.Encode.string
+                            , Json.Decode.null Null
+                            ]
+                            rec0.url
+                      )
                     ]
             )
                 rec.pullRequest
           )
-        , ( "closed_at", Debug.todo "encode nullable" rec.closedAt )
+        , ( "closed_at"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.closedAt
+          )
         , ( "created_at", Json.Encode.string rec.createdAt )
         , ( "updated_at", Json.Encode.string rec.updatedAt )
         , ( "draft", Json.Encode.bool rec.draft )
@@ -24778,14 +27558,14 @@ encodeIssue rec =
         , ( "body_html", Json.Encode.string rec.bodyHtml )
         , ( "body_text", Json.Encode.string rec.bodyText )
         , ( "timeline_url", Json.Encode.string rec.timelineUrl )
-        , ( "repository", decodeRepository rec.repository )
+        , ( "repository", encodeRepository rec.repository )
         , ( "performed_via_github_app"
           , Debug.todo "decode anyOf" rec.performedViaGithubApp
           )
         , ( "author_association"
-          , decodeAuthorAssociation rec.authorAssociation
+          , encodeAuthorAssociation rec.authorAssociation
           )
-        , ( "reactions", decodeReactionRollup rec.reactions )
+        , ( "reactions", encodeReactionRollup rec.reactions )
         ]
 
 
@@ -24810,7 +27590,7 @@ decodeInteractionLimitResponse =
 encodeInteractionLimitResponse : InteractionLimitResponse -> Json.Encode.Value
 encodeInteractionLimitResponse rec =
     Json.Encode.object
-        [ ( "limit", decodeInteractionGroup rec.limit )
+        [ ( "limit", encodeInteractionGroup rec.limit )
         , ( "origin", Json.Encode.string rec.origin )
         , ( "expires_at", Json.Encode.string rec.expiresAt )
         ]
@@ -24832,8 +27612,8 @@ decodeInteractionLimit =
 encodeInteractionLimit : InteractionLimit -> Json.Encode.Value
 encodeInteractionLimit rec =
     Json.Encode.object
-        [ ( "limit", decodeInteractionGroup rec.limit )
-        , ( "expiry", decodeInteractionExpiry rec.expiry )
+        [ ( "limit", encodeInteractionGroup rec.limit )
+        , ( "expiry", encodeInteractionExpiry rec.expiry )
         ]
 
 
@@ -24985,7 +27765,13 @@ encodeIntegration rec =
         , ( "node_id", Json.Encode.string rec.nodeId )
         , ( "owner", Debug.todo "decode anyOf" rec.owner )
         , ( "name", Json.Encode.string rec.name )
-        , ( "description", Debug.todo "encode nullable" rec.description )
+        , ( "description"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.description
+          )
         , ( "external_url", Json.Encode.string rec.externalUrl )
         , ( "html_url", Json.Encode.string rec.htmlUrl )
         , ( "created_at", Json.Encode.string rec.createdAt )
@@ -25006,7 +27792,13 @@ encodeIntegration rec =
         , ( "installations_count", Json.Encode.int rec.installationsCount )
         , ( "client_id", Json.Encode.string rec.clientId )
         , ( "client_secret", Json.Encode.string rec.clientSecret )
-        , ( "webhook_secret", Debug.todo "encode nullable" rec.webhookSecret )
+        , ( "webhook_secret"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.webhookSecret
+          )
         , ( "pem", Json.Encode.string rec.pem )
         ]
 
@@ -25066,9 +27858,9 @@ encodeInstallationToken rec =
     Json.Encode.object
         [ ( "token", Json.Encode.string rec.token )
         , ( "expires_at", Json.Encode.string rec.expiresAt )
-        , ( "permissions", decodeAppPermissions rec.permissions )
+        , ( "permissions", encodeAppPermissions rec.permissions )
         , ( "repository_selection", Json.Encode.string rec.repositorySelection )
-        , ( "repositories", Json.Encode.list decodeRepository rec.repositories )
+        , ( "repositories", Json.Encode.list encodeRepository rec.repositories )
         , ( "single_file", Json.Encode.string rec.singleFile )
         , ( "has_multiple_single_files"
           , Json.Encode.bool rec.hasMultipleSingleFiles
@@ -25188,7 +27980,13 @@ encodeInstallation : Installation -> Json.Encode.Value
 encodeInstallation rec =
     Json.Encode.object
         [ ( "id", Json.Encode.int rec.id )
-        , ( "account", Debug.todo "encode nullable" rec.account )
+        , ( "account"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present (\rec0 -> Json.Encode.object [])
+                , Json.Decode.null Null
+                ]
+                rec.account
+          )
         , ( "repository_selection", Json.Encode.string rec.repositorySelection )
         , ( "access_tokens_url", Json.Encode.string rec.accessTokensUrl )
         , ( "repositories_url", Json.Encode.string rec.repositoriesUrl )
@@ -25196,12 +27994,16 @@ encodeInstallation rec =
         , ( "app_id", Json.Encode.int rec.appId )
         , ( "target_id", Json.Encode.int rec.targetId )
         , ( "target_type", Json.Encode.string rec.targetType )
-        , ( "permissions", decodeAppPermissions rec.permissions )
+        , ( "permissions", encodeAppPermissions rec.permissions )
         , ( "events", Json.Encode.list Json.Encode.string rec.events )
         , ( "created_at", Json.Encode.string rec.createdAt )
         , ( "updated_at", Json.Encode.string rec.updatedAt )
         , ( "single_file_name"
-          , Debug.todo "encode nullable" rec.singleFileName
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.singleFileName
           )
         , ( "has_multiple_single_files"
           , Json.Encode.bool rec.hasMultipleSingleFiles
@@ -25211,8 +28013,20 @@ encodeInstallation rec =
           )
         , ( "app_slug", Json.Encode.string rec.appSlug )
         , ( "suspended_by", Debug.todo "decode anyOf" rec.suspendedBy )
-        , ( "suspended_at", Debug.todo "encode nullable" rec.suspendedAt )
-        , ( "contact_email", Debug.todo "encode nullable" rec.contactEmail )
+        , ( "suspended_at"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.suspendedAt
+          )
+        , ( "contact_email"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.contactEmail
+          )
         ]
 
 
@@ -25363,18 +28177,60 @@ decodeImport =
 encodeImport : Import -> Json.Encode.Value
 encodeImport rec =
     Json.Encode.object
-        [ ( "vcs", Debug.todo "encode nullable" rec.vcs )
+        [ ( "vcs"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.vcs
+          )
         , ( "use_lfs", Json.Encode.bool rec.useLfs )
         , ( "vcs_url", Json.Encode.string rec.vcsUrl )
         , ( "svc_root", Json.Encode.string rec.svcRoot )
         , ( "tfvc_project", Json.Encode.string rec.tfvcProject )
         , ( "status", Json.Encode.string rec.status )
-        , ( "status_text", Debug.todo "encode nullable" rec.statusText )
-        , ( "failed_step", Debug.todo "encode nullable" rec.failedStep )
-        , ( "error_message", Debug.todo "encode nullable" rec.errorMessage )
-        , ( "import_percent", Debug.todo "encode nullable" rec.importPercent )
-        , ( "commit_count", Debug.todo "encode nullable" rec.commitCount )
-        , ( "push_percent", Debug.todo "encode nullable" rec.pushPercent )
+        , ( "status_text"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.statusText
+          )
+        , ( "failed_step"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.failedStep
+          )
+        , ( "error_message"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.errorMessage
+          )
+        , ( "import_percent"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.int
+                , Json.Decode.null Null
+                ]
+                rec.importPercent
+          )
+        , ( "commit_count"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.int
+                , Json.Decode.null Null
+                ]
+                rec.commitCount
+          )
+        , ( "push_percent"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.int
+                , Json.Decode.null Null
+                ]
+                rec.pushPercent
+          )
         , ( "has_large_files", Json.Encode.bool rec.hasLargeFiles )
         , ( "large_files_size", Json.Encode.int rec.largeFilesSize )
         , ( "large_files_count", Json.Encode.int rec.largeFilesCount )
@@ -25392,7 +28248,13 @@ encodeImport rec =
                 rec.projectChoices
           )
         , ( "message", Json.Encode.string rec.message )
-        , ( "authors_count", Debug.todo "encode nullable" rec.authorsCount )
+        , ( "authors_count"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.int
+                , Json.Decode.null Null
+                ]
+                rec.authorsCount
+          )
         , ( "url", Json.Encode.string rec.url )
         , ( "html_url", Json.Encode.string rec.htmlUrl )
         , ( "authors_url", Json.Encode.string rec.authorsUrl )
@@ -25462,9 +28324,27 @@ decodeHookResponse =
 encodeHookResponse : HookResponse -> Json.Encode.Value
 encodeHookResponse rec =
     Json.Encode.object
-        [ ( "code", Debug.todo "encode nullable" rec.code )
-        , ( "status", Debug.todo "encode nullable" rec.status )
-        , ( "message", Debug.todo "encode nullable" rec.message )
+        [ ( "code"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.int
+                , Json.Decode.null Null
+                ]
+                rec.code
+          )
+        , ( "status"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.status
+          )
+        , ( "message"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.message
+          )
         ]
 
 
@@ -25540,9 +28420,27 @@ encodeHookDeliveryItem rec =
         , ( "status", Json.Encode.string rec.status )
         , ( "status_code", Json.Encode.int rec.statusCode )
         , ( "event", Json.Encode.string rec.event )
-        , ( "action", Debug.todo "encode nullable" rec.action )
-        , ( "installation_id", Debug.todo "encode nullable" rec.installationId )
-        , ( "repository_id", Debug.todo "encode nullable" rec.repositoryId )
+        , ( "action"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.action
+          )
+        , ( "installation_id"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.int
+                , Json.Decode.null Null
+                ]
+                rec.installationId
+          )
+        , ( "repository_id"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.int
+                , Json.Decode.null Null
+                ]
+                rec.repositoryId
+          )
         ]
 
 
@@ -25659,15 +28557,53 @@ encodeHookDelivery rec =
         , ( "status", Json.Encode.string rec.status )
         , ( "status_code", Json.Encode.int rec.statusCode )
         , ( "event", Json.Encode.string rec.event )
-        , ( "action", Debug.todo "encode nullable" rec.action )
-        , ( "installation_id", Debug.todo "encode nullable" rec.installationId )
-        , ( "repository_id", Debug.todo "encode nullable" rec.repositoryId )
+        , ( "action"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.action
+          )
+        , ( "installation_id"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.int
+                , Json.Decode.null Null
+                ]
+                rec.installationId
+          )
+        , ( "repository_id"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.int
+                , Json.Decode.null Null
+                ]
+                rec.repositoryId
+          )
         , ( "url", Json.Encode.string rec.url )
         , ( "request"
           , (\rec0 ->
                 Json.Encode.object
-                    [ ( "headers", Debug.todo "encode nullable" rec0.headers )
-                    , ( "payload", Debug.todo "encode nullable" rec0.payload )
+                    [ ( "headers"
+                      , Json.Decode.oneOf
+                            [ Json.Decode.map
+                                Present
+                                (\rec_2_0_1_0_1_1_1_0_13_1_0_0 ->
+                                    Json.Encode.object []
+                                )
+                            , Json.Decode.null Null
+                            ]
+                            rec0.headers
+                      )
+                    , ( "payload"
+                      , Json.Decode.oneOf
+                            [ Json.Decode.map
+                                Present
+                                (\rec_2_0_1_0_2_1_1_0_13_1_0_0 ->
+                                    Json.Encode.object []
+                                )
+                            , Json.Decode.null Null
+                            ]
+                            rec0.payload
+                      )
                     ]
             )
                 rec.request
@@ -25675,8 +28611,24 @@ encodeHookDelivery rec =
         , ( "response"
           , (\rec0 ->
                 Json.Encode.object
-                    [ ( "headers", Debug.todo "encode nullable" rec0.headers )
-                    , ( "payload", Debug.todo "encode nullable" rec0.payload )
+                    [ ( "headers"
+                      , Json.Decode.oneOf
+                            [ Json.Decode.map
+                                Present
+                                (\rec_2_0_1_0_1_1_1_0_14_1_0_0 ->
+                                    Json.Encode.object []
+                                )
+                            , Json.Decode.null Null
+                            ]
+                            rec0.headers
+                      )
+                    , ( "payload"
+                      , Json.Decode.oneOf
+                            [ Json.Decode.map Present Json.Encode.string
+                            , Json.Decode.null Null
+                            ]
+                            rec0.payload
+                      )
                     ]
             )
                 rec.response
@@ -25815,15 +28767,15 @@ encodeHook rec =
                     , ( "password", Json.Encode.string rec0.password )
                     , ( "room", Json.Encode.string rec0.room )
                     , ( "subdomain", Json.Encode.string rec0.subdomain )
-                    , ( "url", decodeWebhookConfigUrl rec0.url )
+                    , ( "url", encodeWebhookConfigUrl rec0.url )
                     , ( "insecure_ssl"
-                      , decodeWebhookConfigInsecureSsl rec0.insecureSsl
+                      , encodeWebhookConfigInsecureSsl rec0.insecureSsl
                       )
                     , ( "content_type"
-                      , decodeWebhookConfigContentType rec0.contentType
+                      , encodeWebhookConfigContentType rec0.contentType
                       )
                     , ( "digest", Json.Encode.string rec0.digest )
-                    , ( "secret", decodeWebhookConfigSecret rec0.secret )
+                    , ( "secret", encodeWebhookConfigSecret rec0.secret )
                     , ( "token", Json.Encode.string rec0.token )
                     ]
             )
@@ -25835,7 +28787,7 @@ encodeHook rec =
         , ( "test_url", Json.Encode.string rec.testUrl )
         , ( "ping_url", Json.Encode.string rec.pingUrl )
         , ( "deliveries_url", Json.Encode.string rec.deliveriesUrl )
-        , ( "last_response", decodeHookResponse rec.lastResponse )
+        , ( "last_response", encodeHookResponse rec.lastResponse )
         ]
 
 
@@ -26016,8 +28968,20 @@ encodeGpgKey : GpgKey -> Json.Encode.Value
 encodeGpgKey rec =
     Json.Encode.object
         [ ( "id", Json.Encode.int rec.id )
-        , ( "name", Debug.todo "encode nullable" rec.name )
-        , ( "primary_key_id", Debug.todo "encode nullable" rec.primaryKeyId )
+        , ( "name"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.name
+          )
+        , ( "primary_key_id"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.int
+                , Json.Decode.null Null
+                ]
+                rec.primaryKeyId
+          )
         , ( "key_id", Json.Encode.string rec.keyId )
         , ( "public_key", Json.Encode.string rec.publicKey )
         , ( "emails"
@@ -26056,10 +29020,18 @@ encodeGpgKey rec =
                         , ( "can_certify", Json.Encode.bool rec0.canCertify )
                         , ( "created_at", Json.Encode.string rec0.createdAt )
                         , ( "expires_at"
-                          , Debug.todo "encode nullable" rec0.expiresAt
+                          , Json.Decode.oneOf
+                                [ Json.Decode.map Present Json.Encode.string
+                                , Json.Decode.null Null
+                                ]
+                                rec0.expiresAt
                           )
                         , ( "raw_key"
-                          , Debug.todo "encode nullable" rec0.rawKey
+                          , Json.Decode.oneOf
+                                [ Json.Decode.map Present Json.Encode.string
+                                , Json.Decode.null Null
+                                ]
+                                rec0.rawKey
                           )
                         , ( "revoked", Json.Encode.bool rec0.revoked )
                         ]
@@ -26071,9 +29043,21 @@ encodeGpgKey rec =
         , ( "can_encrypt_storage", Json.Encode.bool rec.canEncryptStorage )
         , ( "can_certify", Json.Encode.bool rec.canCertify )
         , ( "created_at", Json.Encode.string rec.createdAt )
-        , ( "expires_at", Debug.todo "encode nullable" rec.expiresAt )
+        , ( "expires_at"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.expiresAt
+          )
         , ( "revoked", Json.Encode.bool rec.revoked )
-        , ( "raw_key", Debug.todo "encode nullable" rec.rawKey )
+        , ( "raw_key"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.rawKey
+          )
         ]
 
 
@@ -26295,7 +29279,7 @@ encodeGitTag rec =
             )
                 rec.object
           )
-        , ( "verification", decodeVerification rec.verification )
+        , ( "verification", encodeVerification rec.verification )
         ]
 
 
@@ -26533,9 +29517,19 @@ encodeGitCommit rec =
                     [ ( "verified", Json.Encode.bool rec0.verified )
                     , ( "reason", Json.Encode.string rec0.reason )
                     , ( "signature"
-                      , Debug.todo "encode nullable" rec0.signature
+                      , Json.Decode.oneOf
+                            [ Json.Decode.map Present Json.Encode.string
+                            , Json.Decode.null Null
+                            ]
+                            rec0.signature
                       )
-                    , ( "payload", Debug.todo "encode nullable" rec0.payload )
+                    , ( "payload"
+                      , Json.Decode.oneOf
+                            [ Json.Decode.map Present Json.Encode.string
+                            , Json.Decode.null Null
+                            ]
+                            rec0.payload
+                      )
                     ]
             )
                 rec.verification
@@ -26792,9 +29786,95 @@ decodeGistSimple =
 encodeGistSimple : GistSimple -> Json.Encode.Value
 encodeGistSimple rec =
     Json.Encode.object
-        [ ( "forks", Debug.todo "encode nullable" rec.forks )
-        , ( "history", Debug.todo "encode nullable" rec.history )
-        , ( "fork_of", Debug.todo "encode nullable" rec.forkOf )
+        [ ( "forks"
+          , Json.Decode.oneOf
+                [ Json.Decode.map
+                    Present
+                    (Json.Encode.list
+                        (\rec0 ->
+                            Json.Encode.object
+                                [ ( "id", Json.Encode.string rec0.id )
+                                , ( "url", Json.Encode.string rec0.url )
+                                , ( "user", encodePublicUser rec0.user )
+                                , ( "created_at"
+                                  , Json.Encode.string rec0.createdAt
+                                  )
+                                , ( "updated_at"
+                                  , Json.Encode.string rec0.updatedAt
+                                  )
+                                ]
+                        )
+                    )
+                , Json.Decode.null Null
+                ]
+                rec.forks
+          )
+        , ( "history"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present (Json.Encode.list encodeGistHistory)
+                , Json.Decode.null Null
+                ]
+                rec.history
+          )
+        , ( "fork_of"
+          , Json.Decode.oneOf
+                [ Json.Decode.map
+                    Present
+                    (\rec0 ->
+                        Json.Encode.object
+                            [ ( "url", Json.Encode.string rec0.url )
+                            , ( "forks_url", Json.Encode.string rec0.forksUrl )
+                            , ( "commits_url"
+                              , Json.Encode.string rec0.commitsUrl
+                              )
+                            , ( "id", Json.Encode.string rec0.id )
+                            , ( "node_id", Json.Encode.string rec0.nodeId )
+                            , ( "git_pull_url"
+                              , Json.Encode.string rec0.gitPullUrl
+                              )
+                            , ( "git_push_url"
+                              , Json.Encode.string rec0.gitPushUrl
+                              )
+                            , ( "html_url", Json.Encode.string rec0.htmlUrl )
+                            , ( "files"
+                              , (\rec_0_9_1_1_2_0_1_0_3_1_0_0 ->
+                                    Json.Encode.object []
+                                )
+                                    rec0.files
+                              )
+                            , ( "public", Json.Encode.bool rec0.public )
+                            , ( "created_at"
+                              , Json.Encode.string rec0.createdAt
+                              )
+                            , ( "updated_at"
+                              , Json.Encode.string rec0.updatedAt
+                              )
+                            , ( "description"
+                              , Json.Decode.oneOf
+                                    [ Json.Decode.map Present Json.Encode.string
+                                    , Json.Decode.null Null
+                                    ]
+                                    rec0.description
+                              )
+                            , ( "comments", Json.Encode.int rec0.comments )
+                            , ( "user", Debug.todo "decode anyOf" rec0.user )
+                            , ( "comments_url"
+                              , Json.Encode.string rec0.commentsUrl
+                              )
+                            , ( "owner", Debug.todo "decode anyOf" rec0.owner )
+                            , ( "truncated", Json.Encode.bool rec0.truncated )
+                            , ( "forks"
+                              , Json.Encode.list Json.Decode.value rec0.forks
+                              )
+                            , ( "history"
+                              , Json.Encode.list Json.Decode.value rec0.history
+                              )
+                            ]
+                    )
+                , Json.Decode.null Null
+                ]
+                rec.forkOf
+          )
         , ( "url", Json.Encode.string rec.url )
         , ( "forks_url", Json.Encode.string rec.forksUrl )
         , ( "commits_url", Json.Encode.string rec.commitsUrl )
@@ -26807,11 +29887,23 @@ encodeGistSimple rec =
         , ( "public", Json.Encode.bool rec.public )
         , ( "created_at", Json.Encode.string rec.createdAt )
         , ( "updated_at", Json.Encode.string rec.updatedAt )
-        , ( "description", Debug.todo "encode nullable" rec.description )
+        , ( "description"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.description
+          )
         , ( "comments", Json.Encode.int rec.comments )
-        , ( "user", Debug.todo "encode nullable" rec.user )
+        , ( "user"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.user
+          )
         , ( "comments_url", Json.Encode.string rec.commentsUrl )
-        , ( "owner", decodeSimpleUser rec.owner )
+        , ( "owner", encodeSimpleUser rec.owner )
         , ( "truncated", Json.Encode.bool rec.truncated )
         ]
 
@@ -27003,7 +30095,7 @@ encodeGistComment rec =
         , ( "created_at", Json.Encode.string rec.createdAt )
         , ( "updated_at", Json.Encode.string rec.updatedAt )
         , ( "author_association"
-          , decodeAuthorAssociation rec.authorAssociation
+          , encodeAuthorAssociation rec.authorAssociation
           )
         ]
 
@@ -27467,10 +30559,16 @@ encodeFullRepository rec =
         , ( "node_id", Json.Encode.string rec.nodeId )
         , ( "name", Json.Encode.string rec.name )
         , ( "full_name", Json.Encode.string rec.fullName )
-        , ( "owner", decodeSimpleUser rec.owner )
+        , ( "owner", encodeSimpleUser rec.owner )
         , ( "private", Json.Encode.bool rec.private )
         , ( "html_url", Json.Encode.string rec.htmlUrl )
-        , ( "description", Debug.todo "encode nullable" rec.description )
+        , ( "description"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.description
+          )
         , ( "fork", Json.Encode.bool rec.fork )
         , ( "url", Json.Encode.string rec.url )
         , ( "archive_url", Json.Encode.string rec.archiveUrl )
@@ -27511,11 +30609,29 @@ encodeFullRepository rec =
         , ( "teams_url", Json.Encode.string rec.teamsUrl )
         , ( "trees_url", Json.Encode.string rec.treesUrl )
         , ( "clone_url", Json.Encode.string rec.cloneUrl )
-        , ( "mirror_url", Debug.todo "encode nullable" rec.mirrorUrl )
+        , ( "mirror_url"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.mirrorUrl
+          )
         , ( "hooks_url", Json.Encode.string rec.hooksUrl )
         , ( "svn_url", Json.Encode.string rec.svnUrl )
-        , ( "homepage", Debug.todo "encode nullable" rec.homepage )
-        , ( "language", Debug.todo "encode nullable" rec.language )
+        , ( "homepage"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.homepage
+          )
+        , ( "language"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.language
+          )
         , ( "forks_count", Json.Encode.int rec.forksCount )
         , ( "stargazers_count", Json.Encode.int rec.stargazersCount )
         , ( "watchers_count", Json.Encode.int rec.watchersCount )
@@ -27552,7 +30668,11 @@ encodeFullRepository rec =
           , Debug.todo "decode anyOf" rec.templateRepository
           )
         , ( "temp_clone_token"
-          , Debug.todo "encode nullable" rec.tempCloneToken
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.tempCloneToken
           )
         , ( "allow_squash_merge", Json.Encode.bool rec.allowSquashMerge )
         , ( "allow_auto_merge", Json.Encode.bool rec.allowAutoMerge )
@@ -27578,8 +30698,8 @@ encodeFullRepository rec =
         , ( "network_count", Json.Encode.int rec.networkCount )
         , ( "license", Debug.todo "decode anyOf" rec.license )
         , ( "organization", Debug.todo "decode anyOf" rec.organization )
-        , ( "parent", decodeRepository rec.parent )
-        , ( "source", decodeRepository rec.source )
+        , ( "parent", encodeRepository rec.parent )
+        , ( "source", encodeRepository rec.source )
         , ( "forks", Json.Encode.int rec.forks )
         , ( "master_branch", Json.Encode.string rec.masterBranch )
         , ( "open_issues", Json.Encode.int rec.openIssues )
@@ -27587,9 +30707,9 @@ encodeFullRepository rec =
         , ( "anonymous_access_enabled"
           , Json.Encode.bool rec.anonymousAccessEnabled
           )
-        , ( "code_of_conduct", decodeCodeOfConductSimple rec.codeOfConduct )
+        , ( "code_of_conduct", encodeCodeOfConductSimple rec.codeOfConduct )
         , ( "security_and_analysis"
-          , decodeSecurityAndAnalysis rec.securityAndAnalysis
+          , encodeSecurityAndAnalysis rec.securityAndAnalysis
           )
         ]
 
@@ -27842,7 +30962,48 @@ decodeFileCommit =
 encodeFileCommit : FileCommit -> Json.Encode.Value
 encodeFileCommit rec =
     Json.Encode.object
-        [ ( "content", Debug.todo "encode nullable" rec.content )
+        [ ( "content"
+          , Json.Decode.oneOf
+                [ Json.Decode.map
+                    Present
+                    (\rec0 ->
+                        Json.Encode.object
+                            [ ( "name", Json.Encode.string rec0.name )
+                            , ( "path", Json.Encode.string rec0.path )
+                            , ( "sha", Json.Encode.string rec0.sha )
+                            , ( "size", Json.Encode.int rec0.size )
+                            , ( "url", Json.Encode.string rec0.url )
+                            , ( "html_url", Json.Encode.string rec0.htmlUrl )
+                            , ( "git_url", Json.Encode.string rec0.gitUrl )
+                            , ( "download_url"
+                              , Json.Encode.string rec0.downloadUrl
+                              )
+                            , ( "type", Json.Encode.string rec0.type_ )
+                            , ( "_links"
+                              , (\rec_0_10_1_1_2_0_1_0_1_1_0_0 ->
+                                    Json.Encode.object
+                                        [ ( "self"
+                                          , Json.Encode.string
+                                                rec_0_10_1_1_2_0_1_0_1_1_0_0.self
+                                          )
+                                        , ( "git"
+                                          , Json.Encode.string
+                                                rec_0_10_1_1_2_0_1_0_1_1_0_0.git
+                                          )
+                                        , ( "html"
+                                          , Json.Encode.string
+                                                rec_0_10_1_1_2_0_1_0_1_1_0_0.html
+                                          )
+                                        ]
+                                )
+                                    rec0.links
+                              )
+                            ]
+                    )
+                , Json.Decode.null Null
+                ]
+                rec.content
+          )
         , ( "commit"
           , (\rec0 ->
                 Json.Encode.object
@@ -27934,11 +31095,21 @@ encodeFileCommit rec =
                                         rec_0_10_1_1_0_2_1_0_0.reason
                                   )
                                 , ( "signature"
-                                  , Debug.todo "encode nullable"
+                                  , Json.Decode.oneOf
+                                        [ Json.Decode.map
+                                            Present
+                                            Json.Encode.string
+                                        , Json.Decode.null Null
+                                        ]
                                         rec_0_10_1_1_0_2_1_0_0.signature
                                   )
                                 , ( "payload"
-                                  , Debug.todo "encode nullable"
+                                  , Json.Decode.oneOf
+                                        [ Json.Decode.map
+                                            Present
+                                            Json.Encode.string
+                                        , Json.Decode.null Null
+                                        ]
                                         rec_0_10_1_1_0_2_1_0_0.payload
                                   )
                                 ]
@@ -28085,23 +31256,23 @@ encodeFeed rec =
         , ( "_links"
           , (\rec0 ->
                 Json.Encode.object
-                    [ ( "timeline", decodeLinkWithType rec0.timeline )
-                    , ( "user", decodeLinkWithType rec0.user )
+                    [ ( "timeline", encodeLinkWithType rec0.timeline )
+                    , ( "user", encodeLinkWithType rec0.user )
                     , ( "security_advisories"
-                      , decodeLinkWithType rec0.securityAdvisories
+                      , encodeLinkWithType rec0.securityAdvisories
                       )
-                    , ( "current_user", decodeLinkWithType rec0.currentUser )
+                    , ( "current_user", encodeLinkWithType rec0.currentUser )
                     , ( "current_user_public"
-                      , decodeLinkWithType rec0.currentUserPublic
+                      , encodeLinkWithType rec0.currentUserPublic
                       )
                     , ( "current_user_actor"
-                      , decodeLinkWithType rec0.currentUserActor
+                      , encodeLinkWithType rec0.currentUserActor
                       )
                     , ( "current_user_organization"
-                      , decodeLinkWithType rec0.currentUserOrganization
+                      , encodeLinkWithType rec0.currentUserOrganization
                       )
                     , ( "current_user_organizations"
-                      , Json.Encode.list decodeLinkWithType
+                      , Json.Encode.list encodeLinkWithType
                             rec0.currentUserOrganizations
                       )
                     ]
@@ -28248,8 +31419,14 @@ encodeEvent : Event -> Json.Encode.Value
 encodeEvent rec =
     Json.Encode.object
         [ ( "id", Json.Encode.string rec.id )
-        , ( "type", Debug.todo "encode nullable" rec.type_ )
-        , ( "actor", decodeActor rec.actor )
+        , ( "type"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.type_
+          )
+        , ( "actor", encodeActor rec.actor )
         , ( "repo"
           , (\rec0 ->
                 Json.Encode.object
@@ -28260,13 +31437,13 @@ encodeEvent rec =
             )
                 rec.repo
           )
-        , ( "org", decodeActor rec.org )
+        , ( "org", encodeActor rec.org )
         , ( "payload"
           , (\rec0 ->
                 Json.Encode.object
                     [ ( "action", Json.Encode.string rec0.action )
-                    , ( "issue", decodeIssue rec0.issue )
-                    , ( "comment", decodeIssueComment rec0.comment )
+                    , ( "issue", encodeIssue rec0.issue )
+                    , ( "comment", encodeIssueComment rec0.comment )
                     , ( "pages"
                       , Json.Encode.list
                             (\rec_1_0_4_1_1_0_6_1_0_0 ->
@@ -28280,7 +31457,12 @@ encodeEvent rec =
                                             rec_1_0_4_1_1_0_6_1_0_0.title
                                       )
                                     , ( "summary"
-                                      , Debug.todo "encode nullable"
+                                      , Json.Decode.oneOf
+                                            [ Json.Decode.map
+                                                Present
+                                                Json.Encode.string
+                                            , Json.Decode.null Null
+                                            ]
                                             rec_1_0_4_1_1_0_6_1_0_0.summary
                                       )
                                     , ( "action"
@@ -28304,7 +31486,13 @@ encodeEvent rec =
                 rec.payload
           )
         , ( "public", Json.Encode.bool rec.public )
-        , ( "created_at", Debug.todo "encode nullable" rec.createdAt )
+        , ( "created_at"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.createdAt
+          )
         ]
 
 
@@ -28392,7 +31580,7 @@ encodeEnvironmentApprovals rec =
                 rec.environments
           )
         , ( "state", Json.Encode.string rec.state )
-        , ( "user", decodeSimpleUser rec.user )
+        , ( "user", encodeSimpleUser rec.user )
         , ( "comment", Json.Encode.string rec.comment )
         ]
 
@@ -28463,7 +31651,7 @@ encodeEnvironment rec =
           , Json.Encode.list (Debug.todo "decode anyOf") rec.protectionRules
           )
         , ( "deployment_branch_policy"
-          , decodeDeploymentBranchPolicySettings rec.deploymentBranchPolicy
+          , encodeDeploymentBranchPolicySettings rec.deploymentBranchPolicy
           )
         ]
 
@@ -28534,15 +31722,39 @@ decodeEnterprise =
 encodeEnterprise : Enterprise -> Json.Encode.Value
 encodeEnterprise rec =
     Json.Encode.object
-        [ ( "description", Debug.todo "encode nullable" rec.description )
+        [ ( "description"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.description
+          )
         , ( "html_url", Json.Encode.string rec.htmlUrl )
-        , ( "website_url", Debug.todo "encode nullable" rec.websiteUrl )
+        , ( "website_url"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.websiteUrl
+          )
         , ( "id", Json.Encode.int rec.id )
         , ( "node_id", Json.Encode.string rec.nodeId )
         , ( "name", Json.Encode.string rec.name )
         , ( "slug", Json.Encode.string rec.slug )
-        , ( "created_at", Debug.todo "encode nullable" rec.createdAt )
-        , ( "updated_at", Debug.todo "encode nullable" rec.updatedAt )
+        , ( "created_at"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.createdAt
+          )
+        , ( "updated_at"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.updatedAt
+          )
         , ( "avatar_url", Json.Encode.string rec.avatarUrl )
         ]
 
@@ -28626,7 +31838,13 @@ encodeEmail rec =
         [ ( "email", Json.Encode.string rec.email )
         , ( "primary", Json.Encode.bool rec.primary )
         , ( "verified", Json.Encode.bool rec.verified )
-        , ( "visibility", Debug.todo "encode nullable" rec.visibility )
+        , ( "visibility"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.visibility
+          )
         ]
 
 
@@ -28879,7 +32097,13 @@ encodeDeploymentSimple rec =
         , ( "task", Json.Encode.string rec.task )
         , ( "original_environment", Json.Encode.string rec.originalEnvironment )
         , ( "environment", Json.Encode.string rec.environment )
-        , ( "description", Debug.todo "encode nullable" rec.description )
+        , ( "description"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.description
+          )
         , ( "created_at", Json.Encode.string rec.createdAt )
         , ( "updated_at", Json.Encode.string rec.updatedAt )
         , ( "statuses_url", Json.Encode.string rec.statusesUrl )
@@ -28932,7 +32156,21 @@ decodeDeploymentBranchPolicySettings =
 encodeDeploymentBranchPolicySettings :
     DeploymentBranchPolicySettings -> Json.Encode.Value
 encodeDeploymentBranchPolicySettings =
-    Debug.todo "encode nullable"
+    Json.Decode.oneOf
+        [ Json.Decode.map
+            Present
+            (\rec ->
+                Json.Encode.object
+                    [ ( "protected_branches"
+                      , Json.Encode.bool rec.protectedBranches
+                      )
+                    , ( "custom_branch_policies"
+                      , Json.Encode.bool rec.customBranchPolicies
+                      )
+                    ]
+            )
+        , Json.Decode.null Null
+        ]
 
 
 type alias DeploymentBranchPolicyNamePattern =
@@ -29075,7 +32313,13 @@ encodeDeployment rec =
         , ( "payload", Json.Decode.value rec.payload )
         , ( "original_environment", Json.Encode.string rec.originalEnvironment )
         , ( "environment", Json.Encode.string rec.environment )
-        , ( "description", Debug.todo "encode nullable" rec.description )
+        , ( "description"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.description
+          )
         , ( "creator", Debug.todo "decode anyOf" rec.creator )
         , ( "created_at", Json.Encode.string rec.createdAt )
         , ( "updated_at", Json.Encode.string rec.updatedAt )
@@ -29150,8 +32394,20 @@ encodeDeployKey rec =
         , ( "verified", Json.Encode.bool rec.verified )
         , ( "created_at", Json.Encode.string rec.createdAt )
         , ( "read_only", Json.Encode.bool rec.readOnly )
-        , ( "added_by", Debug.todo "encode nullable" rec.addedBy )
-        , ( "last_used", Debug.todo "encode nullable" rec.lastUsed )
+        , ( "added_by"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.addedBy
+          )
+        , ( "last_used"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.lastUsed
+          )
         ]
 
 
@@ -29264,10 +32520,26 @@ encodeDependencyGraphDiff =
                 , ( "ecosystem", Json.Encode.string rec.ecosystem )
                 , ( "name", Json.Encode.string rec.name )
                 , ( "version", Json.Encode.string rec.version )
-                , ( "package_url", Debug.todo "encode nullable" rec.packageUrl )
-                , ( "license", Debug.todo "encode nullable" rec.license )
+                , ( "package_url"
+                  , Json.Decode.oneOf
+                        [ Json.Decode.map Present Json.Encode.string
+                        , Json.Decode.null Null
+                        ]
+                        rec.packageUrl
+                  )
+                , ( "license"
+                  , Json.Decode.oneOf
+                        [ Json.Decode.map Present Json.Encode.string
+                        , Json.Decode.null Null
+                        ]
+                        rec.license
+                  )
                 , ( "source_repository_url"
-                  , Debug.todo "encode nullable" rec.sourceRepositoryUrl
+                  , Json.Decode.oneOf
+                        [ Json.Decode.map Present Json.Encode.string
+                        , Json.Decode.null Null
+                        ]
+                        rec.sourceRepositoryUrl
                   )
                 , ( "vulnerabilities"
                   , Json.Encode.list
@@ -29333,7 +32605,7 @@ encodeDependency : Dependency -> Json.Encode.Value
 encodeDependency rec =
     Json.Encode.object
         [ ( "package_url", Json.Encode.string rec.packageUrl )
-        , ( "metadata", decodeMetadata rec.metadata )
+        , ( "metadata", encodeMetadata rec.metadata )
         , ( "relationship", Json.Encode.string rec.relationship )
         , ( "scope", Json.Encode.string rec.scope )
         , ( "dependencies"
@@ -29431,13 +32703,25 @@ encodeDependabotAlertSecurityVulnerability :
     DependabotAlertSecurityVulnerability -> Json.Encode.Value
 encodeDependabotAlertSecurityVulnerability rec =
     Json.Encode.object
-        [ ( "package", decodeDependabotAlertPackage rec.package )
+        [ ( "package", encodeDependabotAlertPackage rec.package )
         , ( "severity", Json.Encode.string rec.severity )
         , ( "vulnerable_version_range"
           , Json.Encode.string rec.vulnerableVersionRange
           )
         , ( "first_patched_version"
-          , Debug.todo "encode nullable" rec.firstPatchedVersion
+          , Json.Decode.oneOf
+                [ Json.Decode.map
+                    Present
+                    (\rec0 ->
+                        Json.Encode.object
+                            [ ( "identifier"
+                              , Json.Encode.string rec0.identifier
+                              )
+                            ]
+                    )
+                , Json.Decode.null Null
+                ]
+                rec.firstPatchedVersion
           )
         ]
 
@@ -29562,11 +32846,17 @@ encodeDependabotAlertSecurityAdvisory :
 encodeDependabotAlertSecurityAdvisory rec =
     Json.Encode.object
         [ ( "ghsa_id", Json.Encode.string rec.ghsaId )
-        , ( "cve_id", Debug.todo "encode nullable" rec.cveId )
+        , ( "cve_id"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.cveId
+          )
         , ( "summary", Json.Encode.string rec.summary )
         , ( "description", Json.Encode.string rec.description )
         , ( "vulnerabilities"
-          , Json.Encode.list decodeDependabotAlertSecurityVulnerability
+          , Json.Encode.list encodeDependabotAlertSecurityVulnerability
                 rec.vulnerabilities
           )
         , ( "severity", Json.Encode.string rec.severity )
@@ -29575,7 +32865,11 @@ encodeDependabotAlertSecurityAdvisory rec =
                 Json.Encode.object
                     [ ( "score", Json.Encode.float rec0.score )
                     , ( "vector_string"
-                      , Debug.todo "encode nullable" rec0.vectorString
+                      , Json.Decode.oneOf
+                            [ Json.Decode.map Present Json.Encode.string
+                            , Json.Decode.null Null
+                            ]
+                            rec0.vectorString
                       )
                     ]
             )
@@ -29611,7 +32905,13 @@ encodeDependabotAlertSecurityAdvisory rec =
           )
         , ( "published_at", Json.Encode.string rec.publishedAt )
         , ( "updated_at", Json.Encode.string rec.updatedAt )
-        , ( "withdrawn_at", Debug.todo "encode nullable" rec.withdrawnAt )
+        , ( "withdrawn_at"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.withdrawnAt
+          )
         ]
 
 
@@ -29745,37 +33045,51 @@ decodeDependabotAlert =
 encodeDependabotAlert : DependabotAlert -> Json.Encode.Value
 encodeDependabotAlert rec =
     Json.Encode.object
-        [ ( "number", decodeAlertNumber rec.number )
+        [ ( "number", encodeAlertNumber rec.number )
         , ( "state", Json.Encode.string rec.state )
         , ( "dependency"
           , (\rec0 ->
                 Json.Encode.object
-                    [ ( "package", decodeDependabotAlertPackage rec0.package )
+                    [ ( "package", encodeDependabotAlertPackage rec0.package )
                     , ( "manifest_path", Json.Encode.string rec0.manifestPath )
-                    , ( "scope", Debug.todo "encode nullable" rec0.scope )
+                    , ( "scope"
+                      , Json.Decode.oneOf
+                            [ Json.Decode.map Present Json.Encode.string
+                            , Json.Decode.null Null
+                            ]
+                            rec0.scope
+                      )
                     ]
             )
                 rec.dependency
           )
         , ( "security_advisory"
-          , decodeDependabotAlertSecurityAdvisory rec.securityAdvisory
+          , encodeDependabotAlertSecurityAdvisory rec.securityAdvisory
           )
         , ( "security_vulnerability"
-          , decodeDependabotAlertSecurityVulnerability rec.securityVulnerability
+          , encodeDependabotAlertSecurityVulnerability rec.securityVulnerability
           )
-        , ( "url", decodeAlertUrl rec.url )
-        , ( "html_url", decodeAlertHtmlUrl rec.htmlUrl )
-        , ( "created_at", decodeAlertCreatedAt rec.createdAt )
-        , ( "updated_at", decodeAlertUpdatedAt rec.updatedAt )
-        , ( "dismissed_at", decodeAlertDismissedAt rec.dismissedAt )
+        , ( "url", encodeAlertUrl rec.url )
+        , ( "html_url", encodeAlertHtmlUrl rec.htmlUrl )
+        , ( "created_at", encodeAlertCreatedAt rec.createdAt )
+        , ( "updated_at", encodeAlertUpdatedAt rec.updatedAt )
+        , ( "dismissed_at", encodeAlertDismissedAt rec.dismissedAt )
         , ( "dismissed_by", Debug.todo "decode anyOf" rec.dismissedBy )
         , ( "dismissed_reason"
-          , Debug.todo "encode nullable" rec.dismissedReason
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.dismissedReason
           )
         , ( "dismissed_comment"
-          , Debug.todo "encode nullable" rec.dismissedComment
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.dismissedComment
           )
-        , ( "fixed_at", decodeAlertFixedAt rec.fixedAt )
+        , ( "fixed_at", encodeAlertFixedAt rec.fixedAt )
         ]
 
 
@@ -29849,10 +33163,22 @@ encodeDemilestonedIssueEvent rec =
         [ ( "id", Json.Encode.int rec.id )
         , ( "node_id", Json.Encode.string rec.nodeId )
         , ( "url", Json.Encode.string rec.url )
-        , ( "actor", decodeSimpleUser rec.actor )
+        , ( "actor", encodeSimpleUser rec.actor )
         , ( "event", Json.Encode.string rec.event )
-        , ( "commit_id", Debug.todo "encode nullable" rec.commitId )
-        , ( "commit_url", Debug.todo "encode nullable" rec.commitUrl )
+        , ( "commit_id"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.commitId
+          )
+        , ( "commit_url"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.commitUrl
+          )
         , ( "created_at", Json.Encode.string rec.createdAt )
         , ( "performed_via_github_app"
           , Debug.todo "decode anyOf" rec.performedViaGithubApp
@@ -29965,13 +33291,25 @@ encodeConvertedNoteToIssueIssueEvent rec =
         [ ( "id", Json.Encode.int rec.id )
         , ( "node_id", Json.Encode.string rec.nodeId )
         , ( "url", Json.Encode.string rec.url )
-        , ( "actor", decodeSimpleUser rec.actor )
+        , ( "actor", encodeSimpleUser rec.actor )
         , ( "event", Json.Encode.string rec.event )
-        , ( "commit_id", Debug.todo "encode nullable" rec.commitId )
-        , ( "commit_url", Debug.todo "encode nullable" rec.commitUrl )
+        , ( "commit_id"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.commitId
+          )
+        , ( "commit_url"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.commitUrl
+          )
         , ( "created_at", Json.Encode.string rec.createdAt )
         , ( "performed_via_github_app"
-          , decodeIntegration rec.performedViaGithubApp
+          , encodeIntegration rec.performedViaGithubApp
           )
         , ( "project_card"
           , (\rec0 ->
@@ -30148,7 +33486,13 @@ encodeContributor rec =
         , ( "id", Json.Encode.int rec.id )
         , ( "node_id", Json.Encode.string rec.nodeId )
         , ( "avatar_url", Json.Encode.string rec.avatarUrl )
-        , ( "gravatar_id", Debug.todo "encode nullable" rec.gravatarId )
+        , ( "gravatar_id"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.gravatarId
+          )
         , ( "url", Json.Encode.string rec.url )
         , ( "html_url", Json.Encode.string rec.htmlUrl )
         , ( "followers_url", Json.Encode.string rec.followersUrl )
@@ -30340,9 +33684,27 @@ encodeContentTree rec =
         , ( "path", Json.Encode.string rec.path )
         , ( "sha", Json.Encode.string rec.sha )
         , ( "url", Json.Encode.string rec.url )
-        , ( "git_url", Debug.todo "encode nullable" rec.gitUrl )
-        , ( "html_url", Debug.todo "encode nullable" rec.htmlUrl )
-        , ( "download_url", Debug.todo "encode nullable" rec.downloadUrl )
+        , ( "git_url"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.gitUrl
+          )
+        , ( "html_url"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.htmlUrl
+          )
+        , ( "download_url"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.downloadUrl
+          )
         , ( "entries"
           , Json.Encode.list
                 (\rec0 ->
@@ -30355,23 +33717,45 @@ encodeContentTree rec =
                         , ( "sha", Json.Encode.string rec0.sha )
                         , ( "url", Json.Encode.string rec0.url )
                         , ( "git_url"
-                          , Debug.todo "encode nullable" rec0.gitUrl
+                          , Json.Decode.oneOf
+                                [ Json.Decode.map Present Json.Encode.string
+                                , Json.Decode.null Null
+                                ]
+                                rec0.gitUrl
                           )
                         , ( "html_url"
-                          , Debug.todo "encode nullable" rec0.htmlUrl
+                          , Json.Decode.oneOf
+                                [ Json.Decode.map Present Json.Encode.string
+                                , Json.Decode.null Null
+                                ]
+                                rec0.htmlUrl
                           )
                         , ( "download_url"
-                          , Debug.todo "encode nullable" rec0.downloadUrl
+                          , Json.Decode.oneOf
+                                [ Json.Decode.map Present Json.Encode.string
+                                , Json.Decode.null Null
+                                ]
+                                rec0.downloadUrl
                           )
                         , ( "_links"
                           , (\rec_0_11_1_1_1_0_10_1_0_0 ->
                                 Json.Encode.object
                                     [ ( "git"
-                                      , Debug.todo "encode nullable"
+                                      , Json.Decode.oneOf
+                                            [ Json.Decode.map
+                                                Present
+                                                Json.Encode.string
+                                            , Json.Decode.null Null
+                                            ]
                                             rec_0_11_1_1_1_0_10_1_0_0.git
                                       )
                                     , ( "html"
-                                      , Debug.todo "encode nullable"
+                                      , Json.Decode.oneOf
+                                            [ Json.Decode.map
+                                                Present
+                                                Json.Encode.string
+                                            , Json.Decode.null Null
+                                            ]
                                             rec_0_11_1_1_1_0_10_1_0_0.html
                                       )
                                     , ( "self"
@@ -30389,8 +33773,20 @@ encodeContentTree rec =
         , ( "_links"
           , (\rec0 ->
                 Json.Encode.object
-                    [ ( "git", Debug.todo "encode nullable" rec0.git )
-                    , ( "html", Debug.todo "encode nullable" rec0.html )
+                    [ ( "git"
+                      , Json.Decode.oneOf
+                            [ Json.Decode.map Present Json.Encode.string
+                            , Json.Decode.null Null
+                            ]
+                            rec0.git
+                      )
+                    , ( "html"
+                      , Json.Decode.oneOf
+                            [ Json.Decode.map Present Json.Encode.string
+                            , Json.Decode.null Null
+                            ]
+                            rec0.html
+                      )
                     , ( "self", Json.Encode.string rec0.self )
                     ]
             )
@@ -30512,14 +33908,44 @@ encodeContentSymlink rec =
         , ( "path", Json.Encode.string rec.path )
         , ( "sha", Json.Encode.string rec.sha )
         , ( "url", Json.Encode.string rec.url )
-        , ( "git_url", Debug.todo "encode nullable" rec.gitUrl )
-        , ( "html_url", Debug.todo "encode nullable" rec.htmlUrl )
-        , ( "download_url", Debug.todo "encode nullable" rec.downloadUrl )
+        , ( "git_url"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.gitUrl
+          )
+        , ( "html_url"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.htmlUrl
+          )
+        , ( "download_url"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.downloadUrl
+          )
         , ( "_links"
           , (\rec0 ->
                 Json.Encode.object
-                    [ ( "git", Debug.todo "encode nullable" rec0.git )
-                    , ( "html", Debug.todo "encode nullable" rec0.html )
+                    [ ( "git"
+                      , Json.Decode.oneOf
+                            [ Json.Decode.map Present Json.Encode.string
+                            , Json.Decode.null Null
+                            ]
+                            rec0.git
+                      )
+                    , ( "html"
+                      , Json.Decode.oneOf
+                            [ Json.Decode.map Present Json.Encode.string
+                            , Json.Decode.null Null
+                            ]
+                            rec0.html
+                      )
                     , ( "self", Json.Encode.string rec0.self )
                     ]
             )
@@ -30612,14 +34038,44 @@ encodeContentSubmodule rec =
         , ( "path", Json.Encode.string rec.path )
         , ( "sha", Json.Encode.string rec.sha )
         , ( "url", Json.Encode.string rec.url )
-        , ( "git_url", Debug.todo "encode nullable" rec.gitUrl )
-        , ( "html_url", Debug.todo "encode nullable" rec.htmlUrl )
-        , ( "download_url", Debug.todo "encode nullable" rec.downloadUrl )
+        , ( "git_url"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.gitUrl
+          )
+        , ( "html_url"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.htmlUrl
+          )
+        , ( "download_url"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.downloadUrl
+          )
         , ( "_links"
           , (\rec0 ->
                 Json.Encode.object
-                    [ ( "git", Debug.todo "encode nullable" rec0.git )
-                    , ( "html", Debug.todo "encode nullable" rec0.html )
+                    [ ( "git"
+                      , Json.Decode.oneOf
+                            [ Json.Decode.map Present Json.Encode.string
+                            , Json.Decode.null Null
+                            ]
+                            rec0.git
+                      )
+                    , ( "html"
+                      , Json.Decode.oneOf
+                            [ Json.Decode.map Present Json.Encode.string
+                            , Json.Decode.null Null
+                            ]
+                            rec0.html
+                      )
                     , ( "self", Json.Encode.string rec0.self )
                     ]
             )
@@ -30725,14 +34181,44 @@ encodeContentFile rec =
         , ( "content", Json.Encode.string rec.content )
         , ( "sha", Json.Encode.string rec.sha )
         , ( "url", Json.Encode.string rec.url )
-        , ( "git_url", Debug.todo "encode nullable" rec.gitUrl )
-        , ( "html_url", Debug.todo "encode nullable" rec.htmlUrl )
-        , ( "download_url", Debug.todo "encode nullable" rec.downloadUrl )
+        , ( "git_url"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.gitUrl
+          )
+        , ( "html_url"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.htmlUrl
+          )
+        , ( "download_url"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.downloadUrl
+          )
         , ( "_links"
           , (\rec0 ->
                 Json.Encode.object
-                    [ ( "git", Debug.todo "encode nullable" rec0.git )
-                    , ( "html", Debug.todo "encode nullable" rec0.html )
+                    [ ( "git"
+                      , Json.Decode.oneOf
+                            [ Json.Decode.map Present Json.Encode.string
+                            , Json.Decode.null Null
+                            ]
+                            rec0.git
+                      )
+                    , ( "html"
+                      , Json.Decode.oneOf
+                            [ Json.Decode.map Present Json.Encode.string
+                            , Json.Decode.null Null
+                            ]
+                            rec0.html
+                      )
                     , ( "self", Json.Encode.string rec0.self )
                     ]
             )
@@ -30840,16 +34326,44 @@ encodeContentDirectory =
                 , ( "content", Json.Encode.string rec.content )
                 , ( "sha", Json.Encode.string rec.sha )
                 , ( "url", Json.Encode.string rec.url )
-                , ( "git_url", Debug.todo "encode nullable" rec.gitUrl )
-                , ( "html_url", Debug.todo "encode nullable" rec.htmlUrl )
+                , ( "git_url"
+                  , Json.Decode.oneOf
+                        [ Json.Decode.map Present Json.Encode.string
+                        , Json.Decode.null Null
+                        ]
+                        rec.gitUrl
+                  )
+                , ( "html_url"
+                  , Json.Decode.oneOf
+                        [ Json.Decode.map Present Json.Encode.string
+                        , Json.Decode.null Null
+                        ]
+                        rec.htmlUrl
+                  )
                 , ( "download_url"
-                  , Debug.todo "encode nullable" rec.downloadUrl
+                  , Json.Decode.oneOf
+                        [ Json.Decode.map Present Json.Encode.string
+                        , Json.Decode.null Null
+                        ]
+                        rec.downloadUrl
                   )
                 , ( "_links"
                   , (\rec0 ->
                         Json.Encode.object
-                            [ ( "git", Debug.todo "encode nullable" rec0.git )
-                            , ( "html", Debug.todo "encode nullable" rec0.html )
+                            [ ( "git"
+                              , Json.Decode.oneOf
+                                    [ Json.Decode.map Present Json.Encode.string
+                                    , Json.Decode.null Null
+                                    ]
+                                    rec0.git
+                              )
+                            , ( "html"
+                              , Json.Decode.oneOf
+                                    [ Json.Decode.map Present Json.Encode.string
+                                    , Json.Decode.null Null
+                                    ]
+                                    rec0.html
+                              )
                             , ( "self", Json.Encode.string rec0.self )
                             ]
                     )
@@ -30960,8 +34474,20 @@ encodeCommunityProfile : CommunityProfile -> Json.Encode.Value
 encodeCommunityProfile rec =
     Json.Encode.object
         [ ( "health_percentage", Json.Encode.int rec.healthPercentage )
-        , ( "description", Debug.todo "encode nullable" rec.description )
-        , ( "documentation", Debug.todo "encode nullable" rec.documentation )
+        , ( "description"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.description
+          )
+        , ( "documentation"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.documentation
+          )
         , ( "files"
           , (\rec0 ->
                 Json.Encode.object
@@ -30986,7 +34512,13 @@ encodeCommunityProfile rec =
             )
                 rec.files
           )
-        , ( "updated_at", Debug.todo "encode nullable" rec.updatedAt )
+        , ( "updated_at"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.updatedAt
+          )
         , ( "content_reports_enabled"
           , Json.Encode.bool rec.contentReportsEnabled
           )
@@ -31198,7 +34730,7 @@ encodeCommitSearchResultItem rec =
                             rec0.tree
                       )
                     , ( "url", Json.Encode.string rec0.url )
-                    , ( "verification", decodeVerification rec0.verification )
+                    , ( "verification", encodeVerification rec0.verification )
                     ]
             )
                 rec.commit
@@ -31216,10 +34748,10 @@ encodeCommitSearchResultItem rec =
                 )
                 rec.parents
           )
-        , ( "repository", decodeMinimalRepository rec.repository )
+        , ( "repository", encodeMinimalRepository rec.repository )
         , ( "score", Json.Encode.float rec.score )
         , ( "node_id", Json.Encode.string rec.nodeId )
-        , ( "text_matches", decodeSearchResultTextMatches rec.textMatches )
+        , ( "text_matches", encodeSearchResultTextMatches rec.textMatches )
         ]
 
 
@@ -31294,14 +34826,14 @@ encodeCommitComparison rec =
         , ( "permalink_url", Json.Encode.string rec.permalinkUrl )
         , ( "diff_url", Json.Encode.string rec.diffUrl )
         , ( "patch_url", Json.Encode.string rec.patchUrl )
-        , ( "base_commit", decodeCommit rec.baseCommit )
-        , ( "merge_base_commit", decodeCommit rec.mergeBaseCommit )
+        , ( "base_commit", encodeCommit rec.baseCommit )
+        , ( "merge_base_commit", encodeCommit rec.mergeBaseCommit )
         , ( "status", Json.Encode.string rec.status )
         , ( "ahead_by", Json.Encode.int rec.aheadBy )
         , ( "behind_by", Json.Encode.int rec.behindBy )
         , ( "total_commits", Json.Encode.int rec.totalCommits )
-        , ( "commits", Json.Encode.list decodeCommit rec.commits )
-        , ( "files", Json.Encode.list decodeDiffEntry rec.files )
+        , ( "commits", Json.Encode.list encodeCommit rec.commits )
+        , ( "files", Json.Encode.list encodeDiffEntry rec.files )
         ]
 
 
@@ -31379,17 +34911,35 @@ encodeCommitComment rec =
         , ( "id", Json.Encode.int rec.id )
         , ( "node_id", Json.Encode.string rec.nodeId )
         , ( "body", Json.Encode.string rec.body )
-        , ( "path", Debug.todo "encode nullable" rec.path )
-        , ( "position", Debug.todo "encode nullable" rec.position )
-        , ( "line", Debug.todo "encode nullable" rec.line )
+        , ( "path"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.path
+          )
+        , ( "position"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.int
+                , Json.Decode.null Null
+                ]
+                rec.position
+          )
+        , ( "line"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.int
+                , Json.Decode.null Null
+                ]
+                rec.line
+          )
         , ( "commit_id", Json.Encode.string rec.commitId )
         , ( "user", Debug.todo "decode anyOf" rec.user )
         , ( "created_at", Json.Encode.string rec.createdAt )
         , ( "updated_at", Json.Encode.string rec.updatedAt )
         , ( "author_association"
-          , decodeAuthorAssociation rec.authorAssociation
+          , encodeAuthorAssociation rec.authorAssociation
           )
-        , ( "reactions", decodeReactionRollup rec.reactions )
+        , ( "reactions", encodeReactionRollup rec.reactions )
         ]
 
 
@@ -31578,7 +35128,7 @@ encodeCommit rec =
                         )
                             rec0.tree
                       )
-                    , ( "verification", decodeVerification rec0.verification )
+                    , ( "verification", encodeVerification rec0.verification )
                     ]
             )
                 rec.commit
@@ -31606,7 +35156,7 @@ encodeCommit rec =
             )
                 rec.stats
           )
-        , ( "files", Json.Encode.list decodeDiffEntry rec.files )
+        , ( "files", Json.Encode.list encodeDiffEntry rec.files )
         ]
 
 
@@ -31655,10 +35205,10 @@ encodeCombinedCommitStatus : CombinedCommitStatus -> Json.Encode.Value
 encodeCombinedCommitStatus rec =
     Json.Encode.object
         [ ( "state", Json.Encode.string rec.state )
-        , ( "statuses", Json.Encode.list decodeSimpleCommitStatus rec.statuses )
+        , ( "statuses", Json.Encode.list encodeSimpleCommitStatus rec.statuses )
         , ( "sha", Json.Encode.string rec.sha )
         , ( "total_count", Json.Encode.int rec.totalCount )
-        , ( "repository", decodeMinimalRepository rec.repository )
+        , ( "repository", encodeMinimalRepository rec.repository )
         , ( "commit_url", Json.Encode.string rec.commitUrl )
         , ( "url", Json.Encode.string rec.url )
         ]
@@ -31840,11 +35390,29 @@ encodeCollaborator rec =
     Json.Encode.object
         [ ( "login", Json.Encode.string rec.login )
         , ( "id", Json.Encode.int rec.id )
-        , ( "email", Debug.todo "encode nullable" rec.email )
-        , ( "name", Debug.todo "encode nullable" rec.name )
+        , ( "email"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.email
+          )
+        , ( "name"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.name
+          )
         , ( "node_id", Json.Encode.string rec.nodeId )
         , ( "avatar_url", Json.Encode.string rec.avatarUrl )
-        , ( "gravatar_id", Debug.todo "encode nullable" rec.gravatarId )
+        , ( "gravatar_id"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.gravatarId
+          )
         , ( "url", Json.Encode.string rec.url )
         , ( "html_url", Json.Encode.string rec.htmlUrl )
         , ( "followers_url", Json.Encode.string rec.followersUrl )
@@ -32081,7 +35649,11 @@ encodeCodespaceMachine rec =
         , ( "memory_in_bytes", Json.Encode.int rec.memoryInBytes )
         , ( "cpus", Json.Encode.int rec.cpus )
         , ( "prebuild_availability"
-          , Debug.todo "encode nullable" rec.prebuildAvailability
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.prebuildAvailability
           )
         ]
 
@@ -32132,13 +35704,43 @@ decodeCodespaceExportDetails =
 encodeCodespaceExportDetails : CodespaceExportDetails -> Json.Encode.Value
 encodeCodespaceExportDetails rec =
     Json.Encode.object
-        [ ( "state", Debug.todo "encode nullable" rec.state )
-        , ( "completed_at", Debug.todo "encode nullable" rec.completedAt )
-        , ( "branch", Debug.todo "encode nullable" rec.branch )
-        , ( "sha", Debug.todo "encode nullable" rec.sha )
+        [ ( "state"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.state
+          )
+        , ( "completed_at"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.completedAt
+          )
+        , ( "branch"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.branch
+          )
+        , ( "sha"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.sha
+          )
         , ( "id", Json.Encode.string rec.id )
         , ( "export_url", Json.Encode.string rec.exportUrl )
-        , ( "html_url", Debug.todo "encode nullable" rec.htmlUrl )
+        , ( "html_url"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.htmlUrl
+          )
         ]
 
 
@@ -32366,16 +35968,38 @@ encodeCodespace rec =
     Json.Encode.object
         [ ( "id", Json.Encode.int rec.id )
         , ( "name", Json.Encode.string rec.name )
-        , ( "display_name", Debug.todo "encode nullable" rec.displayName )
-        , ( "environment_id", Debug.todo "encode nullable" rec.environmentId )
-        , ( "owner", decodeSimpleUser rec.owner )
-        , ( "billable_owner", decodeSimpleUser rec.billableOwner )
-        , ( "repository", decodeMinimalRepository rec.repository )
+        , ( "display_name"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.displayName
+          )
+        , ( "environment_id"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.environmentId
+          )
+        , ( "owner", encodeSimpleUser rec.owner )
+        , ( "billable_owner", encodeSimpleUser rec.billableOwner )
+        , ( "repository", encodeMinimalRepository rec.repository )
         , ( "machine", Debug.todo "decode anyOf" rec.machine )
         , ( "devcontainer_path"
-          , Debug.todo "encode nullable" rec.devcontainerPath
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.devcontainerPath
           )
-        , ( "prebuild", Debug.todo "encode nullable" rec.prebuild )
+        , ( "prebuild"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.bool
+                , Json.Decode.null Null
+                ]
+                rec.prebuild
+          )
         , ( "created_at", Json.Encode.string rec.createdAt )
         , ( "updated_at", Json.Encode.string rec.updatedAt )
         , ( "last_used_at", Json.Encode.string rec.lastUsedAt )
@@ -32399,13 +36023,23 @@ encodeCodespace rec =
           )
         , ( "location", Json.Encode.string rec.location )
         , ( "idle_timeout_minutes"
-          , Debug.todo "encode nullable" rec.idleTimeoutMinutes
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.int
+                , Json.Decode.null Null
+                ]
+                rec.idleTimeoutMinutes
           )
         , ( "web_url", Json.Encode.string rec.webUrl )
         , ( "machines_url", Json.Encode.string rec.machinesUrl )
         , ( "start_url", Json.Encode.string rec.startUrl )
         , ( "stop_url", Json.Encode.string rec.stopUrl )
-        , ( "pulls_url", Debug.todo "encode nullable" rec.pullsUrl )
+        , ( "pulls_url"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.pullsUrl
+          )
         , ( "recent_folders"
           , Json.Encode.list Json.Encode.string rec.recentFolders
           )
@@ -32413,7 +36047,12 @@ encodeCodespace rec =
           , (\rec0 ->
                 Json.Encode.object
                     [ ( "allowed_port_privacy_settings"
-                      , Debug.todo "encode nullable"
+                      , Json.Decode.oneOf
+                            [ Json.Decode.map
+                                Present
+                                (Json.Encode.list Json.Encode.string)
+                            , Json.Decode.null Null
+                            ]
                             rec0.allowedPortPrivacySettings
                       )
                     ]
@@ -32421,22 +36060,46 @@ encodeCodespace rec =
                 rec.runtimeConstraints
           )
         , ( "pending_operation"
-          , Debug.todo "encode nullable" rec.pendingOperation
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.bool
+                , Json.Decode.null Null
+                ]
+                rec.pendingOperation
           )
         , ( "pending_operation_disabled_reason"
-          , Debug.todo "encode nullable" rec.pendingOperationDisabledReason
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.pendingOperationDisabledReason
           )
         , ( "idle_timeout_notice"
-          , Debug.todo "encode nullable" rec.idleTimeoutNotice
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.idleTimeoutNotice
           )
         , ( "retention_period_minutes"
-          , Debug.todo "encode nullable" rec.retentionPeriodMinutes
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.int
+                , Json.Decode.null Null
+                ]
+                rec.retentionPeriodMinutes
           )
         , ( "retention_expires_at"
-          , Debug.todo "encode nullable" rec.retentionExpiresAt
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.retentionExpiresAt
           )
         , ( "last_known_stop_notice"
-          , Debug.todo "encode nullable" rec.lastKnownStopNotice
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.lastKnownStopNotice
           )
         ]
 
@@ -32506,7 +36169,11 @@ encodeCodeownersErrors rec =
                         , ( "source", Json.Encode.string rec0.source )
                         , ( "kind", Json.Encode.string rec0.kind )
                         , ( "suggestion"
-                          , Debug.todo "encode nullable" rec0.suggestion
+                          , Json.Decode.oneOf
+                                [ Json.Decode.map Present Json.Encode.string
+                                , Json.Decode.null Null
+                                ]
+                                rec0.suggestion
                           )
                         , ( "message", Json.Encode.string rec0.message )
                         , ( "path", Json.Encode.string rec0.path )
@@ -32592,15 +36259,21 @@ encodeCodeSearchResultItem rec =
         , ( "url", Json.Encode.string rec.url )
         , ( "git_url", Json.Encode.string rec.gitUrl )
         , ( "html_url", Json.Encode.string rec.htmlUrl )
-        , ( "repository", decodeMinimalRepository rec.repository )
+        , ( "repository", encodeMinimalRepository rec.repository )
         , ( "score", Json.Encode.float rec.score )
         , ( "file_size", Json.Encode.int rec.fileSize )
-        , ( "language", Debug.todo "encode nullable" rec.language )
+        , ( "language"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.language
+          )
         , ( "last_modified_at", Json.Encode.string rec.lastModifiedAt )
         , ( "line_numbers"
           , Json.Encode.list Json.Encode.string rec.lineNumbers
           )
-        , ( "text_matches", decodeSearchResultTextMatches rec.textMatches )
+        , ( "text_matches", encodeSearchResultTextMatches rec.textMatches )
         ]
 
 
@@ -32638,8 +36311,20 @@ encodeCodeScanningSarifsStatus : CodeScanningSarifsStatus -> Json.Encode.Value
 encodeCodeScanningSarifsStatus rec =
     Json.Encode.object
         [ ( "processing_status", Json.Encode.string rec.processingStatus )
-        , ( "analyses_url", Debug.todo "encode nullable" rec.analysesUrl )
-        , ( "errors", Debug.todo "encode nullable" rec.errors )
+        , ( "analyses_url"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.analysesUrl
+          )
+        , ( "errors"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present (Json.Encode.list Json.Encode.string)
+                , Json.Decode.null Null
+                ]
+                rec.errors
+          )
         ]
 
 
@@ -32658,7 +36343,7 @@ decodeCodeScanningSarifsReceipt =
 encodeCodeScanningSarifsReceipt : CodeScanningSarifsReceipt -> Json.Encode.Value
 encodeCodeScanningSarifsReceipt rec =
     Json.Encode.object
-        [ ( "id", decodeCodeScanningAnalysisSarifId rec.id )
+        [ ( "id", encodeCodeScanningAnalysisSarifId rec.id )
         , ( "url", Json.Encode.string rec.url )
         ]
 
@@ -32766,28 +36451,28 @@ encodeCodeScanningOrganizationAlertItems :
     CodeScanningOrganizationAlertItems -> Json.Encode.Value
 encodeCodeScanningOrganizationAlertItems rec =
     Json.Encode.object
-        [ ( "number", decodeAlertNumber rec.number )
-        , ( "created_at", decodeAlertCreatedAt rec.createdAt )
-        , ( "updated_at", decodeAlertUpdatedAt rec.updatedAt )
-        , ( "url", decodeAlertUrl rec.url )
-        , ( "html_url", decodeAlertHtmlUrl rec.htmlUrl )
-        , ( "instances_url", decodeAlertInstancesUrl rec.instancesUrl )
-        , ( "state", decodeCodeScanningAlertState rec.state )
-        , ( "fixed_at", decodeAlertFixedAt rec.fixedAt )
+        [ ( "number", encodeAlertNumber rec.number )
+        , ( "created_at", encodeAlertCreatedAt rec.createdAt )
+        , ( "updated_at", encodeAlertUpdatedAt rec.updatedAt )
+        , ( "url", encodeAlertUrl rec.url )
+        , ( "html_url", encodeAlertHtmlUrl rec.htmlUrl )
+        , ( "instances_url", encodeAlertInstancesUrl rec.instancesUrl )
+        , ( "state", encodeCodeScanningAlertState rec.state )
+        , ( "fixed_at", encodeAlertFixedAt rec.fixedAt )
         , ( "dismissed_by", Debug.todo "decode anyOf" rec.dismissedBy )
-        , ( "dismissed_at", decodeAlertDismissedAt rec.dismissedAt )
+        , ( "dismissed_at", encodeAlertDismissedAt rec.dismissedAt )
         , ( "dismissed_reason"
-          , decodeCodeScanningAlertDismissedReason rec.dismissedReason
+          , encodeCodeScanningAlertDismissedReason rec.dismissedReason
           )
         , ( "dismissed_comment"
-          , decodeCodeScanningAlertDismissedComment rec.dismissedComment
+          , encodeCodeScanningAlertDismissedComment rec.dismissedComment
           )
-        , ( "rule", decodeCodeScanningAlertRule rec.rule )
-        , ( "tool", decodeCodeScanningAnalysisTool rec.tool )
+        , ( "rule", encodeCodeScanningAlertRule rec.rule )
+        , ( "tool", encodeCodeScanningAnalysisTool rec.tool )
         , ( "most_recent_instance"
-          , decodeCodeScanningAlertInstance rec.mostRecentInstance
+          , encodeCodeScanningAlertInstance rec.mostRecentInstance
           )
-        , ( "repository", decodeSimpleRepository rec.repository )
+        , ( "repository", encodeSimpleRepository rec.repository )
         ]
 
 
@@ -32844,7 +36529,7 @@ encodeCodeScanningCodeqlDatabase rec =
         [ ( "id", Json.Encode.int rec.id )
         , ( "name", Json.Encode.string rec.name )
         , ( "language", Json.Encode.string rec.language )
-        , ( "uploader", decodeSimpleUser rec.uploader )
+        , ( "uploader", encodeSimpleUser rec.uploader )
         , ( "content_type", Json.Encode.string rec.contentType )
         , ( "size", Json.Encode.int rec.size )
         , ( "created_at", Json.Encode.string rec.createdAt )
@@ -32880,7 +36565,8 @@ decodeCodeScanningAnalysisToolVersion =
 encodeCodeScanningAnalysisToolVersion :
     CodeScanningAnalysisToolVersion -> Json.Encode.Value
 encodeCodeScanningAnalysisToolVersion =
-    Debug.todo "encode nullable"
+    Json.Decode.oneOf
+        [ Json.Decode.map Present Json.Encode.string, Json.Decode.null Null ]
 
 
 type alias CodeScanningAnalysisToolName =
@@ -32912,7 +36598,8 @@ decodeCodeScanningAnalysisToolGuid =
 encodeCodeScanningAnalysisToolGuid :
     CodeScanningAnalysisToolGuid -> Json.Encode.Value
 encodeCodeScanningAnalysisToolGuid =
-    Debug.todo "encode nullable"
+    Json.Decode.oneOf
+        [ Json.Decode.map Present Json.Encode.string, Json.Decode.null Null ]
 
 
 type alias CodeScanningAnalysisTool =
@@ -32937,9 +36624,9 @@ decodeCodeScanningAnalysisTool =
 encodeCodeScanningAnalysisTool : CodeScanningAnalysisTool -> Json.Encode.Value
 encodeCodeScanningAnalysisTool rec =
     Json.Encode.object
-        [ ( "name", decodeCodeScanningAnalysisToolName rec.name )
-        , ( "version", decodeCodeScanningAnalysisToolVersion rec.version )
-        , ( "guid", decodeCodeScanningAnalysisToolGuid rec.guid )
+        [ ( "name", encodeCodeScanningAnalysisToolName rec.name )
+        , ( "version", encodeCodeScanningAnalysisToolVersion rec.version )
+        , ( "guid", encodeCodeScanningAnalysisToolGuid rec.guid )
         ]
 
 
@@ -33021,10 +36708,18 @@ encodeCodeScanningAnalysisDeletion :
 encodeCodeScanningAnalysisDeletion rec =
     Json.Encode.object
         [ ( "next_analysis_url"
-          , Debug.todo "encode nullable" rec.nextAnalysisUrl
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.nextAnalysisUrl
           )
         , ( "confirm_delete_url"
-          , Debug.todo "encode nullable" rec.confirmDeleteUrl
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.confirmDeleteUrl
           )
         ]
 
@@ -33173,23 +36868,23 @@ decodeCodeScanningAnalysis =
 encodeCodeScanningAnalysis : CodeScanningAnalysis -> Json.Encode.Value
 encodeCodeScanningAnalysis rec =
     Json.Encode.object
-        [ ( "ref", decodeCodeScanningRef rec.ref )
-        , ( "commit_sha", decodeCodeScanningAnalysisCommitSha rec.commitSha )
+        [ ( "ref", encodeCodeScanningRef rec.ref )
+        , ( "commit_sha", encodeCodeScanningAnalysisCommitSha rec.commitSha )
         , ( "analysis_key"
-          , decodeCodeScanningAnalysisAnalysisKey rec.analysisKey
+          , encodeCodeScanningAnalysisAnalysisKey rec.analysisKey
           )
         , ( "environment"
-          , decodeCodeScanningAnalysisEnvironment rec.environment
+          , encodeCodeScanningAnalysisEnvironment rec.environment
           )
-        , ( "category", decodeCodeScanningAnalysisCategory rec.category )
+        , ( "category", encodeCodeScanningAnalysisCategory rec.category )
         , ( "error", Json.Encode.string rec.error )
-        , ( "created_at", decodeCodeScanningAnalysisCreatedAt rec.createdAt )
+        , ( "created_at", encodeCodeScanningAnalysisCreatedAt rec.createdAt )
         , ( "results_count", Json.Encode.int rec.resultsCount )
         , ( "rules_count", Json.Encode.int rec.rulesCount )
         , ( "id", Json.Encode.int rec.id )
-        , ( "url", decodeCodeScanningAnalysisUrl rec.url )
-        , ( "sarif_id", decodeCodeScanningAnalysisSarifId rec.sarifId )
-        , ( "tool", decodeCodeScanningAnalysisTool rec.tool )
+        , ( "url", encodeCodeScanningAnalysisUrl rec.url )
+        , ( "sarif_id", encodeCodeScanningAnalysisSarifId rec.sarifId )
+        , ( "tool", encodeCodeScanningAnalysisTool rec.tool )
         , ( "deletable", Json.Encode.bool rec.deletable )
         , ( "warning", Json.Encode.string rec.warning )
         ]
@@ -33264,10 +36959,28 @@ encodeCodeScanningAlertRuleSummary :
     CodeScanningAlertRuleSummary -> Json.Encode.Value
 encodeCodeScanningAlertRuleSummary rec =
     Json.Encode.object
-        [ ( "id", Debug.todo "encode nullable" rec.id )
+        [ ( "id"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.id
+          )
         , ( "name", Json.Encode.string rec.name )
-        , ( "tags", Debug.todo "encode nullable" rec.tags )
-        , ( "severity", Debug.todo "encode nullable" rec.severity )
+        , ( "tags"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present (Json.Encode.list Json.Encode.string)
+                , Json.Decode.null Null
+                ]
+                rec.tags
+          )
+        , ( "severity"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.severity
+          )
         , ( "description", Json.Encode.string rec.description )
         ]
 
@@ -33331,17 +37044,51 @@ decodeCodeScanningAlertRule =
 encodeCodeScanningAlertRule : CodeScanningAlertRule -> Json.Encode.Value
 encodeCodeScanningAlertRule rec =
     Json.Encode.object
-        [ ( "id", Debug.todo "encode nullable" rec.id )
+        [ ( "id"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.id
+          )
         , ( "name", Json.Encode.string rec.name )
-        , ( "severity", Debug.todo "encode nullable" rec.severity )
+        , ( "severity"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.severity
+          )
         , ( "security_severity_level"
-          , Debug.todo "encode nullable" rec.securitySeverityLevel
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.securitySeverityLevel
           )
         , ( "description", Json.Encode.string rec.description )
         , ( "full_description", Json.Encode.string rec.fullDescription )
-        , ( "tags", Debug.todo "encode nullable" rec.tags )
-        , ( "help", Debug.todo "encode nullable" rec.help )
-        , ( "help_uri", Debug.todo "encode nullable" rec.helpUri )
+        , ( "tags"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present (Json.Encode.list Json.Encode.string)
+                , Json.Decode.null Null
+                ]
+                rec.tags
+          )
+        , ( "help"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.help
+          )
+        , ( "help_uri"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.helpUri
+          )
         ]
 
 
@@ -33471,26 +37218,26 @@ decodeCodeScanningAlertItems =
 encodeCodeScanningAlertItems : CodeScanningAlertItems -> Json.Encode.Value
 encodeCodeScanningAlertItems rec =
     Json.Encode.object
-        [ ( "number", decodeAlertNumber rec.number )
-        , ( "created_at", decodeAlertCreatedAt rec.createdAt )
-        , ( "updated_at", decodeAlertUpdatedAt rec.updatedAt )
-        , ( "url", decodeAlertUrl rec.url )
-        , ( "html_url", decodeAlertHtmlUrl rec.htmlUrl )
-        , ( "instances_url", decodeAlertInstancesUrl rec.instancesUrl )
-        , ( "state", decodeCodeScanningAlertState rec.state )
-        , ( "fixed_at", decodeAlertFixedAt rec.fixedAt )
+        [ ( "number", encodeAlertNumber rec.number )
+        , ( "created_at", encodeAlertCreatedAt rec.createdAt )
+        , ( "updated_at", encodeAlertUpdatedAt rec.updatedAt )
+        , ( "url", encodeAlertUrl rec.url )
+        , ( "html_url", encodeAlertHtmlUrl rec.htmlUrl )
+        , ( "instances_url", encodeAlertInstancesUrl rec.instancesUrl )
+        , ( "state", encodeCodeScanningAlertState rec.state )
+        , ( "fixed_at", encodeAlertFixedAt rec.fixedAt )
         , ( "dismissed_by", Debug.todo "decode anyOf" rec.dismissedBy )
-        , ( "dismissed_at", decodeAlertDismissedAt rec.dismissedAt )
+        , ( "dismissed_at", encodeAlertDismissedAt rec.dismissedAt )
         , ( "dismissed_reason"
-          , decodeCodeScanningAlertDismissedReason rec.dismissedReason
+          , encodeCodeScanningAlertDismissedReason rec.dismissedReason
           )
         , ( "dismissed_comment"
-          , decodeCodeScanningAlertDismissedComment rec.dismissedComment
+          , encodeCodeScanningAlertDismissedComment rec.dismissedComment
           )
-        , ( "rule", decodeCodeScanningAlertRuleSummary rec.rule )
-        , ( "tool", decodeCodeScanningAnalysisTool rec.tool )
+        , ( "rule", encodeCodeScanningAlertRuleSummary rec.rule )
+        , ( "tool", encodeCodeScanningAnalysisTool rec.tool )
         , ( "most_recent_instance"
-          , decodeCodeScanningAlertInstance rec.mostRecentInstance
+          , encodeCodeScanningAlertInstance rec.mostRecentInstance
           )
         ]
 
@@ -33562,13 +37309,13 @@ decodeCodeScanningAlertInstance =
 encodeCodeScanningAlertInstance : CodeScanningAlertInstance -> Json.Encode.Value
 encodeCodeScanningAlertInstance rec =
     Json.Encode.object
-        [ ( "ref", decodeCodeScanningRef rec.ref )
+        [ ( "ref", encodeCodeScanningRef rec.ref )
         , ( "analysis_key"
-          , decodeCodeScanningAnalysisAnalysisKey rec.analysisKey
+          , encodeCodeScanningAnalysisAnalysisKey rec.analysisKey
           )
-        , ( "environment", decodeCodeScanningAlertEnvironment rec.environment )
-        , ( "category", decodeCodeScanningAnalysisCategory rec.category )
-        , ( "state", decodeCodeScanningAlertState rec.state )
+        , ( "environment", encodeCodeScanningAlertEnvironment rec.environment )
+        , ( "category", encodeCodeScanningAnalysisCategory rec.category )
+        , ( "state", encodeCodeScanningAlertState rec.state )
         , ( "commit_sha", Json.Encode.string rec.commitSha )
         , ( "message"
           , (\rec0 ->
@@ -33576,10 +37323,10 @@ encodeCodeScanningAlertInstance rec =
             )
                 rec.message
           )
-        , ( "location", decodeCodeScanningAlertLocation rec.location )
+        , ( "location", encodeCodeScanningAlertLocation rec.location )
         , ( "html_url", Json.Encode.string rec.htmlUrl )
         , ( "classifications"
-          , Json.Encode.list decodeCodeScanningAlertClassification
+          , Json.Encode.list encodeCodeScanningAlertClassification
                 rec.classifications
           )
         ]
@@ -33614,7 +37361,8 @@ decodeCodeScanningAlertDismissedReason =
 encodeCodeScanningAlertDismissedReason :
     CodeScanningAlertDismissedReason -> Json.Encode.Value
 encodeCodeScanningAlertDismissedReason =
-    Debug.todo "encode nullable"
+    Json.Decode.oneOf
+        [ Json.Decode.map Present Json.Encode.string, Json.Decode.null Null ]
 
 
 type alias CodeScanningAlertDismissedComment =
@@ -33630,7 +37378,8 @@ decodeCodeScanningAlertDismissedComment =
 encodeCodeScanningAlertDismissedComment :
     CodeScanningAlertDismissedComment -> Json.Encode.Value
 encodeCodeScanningAlertDismissedComment =
-    Debug.todo "encode nullable"
+    Json.Decode.oneOf
+        [ Json.Decode.map Present Json.Encode.string, Json.Decode.null Null ]
 
 
 type alias CodeScanningAlertClassification =
@@ -33646,7 +37395,8 @@ decodeCodeScanningAlertClassification =
 encodeCodeScanningAlertClassification :
     CodeScanningAlertClassification -> Json.Encode.Value
 encodeCodeScanningAlertClassification =
-    Debug.todo "encode nullable"
+    Json.Decode.oneOf
+        [ Json.Decode.map Present Json.Encode.string, Json.Decode.null Null ]
 
 
 type alias CodeScanningAlert =
@@ -33732,26 +37482,26 @@ decodeCodeScanningAlert =
 encodeCodeScanningAlert : CodeScanningAlert -> Json.Encode.Value
 encodeCodeScanningAlert rec =
     Json.Encode.object
-        [ ( "number", decodeAlertNumber rec.number )
-        , ( "created_at", decodeAlertCreatedAt rec.createdAt )
-        , ( "updated_at", decodeAlertUpdatedAt rec.updatedAt )
-        , ( "url", decodeAlertUrl rec.url )
-        , ( "html_url", decodeAlertHtmlUrl rec.htmlUrl )
-        , ( "instances_url", decodeAlertInstancesUrl rec.instancesUrl )
-        , ( "state", decodeCodeScanningAlertState rec.state )
-        , ( "fixed_at", decodeAlertFixedAt rec.fixedAt )
+        [ ( "number", encodeAlertNumber rec.number )
+        , ( "created_at", encodeAlertCreatedAt rec.createdAt )
+        , ( "updated_at", encodeAlertUpdatedAt rec.updatedAt )
+        , ( "url", encodeAlertUrl rec.url )
+        , ( "html_url", encodeAlertHtmlUrl rec.htmlUrl )
+        , ( "instances_url", encodeAlertInstancesUrl rec.instancesUrl )
+        , ( "state", encodeCodeScanningAlertState rec.state )
+        , ( "fixed_at", encodeAlertFixedAt rec.fixedAt )
         , ( "dismissed_by", Debug.todo "decode anyOf" rec.dismissedBy )
-        , ( "dismissed_at", decodeAlertDismissedAt rec.dismissedAt )
+        , ( "dismissed_at", encodeAlertDismissedAt rec.dismissedAt )
         , ( "dismissed_reason"
-          , decodeCodeScanningAlertDismissedReason rec.dismissedReason
+          , encodeCodeScanningAlertDismissedReason rec.dismissedReason
           )
         , ( "dismissed_comment"
-          , decodeCodeScanningAlertDismissedComment rec.dismissedComment
+          , encodeCodeScanningAlertDismissedComment rec.dismissedComment
           )
-        , ( "rule", decodeCodeScanningAlertRule rec.rule )
-        , ( "tool", decodeCodeScanningAnalysisTool rec.tool )
+        , ( "rule", encodeCodeScanningAlertRule rec.rule )
+        , ( "tool", encodeCodeScanningAnalysisTool rec.tool )
         , ( "most_recent_instance"
-          , decodeCodeScanningAlertInstance rec.mostRecentInstance
+          , encodeCodeScanningAlertInstance rec.mostRecentInstance
           )
         ]
 
@@ -33781,7 +37531,13 @@ encodeCodeOfConductSimple rec =
         [ ( "url", Json.Encode.string rec.url )
         , ( "key", Json.Encode.string rec.key )
         , ( "name", Json.Encode.string rec.name )
-        , ( "html_url", Debug.todo "encode nullable" rec.htmlUrl )
+        , ( "html_url"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.htmlUrl
+          )
         ]
 
 
@@ -33818,7 +37574,13 @@ encodeCodeOfConduct rec =
         , ( "name", Json.Encode.string rec.name )
         , ( "url", Json.Encode.string rec.url )
         , ( "body", Json.Encode.string rec.body )
-        , ( "html_url", Debug.todo "encode nullable" rec.htmlUrl )
+        , ( "html_url"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.htmlUrl
+          )
         ]
 
 
@@ -33858,7 +37620,7 @@ encodeCloneTraffic rec =
     Json.Encode.object
         [ ( "count", Json.Encode.int rec.count )
         , ( "uniques", Json.Encode.int rec.uniques )
-        , ( "clones", Json.Encode.list decodeTraffic rec.clones )
+        , ( "clones", Json.Encode.list encodeTraffic rec.clones )
         ]
 
 
@@ -33934,7 +37696,7 @@ encodeCheckSuitePreference rec =
             )
                 rec.preferences
           )
-        , ( "repository", decodeMinimalRepository rec.repository )
+        , ( "repository", encodeMinimalRepository rec.repository )
         ]
 
 
@@ -34045,19 +37807,75 @@ encodeCheckSuite rec =
     Json.Encode.object
         [ ( "id", Json.Encode.int rec.id )
         , ( "node_id", Json.Encode.string rec.nodeId )
-        , ( "head_branch", Debug.todo "encode nullable" rec.headBranch )
+        , ( "head_branch"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.headBranch
+          )
         , ( "head_sha", Json.Encode.string rec.headSha )
-        , ( "status", Debug.todo "encode nullable" rec.status )
-        , ( "conclusion", Debug.todo "encode nullable" rec.conclusion )
-        , ( "url", Debug.todo "encode nullable" rec.url )
-        , ( "before", Debug.todo "encode nullable" rec.before )
-        , ( "after", Debug.todo "encode nullable" rec.after )
-        , ( "pull_requests", Debug.todo "encode nullable" rec.pullRequests )
+        , ( "status"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.status
+          )
+        , ( "conclusion"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.conclusion
+          )
+        , ( "url"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.url
+          )
+        , ( "before"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.before
+          )
+        , ( "after"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.after
+          )
+        , ( "pull_requests"
+          , Json.Decode.oneOf
+                [ Json.Decode.map
+                    Present
+                    (Json.Encode.list encodePullRequestMinimal)
+                , Json.Decode.null Null
+                ]
+                rec.pullRequests
+          )
         , ( "app", Debug.todo "decode anyOf" rec.app )
-        , ( "repository", decodeMinimalRepository rec.repository )
-        , ( "created_at", Debug.todo "encode nullable" rec.createdAt )
-        , ( "updated_at", Debug.todo "encode nullable" rec.updatedAt )
-        , ( "head_commit", decodeSimpleCommit rec.headCommit )
+        , ( "repository", encodeMinimalRepository rec.repository )
+        , ( "created_at"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.createdAt
+          )
+        , ( "updated_at"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.updatedAt
+          )
+        , ( "head_commit", encodeSimpleCommit rec.headCommit )
         , ( "latest_check_runs_count"
           , Json.Encode.int rec.latestCheckRunsCount
           )
@@ -34215,20 +38033,74 @@ encodeCheckRun rec =
         [ ( "id", Json.Encode.int rec.id )
         , ( "head_sha", Json.Encode.string rec.headSha )
         , ( "node_id", Json.Encode.string rec.nodeId )
-        , ( "external_id", Debug.todo "encode nullable" rec.externalId )
+        , ( "external_id"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.externalId
+          )
         , ( "url", Json.Encode.string rec.url )
-        , ( "html_url", Debug.todo "encode nullable" rec.htmlUrl )
-        , ( "details_url", Debug.todo "encode nullable" rec.detailsUrl )
+        , ( "html_url"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.htmlUrl
+          )
+        , ( "details_url"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.detailsUrl
+          )
         , ( "status", Json.Encode.string rec.status )
-        , ( "conclusion", Debug.todo "encode nullable" rec.conclusion )
-        , ( "started_at", Debug.todo "encode nullable" rec.startedAt )
-        , ( "completed_at", Debug.todo "encode nullable" rec.completedAt )
+        , ( "conclusion"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.conclusion
+          )
+        , ( "started_at"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.startedAt
+          )
+        , ( "completed_at"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.completedAt
+          )
         , ( "output"
           , (\rec0 ->
                 Json.Encode.object
-                    [ ( "title", Debug.todo "encode nullable" rec0.title )
-                    , ( "summary", Debug.todo "encode nullable" rec0.summary )
-                    , ( "text", Debug.todo "encode nullable" rec0.text )
+                    [ ( "title"
+                      , Json.Decode.oneOf
+                            [ Json.Decode.map Present Json.Encode.string
+                            , Json.Decode.null Null
+                            ]
+                            rec0.title
+                      )
+                    , ( "summary"
+                      , Json.Decode.oneOf
+                            [ Json.Decode.map Present Json.Encode.string
+                            , Json.Decode.null Null
+                            ]
+                            rec0.summary
+                      )
+                    , ( "text"
+                      , Json.Decode.oneOf
+                            [ Json.Decode.map Present Json.Encode.string
+                            , Json.Decode.null Null
+                            ]
+                            rec0.text
+                      )
                     , ( "annotations_count"
                       , Json.Encode.int rec0.annotationsCount
                       )
@@ -34240,12 +38112,22 @@ encodeCheckRun rec =
                 rec.output
           )
         , ( "name", Json.Encode.string rec.name )
-        , ( "check_suite", Debug.todo "encode nullable" rec.checkSuite )
+        , ( "check_suite"
+          , Json.Decode.oneOf
+                [ Json.Decode.map
+                    Present
+                    (\rec0 ->
+                        Json.Encode.object [ ( "id", Json.Encode.int rec0.id ) ]
+                    )
+                , Json.Decode.null Null
+                ]
+                rec.checkSuite
+          )
         , ( "app", Debug.todo "decode anyOf" rec.app )
         , ( "pull_requests"
-          , Json.Encode.list decodePullRequestMinimal rec.pullRequests
+          , Json.Encode.list encodePullRequestMinimal rec.pullRequests
           )
-        , ( "deployment", decodeDeploymentSimple rec.deployment )
+        , ( "deployment", encodeDeploymentSimple rec.deployment )
         ]
 
 
@@ -34316,14 +38198,48 @@ encodeCheckAnnotation rec =
         [ ( "path", Json.Encode.string rec.path )
         , ( "start_line", Json.Encode.int rec.startLine )
         , ( "end_line", Json.Encode.int rec.endLine )
-        , ( "start_column", Debug.todo "encode nullable" rec.startColumn )
-        , ( "end_column", Debug.todo "encode nullable" rec.endColumn )
-        , ( "annotation_level"
-          , Debug.todo "encode nullable" rec.annotationLevel
+        , ( "start_column"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.int
+                , Json.Decode.null Null
+                ]
+                rec.startColumn
           )
-        , ( "title", Debug.todo "encode nullable" rec.title )
-        , ( "message", Debug.todo "encode nullable" rec.message )
-        , ( "raw_details", Debug.todo "encode nullable" rec.rawDetails )
+        , ( "end_column"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.int
+                , Json.Decode.null Null
+                ]
+                rec.endColumn
+          )
+        , ( "annotation_level"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.annotationLevel
+          )
+        , ( "title"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.title
+          )
+        , ( "message"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.message
+          )
+        , ( "raw_details"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.rawDetails
+          )
         , ( "blob_href", Json.Encode.string rec.blobHref )
         ]
 
@@ -34385,7 +38301,7 @@ encodeBranchWithProtection : BranchWithProtection -> Json.Encode.Value
 encodeBranchWithProtection rec =
     Json.Encode.object
         [ ( "name", Json.Encode.string rec.name )
-        , ( "commit", decodeCommit rec.commit )
+        , ( "commit", encodeCommit rec.commit )
         , ( "_links"
           , (\rec0 ->
                 Json.Encode.object
@@ -34396,7 +38312,7 @@ encodeBranchWithProtection rec =
                 rec.links
           )
         , ( "protected", Json.Encode.bool rec.protected )
-        , ( "protection", decodeBranchProtection rec.protection )
+        , ( "protection", encodeBranchProtection rec.protection )
         , ( "protection_url", Json.Encode.string rec.protectionUrl )
         , ( "pattern", Json.Encode.string rec.pattern )
         , ( "required_approving_review_count"
@@ -34969,7 +38885,11 @@ encodeBranchRestrictionPolicy rec =
                         , ( "name", Json.Encode.string rec0.name )
                         , ( "slug", Json.Encode.string rec0.slug )
                         , ( "description"
-                          , Debug.todo "encode nullable" rec0.description
+                          , Json.Decode.oneOf
+                                [ Json.Decode.map Present Json.Encode.string
+                                , Json.Decode.null Null
+                                ]
+                                rec0.description
                           )
                         , ( "privacy", Json.Encode.string rec0.privacy )
                         , ( "permission", Json.Encode.string rec0.permission )
@@ -34977,7 +38897,13 @@ encodeBranchRestrictionPolicy rec =
                         , ( "repositories_url"
                           , Json.Encode.string rec0.repositoriesUrl
                           )
-                        , ( "parent", Debug.todo "encode nullable" rec0.parent )
+                        , ( "parent"
+                          , Json.Decode.oneOf
+                                [ Json.Decode.map Present Json.Encode.string
+                                , Json.Decode.null Null
+                                ]
+                                rec0.parent
+                          )
                         ]
                 )
                 rec.teams
@@ -35250,16 +39176,16 @@ encodeBranchProtection rec =
         [ ( "url", Json.Encode.string rec.url )
         , ( "enabled", Json.Encode.bool rec.enabled )
         , ( "required_status_checks"
-          , decodeProtectedBranchRequiredStatusCheck rec.requiredStatusChecks
+          , encodeProtectedBranchRequiredStatusCheck rec.requiredStatusChecks
           )
         , ( "enforce_admins"
-          , decodeProtectedBranchAdminEnforced rec.enforceAdmins
+          , encodeProtectedBranchAdminEnforced rec.enforceAdmins
           )
         , ( "required_pull_request_reviews"
-          , decodeProtectedBranchPullRequestReview
+          , encodeProtectedBranchPullRequestReview
                 rec.requiredPullRequestReviews
           )
-        , ( "restrictions", decodeBranchRestrictionPolicy rec.restrictions )
+        , ( "restrictions", encodeBranchRestrictionPolicy rec.restrictions )
         , ( "required_linear_history"
           , (\rec0 ->
                 Json.Encode.object
@@ -35354,7 +39280,13 @@ encodeBlob rec =
         , ( "encoding", Json.Encode.string rec.encoding )
         , ( "url", Json.Encode.string rec.url )
         , ( "sha", Json.Encode.string rec.sha )
-        , ( "size", Debug.todo "encode nullable" rec.size )
+        , ( "size"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.int
+                , Json.Decode.null Null
+                ]
+                rec.size
+          )
         , ( "node_id", Json.Encode.string rec.nodeId )
         , ( "highlighted_content", Json.Encode.string rec.highlightedContent )
         ]
@@ -35504,11 +39436,17 @@ encodeBaseGist rec =
         , ( "public", Json.Encode.bool rec.public )
         , ( "created_at", Json.Encode.string rec.createdAt )
         , ( "updated_at", Json.Encode.string rec.updatedAt )
-        , ( "description", Debug.todo "encode nullable" rec.description )
+        , ( "description"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.description
+          )
         , ( "comments", Json.Encode.int rec.comments )
         , ( "user", Debug.todo "decode anyOf" rec.user )
         , ( "comments_url", Json.Encode.string rec.commentsUrl )
-        , ( "owner", decodeSimpleUser rec.owner )
+        , ( "owner", encodeSimpleUser rec.owner )
         , ( "truncated", Json.Encode.bool rec.truncated )
         , ( "forks", Json.Encode.list Json.Decode.value rec.forks )
         , ( "history", Json.Encode.list Json.Decode.value rec.history )
@@ -35584,7 +39522,19 @@ decodeAutoMerge =
 
 encodeAutoMerge : AutoMerge -> Json.Encode.Value
 encodeAutoMerge =
-    Debug.todo "encode nullable"
+    Json.Decode.oneOf
+        [ Json.Decode.map
+            Present
+            (\rec ->
+                Json.Encode.object
+                    [ ( "enabled_by", encodeSimpleUser rec.enabledBy )
+                    , ( "merge_method", Json.Encode.string rec.mergeMethod )
+                    , ( "commit_title", Json.Encode.string rec.commitTitle )
+                    , ( "commit_message", Json.Encode.string rec.commitMessage )
+                    ]
+            )
+        , Json.Decode.null Null
+        ]
 
 
 type alias Authorization =
@@ -35691,12 +39641,28 @@ encodeAuthorization rec =
     Json.Encode.object
         [ ( "id", Json.Encode.int rec.id )
         , ( "url", Json.Encode.string rec.url )
-        , ( "scopes", Debug.todo "encode nullable" rec.scopes )
+        , ( "scopes"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present (Json.Encode.list Json.Encode.string)
+                , Json.Decode.null Null
+                ]
+                rec.scopes
+          )
         , ( "token", Json.Encode.string rec.token )
         , ( "token_last_eight"
-          , Debug.todo "encode nullable" rec.tokenLastEight
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.tokenLastEight
           )
-        , ( "hashed_token", Debug.todo "encode nullable" rec.hashedToken )
+        , ( "hashed_token"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.hashedToken
+          )
         , ( "app"
           , (\rec0 ->
                 Json.Encode.object
@@ -35707,14 +39673,38 @@ encodeAuthorization rec =
             )
                 rec.app
           )
-        , ( "note", Debug.todo "encode nullable" rec.note )
-        , ( "note_url", Debug.todo "encode nullable" rec.noteUrl )
+        , ( "note"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.note
+          )
+        , ( "note_url"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.noteUrl
+          )
         , ( "updated_at", Json.Encode.string rec.updatedAt )
         , ( "created_at", Json.Encode.string rec.createdAt )
-        , ( "fingerprint", Debug.todo "encode nullable" rec.fingerprint )
+        , ( "fingerprint"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.fingerprint
+          )
         , ( "user", Debug.todo "decode anyOf" rec.user )
         , ( "installation", Debug.todo "decode anyOf" rec.installation )
-        , ( "expires_at", Debug.todo "encode nullable" rec.expiresAt )
+        , ( "expires_at"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.expiresAt
+          )
         ]
 
 
@@ -35780,8 +39770,14 @@ encodeAuthenticationToken rec =
         [ ( "token", Json.Encode.string rec.token )
         , ( "expires_at", Json.Encode.string rec.expiresAt )
         , ( "permissions", (\rec0 -> Json.Encode.object []) rec.permissions )
-        , ( "repositories", Json.Encode.list decodeRepository rec.repositories )
-        , ( "single_file", Debug.todo "encode nullable" rec.singleFile )
+        , ( "repositories", Json.Encode.list encodeRepository rec.repositories )
+        , ( "single_file"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.singleFile
+          )
         , ( "repository_selection", Json.Encode.string rec.repositorySelection )
         ]
 
@@ -35851,16 +39847,28 @@ encodeAssignedIssueEvent rec =
         [ ( "id", Json.Encode.int rec.id )
         , ( "node_id", Json.Encode.string rec.nodeId )
         , ( "url", Json.Encode.string rec.url )
-        , ( "actor", decodeSimpleUser rec.actor )
+        , ( "actor", encodeSimpleUser rec.actor )
         , ( "event", Json.Encode.string rec.event )
-        , ( "commit_id", Debug.todo "encode nullable" rec.commitId )
-        , ( "commit_url", Debug.todo "encode nullable" rec.commitUrl )
+        , ( "commit_id"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.commitId
+          )
+        , ( "commit_url"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.commitUrl
+          )
         , ( "created_at", Json.Encode.string rec.createdAt )
         , ( "performed_via_github_app"
-          , decodeIntegration rec.performedViaGithubApp
+          , encodeIntegration rec.performedViaGithubApp
           )
-        , ( "assignee", decodeSimpleUser rec.assignee )
-        , ( "assigner", decodeSimpleUser rec.assigner )
+        , ( "assignee", encodeSimpleUser rec.assignee )
+        , ( "assigner", encodeSimpleUser rec.assigner )
         ]
 
 
@@ -35970,10 +39978,50 @@ encodeArtifact rec =
         , ( "url", Json.Encode.string rec.url )
         , ( "archive_download_url", Json.Encode.string rec.archiveDownloadUrl )
         , ( "expired", Json.Encode.bool rec.expired )
-        , ( "created_at", Debug.todo "encode nullable" rec.createdAt )
-        , ( "expires_at", Debug.todo "encode nullable" rec.expiresAt )
-        , ( "updated_at", Debug.todo "encode nullable" rec.updatedAt )
-        , ( "workflow_run", Debug.todo "encode nullable" rec.workflowRun )
+        , ( "created_at"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.createdAt
+          )
+        , ( "expires_at"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.expiresAt
+          )
+        , ( "updated_at"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.updatedAt
+          )
+        , ( "workflow_run"
+          , Json.Decode.oneOf
+                [ Json.Decode.map
+                    Present
+                    (\rec0 ->
+                        Json.Encode.object
+                            [ ( "id", Json.Encode.int rec0.id )
+                            , ( "repository_id"
+                              , Json.Encode.int rec0.repositoryId
+                              )
+                            , ( "head_repository_id"
+                              , Json.Encode.int rec0.headRepositoryId
+                              )
+                            , ( "head_branch"
+                              , Json.Encode.string rec0.headBranch
+                              )
+                            , ( "head_sha", Json.Encode.string rec0.headSha )
+                            ]
+                    )
+                , Json.Decode.null Null
+                ]
+                rec.workflowRun
+          )
         ]
 
 
@@ -36384,7 +40432,8 @@ decodeAlertFixedAt =
 
 encodeAlertFixedAt : AlertFixedAt -> Json.Encode.Value
 encodeAlertFixedAt =
-    Debug.todo "encode nullable"
+    Json.Decode.oneOf
+        [ Json.Decode.map Present Json.Encode.string, Json.Decode.null Null ]
 
 
 type alias AlertDismissedAt =
@@ -36398,7 +40447,8 @@ decodeAlertDismissedAt =
 
 encodeAlertDismissedAt : AlertDismissedAt -> Json.Encode.Value
 encodeAlertDismissedAt =
-    Debug.todo "encode nullable"
+    Json.Decode.oneOf
+        [ Json.Decode.map Present Json.Encode.string, Json.Decode.null Null ]
 
 
 type alias AlertCreatedAt =
@@ -36480,7 +40530,7 @@ encodeAdvancedSecurityActiveCommittersRepository rec =
           , Json.Encode.int rec.advancedSecurityCommitters
           )
         , ( "advanced_security_committers_breakdown"
-          , Json.Encode.list decodeAdvancedSecurityActiveCommittersUser
+          , Json.Encode.list encodeAdvancedSecurityActiveCommittersUser
                 rec.advancedSecurityCommittersBreakdown
           )
         ]
@@ -36528,7 +40578,7 @@ encodeAdvancedSecurityActiveCommitters rec =
           )
         , ( "total_count", Json.Encode.int rec.totalCount )
         , ( "repositories"
-          , Json.Encode.list decodeAdvancedSecurityActiveCommittersRepository
+          , Json.Encode.list encodeAdvancedSecurityActiveCommittersRepository
                 rec.repositories
           )
         ]
@@ -36633,10 +40683,22 @@ encodeAddedToProjectIssueEvent rec =
         [ ( "id", Json.Encode.int rec.id )
         , ( "node_id", Json.Encode.string rec.nodeId )
         , ( "url", Json.Encode.string rec.url )
-        , ( "actor", decodeSimpleUser rec.actor )
+        , ( "actor", encodeSimpleUser rec.actor )
         , ( "event", Json.Encode.string rec.event )
-        , ( "commit_id", Debug.todo "encode nullable" rec.commitId )
-        , ( "commit_url", Debug.todo "encode nullable" rec.commitUrl )
+        , ( "commit_id"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.commitId
+          )
+        , ( "commit_url"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.commitUrl
+          )
         , ( "created_at", Json.Encode.string rec.createdAt )
         , ( "performed_via_github_app"
           , Debug.todo "decode anyOf" rec.performedViaGithubApp
@@ -36702,7 +40764,13 @@ encodeActor rec =
         [ ( "id", Json.Encode.int rec.id )
         , ( "login", Json.Encode.string rec.login )
         , ( "display_login", Json.Encode.string rec.displayLogin )
-        , ( "gravatar_id", Debug.todo "encode nullable" rec.gravatarId )
+        , ( "gravatar_id"
+          , Json.Decode.oneOf
+                [ Json.Decode.map Present Json.Encode.string
+                , Json.Decode.null Null
+                ]
+                rec.gravatarId
+          )
         , ( "url", Json.Encode.string rec.url )
         , ( "avatar_url", Json.Encode.string rec.avatarUrl )
         ]
@@ -36759,11 +40827,11 @@ encodeActionsSetDefaultWorkflowPermissions :
 encodeActionsSetDefaultWorkflowPermissions rec =
     Json.Encode.object
         [ ( "default_workflow_permissions"
-          , decodeActionsDefaultWorkflowPermissions
+          , encodeActionsDefaultWorkflowPermissions
                 rec.defaultWorkflowPermissions
           )
         , ( "can_approve_pull_request_reviews"
-          , decodeActionsCanApprovePullRequestReviews
+          , encodeActionsCanApprovePullRequestReviews
                 rec.canApprovePullRequestReviews
           )
         ]
@@ -36825,10 +40893,10 @@ encodeActionsRepositoryPermissions :
     ActionsRepositoryPermissions -> Json.Encode.Value
 encodeActionsRepositoryPermissions rec =
     Json.Encode.object
-        [ ( "enabled", decodeActionsEnabled rec.enabled )
-        , ( "allowed_actions", decodeAllowedActions rec.allowedActions )
+        [ ( "enabled", encodeActionsEnabled rec.enabled )
+        , ( "allowed_actions", encodeAllowedActions rec.allowedActions )
         , ( "selected_actions_url"
-          , decodeSelectedActionsUrl rec.selectedActionsUrl
+          , encodeSelectedActionsUrl rec.selectedActionsUrl
           )
         ]
 
@@ -36912,14 +40980,14 @@ encodeActionsOrganizationPermissions :
 encodeActionsOrganizationPermissions rec =
     Json.Encode.object
         [ ( "enabled_repositories"
-          , decodeEnabledRepositories rec.enabledRepositories
+          , encodeEnabledRepositories rec.enabledRepositories
           )
         , ( "selected_repositories_url"
           , Json.Encode.string rec.selectedRepositoriesUrl
           )
-        , ( "allowed_actions", decodeAllowedActions rec.allowedActions )
+        , ( "allowed_actions", encodeAllowedActions rec.allowedActions )
         , ( "selected_actions_url"
-          , decodeSelectedActionsUrl rec.selectedActionsUrl
+          , encodeSelectedActionsUrl rec.selectedActionsUrl
           )
         ]
 
@@ -36956,11 +41024,11 @@ encodeActionsGetDefaultWorkflowPermissions :
 encodeActionsGetDefaultWorkflowPermissions rec =
     Json.Encode.object
         [ ( "default_workflow_permissions"
-          , decodeActionsDefaultWorkflowPermissions
+          , encodeActionsDefaultWorkflowPermissions
                 rec.defaultWorkflowPermissions
           )
         , ( "can_approve_pull_request_reviews"
-          , decodeActionsCanApprovePullRequestReviews
+          , encodeActionsCanApprovePullRequestReviews
                 rec.canApprovePullRequestReviews
           )
         ]
@@ -37003,14 +41071,14 @@ encodeActionsEnterprisePermissions :
 encodeActionsEnterprisePermissions rec =
     Json.Encode.object
         [ ( "enabled_organizations"
-          , decodeEnabledOrganizations rec.enabledOrganizations
+          , encodeEnabledOrganizations rec.enabledOrganizations
           )
         , ( "selected_organizations_url"
           , Json.Encode.string rec.selectedOrganizationsUrl
           )
-        , ( "allowed_actions", decodeAllowedActions rec.allowedActions )
+        , ( "allowed_actions", encodeAllowedActions rec.allowedActions )
         , ( "selected_actions_url"
-          , decodeSelectedActionsUrl rec.selectedActionsUrl
+          , encodeSelectedActionsUrl rec.selectedActionsUrl
           )
         ]
 

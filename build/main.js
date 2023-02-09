@@ -3419,77 +3419,16 @@ var $mdgriffith$elm_codegen$Elm$alias = F2(
 				}
 			});
 	});
-var $stil4m$elm_syntax$Elm$Syntax$Expression$Application = function (a) {
-	return {$: 'Application', a: a};
+var $mdgriffith$elm_codegen$Internal$Compiler$Annotation = function (a) {
+	return {$: 'Annotation', a: a};
 };
-var $mdgriffith$elm_codegen$Internal$Compiler$FunctionAppliedToTooManyArgs = F2(
+var $stil4m$elm_syntax$Elm$Syntax$TypeAnnotation$Typed = F2(
 	function (a, b) {
-		return {$: 'FunctionAppliedToTooManyArgs', a: a, b: b};
+		return {$: 'Typed', a: a, b: b};
 	});
-var $stil4m$elm_syntax$Elm$Syntax$TypeAnnotation$GenericType = function (a) {
-	return {$: 'GenericType', a: a};
-};
-var $stil4m$elm_syntax$Elm$Syntax$TypeAnnotation$GenericRecord = F2(
-	function (a, b) {
-		return {$: 'GenericRecord', a: a, b: b};
-	});
-var $mdgriffith$elm_codegen$Internal$Compiler$containsFieldByName = F2(
-	function (_v0, _v2) {
-		var _v1 = _v0.a;
-		var oneName = _v1.b;
-		var _v3 = _v2.a;
-		var twoName = _v3.b;
-		return _Utils_eq(oneName, twoName);
-	});
-var $mdgriffith$elm_codegen$Internal$Compiler$mergeFieldLists = F2(
-	function (fieldOne, fieldTwo) {
-		return A3(
-			$elm$core$List$foldl,
-			F2(
-				function (_new, existing) {
-					var newField = _new.b;
-					return A2(
-						$elm$core$List$any,
-						A2(
-							$elm$core$Basics$composeL,
-							$mdgriffith$elm_codegen$Internal$Compiler$containsFieldByName(newField),
-							$mdgriffith$elm_codegen$Internal$Compiler$denode),
-						existing) ? existing : A2($elm$core$List$cons, _new, existing);
-				}),
-			fieldOne,
-			fieldTwo);
-	});
-var $elm$core$Basics$compare = _Utils_compare;
-var $elm$core$Dict$get = F2(
-	function (targetKey, dict) {
-		get:
-		while (true) {
-			if (dict.$ === 'RBEmpty_elm_builtin') {
-				return $elm$core$Maybe$Nothing;
-			} else {
-				var key = dict.b;
-				var value = dict.c;
-				var left = dict.d;
-				var right = dict.e;
-				var _v1 = A2($elm$core$Basics$compare, targetKey, key);
-				switch (_v1.$) {
-					case 'LT':
-						var $temp$targetKey = targetKey,
-							$temp$dict = left;
-						targetKey = $temp$targetKey;
-						dict = $temp$dict;
-						continue get;
-					case 'EQ':
-						return $elm$core$Maybe$Just(value);
-					default:
-						var $temp$targetKey = targetKey,
-							$temp$dict = right;
-						targetKey = $temp$targetKey;
-						dict = $temp$dict;
-						continue get;
-				}
-			}
-		}
+var $mdgriffith$elm_codegen$Internal$Compiler$formatAliasKey = F2(
+	function (mod, name) {
+		return A2($elm$core$String$join, '.', mod) + ('.' + name);
 	});
 var $elm$core$Dict$Black = {$: 'Black'};
 var $elm$core$Dict$RBNode_elm_builtin = F5(
@@ -3552,6 +3491,7 @@ var $elm$core$Dict$balance = F5(
 			}
 		}
 	});
+var $elm$core$Basics$compare = _Utils_compare;
 var $elm$core$Dict$insertHelp = F3(
 	function (key, value, dict) {
 		if (dict.$ === 'RBEmpty_elm_builtin') {
@@ -3598,6 +3538,239 @@ var $elm$core$Dict$insert = F3(
 		} else {
 			var x = _v0;
 			return x;
+		}
+	});
+var $mdgriffith$elm_codegen$Internal$Compiler$addAlias = F4(
+	function (mod, name, ann, aliasCache) {
+		var annDetails = ann.a;
+		return A3(
+			$elm$core$Dict$insert,
+			A2($mdgriffith$elm_codegen$Internal$Compiler$formatAliasKey, mod, name),
+			{
+				target: annDetails.annotation,
+				variables: $mdgriffith$elm_codegen$Internal$Compiler$getGenerics(ann)
+			},
+			aliasCache);
+	});
+var $mdgriffith$elm_codegen$Internal$Compiler$getAliases = function (_v0) {
+	var ann = _v0.a;
+	return ann.aliases;
+};
+var $elm$core$Dict$foldl = F3(
+	function (func, acc, dict) {
+		foldl:
+		while (true) {
+			if (dict.$ === 'RBEmpty_elm_builtin') {
+				return acc;
+			} else {
+				var key = dict.b;
+				var value = dict.c;
+				var left = dict.d;
+				var right = dict.e;
+				var $temp$func = func,
+					$temp$acc = A3(
+					func,
+					key,
+					value,
+					A3($elm$core$Dict$foldl, func, acc, left)),
+					$temp$dict = right;
+				func = $temp$func;
+				acc = $temp$acc;
+				dict = $temp$dict;
+				continue foldl;
+			}
+		}
+	});
+var $elm$core$Dict$union = F2(
+	function (t1, t2) {
+		return A3($elm$core$Dict$foldl, $elm$core$Dict$insert, t2, t1);
+	});
+var $mdgriffith$elm_codegen$Internal$Compiler$mergeAliases = $elm$core$Dict$union;
+var $mdgriffith$elm_codegen$Elm$Annotation$alias = F4(
+	function (mod, name, vars, target) {
+		return $mdgriffith$elm_codegen$Internal$Compiler$Annotation(
+			{
+				aliases: A4(
+					$mdgriffith$elm_codegen$Internal$Compiler$addAlias,
+					mod,
+					name,
+					target,
+					A3(
+						$elm$core$List$foldl,
+						F2(
+							function (ann, aliases) {
+								return A2(
+									$mdgriffith$elm_codegen$Internal$Compiler$mergeAliases,
+									$mdgriffith$elm_codegen$Internal$Compiler$getAliases(ann),
+									aliases);
+							}),
+						$mdgriffith$elm_codegen$Internal$Compiler$getAliases(target),
+						vars)),
+				annotation: A2(
+					$stil4m$elm_syntax$Elm$Syntax$TypeAnnotation$Typed,
+					$mdgriffith$elm_codegen$Internal$Compiler$nodify(
+						_Utils_Tuple2(
+							mod,
+							$mdgriffith$elm_codegen$Internal$Format$formatType(name))),
+					A2(
+						$elm$core$List$map,
+						A2($elm$core$Basics$composeL, $mdgriffith$elm_codegen$Internal$Compiler$nodify, $mdgriffith$elm_codegen$Internal$Compiler$getInnerAnnotation),
+						vars)),
+				imports: function () {
+					if (!mod.b) {
+						return A2($elm$core$List$concatMap, $mdgriffith$elm_codegen$Internal$Compiler$getAnnotationImports, vars);
+					} else {
+						return _Utils_ap(
+							_List_fromArray(
+								[mod]),
+							A2($elm$core$List$concatMap, $mdgriffith$elm_codegen$Internal$Compiler$getAnnotationImports, vars));
+					}
+				}()
+			});
+	});
+var $author$project$Gen$Json$Decode$moduleName_ = _List_fromArray(
+	['Json', 'Decode']);
+var $elm$core$Dict$empty = $elm$core$Dict$RBEmpty_elm_builtin;
+var $mdgriffith$elm_codegen$Internal$Compiler$emptyAliases = $elm$core$Dict$empty;
+var $mdgriffith$elm_codegen$Elm$Annotation$getAliases = function (_v0) {
+	var ann = _v0.a;
+	return ann.aliases;
+};
+var $mdgriffith$elm_codegen$Internal$Compiler$nodifyAll = $elm$core$List$map($mdgriffith$elm_codegen$Internal$Compiler$nodify);
+var $mdgriffith$elm_codegen$Elm$Annotation$namedWith = F3(
+	function (mod, name, args) {
+		return $mdgriffith$elm_codegen$Internal$Compiler$Annotation(
+			{
+				aliases: A3(
+					$elm$core$List$foldl,
+					F2(
+						function (ann, aliases) {
+							return A2(
+								$mdgriffith$elm_codegen$Internal$Compiler$mergeAliases,
+								$mdgriffith$elm_codegen$Elm$Annotation$getAliases(ann),
+								aliases);
+						}),
+					$mdgriffith$elm_codegen$Internal$Compiler$emptyAliases,
+					args),
+				annotation: A2(
+					$stil4m$elm_syntax$Elm$Syntax$TypeAnnotation$Typed,
+					$mdgriffith$elm_codegen$Internal$Compiler$nodify(
+						_Utils_Tuple2(
+							mod,
+							$mdgriffith$elm_codegen$Internal$Format$formatType(name))),
+					$mdgriffith$elm_codegen$Internal$Compiler$nodifyAll(
+						A2($elm$core$List$map, $mdgriffith$elm_codegen$Internal$Compiler$getInnerAnnotation, args))),
+				imports: A2(
+					$elm$core$List$cons,
+					mod,
+					A2($elm$core$List$concatMap, $mdgriffith$elm_codegen$Internal$Compiler$getAnnotationImports, args))
+			});
+	});
+var $author$project$Gen$Json$Decode$annotation_ = {
+	decoder: function (decoderArg0) {
+		return A3(
+			$mdgriffith$elm_codegen$Elm$Annotation$namedWith,
+			_List_fromArray(
+				['Json', 'Decode']),
+			'Decoder',
+			_List_fromArray(
+				[decoderArg0]));
+	},
+	error: A3(
+		$mdgriffith$elm_codegen$Elm$Annotation$namedWith,
+		_List_fromArray(
+			['Json', 'Decode']),
+		'Error',
+		_List_Nil),
+	value: A4(
+		$mdgriffith$elm_codegen$Elm$Annotation$alias,
+		$author$project$Gen$Json$Decode$moduleName_,
+		'Value',
+		_List_Nil,
+		A3(
+			$mdgriffith$elm_codegen$Elm$Annotation$namedWith,
+			_List_fromArray(
+				['Json', 'Encode']),
+			'Value',
+			_List_Nil))
+};
+var $author$project$Gen$Json$Encode$annotation_ = {
+	value: A3(
+		$mdgriffith$elm_codegen$Elm$Annotation$namedWith,
+		_List_fromArray(
+			['Json', 'Encode']),
+		'Value',
+		_List_Nil)
+};
+var $stil4m$elm_syntax$Elm$Syntax$Expression$Application = function (a) {
+	return {$: 'Application', a: a};
+};
+var $mdgriffith$elm_codegen$Internal$Compiler$FunctionAppliedToTooManyArgs = F2(
+	function (a, b) {
+		return {$: 'FunctionAppliedToTooManyArgs', a: a, b: b};
+	});
+var $stil4m$elm_syntax$Elm$Syntax$TypeAnnotation$GenericType = function (a) {
+	return {$: 'GenericType', a: a};
+};
+var $stil4m$elm_syntax$Elm$Syntax$TypeAnnotation$GenericRecord = F2(
+	function (a, b) {
+		return {$: 'GenericRecord', a: a, b: b};
+	});
+var $mdgriffith$elm_codegen$Internal$Compiler$containsFieldByName = F2(
+	function (_v0, _v2) {
+		var _v1 = _v0.a;
+		var oneName = _v1.b;
+		var _v3 = _v2.a;
+		var twoName = _v3.b;
+		return _Utils_eq(oneName, twoName);
+	});
+var $mdgriffith$elm_codegen$Internal$Compiler$mergeFieldLists = F2(
+	function (fieldOne, fieldTwo) {
+		return A3(
+			$elm$core$List$foldl,
+			F2(
+				function (_new, existing) {
+					var newField = _new.b;
+					return A2(
+						$elm$core$List$any,
+						A2(
+							$elm$core$Basics$composeL,
+							$mdgriffith$elm_codegen$Internal$Compiler$containsFieldByName(newField),
+							$mdgriffith$elm_codegen$Internal$Compiler$denode),
+						existing) ? existing : A2($elm$core$List$cons, _new, existing);
+				}),
+			fieldOne,
+			fieldTwo);
+	});
+var $elm$core$Dict$get = F2(
+	function (targetKey, dict) {
+		get:
+		while (true) {
+			if (dict.$ === 'RBEmpty_elm_builtin') {
+				return $elm$core$Maybe$Nothing;
+			} else {
+				var key = dict.b;
+				var value = dict.c;
+				var left = dict.d;
+				var right = dict.e;
+				var _v1 = A2($elm$core$Basics$compare, targetKey, key);
+				switch (_v1.$) {
+					case 'LT':
+						var $temp$targetKey = targetKey,
+							$temp$dict = left;
+						targetKey = $temp$targetKey;
+						dict = $temp$dict;
+						continue get;
+					case 'EQ':
+						return $elm$core$Maybe$Just(value);
+					default:
+						var $temp$targetKey = targetKey,
+							$temp$dict = right;
+						targetKey = $temp$targetKey;
+						dict = $temp$dict;
+						continue get;
+				}
+			}
 		}
 	});
 var $elm$core$Dict$getMin = function (dict) {
@@ -4016,8 +4189,6 @@ var $mdgriffith$elm_codegen$Internal$Compiler$addInference = F3(
 			},
 			infs);
 	});
-var $elm$core$Dict$empty = $elm$core$Dict$RBEmpty_elm_builtin;
-var $mdgriffith$elm_codegen$Internal$Compiler$emptyAliases = $elm$core$Dict$empty;
 var $stil4m$elm_syntax$Elm$Syntax$TypeAnnotation$FunctionTypeAnnotation = F2(
 	function (a, b) {
 		return {$: 'FunctionTypeAnnotation', a: a, b: b};
@@ -4064,10 +4235,6 @@ var $stil4m$elm_syntax$Elm$Syntax$TypeAnnotation$Record = function (a) {
 var $stil4m$elm_syntax$Elm$Syntax$TypeAnnotation$Tupled = function (a) {
 	return {$: 'Tupled', a: a};
 };
-var $stil4m$elm_syntax$Elm$Syntax$TypeAnnotation$Typed = F2(
-	function (a, b) {
-		return {$: 'Typed', a: a, b: b};
-	});
 var $mdgriffith$elm_codegen$Internal$Compiler$UnableToUnify = F2(
 	function (a, b) {
 		return {$: 'UnableToUnify', a: a, b: b};
@@ -4089,10 +4256,6 @@ var $elm$core$Dict$fromList = function (assocs) {
 		$elm$core$Dict$empty,
 		assocs);
 };
-var $mdgriffith$elm_codegen$Internal$Compiler$formatAliasKey = F2(
-	function (mod, name) {
-		return A2($elm$core$String$join, '.', mod) + ('.' + name);
-	});
 var $mdgriffith$elm_codegen$Internal$Compiler$getAlias = F2(
 	function (_v0, cache) {
 		var _v1 = _v0.b;
@@ -4155,7 +4318,6 @@ var $mdgriffith$elm_codegen$Internal$Compiler$getField = F4(
 			}
 		}
 	});
-var $mdgriffith$elm_codegen$Internal$Compiler$nodifyAll = $elm$core$List$map($mdgriffith$elm_codegen$Internal$Compiler$nodify);
 var $mdgriffith$elm_codegen$Internal$Compiler$isAppendable = function (annotation) {
 	_v0$2:
 	while (true) {
@@ -5696,31 +5858,6 @@ var $mdgriffith$elm_codegen$Internal$Compiler$applyTypeHelper = F4(
 									A2($mdgriffith$elm_codegen$Internal$Compiler$FunctionAppliedToTooManyArgs, _final, args)
 								]));
 					}
-			}
-		}
-	});
-var $elm$core$Dict$foldl = F3(
-	function (func, acc, dict) {
-		foldl:
-		while (true) {
-			if (dict.$ === 'RBEmpty_elm_builtin') {
-				return acc;
-			} else {
-				var key = dict.b;
-				var value = dict.c;
-				var left = dict.d;
-				var right = dict.e;
-				var $temp$func = func,
-					$temp$acc = A3(
-					func,
-					key,
-					value,
-					A3($elm$core$Dict$foldl, func, acc, left)),
-					$temp$dict = right;
-				func = $temp$func;
-				acc = $temp$acc;
-				dict = $temp$dict;
-				continue foldl;
 			}
 		}
 	});
@@ -8722,18 +8859,6 @@ var $author$project$OpenApi$decode = A4(
 													};
 												};
 											})))))))))));
-var $mdgriffith$elm_codegen$Internal$Compiler$Annotation = function (a) {
-	return {$: 'Annotation', a: a};
-};
-var $mdgriffith$elm_codegen$Elm$Annotation$getAliases = function (_v0) {
-	var ann = _v0.a;
-	return ann.aliases;
-};
-var $elm$core$Dict$union = F2(
-	function (t1, t2) {
-		return A3($elm$core$Dict$foldl, $elm$core$Dict$insert, t2, t1);
-	});
-var $mdgriffith$elm_codegen$Internal$Compiler$mergeAliases = $elm$core$Dict$union;
 var $mdgriffith$elm_codegen$Elm$Annotation$function = F2(
 	function (anns, _return) {
 		return $mdgriffith$elm_codegen$Internal$Compiler$Annotation(
@@ -9237,35 +9362,6 @@ var $mdgriffith$elm_codegen$Elm$functionReduced = F2(
 							})),
 					imports: _return.imports
 				};
-			});
-	});
-var $mdgriffith$elm_codegen$Elm$Annotation$namedWith = F3(
-	function (mod, name, args) {
-		return $mdgriffith$elm_codegen$Internal$Compiler$Annotation(
-			{
-				aliases: A3(
-					$elm$core$List$foldl,
-					F2(
-						function (ann, aliases) {
-							return A2(
-								$mdgriffith$elm_codegen$Internal$Compiler$mergeAliases,
-								$mdgriffith$elm_codegen$Elm$Annotation$getAliases(ann),
-								aliases);
-						}),
-					$mdgriffith$elm_codegen$Internal$Compiler$emptyAliases,
-					args),
-				annotation: A2(
-					$stil4m$elm_syntax$Elm$Syntax$TypeAnnotation$Typed,
-					$mdgriffith$elm_codegen$Internal$Compiler$nodify(
-						_Utils_Tuple2(
-							mod,
-							$mdgriffith$elm_codegen$Internal$Format$formatType(name))),
-					$mdgriffith$elm_codegen$Internal$Compiler$nodifyAll(
-						A2($elm$core$List$map, $mdgriffith$elm_codegen$Internal$Compiler$getInnerAnnotation, args))),
-				imports: A2(
-					$elm$core$List$cons,
-					mod,
-					A2($elm$core$List$concatMap, $mdgriffith$elm_codegen$Internal$Compiler$getAnnotationImports, args))
 			});
 	});
 var $author$project$Gen$Http$expectJson = F2(
@@ -13793,6 +13889,147 @@ var $mdgriffith$elm_codegen$Elm$Declare$fn = F3(
 			declaration: A2($mdgriffith$elm_codegen$Elm$declaration, name, funcExp)
 		};
 	});
+var $mdgriffith$elm_codegen$Elm$function = F2(
+	function (initialArgList, toFullExpression) {
+		if (!initialArgList.b) {
+			return toFullExpression(_List_Nil);
+		} else {
+			return $mdgriffith$elm_codegen$Internal$Compiler$expression(
+				function (index) {
+					var args = A3(
+						$elm$core$List$foldl,
+						F2(
+							function (_v5, found) {
+								var nameBase = _v5.a;
+								var maybeType = _v5.b;
+								var argType = A2(
+									$elm$core$Maybe$withDefault,
+									$mdgriffith$elm_codegen$Internal$Compiler$Annotation(
+										{
+											aliases: $mdgriffith$elm_codegen$Internal$Compiler$emptyAliases,
+											annotation: $stil4m$elm_syntax$Elm$Syntax$TypeAnnotation$GenericType(
+												A2($mdgriffith$elm_codegen$Internal$Index$protectTypeName, nameBase, found.index)),
+											imports: _List_Nil
+										}),
+									maybeType);
+								var _v6 = A2($mdgriffith$elm_codegen$Internal$Index$getName, nameBase, found.index);
+								var name = _v6.a;
+								var newIndex = _v6.b;
+								var arg = $mdgriffith$elm_codegen$Elm$value(
+									{
+										annotation: $elm$core$Maybe$Just(argType),
+										importFrom: _List_Nil,
+										name: name
+									});
+								return {
+									args: A2($elm$core$List$cons, arg, found.args),
+									index: newIndex,
+									names: A2($elm$core$List$cons, name, found.names),
+									types: A2(
+										$elm$core$List$cons,
+										$mdgriffith$elm_codegen$Internal$Compiler$getInnerAnnotation(argType),
+										found.types)
+								};
+							}),
+						{args: _List_Nil, index: index, names: _List_Nil, types: _List_Nil},
+						initialArgList);
+					var fullExpression = toFullExpression(
+						$elm$core$List$reverse(args.args));
+					var expr = function () {
+						var toExpr = fullExpression.a;
+						return toExpr(index);
+					}();
+					return {
+						annotation: function () {
+							var _v1 = expr.annotation;
+							if (_v1.$ === 'Err') {
+								var err = _v1.a;
+								return $elm$core$Result$Err(err);
+							} else {
+								var _return = _v1.a;
+								return $elm$core$Result$Ok(
+									{
+										aliases: A3(
+											$elm$core$List$foldl,
+											F2(
+												function (_v2, aliases) {
+													var maybeAnn = _v2.b;
+													if (maybeAnn.$ === 'Nothing') {
+														return aliases;
+													} else {
+														var ann = maybeAnn.a;
+														return A2(
+															$mdgriffith$elm_codegen$Internal$Compiler$mergeAliases,
+															$mdgriffith$elm_codegen$Internal$Compiler$getAliases(ann),
+															aliases);
+													}
+												}),
+											_return.aliases,
+											initialArgList),
+										inferences: _return.inferences,
+										type_: A3(
+											$elm$core$List$foldl,
+											F2(
+												function (ann, fnbody) {
+													return A2(
+														$stil4m$elm_syntax$Elm$Syntax$TypeAnnotation$FunctionTypeAnnotation,
+														$mdgriffith$elm_codegen$Internal$Compiler$nodify(ann),
+														$mdgriffith$elm_codegen$Internal$Compiler$nodify(fnbody));
+												}),
+											_return.type_,
+											args.types)
+									});
+							}
+						}(),
+						expression: $stil4m$elm_syntax$Elm$Syntax$Expression$LambdaExpression(
+							{
+								args: A3(
+									$elm$core$List$foldl,
+									F2(
+										function (n, names) {
+											return A2(
+												$elm$core$List$cons,
+												$mdgriffith$elm_codegen$Internal$Compiler$nodify(
+													$stil4m$elm_syntax$Elm$Syntax$Pattern$VarPattern(n)),
+												names);
+										}),
+									_List_Nil,
+									args.names),
+								expression: $mdgriffith$elm_codegen$Internal$Compiler$nodify(expr.expression)
+							}),
+						imports: expr.imports
+					};
+				});
+		}
+	});
+var $mdgriffith$elm_codegen$Elm$Declare$function = F3(
+	function (name, params, toExp) {
+		var funcExp = A2($mdgriffith$elm_codegen$Elm$function, params, toExp);
+		var call = F2(
+			function (importFrom, args) {
+				return A2(
+					$mdgriffith$elm_codegen$Elm$apply,
+					$mdgriffith$elm_codegen$Internal$Compiler$Expression(
+						function (index) {
+							var toFnExp = funcExp.a;
+							var fnExp = toFnExp(index);
+							return {
+								annotation: fnExp.annotation,
+								expression: A2(
+									$stil4m$elm_syntax$Elm$Syntax$Expression$FunctionOrValue,
+									importFrom,
+									$mdgriffith$elm_codegen$Internal$Format$sanitize(name)),
+								imports: fnExp.imports
+							};
+						}),
+					args);
+			});
+		return {
+			call: call(_List_Nil),
+			callFrom: call,
+			declaration: A2($mdgriffith$elm_codegen$Elm$declaration, name, funcExp)
+		};
+	});
 var $mdgriffith$elm_codegen$Internal$Compiler$DuplicateFieldInRecord = function (a) {
 	return {$: 'DuplicateFieldInRecord', a: a};
 };
@@ -14059,32 +14296,14 @@ var $author$project$OpenApi$info = function (_v0) {
 	var openApi = _v0.a;
 	return openApi.info;
 };
-var $stil4m$elm_syntax$Elm$Syntax$Expression$Integer = function (a) {
-	return {$: 'Integer', a: a};
-};
-var $mdgriffith$elm_codegen$Internal$Types$int = A2(
-	$stil4m$elm_syntax$Elm$Syntax$TypeAnnotation$Typed,
-	$mdgriffith$elm_codegen$Internal$Types$nodify(
-		_Utils_Tuple2(_List_Nil, 'Int')),
-	_List_Nil);
-var $mdgriffith$elm_codegen$Elm$int = function (intVal) {
-	return $mdgriffith$elm_codegen$Internal$Compiler$Expression(
-		function (_v0) {
-			return {
-				annotation: $elm$core$Result$Ok(
-					{aliases: $mdgriffith$elm_codegen$Internal$Compiler$emptyAliases, inferences: $elm$core$Dict$empty, type_: $mdgriffith$elm_codegen$Internal$Types$int}),
-				expression: $stil4m$elm_syntax$Elm$Syntax$Expression$Integer(intVal),
-				imports: _List_Nil
-			};
-		});
-};
 var $author$project$Main$invalidModuleNameChars = _List_fromArray(
 	[
 		_Utils_chr(' '),
 		_Utils_chr('.'),
 		_Utils_chr('/'),
 		_Utils_chr('{'),
-		_Utils_chr('}')
+		_Utils_chr('}'),
+		_Utils_chr('-')
 	]);
 var $elm$core$String$map = _String_map;
 var $author$project$Main$makeNamespaceValid = function (str) {
@@ -14094,44 +14313,6 @@ var $author$project$Main$makeNamespaceValid = function (str) {
 			return A2($elm$core$List$member, _char, $author$project$Main$invalidModuleNameChars) ? _Utils_chr('_') : _char;
 		},
 		str);
-};
-var $author$project$OpenApi$Operation$operationId = function (_v0) {
-	var operation_ = _v0.a;
-	return operation_.operationId;
-};
-var $author$project$OpenApi$paths = function (_v0) {
-	var openApi = _v0.a;
-	return openApi.paths;
-};
-var $elm$core$String$filter = _String_filter;
-var $author$project$Main$removeInvlidChars = function (str) {
-	return A2(
-		$elm$core$String$filter,
-		function (_char) {
-			return !_Utils_eq(
-				_char,
-				_Utils_chr('\''));
-		},
-		str);
-};
-var $mdgriffith$elm_codegen$Elm$Annotation$bool = A3($mdgriffith$elm_codegen$Elm$Annotation$typed, _List_Nil, 'Bool', _List_Nil);
-var $mdgriffith$elm_codegen$Elm$Annotation$float = A3($mdgriffith$elm_codegen$Elm$Annotation$typed, _List_Nil, 'Float', _List_Nil);
-var $mdgriffith$elm_codegen$Elm$Annotation$int = A3($mdgriffith$elm_codegen$Elm$Annotation$typed, _List_Nil, 'Int', _List_Nil);
-var $mdgriffith$elm_codegen$Elm$Annotation$list = function (inner) {
-	return A3(
-		$mdgriffith$elm_codegen$Elm$Annotation$typed,
-		_List_Nil,
-		'List',
-		_List_fromArray(
-			[inner]));
-};
-var $mdgriffith$elm_codegen$Elm$Annotation$maybe = function (maybeArg) {
-	return A3(
-		$mdgriffith$elm_codegen$Elm$Annotation$typed,
-		_List_Nil,
-		'Maybe',
-		_List_fromArray(
-			[maybeArg]));
 };
 var $mdgriffith$elm_codegen$Elm$Annotation$named = F2(
 	function (mod, name) {
@@ -14155,7 +14336,27 @@ var $mdgriffith$elm_codegen$Elm$Annotation$named = F2(
 				}()
 			});
 	});
-var $elm$core$Debug$todo = _Debug_todo;
+var $author$project$OpenApi$Operation$operationId = function (_v0) {
+	var operation_ = _v0.a;
+	return operation_.operationId;
+};
+var $author$project$OpenApi$paths = function (_v0) {
+	var openApi = _v0.a;
+	return openApi.paths;
+};
+var $elm$core$String$filter = _String_filter;
+var $author$project$Main$removeInvlidChars = function (str) {
+	return A2(
+		$elm$core$String$filter,
+		function (_char) {
+			return !_Utils_eq(
+				_char,
+				_Utils_chr('\''));
+		},
+		str);
+};
+var $mdgriffith$elm_codegen$Elm$Annotation$bool = A3($mdgriffith$elm_codegen$Elm$Annotation$typed, _List_Nil, 'Bool', _List_Nil);
+var $elm$core$Char$toLower = _Char_toLower;
 var $elm_community$string_extra$String$Extra$changeCase = F2(
 	function (mutator, word) {
 		return A2(
@@ -14210,14 +14411,50 @@ var $author$project$Main$typifyName = function (name) {
 				' ',
 				A3($elm$core$String$replace, '-', ' ', name))));
 };
+var $author$project$Main$elmifyName = function (name) {
+	return A2(
+		$elm$core$Maybe$withDefault,
+		'',
+		A2(
+			$elm$core$Maybe$map,
+			function (_v0) {
+				var first = _v0.a;
+				var rest = _v0.b;
+				return A2(
+					$elm$core$String$cons,
+					$elm$core$Char$toLower(first),
+					rest);
+			},
+			$elm$core$String$uncons(
+				$author$project$Main$typifyName(name))));
+};
+var $mdgriffith$elm_codegen$Elm$Annotation$float = A3($mdgriffith$elm_codegen$Elm$Annotation$typed, _List_Nil, 'Float', _List_Nil);
+var $mdgriffith$elm_codegen$Elm$Annotation$int = A3($mdgriffith$elm_codegen$Elm$Annotation$typed, _List_Nil, 'Int', _List_Nil);
+var $mdgriffith$elm_codegen$Elm$Annotation$list = function (inner) {
+	return A3(
+		$mdgriffith$elm_codegen$Elm$Annotation$typed,
+		_List_Nil,
+		'List',
+		_List_fromArray(
+			[inner]));
+};
+var $mdgriffith$elm_codegen$Elm$Annotation$maybe = function (maybeArg) {
+	return A3(
+		$mdgriffith$elm_codegen$Elm$Annotation$typed,
+		_List_Nil,
+		'Maybe',
+		_List_fromArray(
+			[maybeArg]));
+};
+var $elm$core$Debug$todo = _Debug_todo;
 var $author$project$Main$schemaToAnnotation = function (schema) {
 	if (schema.$ === 'BooleanSchema') {
 		var bool = schema.a;
 		return _Debug_todo(
 			'Main',
 			{
-				start: {line: 151, column: 13},
-				end: {line: 151, column: 23}
+				start: {line: 388, column: 13},
+				end: {line: 388, column: 23}
 			})('');
 	} else {
 		var subSchema = schema.a;
@@ -14231,7 +14468,7 @@ var $author$project$Main$schemaToAnnotation = function (schema) {
 								var key = _v10.a;
 								var valueSchema = _v10.b;
 								return _Utils_Tuple2(
-									key,
+									$author$project$Main$elmifyName(key),
 									$author$project$Main$schemaToAnnotation(valueSchema));
 							},
 							A2(
@@ -14256,8 +14493,8 @@ var $author$project$Main$schemaToAnnotation = function (schema) {
 					return _Debug_todo(
 						'Main',
 						{
-							start: {line: 180, column: 29},
-							end: {line: 180, column: 39}
+							start: {line: 417, column: 29},
+							end: {line: 417, column: 39}
 						})('');
 				default:
 					var _v11 = subSchema.items;
@@ -14266,15 +14503,15 @@ var $author$project$Main$schemaToAnnotation = function (schema) {
 							return _Debug_todo(
 								'Main',
 								{
-									start: {line: 185, column: 37},
-									end: {line: 185, column: 47}
+									start: {line: 422, column: 37},
+									end: {line: 422, column: 47}
 								})('err');
 						case 'ArrayOfItems':
 							return _Debug_todo(
 								'Main',
 								{
-									start: {line: 188, column: 37},
-									end: {line: 188, column: 47}
+									start: {line: 425, column: 37},
+									end: {line: 425, column: 47}
 								})('');
 						default:
 							var itemSchema = _v11.a;
@@ -14322,8 +14559,8 @@ var $author$project$Main$schemaToAnnotation = function (schema) {
 						return _Debug_todo(
 							'Main',
 							{
-								start: {line: 213, column: 37},
-								end: {line: 213, column: 47}
+								start: {line: 450, column: 37},
+								end: {line: 450, column: 47}
 							})('other ref: ' + ref);
 					}
 				}
@@ -14336,8 +14573,1087 @@ var $author$project$Main$schemaToAnnotation = function (schema) {
 				return _Debug_todo(
 					'Main',
 					{
-						start: {line: 219, column: 21},
-						end: {line: 219, column: 31}
+						start: {line: 456, column: 21},
+						end: {line: 456, column: 31}
+					})('union type');
+		}
+	}
+};
+var $author$project$Gen$Json$Decode$bool = $mdgriffith$elm_codegen$Elm$value(
+	{
+		annotation: $elm$core$Maybe$Just(
+			A3(
+				$mdgriffith$elm_codegen$Elm$Annotation$namedWith,
+				_List_fromArray(
+					['Json', 'Decode']),
+				'Decoder',
+				_List_fromArray(
+					[$mdgriffith$elm_codegen$Elm$Annotation$bool]))),
+		importFrom: _List_fromArray(
+			['Json', 'Decode']),
+		name: 'bool'
+	});
+var $author$project$Gen$Json$Decode$field = F2(
+	function (fieldArg, fieldArg0) {
+		return A2(
+			$mdgriffith$elm_codegen$Elm$apply,
+			$mdgriffith$elm_codegen$Elm$value(
+				{
+					annotation: $elm$core$Maybe$Just(
+						A2(
+							$mdgriffith$elm_codegen$Elm$Annotation$function,
+							_List_fromArray(
+								[
+									$mdgriffith$elm_codegen$Elm$Annotation$string,
+									A3(
+									$mdgriffith$elm_codegen$Elm$Annotation$namedWith,
+									_List_fromArray(
+										['Json', 'Decode']),
+									'Decoder',
+									_List_fromArray(
+										[
+											$mdgriffith$elm_codegen$Elm$Annotation$var('a')
+										]))
+								]),
+							A3(
+								$mdgriffith$elm_codegen$Elm$Annotation$namedWith,
+								_List_fromArray(
+									['Json', 'Decode']),
+								'Decoder',
+								_List_fromArray(
+									[
+										$mdgriffith$elm_codegen$Elm$Annotation$var('a')
+									])))),
+					importFrom: _List_fromArray(
+						['Json', 'Decode']),
+					name: 'field'
+				}),
+			_List_fromArray(
+				[
+					$mdgriffith$elm_codegen$Elm$string(fieldArg),
+					fieldArg0
+				]));
+	});
+var $author$project$Gen$Json$Decode$float = $mdgriffith$elm_codegen$Elm$value(
+	{
+		annotation: $elm$core$Maybe$Just(
+			A3(
+				$mdgriffith$elm_codegen$Elm$Annotation$namedWith,
+				_List_fromArray(
+					['Json', 'Decode']),
+				'Decoder',
+				_List_fromArray(
+					[$mdgriffith$elm_codegen$Elm$Annotation$float]))),
+		importFrom: _List_fromArray(
+			['Json', 'Decode']),
+		name: 'float'
+	});
+var $author$project$Gen$Json$Decode$int = $mdgriffith$elm_codegen$Elm$value(
+	{
+		annotation: $elm$core$Maybe$Just(
+			A3(
+				$mdgriffith$elm_codegen$Elm$Annotation$namedWith,
+				_List_fromArray(
+					['Json', 'Decode']),
+				'Decoder',
+				_List_fromArray(
+					[$mdgriffith$elm_codegen$Elm$Annotation$int]))),
+		importFrom: _List_fromArray(
+			['Json', 'Decode']),
+		name: 'int'
+	});
+var $author$project$Gen$Json$Decode$list = function (listArg) {
+	return A2(
+		$mdgriffith$elm_codegen$Elm$apply,
+		$mdgriffith$elm_codegen$Elm$value(
+			{
+				annotation: $elm$core$Maybe$Just(
+					A2(
+						$mdgriffith$elm_codegen$Elm$Annotation$function,
+						_List_fromArray(
+							[
+								A3(
+								$mdgriffith$elm_codegen$Elm$Annotation$namedWith,
+								_List_fromArray(
+									['Json', 'Decode']),
+								'Decoder',
+								_List_fromArray(
+									[
+										$mdgriffith$elm_codegen$Elm$Annotation$var('a')
+									]))
+							]),
+						A3(
+							$mdgriffith$elm_codegen$Elm$Annotation$namedWith,
+							_List_fromArray(
+								['Json', 'Decode']),
+							'Decoder',
+							_List_fromArray(
+								[
+									$mdgriffith$elm_codegen$Elm$Annotation$list(
+									$mdgriffith$elm_codegen$Elm$Annotation$var('a'))
+								])))),
+				importFrom: _List_fromArray(
+					['Json', 'Decode']),
+				name: 'list'
+			}),
+		_List_fromArray(
+			[listArg]));
+};
+var $author$project$Gen$Json$Decode$maybe = function (maybeArg) {
+	return A2(
+		$mdgriffith$elm_codegen$Elm$apply,
+		$mdgriffith$elm_codegen$Elm$value(
+			{
+				annotation: $elm$core$Maybe$Just(
+					A2(
+						$mdgriffith$elm_codegen$Elm$Annotation$function,
+						_List_fromArray(
+							[
+								A3(
+								$mdgriffith$elm_codegen$Elm$Annotation$namedWith,
+								_List_fromArray(
+									['Json', 'Decode']),
+								'Decoder',
+								_List_fromArray(
+									[
+										$mdgriffith$elm_codegen$Elm$Annotation$var('a')
+									]))
+							]),
+						A3(
+							$mdgriffith$elm_codegen$Elm$Annotation$namedWith,
+							_List_fromArray(
+								['Json', 'Decode']),
+							'Decoder',
+							_List_fromArray(
+								[
+									$mdgriffith$elm_codegen$Elm$Annotation$maybe(
+									$mdgriffith$elm_codegen$Elm$Annotation$var('a'))
+								])))),
+				importFrom: _List_fromArray(
+					['Json', 'Decode']),
+				name: 'maybe'
+			}),
+		_List_fromArray(
+			[maybeArg]));
+};
+var $mdgriffith$elm_codegen$Elm$Op$BinOp = F3(
+	function (a, b, c) {
+		return {$: 'BinOp', a: a, b: b, c: c};
+	});
+var $stil4m$elm_syntax$Elm$Syntax$Infix$Left = {$: 'Left'};
+var $stil4m$elm_syntax$Elm$Syntax$Expression$OperatorApplication = F4(
+	function (a, b, c, d) {
+		return {$: 'OperatorApplication', a: a, b: b, c: c, d: d};
+	});
+var $mdgriffith$elm_codegen$Elm$Op$applyPipe = F4(
+	function (_v0, infixAnnotation, l, r) {
+		var symbol = _v0.a;
+		var dir = _v0.b;
+		return $mdgriffith$elm_codegen$Internal$Compiler$Expression(
+			function (index) {
+				var _v1 = A2($mdgriffith$elm_codegen$Internal$Compiler$toExpressionDetails, index, l);
+				var leftIndex = _v1.a;
+				var left = _v1.b;
+				var _v2 = A2($mdgriffith$elm_codegen$Internal$Compiler$toExpressionDetails, leftIndex, r);
+				var rightIndex = _v2.a;
+				var right = _v2.b;
+				var annotationIndex = $mdgriffith$elm_codegen$Internal$Index$next(rightIndex);
+				return {
+					annotation: A3(
+						$mdgriffith$elm_codegen$Internal$Compiler$applyType,
+						index,
+						$elm$core$Result$Ok(
+							{aliases: $mdgriffith$elm_codegen$Internal$Compiler$emptyAliases, inferences: $elm$core$Dict$empty, type_: infixAnnotation}),
+						_List_fromArray(
+							[left, right])),
+					expression: A4(
+						$stil4m$elm_syntax$Elm$Syntax$Expression$OperatorApplication,
+						symbol,
+						dir,
+						$mdgriffith$elm_codegen$Internal$Compiler$nodify(left.expression),
+						$mdgriffith$elm_codegen$Internal$Compiler$nodify(right.expression)),
+					imports: _Utils_ap(left.imports, right.imports)
+				};
+			});
+	});
+var $mdgriffith$elm_codegen$Internal$Types$function = F2(
+	function (args, _return) {
+		return A3(
+			$elm$core$List$foldr,
+			F2(
+				function (ann, fn) {
+					return A2(
+						$stil4m$elm_syntax$Elm$Syntax$TypeAnnotation$FunctionTypeAnnotation,
+						$mdgriffith$elm_codegen$Internal$Types$nodify(ann),
+						$mdgriffith$elm_codegen$Internal$Types$nodify(fn));
+				}),
+			_return,
+			args);
+	});
+var $mdgriffith$elm_codegen$Internal$Types$formatValue = function (str) {
+	var formatted = _Utils_eq(
+		$elm$core$String$toUpper(str),
+		str) ? $elm$core$String$toLower(str) : _Utils_ap(
+		$elm$core$String$toLower(
+			A2($elm$core$String$left, 1, str)),
+		A2($elm$core$String$dropLeft, 1, str));
+	return $mdgriffith$elm_codegen$Internal$Format$sanitize(formatted);
+};
+var $mdgriffith$elm_codegen$Internal$Types$var = function (name) {
+	return $stil4m$elm_syntax$Elm$Syntax$TypeAnnotation$GenericType(
+		$mdgriffith$elm_codegen$Internal$Types$formatValue(name));
+};
+var $mdgriffith$elm_codegen$Elm$Op$pipe = F2(
+	function (r, l) {
+		return A4(
+			$mdgriffith$elm_codegen$Elm$Op$applyPipe,
+			A3($mdgriffith$elm_codegen$Elm$Op$BinOp, '|>', $stil4m$elm_syntax$Elm$Syntax$Infix$Left, 0),
+			A2(
+				$mdgriffith$elm_codegen$Internal$Types$function,
+				_List_fromArray(
+					[
+						$mdgriffith$elm_codegen$Internal$Types$var('a'),
+						A2(
+						$mdgriffith$elm_codegen$Internal$Types$function,
+						_List_fromArray(
+							[
+								$mdgriffith$elm_codegen$Internal$Types$var('a')
+							]),
+						$mdgriffith$elm_codegen$Internal$Types$var('b'))
+					]),
+				$mdgriffith$elm_codegen$Internal$Types$var('b')),
+			l,
+			r);
+	});
+var $author$project$Gen$Json$Decode$string = $mdgriffith$elm_codegen$Elm$value(
+	{
+		annotation: $elm$core$Maybe$Just(
+			A3(
+				$mdgriffith$elm_codegen$Elm$Annotation$namedWith,
+				_List_fromArray(
+					['Json', 'Decode']),
+				'Decoder',
+				_List_fromArray(
+					[$mdgriffith$elm_codegen$Elm$Annotation$string]))),
+		importFrom: _List_fromArray(
+			['Json', 'Decode']),
+		name: 'string'
+	});
+var $author$project$Gen$Json$Decode$succeed = function (succeedArg) {
+	return A2(
+		$mdgriffith$elm_codegen$Elm$apply,
+		$mdgriffith$elm_codegen$Elm$value(
+			{
+				annotation: $elm$core$Maybe$Just(
+					A2(
+						$mdgriffith$elm_codegen$Elm$Annotation$function,
+						_List_fromArray(
+							[
+								$mdgriffith$elm_codegen$Elm$Annotation$var('a')
+							]),
+						A3(
+							$mdgriffith$elm_codegen$Elm$Annotation$namedWith,
+							_List_fromArray(
+								['Json', 'Decode']),
+							'Decoder',
+							_List_fromArray(
+								[
+									$mdgriffith$elm_codegen$Elm$Annotation$var('a')
+								])))),
+				importFrom: _List_fromArray(
+					['Json', 'Decode']),
+				name: 'succeed'
+			}),
+		_List_fromArray(
+			[succeedArg]));
+};
+var $author$project$Gen$Debug$todo = function (todoArg) {
+	return A2(
+		$mdgriffith$elm_codegen$Elm$apply,
+		$mdgriffith$elm_codegen$Elm$value(
+			{
+				annotation: $elm$core$Maybe$Just(
+					A2(
+						$mdgriffith$elm_codegen$Elm$Annotation$function,
+						_List_fromArray(
+							[$mdgriffith$elm_codegen$Elm$Annotation$string]),
+						$mdgriffith$elm_codegen$Elm$Annotation$var('a'))),
+				importFrom: _List_fromArray(
+					['Debug']),
+				name: 'todo'
+			}),
+		_List_fromArray(
+			[
+				$mdgriffith$elm_codegen$Elm$string(todoArg)
+			]));
+};
+var $mdgriffith$elm_codegen$Elm$val = function (name) {
+	return $mdgriffith$elm_codegen$Elm$value(
+		{annotation: $elm$core$Maybe$Nothing, importFrom: _List_Nil, name: name});
+};
+var $author$project$Gen$Json$Decode$value = $mdgriffith$elm_codegen$Elm$value(
+	{
+		annotation: $elm$core$Maybe$Just(
+			A3(
+				$mdgriffith$elm_codegen$Elm$Annotation$namedWith,
+				_List_fromArray(
+					['Json', 'Decode']),
+				'Decoder',
+				_List_fromArray(
+					[
+						A3(
+						$mdgriffith$elm_codegen$Elm$Annotation$namedWith,
+						_List_fromArray(
+							['Json', 'Decode']),
+						'Value',
+						_List_Nil)
+					]))),
+		importFrom: _List_fromArray(
+			['Json', 'Decode']),
+		name: 'value'
+	});
+var $author$project$Main$schemaToDecoder = function (schema) {
+	if (schema.$ === 'BooleanSchema') {
+		var bool = schema.a;
+		return _Debug_todo(
+			'Main',
+			{
+				start: {line: 286, column: 13},
+				end: {line: 286, column: 23}
+			})('');
+	} else {
+		var subSchema = schema.a;
+		var singleTypeToDecoder = function (singleType) {
+			switch (singleType.$) {
+				case 'ObjectType':
+					var properties = A2(
+						$elm$core$Maybe$withDefault,
+						_List_Nil,
+						A2(
+							$elm$core$Maybe$map,
+							function (_v12) {
+								var schemata = _v12.a;
+								return schemata;
+							},
+							subSchema.properties));
+					return A3(
+						$elm$core$List$foldl,
+						F2(
+							function (_v9, prevExpr) {
+								var key = _v9.a;
+								var valueSchema = _v9.b;
+								return A2(
+									$mdgriffith$elm_codegen$Elm$Op$pipe,
+									A2(
+										$mdgriffith$elm_codegen$Elm$apply,
+										$mdgriffith$elm_codegen$Elm$value(
+											{
+												annotation: $elm$core$Maybe$Nothing,
+												importFrom: _List_fromArray(
+													['Json', 'Decode', 'Extra']),
+												name: 'andMap'
+											}),
+										_List_fromArray(
+											[
+												A2(
+												$author$project$Gen$Json$Decode$field,
+												key,
+												$author$project$Main$schemaToDecoder(valueSchema))
+											])),
+									prevExpr);
+							}),
+						$author$project$Gen$Json$Decode$succeed(
+							A2(
+								$mdgriffith$elm_codegen$Elm$function,
+								A2(
+									$elm$core$List$map,
+									function (_v10) {
+										var key = _v10.a;
+										return _Utils_Tuple2(
+											$author$project$Main$elmifyName(key),
+											$elm$core$Maybe$Nothing);
+									},
+									properties),
+								function (args) {
+									return $mdgriffith$elm_codegen$Elm$record(
+										A3(
+											$elm$core$List$map2,
+											F2(
+												function (_v11, arg) {
+													var key = _v11.a;
+													return _Utils_Tuple2(
+														$author$project$Main$elmifyName(key),
+														arg);
+												}),
+											properties,
+											args));
+								})),
+						properties);
+				case 'StringType':
+					return $author$project$Gen$Json$Decode$string;
+				case 'IntegerType':
+					return $author$project$Gen$Json$Decode$int;
+				case 'NumberType':
+					return $author$project$Gen$Json$Decode$float;
+				case 'BooleanType':
+					return $author$project$Gen$Json$Decode$bool;
+				case 'NullType':
+					return _Debug_todo(
+						'Main',
+						{
+							start: {line: 341, column: 29},
+							end: {line: 341, column: 39}
+						})('');
+				default:
+					var _v13 = subSchema.items;
+					switch (_v13.$) {
+						case 'NoItems':
+							return _Debug_todo(
+								'Main',
+								{
+									start: {line: 346, column: 37},
+									end: {line: 346, column: 47}
+								})('err');
+						case 'ArrayOfItems':
+							return _Debug_todo(
+								'Main',
+								{
+									start: {line: 349, column: 37},
+									end: {line: 349, column: 47}
+								})('');
+						default:
+							var itemSchema = _v13.a;
+							return $author$project$Gen$Json$Decode$list(
+								$author$project$Main$schemaToDecoder(itemSchema));
+					}
+			}
+		};
+		var _v1 = subSchema.type_;
+		switch (_v1.$) {
+			case 'SingleType':
+				var singleType = _v1.a;
+				return singleTypeToDecoder(singleType);
+			case 'AnyType':
+				var _v2 = subSchema.ref;
+				if (_v2.$ === 'Nothing') {
+					var _v3 = subSchema.anyOf;
+					if (_v3.$ === 'Nothing') {
+						return $author$project$Gen$Json$Decode$value;
+					} else {
+						var anyOf = _v3.a;
+						return $author$project$Gen$Debug$todo('decode anyOf');
+					}
+				} else {
+					var ref = _v2.a;
+					var _v4 = A2($elm$core$String$split, '/', ref);
+					if (((((((_v4.b && (_v4.a === '#')) && _v4.b.b) && (_v4.b.a === 'components')) && _v4.b.b.b) && (_v4.b.b.a === 'schemas')) && _v4.b.b.b.b) && (!_v4.b.b.b.b.b)) {
+						var _v5 = _v4.b;
+						var _v6 = _v5.b;
+						var _v7 = _v6.b;
+						var schemaName = _v7.a;
+						return $mdgriffith$elm_codegen$Elm$val(
+							'decode' + $author$project$Main$typifyName(schemaName));
+					} else {
+						return _Debug_todo(
+							'Main',
+							{
+								start: {line: 375, column: 37},
+								end: {line: 375, column: 47}
+							})('other ref: ' + ref);
+					}
+				}
+			case 'NullableType':
+				var singleType = _v1.a;
+				return $author$project$Gen$Json$Decode$maybe(
+					singleTypeToDecoder(singleType));
+			default:
+				var singleTypes = _v1.a;
+				return _Debug_todo(
+					'Main',
+					{
+						start: {line: 381, column: 21},
+						end: {line: 381, column: 31}
+					})('union type');
+		}
+	}
+};
+var $stil4m$elm_syntax$Elm$Syntax$Expression$RecordAccess = F2(
+	function (a, b) {
+		return {$: 'RecordAccess', a: a, b: b};
+	});
+var $mdgriffith$elm_codegen$Internal$Compiler$AttemptingGetOnTypeNameNotAnAlias = function (a) {
+	return {$: 'AttemptingGetOnTypeNameNotAnAlias', a: a};
+};
+var $mdgriffith$elm_codegen$Internal$Compiler$AttemptingToGetOnIncorrectType = function (a) {
+	return {$: 'AttemptingToGetOnIncorrectType', a: a};
+};
+var $mdgriffith$elm_codegen$Internal$Compiler$getFieldFromList = F2(
+	function (selector, fields) {
+		getFieldFromList:
+		while (true) {
+			if (!fields.b) {
+				return $elm$core$Maybe$Nothing;
+			} else {
+				var nodifiedTop = fields.a;
+				var remain = fields.b;
+				var _v1 = $mdgriffith$elm_codegen$Internal$Compiler$denode(nodifiedTop);
+				var fieldname = _v1.a;
+				var contents = _v1.b;
+				if (_Utils_eq(
+					$mdgriffith$elm_codegen$Internal$Compiler$denode(fieldname),
+					selector)) {
+					return $elm$core$Maybe$Just(
+						$mdgriffith$elm_codegen$Internal$Compiler$denode(contents));
+				} else {
+					var $temp$selector = selector,
+						$temp$fields = remain;
+					selector = $temp$selector;
+					fields = $temp$fields;
+					continue getFieldFromList;
+				}
+			}
+		}
+	});
+var $mdgriffith$elm_codegen$Internal$Compiler$inferRecordField = F2(
+	function (index, _v0) {
+		var fieldName = _v0.fieldName;
+		var nameOfRecord = _v0.nameOfRecord;
+		var fieldType = $stil4m$elm_syntax$Elm$Syntax$TypeAnnotation$GenericType(
+			$mdgriffith$elm_codegen$Internal$Format$formatValue(
+				_Utils_ap(
+					fieldName,
+					$mdgriffith$elm_codegen$Internal$Index$indexToString(index))));
+		return $elm$core$Result$Ok(
+			{
+				aliases: $mdgriffith$elm_codegen$Internal$Compiler$emptyAliases,
+				inferences: A3(
+					$mdgriffith$elm_codegen$Internal$Compiler$addInference,
+					nameOfRecord,
+					A2(
+						$stil4m$elm_syntax$Elm$Syntax$TypeAnnotation$GenericRecord,
+						$mdgriffith$elm_codegen$Internal$Compiler$nodify(nameOfRecord),
+						$mdgriffith$elm_codegen$Internal$Compiler$nodify(
+							_List_fromArray(
+								[
+									$mdgriffith$elm_codegen$Internal$Compiler$nodify(
+									_Utils_Tuple2(
+										$mdgriffith$elm_codegen$Internal$Compiler$nodify(fieldName),
+										$mdgriffith$elm_codegen$Internal$Compiler$nodify(fieldType)))
+								]))),
+					$elm$core$Dict$empty),
+				type_: fieldType
+			});
+	});
+var $mdgriffith$elm_codegen$Internal$Compiler$resolveField = F5(
+	function (index, type_, aliases, inferences, fieldName) {
+		resolveField:
+		while (true) {
+			if ($mdgriffith$elm_codegen$Internal$Index$typecheck(index)) {
+				switch (type_.$) {
+					case 'Record':
+						var fields = type_.a;
+						var _v1 = A2($mdgriffith$elm_codegen$Internal$Compiler$getFieldFromList, fieldName, fields);
+						if (_v1.$ === 'Just') {
+							var ann = _v1.a;
+							return $elm$core$Result$Ok(
+								{aliases: aliases, inferences: inferences, type_: ann});
+						} else {
+							return $elm$core$Result$Err(
+								_List_fromArray(
+									[
+										$mdgriffith$elm_codegen$Internal$Compiler$CouldNotFindField(
+										{
+											existingFields: A2(
+												$elm$core$List$map,
+												A2(
+													$elm$core$Basics$composeR,
+													$mdgriffith$elm_codegen$Internal$Compiler$denode,
+													A2($elm$core$Basics$composeR, $elm$core$Tuple$first, $mdgriffith$elm_codegen$Internal$Compiler$denode)),
+												fields),
+											field: fieldName
+										})
+									]));
+						}
+					case 'GenericRecord':
+						var name = type_.a;
+						var fields = type_.b;
+						var _v2 = A2(
+							$mdgriffith$elm_codegen$Internal$Compiler$getFieldFromList,
+							fieldName,
+							$mdgriffith$elm_codegen$Internal$Compiler$denode(fields));
+						if (_v2.$ === 'Just') {
+							var ann = _v2.a;
+							return $elm$core$Result$Ok(
+								{aliases: aliases, inferences: inferences, type_: ann});
+						} else {
+							return $elm$core$Result$Err(
+								_List_fromArray(
+									[
+										$mdgriffith$elm_codegen$Internal$Compiler$CouldNotFindField(
+										{
+											existingFields: A2(
+												$elm$core$List$map,
+												A2(
+													$elm$core$Basics$composeR,
+													$mdgriffith$elm_codegen$Internal$Compiler$denode,
+													A2($elm$core$Basics$composeR, $elm$core$Tuple$first, $mdgriffith$elm_codegen$Internal$Compiler$denode)),
+												$mdgriffith$elm_codegen$Internal$Compiler$denode(fields)),
+											field: fieldName
+										})
+									]));
+						}
+					case 'GenericType':
+						var nameOfRecord = type_.a;
+						return A2(
+							$mdgriffith$elm_codegen$Internal$Compiler$inferRecordField,
+							index,
+							{fieldName: fieldName, nameOfRecord: nameOfRecord});
+					case 'Typed':
+						var nodedModAndName = type_.a;
+						var vars = type_.b;
+						var _v3 = A2($mdgriffith$elm_codegen$Internal$Compiler$getAlias, nodedModAndName, aliases);
+						if (_v3.$ === 'Nothing') {
+							return $elm$core$Result$Err(
+								_List_fromArray(
+									[
+										$mdgriffith$elm_codegen$Internal$Compiler$AttemptingGetOnTypeNameNotAnAlias(
+										{field: fieldName, on: type_})
+									]));
+						} else {
+							var aliased = _v3.a;
+							var $temp$index = index,
+								$temp$type_ = aliased.target,
+								$temp$aliases = aliases,
+								$temp$inferences = inferences,
+								$temp$fieldName = fieldName;
+							index = $temp$index;
+							type_ = $temp$type_;
+							aliases = $temp$aliases;
+							inferences = $temp$inferences;
+							fieldName = $temp$fieldName;
+							continue resolveField;
+						}
+					case 'Tupled':
+						return $elm$core$Result$Err(
+							_List_fromArray(
+								[
+									$mdgriffith$elm_codegen$Internal$Compiler$AttemptingToGetOnIncorrectType(
+									{field: fieldName, on: type_})
+								]));
+					case 'Unit':
+						return $elm$core$Result$Err(
+							_List_fromArray(
+								[
+									$mdgriffith$elm_codegen$Internal$Compiler$AttemptingToGetOnIncorrectType(
+									{field: fieldName, on: type_})
+								]));
+					default:
+						return $elm$core$Result$Err(
+							_List_fromArray(
+								[
+									$mdgriffith$elm_codegen$Internal$Compiler$AttemptingToGetOnIncorrectType(
+									{field: fieldName, on: type_})
+								]));
+				}
+			} else {
+				return $elm$core$Result$Err(_List_Nil);
+			}
+		}
+	});
+var $mdgriffith$elm_codegen$Elm$get = F2(
+	function (unformattedFieldName, recordExpression) {
+		return $mdgriffith$elm_codegen$Internal$Compiler$Expression(
+			function (index) {
+				var fieldName = $mdgriffith$elm_codegen$Internal$Format$formatValue(unformattedFieldName);
+				var _v0 = A2($mdgriffith$elm_codegen$Internal$Compiler$toExpressionDetails, index, recordExpression);
+				var expr = _v0.b;
+				return {
+					annotation: function () {
+						var _v1 = expr.annotation;
+						if (_v1.$ === 'Ok') {
+							var recordAnn = _v1.a;
+							return A5($mdgriffith$elm_codegen$Internal$Compiler$resolveField, index, recordAnn.type_, recordAnn.aliases, recordAnn.inferences, fieldName);
+						} else {
+							var otherwise = _v1;
+							return otherwise;
+						}
+					}(),
+					expression: A2(
+						$stil4m$elm_syntax$Elm$Syntax$Expression$RecordAccess,
+						$mdgriffith$elm_codegen$Internal$Compiler$nodify(expr.expression),
+						$mdgriffith$elm_codegen$Internal$Compiler$nodify(fieldName)),
+					imports: expr.imports
+				};
+			});
+	});
+var $stil4m$elm_syntax$Elm$Syntax$Expression$ListExpr = function (a) {
+	return {$: 'ListExpr', a: a};
+};
+var $mdgriffith$elm_codegen$Internal$Compiler$MismatchedList = F2(
+	function (a, b) {
+		return {$: 'MismatchedList', a: a, b: b};
+	});
+var $mdgriffith$elm_codegen$Internal$Compiler$unifyHelper = F2(
+	function (exps, existing) {
+		unifyHelper:
+		while (true) {
+			if (!exps.b) {
+				return $elm$core$Result$Ok(existing);
+			} else {
+				var top = exps.a;
+				var remain = exps.b;
+				var _v1 = top.annotation;
+				if (_v1.$ === 'Ok') {
+					var ann = _v1.a;
+					var _v2 = A4($mdgriffith$elm_codegen$Internal$Compiler$unifiable, ann.aliases, ann.inferences, ann.type_, existing.type_);
+					if (_v2.b.$ === 'Err') {
+						var err = _v2.b.a;
+						return $elm$core$Result$Err(
+							_List_fromArray(
+								[
+									A2($mdgriffith$elm_codegen$Internal$Compiler$MismatchedList, ann.type_, existing.type_)
+								]));
+					} else {
+						var cache = _v2.a;
+						var _new = _v2.b.a;
+						var $temp$exps = remain,
+							$temp$existing = {
+							aliases: existing.aliases,
+							inferences: A2($mdgriffith$elm_codegen$Internal$Compiler$mergeInferences, existing.inferences, cache),
+							type_: _new
+						};
+						exps = $temp$exps;
+						existing = $temp$existing;
+						continue unifyHelper;
+					}
+				} else {
+					var err = _v1.a;
+					return $elm$core$Result$Err(err);
+				}
+			}
+		}
+	});
+var $mdgriffith$elm_codegen$Internal$Compiler$unify = function (exps) {
+	if (!exps.b) {
+		return $elm$core$Result$Ok(
+			{
+				aliases: $mdgriffith$elm_codegen$Internal$Compiler$emptyAliases,
+				inferences: $elm$core$Dict$empty,
+				type_: $stil4m$elm_syntax$Elm$Syntax$TypeAnnotation$GenericType('a')
+			});
+	} else {
+		var top = exps.a;
+		var remain = exps.b;
+		var _v1 = top.annotation;
+		if (_v1.$ === 'Ok') {
+			var ann = _v1.a;
+			return A2($mdgriffith$elm_codegen$Internal$Compiler$unifyHelper, remain, ann);
+		} else {
+			var err = _v1.a;
+			return $elm$core$Result$Err(err);
+		}
+	}
+};
+var $mdgriffith$elm_codegen$Elm$list = function (exprs) {
+	return $mdgriffith$elm_codegen$Internal$Compiler$expression(
+		function (index) {
+			var exprDetails = A2($mdgriffith$elm_codegen$Internal$Compiler$thread, index, exprs);
+			return {
+				annotation: A2(
+					$elm$core$Result$map,
+					function (inner) {
+						return {
+							aliases: inner.aliases,
+							inferences: inner.inferences,
+							type_: A2(
+								$stil4m$elm_syntax$Elm$Syntax$TypeAnnotation$Typed,
+								$mdgriffith$elm_codegen$Internal$Compiler$nodify(
+									_Utils_Tuple2(_List_Nil, 'List')),
+								_List_fromArray(
+									[
+										$mdgriffith$elm_codegen$Internal$Compiler$nodify(inner.type_)
+									]))
+						};
+					},
+					$mdgriffith$elm_codegen$Internal$Compiler$unify(exprDetails)),
+				expression: $stil4m$elm_syntax$Elm$Syntax$Expression$ListExpr(
+					A2(
+						$elm$core$List$map,
+						A2(
+							$elm$core$Basics$composeR,
+							function ($) {
+								return $.expression;
+							},
+							$mdgriffith$elm_codegen$Internal$Compiler$nodify),
+						exprDetails)),
+				imports: A2($elm$core$List$concatMap, $mdgriffith$elm_codegen$Internal$Compiler$getImports, exprDetails)
+			};
+		});
+};
+var $mdgriffith$elm_codegen$Elm$Annotation$tuple = F2(
+	function (one, two) {
+		return $mdgriffith$elm_codegen$Internal$Compiler$Annotation(
+			{
+				aliases: A2(
+					$mdgriffith$elm_codegen$Internal$Compiler$mergeAliases,
+					$mdgriffith$elm_codegen$Elm$Annotation$getAliases(one),
+					$mdgriffith$elm_codegen$Elm$Annotation$getAliases(two)),
+				annotation: $stil4m$elm_syntax$Elm$Syntax$TypeAnnotation$Tupled(
+					$mdgriffith$elm_codegen$Internal$Compiler$nodifyAll(
+						_List_fromArray(
+							[
+								$mdgriffith$elm_codegen$Internal$Compiler$getInnerAnnotation(one),
+								$mdgriffith$elm_codegen$Internal$Compiler$getInnerAnnotation(two)
+							]))),
+				imports: _Utils_ap(
+					$mdgriffith$elm_codegen$Internal$Compiler$getAnnotationImports(one),
+					$mdgriffith$elm_codegen$Internal$Compiler$getAnnotationImports(two))
+			});
+	});
+var $author$project$Gen$Json$Encode$object = function (objectArg) {
+	return A2(
+		$mdgriffith$elm_codegen$Elm$apply,
+		$mdgriffith$elm_codegen$Elm$value(
+			{
+				annotation: $elm$core$Maybe$Just(
+					A2(
+						$mdgriffith$elm_codegen$Elm$Annotation$function,
+						_List_fromArray(
+							[
+								$mdgriffith$elm_codegen$Elm$Annotation$list(
+								A2(
+									$mdgriffith$elm_codegen$Elm$Annotation$tuple,
+									$mdgriffith$elm_codegen$Elm$Annotation$string,
+									A3(
+										$mdgriffith$elm_codegen$Elm$Annotation$namedWith,
+										_List_fromArray(
+											['Json', 'Encode']),
+										'Value',
+										_List_Nil)))
+							]),
+						A3(
+							$mdgriffith$elm_codegen$Elm$Annotation$namedWith,
+							_List_fromArray(
+								['Json', 'Encode']),
+							'Value',
+							_List_Nil))),
+				importFrom: _List_fromArray(
+					['Json', 'Encode']),
+				name: 'object'
+			}),
+		_List_fromArray(
+			[
+				$mdgriffith$elm_codegen$Elm$list(objectArg)
+			]));
+};
+var $stil4m$elm_syntax$Elm$Syntax$Expression$TupledExpression = function (a) {
+	return {$: 'TupledExpression', a: a};
+};
+var $mdgriffith$elm_codegen$Elm$tuple = F2(
+	function (oneExp, twoExp) {
+		return $mdgriffith$elm_codegen$Internal$Compiler$Expression(
+			function (index) {
+				var _v0 = A2($mdgriffith$elm_codegen$Internal$Compiler$toExpressionDetails, index, oneExp);
+				var oneIndex = _v0.a;
+				var one = _v0.b;
+				var _v1 = A2($mdgriffith$elm_codegen$Internal$Compiler$toExpressionDetails, oneIndex, twoExp);
+				var twoIndex = _v1.a;
+				var two = _v1.b;
+				return {
+					annotation: A3(
+						$elm$core$Result$map2,
+						F2(
+							function (oneA, twoA) {
+								return {
+									aliases: A2($mdgriffith$elm_codegen$Internal$Compiler$mergeAliases, twoA.aliases, oneA.aliases),
+									inferences: A2($mdgriffith$elm_codegen$Internal$Compiler$mergeInferences, twoA.inferences, oneA.inferences),
+									type_: $stil4m$elm_syntax$Elm$Syntax$TypeAnnotation$Tupled(
+										_List_fromArray(
+											[
+												$mdgriffith$elm_codegen$Internal$Compiler$nodify(oneA.type_),
+												$mdgriffith$elm_codegen$Internal$Compiler$nodify(twoA.type_)
+											]))
+								};
+							}),
+						one.annotation,
+						two.annotation),
+					expression: $stil4m$elm_syntax$Elm$Syntax$Expression$TupledExpression(
+						_List_fromArray(
+							[
+								$mdgriffith$elm_codegen$Internal$Compiler$nodify(one.expression),
+								$mdgriffith$elm_codegen$Internal$Compiler$nodify(two.expression)
+							])),
+					imports: _Utils_ap(one.imports, two.imports)
+				};
+			});
+	});
+var $author$project$Main$schemaToEncoder = function (schema) {
+	if (schema.$ === 'BooleanSchema') {
+		var bool = schema.a;
+		return _Debug_todo(
+			'Main',
+			{
+				start: {line: 181, column: 13},
+				end: {line: 181, column: 23}
+			})('');
+	} else {
+		var subSchema = schema.a;
+		var singleTypeToDecoder = function (singleType) {
+			switch (singleType.$) {
+				case 'ObjectType':
+					return A2(
+						$mdgriffith$elm_codegen$Elm$fn,
+						_Utils_Tuple2('rec', $elm$core$Maybe$Nothing),
+						function (rec) {
+							return $author$project$Gen$Json$Encode$object(
+								A2(
+									$elm$core$List$map,
+									function (_v10) {
+										var key = _v10.a;
+										var valueSchema = _v10.b;
+										return A2(
+											$mdgriffith$elm_codegen$Elm$tuple,
+											$mdgriffith$elm_codegen$Elm$string(key),
+											A2(
+												$mdgriffith$elm_codegen$Elm$apply,
+												$author$project$Main$schemaToEncoder(valueSchema),
+												_List_fromArray(
+													[
+														A2(
+														$mdgriffith$elm_codegen$Elm$get,
+														$author$project$Main$elmifyName(key),
+														rec)
+													])));
+									},
+									A2(
+										$elm$core$Maybe$withDefault,
+										_List_Nil,
+										A2(
+											$elm$core$Maybe$map,
+											function (_v9) {
+												var schemata = _v9.a;
+												return schemata;
+											},
+											subSchema.properties))));
+						});
+				case 'StringType':
+					return $mdgriffith$elm_codegen$Elm$value(
+						{
+							annotation: $elm$core$Maybe$Nothing,
+							importFrom: _List_fromArray(
+								['Json', 'Encode']),
+							name: 'string'
+						});
+				case 'IntegerType':
+					return $mdgriffith$elm_codegen$Elm$value(
+						{
+							annotation: $elm$core$Maybe$Nothing,
+							importFrom: _List_fromArray(
+								['Json', 'Encode']),
+							name: 'int'
+						});
+				case 'NumberType':
+					return $mdgriffith$elm_codegen$Elm$value(
+						{
+							annotation: $elm$core$Maybe$Nothing,
+							importFrom: _List_fromArray(
+								['Json', 'Encode']),
+							name: 'float'
+						});
+				case 'BooleanType':
+					return $mdgriffith$elm_codegen$Elm$value(
+						{
+							annotation: $elm$core$Maybe$Nothing,
+							importFrom: _List_fromArray(
+								['Json', 'Encode']),
+							name: 'bool'
+						});
+				case 'NullType':
+					return _Debug_todo(
+						'Main',
+						{
+							start: {line: 231, column: 29},
+							end: {line: 231, column: 39}
+						})('');
+				default:
+					var _v11 = subSchema.items;
+					switch (_v11.$) {
+						case 'NoItems':
+							return _Debug_todo(
+								'Main',
+								{
+									start: {line: 236, column: 37},
+									end: {line: 236, column: 47}
+								})('err');
+						case 'ArrayOfItems':
+							return _Debug_todo(
+								'Main',
+								{
+									start: {line: 239, column: 37},
+									end: {line: 239, column: 47}
+								})('');
+						default:
+							var itemSchema = _v11.a;
+							return A2(
+								$mdgriffith$elm_codegen$Elm$apply,
+								$mdgriffith$elm_codegen$Elm$value(
+									{
+										annotation: $elm$core$Maybe$Nothing,
+										importFrom: _List_fromArray(
+											['Json', 'Encode']),
+										name: 'list'
+									}),
+								_List_fromArray(
+									[
+										$author$project$Main$schemaToEncoder(itemSchema)
+									]));
+					}
+			}
+		};
+		var _v1 = subSchema.type_;
+		switch (_v1.$) {
+			case 'SingleType':
+				var singleType = _v1.a;
+				return singleTypeToDecoder(singleType);
+			case 'AnyType':
+				var _v2 = subSchema.ref;
+				if (_v2.$ === 'Nothing') {
+					var _v3 = subSchema.anyOf;
+					if (_v3.$ === 'Nothing') {
+						return $author$project$Gen$Json$Decode$value;
+					} else {
+						var anyOf = _v3.a;
+						return $author$project$Gen$Debug$todo('decode anyOf');
+					}
+				} else {
+					var ref = _v2.a;
+					var _v4 = A2($elm$core$String$split, '/', ref);
+					if (((((((_v4.b && (_v4.a === '#')) && _v4.b.b) && (_v4.b.a === 'components')) && _v4.b.b.b) && (_v4.b.b.a === 'schemas')) && _v4.b.b.b.b) && (!_v4.b.b.b.b.b)) {
+						var _v5 = _v4.b;
+						var _v6 = _v5.b;
+						var _v7 = _v6.b;
+						var schemaName = _v7.a;
+						return $mdgriffith$elm_codegen$Elm$val(
+							'decode' + $author$project$Main$typifyName(schemaName));
+					} else {
+						return _Debug_todo(
+							'Main',
+							{
+								start: {line: 272, column: 37},
+								end: {line: 272, column: 47}
+							})('other ref: ' + ref);
+					}
+				}
+			case 'NullableType':
+				var singleType = _v1.a;
+				return $author$project$Gen$Debug$todo('encode nullable');
+			default:
+				var singleTypes = _v1.a;
+				return _Debug_todo(
+					'Main',
+					{
+						start: {line: 279, column: 21},
+						end: {line: 279, column: 31}
 					})('union type');
 		}
 	}
@@ -14350,6 +15666,64 @@ var $author$project$OpenApi$Info$title = function (_v0) {
 	var info = _v0.a;
 	return info.title;
 };
+var $mdgriffith$elm_codegen$Internal$Compiler$unifyOn = F2(
+	function (_v0, res) {
+		var annDetails = _v0.a;
+		if (res.$ === 'Err') {
+			return res;
+		} else {
+			var inf = res.a;
+			var _v2 = A4($mdgriffith$elm_codegen$Internal$Compiler$unifiable, inf.aliases, inf.inferences, annDetails.annotation, inf.type_);
+			var newInferences = _v2.a;
+			var finalResult = _v2.b;
+			if (finalResult.$ === 'Ok') {
+				var finalType = finalResult.a;
+				return $elm$core$Result$Ok(
+					{
+						aliases: A2($mdgriffith$elm_codegen$Internal$Compiler$mergeAliases, annDetails.aliases, inf.aliases),
+						inferences: newInferences,
+						type_: finalType
+					});
+			} else {
+				var err = finalResult.a;
+				return $elm$core$Result$Err(
+					_List_fromArray(
+						[err]));
+			}
+		}
+	});
+var $mdgriffith$elm_codegen$Elm$withType = F2(
+	function (ann, _v0) {
+		var annDetails = ann.a;
+		var toExp = _v0.a;
+		return $mdgriffith$elm_codegen$Internal$Compiler$Expression(
+			function (index) {
+				var exp = toExp(index);
+				return _Utils_update(
+					exp,
+					{
+						annotation: function () {
+							var _v1 = A2($mdgriffith$elm_codegen$Internal$Compiler$unifyOn, ann, exp.annotation);
+							if (_v1.$ === 'Ok') {
+								var unified = _v1.a;
+								return $elm$core$Result$Ok(unified);
+							} else {
+								var _v2 = exp.annotation;
+								if (_v2.$ === 'Ok') {
+									var expressionAnnotation = _v2.a;
+									return $elm$core$Result$Ok(
+										{aliases: expressionAnnotation.aliases, inferences: expressionAnnotation.inferences, type_: annDetails.annotation});
+								} else {
+									var err = _v2.a;
+									return $elm$core$Result$Ok(
+										{aliases: $mdgriffith$elm_codegen$Internal$Compiler$emptyAliases, inferences: $elm$core$Dict$empty, type_: annDetails.annotation});
+								}
+							}
+						}(),
+						imports: _Utils_ap(exp.imports, annDetails.imports)
+					});
+			});
+	});
 var $elm$json$Json$Encode$list = F2(
 	function (func, entries) {
 		return _Json_wrap(
@@ -14420,7 +15794,7 @@ var $author$project$Main$update = F2(
 																				_List_fromArray(
 																					[result]));
 																		},
-																		$mdgriffith$elm_codegen$Elm$int(55)),
+																		$author$project$Gen$Debug$todo('todo')),
 																	url: url
 																});
 														}).declaration;
@@ -14434,27 +15808,66 @@ var $author$project$Main$update = F2(
 						$author$project$Main$makeNamespaceValid(
 							$author$project$OpenApi$Info$title(
 								$author$project$OpenApi$info(apiSpec))));
-					var componentDeclarations = A3(
-						$elm$core$Dict$foldl,
-						F3(
-							function (name, schema, res) {
-								return A2(
-									$elm$core$List$cons,
-									A2(
-										$mdgriffith$elm_codegen$Elm$alias,
-										$author$project$Main$typifyName(name),
-										$author$project$Main$schemaToAnnotation(
-											$author$project$OpenApi$Schema$get(schema))),
-									res);
-							}),
-						_List_Nil,
-						A2(
-							$elm$core$Maybe$withDefault,
-							$elm$core$Dict$empty,
+					var componentDeclarations = $elm$core$List$concat(
+						A3(
+							$elm$core$Dict$foldl,
+							F3(
+								function (name, schema, res) {
+									return A2(
+										$elm$core$List$cons,
+										_List_fromArray(
+											[
+												A2(
+												$mdgriffith$elm_codegen$Elm$alias,
+												$author$project$Main$typifyName(name),
+												$author$project$Main$schemaToAnnotation(
+													$author$project$OpenApi$Schema$get(schema))),
+												A3(
+												$mdgriffith$elm_codegen$Elm$Declare$function,
+												'decode' + $author$project$Main$typifyName(name),
+												_List_Nil,
+												function (_v2) {
+													return A2(
+														$mdgriffith$elm_codegen$Elm$withType,
+														$author$project$Gen$Json$Decode$annotation_.decoder(
+															A2(
+																$mdgriffith$elm_codegen$Elm$Annotation$named,
+																_List_Nil,
+																$author$project$Main$typifyName(name))),
+														$author$project$Main$schemaToDecoder(
+															$author$project$OpenApi$Schema$get(schema)));
+												}).declaration,
+												A3(
+												$mdgriffith$elm_codegen$Elm$Declare$function,
+												'encode' + $author$project$Main$typifyName(name),
+												_List_Nil,
+												function (_v3) {
+													return A2(
+														$mdgriffith$elm_codegen$Elm$withType,
+														A2(
+															$mdgriffith$elm_codegen$Elm$Annotation$function,
+															_List_fromArray(
+																[
+																	A2(
+																	$mdgriffith$elm_codegen$Elm$Annotation$named,
+																	_List_Nil,
+																	$author$project$Main$typifyName(name))
+																]),
+															$author$project$Gen$Json$Encode$annotation_.value),
+														$author$project$Main$schemaToEncoder(
+															$author$project$OpenApi$Schema$get(schema)));
+												}).declaration
+											]),
+										res);
+								}),
+							_List_Nil,
 							A2(
-								$elm$core$Maybe$map,
-								$author$project$OpenApi$Components$schemas,
-								$author$project$OpenApi$components(apiSpec))));
+								$elm$core$Maybe$withDefault,
+								$elm$core$Dict$empty,
+								A2(
+									$elm$core$Maybe$map,
+									$author$project$OpenApi$Components$schemas,
+									$author$project$OpenApi$components(apiSpec)))));
 					var file = A2(
 						$mdgriffith$elm_codegen$Elm$file,
 						_List_fromArray(

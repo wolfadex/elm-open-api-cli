@@ -4,7 +4,12 @@ import Dict
 import Elm
 import Elm.Annotation
 import Elm.Declare
+import Elm.Op
+import Gen.Debug
 import Gen.Http
+import Gen.Json.Decode
+import Gen.Json.Decode.Extra
+import Gen.Json.Encode
 import Json.Decode
 import Json.Encode exposing (Value)
 import Json.Schema
@@ -96,7 +101,7 @@ update msg model =
                                                                 , expect =
                                                                     Gen.Http.expectJson
                                                                         (\result -> Elm.apply toMsg [ result ])
-                                                                        (Elm.int 55)
+                                                                        (Gen.Debug.todo "todo")
                                                                 }
                                                         )
                                                         |> .declaration
@@ -114,11 +119,27 @@ update msg model =
                                 |> Maybe.withDefault Dict.empty
                                 |> Dict.foldl
                                     (\name schema res ->
-                                        Elm.alias (typifyName name)
+                                        [ Elm.alias (typifyName name)
                                             (schemaToAnnotation (OpenApi.Schema.get schema))
+                                        , Elm.Declare.function ("decode" ++ typifyName name)
+                                            []
+                                            (\_ ->
+                                                schemaToDecoder (OpenApi.Schema.get schema)
+                                                    |> Elm.withType (Gen.Json.Decode.annotation_.decoder (Elm.Annotation.named [] (typifyName name)))
+                                            )
+                                            |> .declaration
+                                        , Elm.Declare.function ("encode" ++ typifyName name)
+                                            []
+                                            (\_ ->
+                                                schemaToEncoder (OpenApi.Schema.get schema)
+                                                    |> Elm.withType (Elm.Annotation.function [ Elm.Annotation.named [] (typifyName name) ] Gen.Json.Encode.annotation_.value)
+                                            )
+                                            |> .declaration
+                                        ]
                                             :: res
                                     )
                                     []
+                                |> List.concat
 
                         file =
                             Elm.file [ namespace ]
@@ -144,6 +165,222 @@ typifyName name =
         |> String.replace " " ""
 
 
+elmifyName : String -> String
+elmifyName name =
+    name
+        |> typifyName
+        |> String.uncons
+        |> Maybe.map (\( first, rest ) -> String.cons (Char.toLower first) rest)
+        |> Maybe.withDefault ""
+
+
+schemaToEncoder : Json.Schema.Definitions.Schema -> Elm.Expression
+schemaToEncoder schema =
+    case schema of
+        Json.Schema.Definitions.BooleanSchema bool ->
+            Debug.todo ""
+
+        Json.Schema.Definitions.ObjectSchema subSchema ->
+            let
+                singleTypeToDecoder singleType =
+                    case singleType of
+                        Json.Schema.Definitions.ObjectType ->
+                            Elm.fn ( "rec", Nothing )
+                                (\rec ->
+                                    subSchema.properties
+                                        |> Maybe.map (\(Json.Schema.Definitions.Schemata schemata) -> schemata)
+                                        |> Maybe.withDefault []
+                                        |> List.map
+                                            (\( key, valueSchema ) ->
+                                                Elm.tuple
+                                                    (Elm.string key)
+                                                    (Elm.apply (schemaToEncoder valueSchema) [ Elm.get (elmifyName key) rec ])
+                                            )
+                                        |> Gen.Json.Encode.object
+                                )
+
+                        Json.Schema.Definitions.StringType ->
+                            Elm.value
+                                { importFrom = [ "Json", "Encode" ]
+                                , name = "string"
+                                , annotation = Nothing
+                                }
+
+                        Json.Schema.Definitions.IntegerType ->
+                            Elm.value
+                                { importFrom = [ "Json", "Encode" ]
+                                , name = "int"
+                                , annotation = Nothing
+                                }
+
+                        Json.Schema.Definitions.NumberType ->
+                            Elm.value
+                                { importFrom = [ "Json", "Encode" ]
+                                , name = "float"
+                                , annotation = Nothing
+                                }
+
+                        Json.Schema.Definitions.BooleanType ->
+                            Elm.value
+                                { importFrom = [ "Json", "Encode" ]
+                                , name = "bool"
+                                , annotation = Nothing
+                                }
+
+                        Json.Schema.Definitions.NullType ->
+                            Debug.todo ""
+
+                        Json.Schema.Definitions.ArrayType ->
+                            case subSchema.items of
+                                Json.Schema.Definitions.NoItems ->
+                                    Debug.todo "err"
+
+                                Json.Schema.Definitions.ArrayOfItems _ ->
+                                    Debug.todo ""
+
+                                Json.Schema.Definitions.ItemDefinition itemSchema ->
+                                    Elm.apply
+                                        (Elm.value
+                                            { importFrom = [ "Json", "Encode" ]
+                                            , name = "list"
+                                            , annotation = Nothing
+                                            }
+                                        )
+                                        [ schemaToEncoder itemSchema ]
+            in
+            case subSchema.type_ of
+                Json.Schema.Definitions.SingleType singleType ->
+                    singleTypeToDecoder singleType
+
+                Json.Schema.Definitions.AnyType ->
+                    case subSchema.ref of
+                        Nothing ->
+                            case subSchema.anyOf of
+                                Nothing ->
+                                    Gen.Json.Decode.value
+
+                                Just anyOf ->
+                                    -- Elm.Annotation.named [ "Debug" ] "Todo"
+                                    Gen.Debug.todo "decode anyOf"
+
+                        Just ref ->
+                            case String.split "/" ref of
+                                [ "#", "components", "schemas", schemaName ] ->
+                                    Elm.val ("decode" ++ typifyName schemaName)
+
+                                _ ->
+                                    Debug.todo ("other ref: " ++ ref)
+
+                Json.Schema.Definitions.NullableType singleType ->
+                    -- Gen.Json.Decode.maybe (singleTypeToDecoder singleType)
+                    Gen.Debug.todo "encode nullable"
+
+                Json.Schema.Definitions.UnionType singleTypes ->
+                    Debug.todo "union type"
+
+
+schemaToDecoder : Json.Schema.Definitions.Schema -> Elm.Expression
+schemaToDecoder schema =
+    case schema of
+        Json.Schema.Definitions.BooleanSchema bool ->
+            Debug.todo ""
+
+        Json.Schema.Definitions.ObjectSchema subSchema ->
+            let
+                singleTypeToDecoder singleType =
+                    case singleType of
+                        Json.Schema.Definitions.ObjectType ->
+                            let
+                                properties =
+                                    subSchema.properties
+                                        |> Maybe.map (\(Json.Schema.Definitions.Schemata schemata) -> schemata)
+                                        |> Maybe.withDefault []
+                            in
+                            List.foldl
+                                (\( key, valueSchema ) prevExpr ->
+                                    Elm.Op.pipe
+                                        (Elm.apply
+                                            (Elm.value
+                                                { importFrom = [ "Json", "Decode", "Extra" ]
+                                                , name = "andMap"
+                                                , annotation = Nothing
+                                                }
+                                            )
+                                            [ Gen.Json.Decode.field key (schemaToDecoder valueSchema) ]
+                                        )
+                                        prevExpr
+                                )
+                                (Gen.Json.Decode.succeed
+                                    (Elm.function
+                                        (List.map (\( key, _ ) -> ( elmifyName key, Nothing )) properties)
+                                        (\args ->
+                                            Elm.record
+                                                (List.map2
+                                                    (\( key, _ ) arg -> ( elmifyName key, arg ))
+                                                    properties
+                                                    args
+                                                )
+                                        )
+                                    )
+                                )
+                                properties
+
+                        Json.Schema.Definitions.StringType ->
+                            Gen.Json.Decode.string
+
+                        Json.Schema.Definitions.IntegerType ->
+                            Gen.Json.Decode.int
+
+                        Json.Schema.Definitions.NumberType ->
+                            Gen.Json.Decode.float
+
+                        Json.Schema.Definitions.BooleanType ->
+                            Gen.Json.Decode.bool
+
+                        Json.Schema.Definitions.NullType ->
+                            Debug.todo ""
+
+                        Json.Schema.Definitions.ArrayType ->
+                            case subSchema.items of
+                                Json.Schema.Definitions.NoItems ->
+                                    Debug.todo "err"
+
+                                Json.Schema.Definitions.ArrayOfItems _ ->
+                                    Debug.todo ""
+
+                                Json.Schema.Definitions.ItemDefinition itemSchema ->
+                                    Gen.Json.Decode.list (schemaToDecoder itemSchema)
+            in
+            case subSchema.type_ of
+                Json.Schema.Definitions.SingleType singleType ->
+                    singleTypeToDecoder singleType
+
+                Json.Schema.Definitions.AnyType ->
+                    case subSchema.ref of
+                        Nothing ->
+                            case subSchema.anyOf of
+                                Nothing ->
+                                    Gen.Json.Decode.value
+
+                                Just anyOf ->
+                                    -- Elm.Annotation.named [ "Debug" ] "Todo"
+                                    Gen.Debug.todo "decode anyOf"
+
+                        Just ref ->
+                            case String.split "/" ref of
+                                [ "#", "components", "schemas", schemaName ] ->
+                                    Elm.val ("decode" ++ typifyName schemaName)
+
+                                _ ->
+                                    Debug.todo ("other ref: " ++ ref)
+
+                Json.Schema.Definitions.NullableType singleType ->
+                    Gen.Json.Decode.maybe (singleTypeToDecoder singleType)
+
+                Json.Schema.Definitions.UnionType singleTypes ->
+                    Debug.todo "union type"
+
+
 schemaToAnnotation : Json.Schema.Definitions.Schema -> Elm.Annotation.Annotation
 schemaToAnnotation schema =
     case schema of
@@ -160,7 +397,7 @@ schemaToAnnotation schema =
                                 |> Maybe.withDefault []
                                 |> List.map
                                     (\( key, valueSchema ) ->
-                                        ( key, schemaToAnnotation valueSchema )
+                                        ( elmifyName key, schemaToAnnotation valueSchema )
                                     )
                                 |> Elm.Annotation.record
 
@@ -244,4 +481,5 @@ invalidModuleNameChars =
     , '/'
     , '{'
     , '}'
+    , '-'
     ]

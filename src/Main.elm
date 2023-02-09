@@ -382,8 +382,45 @@ schemaToDecoder schema =
                                     Gen.Json.Decode.value
 
                                 Just anyOf ->
-                                    -- Elm.Annotation.named [ "Debug" ] "Todo"
-                                    Gen.Debug.todo "decode anyOf"
+                                    case anyOf of
+                                        [ firstSchema, secondSchema ] ->
+                                            case ( firstSchema, secondSchema ) of
+                                                ( Json.Schema.Definitions.ObjectSchema firstSubSchema, Json.Schema.Definitions.ObjectSchema secondSubSchema ) ->
+                                                    case ( firstSubSchema.type_, secondSubSchema.type_ ) of
+                                                        ( Json.Schema.Definitions.SingleType Json.Schema.Definitions.NullType, _ ) ->
+                                                            Gen.Json.Decode.oneOf
+                                                                [ Elm.apply
+                                                                    (Elm.value
+                                                                        { importFrom = [ "Json", "Decode" ]
+                                                                        , name = "map"
+                                                                        , annotation = Nothing
+                                                                        }
+                                                                    )
+                                                                    [ Elm.val "Present", schemaToDecoder secondSchema ]
+                                                                , Gen.Json.Decode.null (Elm.val "Null")
+                                                                ]
+
+                                                        ( _, Json.Schema.Definitions.SingleType Json.Schema.Definitions.NullType ) ->
+                                                            Gen.Json.Decode.oneOf
+                                                                [ Elm.apply
+                                                                    (Elm.value
+                                                                        { importFrom = [ "Json", "Decode" ]
+                                                                        , name = "map"
+                                                                        , annotation = Nothing
+                                                                        }
+                                                                    )
+                                                                    [ Elm.val "Present", schemaToDecoder firstSchema ]
+                                                                , Gen.Json.Decode.null (Elm.val "Null")
+                                                                ]
+
+                                                        _ ->
+                                                            Gen.Debug.todo ("decode anyOf 2: not nullable:: " ++ Debug.toString firstSubSchema ++ " ,,, " ++ Debug.toString secondSubSchema)
+
+                                                _ ->
+                                                    Gen.Debug.todo "decode anyOf 2: not both object schemas"
+
+                                        _ ->
+                                            Gen.Debug.todo "decode anyOf: not exactly 2 items"
 
                         Just ref ->
                             case String.split "/" ref of

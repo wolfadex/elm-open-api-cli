@@ -14524,8 +14524,8 @@ var $author$project$Main$schemaToAnnotation = function (schema) {
 		return _Debug_todo(
 			'Main',
 			{
-				start: {line: 428, column: 13},
-				end: {line: 428, column: 23}
+				start: {line: 454, column: 13},
+				end: {line: 454, column: 23}
 			})('');
 	} else {
 		var subSchema = schema.a;
@@ -14564,8 +14564,8 @@ var $author$project$Main$schemaToAnnotation = function (schema) {
 					return _Debug_todo(
 						'Main',
 						{
-							start: {line: 457, column: 29},
-							end: {line: 457, column: 39}
+							start: {line: 483, column: 29},
+							end: {line: 483, column: 39}
 						})('');
 				default:
 					var _v11 = subSchema.items;
@@ -14574,15 +14574,15 @@ var $author$project$Main$schemaToAnnotation = function (schema) {
 							return _Debug_todo(
 								'Main',
 								{
-									start: {line: 462, column: 37},
-									end: {line: 462, column: 47}
+									start: {line: 488, column: 37},
+									end: {line: 488, column: 47}
 								})('err');
 						case 'ArrayOfItems':
 							return _Debug_todo(
 								'Main',
 								{
-									start: {line: 465, column: 37},
-									end: {line: 465, column: 47}
+									start: {line: 491, column: 37},
+									end: {line: 491, column: 47}
 								})('');
 						default:
 							var itemSchema = _v11.a;
@@ -14630,8 +14630,8 @@ var $author$project$Main$schemaToAnnotation = function (schema) {
 						return _Debug_todo(
 							'Main',
 							{
-								start: {line: 490, column: 37},
-								end: {line: 490, column: 47}
+								start: {line: 516, column: 37},
+								end: {line: 516, column: 47}
 							})('other ref: ' + ref);
 					}
 				}
@@ -14650,8 +14650,8 @@ var $author$project$Main$schemaToAnnotation = function (schema) {
 				return _Debug_todo(
 					'Main',
 					{
-						start: {line: 498, column: 21},
-						end: {line: 498, column: 31}
+						start: {line: 524, column: 21},
+						end: {line: 524, column: 31}
 					})('union type');
 		}
 	}
@@ -15078,6 +15078,7 @@ var $author$project$Gen$Json$Decode$succeed = function (succeedArg) {
 		_List_fromArray(
 			[succeedArg]));
 };
+var $elm$core$Debug$toString = _Debug_toString;
 var $author$project$Gen$Debug$todo = function (todoArg) {
 	return A2(
 		$mdgriffith$elm_codegen$Elm$apply,
@@ -15129,8 +15130,8 @@ var $author$project$Main$schemaToDecoder = function (schema) {
 		return _Debug_todo(
 			'Main',
 			{
-				start: {line: 316, column: 13},
-				end: {line: 316, column: 23}
+				start: {line: 305, column: 13},
+				end: {line: 305, column: 23}
 			})('');
 	} else {
 		var subSchema = schema.a;
@@ -15142,17 +15143,17 @@ var $author$project$Main$schemaToDecoder = function (schema) {
 						_List_Nil,
 						A2(
 							$elm$core$Maybe$map,
-							function (_v12) {
-								var schemata = _v12.a;
+							function (_v18) {
+								var schemata = _v18.a;
 								return schemata;
 							},
 							subSchema.properties));
 					return A3(
 						$elm$core$List$foldl,
 						F2(
-							function (_v9, prevExpr) {
-								var key = _v9.a;
-								var valueSchema = _v9.b;
+							function (_v15, prevExpr) {
+								var key = _v15.a;
+								var valueSchema = _v15.b;
 								return A2(
 									$mdgriffith$elm_codegen$Elm$Op$pipe,
 									A2(
@@ -15178,8 +15179,8 @@ var $author$project$Main$schemaToDecoder = function (schema) {
 								$mdgriffith$elm_codegen$Elm$function,
 								A2(
 									$elm$core$List$map,
-									function (_v10) {
-										var key = _v10.a;
+									function (_v16) {
+										var key = _v16.a;
 										return _Utils_Tuple2(
 											$author$project$Main$elmifyName(key),
 											$elm$core$Maybe$Nothing);
@@ -15190,8 +15191,8 @@ var $author$project$Main$schemaToDecoder = function (schema) {
 										A3(
 											$elm$core$List$map2,
 											F2(
-												function (_v11, arg) {
-													var key = _v11.a;
+												function (_v17, arg) {
+													var key = _v17.a;
 													return _Utils_Tuple2(
 														$author$project$Main$elmifyName(key),
 														arg);
@@ -15212,28 +15213,28 @@ var $author$project$Main$schemaToDecoder = function (schema) {
 					return _Debug_todo(
 						'Main',
 						{
-							start: {line: 371, column: 29},
-							end: {line: 371, column: 39}
+							start: {line: 360, column: 29},
+							end: {line: 360, column: 39}
 						})('');
 				default:
-					var _v13 = subSchema.items;
-					switch (_v13.$) {
+					var _v19 = subSchema.items;
+					switch (_v19.$) {
 						case 'NoItems':
 							return _Debug_todo(
 								'Main',
 								{
-									start: {line: 376, column: 37},
-									end: {line: 376, column: 47}
+									start: {line: 365, column: 37},
+									end: {line: 365, column: 47}
 								})('err');
 						case 'ArrayOfItems':
 							return _Debug_todo(
 								'Main',
 								{
-									start: {line: 379, column: 37},
-									end: {line: 379, column: 47}
+									start: {line: 368, column: 37},
+									end: {line: 368, column: 47}
 								})('');
 						default:
-							var itemSchema = _v13.a;
+							var itemSchema = _v19.a;
 							return $author$project$Gen$Json$Decode$list(
 								$author$project$Main$schemaToDecoder(itemSchema));
 					}
@@ -15252,24 +15253,88 @@ var $author$project$Main$schemaToDecoder = function (schema) {
 						return $author$project$Gen$Json$Decode$value;
 					} else {
 						var anyOf = _v3.a;
-						return $author$project$Gen$Debug$todo('decode anyOf');
+						if ((anyOf.b && anyOf.b.b) && (!anyOf.b.b.b)) {
+							var firstSchema = anyOf.a;
+							var _v5 = anyOf.b;
+							var secondSchema = _v5.a;
+							var _v6 = _Utils_Tuple2(firstSchema, secondSchema);
+							if ((_v6.a.$ === 'ObjectSchema') && (_v6.b.$ === 'ObjectSchema')) {
+								var firstSubSchema = _v6.a.a;
+								var secondSubSchema = _v6.b.a;
+								var _v7 = _Utils_Tuple2(firstSubSchema.type_, secondSubSchema.type_);
+								if ((_v7.a.$ === 'SingleType') && (_v7.a.a.$ === 'NullType')) {
+									var _v8 = _v7.a.a;
+									return $author$project$Gen$Json$Decode$oneOf(
+										_List_fromArray(
+											[
+												A2(
+												$mdgriffith$elm_codegen$Elm$apply,
+												$mdgriffith$elm_codegen$Elm$value(
+													{
+														annotation: $elm$core$Maybe$Nothing,
+														importFrom: _List_fromArray(
+															['Json', 'Decode']),
+														name: 'map'
+													}),
+												_List_fromArray(
+													[
+														$mdgriffith$elm_codegen$Elm$val('Present'),
+														$author$project$Main$schemaToDecoder(secondSchema)
+													])),
+												$author$project$Gen$Json$Decode$null(
+												$mdgriffith$elm_codegen$Elm$val('Null'))
+											]));
+								} else {
+									if ((_v7.b.$ === 'SingleType') && (_v7.b.a.$ === 'NullType')) {
+										var _v9 = _v7.b.a;
+										return $author$project$Gen$Json$Decode$oneOf(
+											_List_fromArray(
+												[
+													A2(
+													$mdgriffith$elm_codegen$Elm$apply,
+													$mdgriffith$elm_codegen$Elm$value(
+														{
+															annotation: $elm$core$Maybe$Nothing,
+															importFrom: _List_fromArray(
+																['Json', 'Decode']),
+															name: 'map'
+														}),
+													_List_fromArray(
+														[
+															$mdgriffith$elm_codegen$Elm$val('Present'),
+															$author$project$Main$schemaToDecoder(firstSchema)
+														])),
+													$author$project$Gen$Json$Decode$null(
+													$mdgriffith$elm_codegen$Elm$val('Null'))
+												]));
+									} else {
+										return $author$project$Gen$Debug$todo(
+											'decode anyOf 2: not nullable:: ' + ($elm$core$Debug$toString(firstSubSchema) + (' ,,, ' + $elm$core$Debug$toString(secondSubSchema))));
+									}
+								}
+							} else {
+								return $author$project$Gen$Debug$todo('decode anyOf 2: not both object schemas');
+							}
+						} else {
+							return $author$project$Gen$Debug$todo('decode anyOf: not exactly 2 items');
+						}
 					}
 				} else {
 					var ref = _v2.a;
-					var _v4 = A2($elm$core$String$split, '/', ref);
-					if (((((((_v4.b && (_v4.a === '#')) && _v4.b.b) && (_v4.b.a === 'components')) && _v4.b.b.b) && (_v4.b.b.a === 'schemas')) && _v4.b.b.b.b) && (!_v4.b.b.b.b.b)) {
-						var _v5 = _v4.b;
-						var _v6 = _v5.b;
-						var _v7 = _v6.b;
-						var schemaName = _v7.a;
+					var _v10 = A2($elm$core$String$split, '/', ref);
+					if (((((((_v10.b && (_v10.a === '#')) && _v10.b.b) && (_v10.b.a === 'components')) && _v10.b.b.b) && (_v10.b.b.a === 'schemas')) && _v10.b.b.b.b) && (!_v10.b.b.b.b.b)) {
+						var _v11 = _v10.b;
+						var _v12 = _v11.b;
+						var _v13 = _v12.b;
+						var schemaName = _v13.a;
 						return $mdgriffith$elm_codegen$Elm$val(
 							'decode' + $author$project$Main$typifyName(schemaName));
 					} else {
 						return _Debug_todo(
 							'Main',
 							{
-								start: {line: 405, column: 37},
-								end: {line: 405, column: 47}
+								start: {line: 431, column: 37},
+								end: {line: 431, column: 47}
 							})('other ref: ' + ref);
 					}
 				}
@@ -15300,8 +15365,8 @@ var $author$project$Main$schemaToDecoder = function (schema) {
 				return _Debug_todo(
 					'Main',
 					{
-						start: {line: 421, column: 21},
-						end: {line: 421, column: 31}
+						start: {line: 447, column: 21},
+						end: {line: 447, column: 31}
 					})('union type');
 		}
 	}
@@ -16113,8 +16178,8 @@ var $author$project$Main$schemaToEncoder = function (schema) {
 				return _Debug_todo(
 					'Main',
 					{
-						start: {line: 309, column: 21},
-						end: {line: 309, column: 31}
+						start: {line: 298, column: 21},
+						end: {line: 298, column: 31}
 					})('union type');
 		}
 	}

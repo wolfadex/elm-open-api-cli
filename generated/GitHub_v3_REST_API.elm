@@ -4257,7 +4257,14 @@ decodeWorkflowRun =
         |> Json.Decode.Extra.andMap
             (Json.Decode.field "workflow_url" Json.Decode.string)
         |> Json.Decode.Extra.andMap
-            (Json.Decode.field "head_commit" (Debug.todo "decode anyOf"))
+            (Json.Decode.field
+                "head_commit"
+                (Json.Decode.oneOf
+                    [ Json.Decode.map Present decodeSimpleCommit
+                    , Json.Decode.null Null
+                    ]
+                )
+            )
         |> Json.Decode.Extra.andMap
             (Json.Decode.field "repository" decodeMinimalRepository)
         |> Json.Decode.Extra.andMap
@@ -5642,7 +5649,11 @@ decodeUnlabeledIssueEvent =
         |> Json.Decode.Extra.andMap
             (Json.Decode.field
                 "performed_via_github_app"
-                (Debug.todo "decode anyOf")
+                (Json.Decode.oneOf
+                    [ Json.Decode.map Present decodeIntegration
+                    , Json.Decode.null Null
+                    ]
+                )
             )
         |> Json.Decode.Extra.andMap
             (Json.Decode.field
@@ -5765,7 +5776,11 @@ decodeUnassignedIssueEvent =
         |> Json.Decode.Extra.andMap
             (Json.Decode.field
                 "performed_via_github_app"
-                (Debug.todo "decode anyOf")
+                (Json.Decode.oneOf
+                    [ Json.Decode.map Present decodeIntegration
+                    , Json.Decode.null Null
+                    ]
+                )
             )
         |> Json.Decode.Extra.andMap
             (Json.Decode.field "assignee" decodeSimpleUser)
@@ -6311,7 +6326,11 @@ decodeTimelineUnassignedIssueEvent =
         |> Json.Decode.Extra.andMap
             (Json.Decode.field
                 "performed_via_github_app"
-                (Debug.todo "decode anyOf")
+                (Json.Decode.oneOf
+                    [ Json.Decode.map Present decodeIntegration
+                    , Json.Decode.null Null
+                    ]
+                )
             )
         |> Json.Decode.Extra.andMap
             (Json.Decode.field "assignee" decodeSimpleUser)
@@ -6960,7 +6979,11 @@ decodeTimelineCommentEvent =
         |> Json.Decode.Extra.andMap
             (Json.Decode.field
                 "performed_via_github_app"
-                (Debug.todo "decode anyOf")
+                (Json.Decode.oneOf
+                    [ Json.Decode.map Present decodeIntegration
+                    , Json.Decode.null Null
+                    ]
+                )
             )
         |> Json.Decode.Extra.andMap
             (Json.Decode.field "reactions" decodeReactionRollup)
@@ -7053,7 +7076,11 @@ decodeTimelineAssignedIssueEvent =
         |> Json.Decode.Extra.andMap
             (Json.Decode.field
                 "performed_via_github_app"
-                (Debug.todo "decode anyOf")
+                (Json.Decode.oneOf
+                    [ Json.Decode.map Present decodeIntegration
+                    , Json.Decode.null Null
+                    ]
+                )
             )
         |> Json.Decode.Extra.andMap
             (Json.Decode.field "assignee" decodeSimpleUser)
@@ -7598,7 +7625,14 @@ decodeTeamRepository =
         |> Json.Decode.Extra.andMap
             (Json.Decode.field "full_name" Json.Decode.string)
         |> Json.Decode.Extra.andMap
-            (Json.Decode.field "license" (Debug.todo "decode anyOf"))
+            (Json.Decode.field
+                "license"
+                (Json.Decode.oneOf
+                    [ Json.Decode.map Present decodeLicenseSimple
+                    , Json.Decode.null Null
+                    ]
+                )
+            )
         |> Json.Decode.Extra.andMap (Json.Decode.field "forks" Json.Decode.int)
         |> Json.Decode.Extra.andMap
             (Json.Decode.field
@@ -7627,7 +7661,14 @@ decodeTeamRepository =
         |> Json.Decode.Extra.andMap
             (Json.Decode.field "role_name" Json.Decode.string)
         |> Json.Decode.Extra.andMap
-            (Json.Decode.field "owner" (Debug.todo "decode anyOf"))
+            (Json.Decode.field
+                "owner"
+                (Json.Decode.oneOf
+                    [ Json.Decode.map Present decodeSimpleUser
+                    , Json.Decode.null Null
+                    ]
+                )
+            )
         |> Json.Decode.Extra.andMap
             (Json.Decode.field "private" Json.Decode.bool)
         |> Json.Decode.Extra.andMap
@@ -7811,7 +7852,13 @@ decodeTeamRepository =
         |> Json.Decode.Extra.andMap
             (Json.Decode.field "allow_rebase_merge" Json.Decode.bool)
         |> Json.Decode.Extra.andMap
-            (Json.Decode.field "template_repository" (Debug.todo "decode anyOf")
+            (Json.Decode.field
+                "template_repository"
+                (Json.Decode.oneOf
+                    [ Json.Decode.map Present decodeRepository
+                    , Json.Decode.null Null
+                    ]
+                )
             )
         |> Json.Decode.Extra.andMap
             (Json.Decode.field "temp_clone_token" Json.Decode.string)
@@ -8761,7 +8808,14 @@ decodeTeamFull =
         |> Json.Decode.Extra.andMap
             (Json.Decode.field "repositories_url" Json.Decode.string)
         |> Json.Decode.Extra.andMap
-            (Json.Decode.field "parent" (Debug.todo "decode anyOf"))
+            (Json.Decode.field
+                "parent"
+                (Json.Decode.oneOf
+                    [ Json.Decode.map Present decodeTeamSimple
+                    , Json.Decode.null Null
+                    ]
+                )
+            )
         |> Json.Decode.Extra.andMap
             (Json.Decode.field "members_count" Json.Decode.int)
         |> Json.Decode.Extra.andMap
@@ -8847,7 +8901,14 @@ decodeTeamDiscussionComment =
          }
      )
         |> Json.Decode.Extra.andMap
-            (Json.Decode.field "author" (Debug.todo "decode anyOf"))
+            (Json.Decode.field
+                "author"
+                (Json.Decode.oneOf
+                    [ Json.Decode.map Present decodeSimpleUser
+                    , Json.Decode.null Null
+                    ]
+                )
+            )
         |> Json.Decode.Extra.andMap
             (Json.Decode.field "body" Json.Decode.string)
         |> Json.Decode.Extra.andMap
@@ -8955,7 +9016,14 @@ decodeTeamDiscussion =
          }
      )
         |> Json.Decode.Extra.andMap
-            (Json.Decode.field "author" (Debug.todo "decode anyOf"))
+            (Json.Decode.field
+                "author"
+                (Json.Decode.oneOf
+                    [ Json.Decode.map Present decodeSimpleUser
+                    , Json.Decode.null Null
+                    ]
+                )
+            )
         |> Json.Decode.Extra.andMap
             (Json.Decode.field "body" Json.Decode.string)
         |> Json.Decode.Extra.andMap
@@ -9125,7 +9193,14 @@ decodeTeam =
         |> Json.Decode.Extra.andMap
             (Json.Decode.field "repositories_url" Json.Decode.string)
         |> Json.Decode.Extra.andMap
-            (Json.Decode.field "parent" (Debug.todo "decode anyOf"))
+            (Json.Decode.field
+                "parent"
+                (Json.Decode.oneOf
+                    [ Json.Decode.map Present decodeTeamSimple
+                    , Json.Decode.null Null
+                    ]
+                )
+            )
 
 
 encodeTeam : Team -> Json.Encode.Value
@@ -9420,7 +9495,14 @@ decodeStatus =
         |> Json.Decode.Extra.andMap
             (Json.Decode.field "updated_at" Json.Decode.string)
         |> Json.Decode.Extra.andMap
-            (Json.Decode.field "creator" (Debug.todo "decode anyOf"))
+            (Json.Decode.field
+                "creator"
+                (Json.Decode.oneOf
+                    [ Json.Decode.map Present decodeSimpleUser
+                    , Json.Decode.null Null
+                    ]
+                )
+            )
 
 
 encodeStatus : Status -> Json.Encode.Value
@@ -9530,7 +9612,11 @@ decodeStateChangeIssueEvent =
         |> Json.Decode.Extra.andMap
             (Json.Decode.field
                 "performed_via_github_app"
-                (Debug.todo "decode anyOf")
+                (Json.Decode.oneOf
+                    [ Json.Decode.map Present decodeIntegration
+                    , Json.Decode.null Null
+                    ]
+                )
             )
         |> Json.Decode.Extra.andMap
             (Json.Decode.field
@@ -9623,7 +9709,14 @@ decodeStargazer =
         |> Json.Decode.Extra.andMap
             (Json.Decode.field "starred_at" Json.Decode.string)
         |> Json.Decode.Extra.andMap
-            (Json.Decode.field "user" (Debug.todo "decode anyOf"))
+            (Json.Decode.field
+                "user"
+                (Json.Decode.oneOf
+                    [ Json.Decode.map Present decodeSimpleUser
+                    , Json.Decode.null Null
+                    ]
+                )
+            )
 
 
 encodeStargazer : Stargazer -> Json.Encode.Value
@@ -11564,7 +11657,14 @@ decodeSecretScanningAlert =
                 )
             )
         |> Json.Decode.Extra.andMap
-            (Json.Decode.field "resolved_by" (Debug.todo "decode anyOf"))
+            (Json.Decode.field
+                "resolved_by"
+                (Json.Decode.oneOf
+                    [ Json.Decode.map Present decodeSimpleUser
+                    , Json.Decode.null Null
+                    ]
+                )
+            )
         |> Json.Decode.Extra.andMap
             (Json.Decode.field "secret_type" Json.Decode.string)
         |> Json.Decode.Extra.andMap
@@ -11583,7 +11683,11 @@ decodeSecretScanningAlert =
         |> Json.Decode.Extra.andMap
             (Json.Decode.field
                 "push_protection_bypassed_by"
-                (Debug.todo "decode anyOf")
+                (Json.Decode.oneOf
+                    [ Json.Decode.map Present decodeSimpleUser
+                    , Json.Decode.null Null
+                    ]
+                )
             )
         |> Json.Decode.Extra.andMap
             (Json.Decode.field
@@ -12522,7 +12626,11 @@ decodeReviewRequestedIssueEvent =
         |> Json.Decode.Extra.andMap
             (Json.Decode.field
                 "performed_via_github_app"
-                (Debug.todo "decode anyOf")
+                (Json.Decode.oneOf
+                    [ Json.Decode.map Present decodeIntegration
+                    , Json.Decode.null Null
+                    ]
+                )
             )
         |> Json.Decode.Extra.andMap
             (Json.Decode.field "review_requester" decodeSimpleUser)
@@ -12637,7 +12745,11 @@ decodeReviewRequestRemovedIssueEvent =
         |> Json.Decode.Extra.andMap
             (Json.Decode.field
                 "performed_via_github_app"
-                (Debug.todo "decode anyOf")
+                (Json.Decode.oneOf
+                    [ Json.Decode.map Present decodeIntegration
+                    , Json.Decode.null Null
+                    ]
+                )
             )
         |> Json.Decode.Extra.andMap
             (Json.Decode.field "review_requester" decodeSimpleUser)
@@ -12753,7 +12865,11 @@ decodeReviewDismissedIssueEvent =
         |> Json.Decode.Extra.andMap
             (Json.Decode.field
                 "performed_via_github_app"
-                (Debug.todo "decode anyOf")
+                (Json.Decode.oneOf
+                    [ Json.Decode.map Present decodeIntegration
+                    , Json.Decode.null Null
+                    ]
+                )
             )
         |> Json.Decode.Extra.andMap
             (Json.Decode.field
@@ -12949,7 +13065,14 @@ decodeReviewComment =
         |> Json.Decode.Extra.andMap
             (Json.Decode.field "in_reply_to_id" Json.Decode.int)
         |> Json.Decode.Extra.andMap
-            (Json.Decode.field "user" (Debug.todo "decode anyOf"))
+            (Json.Decode.field
+                "user"
+                (Json.Decode.oneOf
+                    [ Json.Decode.map Present decodeSimpleUser
+                    , Json.Decode.null Null
+                    ]
+                )
+            )
         |> Json.Decode.Extra.andMap
             (Json.Decode.field "body" Json.Decode.string)
         |> Json.Decode.Extra.andMap
@@ -13210,9 +13333,23 @@ decodeRepositoryInvitation =
         |> Json.Decode.Extra.andMap
             (Json.Decode.field "repository" decodeMinimalRepository)
         |> Json.Decode.Extra.andMap
-            (Json.Decode.field "invitee" (Debug.todo "decode anyOf"))
+            (Json.Decode.field
+                "invitee"
+                (Json.Decode.oneOf
+                    [ Json.Decode.map Present decodeSimpleUser
+                    , Json.Decode.null Null
+                    ]
+                )
+            )
         |> Json.Decode.Extra.andMap
-            (Json.Decode.field "inviter" (Debug.todo "decode anyOf"))
+            (Json.Decode.field
+                "inviter"
+                (Json.Decode.oneOf
+                    [ Json.Decode.map Present decodeSimpleUser
+                    , Json.Decode.null Null
+                    ]
+                )
+            )
         |> Json.Decode.Extra.andMap
             (Json.Decode.field "permissions" Json.Decode.string)
         |> Json.Decode.Extra.andMap
@@ -13258,7 +13395,14 @@ decodeRepositoryCollaboratorPermission =
         |> Json.Decode.Extra.andMap
             (Json.Decode.field "role_name" Json.Decode.string)
         |> Json.Decode.Extra.andMap
-            (Json.Decode.field "user" (Debug.todo "decode anyOf"))
+            (Json.Decode.field
+                "user"
+                (Json.Decode.oneOf
+                    [ Json.Decode.map Present decodeCollaborator
+                    , Json.Decode.null Null
+                    ]
+                )
+            )
 
 
 encodeRepositoryCollaboratorPermission :
@@ -13604,9 +13748,23 @@ decodeRepository =
         |> Json.Decode.Extra.andMap
             (Json.Decode.field "full_name" Json.Decode.string)
         |> Json.Decode.Extra.andMap
-            (Json.Decode.field "license" (Debug.todo "decode anyOf"))
+            (Json.Decode.field
+                "license"
+                (Json.Decode.oneOf
+                    [ Json.Decode.map Present decodeLicenseSimple
+                    , Json.Decode.null Null
+                    ]
+                )
+            )
         |> Json.Decode.Extra.andMap
-            (Json.Decode.field "organization" (Debug.todo "decode anyOf"))
+            (Json.Decode.field
+                "organization"
+                (Json.Decode.oneOf
+                    [ Json.Decode.map Present decodeSimpleUser
+                    , Json.Decode.null Null
+                    ]
+                )
+            )
         |> Json.Decode.Extra.andMap (Json.Decode.field "forks" Json.Decode.int)
         |> Json.Decode.Extra.andMap
             (Json.Decode.field
@@ -15236,7 +15394,14 @@ decodeRepoSearchResultItem =
         |> Json.Decode.Extra.andMap
             (Json.Decode.field "full_name" Json.Decode.string)
         |> Json.Decode.Extra.andMap
-            (Json.Decode.field "owner" (Debug.todo "decode anyOf"))
+            (Json.Decode.field
+                "owner"
+                (Json.Decode.oneOf
+                    [ Json.Decode.map Present decodeSimpleUser
+                    , Json.Decode.null Null
+                    ]
+                )
+            )
         |> Json.Decode.Extra.andMap
             (Json.Decode.field "private" Json.Decode.bool)
         |> Json.Decode.Extra.andMap
@@ -15404,7 +15569,14 @@ decodeRepoSearchResultItem =
         |> Json.Decode.Extra.andMap
             (Json.Decode.field "visibility" Json.Decode.string)
         |> Json.Decode.Extra.andMap
-            (Json.Decode.field "license" (Debug.todo "decode anyOf"))
+            (Json.Decode.field
+                "license"
+                (Json.Decode.oneOf
+                    [ Json.Decode.map Present decodeLicenseSimple
+                    , Json.Decode.null Null
+                    ]
+                )
+            )
         |> Json.Decode.Extra.andMap
             (Json.Decode.field
                 "permissions"
@@ -15685,7 +15857,11 @@ decodeRenamedIssueEvent =
         |> Json.Decode.Extra.andMap
             (Json.Decode.field
                 "performed_via_github_app"
-                (Debug.todo "decode anyOf")
+                (Json.Decode.oneOf
+                    [ Json.Decode.map Present decodeIntegration
+                    , Json.Decode.null Null
+                    ]
+                )
             )
         |> Json.Decode.Extra.andMap
             (Json.Decode.field
@@ -15813,7 +15989,11 @@ decodeRemovedFromProjectIssueEvent =
         |> Json.Decode.Extra.andMap
             (Json.Decode.field
                 "performed_via_github_app"
-                (Debug.todo "decode anyOf")
+                (Json.Decode.oneOf
+                    [ Json.Decode.map Present decodeIntegration
+                    , Json.Decode.null Null
+                    ]
+                )
             )
         |> Json.Decode.Extra.andMap
             (Json.Decode.field
@@ -15986,7 +16166,14 @@ decodeReleaseAsset =
         |> Json.Decode.Extra.andMap
             (Json.Decode.field "updated_at" Json.Decode.string)
         |> Json.Decode.Extra.andMap
-            (Json.Decode.field "uploader" (Debug.todo "decode anyOf"))
+            (Json.Decode.field
+                "uploader"
+                (Json.Decode.oneOf
+                    [ Json.Decode.map Present decodeSimpleUser
+                    , Json.Decode.null Null
+                    ]
+                )
+            )
 
 
 encodeReleaseAsset : ReleaseAsset -> Json.Encode.Value
@@ -16365,7 +16552,14 @@ decodeReaction =
         |> Json.Decode.Extra.andMap
             (Json.Decode.field "node_id" Json.Decode.string)
         |> Json.Decode.Extra.andMap
-            (Json.Decode.field "user" (Debug.todo "decode anyOf"))
+            (Json.Decode.field
+                "user"
+                (Json.Decode.oneOf
+                    [ Json.Decode.map Present decodeSimpleUser
+                    , Json.Decode.null Null
+                    ]
+                )
+            )
         |> Json.Decode.Extra.andMap
             (Json.Decode.field "content" Json.Decode.string)
         |> Json.Decode.Extra.andMap
@@ -16653,7 +16847,14 @@ decodePullRequestSimple =
         |> Json.Decode.Extra.andMap
             (Json.Decode.field "title" Json.Decode.string)
         |> Json.Decode.Extra.andMap
-            (Json.Decode.field "user" (Debug.todo "decode anyOf"))
+            (Json.Decode.field
+                "user"
+                (Json.Decode.oneOf
+                    [ Json.Decode.map Present decodeSimpleUser
+                    , Json.Decode.null Null
+                    ]
+                )
+            )
         |> Json.Decode.Extra.andMap
             (Json.Decode.field
                 "body"
@@ -16696,7 +16897,14 @@ decodePullRequestSimple =
                 )
             )
         |> Json.Decode.Extra.andMap
-            (Json.Decode.field "milestone" (Debug.todo "decode anyOf"))
+            (Json.Decode.field
+                "milestone"
+                (Json.Decode.oneOf
+                    [ Json.Decode.map Present decodeMilestone
+                    , Json.Decode.null Null
+                    ]
+                )
+            )
         |> Json.Decode.Extra.andMap
             (Json.Decode.field
                 "active_lock_reason"
@@ -16738,7 +16946,14 @@ decodePullRequestSimple =
                 )
             )
         |> Json.Decode.Extra.andMap
-            (Json.Decode.field "assignee" (Debug.todo "decode anyOf"))
+            (Json.Decode.field
+                "assignee"
+                (Json.Decode.oneOf
+                    [ Json.Decode.map Present decodeSimpleUser
+                    , Json.Decode.null Null
+                    ]
+                )
+            )
         |> Json.Decode.Extra.andMap
             (Json.Decode.field
                 "assignees"
@@ -16791,7 +17006,14 @@ decodePullRequestSimple =
                     |> Json.Decode.Extra.andMap
                         (Json.Decode.field "sha" Json.Decode.string)
                     |> Json.Decode.Extra.andMap
-                        (Json.Decode.field "user" (Debug.todo "decode anyOf"))
+                        (Json.Decode.field
+                            "user"
+                            (Json.Decode.oneOf
+                                [ Json.Decode.map Present decodeSimpleUser
+                                , Json.Decode.null Null
+                                ]
+                            )
+                        )
                 )
             )
         |> Json.Decode.Extra.andMap
@@ -16815,7 +17037,14 @@ decodePullRequestSimple =
                     |> Json.Decode.Extra.andMap
                         (Json.Decode.field "sha" Json.Decode.string)
                     |> Json.Decode.Extra.andMap
-                        (Json.Decode.field "user" (Debug.todo "decode anyOf"))
+                        (Json.Decode.field
+                            "user"
+                            (Json.Decode.oneOf
+                                [ Json.Decode.map Present decodeSimpleUser
+                                , Json.Decode.null Null
+                                ]
+                            )
+                        )
                 )
             )
         |> Json.Decode.Extra.andMap
@@ -17394,7 +17623,14 @@ decodePullRequestReview =
         |> Json.Decode.Extra.andMap
             (Json.Decode.field "node_id" Json.Decode.string)
         |> Json.Decode.Extra.andMap
-            (Json.Decode.field "user" (Debug.todo "decode anyOf"))
+            (Json.Decode.field
+                "user"
+                (Json.Decode.oneOf
+                    [ Json.Decode.map Present decodeSimpleUser
+                    , Json.Decode.null Null
+                    ]
+                )
+            )
         |> Json.Decode.Extra.andMap
             (Json.Decode.field "body" Json.Decode.string)
         |> Json.Decode.Extra.andMap
@@ -18087,7 +18323,14 @@ decodePullRequest =
         |> Json.Decode.Extra.andMap
             (Json.Decode.field "title" Json.Decode.string)
         |> Json.Decode.Extra.andMap
-            (Json.Decode.field "user" (Debug.todo "decode anyOf"))
+            (Json.Decode.field
+                "user"
+                (Json.Decode.oneOf
+                    [ Json.Decode.map Present decodeSimpleUser
+                    , Json.Decode.null Null
+                    ]
+                )
+            )
         |> Json.Decode.Extra.andMap
             (Json.Decode.field
                 "body"
@@ -18137,7 +18380,14 @@ decodePullRequest =
                 )
             )
         |> Json.Decode.Extra.andMap
-            (Json.Decode.field "milestone" (Debug.todo "decode anyOf"))
+            (Json.Decode.field
+                "milestone"
+                (Json.Decode.oneOf
+                    [ Json.Decode.map Present decodeMilestone
+                    , Json.Decode.null Null
+                    ]
+                )
+            )
         |> Json.Decode.Extra.andMap
             (Json.Decode.field
                 "active_lock_reason"
@@ -18179,7 +18429,14 @@ decodePullRequest =
                 )
             )
         |> Json.Decode.Extra.andMap
-            (Json.Decode.field "assignee" (Debug.todo "decode anyOf"))
+            (Json.Decode.field
+                "assignee"
+                (Json.Decode.oneOf
+                    [ Json.Decode.map Present decodeSimpleUser
+                    , Json.Decode.null Null
+                    ]
+                )
+            )
         |> Json.Decode.Extra.andMap
             (Json.Decode.field
                 "assignees"
@@ -19737,7 +19994,13 @@ decodePullRequest =
                                 |> Json.Decode.Extra.andMap
                                     (Json.Decode.field
                                         "license"
-                                        (Debug.todo "decode anyOf")
+                                        (Json.Decode.oneOf
+                                            [ Json.Decode.map
+                                                Present
+                                                decodeLicenseSimple
+                                            , Json.Decode.null Null
+                                            ]
+                                        )
                                     )
                                 |> Json.Decode.Extra.andMap
                                     (Json.Decode.field
@@ -19978,7 +20241,14 @@ decodePullRequest =
         |> Json.Decode.Extra.andMap
             (Json.Decode.field "mergeable_state" Json.Decode.string)
         |> Json.Decode.Extra.andMap
-            (Json.Decode.field "merged_by" (Debug.todo "decode anyOf"))
+            (Json.Decode.field
+                "merged_by"
+                (Json.Decode.oneOf
+                    [ Json.Decode.map Present decodeSimpleUser
+                    , Json.Decode.null Null
+                    ]
+                )
+            )
         |> Json.Decode.Extra.andMap
             (Json.Decode.field "comments" Json.Decode.int)
         |> Json.Decode.Extra.andMap
@@ -22464,7 +22734,14 @@ decodeProjectCollaboratorPermission =
         |> Json.Decode.Extra.andMap
             (Json.Decode.field "permission" Json.Decode.string)
         |> Json.Decode.Extra.andMap
-            (Json.Decode.field "user" (Debug.todo "decode anyOf"))
+            (Json.Decode.field
+                "user"
+                (Json.Decode.oneOf
+                    [ Json.Decode.map Present decodeSimpleUser
+                    , Json.Decode.null Null
+                    ]
+                )
+            )
 
 
 encodeProjectCollaboratorPermission :
@@ -22526,7 +22803,14 @@ decodeProjectCard =
                 )
             )
         |> Json.Decode.Extra.andMap
-            (Json.Decode.field "creator" (Debug.todo "decode anyOf"))
+            (Json.Decode.field
+                "creator"
+                (Json.Decode.oneOf
+                    [ Json.Decode.map Present decodeSimpleUser
+                    , Json.Decode.null Null
+                    ]
+                )
+            )
         |> Json.Decode.Extra.andMap
             (Json.Decode.field "created_at" Json.Decode.string)
         |> Json.Decode.Extra.andMap
@@ -22639,7 +22923,14 @@ decodeProject =
         |> Json.Decode.Extra.andMap
             (Json.Decode.field "state" Json.Decode.string)
         |> Json.Decode.Extra.andMap
-            (Json.Decode.field "creator" (Debug.todo "decode anyOf"))
+            (Json.Decode.field
+                "creator"
+                (Json.Decode.oneOf
+                    [ Json.Decode.map Present decodeSimpleUser
+                    , Json.Decode.null Null
+                    ]
+                )
+            )
         |> Json.Decode.Extra.andMap
             (Json.Decode.field "created_at" Json.Decode.string)
         |> Json.Decode.Extra.andMap
@@ -23268,7 +23559,9 @@ decodePendingDeployment =
                         |> Json.Decode.Extra.andMap
                             (Json.Decode.field
                                 "reviewer"
-                                (Debug.todo "decode anyOf")
+                                (Debug.todo
+                                    "decode anyOf 2: not nullable:: { additionalItems = Nothing, additionalProperties = Nothing, allOf = Nothing, anyOf = Nothing, const = Nothing, contains = Nothing, default = Nothing, definitions = Nothing, dependencies = [], description = Nothing, enum = Nothing, examples = Nothing, exclusiveMaximum = Nothing, exclusiveMinimum = Nothing, format = Nothing, id = Nothing, items = NoItems, maxItems = Nothing, maxLength = Nothing, maxProperties = Nothing, maximum = Nothing, minItems = Nothing, minLength = Nothing, minProperties = Nothing, minimum = Nothing, multipleOf = Nothing, not = Nothing, oneOf = Nothing, pattern = Nothing, patternProperties = Nothing, properties = Nothing, propertyNames = Nothing, ref = Just \"#/components/schemas/simple-user\", required = Nothing, source = <internals>, title = Nothing, type_ = AnyType, uniqueItems = Nothing } ,,, { additionalItems = Nothing, additionalProperties = Nothing, allOf = Nothing, anyOf = Nothing, const = Nothing, contains = Nothing, default = Nothing, definitions = Nothing, dependencies = [], description = Nothing, enum = Nothing, examples = Nothing, exclusiveMaximum = Nothing, exclusiveMinimum = Nothing, format = Nothing, id = Nothing, items = NoItems, maxItems = Nothing, maxLength = Nothing, maxProperties = Nothing, maximum = Nothing, minItems = Nothing, minLength = Nothing, minProperties = Nothing, minimum = Nothing, multipleOf = Nothing, not = Nothing, oneOf = Nothing, pattern = Nothing, patternProperties = Nothing, properties = Nothing, propertyNames = Nothing, ref = Just \"#/components/schemas/team\", required = Nothing, source = <internals>, title = Nothing, type_ = AnyType, uniqueItems = Nothing }"
+                                )
                             )
                     )
                 )
@@ -24528,7 +24821,14 @@ decodePageBuild =
                 )
             )
         |> Json.Decode.Extra.andMap
-            (Json.Decode.field "pusher" (Debug.todo "decode anyOf"))
+            (Json.Decode.field
+                "pusher"
+                (Json.Decode.oneOf
+                    [ Json.Decode.map Present decodeSimpleUser
+                    , Json.Decode.null Null
+                    ]
+                )
+            )
         |> Json.Decode.Extra.andMap
             (Json.Decode.field "commit" Json.Decode.string)
         |> Json.Decode.Extra.andMap
@@ -24959,9 +25259,23 @@ decodePackage =
         |> Json.Decode.Extra.andMap
             (Json.Decode.field "visibility" Json.Decode.string)
         |> Json.Decode.Extra.andMap
-            (Json.Decode.field "owner" (Debug.todo "decode anyOf"))
+            (Json.Decode.field
+                "owner"
+                (Json.Decode.oneOf
+                    [ Json.Decode.map Present decodeSimpleUser
+                    , Json.Decode.null Null
+                    ]
+                )
+            )
         |> Json.Decode.Extra.andMap
-            (Json.Decode.field "repository" (Debug.todo "decode anyOf"))
+            (Json.Decode.field
+                "repository"
+                (Json.Decode.oneOf
+                    [ Json.Decode.map Present decodeMinimalRepository
+                    , Json.Decode.null Null
+                    ]
+                )
+            )
         |> Json.Decode.Extra.andMap
             (Json.Decode.field "created_at" Json.Decode.string)
         |> Json.Decode.Extra.andMap
@@ -25130,7 +25444,14 @@ decodeOrganizationSecretScanningAlert =
         |> Json.Decode.Extra.andMap
             (Json.Decode.field "created_at" decodeAlertCreatedAt)
         |> Json.Decode.Extra.andMap
-            (Json.Decode.field "updated_at" (Debug.todo "decode anyOf"))
+            (Json.Decode.field
+                "updated_at"
+                (Json.Decode.oneOf
+                    [ Json.Decode.map Present decodeAlertUpdatedAt
+                    , Json.Decode.null Null
+                    ]
+                )
+            )
         |> Json.Decode.Extra.andMap (Json.Decode.field "url" decodeAlertUrl)
         |> Json.Decode.Extra.andMap
             (Json.Decode.field "html_url" decodeAlertHtmlUrl)
@@ -25150,7 +25471,14 @@ decodeOrganizationSecretScanningAlert =
                 )
             )
         |> Json.Decode.Extra.andMap
-            (Json.Decode.field "resolved_by" (Debug.todo "decode anyOf"))
+            (Json.Decode.field
+                "resolved_by"
+                (Json.Decode.oneOf
+                    [ Json.Decode.map Present decodeSimpleUser
+                    , Json.Decode.null Null
+                    ]
+                )
+            )
         |> Json.Decode.Extra.andMap
             (Json.Decode.field "secret_type" Json.Decode.string)
         |> Json.Decode.Extra.andMap
@@ -25171,7 +25499,11 @@ decodeOrganizationSecretScanningAlert =
         |> Json.Decode.Extra.andMap
             (Json.Decode.field
                 "push_protection_bypassed_by"
-                (Debug.todo "decode anyOf")
+                (Json.Decode.oneOf
+                    [ Json.Decode.map Present decodeSimpleUser
+                    , Json.Decode.null Null
+                    ]
+                )
             )
         |> Json.Decode.Extra.andMap
             (Json.Decode.field
@@ -26206,7 +26538,14 @@ decodeOrgMembership =
         |> Json.Decode.Extra.andMap
             (Json.Decode.field "organization" decodeOrganizationSimple)
         |> Json.Decode.Extra.andMap
-            (Json.Decode.field "user" (Debug.todo "decode anyOf"))
+            (Json.Decode.field
+                "user"
+                (Json.Decode.oneOf
+                    [ Json.Decode.map Present decodeSimpleUser
+                    , Json.Decode.null Null
+                    ]
+                )
+            )
         |> Json.Decode.Extra.andMap
             (Json.Decode.field
                 "permissions"
@@ -26418,7 +26757,11 @@ decodeMovedColumnInProjectIssueEvent =
         |> Json.Decode.Extra.andMap
             (Json.Decode.field
                 "performed_via_github_app"
-                (Debug.todo "decode anyOf")
+                (Json.Decode.oneOf
+                    [ Json.Decode.map Present decodeIntegration
+                    , Json.Decode.null Null
+                    ]
+                )
             )
         |> Json.Decode.Extra.andMap
             (Json.Decode.field
@@ -27215,7 +27558,11 @@ decodeMilestonedIssueEvent =
         |> Json.Decode.Extra.andMap
             (Json.Decode.field
                 "performed_via_github_app"
-                (Debug.todo "decode anyOf")
+                (Json.Decode.oneOf
+                    [ Json.Decode.map Present decodeIntegration
+                    , Json.Decode.null Null
+                    ]
+                )
             )
         |> Json.Decode.Extra.andMap
             (Json.Decode.field
@@ -27336,7 +27683,14 @@ decodeMilestone =
                 )
             )
         |> Json.Decode.Extra.andMap
-            (Json.Decode.field "creator" (Debug.todo "decode anyOf"))
+            (Json.Decode.field
+                "creator"
+                (Json.Decode.oneOf
+                    [ Json.Decode.map Present decodeSimpleUser
+                    , Json.Decode.null Null
+                    ]
+                )
+            )
         |> Json.Decode.Extra.andMap
             (Json.Decode.field "open_issues" Json.Decode.int)
         |> Json.Decode.Extra.andMap
@@ -27465,7 +27819,14 @@ decodeMigration =
      )
         |> Json.Decode.Extra.andMap (Json.Decode.field "id" Json.Decode.int)
         |> Json.Decode.Extra.andMap
-            (Json.Decode.field "owner" (Debug.todo "decode anyOf"))
+            (Json.Decode.field
+                "owner"
+                (Json.Decode.oneOf
+                    [ Json.Decode.map Present decodeSimpleUser
+                    , Json.Decode.null Null
+                    ]
+                )
+            )
         |> Json.Decode.Extra.andMap
             (Json.Decode.field "guid" Json.Decode.string)
         |> Json.Decode.Extra.andMap
@@ -28128,7 +28489,11 @@ decodeLockedIssueEvent =
         |> Json.Decode.Extra.andMap
             (Json.Decode.field
                 "performed_via_github_app"
-                (Debug.todo "decode anyOf")
+                (Json.Decode.oneOf
+                    [ Json.Decode.map Present decodeIntegration
+                    , Json.Decode.null Null
+                    ]
+                )
             )
         |> Json.Decode.Extra.andMap
             (Json.Decode.field
@@ -28411,7 +28776,14 @@ decodeLicenseContent =
                 )
             )
         |> Json.Decode.Extra.andMap
-            (Json.Decode.field "license" (Debug.todo "decode anyOf"))
+            (Json.Decode.field
+                "license"
+                (Json.Decode.oneOf
+                    [ Json.Decode.map Present decodeLicenseSimple
+                    , Json.Decode.null Null
+                    ]
+                )
+            )
 
 
 encodeLicenseContent : LicenseContent -> Json.Encode.Value
@@ -28691,7 +29063,11 @@ decodeLabeledIssueEvent =
         |> Json.Decode.Extra.andMap
             (Json.Decode.field
                 "performed_via_github_app"
-                (Debug.todo "decode anyOf")
+                (Json.Decode.oneOf
+                    [ Json.Decode.map Present decodeIntegration
+                    , Json.Decode.null Null
+                    ]
+                )
             )
         |> Json.Decode.Extra.andMap
             (Json.Decode.field
@@ -29433,7 +29809,14 @@ decodeIssueSearchResultItem =
                 )
             )
         |> Json.Decode.Extra.andMap
-            (Json.Decode.field "user" (Debug.todo "decode anyOf"))
+            (Json.Decode.field
+                "user"
+                (Json.Decode.oneOf
+                    [ Json.Decode.map Present decodeSimpleUser
+                    , Json.Decode.null Null
+                    ]
+                )
+            )
         |> Json.Decode.Extra.andMap
             (Json.Decode.field
                 "labels"
@@ -29485,9 +29868,23 @@ decodeIssueSearchResultItem =
                 )
             )
         |> Json.Decode.Extra.andMap
-            (Json.Decode.field "assignee" (Debug.todo "decode anyOf"))
+            (Json.Decode.field
+                "assignee"
+                (Json.Decode.oneOf
+                    [ Json.Decode.map Present decodeSimpleUser
+                    , Json.Decode.null Null
+                    ]
+                )
+            )
         |> Json.Decode.Extra.andMap
-            (Json.Decode.field "milestone" (Debug.todo "decode anyOf"))
+            (Json.Decode.field
+                "milestone"
+                (Json.Decode.oneOf
+                    [ Json.Decode.map Present decodeMilestone
+                    , Json.Decode.null Null
+                    ]
+                )
+            )
         |> Json.Decode.Extra.andMap
             (Json.Decode.field "comments" Json.Decode.int)
         |> Json.Decode.Extra.andMap
@@ -29582,7 +29979,11 @@ decodeIssueSearchResultItem =
         |> Json.Decode.Extra.andMap
             (Json.Decode.field
                 "performed_via_github_app"
-                (Debug.todo "decode anyOf")
+                (Json.Decode.oneOf
+                    [ Json.Decode.map Present decodeIntegration
+                    , Json.Decode.null Null
+                    ]
+                )
             )
         |> Json.Decode.Extra.andMap
             (Json.Decode.field "reactions" decodeReactionRollup)
@@ -29901,7 +30302,7 @@ type alias IssueEventForIssue =
 
 decodeIssueEventForIssue : Json.Decode.Decoder IssueEventForIssue
 decodeIssueEventForIssue =
-    Debug.todo "decode anyOf"
+    Debug.todo "decode anyOf: not exactly 2 items"
 
 
 encodeIssueEventForIssue : IssueEventForIssue -> Json.Encode.Value
@@ -30040,7 +30441,14 @@ decodeIssueEvent =
             (Json.Decode.field "node_id" Json.Decode.string)
         |> Json.Decode.Extra.andMap (Json.Decode.field "url" Json.Decode.string)
         |> Json.Decode.Extra.andMap
-            (Json.Decode.field "actor" (Debug.todo "decode anyOf"))
+            (Json.Decode.field
+                "actor"
+                (Json.Decode.oneOf
+                    [ Json.Decode.map Present decodeSimpleUser
+                    , Json.Decode.null Null
+                    ]
+                )
+            )
         |> Json.Decode.Extra.andMap
             (Json.Decode.field "event" Json.Decode.string)
         |> Json.Decode.Extra.andMap
@@ -30064,17 +30472,52 @@ decodeIssueEvent =
         |> Json.Decode.Extra.andMap
             (Json.Decode.field "created_at" Json.Decode.string)
         |> Json.Decode.Extra.andMap
-            (Json.Decode.field "issue" (Debug.todo "decode anyOf"))
+            (Json.Decode.field
+                "issue"
+                (Json.Decode.oneOf
+                    [ Json.Decode.map Present decodeIssue
+                    , Json.Decode.null Null
+                    ]
+                )
+            )
         |> Json.Decode.Extra.andMap
             (Json.Decode.field "label" decodeIssueEventLabel)
         |> Json.Decode.Extra.andMap
-            (Json.Decode.field "assignee" (Debug.todo "decode anyOf"))
+            (Json.Decode.field
+                "assignee"
+                (Json.Decode.oneOf
+                    [ Json.Decode.map Present decodeSimpleUser
+                    , Json.Decode.null Null
+                    ]
+                )
+            )
         |> Json.Decode.Extra.andMap
-            (Json.Decode.field "assigner" (Debug.todo "decode anyOf"))
+            (Json.Decode.field
+                "assigner"
+                (Json.Decode.oneOf
+                    [ Json.Decode.map Present decodeSimpleUser
+                    , Json.Decode.null Null
+                    ]
+                )
+            )
         |> Json.Decode.Extra.andMap
-            (Json.Decode.field "review_requester" (Debug.todo "decode anyOf"))
+            (Json.Decode.field
+                "review_requester"
+                (Json.Decode.oneOf
+                    [ Json.Decode.map Present decodeSimpleUser
+                    , Json.Decode.null Null
+                    ]
+                )
+            )
         |> Json.Decode.Extra.andMap
-            (Json.Decode.field "requested_reviewer" (Debug.todo "decode anyOf"))
+            (Json.Decode.field
+                "requested_reviewer"
+                (Json.Decode.oneOf
+                    [ Json.Decode.map Present decodeSimpleUser
+                    , Json.Decode.null Null
+                    ]
+                )
+            )
         |> Json.Decode.Extra.andMap
             (Json.Decode.field "requested_team" decodeTeam)
         |> Json.Decode.Extra.andMap
@@ -30102,7 +30545,11 @@ decodeIssueEvent =
         |> Json.Decode.Extra.andMap
             (Json.Decode.field
                 "performed_via_github_app"
-                (Debug.todo "decode anyOf")
+                (Json.Decode.oneOf
+                    [ Json.Decode.map Present decodeIntegration
+                    , Json.Decode.null Null
+                    ]
+                )
             )
 
 
@@ -30223,7 +30670,14 @@ decodeIssueComment =
         |> Json.Decode.Extra.andMap
             (Json.Decode.field "html_url" Json.Decode.string)
         |> Json.Decode.Extra.andMap
-            (Json.Decode.field "user" (Debug.todo "decode anyOf"))
+            (Json.Decode.field
+                "user"
+                (Json.Decode.oneOf
+                    [ Json.Decode.map Present decodeSimpleUser
+                    , Json.Decode.null Null
+                    ]
+                )
+            )
         |> Json.Decode.Extra.andMap
             (Json.Decode.field "created_at" Json.Decode.string)
         |> Json.Decode.Extra.andMap
@@ -30235,7 +30689,11 @@ decodeIssueComment =
         |> Json.Decode.Extra.andMap
             (Json.Decode.field
                 "performed_via_github_app"
-                (Debug.todo "decode anyOf")
+                (Json.Decode.oneOf
+                    [ Json.Decode.map Present decodeIntegration
+                    , Json.Decode.null Null
+                    ]
+                )
             )
         |> Json.Decode.Extra.andMap
             (Json.Decode.field "reactions" decodeReactionRollup)
@@ -30387,11 +30845,25 @@ decodeIssue =
                 )
             )
         |> Json.Decode.Extra.andMap
-            (Json.Decode.field "user" (Debug.todo "decode anyOf"))
+            (Json.Decode.field
+                "user"
+                (Json.Decode.oneOf
+                    [ Json.Decode.map Present decodeSimpleUser
+                    , Json.Decode.null Null
+                    ]
+                )
+            )
         |> Json.Decode.Extra.andMap
             (Json.Decode.field "labels" (Json.Decode.list Json.Decode.value))
         |> Json.Decode.Extra.andMap
-            (Json.Decode.field "assignee" (Debug.todo "decode anyOf"))
+            (Json.Decode.field
+                "assignee"
+                (Json.Decode.oneOf
+                    [ Json.Decode.map Present decodeSimpleUser
+                    , Json.Decode.null Null
+                    ]
+                )
+            )
         |> Json.Decode.Extra.andMap
             (Json.Decode.field
                 "assignees"
@@ -30404,7 +30876,14 @@ decodeIssue =
                 )
             )
         |> Json.Decode.Extra.andMap
-            (Json.Decode.field "milestone" (Debug.todo "decode anyOf"))
+            (Json.Decode.field
+                "milestone"
+                (Json.Decode.oneOf
+                    [ Json.Decode.map Present decodeMilestone
+                    , Json.Decode.null Null
+                    ]
+                )
+            )
         |> Json.Decode.Extra.andMap
             (Json.Decode.field "locked" Json.Decode.bool)
         |> Json.Decode.Extra.andMap
@@ -30492,7 +30971,14 @@ decodeIssue =
             (Json.Decode.field "updated_at" Json.Decode.string)
         |> Json.Decode.Extra.andMap (Json.Decode.field "draft" Json.Decode.bool)
         |> Json.Decode.Extra.andMap
-            (Json.Decode.field "closed_by" (Debug.todo "decode anyOf"))
+            (Json.Decode.field
+                "closed_by"
+                (Json.Decode.oneOf
+                    [ Json.Decode.map Present decodeSimpleUser
+                    , Json.Decode.null Null
+                    ]
+                )
+            )
         |> Json.Decode.Extra.andMap
             (Json.Decode.field "body_html" Json.Decode.string)
         |> Json.Decode.Extra.andMap
@@ -30504,7 +30990,11 @@ decodeIssue =
         |> Json.Decode.Extra.andMap
             (Json.Decode.field
                 "performed_via_github_app"
-                (Debug.todo "decode anyOf")
+                (Json.Decode.oneOf
+                    [ Json.Decode.map Present decodeIntegration
+                    , Json.Decode.null Null
+                    ]
+                )
             )
         |> Json.Decode.Extra.andMap
             (Json.Decode.field "author_association" decodeAuthorAssociation)
@@ -30799,7 +31289,14 @@ decodeIntegration =
         |> Json.Decode.Extra.andMap
             (Json.Decode.field "node_id" Json.Decode.string)
         |> Json.Decode.Extra.andMap
-            (Json.Decode.field "owner" (Debug.todo "decode anyOf"))
+            (Json.Decode.field
+                "owner"
+                (Json.Decode.oneOf
+                    [ Json.Decode.map Present decodeSimpleUser
+                    , Json.Decode.null Null
+                    ]
+                )
+            )
         |> Json.Decode.Extra.andMap
             (Json.Decode.field "name" Json.Decode.string)
         |> Json.Decode.Extra.andMap
@@ -31085,7 +31582,14 @@ decodeInstallation =
         |> Json.Decode.Extra.andMap
             (Json.Decode.field "app_slug" Json.Decode.string)
         |> Json.Decode.Extra.andMap
-            (Json.Decode.field "suspended_by" (Debug.todo "decode anyOf"))
+            (Json.Decode.field
+                "suspended_by"
+                (Json.Decode.oneOf
+                    [ Json.Decode.map Present decodeSimpleUser
+                    , Json.Decode.null Null
+                    ]
+                )
+            )
         |> Json.Decode.Extra.andMap
             (Json.Decode.field
                 "suspended_at"
@@ -33163,7 +33667,13 @@ decodeGistSimple =
                             |> Json.Decode.Extra.andMap
                                 (Json.Decode.field
                                     "user"
-                                    (Debug.todo "decode anyOf")
+                                    (Json.Decode.oneOf
+                                        [ Json.Decode.map
+                                            Present
+                                            decodeSimpleUser
+                                        , Json.Decode.null Null
+                                        ]
+                                    )
                                 )
                             |> Json.Decode.Extra.andMap
                                 (Json.Decode.field
@@ -33173,7 +33683,13 @@ decodeGistSimple =
                             |> Json.Decode.Extra.andMap
                                 (Json.Decode.field
                                     "owner"
-                                    (Debug.todo "decode anyOf")
+                                    (Json.Decode.oneOf
+                                        [ Json.Decode.map
+                                            Present
+                                            decodeSimpleUser
+                                        , Json.Decode.null Null
+                                        ]
+                                    )
                                 )
                             |> Json.Decode.Extra.andMap
                                 (Json.Decode.field "truncated" Json.Decode.bool)
@@ -33420,7 +33936,14 @@ decodeGistHistory =
          }
      )
         |> Json.Decode.Extra.andMap
-            (Json.Decode.field "user" (Debug.todo "decode anyOf"))
+            (Json.Decode.field
+                "user"
+                (Json.Decode.oneOf
+                    [ Json.Decode.map Present decodeSimpleUser
+                    , Json.Decode.null Null
+                    ]
+                )
+            )
         |> Json.Decode.Extra.andMap
             (Json.Decode.field "version" Json.Decode.string)
         |> Json.Decode.Extra.andMap
@@ -33490,7 +34013,14 @@ decodeGistCommit =
         |> Json.Decode.Extra.andMap
             (Json.Decode.field "version" Json.Decode.string)
         |> Json.Decode.Extra.andMap
-            (Json.Decode.field "user" (Debug.todo "decode anyOf"))
+            (Json.Decode.field
+                "user"
+                (Json.Decode.oneOf
+                    [ Json.Decode.map Present decodeSimpleUser
+                    , Json.Decode.null Null
+                    ]
+                )
+            )
         |> Json.Decode.Extra.andMap
             (Json.Decode.field
                 "change_status"
@@ -33566,7 +34096,14 @@ decodeGistComment =
         |> Json.Decode.Extra.andMap
             (Json.Decode.field "body" Json.Decode.string)
         |> Json.Decode.Extra.andMap
-            (Json.Decode.field "user" (Debug.todo "decode anyOf"))
+            (Json.Decode.field
+                "user"
+                (Json.Decode.oneOf
+                    [ Json.Decode.map Present decodeSimpleUser
+                    , Json.Decode.null Null
+                    ]
+                )
+            )
         |> Json.Decode.Extra.andMap
             (Json.Decode.field "created_at" Json.Decode.string)
         |> Json.Decode.Extra.andMap
@@ -34003,7 +34540,13 @@ decodeFullRepository =
         |> Json.Decode.Extra.andMap
             (Json.Decode.field "allow_rebase_merge" Json.Decode.bool)
         |> Json.Decode.Extra.andMap
-            (Json.Decode.field "template_repository" (Debug.todo "decode anyOf")
+            (Json.Decode.field
+                "template_repository"
+                (Json.Decode.oneOf
+                    [ Json.Decode.map Present decodeRepository
+                    , Json.Decode.null Null
+                    ]
+                )
             )
         |> Json.Decode.Extra.andMap
             (Json.Decode.field
@@ -34044,9 +34587,23 @@ decodeFullRepository =
         |> Json.Decode.Extra.andMap
             (Json.Decode.field "network_count" Json.Decode.int)
         |> Json.Decode.Extra.andMap
-            (Json.Decode.field "license" (Debug.todo "decode anyOf"))
+            (Json.Decode.field
+                "license"
+                (Json.Decode.oneOf
+                    [ Json.Decode.map Present decodeLicenseSimple
+                    , Json.Decode.null Null
+                    ]
+                )
+            )
         |> Json.Decode.Extra.andMap
-            (Json.Decode.field "organization" (Debug.todo "decode anyOf"))
+            (Json.Decode.field
+                "organization"
+                (Json.Decode.oneOf
+                    [ Json.Decode.map Present decodeSimpleUser
+                    , Json.Decode.null Null
+                    ]
+                )
+            )
         |> Json.Decode.Extra.andMap
             (Json.Decode.field "parent" decodeRepository)
         |> Json.Decode.Extra.andMap
@@ -35219,7 +35776,9 @@ decodeEnvironment =
         |> Json.Decode.Extra.andMap
             (Json.Decode.field
                 "protection_rules"
-                (Json.Decode.list (Debug.todo "decode anyOf"))
+                (Json.Decode.list
+                    (Debug.todo "decode anyOf: not exactly 2 items")
+                )
             )
         |> Json.Decode.Extra.andMap
             (Json.Decode.field
@@ -35598,7 +36157,14 @@ decodeDeploymentStatus =
         |> Json.Decode.Extra.andMap
             (Json.Decode.field "state" Json.Decode.string)
         |> Json.Decode.Extra.andMap
-            (Json.Decode.field "creator" (Debug.todo "decode anyOf"))
+            (Json.Decode.field
+                "creator"
+                (Json.Decode.oneOf
+                    [ Json.Decode.map Present decodeSimpleUser
+                    , Json.Decode.null Null
+                    ]
+                )
+            )
         |> Json.Decode.Extra.andMap
             (Json.Decode.field "description" Json.Decode.string)
         |> Json.Decode.Extra.andMap
@@ -35620,7 +36186,11 @@ decodeDeploymentStatus =
         |> Json.Decode.Extra.andMap
             (Json.Decode.field
                 "performed_via_github_app"
-                (Debug.todo "decode anyOf")
+                (Json.Decode.oneOf
+                    [ Json.Decode.map Present decodeIntegration
+                    , Json.Decode.null Null
+                    ]
+                )
             )
 
 
@@ -35719,7 +36289,11 @@ decodeDeploymentSimple =
         |> Json.Decode.Extra.andMap
             (Json.Decode.field
                 "performed_via_github_app"
-                (Debug.todo "decode anyOf")
+                (Json.Decode.oneOf
+                    [ Json.Decode.map Present decodeIntegration
+                    , Json.Decode.null Null
+                    ]
+                )
             )
 
 
@@ -35930,7 +36504,14 @@ decodeDeployment =
                 )
             )
         |> Json.Decode.Extra.andMap
-            (Json.Decode.field "creator" (Debug.todo "decode anyOf"))
+            (Json.Decode.field
+                "creator"
+                (Json.Decode.oneOf
+                    [ Json.Decode.map Present decodeSimpleUser
+                    , Json.Decode.null Null
+                    ]
+                )
+            )
         |> Json.Decode.Extra.andMap
             (Json.Decode.field "created_at" Json.Decode.string)
         |> Json.Decode.Extra.andMap
@@ -35946,7 +36527,11 @@ decodeDeployment =
         |> Json.Decode.Extra.andMap
             (Json.Decode.field
                 "performed_via_github_app"
-                (Debug.todo "decode anyOf")
+                (Json.Decode.oneOf
+                    [ Json.Decode.map Present decodeIntegration
+                    , Json.Decode.null Null
+                    ]
+                )
             )
 
 
@@ -36763,7 +37348,14 @@ decodeDependabotAlert =
         |> Json.Decode.Extra.andMap
             (Json.Decode.field "dismissed_at" decodeAlertDismissedAt)
         |> Json.Decode.Extra.andMap
-            (Json.Decode.field "dismissed_by" (Debug.todo "decode anyOf"))
+            (Json.Decode.field
+                "dismissed_by"
+                (Json.Decode.oneOf
+                    [ Json.Decode.map Present decodeSimpleUser
+                    , Json.Decode.null Null
+                    ]
+                )
+            )
         |> Json.Decode.Extra.andMap
             (Json.Decode.field
                 "dismissed_reason"
@@ -36909,7 +37501,11 @@ decodeDemilestonedIssueEvent =
         |> Json.Decode.Extra.andMap
             (Json.Decode.field
                 "performed_via_github_app"
-                (Debug.todo "decode anyOf")
+                (Json.Decode.oneOf
+                    [ Json.Decode.map Present decodeIntegration
+                    , Json.Decode.null Null
+                    ]
+                )
             )
         |> Json.Decode.Extra.andMap
             (Json.Decode.field
@@ -37129,7 +37725,14 @@ decodeContributorActivity =
     Json.Decode.succeed
      (\author total weeks -> { author = author, total = total, weeks = weeks })
         |> Json.Decode.Extra.andMap
-            (Json.Decode.field "author" (Debug.todo "decode anyOf"))
+            (Json.Decode.field
+                "author"
+                (Json.Decode.oneOf
+                    [ Json.Decode.map Present decodeSimpleUser
+                    , Json.Decode.null Null
+                    ]
+                )
+            )
         |> Json.Decode.Extra.andMap (Json.Decode.field "total" Json.Decode.int)
         |> Json.Decode.Extra.andMap
             (Json.Decode.field
@@ -38493,32 +39096,77 @@ decodeCommunityProfile =
                     |> Json.Decode.Extra.andMap
                         (Json.Decode.field
                             "code_of_conduct"
-                            (Debug.todo "decode anyOf")
+                            (Json.Decode.oneOf
+                                [ Json.Decode.map
+                                    Present
+                                    decodeCodeOfConductSimple
+                                , Json.Decode.null Null
+                                ]
+                            )
                         )
                     |> Json.Decode.Extra.andMap
                         (Json.Decode.field
                             "code_of_conduct_file"
-                            (Debug.todo "decode anyOf")
+                            (Json.Decode.oneOf
+                                [ Json.Decode.map
+                                    Present
+                                    decodeCommunityHealthFile
+                                , Json.Decode.null Null
+                                ]
+                            )
                         )
                     |> Json.Decode.Extra.andMap
-                        (Json.Decode.field "license" (Debug.todo "decode anyOf")
+                        (Json.Decode.field
+                            "license"
+                            (Json.Decode.oneOf
+                                [ Json.Decode.map Present decodeLicenseSimple
+                                , Json.Decode.null Null
+                                ]
+                            )
                         )
                     |> Json.Decode.Extra.andMap
                         (Json.Decode.field
                             "contributing"
-                            (Debug.todo "decode anyOf")
+                            (Json.Decode.oneOf
+                                [ Json.Decode.map
+                                    Present
+                                    decodeCommunityHealthFile
+                                , Json.Decode.null Null
+                                ]
+                            )
                         )
                     |> Json.Decode.Extra.andMap
-                        (Json.Decode.field "readme" (Debug.todo "decode anyOf"))
+                        (Json.Decode.field
+                            "readme"
+                            (Json.Decode.oneOf
+                                [ Json.Decode.map
+                                    Present
+                                    decodeCommunityHealthFile
+                                , Json.Decode.null Null
+                                ]
+                            )
+                        )
                     |> Json.Decode.Extra.andMap
                         (Json.Decode.field
                             "issue_template"
-                            (Debug.todo "decode anyOf")
+                            (Json.Decode.oneOf
+                                [ Json.Decode.map
+                                    Present
+                                    decodeCommunityHealthFile
+                                , Json.Decode.null Null
+                                ]
+                            )
                         )
                     |> Json.Decode.Extra.andMap
                         (Json.Decode.field
                             "pull_request_template"
-                            (Debug.todo "decode anyOf")
+                            (Json.Decode.oneOf
+                                [ Json.Decode.map
+                                    Present
+                                    decodeCommunityHealthFile
+                                , Json.Decode.null Null
+                                ]
+                            )
                         )
                 )
             )
@@ -38707,7 +39355,11 @@ decodeCommitSearchResultItem =
                     |> Json.Decode.Extra.andMap
                         (Json.Decode.field
                             "committer"
-                            (Debug.todo "decode anyOf")
+                            (Json.Decode.oneOf
+                                [ Json.Decode.map Present decodeGitUser
+                                , Json.Decode.null Null
+                                ]
+                            )
                         )
                     |> Json.Decode.Extra.andMap
                         (Json.Decode.field "comment_count" Json.Decode.int)
@@ -38731,9 +39383,23 @@ decodeCommitSearchResultItem =
                 )
             )
         |> Json.Decode.Extra.andMap
-            (Json.Decode.field "author" (Debug.todo "decode anyOf"))
+            (Json.Decode.field
+                "author"
+                (Json.Decode.oneOf
+                    [ Json.Decode.map Present decodeSimpleUser
+                    , Json.Decode.null Null
+                    ]
+                )
+            )
         |> Json.Decode.Extra.andMap
-            (Json.Decode.field "committer" (Debug.todo "decode anyOf"))
+            (Json.Decode.field
+                "committer"
+                (Json.Decode.oneOf
+                    [ Json.Decode.map Present decodeGitUser
+                    , Json.Decode.null Null
+                    ]
+                )
+            )
         |> Json.Decode.Extra.andMap
             (Json.Decode.field
                 "parents"
@@ -38990,7 +39656,14 @@ decodeCommitComment =
         |> Json.Decode.Extra.andMap
             (Json.Decode.field "commit_id" Json.Decode.string)
         |> Json.Decode.Extra.andMap
-            (Json.Decode.field "user" (Debug.todo "decode anyOf"))
+            (Json.Decode.field
+                "user"
+                (Json.Decode.oneOf
+                    [ Json.Decode.map Present decodeSimpleUser
+                    , Json.Decode.null Null
+                    ]
+                )
+            )
         |> Json.Decode.Extra.andMap
             (Json.Decode.field "created_at" Json.Decode.string)
         |> Json.Decode.Extra.andMap
@@ -39141,11 +39814,22 @@ decodeCommit =
                     |> Json.Decode.Extra.andMap
                         (Json.Decode.field "url" Json.Decode.string)
                     |> Json.Decode.Extra.andMap
-                        (Json.Decode.field "author" (Debug.todo "decode anyOf"))
+                        (Json.Decode.field
+                            "author"
+                            (Json.Decode.oneOf
+                                [ Json.Decode.map Present decodeGitUser
+                                , Json.Decode.null Null
+                                ]
+                            )
+                        )
                     |> Json.Decode.Extra.andMap
                         (Json.Decode.field
                             "committer"
-                            (Debug.todo "decode anyOf")
+                            (Json.Decode.oneOf
+                                [ Json.Decode.map Present decodeGitUser
+                                , Json.Decode.null Null
+                                ]
+                            )
                         )
                     |> Json.Decode.Extra.andMap
                         (Json.Decode.field "message" Json.Decode.string)
@@ -39167,9 +39851,23 @@ decodeCommit =
                 )
             )
         |> Json.Decode.Extra.andMap
-            (Json.Decode.field "author" (Debug.todo "decode anyOf"))
+            (Json.Decode.field
+                "author"
+                (Json.Decode.oneOf
+                    [ Json.Decode.map Present decodeSimpleUser
+                    , Json.Decode.null Null
+                    ]
+                )
+            )
         |> Json.Decode.Extra.andMap
-            (Json.Decode.field "committer" (Debug.todo "decode anyOf"))
+            (Json.Decode.field
+                "committer"
+                (Json.Decode.oneOf
+                    [ Json.Decode.map Present decodeSimpleUser
+                    , Json.Decode.null Null
+                    ]
+                )
+            )
         |> Json.Decode.Extra.andMap
             (Json.Decode.field
                 "parents"
@@ -40049,7 +40747,14 @@ decodeCodespace =
         |> Json.Decode.Extra.andMap
             (Json.Decode.field "repository" decodeMinimalRepository)
         |> Json.Decode.Extra.andMap
-            (Json.Decode.field "machine" (Debug.todo "decode anyOf"))
+            (Json.Decode.field
+                "machine"
+                (Json.Decode.oneOf
+                    [ Json.Decode.map Present decodeCodespaceMachine
+                    , Json.Decode.null Null
+                    ]
+                )
+            )
         |> Json.Decode.Extra.andMap
             (Json.Decode.field
                 "devcontainer_path"
@@ -40762,7 +41467,14 @@ decodeCodeScanningOrganizationAlertItems =
         |> Json.Decode.Extra.andMap
             (Json.Decode.field "fixed_at" decodeAlertFixedAt)
         |> Json.Decode.Extra.andMap
-            (Json.Decode.field "dismissed_by" (Debug.todo "decode anyOf"))
+            (Json.Decode.field
+                "dismissed_by"
+                (Json.Decode.oneOf
+                    [ Json.Decode.map Present decodeSimpleUser
+                    , Json.Decode.null Null
+                    ]
+                )
+            )
         |> Json.Decode.Extra.andMap
             (Json.Decode.field "dismissed_at" decodeAlertDismissedAt)
         |> Json.Decode.Extra.andMap
@@ -41649,7 +42361,14 @@ decodeCodeScanningAlertItems =
         |> Json.Decode.Extra.andMap
             (Json.Decode.field "fixed_at" decodeAlertFixedAt)
         |> Json.Decode.Extra.andMap
-            (Json.Decode.field "dismissed_by" (Debug.todo "decode anyOf"))
+            (Json.Decode.field
+                "dismissed_by"
+                (Json.Decode.oneOf
+                    [ Json.Decode.map Present decodeSimpleUser
+                    , Json.Decode.null Null
+                    ]
+                )
+            )
         |> Json.Decode.Extra.andMap
             (Json.Decode.field "dismissed_at" decodeAlertDismissedAt)
         |> Json.Decode.Extra.andMap
@@ -41928,7 +42647,14 @@ decodeCodeScanningAlert =
         |> Json.Decode.Extra.andMap
             (Json.Decode.field "fixed_at" decodeAlertFixedAt)
         |> Json.Decode.Extra.andMap
-            (Json.Decode.field "dismissed_by" (Debug.todo "decode anyOf"))
+            (Json.Decode.field
+                "dismissed_by"
+                (Json.Decode.oneOf
+                    [ Json.Decode.map Present decodeSimpleUser
+                    , Json.Decode.null Null
+                    ]
+                )
+            )
         |> Json.Decode.Extra.andMap
             (Json.Decode.field "dismissed_at" decodeAlertDismissedAt)
         |> Json.Decode.Extra.andMap
@@ -42312,7 +43038,14 @@ decodeCheckSuite =
                 )
             )
         |> Json.Decode.Extra.andMap
-            (Json.Decode.field "app" (Debug.todo "decode anyOf"))
+            (Json.Decode.field
+                "app"
+                (Json.Decode.oneOf
+                    [ Json.Decode.map Present decodeIntegration
+                    , Json.Decode.null Null
+                    ]
+                )
+            )
         |> Json.Decode.Extra.andMap
             (Json.Decode.field "repository" decodeMinimalRepository)
         |> Json.Decode.Extra.andMap
@@ -42636,7 +43369,14 @@ decodeCheckRun =
                 )
             )
         |> Json.Decode.Extra.andMap
-            (Json.Decode.field "app" (Debug.todo "decode anyOf"))
+            (Json.Decode.field
+                "app"
+                (Json.Decode.oneOf
+                    [ Json.Decode.map Present decodeIntegration
+                    , Json.Decode.null Null
+                    ]
+                )
+            )
         |> Json.Decode.Extra.andMap
             (Json.Decode.field
                 "pull_requests"
@@ -44156,7 +44896,14 @@ decodeBaseGist =
         |> Json.Decode.Extra.andMap
             (Json.Decode.field "comments" Json.Decode.int)
         |> Json.Decode.Extra.andMap
-            (Json.Decode.field "user" (Debug.todo "decode anyOf"))
+            (Json.Decode.field
+                "user"
+                (Json.Decode.oneOf
+                    [ Json.Decode.map Present decodeSimpleUser
+                    , Json.Decode.null Null
+                    ]
+                )
+            )
         |> Json.Decode.Extra.andMap
             (Json.Decode.field "comments_url" Json.Decode.string)
         |> Json.Decode.Extra.andMap (Json.Decode.field "owner" decodeSimpleUser)
@@ -44413,9 +45160,23 @@ decodeAuthorization =
                 )
             )
         |> Json.Decode.Extra.andMap
-            (Json.Decode.field "user" (Debug.todo "decode anyOf"))
+            (Json.Decode.field
+                "user"
+                (Json.Decode.oneOf
+                    [ Json.Decode.map Present decodeSimpleUser
+                    , Json.Decode.null Null
+                    ]
+                )
+            )
         |> Json.Decode.Extra.andMap
-            (Json.Decode.field "installation" (Debug.todo "decode anyOf"))
+            (Json.Decode.field
+                "installation"
+                (Json.Decode.oneOf
+                    [ Json.Decode.map Present decodeScopedInstallation
+                    , Json.Decode.null Null
+                    ]
+                )
+            )
         |> Json.Decode.Extra.andMap
             (Json.Decode.field
                 "expires_at"
@@ -45544,7 +46305,11 @@ decodeAddedToProjectIssueEvent =
         |> Json.Decode.Extra.andMap
             (Json.Decode.field
                 "performed_via_github_app"
-                (Debug.todo "decode anyOf")
+                (Json.Decode.oneOf
+                    [ Json.Decode.map Present decodeIntegration
+                    , Json.Decode.null Null
+                    ]
+                )
             )
         |> Json.Decode.Extra.andMap
             (Json.Decode.field

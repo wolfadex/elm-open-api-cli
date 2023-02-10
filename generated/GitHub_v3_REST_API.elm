@@ -13,18 +13,18 @@ import Json.Encode
 import Result
 
 
-metaRoot : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+metaRoot : (Result Http.Error todo -> msg) -> Cmd msg
 metaRoot toMsg =
     Http.get { url = "/", expect = Http.expectJson toMsg (Debug.todo "todo") }
 
 
-appsGetAuthenticated : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+appsGetAuthenticated : (Result Http.Error todo -> msg) -> Cmd msg
 appsGetAuthenticated toMsg =
     Http.get
         { url = "/app", expect = Http.expectJson toMsg (Debug.todo "todo") }
 
 
-appsGetWebhookConfigForApp : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+appsGetWebhookConfigForApp : (Result Http.Error todo -> msg) -> Cmd msg
 appsGetWebhookConfigForApp toMsg =
     Http.get
         { url = "/app/hook/config"
@@ -32,7 +32,7 @@ appsGetWebhookConfigForApp toMsg =
         }
 
 
-appsListWebhookDeliveries : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+appsListWebhookDeliveries : (Result Http.Error todo -> msg) -> Cmd msg
 appsListWebhookDeliveries toMsg =
     Http.get
         { url = "/app/hook/deliveries"
@@ -40,7 +40,7 @@ appsListWebhookDeliveries toMsg =
         }
 
 
-appsGetWebhookDelivery : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+appsGetWebhookDelivery : (Result Http.Error todo -> msg) -> Cmd msg
 appsGetWebhookDelivery toMsg =
     Http.get
         { url = "/app/hook/deliveries/{delivery_id}"
@@ -48,7 +48,7 @@ appsGetWebhookDelivery toMsg =
         }
 
 
-appsListInstallations : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+appsListInstallations : (Result Http.Error todo -> msg) -> Cmd msg
 appsListInstallations toMsg =
     Http.get
         { url = "/app/installations"
@@ -56,7 +56,7 @@ appsListInstallations toMsg =
         }
 
 
-appsGetInstallation : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+appsGetInstallation : (Result Http.Error todo -> msg) -> Cmd msg
 appsGetInstallation toMsg =
     Http.get
         { url = "/app/installations/{installation_id}"
@@ -64,7 +64,7 @@ appsGetInstallation toMsg =
         }
 
 
-appsGetBySlug : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+appsGetBySlug : (Result Http.Error todo -> msg) -> Cmd msg
 appsGetBySlug toMsg =
     Http.get
         { url = "/apps/{app_slug}"
@@ -72,7 +72,7 @@ appsGetBySlug toMsg =
         }
 
 
-codesOfConductGetAllCodesOfConduct : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+codesOfConductGetAllCodesOfConduct : (Result Http.Error todo -> msg) -> Cmd msg
 codesOfConductGetAllCodesOfConduct toMsg =
     Http.get
         { url = "/codes_of_conduct"
@@ -80,7 +80,7 @@ codesOfConductGetAllCodesOfConduct toMsg =
         }
 
 
-codesOfConductGetConductCode : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+codesOfConductGetConductCode : (Result Http.Error todo -> msg) -> Cmd msg
 codesOfConductGetConductCode toMsg =
     Http.get
         { url = "/codes_of_conduct/{key}"
@@ -88,13 +88,13 @@ codesOfConductGetConductCode toMsg =
         }
 
 
-emojisGet : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+emojisGet : (Result Http.Error todo -> msg) -> Cmd msg
 emojisGet toMsg =
     Http.get
         { url = "/emojis", expect = Http.expectJson toMsg (Debug.todo "todo") }
 
 
-enterpriseAdminGetServerStatistics : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+enterpriseAdminGetServerStatistics : (Result Http.Error todo -> msg) -> Cmd msg
 enterpriseAdminGetServerStatistics toMsg =
     Http.get
         { url = "/enterprise-installation/{enterprise_or_org}/server-statistics"
@@ -103,7 +103,7 @@ enterpriseAdminGetServerStatistics toMsg =
 
 
 actionsGetActionsCacheUsageForEnterprise :
-    (expectJsonUnpack -> toMsg) -> Cmd toMsg
+    (Result Http.Error todo -> msg) -> Cmd msg
 actionsGetActionsCacheUsageForEnterprise toMsg =
     Http.get
         { url = "/enterprises/{enterprise}/actions/cache/usage"
@@ -112,7 +112,7 @@ actionsGetActionsCacheUsageForEnterprise toMsg =
 
 
 enterpriseAdminGetGithubActionsPermissionsEnterprise :
-    (expectJsonUnpack -> toMsg) -> Cmd toMsg
+    (Result Http.Error todo -> msg) -> Cmd msg
 enterpriseAdminGetGithubActionsPermissionsEnterprise toMsg =
     Http.get
         { url = "/enterprises/{enterprise}/actions/permissions"
@@ -121,7 +121,7 @@ enterpriseAdminGetGithubActionsPermissionsEnterprise toMsg =
 
 
 enterpriseAdminListSelectedOrganizationsEnabledGithubActionsEnterprise :
-    (expectJsonUnpack -> toMsg) -> Cmd toMsg
+    (Result Http.Error todo -> msg) -> Cmd msg
 enterpriseAdminListSelectedOrganizationsEnabledGithubActionsEnterprise toMsg =
     Http.get
         { url = "/enterprises/{enterprise}/actions/permissions/organizations"
@@ -130,7 +130,7 @@ enterpriseAdminListSelectedOrganizationsEnabledGithubActionsEnterprise toMsg =
 
 
 enterpriseAdminGetAllowedActionsEnterprise :
-    (expectJsonUnpack -> toMsg) -> Cmd toMsg
+    (Result Http.Error todo -> msg) -> Cmd msg
 enterpriseAdminGetAllowedActionsEnterprise toMsg =
     Http.get
         { url = "/enterprises/{enterprise}/actions/permissions/selected-actions"
@@ -139,7 +139,7 @@ enterpriseAdminGetAllowedActionsEnterprise toMsg =
 
 
 actionsGetGithubActionsDefaultWorkflowPermissionsEnterprise :
-    (expectJsonUnpack -> toMsg) -> Cmd toMsg
+    (Result Http.Error todo -> msg) -> Cmd msg
 actionsGetGithubActionsDefaultWorkflowPermissionsEnterprise toMsg =
     Http.get
         { url = "/enterprises/{enterprise}/actions/permissions/workflow"
@@ -148,7 +148,7 @@ actionsGetGithubActionsDefaultWorkflowPermissionsEnterprise toMsg =
 
 
 enterpriseAdminListSelfHostedRunnerGroupsForEnterprise :
-    (expectJsonUnpack -> toMsg) -> Cmd toMsg
+    (Result Http.Error todo -> msg) -> Cmd msg
 enterpriseAdminListSelfHostedRunnerGroupsForEnterprise toMsg =
     Http.get
         { url = "/enterprises/{enterprise}/actions/runner-groups"
@@ -157,7 +157,7 @@ enterpriseAdminListSelfHostedRunnerGroupsForEnterprise toMsg =
 
 
 enterpriseAdminGetSelfHostedRunnerGroupForEnterprise :
-    (expectJsonUnpack -> toMsg) -> Cmd toMsg
+    (Result Http.Error todo -> msg) -> Cmd msg
 enterpriseAdminGetSelfHostedRunnerGroupForEnterprise toMsg =
     Http.get
         { url =
@@ -167,7 +167,7 @@ enterpriseAdminGetSelfHostedRunnerGroupForEnterprise toMsg =
 
 
 enterpriseAdminListOrgAccessToSelfHostedRunnerGroupInEnterprise :
-    (expectJsonUnpack -> toMsg) -> Cmd toMsg
+    (Result Http.Error todo -> msg) -> Cmd msg
 enterpriseAdminListOrgAccessToSelfHostedRunnerGroupInEnterprise toMsg =
     Http.get
         { url =
@@ -177,7 +177,7 @@ enterpriseAdminListOrgAccessToSelfHostedRunnerGroupInEnterprise toMsg =
 
 
 enterpriseAdminListSelfHostedRunnersInGroupForEnterprise :
-    (expectJsonUnpack -> toMsg) -> Cmd toMsg
+    (Result Http.Error todo -> msg) -> Cmd msg
 enterpriseAdminListSelfHostedRunnersInGroupForEnterprise toMsg =
     Http.get
         { url =
@@ -187,7 +187,7 @@ enterpriseAdminListSelfHostedRunnersInGroupForEnterprise toMsg =
 
 
 enterpriseAdminListSelfHostedRunnersForEnterprise :
-    (expectJsonUnpack -> toMsg) -> Cmd toMsg
+    (Result Http.Error todo -> msg) -> Cmd msg
 enterpriseAdminListSelfHostedRunnersForEnterprise toMsg =
     Http.get
         { url = "/enterprises/{enterprise}/actions/runners"
@@ -196,7 +196,7 @@ enterpriseAdminListSelfHostedRunnersForEnterprise toMsg =
 
 
 enterpriseAdminListRunnerApplicationsForEnterprise :
-    (expectJsonUnpack -> toMsg) -> Cmd toMsg
+    (Result Http.Error todo -> msg) -> Cmd msg
 enterpriseAdminListRunnerApplicationsForEnterprise toMsg =
     Http.get
         { url = "/enterprises/{enterprise}/actions/runners/downloads"
@@ -205,7 +205,7 @@ enterpriseAdminListRunnerApplicationsForEnterprise toMsg =
 
 
 enterpriseAdminGetSelfHostedRunnerForEnterprise :
-    (expectJsonUnpack -> toMsg) -> Cmd toMsg
+    (Result Http.Error todo -> msg) -> Cmd msg
 enterpriseAdminGetSelfHostedRunnerForEnterprise toMsg =
     Http.get
         { url = "/enterprises/{enterprise}/actions/runners/{runner_id}"
@@ -214,7 +214,7 @@ enterpriseAdminGetSelfHostedRunnerForEnterprise toMsg =
 
 
 enterpriseAdminListLabelsForSelfHostedRunnerForEnterprise :
-    (expectJsonUnpack -> toMsg) -> Cmd toMsg
+    (Result Http.Error todo -> msg) -> Cmd msg
 enterpriseAdminListLabelsForSelfHostedRunnerForEnterprise toMsg =
     Http.get
         { url = "/enterprises/{enterprise}/actions/runners/{runner_id}/labels"
@@ -222,7 +222,7 @@ enterpriseAdminListLabelsForSelfHostedRunnerForEnterprise toMsg =
         }
 
 
-codeScanningListAlertsForEnterprise : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+codeScanningListAlertsForEnterprise : (Result Http.Error todo -> msg) -> Cmd msg
 codeScanningListAlertsForEnterprise toMsg =
     Http.get
         { url = "/enterprises/{enterprise}/code-scanning/alerts"
@@ -230,7 +230,8 @@ codeScanningListAlertsForEnterprise toMsg =
         }
 
 
-secretScanningListAlertsForEnterprise : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+secretScanningListAlertsForEnterprise :
+    (Result Http.Error todo -> msg) -> Cmd msg
 secretScanningListAlertsForEnterprise toMsg =
     Http.get
         { url = "/enterprises/{enterprise}/secret-scanning/alerts"
@@ -239,7 +240,7 @@ secretScanningListAlertsForEnterprise toMsg =
 
 
 billingGetGithubAdvancedSecurityBillingGhe :
-    (expectJsonUnpack -> toMsg) -> Cmd toMsg
+    (Result Http.Error todo -> msg) -> Cmd msg
 billingGetGithubAdvancedSecurityBillingGhe toMsg =
     Http.get
         { url = "/enterprises/{enterprise}/settings/billing/advanced-security"
@@ -247,25 +248,25 @@ billingGetGithubAdvancedSecurityBillingGhe toMsg =
         }
 
 
-activityListPublicEvents : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+activityListPublicEvents : (Result Http.Error todo -> msg) -> Cmd msg
 activityListPublicEvents toMsg =
     Http.get
         { url = "/events", expect = Http.expectJson toMsg (Debug.todo "todo") }
 
 
-activityGetFeeds : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+activityGetFeeds : (Result Http.Error todo -> msg) -> Cmd msg
 activityGetFeeds toMsg =
     Http.get
         { url = "/feeds", expect = Http.expectJson toMsg (Debug.todo "todo") }
 
 
-gistsList : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+gistsList : (Result Http.Error todo -> msg) -> Cmd msg
 gistsList toMsg =
     Http.get
         { url = "/gists", expect = Http.expectJson toMsg (Debug.todo "todo") }
 
 
-gistsListPublic : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+gistsListPublic : (Result Http.Error todo -> msg) -> Cmd msg
 gistsListPublic toMsg =
     Http.get
         { url = "/gists/public"
@@ -273,7 +274,7 @@ gistsListPublic toMsg =
         }
 
 
-gistsListStarred : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+gistsListStarred : (Result Http.Error todo -> msg) -> Cmd msg
 gistsListStarred toMsg =
     Http.get
         { url = "/gists/starred"
@@ -281,7 +282,7 @@ gistsListStarred toMsg =
         }
 
 
-gistsGet : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+gistsGet : (Result Http.Error todo -> msg) -> Cmd msg
 gistsGet toMsg =
     Http.get
         { url = "/gists/{gist_id}"
@@ -289,7 +290,7 @@ gistsGet toMsg =
         }
 
 
-gistsListComments : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+gistsListComments : (Result Http.Error todo -> msg) -> Cmd msg
 gistsListComments toMsg =
     Http.get
         { url = "/gists/{gist_id}/comments"
@@ -297,7 +298,7 @@ gistsListComments toMsg =
         }
 
 
-gistsGetComment : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+gistsGetComment : (Result Http.Error todo -> msg) -> Cmd msg
 gistsGetComment toMsg =
     Http.get
         { url = "/gists/{gist_id}/comments/{comment_id}"
@@ -305,7 +306,7 @@ gistsGetComment toMsg =
         }
 
 
-gistsListCommits : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+gistsListCommits : (Result Http.Error todo -> msg) -> Cmd msg
 gistsListCommits toMsg =
     Http.get
         { url = "/gists/{gist_id}/commits"
@@ -313,7 +314,7 @@ gistsListCommits toMsg =
         }
 
 
-gistsListForks : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+gistsListForks : (Result Http.Error todo -> msg) -> Cmd msg
 gistsListForks toMsg =
     Http.get
         { url = "/gists/{gist_id}/forks"
@@ -321,7 +322,7 @@ gistsListForks toMsg =
         }
 
 
-gistsCheckIsStarred : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+gistsCheckIsStarred : (Result Http.Error todo -> msg) -> Cmd msg
 gistsCheckIsStarred toMsg =
     Http.get
         { url = "/gists/{gist_id}/star"
@@ -329,7 +330,7 @@ gistsCheckIsStarred toMsg =
         }
 
 
-gistsGetRevision : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+gistsGetRevision : (Result Http.Error todo -> msg) -> Cmd msg
 gistsGetRevision toMsg =
     Http.get
         { url = "/gists/{gist_id}/{sha}"
@@ -337,7 +338,7 @@ gistsGetRevision toMsg =
         }
 
 
-gitignoreGetAllTemplates : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+gitignoreGetAllTemplates : (Result Http.Error todo -> msg) -> Cmd msg
 gitignoreGetAllTemplates toMsg =
     Http.get
         { url = "/gitignore/templates"
@@ -345,7 +346,7 @@ gitignoreGetAllTemplates toMsg =
         }
 
 
-gitignoreGetTemplate : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+gitignoreGetTemplate : (Result Http.Error todo -> msg) -> Cmd msg
 gitignoreGetTemplate toMsg =
     Http.get
         { url = "/gitignore/templates/{name}"
@@ -353,7 +354,8 @@ gitignoreGetTemplate toMsg =
         }
 
 
-appsListReposAccessibleToInstallation : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+appsListReposAccessibleToInstallation :
+    (Result Http.Error todo -> msg) -> Cmd msg
 appsListReposAccessibleToInstallation toMsg =
     Http.get
         { url = "/installation/repositories"
@@ -361,13 +363,13 @@ appsListReposAccessibleToInstallation toMsg =
         }
 
 
-issuesList : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+issuesList : (Result Http.Error todo -> msg) -> Cmd msg
 issuesList toMsg =
     Http.get
         { url = "/issues", expect = Http.expectJson toMsg (Debug.todo "todo") }
 
 
-licensesGetAllCommonlyUsed : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+licensesGetAllCommonlyUsed : (Result Http.Error todo -> msg) -> Cmd msg
 licensesGetAllCommonlyUsed toMsg =
     Http.get
         { url = "/licenses"
@@ -375,7 +377,7 @@ licensesGetAllCommonlyUsed toMsg =
         }
 
 
-licensesGet : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+licensesGet : (Result Http.Error todo -> msg) -> Cmd msg
 licensesGet toMsg =
     Http.get
         { url = "/licenses/{license}"
@@ -383,7 +385,7 @@ licensesGet toMsg =
         }
 
 
-appsGetSubscriptionPlanForAccount : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+appsGetSubscriptionPlanForAccount : (Result Http.Error todo -> msg) -> Cmd msg
 appsGetSubscriptionPlanForAccount toMsg =
     Http.get
         { url = "/marketplace_listing/accounts/{account_id}"
@@ -391,7 +393,7 @@ appsGetSubscriptionPlanForAccount toMsg =
         }
 
 
-appsListPlans : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+appsListPlans : (Result Http.Error todo -> msg) -> Cmd msg
 appsListPlans toMsg =
     Http.get
         { url = "/marketplace_listing/plans"
@@ -399,7 +401,7 @@ appsListPlans toMsg =
         }
 
 
-appsListAccountsForPlan : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+appsListAccountsForPlan : (Result Http.Error todo -> msg) -> Cmd msg
 appsListAccountsForPlan toMsg =
     Http.get
         { url = "/marketplace_listing/plans/{plan_id}/accounts"
@@ -408,7 +410,7 @@ appsListAccountsForPlan toMsg =
 
 
 appsGetSubscriptionPlanForAccountStubbed :
-    (expectJsonUnpack -> toMsg) -> Cmd toMsg
+    (Result Http.Error todo -> msg) -> Cmd msg
 appsGetSubscriptionPlanForAccountStubbed toMsg =
     Http.get
         { url = "/marketplace_listing/stubbed/accounts/{account_id}"
@@ -416,7 +418,7 @@ appsGetSubscriptionPlanForAccountStubbed toMsg =
         }
 
 
-appsListPlansStubbed : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+appsListPlansStubbed : (Result Http.Error todo -> msg) -> Cmd msg
 appsListPlansStubbed toMsg =
     Http.get
         { url = "/marketplace_listing/stubbed/plans"
@@ -424,7 +426,7 @@ appsListPlansStubbed toMsg =
         }
 
 
-appsListAccountsForPlanStubbed : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+appsListAccountsForPlanStubbed : (Result Http.Error todo -> msg) -> Cmd msg
 appsListAccountsForPlanStubbed toMsg =
     Http.get
         { url = "/marketplace_listing/stubbed/plans/{plan_id}/accounts"
@@ -432,14 +434,14 @@ appsListAccountsForPlanStubbed toMsg =
         }
 
 
-metaGet : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+metaGet : (Result Http.Error todo -> msg) -> Cmd msg
 metaGet toMsg =
     Http.get
         { url = "/meta", expect = Http.expectJson toMsg (Debug.todo "todo") }
 
 
 activityListPublicEventsForRepoNetwork :
-    (expectJsonUnpack -> toMsg) -> Cmd toMsg
+    (Result Http.Error todo -> msg) -> Cmd msg
 activityListPublicEventsForRepoNetwork toMsg =
     Http.get
         { url = "/networks/{owner}/{repo}/events"
@@ -448,7 +450,7 @@ activityListPublicEventsForRepoNetwork toMsg =
 
 
 activityListNotificationsForAuthenticatedUser :
-    (expectJsonUnpack -> toMsg) -> Cmd toMsg
+    (Result Http.Error todo -> msg) -> Cmd msg
 activityListNotificationsForAuthenticatedUser toMsg =
     Http.get
         { url = "/notifications"
@@ -456,7 +458,7 @@ activityListNotificationsForAuthenticatedUser toMsg =
         }
 
 
-activityGetThread : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+activityGetThread : (Result Http.Error todo -> msg) -> Cmd msg
 activityGetThread toMsg =
     Http.get
         { url = "/notifications/threads/{thread_id}"
@@ -465,7 +467,7 @@ activityGetThread toMsg =
 
 
 activityGetThreadSubscriptionForAuthenticatedUser :
-    (expectJsonUnpack -> toMsg) -> Cmd toMsg
+    (Result Http.Error todo -> msg) -> Cmd msg
 activityGetThreadSubscriptionForAuthenticatedUser toMsg =
     Http.get
         { url = "/notifications/threads/{thread_id}/subscription"
@@ -473,13 +475,13 @@ activityGetThreadSubscriptionForAuthenticatedUser toMsg =
         }
 
 
-metaGetOctocat : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+metaGetOctocat : (Result Http.Error todo -> msg) -> Cmd msg
 metaGetOctocat toMsg =
     Http.get
         { url = "/octocat", expect = Http.expectJson toMsg (Debug.todo "todo") }
 
 
-orgsList : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+orgsList : (Result Http.Error todo -> msg) -> Cmd msg
 orgsList toMsg =
     Http.get
         { url = "/organizations"
@@ -487,7 +489,7 @@ orgsList toMsg =
         }
 
 
-orgsListCustomRoles : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+orgsListCustomRoles : (Result Http.Error todo -> msg) -> Cmd msg
 orgsListCustomRoles toMsg =
     Http.get
         { url = "/organizations/{organization_id}/custom_roles"
@@ -495,7 +497,7 @@ orgsListCustomRoles toMsg =
         }
 
 
-orgsGet : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+orgsGet : (Result Http.Error todo -> msg) -> Cmd msg
 orgsGet toMsg =
     Http.get
         { url = "/orgs/{org}"
@@ -503,7 +505,7 @@ orgsGet toMsg =
         }
 
 
-actionsGetActionsCacheUsageForOrg : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+actionsGetActionsCacheUsageForOrg : (Result Http.Error todo -> msg) -> Cmd msg
 actionsGetActionsCacheUsageForOrg toMsg =
     Http.get
         { url = "/orgs/{org}/actions/cache/usage"
@@ -512,7 +514,7 @@ actionsGetActionsCacheUsageForOrg toMsg =
 
 
 actionsGetActionsCacheUsageByRepoForOrg :
-    (expectJsonUnpack -> toMsg) -> Cmd toMsg
+    (Result Http.Error todo -> msg) -> Cmd msg
 actionsGetActionsCacheUsageByRepoForOrg toMsg =
     Http.get
         { url = "/orgs/{org}/actions/cache/usage-by-repository"
@@ -521,7 +523,7 @@ actionsGetActionsCacheUsageByRepoForOrg toMsg =
 
 
 actionsGetGithubActionsPermissionsOrganization :
-    (expectJsonUnpack -> toMsg) -> Cmd toMsg
+    (Result Http.Error todo -> msg) -> Cmd msg
 actionsGetGithubActionsPermissionsOrganization toMsg =
     Http.get
         { url = "/orgs/{org}/actions/permissions"
@@ -530,7 +532,7 @@ actionsGetGithubActionsPermissionsOrganization toMsg =
 
 
 actionsListSelectedRepositoriesEnabledGithubActionsOrganization :
-    (expectJsonUnpack -> toMsg) -> Cmd toMsg
+    (Result Http.Error todo -> msg) -> Cmd msg
 actionsListSelectedRepositoriesEnabledGithubActionsOrganization toMsg =
     Http.get
         { url = "/orgs/{org}/actions/permissions/repositories"
@@ -538,7 +540,8 @@ actionsListSelectedRepositoriesEnabledGithubActionsOrganization toMsg =
         }
 
 
-actionsGetAllowedActionsOrganization : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+actionsGetAllowedActionsOrganization :
+    (Result Http.Error todo -> msg) -> Cmd msg
 actionsGetAllowedActionsOrganization toMsg =
     Http.get
         { url = "/orgs/{org}/actions/permissions/selected-actions"
@@ -547,7 +550,7 @@ actionsGetAllowedActionsOrganization toMsg =
 
 
 actionsGetGithubActionsDefaultWorkflowPermissionsOrganization :
-    (expectJsonUnpack -> toMsg) -> Cmd toMsg
+    (Result Http.Error todo -> msg) -> Cmd msg
 actionsGetGithubActionsDefaultWorkflowPermissionsOrganization toMsg =
     Http.get
         { url = "/orgs/{org}/actions/permissions/workflow"
@@ -556,7 +559,7 @@ actionsGetGithubActionsDefaultWorkflowPermissionsOrganization toMsg =
 
 
 actionsListSelfHostedRunnerGroupsForOrg :
-    (expectJsonUnpack -> toMsg) -> Cmd toMsg
+    (Result Http.Error todo -> msg) -> Cmd msg
 actionsListSelfHostedRunnerGroupsForOrg toMsg =
     Http.get
         { url = "/orgs/{org}/actions/runner-groups"
@@ -564,7 +567,8 @@ actionsListSelfHostedRunnerGroupsForOrg toMsg =
         }
 
 
-actionsGetSelfHostedRunnerGroupForOrg : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+actionsGetSelfHostedRunnerGroupForOrg :
+    (Result Http.Error todo -> msg) -> Cmd msg
 actionsGetSelfHostedRunnerGroupForOrg toMsg =
     Http.get
         { url = "/orgs/{org}/actions/runner-groups/{runner_group_id}"
@@ -573,7 +577,7 @@ actionsGetSelfHostedRunnerGroupForOrg toMsg =
 
 
 actionsListRepoAccessToSelfHostedRunnerGroupInOrg :
-    (expectJsonUnpack -> toMsg) -> Cmd toMsg
+    (Result Http.Error todo -> msg) -> Cmd msg
 actionsListRepoAccessToSelfHostedRunnerGroupInOrg toMsg =
     Http.get
         { url =
@@ -583,7 +587,7 @@ actionsListRepoAccessToSelfHostedRunnerGroupInOrg toMsg =
 
 
 actionsListSelfHostedRunnersInGroupForOrg :
-    (expectJsonUnpack -> toMsg) -> Cmd toMsg
+    (Result Http.Error todo -> msg) -> Cmd msg
 actionsListSelfHostedRunnersInGroupForOrg toMsg =
     Http.get
         { url = "/orgs/{org}/actions/runner-groups/{runner_group_id}/runners"
@@ -591,7 +595,7 @@ actionsListSelfHostedRunnersInGroupForOrg toMsg =
         }
 
 
-actionsListSelfHostedRunnersForOrg : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+actionsListSelfHostedRunnersForOrg : (Result Http.Error todo -> msg) -> Cmd msg
 actionsListSelfHostedRunnersForOrg toMsg =
     Http.get
         { url = "/orgs/{org}/actions/runners"
@@ -599,7 +603,7 @@ actionsListSelfHostedRunnersForOrg toMsg =
         }
 
 
-actionsListRunnerApplicationsForOrg : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+actionsListRunnerApplicationsForOrg : (Result Http.Error todo -> msg) -> Cmd msg
 actionsListRunnerApplicationsForOrg toMsg =
     Http.get
         { url = "/orgs/{org}/actions/runners/downloads"
@@ -607,7 +611,7 @@ actionsListRunnerApplicationsForOrg toMsg =
         }
 
 
-actionsGetSelfHostedRunnerForOrg : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+actionsGetSelfHostedRunnerForOrg : (Result Http.Error todo -> msg) -> Cmd msg
 actionsGetSelfHostedRunnerForOrg toMsg =
     Http.get
         { url = "/orgs/{org}/actions/runners/{runner_id}"
@@ -616,7 +620,7 @@ actionsGetSelfHostedRunnerForOrg toMsg =
 
 
 actionsListLabelsForSelfHostedRunnerForOrg :
-    (expectJsonUnpack -> toMsg) -> Cmd toMsg
+    (Result Http.Error todo -> msg) -> Cmd msg
 actionsListLabelsForSelfHostedRunnerForOrg toMsg =
     Http.get
         { url = "/orgs/{org}/actions/runners/{runner_id}/labels"
@@ -624,7 +628,7 @@ actionsListLabelsForSelfHostedRunnerForOrg toMsg =
         }
 
 
-actionsListOrgSecrets : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+actionsListOrgSecrets : (Result Http.Error todo -> msg) -> Cmd msg
 actionsListOrgSecrets toMsg =
     Http.get
         { url = "/orgs/{org}/actions/secrets"
@@ -632,7 +636,7 @@ actionsListOrgSecrets toMsg =
         }
 
 
-actionsGetOrgPublicKey : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+actionsGetOrgPublicKey : (Result Http.Error todo -> msg) -> Cmd msg
 actionsGetOrgPublicKey toMsg =
     Http.get
         { url = "/orgs/{org}/actions/secrets/public-key"
@@ -640,7 +644,7 @@ actionsGetOrgPublicKey toMsg =
         }
 
 
-actionsGetOrgSecret : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+actionsGetOrgSecret : (Result Http.Error todo -> msg) -> Cmd msg
 actionsGetOrgSecret toMsg =
     Http.get
         { url = "/orgs/{org}/actions/secrets/{secret_name}"
@@ -648,7 +652,8 @@ actionsGetOrgSecret toMsg =
         }
 
 
-actionsListSelectedReposForOrgSecret : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+actionsListSelectedReposForOrgSecret :
+    (Result Http.Error todo -> msg) -> Cmd msg
 actionsListSelectedReposForOrgSecret toMsg =
     Http.get
         { url = "/orgs/{org}/actions/secrets/{secret_name}/repositories"
@@ -656,7 +661,7 @@ actionsListSelectedReposForOrgSecret toMsg =
         }
 
 
-orgsListBlockedUsers : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+orgsListBlockedUsers : (Result Http.Error todo -> msg) -> Cmd msg
 orgsListBlockedUsers toMsg =
     Http.get
         { url = "/orgs/{org}/blocks"
@@ -664,7 +669,7 @@ orgsListBlockedUsers toMsg =
         }
 
 
-orgsCheckBlockedUser : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+orgsCheckBlockedUser : (Result Http.Error todo -> msg) -> Cmd msg
 orgsCheckBlockedUser toMsg =
     Http.get
         { url = "/orgs/{org}/blocks/{username}"
@@ -672,7 +677,7 @@ orgsCheckBlockedUser toMsg =
         }
 
 
-codeScanningListAlertsForOrg : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+codeScanningListAlertsForOrg : (Result Http.Error todo -> msg) -> Cmd msg
 codeScanningListAlertsForOrg toMsg =
     Http.get
         { url = "/orgs/{org}/code-scanning/alerts"
@@ -680,7 +685,7 @@ codeScanningListAlertsForOrg toMsg =
         }
 
 
-codespacesListInOrganization : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+codespacesListInOrganization : (Result Http.Error todo -> msg) -> Cmd msg
 codespacesListInOrganization toMsg =
     Http.get
         { url = "/orgs/{org}/codespaces"
@@ -688,7 +693,7 @@ codespacesListInOrganization toMsg =
         }
 
 
-codespacesListOrgSecrets : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+codespacesListOrgSecrets : (Result Http.Error todo -> msg) -> Cmd msg
 codespacesListOrgSecrets toMsg =
     Http.get
         { url = "/orgs/{org}/codespaces/secrets"
@@ -696,7 +701,7 @@ codespacesListOrgSecrets toMsg =
         }
 
 
-codespacesGetOrgPublicKey : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+codespacesGetOrgPublicKey : (Result Http.Error todo -> msg) -> Cmd msg
 codespacesGetOrgPublicKey toMsg =
     Http.get
         { url = "/orgs/{org}/codespaces/secrets/public-key"
@@ -704,7 +709,7 @@ codespacesGetOrgPublicKey toMsg =
         }
 
 
-codespacesGetOrgSecret : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+codespacesGetOrgSecret : (Result Http.Error todo -> msg) -> Cmd msg
 codespacesGetOrgSecret toMsg =
     Http.get
         { url = "/orgs/{org}/codespaces/secrets/{secret_name}"
@@ -713,7 +718,7 @@ codespacesGetOrgSecret toMsg =
 
 
 codespacesListSelectedReposForOrgSecret :
-    (expectJsonUnpack -> toMsg) -> Cmd toMsg
+    (Result Http.Error todo -> msg) -> Cmd msg
 codespacesListSelectedReposForOrgSecret toMsg =
     Http.get
         { url = "/orgs/{org}/codespaces/secrets/{secret_name}/repositories"
@@ -721,7 +726,7 @@ codespacesListSelectedReposForOrgSecret toMsg =
         }
 
 
-dependabotListOrgSecrets : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+dependabotListOrgSecrets : (Result Http.Error todo -> msg) -> Cmd msg
 dependabotListOrgSecrets toMsg =
     Http.get
         { url = "/orgs/{org}/dependabot/secrets"
@@ -729,7 +734,7 @@ dependabotListOrgSecrets toMsg =
         }
 
 
-dependabotGetOrgPublicKey : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+dependabotGetOrgPublicKey : (Result Http.Error todo -> msg) -> Cmd msg
 dependabotGetOrgPublicKey toMsg =
     Http.get
         { url = "/orgs/{org}/dependabot/secrets/public-key"
@@ -737,7 +742,7 @@ dependabotGetOrgPublicKey toMsg =
         }
 
 
-dependabotGetOrgSecret : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+dependabotGetOrgSecret : (Result Http.Error todo -> msg) -> Cmd msg
 dependabotGetOrgSecret toMsg =
     Http.get
         { url = "/orgs/{org}/dependabot/secrets/{secret_name}"
@@ -746,7 +751,7 @@ dependabotGetOrgSecret toMsg =
 
 
 dependabotListSelectedReposForOrgSecret :
-    (expectJsonUnpack -> toMsg) -> Cmd toMsg
+    (Result Http.Error todo -> msg) -> Cmd msg
 dependabotListSelectedReposForOrgSecret toMsg =
     Http.get
         { url = "/orgs/{org}/dependabot/secrets/{secret_name}/repositories"
@@ -754,7 +759,7 @@ dependabotListSelectedReposForOrgSecret toMsg =
         }
 
 
-activityListPublicOrgEvents : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+activityListPublicOrgEvents : (Result Http.Error todo -> msg) -> Cmd msg
 activityListPublicOrgEvents toMsg =
     Http.get
         { url = "/orgs/{org}/events"
@@ -762,7 +767,7 @@ activityListPublicOrgEvents toMsg =
         }
 
 
-orgsListFailedInvitations : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+orgsListFailedInvitations : (Result Http.Error todo -> msg) -> Cmd msg
 orgsListFailedInvitations toMsg =
     Http.get
         { url = "/orgs/{org}/failed_invitations"
@@ -770,7 +775,7 @@ orgsListFailedInvitations toMsg =
         }
 
 
-orgsListFineGrainedPermissions : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+orgsListFineGrainedPermissions : (Result Http.Error todo -> msg) -> Cmd msg
 orgsListFineGrainedPermissions toMsg =
     Http.get
         { url = "/orgs/{org}/fine_grained_permissions"
@@ -778,7 +783,7 @@ orgsListFineGrainedPermissions toMsg =
         }
 
 
-orgsListWebhooks : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+orgsListWebhooks : (Result Http.Error todo -> msg) -> Cmd msg
 orgsListWebhooks toMsg =
     Http.get
         { url = "/orgs/{org}/hooks"
@@ -786,7 +791,7 @@ orgsListWebhooks toMsg =
         }
 
 
-orgsGetWebhook : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+orgsGetWebhook : (Result Http.Error todo -> msg) -> Cmd msg
 orgsGetWebhook toMsg =
     Http.get
         { url = "/orgs/{org}/hooks/{hook_id}"
@@ -794,7 +799,7 @@ orgsGetWebhook toMsg =
         }
 
 
-orgsGetWebhookConfigForOrg : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+orgsGetWebhookConfigForOrg : (Result Http.Error todo -> msg) -> Cmd msg
 orgsGetWebhookConfigForOrg toMsg =
     Http.get
         { url = "/orgs/{org}/hooks/{hook_id}/config"
@@ -802,7 +807,7 @@ orgsGetWebhookConfigForOrg toMsg =
         }
 
 
-orgsListWebhookDeliveries : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+orgsListWebhookDeliveries : (Result Http.Error todo -> msg) -> Cmd msg
 orgsListWebhookDeliveries toMsg =
     Http.get
         { url = "/orgs/{org}/hooks/{hook_id}/deliveries"
@@ -810,7 +815,7 @@ orgsListWebhookDeliveries toMsg =
         }
 
 
-orgsGetWebhookDelivery : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+orgsGetWebhookDelivery : (Result Http.Error todo -> msg) -> Cmd msg
 orgsGetWebhookDelivery toMsg =
     Http.get
         { url = "/orgs/{org}/hooks/{hook_id}/deliveries/{delivery_id}"
@@ -818,7 +823,7 @@ orgsGetWebhookDelivery toMsg =
         }
 
 
-appsGetOrgInstallation : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+appsGetOrgInstallation : (Result Http.Error todo -> msg) -> Cmd msg
 appsGetOrgInstallation toMsg =
     Http.get
         { url = "/orgs/{org}/installation"
@@ -826,7 +831,7 @@ appsGetOrgInstallation toMsg =
         }
 
 
-orgsListAppInstallations : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+orgsListAppInstallations : (Result Http.Error todo -> msg) -> Cmd msg
 orgsListAppInstallations toMsg =
     Http.get
         { url = "/orgs/{org}/installations"
@@ -834,7 +839,7 @@ orgsListAppInstallations toMsg =
         }
 
 
-interactionsGetRestrictionsForOrg : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+interactionsGetRestrictionsForOrg : (Result Http.Error todo -> msg) -> Cmd msg
 interactionsGetRestrictionsForOrg toMsg =
     Http.get
         { url = "/orgs/{org}/interaction-limits"
@@ -842,7 +847,7 @@ interactionsGetRestrictionsForOrg toMsg =
         }
 
 
-orgsListPendingInvitations : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+orgsListPendingInvitations : (Result Http.Error todo -> msg) -> Cmd msg
 orgsListPendingInvitations toMsg =
     Http.get
         { url = "/orgs/{org}/invitations"
@@ -850,7 +855,7 @@ orgsListPendingInvitations toMsg =
         }
 
 
-orgsListInvitationTeams : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+orgsListInvitationTeams : (Result Http.Error todo -> msg) -> Cmd msg
 orgsListInvitationTeams toMsg =
     Http.get
         { url = "/orgs/{org}/invitations/{invitation_id}/teams"
@@ -858,7 +863,7 @@ orgsListInvitationTeams toMsg =
         }
 
 
-issuesListForOrg : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+issuesListForOrg : (Result Http.Error todo -> msg) -> Cmd msg
 issuesListForOrg toMsg =
     Http.get
         { url = "/orgs/{org}/issues"
@@ -866,7 +871,7 @@ issuesListForOrg toMsg =
         }
 
 
-orgsListMembers : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+orgsListMembers : (Result Http.Error todo -> msg) -> Cmd msg
 orgsListMembers toMsg =
     Http.get
         { url = "/orgs/{org}/members"
@@ -874,7 +879,7 @@ orgsListMembers toMsg =
         }
 
 
-orgsCheckMembershipForUser : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+orgsCheckMembershipForUser : (Result Http.Error todo -> msg) -> Cmd msg
 orgsCheckMembershipForUser toMsg =
     Http.get
         { url = "/orgs/{org}/members/{username}"
@@ -882,7 +887,7 @@ orgsCheckMembershipForUser toMsg =
         }
 
 
-codespacesGetCodespacesForUserInOrg : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+codespacesGetCodespacesForUserInOrg : (Result Http.Error todo -> msg) -> Cmd msg
 codespacesGetCodespacesForUserInOrg toMsg =
     Http.get
         { url = "/orgs/{org}/members/{username}/codespaces"
@@ -890,7 +895,7 @@ codespacesGetCodespacesForUserInOrg toMsg =
         }
 
 
-orgsGetMembershipForUser : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+orgsGetMembershipForUser : (Result Http.Error todo -> msg) -> Cmd msg
 orgsGetMembershipForUser toMsg =
     Http.get
         { url = "/orgs/{org}/memberships/{username}"
@@ -898,7 +903,7 @@ orgsGetMembershipForUser toMsg =
         }
 
 
-migrationsListForOrg : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+migrationsListForOrg : (Result Http.Error todo -> msg) -> Cmd msg
 migrationsListForOrg toMsg =
     Http.get
         { url = "/orgs/{org}/migrations"
@@ -906,7 +911,7 @@ migrationsListForOrg toMsg =
         }
 
 
-migrationsGetStatusForOrg : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+migrationsGetStatusForOrg : (Result Http.Error todo -> msg) -> Cmd msg
 migrationsGetStatusForOrg toMsg =
     Http.get
         { url = "/orgs/{org}/migrations/{migration_id}"
@@ -914,7 +919,7 @@ migrationsGetStatusForOrg toMsg =
         }
 
 
-migrationsDownloadArchiveForOrg : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+migrationsDownloadArchiveForOrg : (Result Http.Error todo -> msg) -> Cmd msg
 migrationsDownloadArchiveForOrg toMsg =
     Http.get
         { url = "/orgs/{org}/migrations/{migration_id}/archive"
@@ -922,7 +927,7 @@ migrationsDownloadArchiveForOrg toMsg =
         }
 
 
-migrationsListReposForOrg : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+migrationsListReposForOrg : (Result Http.Error todo -> msg) -> Cmd msg
 migrationsListReposForOrg toMsg =
     Http.get
         { url = "/orgs/{org}/migrations/{migration_id}/repositories"
@@ -930,7 +935,7 @@ migrationsListReposForOrg toMsg =
         }
 
 
-orgsListOutsideCollaborators : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+orgsListOutsideCollaborators : (Result Http.Error todo -> msg) -> Cmd msg
 orgsListOutsideCollaborators toMsg =
     Http.get
         { url = "/orgs/{org}/outside_collaborators"
@@ -938,7 +943,7 @@ orgsListOutsideCollaborators toMsg =
         }
 
 
-packagesListPackagesForOrganization : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+packagesListPackagesForOrganization : (Result Http.Error todo -> msg) -> Cmd msg
 packagesListPackagesForOrganization toMsg =
     Http.get
         { url = "/orgs/{org}/packages"
@@ -946,7 +951,7 @@ packagesListPackagesForOrganization toMsg =
         }
 
 
-packagesGetPackageForOrganization : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+packagesGetPackageForOrganization : (Result Http.Error todo -> msg) -> Cmd msg
 packagesGetPackageForOrganization toMsg =
     Http.get
         { url = "/orgs/{org}/packages/{package_type}/{package_name}"
@@ -955,7 +960,7 @@ packagesGetPackageForOrganization toMsg =
 
 
 packagesGetAllPackageVersionsForPackageOwnedByOrg :
-    (expectJsonUnpack -> toMsg) -> Cmd toMsg
+    (Result Http.Error todo -> msg) -> Cmd msg
 packagesGetAllPackageVersionsForPackageOwnedByOrg toMsg =
     Http.get
         { url = "/orgs/{org}/packages/{package_type}/{package_name}/versions"
@@ -964,7 +969,7 @@ packagesGetAllPackageVersionsForPackageOwnedByOrg toMsg =
 
 
 packagesGetPackageVersionForOrganization :
-    (expectJsonUnpack -> toMsg) -> Cmd toMsg
+    (Result Http.Error todo -> msg) -> Cmd msg
 packagesGetPackageVersionForOrganization toMsg =
     Http.get
         { url =
@@ -973,7 +978,7 @@ packagesGetPackageVersionForOrganization toMsg =
         }
 
 
-projectsListForOrg : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+projectsListForOrg : (Result Http.Error todo -> msg) -> Cmd msg
 projectsListForOrg toMsg =
     Http.get
         { url = "/orgs/{org}/projects"
@@ -981,7 +986,7 @@ projectsListForOrg toMsg =
         }
 
 
-orgsListPublicMembers : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+orgsListPublicMembers : (Result Http.Error todo -> msg) -> Cmd msg
 orgsListPublicMembers toMsg =
     Http.get
         { url = "/orgs/{org}/public_members"
@@ -989,7 +994,7 @@ orgsListPublicMembers toMsg =
         }
 
 
-orgsCheckPublicMembershipForUser : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+orgsCheckPublicMembershipForUser : (Result Http.Error todo -> msg) -> Cmd msg
 orgsCheckPublicMembershipForUser toMsg =
     Http.get
         { url = "/orgs/{org}/public_members/{username}"
@@ -997,7 +1002,7 @@ orgsCheckPublicMembershipForUser toMsg =
         }
 
 
-reposListForOrg : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+reposListForOrg : (Result Http.Error todo -> msg) -> Cmd msg
 reposListForOrg toMsg =
     Http.get
         { url = "/orgs/{org}/repos"
@@ -1005,7 +1010,7 @@ reposListForOrg toMsg =
         }
 
 
-secretScanningListAlertsForOrg : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+secretScanningListAlertsForOrg : (Result Http.Error todo -> msg) -> Cmd msg
 secretScanningListAlertsForOrg toMsg =
     Http.get
         { url = "/orgs/{org}/secret-scanning/alerts"
@@ -1013,7 +1018,7 @@ secretScanningListAlertsForOrg toMsg =
         }
 
 
-orgsListSecurityManagerTeams : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+orgsListSecurityManagerTeams : (Result Http.Error todo -> msg) -> Cmd msg
 orgsListSecurityManagerTeams toMsg =
     Http.get
         { url = "/orgs/{org}/security-managers"
@@ -1021,7 +1026,7 @@ orgsListSecurityManagerTeams toMsg =
         }
 
 
-billingGetGithubActionsBillingOrg : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+billingGetGithubActionsBillingOrg : (Result Http.Error todo -> msg) -> Cmd msg
 billingGetGithubActionsBillingOrg toMsg =
     Http.get
         { url = "/orgs/{org}/settings/billing/actions"
@@ -1030,7 +1035,7 @@ billingGetGithubActionsBillingOrg toMsg =
 
 
 billingGetGithubAdvancedSecurityBillingOrg :
-    (expectJsonUnpack -> toMsg) -> Cmd toMsg
+    (Result Http.Error todo -> msg) -> Cmd msg
 billingGetGithubAdvancedSecurityBillingOrg toMsg =
     Http.get
         { url = "/orgs/{org}/settings/billing/advanced-security"
@@ -1038,7 +1043,7 @@ billingGetGithubAdvancedSecurityBillingOrg toMsg =
         }
 
 
-billingGetGithubPackagesBillingOrg : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+billingGetGithubPackagesBillingOrg : (Result Http.Error todo -> msg) -> Cmd msg
 billingGetGithubPackagesBillingOrg toMsg =
     Http.get
         { url = "/orgs/{org}/settings/billing/packages"
@@ -1046,7 +1051,7 @@ billingGetGithubPackagesBillingOrg toMsg =
         }
 
 
-billingGetSharedStorageBillingOrg : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+billingGetSharedStorageBillingOrg : (Result Http.Error todo -> msg) -> Cmd msg
 billingGetSharedStorageBillingOrg toMsg =
     Http.get
         { url = "/orgs/{org}/settings/billing/shared-storage"
@@ -1054,7 +1059,7 @@ billingGetSharedStorageBillingOrg toMsg =
         }
 
 
-teamsList : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+teamsList : (Result Http.Error todo -> msg) -> Cmd msg
 teamsList toMsg =
     Http.get
         { url = "/orgs/{org}/teams"
@@ -1062,7 +1067,7 @@ teamsList toMsg =
         }
 
 
-teamsGetByName : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+teamsGetByName : (Result Http.Error todo -> msg) -> Cmd msg
 teamsGetByName toMsg =
     Http.get
         { url = "/orgs/{org}/teams/{team_slug}"
@@ -1070,7 +1075,7 @@ teamsGetByName toMsg =
         }
 
 
-teamsListDiscussionsInOrg : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+teamsListDiscussionsInOrg : (Result Http.Error todo -> msg) -> Cmd msg
 teamsListDiscussionsInOrg toMsg =
     Http.get
         { url = "/orgs/{org}/teams/{team_slug}/discussions"
@@ -1078,7 +1083,7 @@ teamsListDiscussionsInOrg toMsg =
         }
 
 
-teamsGetDiscussionInOrg : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+teamsGetDiscussionInOrg : (Result Http.Error todo -> msg) -> Cmd msg
 teamsGetDiscussionInOrg toMsg =
     Http.get
         { url = "/orgs/{org}/teams/{team_slug}/discussions/{discussion_number}"
@@ -1086,7 +1091,7 @@ teamsGetDiscussionInOrg toMsg =
         }
 
 
-teamsListDiscussionCommentsInOrg : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+teamsListDiscussionCommentsInOrg : (Result Http.Error todo -> msg) -> Cmd msg
 teamsListDiscussionCommentsInOrg toMsg =
     Http.get
         { url =
@@ -1095,7 +1100,7 @@ teamsListDiscussionCommentsInOrg toMsg =
         }
 
 
-teamsGetDiscussionCommentInOrg : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+teamsGetDiscussionCommentInOrg : (Result Http.Error todo -> msg) -> Cmd msg
 teamsGetDiscussionCommentInOrg toMsg =
     Http.get
         { url =
@@ -1105,7 +1110,7 @@ teamsGetDiscussionCommentInOrg toMsg =
 
 
 reactionsListForTeamDiscussionCommentInOrg :
-    (expectJsonUnpack -> toMsg) -> Cmd toMsg
+    (Result Http.Error todo -> msg) -> Cmd msg
 reactionsListForTeamDiscussionCommentInOrg toMsg =
     Http.get
         { url =
@@ -1114,7 +1119,7 @@ reactionsListForTeamDiscussionCommentInOrg toMsg =
         }
 
 
-reactionsListForTeamDiscussionInOrg : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+reactionsListForTeamDiscussionInOrg : (Result Http.Error todo -> msg) -> Cmd msg
 reactionsListForTeamDiscussionInOrg toMsg =
     Http.get
         { url =
@@ -1123,7 +1128,7 @@ reactionsListForTeamDiscussionInOrg toMsg =
         }
 
 
-teamsListPendingInvitationsInOrg : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+teamsListPendingInvitationsInOrg : (Result Http.Error todo -> msg) -> Cmd msg
 teamsListPendingInvitationsInOrg toMsg =
     Http.get
         { url = "/orgs/{org}/teams/{team_slug}/invitations"
@@ -1131,7 +1136,7 @@ teamsListPendingInvitationsInOrg toMsg =
         }
 
 
-teamsListMembersInOrg : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+teamsListMembersInOrg : (Result Http.Error todo -> msg) -> Cmd msg
 teamsListMembersInOrg toMsg =
     Http.get
         { url = "/orgs/{org}/teams/{team_slug}/members"
@@ -1139,7 +1144,7 @@ teamsListMembersInOrg toMsg =
         }
 
 
-teamsGetMembershipForUserInOrg : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+teamsGetMembershipForUserInOrg : (Result Http.Error todo -> msg) -> Cmd msg
 teamsGetMembershipForUserInOrg toMsg =
     Http.get
         { url = "/orgs/{org}/teams/{team_slug}/memberships/{username}"
@@ -1147,7 +1152,7 @@ teamsGetMembershipForUserInOrg toMsg =
         }
 
 
-teamsListProjectsInOrg : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+teamsListProjectsInOrg : (Result Http.Error todo -> msg) -> Cmd msg
 teamsListProjectsInOrg toMsg =
     Http.get
         { url = "/orgs/{org}/teams/{team_slug}/projects"
@@ -1155,7 +1160,8 @@ teamsListProjectsInOrg toMsg =
         }
 
 
-teamsCheckPermissionsForProjectInOrg : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+teamsCheckPermissionsForProjectInOrg :
+    (Result Http.Error todo -> msg) -> Cmd msg
 teamsCheckPermissionsForProjectInOrg toMsg =
     Http.get
         { url = "/orgs/{org}/teams/{team_slug}/projects/{project_id}"
@@ -1163,7 +1169,7 @@ teamsCheckPermissionsForProjectInOrg toMsg =
         }
 
 
-teamsListReposInOrg : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+teamsListReposInOrg : (Result Http.Error todo -> msg) -> Cmd msg
 teamsListReposInOrg toMsg =
     Http.get
         { url = "/orgs/{org}/teams/{team_slug}/repos"
@@ -1171,7 +1177,7 @@ teamsListReposInOrg toMsg =
         }
 
 
-teamsCheckPermissionsForRepoInOrg : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+teamsCheckPermissionsForRepoInOrg : (Result Http.Error todo -> msg) -> Cmd msg
 teamsCheckPermissionsForRepoInOrg toMsg =
     Http.get
         { url = "/orgs/{org}/teams/{team_slug}/repos/{owner}/{repo}"
@@ -1179,7 +1185,7 @@ teamsCheckPermissionsForRepoInOrg toMsg =
         }
 
 
-teamsListChildInOrg : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+teamsListChildInOrg : (Result Http.Error todo -> msg) -> Cmd msg
 teamsListChildInOrg toMsg =
     Http.get
         { url = "/orgs/{org}/teams/{team_slug}/teams"
@@ -1187,7 +1193,7 @@ teamsListChildInOrg toMsg =
         }
 
 
-projectsGetCard : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+projectsGetCard : (Result Http.Error todo -> msg) -> Cmd msg
 projectsGetCard toMsg =
     Http.get
         { url = "/projects/columns/cards/{card_id}"
@@ -1195,7 +1201,7 @@ projectsGetCard toMsg =
         }
 
 
-projectsGetColumn : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+projectsGetColumn : (Result Http.Error todo -> msg) -> Cmd msg
 projectsGetColumn toMsg =
     Http.get
         { url = "/projects/columns/{column_id}"
@@ -1203,7 +1209,7 @@ projectsGetColumn toMsg =
         }
 
 
-projectsListCards : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+projectsListCards : (Result Http.Error todo -> msg) -> Cmd msg
 projectsListCards toMsg =
     Http.get
         { url = "/projects/columns/{column_id}/cards"
@@ -1211,7 +1217,7 @@ projectsListCards toMsg =
         }
 
 
-projectsGet : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+projectsGet : (Result Http.Error todo -> msg) -> Cmd msg
 projectsGet toMsg =
     Http.get
         { url = "/projects/{project_id}"
@@ -1219,7 +1225,7 @@ projectsGet toMsg =
         }
 
 
-projectsListCollaborators : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+projectsListCollaborators : (Result Http.Error todo -> msg) -> Cmd msg
 projectsListCollaborators toMsg =
     Http.get
         { url = "/projects/{project_id}/collaborators"
@@ -1227,7 +1233,7 @@ projectsListCollaborators toMsg =
         }
 
 
-projectsGetPermissionForUser : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+projectsGetPermissionForUser : (Result Http.Error todo -> msg) -> Cmd msg
 projectsGetPermissionForUser toMsg =
     Http.get
         { url = "/projects/{project_id}/collaborators/{username}/permission"
@@ -1235,7 +1241,7 @@ projectsGetPermissionForUser toMsg =
         }
 
 
-projectsListColumns : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+projectsListColumns : (Result Http.Error todo -> msg) -> Cmd msg
 projectsListColumns toMsg =
     Http.get
         { url = "/projects/{project_id}/columns"
@@ -1243,7 +1249,7 @@ projectsListColumns toMsg =
         }
 
 
-rateLimitGet : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+rateLimitGet : (Result Http.Error todo -> msg) -> Cmd msg
 rateLimitGet toMsg =
     Http.get
         { url = "/rate_limit"
@@ -1251,7 +1257,7 @@ rateLimitGet toMsg =
         }
 
 
-reposGet : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+reposGet : (Result Http.Error todo -> msg) -> Cmd msg
 reposGet toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}"
@@ -1259,7 +1265,7 @@ reposGet toMsg =
         }
 
 
-actionsListArtifactsForRepo : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+actionsListArtifactsForRepo : (Result Http.Error todo -> msg) -> Cmd msg
 actionsListArtifactsForRepo toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/actions/artifacts"
@@ -1267,7 +1273,7 @@ actionsListArtifactsForRepo toMsg =
         }
 
 
-actionsGetArtifact : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+actionsGetArtifact : (Result Http.Error todo -> msg) -> Cmd msg
 actionsGetArtifact toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/actions/artifacts/{artifact_id}"
@@ -1275,7 +1281,7 @@ actionsGetArtifact toMsg =
         }
 
 
-actionsDownloadArtifact : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+actionsDownloadArtifact : (Result Http.Error todo -> msg) -> Cmd msg
 actionsDownloadArtifact toMsg =
     Http.get
         { url =
@@ -1284,7 +1290,7 @@ actionsDownloadArtifact toMsg =
         }
 
 
-actionsGetActionsCacheUsage : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+actionsGetActionsCacheUsage : (Result Http.Error todo -> msg) -> Cmd msg
 actionsGetActionsCacheUsage toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/actions/cache/usage"
@@ -1292,7 +1298,7 @@ actionsGetActionsCacheUsage toMsg =
         }
 
 
-actionsGetActionsCacheList : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+actionsGetActionsCacheList : (Result Http.Error todo -> msg) -> Cmd msg
 actionsGetActionsCacheList toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/actions/caches"
@@ -1300,7 +1306,7 @@ actionsGetActionsCacheList toMsg =
         }
 
 
-actionsGetJobForWorkflowRun : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+actionsGetJobForWorkflowRun : (Result Http.Error todo -> msg) -> Cmd msg
 actionsGetJobForWorkflowRun toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/actions/jobs/{job_id}"
@@ -1308,7 +1314,8 @@ actionsGetJobForWorkflowRun toMsg =
         }
 
 
-actionsDownloadJobLogsForWorkflowRun : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+actionsDownloadJobLogsForWorkflowRun :
+    (Result Http.Error todo -> msg) -> Cmd msg
 actionsDownloadJobLogsForWorkflowRun toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/actions/jobs/{job_id}/logs"
@@ -1317,7 +1324,7 @@ actionsDownloadJobLogsForWorkflowRun toMsg =
 
 
 actionsGetGithubActionsPermissionsRepository :
-    (expectJsonUnpack -> toMsg) -> Cmd toMsg
+    (Result Http.Error todo -> msg) -> Cmd msg
 actionsGetGithubActionsPermissionsRepository toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/actions/permissions"
@@ -1325,7 +1332,8 @@ actionsGetGithubActionsPermissionsRepository toMsg =
         }
 
 
-actionsGetWorkflowAccessToRepository : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+actionsGetWorkflowAccessToRepository :
+    (Result Http.Error todo -> msg) -> Cmd msg
 actionsGetWorkflowAccessToRepository toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/actions/permissions/access"
@@ -1333,7 +1341,7 @@ actionsGetWorkflowAccessToRepository toMsg =
         }
 
 
-actionsGetAllowedActionsRepository : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+actionsGetAllowedActionsRepository : (Result Http.Error todo -> msg) -> Cmd msg
 actionsGetAllowedActionsRepository toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/actions/permissions/selected-actions"
@@ -1342,7 +1350,7 @@ actionsGetAllowedActionsRepository toMsg =
 
 
 actionsGetGithubActionsDefaultWorkflowPermissionsRepository :
-    (expectJsonUnpack -> toMsg) -> Cmd toMsg
+    (Result Http.Error todo -> msg) -> Cmd msg
 actionsGetGithubActionsDefaultWorkflowPermissionsRepository toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/actions/permissions/workflow"
@@ -1350,7 +1358,7 @@ actionsGetGithubActionsDefaultWorkflowPermissionsRepository toMsg =
         }
 
 
-actionsListSelfHostedRunnersForRepo : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+actionsListSelfHostedRunnersForRepo : (Result Http.Error todo -> msg) -> Cmd msg
 actionsListSelfHostedRunnersForRepo toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/actions/runners"
@@ -1358,7 +1366,8 @@ actionsListSelfHostedRunnersForRepo toMsg =
         }
 
 
-actionsListRunnerApplicationsForRepo : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+actionsListRunnerApplicationsForRepo :
+    (Result Http.Error todo -> msg) -> Cmd msg
 actionsListRunnerApplicationsForRepo toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/actions/runners/downloads"
@@ -1366,7 +1375,7 @@ actionsListRunnerApplicationsForRepo toMsg =
         }
 
 
-actionsGetSelfHostedRunnerForRepo : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+actionsGetSelfHostedRunnerForRepo : (Result Http.Error todo -> msg) -> Cmd msg
 actionsGetSelfHostedRunnerForRepo toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/actions/runners/{runner_id}"
@@ -1375,7 +1384,7 @@ actionsGetSelfHostedRunnerForRepo toMsg =
 
 
 actionsListLabelsForSelfHostedRunnerForRepo :
-    (expectJsonUnpack -> toMsg) -> Cmd toMsg
+    (Result Http.Error todo -> msg) -> Cmd msg
 actionsListLabelsForSelfHostedRunnerForRepo toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/actions/runners/{runner_id}/labels"
@@ -1383,7 +1392,7 @@ actionsListLabelsForSelfHostedRunnerForRepo toMsg =
         }
 
 
-actionsListWorkflowRunsForRepo : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+actionsListWorkflowRunsForRepo : (Result Http.Error todo -> msg) -> Cmd msg
 actionsListWorkflowRunsForRepo toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/actions/runs"
@@ -1391,7 +1400,7 @@ actionsListWorkflowRunsForRepo toMsg =
         }
 
 
-actionsGetWorkflowRun : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+actionsGetWorkflowRun : (Result Http.Error todo -> msg) -> Cmd msg
 actionsGetWorkflowRun toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/actions/runs/{run_id}"
@@ -1399,7 +1408,7 @@ actionsGetWorkflowRun toMsg =
         }
 
 
-actionsGetReviewsForRun : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+actionsGetReviewsForRun : (Result Http.Error todo -> msg) -> Cmd msg
 actionsGetReviewsForRun toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/actions/runs/{run_id}/approvals"
@@ -1407,7 +1416,7 @@ actionsGetReviewsForRun toMsg =
         }
 
 
-actionsListWorkflowRunArtifacts : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+actionsListWorkflowRunArtifacts : (Result Http.Error todo -> msg) -> Cmd msg
 actionsListWorkflowRunArtifacts toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/actions/runs/{run_id}/artifacts"
@@ -1415,7 +1424,7 @@ actionsListWorkflowRunArtifacts toMsg =
         }
 
 
-actionsGetWorkflowRunAttempt : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+actionsGetWorkflowRunAttempt : (Result Http.Error todo -> msg) -> Cmd msg
 actionsGetWorkflowRunAttempt toMsg =
     Http.get
         { url =
@@ -1424,7 +1433,8 @@ actionsGetWorkflowRunAttempt toMsg =
         }
 
 
-actionsListJobsForWorkflowRunAttempt : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+actionsListJobsForWorkflowRunAttempt :
+    (Result Http.Error todo -> msg) -> Cmd msg
 actionsListJobsForWorkflowRunAttempt toMsg =
     Http.get
         { url =
@@ -1433,7 +1443,8 @@ actionsListJobsForWorkflowRunAttempt toMsg =
         }
 
 
-actionsDownloadWorkflowRunAttemptLogs : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+actionsDownloadWorkflowRunAttemptLogs :
+    (Result Http.Error todo -> msg) -> Cmd msg
 actionsDownloadWorkflowRunAttemptLogs toMsg =
     Http.get
         { url =
@@ -1442,7 +1453,7 @@ actionsDownloadWorkflowRunAttemptLogs toMsg =
         }
 
 
-actionsListJobsForWorkflowRun : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+actionsListJobsForWorkflowRun : (Result Http.Error todo -> msg) -> Cmd msg
 actionsListJobsForWorkflowRun toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/actions/runs/{run_id}/jobs"
@@ -1450,7 +1461,7 @@ actionsListJobsForWorkflowRun toMsg =
         }
 
 
-actionsDownloadWorkflowRunLogs : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+actionsDownloadWorkflowRunLogs : (Result Http.Error todo -> msg) -> Cmd msg
 actionsDownloadWorkflowRunLogs toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/actions/runs/{run_id}/logs"
@@ -1458,7 +1469,7 @@ actionsDownloadWorkflowRunLogs toMsg =
         }
 
 
-actionsGetPendingDeploymentsForRun : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+actionsGetPendingDeploymentsForRun : (Result Http.Error todo -> msg) -> Cmd msg
 actionsGetPendingDeploymentsForRun toMsg =
     Http.get
         { url =
@@ -1467,7 +1478,7 @@ actionsGetPendingDeploymentsForRun toMsg =
         }
 
 
-actionsGetWorkflowRunUsage : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+actionsGetWorkflowRunUsage : (Result Http.Error todo -> msg) -> Cmd msg
 actionsGetWorkflowRunUsage toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/actions/runs/{run_id}/timing"
@@ -1475,7 +1486,7 @@ actionsGetWorkflowRunUsage toMsg =
         }
 
 
-actionsListRepoSecrets : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+actionsListRepoSecrets : (Result Http.Error todo -> msg) -> Cmd msg
 actionsListRepoSecrets toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/actions/secrets"
@@ -1483,7 +1494,7 @@ actionsListRepoSecrets toMsg =
         }
 
 
-actionsGetRepoPublicKey : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+actionsGetRepoPublicKey : (Result Http.Error todo -> msg) -> Cmd msg
 actionsGetRepoPublicKey toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/actions/secrets/public-key"
@@ -1491,7 +1502,7 @@ actionsGetRepoPublicKey toMsg =
         }
 
 
-actionsGetRepoSecret : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+actionsGetRepoSecret : (Result Http.Error todo -> msg) -> Cmd msg
 actionsGetRepoSecret toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/actions/secrets/{secret_name}"
@@ -1499,7 +1510,7 @@ actionsGetRepoSecret toMsg =
         }
 
 
-actionsListRepoWorkflows : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+actionsListRepoWorkflows : (Result Http.Error todo -> msg) -> Cmd msg
 actionsListRepoWorkflows toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/actions/workflows"
@@ -1507,7 +1518,7 @@ actionsListRepoWorkflows toMsg =
         }
 
 
-actionsGetWorkflow : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+actionsGetWorkflow : (Result Http.Error todo -> msg) -> Cmd msg
 actionsGetWorkflow toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/actions/workflows/{workflow_id}"
@@ -1515,7 +1526,7 @@ actionsGetWorkflow toMsg =
         }
 
 
-actionsListWorkflowRuns : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+actionsListWorkflowRuns : (Result Http.Error todo -> msg) -> Cmd msg
 actionsListWorkflowRuns toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/actions/workflows/{workflow_id}/runs"
@@ -1523,7 +1534,7 @@ actionsListWorkflowRuns toMsg =
         }
 
 
-actionsGetWorkflowUsage : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+actionsGetWorkflowUsage : (Result Http.Error todo -> msg) -> Cmd msg
 actionsGetWorkflowUsage toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/actions/workflows/{workflow_id}/timing"
@@ -1531,7 +1542,7 @@ actionsGetWorkflowUsage toMsg =
         }
 
 
-issuesListAssignees : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+issuesListAssignees : (Result Http.Error todo -> msg) -> Cmd msg
 issuesListAssignees toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/assignees"
@@ -1539,7 +1550,7 @@ issuesListAssignees toMsg =
         }
 
 
-issuesCheckUserCanBeAssigned : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+issuesCheckUserCanBeAssigned : (Result Http.Error todo -> msg) -> Cmd msg
 issuesCheckUserCanBeAssigned toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/assignees/{assignee}"
@@ -1547,7 +1558,7 @@ issuesCheckUserCanBeAssigned toMsg =
         }
 
 
-reposListAutolinks : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+reposListAutolinks : (Result Http.Error todo -> msg) -> Cmd msg
 reposListAutolinks toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/autolinks"
@@ -1555,7 +1566,7 @@ reposListAutolinks toMsg =
         }
 
 
-reposGetAutolink : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+reposGetAutolink : (Result Http.Error todo -> msg) -> Cmd msg
 reposGetAutolink toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/autolinks/{autolink_id}"
@@ -1563,7 +1574,7 @@ reposGetAutolink toMsg =
         }
 
 
-reposListBranches : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+reposListBranches : (Result Http.Error todo -> msg) -> Cmd msg
 reposListBranches toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/branches"
@@ -1571,7 +1582,7 @@ reposListBranches toMsg =
         }
 
 
-reposGetBranch : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+reposGetBranch : (Result Http.Error todo -> msg) -> Cmd msg
 reposGetBranch toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/branches/{branch}"
@@ -1579,7 +1590,7 @@ reposGetBranch toMsg =
         }
 
 
-reposGetBranchProtection : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+reposGetBranchProtection : (Result Http.Error todo -> msg) -> Cmd msg
 reposGetBranchProtection toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/branches/{branch}/protection"
@@ -1587,7 +1598,7 @@ reposGetBranchProtection toMsg =
         }
 
 
-reposGetAdminBranchProtection : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+reposGetAdminBranchProtection : (Result Http.Error todo -> msg) -> Cmd msg
 reposGetAdminBranchProtection toMsg =
     Http.get
         { url =
@@ -1596,7 +1607,7 @@ reposGetAdminBranchProtection toMsg =
         }
 
 
-reposGetPullRequestReviewProtection : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+reposGetPullRequestReviewProtection : (Result Http.Error todo -> msg) -> Cmd msg
 reposGetPullRequestReviewProtection toMsg =
     Http.get
         { url =
@@ -1605,7 +1616,7 @@ reposGetPullRequestReviewProtection toMsg =
         }
 
 
-reposGetCommitSignatureProtection : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+reposGetCommitSignatureProtection : (Result Http.Error todo -> msg) -> Cmd msg
 reposGetCommitSignatureProtection toMsg =
     Http.get
         { url =
@@ -1614,7 +1625,7 @@ reposGetCommitSignatureProtection toMsg =
         }
 
 
-reposGetStatusChecksProtection : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+reposGetStatusChecksProtection : (Result Http.Error todo -> msg) -> Cmd msg
 reposGetStatusChecksProtection toMsg =
     Http.get
         { url =
@@ -1623,7 +1634,7 @@ reposGetStatusChecksProtection toMsg =
         }
 
 
-reposGetAllStatusCheckContexts : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+reposGetAllStatusCheckContexts : (Result Http.Error todo -> msg) -> Cmd msg
 reposGetAllStatusCheckContexts toMsg =
     Http.get
         { url =
@@ -1632,7 +1643,7 @@ reposGetAllStatusCheckContexts toMsg =
         }
 
 
-reposGetAccessRestrictions : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+reposGetAccessRestrictions : (Result Http.Error todo -> msg) -> Cmd msg
 reposGetAccessRestrictions toMsg =
     Http.get
         { url =
@@ -1642,7 +1653,7 @@ reposGetAccessRestrictions toMsg =
 
 
 reposGetAppsWithAccessToProtectedBranch :
-    (expectJsonUnpack -> toMsg) -> Cmd toMsg
+    (Result Http.Error todo -> msg) -> Cmd msg
 reposGetAppsWithAccessToProtectedBranch toMsg =
     Http.get
         { url =
@@ -1652,7 +1663,7 @@ reposGetAppsWithAccessToProtectedBranch toMsg =
 
 
 reposGetTeamsWithAccessToProtectedBranch :
-    (expectJsonUnpack -> toMsg) -> Cmd toMsg
+    (Result Http.Error todo -> msg) -> Cmd msg
 reposGetTeamsWithAccessToProtectedBranch toMsg =
     Http.get
         { url =
@@ -1662,7 +1673,7 @@ reposGetTeamsWithAccessToProtectedBranch toMsg =
 
 
 reposGetUsersWithAccessToProtectedBranch :
-    (expectJsonUnpack -> toMsg) -> Cmd toMsg
+    (Result Http.Error todo -> msg) -> Cmd msg
 reposGetUsersWithAccessToProtectedBranch toMsg =
     Http.get
         { url =
@@ -1671,7 +1682,7 @@ reposGetUsersWithAccessToProtectedBranch toMsg =
         }
 
 
-checksGet : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+checksGet : (Result Http.Error todo -> msg) -> Cmd msg
 checksGet toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/check-runs/{check_run_id}"
@@ -1679,7 +1690,7 @@ checksGet toMsg =
         }
 
 
-checksListAnnotations : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+checksListAnnotations : (Result Http.Error todo -> msg) -> Cmd msg
 checksListAnnotations toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/check-runs/{check_run_id}/annotations"
@@ -1687,7 +1698,7 @@ checksListAnnotations toMsg =
         }
 
 
-checksGetSuite : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+checksGetSuite : (Result Http.Error todo -> msg) -> Cmd msg
 checksGetSuite toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/check-suites/{check_suite_id}"
@@ -1695,7 +1706,7 @@ checksGetSuite toMsg =
         }
 
 
-checksListForSuite : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+checksListForSuite : (Result Http.Error todo -> msg) -> Cmd msg
 checksListForSuite toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/check-suites/{check_suite_id}/check-runs"
@@ -1703,7 +1714,7 @@ checksListForSuite toMsg =
         }
 
 
-codeScanningListAlertsForRepo : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+codeScanningListAlertsForRepo : (Result Http.Error todo -> msg) -> Cmd msg
 codeScanningListAlertsForRepo toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/code-scanning/alerts"
@@ -1711,7 +1722,7 @@ codeScanningListAlertsForRepo toMsg =
         }
 
 
-codeScanningGetAlert : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+codeScanningGetAlert : (Result Http.Error todo -> msg) -> Cmd msg
 codeScanningGetAlert toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/code-scanning/alerts/{alert_number}"
@@ -1719,7 +1730,7 @@ codeScanningGetAlert toMsg =
         }
 
 
-codeScanningListAlertInstances : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+codeScanningListAlertInstances : (Result Http.Error todo -> msg) -> Cmd msg
 codeScanningListAlertInstances toMsg =
     Http.get
         { url =
@@ -1728,7 +1739,7 @@ codeScanningListAlertInstances toMsg =
         }
 
 
-codeScanningListRecentAnalyses : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+codeScanningListRecentAnalyses : (Result Http.Error todo -> msg) -> Cmd msg
 codeScanningListRecentAnalyses toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/code-scanning/analyses"
@@ -1736,7 +1747,7 @@ codeScanningListRecentAnalyses toMsg =
         }
 
 
-codeScanningGetAnalysis : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+codeScanningGetAnalysis : (Result Http.Error todo -> msg) -> Cmd msg
 codeScanningGetAnalysis toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/code-scanning/analyses/{analysis_id}"
@@ -1744,7 +1755,7 @@ codeScanningGetAnalysis toMsg =
         }
 
 
-codeScanningListCodeqlDatabases : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+codeScanningListCodeqlDatabases : (Result Http.Error todo -> msg) -> Cmd msg
 codeScanningListCodeqlDatabases toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/code-scanning/codeql/databases"
@@ -1752,7 +1763,7 @@ codeScanningListCodeqlDatabases toMsg =
         }
 
 
-codeScanningGetCodeqlDatabase : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+codeScanningGetCodeqlDatabase : (Result Http.Error todo -> msg) -> Cmd msg
 codeScanningGetCodeqlDatabase toMsg =
     Http.get
         { url =
@@ -1761,7 +1772,7 @@ codeScanningGetCodeqlDatabase toMsg =
         }
 
 
-codeScanningGetSarif : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+codeScanningGetSarif : (Result Http.Error todo -> msg) -> Cmd msg
 codeScanningGetSarif toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/code-scanning/sarifs/{sarif_id}"
@@ -1769,7 +1780,7 @@ codeScanningGetSarif toMsg =
         }
 
 
-reposCodeownersErrors : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+reposCodeownersErrors : (Result Http.Error todo -> msg) -> Cmd msg
 reposCodeownersErrors toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/codeowners/errors"
@@ -1778,7 +1789,7 @@ reposCodeownersErrors toMsg =
 
 
 codespacesListInRepositoryForAuthenticatedUser :
-    (expectJsonUnpack -> toMsg) -> Cmd toMsg
+    (Result Http.Error todo -> msg) -> Cmd msg
 codespacesListInRepositoryForAuthenticatedUser toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/codespaces"
@@ -1787,7 +1798,7 @@ codespacesListInRepositoryForAuthenticatedUser toMsg =
 
 
 codespacesListDevcontainersInRepositoryForAuthenticatedUser :
-    (expectJsonUnpack -> toMsg) -> Cmd toMsg
+    (Result Http.Error todo -> msg) -> Cmd msg
 codespacesListDevcontainersInRepositoryForAuthenticatedUser toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/codespaces/devcontainers"
@@ -1796,7 +1807,7 @@ codespacesListDevcontainersInRepositoryForAuthenticatedUser toMsg =
 
 
 codespacesRepoMachinesForAuthenticatedUser :
-    (expectJsonUnpack -> toMsg) -> Cmd toMsg
+    (Result Http.Error todo -> msg) -> Cmd msg
 codespacesRepoMachinesForAuthenticatedUser toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/codespaces/machines"
@@ -1805,7 +1816,7 @@ codespacesRepoMachinesForAuthenticatedUser toMsg =
 
 
 codespacesPreFlightWithRepoForAuthenticatedUser :
-    (expectJsonUnpack -> toMsg) -> Cmd toMsg
+    (Result Http.Error todo -> msg) -> Cmd msg
 codespacesPreFlightWithRepoForAuthenticatedUser toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/codespaces/new"
@@ -1813,7 +1824,7 @@ codespacesPreFlightWithRepoForAuthenticatedUser toMsg =
         }
 
 
-codespacesListRepoSecrets : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+codespacesListRepoSecrets : (Result Http.Error todo -> msg) -> Cmd msg
 codespacesListRepoSecrets toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/codespaces/secrets"
@@ -1821,7 +1832,7 @@ codespacesListRepoSecrets toMsg =
         }
 
 
-codespacesGetRepoPublicKey : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+codespacesGetRepoPublicKey : (Result Http.Error todo -> msg) -> Cmd msg
 codespacesGetRepoPublicKey toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/codespaces/secrets/public-key"
@@ -1829,7 +1840,7 @@ codespacesGetRepoPublicKey toMsg =
         }
 
 
-codespacesGetRepoSecret : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+codespacesGetRepoSecret : (Result Http.Error todo -> msg) -> Cmd msg
 codespacesGetRepoSecret toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/codespaces/secrets/{secret_name}"
@@ -1837,7 +1848,7 @@ codespacesGetRepoSecret toMsg =
         }
 
 
-reposListCollaborators : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+reposListCollaborators : (Result Http.Error todo -> msg) -> Cmd msg
 reposListCollaborators toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/collaborators"
@@ -1845,7 +1856,7 @@ reposListCollaborators toMsg =
         }
 
 
-reposCheckCollaborator : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+reposCheckCollaborator : (Result Http.Error todo -> msg) -> Cmd msg
 reposCheckCollaborator toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/collaborators/{username}"
@@ -1853,7 +1864,7 @@ reposCheckCollaborator toMsg =
         }
 
 
-reposGetCollaboratorPermissionLevel : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+reposGetCollaboratorPermissionLevel : (Result Http.Error todo -> msg) -> Cmd msg
 reposGetCollaboratorPermissionLevel toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/collaborators/{username}/permission"
@@ -1861,7 +1872,7 @@ reposGetCollaboratorPermissionLevel toMsg =
         }
 
 
-reposListCommitCommentsForRepo : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+reposListCommitCommentsForRepo : (Result Http.Error todo -> msg) -> Cmd msg
 reposListCommitCommentsForRepo toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/comments"
@@ -1869,7 +1880,7 @@ reposListCommitCommentsForRepo toMsg =
         }
 
 
-reposGetCommitComment : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+reposGetCommitComment : (Result Http.Error todo -> msg) -> Cmd msg
 reposGetCommitComment toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/comments/{comment_id}"
@@ -1877,7 +1888,7 @@ reposGetCommitComment toMsg =
         }
 
 
-reactionsListForCommitComment : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+reactionsListForCommitComment : (Result Http.Error todo -> msg) -> Cmd msg
 reactionsListForCommitComment toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/comments/{comment_id}/reactions"
@@ -1885,7 +1896,7 @@ reactionsListForCommitComment toMsg =
         }
 
 
-reposListCommits : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+reposListCommits : (Result Http.Error todo -> msg) -> Cmd msg
 reposListCommits toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/commits"
@@ -1893,7 +1904,7 @@ reposListCommits toMsg =
         }
 
 
-reposListBranchesForHeadCommit : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+reposListBranchesForHeadCommit : (Result Http.Error todo -> msg) -> Cmd msg
 reposListBranchesForHeadCommit toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/commits/{commit_sha}/branches-where-head"
@@ -1901,7 +1912,7 @@ reposListBranchesForHeadCommit toMsg =
         }
 
 
-reposListCommentsForCommit : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+reposListCommentsForCommit : (Result Http.Error todo -> msg) -> Cmd msg
 reposListCommentsForCommit toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/commits/{commit_sha}/comments"
@@ -1910,7 +1921,7 @@ reposListCommentsForCommit toMsg =
 
 
 reposListPullRequestsAssociatedWithCommit :
-    (expectJsonUnpack -> toMsg) -> Cmd toMsg
+    (Result Http.Error todo -> msg) -> Cmd msg
 reposListPullRequestsAssociatedWithCommit toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/commits/{commit_sha}/pulls"
@@ -1918,7 +1929,7 @@ reposListPullRequestsAssociatedWithCommit toMsg =
         }
 
 
-reposGetCommit : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+reposGetCommit : (Result Http.Error todo -> msg) -> Cmd msg
 reposGetCommit toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/commits/{ref}"
@@ -1926,7 +1937,7 @@ reposGetCommit toMsg =
         }
 
 
-checksListForRef : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+checksListForRef : (Result Http.Error todo -> msg) -> Cmd msg
 checksListForRef toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/commits/{ref}/check-runs"
@@ -1934,7 +1945,7 @@ checksListForRef toMsg =
         }
 
 
-checksListSuitesForRef : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+checksListSuitesForRef : (Result Http.Error todo -> msg) -> Cmd msg
 checksListSuitesForRef toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/commits/{ref}/check-suites"
@@ -1942,7 +1953,7 @@ checksListSuitesForRef toMsg =
         }
 
 
-reposGetCombinedStatusForRef : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+reposGetCombinedStatusForRef : (Result Http.Error todo -> msg) -> Cmd msg
 reposGetCombinedStatusForRef toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/commits/{ref}/status"
@@ -1950,7 +1961,7 @@ reposGetCombinedStatusForRef toMsg =
         }
 
 
-reposListCommitStatusesForRef : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+reposListCommitStatusesForRef : (Result Http.Error todo -> msg) -> Cmd msg
 reposListCommitStatusesForRef toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/commits/{ref}/statuses"
@@ -1958,7 +1969,7 @@ reposListCommitStatusesForRef toMsg =
         }
 
 
-reposGetCommunityProfileMetrics : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+reposGetCommunityProfileMetrics : (Result Http.Error todo -> msg) -> Cmd msg
 reposGetCommunityProfileMetrics toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/community/profile"
@@ -1966,7 +1977,7 @@ reposGetCommunityProfileMetrics toMsg =
         }
 
 
-reposCompareCommits : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+reposCompareCommits : (Result Http.Error todo -> msg) -> Cmd msg
 reposCompareCommits toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/compare/{basehead}"
@@ -1974,7 +1985,7 @@ reposCompareCommits toMsg =
         }
 
 
-reposGetContent : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+reposGetContent : (Result Http.Error todo -> msg) -> Cmd msg
 reposGetContent toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/contents/{path}"
@@ -1982,7 +1993,7 @@ reposGetContent toMsg =
         }
 
 
-reposListContributors : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+reposListContributors : (Result Http.Error todo -> msg) -> Cmd msg
 reposListContributors toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/contributors"
@@ -1990,7 +2001,7 @@ reposListContributors toMsg =
         }
 
 
-dependabotListAlertsForRepo : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+dependabotListAlertsForRepo : (Result Http.Error todo -> msg) -> Cmd msg
 dependabotListAlertsForRepo toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/dependabot/alerts"
@@ -1998,7 +2009,7 @@ dependabotListAlertsForRepo toMsg =
         }
 
 
-dependabotGetAlert : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+dependabotGetAlert : (Result Http.Error todo -> msg) -> Cmd msg
 dependabotGetAlert toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/dependabot/alerts/{alert_number}"
@@ -2006,7 +2017,7 @@ dependabotGetAlert toMsg =
         }
 
 
-dependabotListRepoSecrets : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+dependabotListRepoSecrets : (Result Http.Error todo -> msg) -> Cmd msg
 dependabotListRepoSecrets toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/dependabot/secrets"
@@ -2014,7 +2025,7 @@ dependabotListRepoSecrets toMsg =
         }
 
 
-dependabotGetRepoPublicKey : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+dependabotGetRepoPublicKey : (Result Http.Error todo -> msg) -> Cmd msg
 dependabotGetRepoPublicKey toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/dependabot/secrets/public-key"
@@ -2022,7 +2033,7 @@ dependabotGetRepoPublicKey toMsg =
         }
 
 
-dependabotGetRepoSecret : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+dependabotGetRepoSecret : (Result Http.Error todo -> msg) -> Cmd msg
 dependabotGetRepoSecret toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/dependabot/secrets/{secret_name}"
@@ -2030,7 +2041,7 @@ dependabotGetRepoSecret toMsg =
         }
 
 
-dependencyGraphDiffRange : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+dependencyGraphDiffRange : (Result Http.Error todo -> msg) -> Cmd msg
 dependencyGraphDiffRange toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/dependency-graph/compare/{basehead}"
@@ -2038,7 +2049,7 @@ dependencyGraphDiffRange toMsg =
         }
 
 
-reposListDeployments : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+reposListDeployments : (Result Http.Error todo -> msg) -> Cmd msg
 reposListDeployments toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/deployments"
@@ -2046,7 +2057,7 @@ reposListDeployments toMsg =
         }
 
 
-reposGetDeployment : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+reposGetDeployment : (Result Http.Error todo -> msg) -> Cmd msg
 reposGetDeployment toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/deployments/{deployment_id}"
@@ -2054,7 +2065,7 @@ reposGetDeployment toMsg =
         }
 
 
-reposListDeploymentStatuses : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+reposListDeploymentStatuses : (Result Http.Error todo -> msg) -> Cmd msg
 reposListDeploymentStatuses toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/deployments/{deployment_id}/statuses"
@@ -2062,7 +2073,7 @@ reposListDeploymentStatuses toMsg =
         }
 
 
-reposGetDeploymentStatus : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+reposGetDeploymentStatus : (Result Http.Error todo -> msg) -> Cmd msg
 reposGetDeploymentStatus toMsg =
     Http.get
         { url =
@@ -2071,7 +2082,7 @@ reposGetDeploymentStatus toMsg =
         }
 
 
-reposGetAllEnvironments : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+reposGetAllEnvironments : (Result Http.Error todo -> msg) -> Cmd msg
 reposGetAllEnvironments toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/environments"
@@ -2079,7 +2090,7 @@ reposGetAllEnvironments toMsg =
         }
 
 
-reposGetEnvironment : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+reposGetEnvironment : (Result Http.Error todo -> msg) -> Cmd msg
 reposGetEnvironment toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/environments/{environment_name}"
@@ -2087,7 +2098,7 @@ reposGetEnvironment toMsg =
         }
 
 
-reposListDeploymentBranchPolicies : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+reposListDeploymentBranchPolicies : (Result Http.Error todo -> msg) -> Cmd msg
 reposListDeploymentBranchPolicies toMsg =
     Http.get
         { url =
@@ -2096,7 +2107,7 @@ reposListDeploymentBranchPolicies toMsg =
         }
 
 
-reposGetDeploymentBranchPolicy : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+reposGetDeploymentBranchPolicy : (Result Http.Error todo -> msg) -> Cmd msg
 reposGetDeploymentBranchPolicy toMsg =
     Http.get
         { url =
@@ -2105,7 +2116,7 @@ reposGetDeploymentBranchPolicy toMsg =
         }
 
 
-activityListRepoEvents : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+activityListRepoEvents : (Result Http.Error todo -> msg) -> Cmd msg
 activityListRepoEvents toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/events"
@@ -2113,7 +2124,7 @@ activityListRepoEvents toMsg =
         }
 
 
-reposListForks : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+reposListForks : (Result Http.Error todo -> msg) -> Cmd msg
 reposListForks toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/forks"
@@ -2121,7 +2132,7 @@ reposListForks toMsg =
         }
 
 
-gitGetBlob : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+gitGetBlob : (Result Http.Error todo -> msg) -> Cmd msg
 gitGetBlob toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/git/blobs/{file_sha}"
@@ -2129,7 +2140,7 @@ gitGetBlob toMsg =
         }
 
 
-gitGetCommit : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+gitGetCommit : (Result Http.Error todo -> msg) -> Cmd msg
 gitGetCommit toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/git/commits/{commit_sha}"
@@ -2137,7 +2148,7 @@ gitGetCommit toMsg =
         }
 
 
-gitListMatchingRefs : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+gitListMatchingRefs : (Result Http.Error todo -> msg) -> Cmd msg
 gitListMatchingRefs toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/git/matching-refs/{ref}"
@@ -2145,7 +2156,7 @@ gitListMatchingRefs toMsg =
         }
 
 
-gitGetRef : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+gitGetRef : (Result Http.Error todo -> msg) -> Cmd msg
 gitGetRef toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/git/ref/{ref}"
@@ -2153,7 +2164,7 @@ gitGetRef toMsg =
         }
 
 
-gitGetTag : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+gitGetTag : (Result Http.Error todo -> msg) -> Cmd msg
 gitGetTag toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/git/tags/{tag_sha}"
@@ -2161,7 +2172,7 @@ gitGetTag toMsg =
         }
 
 
-gitGetTree : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+gitGetTree : (Result Http.Error todo -> msg) -> Cmd msg
 gitGetTree toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/git/trees/{tree_sha}"
@@ -2169,7 +2180,7 @@ gitGetTree toMsg =
         }
 
 
-reposListWebhooks : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+reposListWebhooks : (Result Http.Error todo -> msg) -> Cmd msg
 reposListWebhooks toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/hooks"
@@ -2177,7 +2188,7 @@ reposListWebhooks toMsg =
         }
 
 
-reposGetWebhook : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+reposGetWebhook : (Result Http.Error todo -> msg) -> Cmd msg
 reposGetWebhook toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/hooks/{hook_id}"
@@ -2185,7 +2196,7 @@ reposGetWebhook toMsg =
         }
 
 
-reposGetWebhookConfigForRepo : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+reposGetWebhookConfigForRepo : (Result Http.Error todo -> msg) -> Cmd msg
 reposGetWebhookConfigForRepo toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/hooks/{hook_id}/config"
@@ -2193,7 +2204,7 @@ reposGetWebhookConfigForRepo toMsg =
         }
 
 
-reposListWebhookDeliveries : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+reposListWebhookDeliveries : (Result Http.Error todo -> msg) -> Cmd msg
 reposListWebhookDeliveries toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/hooks/{hook_id}/deliveries"
@@ -2201,7 +2212,7 @@ reposListWebhookDeliveries toMsg =
         }
 
 
-reposGetWebhookDelivery : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+reposGetWebhookDelivery : (Result Http.Error todo -> msg) -> Cmd msg
 reposGetWebhookDelivery toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/hooks/{hook_id}/deliveries/{delivery_id}"
@@ -2209,7 +2220,7 @@ reposGetWebhookDelivery toMsg =
         }
 
 
-migrationsGetImportStatus : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+migrationsGetImportStatus : (Result Http.Error todo -> msg) -> Cmd msg
 migrationsGetImportStatus toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/import"
@@ -2217,7 +2228,7 @@ migrationsGetImportStatus toMsg =
         }
 
 
-migrationsGetCommitAuthors : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+migrationsGetCommitAuthors : (Result Http.Error todo -> msg) -> Cmd msg
 migrationsGetCommitAuthors toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/import/authors"
@@ -2225,7 +2236,7 @@ migrationsGetCommitAuthors toMsg =
         }
 
 
-migrationsGetLargeFiles : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+migrationsGetLargeFiles : (Result Http.Error todo -> msg) -> Cmd msg
 migrationsGetLargeFiles toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/import/large_files"
@@ -2233,7 +2244,7 @@ migrationsGetLargeFiles toMsg =
         }
 
 
-appsGetRepoInstallation : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+appsGetRepoInstallation : (Result Http.Error todo -> msg) -> Cmd msg
 appsGetRepoInstallation toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/installation"
@@ -2241,7 +2252,7 @@ appsGetRepoInstallation toMsg =
         }
 
 
-interactionsGetRestrictionsForRepo : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+interactionsGetRestrictionsForRepo : (Result Http.Error todo -> msg) -> Cmd msg
 interactionsGetRestrictionsForRepo toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/interaction-limits"
@@ -2249,7 +2260,7 @@ interactionsGetRestrictionsForRepo toMsg =
         }
 
 
-reposListInvitations : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+reposListInvitations : (Result Http.Error todo -> msg) -> Cmd msg
 reposListInvitations toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/invitations"
@@ -2257,7 +2268,7 @@ reposListInvitations toMsg =
         }
 
 
-issuesListForRepo : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+issuesListForRepo : (Result Http.Error todo -> msg) -> Cmd msg
 issuesListForRepo toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/issues"
@@ -2265,7 +2276,7 @@ issuesListForRepo toMsg =
         }
 
 
-issuesListCommentsForRepo : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+issuesListCommentsForRepo : (Result Http.Error todo -> msg) -> Cmd msg
 issuesListCommentsForRepo toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/issues/comments"
@@ -2273,7 +2284,7 @@ issuesListCommentsForRepo toMsg =
         }
 
 
-issuesGetComment : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+issuesGetComment : (Result Http.Error todo -> msg) -> Cmd msg
 issuesGetComment toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/issues/comments/{comment_id}"
@@ -2281,7 +2292,7 @@ issuesGetComment toMsg =
         }
 
 
-reactionsListForIssueComment : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+reactionsListForIssueComment : (Result Http.Error todo -> msg) -> Cmd msg
 reactionsListForIssueComment toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/issues/comments/{comment_id}/reactions"
@@ -2289,7 +2300,7 @@ reactionsListForIssueComment toMsg =
         }
 
 
-issuesListEventsForRepo : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+issuesListEventsForRepo : (Result Http.Error todo -> msg) -> Cmd msg
 issuesListEventsForRepo toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/issues/events"
@@ -2297,7 +2308,7 @@ issuesListEventsForRepo toMsg =
         }
 
 
-issuesGetEvent : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+issuesGetEvent : (Result Http.Error todo -> msg) -> Cmd msg
 issuesGetEvent toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/issues/events/{event_id}"
@@ -2305,7 +2316,7 @@ issuesGetEvent toMsg =
         }
 
 
-issuesGet : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+issuesGet : (Result Http.Error todo -> msg) -> Cmd msg
 issuesGet toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/issues/{issue_number}"
@@ -2313,7 +2324,7 @@ issuesGet toMsg =
         }
 
 
-issuesListComments : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+issuesListComments : (Result Http.Error todo -> msg) -> Cmd msg
 issuesListComments toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/issues/{issue_number}/comments"
@@ -2321,7 +2332,7 @@ issuesListComments toMsg =
         }
 
 
-issuesListEvents : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+issuesListEvents : (Result Http.Error todo -> msg) -> Cmd msg
 issuesListEvents toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/issues/{issue_number}/events"
@@ -2329,7 +2340,7 @@ issuesListEvents toMsg =
         }
 
 
-issuesListLabelsOnIssue : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+issuesListLabelsOnIssue : (Result Http.Error todo -> msg) -> Cmd msg
 issuesListLabelsOnIssue toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/issues/{issue_number}/labels"
@@ -2337,7 +2348,7 @@ issuesListLabelsOnIssue toMsg =
         }
 
 
-reactionsListForIssue : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+reactionsListForIssue : (Result Http.Error todo -> msg) -> Cmd msg
 reactionsListForIssue toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/issues/{issue_number}/reactions"
@@ -2345,7 +2356,7 @@ reactionsListForIssue toMsg =
         }
 
 
-issuesListEventsForTimeline : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+issuesListEventsForTimeline : (Result Http.Error todo -> msg) -> Cmd msg
 issuesListEventsForTimeline toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/issues/{issue_number}/timeline"
@@ -2353,7 +2364,7 @@ issuesListEventsForTimeline toMsg =
         }
 
 
-reposListDeployKeys : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+reposListDeployKeys : (Result Http.Error todo -> msg) -> Cmd msg
 reposListDeployKeys toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/keys"
@@ -2361,7 +2372,7 @@ reposListDeployKeys toMsg =
         }
 
 
-reposGetDeployKey : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+reposGetDeployKey : (Result Http.Error todo -> msg) -> Cmd msg
 reposGetDeployKey toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/keys/{key_id}"
@@ -2369,7 +2380,7 @@ reposGetDeployKey toMsg =
         }
 
 
-issuesListLabelsForRepo : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+issuesListLabelsForRepo : (Result Http.Error todo -> msg) -> Cmd msg
 issuesListLabelsForRepo toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/labels"
@@ -2377,7 +2388,7 @@ issuesListLabelsForRepo toMsg =
         }
 
 
-issuesGetLabel : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+issuesGetLabel : (Result Http.Error todo -> msg) -> Cmd msg
 issuesGetLabel toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/labels/{name}"
@@ -2385,7 +2396,7 @@ issuesGetLabel toMsg =
         }
 
 
-reposListLanguages : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+reposListLanguages : (Result Http.Error todo -> msg) -> Cmd msg
 reposListLanguages toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/languages"
@@ -2393,7 +2404,7 @@ reposListLanguages toMsg =
         }
 
 
-licensesGetForRepo : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+licensesGetForRepo : (Result Http.Error todo -> msg) -> Cmd msg
 licensesGetForRepo toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/license"
@@ -2401,7 +2412,7 @@ licensesGetForRepo toMsg =
         }
 
 
-issuesListMilestones : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+issuesListMilestones : (Result Http.Error todo -> msg) -> Cmd msg
 issuesListMilestones toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/milestones"
@@ -2409,7 +2420,7 @@ issuesListMilestones toMsg =
         }
 
 
-issuesGetMilestone : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+issuesGetMilestone : (Result Http.Error todo -> msg) -> Cmd msg
 issuesGetMilestone toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/milestones/{milestone_number}"
@@ -2417,7 +2428,7 @@ issuesGetMilestone toMsg =
         }
 
 
-issuesListLabelsForMilestone : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+issuesListLabelsForMilestone : (Result Http.Error todo -> msg) -> Cmd msg
 issuesListLabelsForMilestone toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/milestones/{milestone_number}/labels"
@@ -2426,7 +2437,7 @@ issuesListLabelsForMilestone toMsg =
 
 
 activityListRepoNotificationsForAuthenticatedUser :
-    (expectJsonUnpack -> toMsg) -> Cmd toMsg
+    (Result Http.Error todo -> msg) -> Cmd msg
 activityListRepoNotificationsForAuthenticatedUser toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/notifications"
@@ -2434,7 +2445,7 @@ activityListRepoNotificationsForAuthenticatedUser toMsg =
         }
 
 
-reposGetPages : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+reposGetPages : (Result Http.Error todo -> msg) -> Cmd msg
 reposGetPages toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/pages"
@@ -2442,7 +2453,7 @@ reposGetPages toMsg =
         }
 
 
-reposListPagesBuilds : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+reposListPagesBuilds : (Result Http.Error todo -> msg) -> Cmd msg
 reposListPagesBuilds toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/pages/builds"
@@ -2450,7 +2461,7 @@ reposListPagesBuilds toMsg =
         }
 
 
-reposGetLatestPagesBuild : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+reposGetLatestPagesBuild : (Result Http.Error todo -> msg) -> Cmd msg
 reposGetLatestPagesBuild toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/pages/builds/latest"
@@ -2458,7 +2469,7 @@ reposGetLatestPagesBuild toMsg =
         }
 
 
-reposGetPagesBuild : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+reposGetPagesBuild : (Result Http.Error todo -> msg) -> Cmd msg
 reposGetPagesBuild toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/pages/builds/{build_id}"
@@ -2466,7 +2477,7 @@ reposGetPagesBuild toMsg =
         }
 
 
-reposGetPagesHealthCheck : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+reposGetPagesHealthCheck : (Result Http.Error todo -> msg) -> Cmd msg
 reposGetPagesHealthCheck toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/pages/health"
@@ -2474,7 +2485,7 @@ reposGetPagesHealthCheck toMsg =
         }
 
 
-projectsListForRepo : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+projectsListForRepo : (Result Http.Error todo -> msg) -> Cmd msg
 projectsListForRepo toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/projects"
@@ -2482,7 +2493,7 @@ projectsListForRepo toMsg =
         }
 
 
-pullsList : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+pullsList : (Result Http.Error todo -> msg) -> Cmd msg
 pullsList toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/pulls"
@@ -2490,7 +2501,7 @@ pullsList toMsg =
         }
 
 
-pullsListReviewCommentsForRepo : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+pullsListReviewCommentsForRepo : (Result Http.Error todo -> msg) -> Cmd msg
 pullsListReviewCommentsForRepo toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/pulls/comments"
@@ -2498,7 +2509,7 @@ pullsListReviewCommentsForRepo toMsg =
         }
 
 
-pullsGetReviewComment : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+pullsGetReviewComment : (Result Http.Error todo -> msg) -> Cmd msg
 pullsGetReviewComment toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/pulls/comments/{comment_id}"
@@ -2507,7 +2518,7 @@ pullsGetReviewComment toMsg =
 
 
 reactionsListForPullRequestReviewComment :
-    (expectJsonUnpack -> toMsg) -> Cmd toMsg
+    (Result Http.Error todo -> msg) -> Cmd msg
 reactionsListForPullRequestReviewComment toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/pulls/comments/{comment_id}/reactions"
@@ -2515,7 +2526,7 @@ reactionsListForPullRequestReviewComment toMsg =
         }
 
 
-pullsGet : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+pullsGet : (Result Http.Error todo -> msg) -> Cmd msg
 pullsGet toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/pulls/{pull_number}"
@@ -2523,7 +2534,7 @@ pullsGet toMsg =
         }
 
 
-pullsListReviewComments : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+pullsListReviewComments : (Result Http.Error todo -> msg) -> Cmd msg
 pullsListReviewComments toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/pulls/{pull_number}/comments"
@@ -2531,7 +2542,7 @@ pullsListReviewComments toMsg =
         }
 
 
-pullsListCommits : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+pullsListCommits : (Result Http.Error todo -> msg) -> Cmd msg
 pullsListCommits toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/pulls/{pull_number}/commits"
@@ -2539,7 +2550,7 @@ pullsListCommits toMsg =
         }
 
 
-pullsListFiles : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+pullsListFiles : (Result Http.Error todo -> msg) -> Cmd msg
 pullsListFiles toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/pulls/{pull_number}/files"
@@ -2547,7 +2558,7 @@ pullsListFiles toMsg =
         }
 
 
-pullsCheckIfMerged : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+pullsCheckIfMerged : (Result Http.Error todo -> msg) -> Cmd msg
 pullsCheckIfMerged toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/pulls/{pull_number}/merge"
@@ -2555,7 +2566,7 @@ pullsCheckIfMerged toMsg =
         }
 
 
-pullsListRequestedReviewers : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+pullsListRequestedReviewers : (Result Http.Error todo -> msg) -> Cmd msg
 pullsListRequestedReviewers toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/pulls/{pull_number}/requested_reviewers"
@@ -2563,7 +2574,7 @@ pullsListRequestedReviewers toMsg =
         }
 
 
-pullsListReviews : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+pullsListReviews : (Result Http.Error todo -> msg) -> Cmd msg
 pullsListReviews toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/pulls/{pull_number}/reviews"
@@ -2571,7 +2582,7 @@ pullsListReviews toMsg =
         }
 
 
-pullsGetReview : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+pullsGetReview : (Result Http.Error todo -> msg) -> Cmd msg
 pullsGetReview toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/pulls/{pull_number}/reviews/{review_id}"
@@ -2579,7 +2590,7 @@ pullsGetReview toMsg =
         }
 
 
-pullsListCommentsForReview : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+pullsListCommentsForReview : (Result Http.Error todo -> msg) -> Cmd msg
 pullsListCommentsForReview toMsg =
     Http.get
         { url =
@@ -2588,7 +2599,7 @@ pullsListCommentsForReview toMsg =
         }
 
 
-reposGetReadme : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+reposGetReadme : (Result Http.Error todo -> msg) -> Cmd msg
 reposGetReadme toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/readme"
@@ -2596,7 +2607,7 @@ reposGetReadme toMsg =
         }
 
 
-reposGetReadmeInDirectory : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+reposGetReadmeInDirectory : (Result Http.Error todo -> msg) -> Cmd msg
 reposGetReadmeInDirectory toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/readme/{dir}"
@@ -2604,7 +2615,7 @@ reposGetReadmeInDirectory toMsg =
         }
 
 
-reposListReleases : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+reposListReleases : (Result Http.Error todo -> msg) -> Cmd msg
 reposListReleases toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/releases"
@@ -2612,7 +2623,7 @@ reposListReleases toMsg =
         }
 
 
-reposGetReleaseAsset : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+reposGetReleaseAsset : (Result Http.Error todo -> msg) -> Cmd msg
 reposGetReleaseAsset toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/releases/assets/{asset_id}"
@@ -2620,7 +2631,7 @@ reposGetReleaseAsset toMsg =
         }
 
 
-reposGetLatestRelease : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+reposGetLatestRelease : (Result Http.Error todo -> msg) -> Cmd msg
 reposGetLatestRelease toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/releases/latest"
@@ -2628,7 +2639,7 @@ reposGetLatestRelease toMsg =
         }
 
 
-reposGetReleaseByTag : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+reposGetReleaseByTag : (Result Http.Error todo -> msg) -> Cmd msg
 reposGetReleaseByTag toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/releases/tags/{tag}"
@@ -2636,7 +2647,7 @@ reposGetReleaseByTag toMsg =
         }
 
 
-reposGetRelease : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+reposGetRelease : (Result Http.Error todo -> msg) -> Cmd msg
 reposGetRelease toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/releases/{release_id}"
@@ -2644,7 +2655,7 @@ reposGetRelease toMsg =
         }
 
 
-reposListReleaseAssets : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+reposListReleaseAssets : (Result Http.Error todo -> msg) -> Cmd msg
 reposListReleaseAssets toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/releases/{release_id}/assets"
@@ -2652,7 +2663,7 @@ reposListReleaseAssets toMsg =
         }
 
 
-reactionsListForRelease : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+reactionsListForRelease : (Result Http.Error todo -> msg) -> Cmd msg
 reactionsListForRelease toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/releases/{release_id}/reactions"
@@ -2660,7 +2671,7 @@ reactionsListForRelease toMsg =
         }
 
 
-secretScanningListAlertsForRepo : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+secretScanningListAlertsForRepo : (Result Http.Error todo -> msg) -> Cmd msg
 secretScanningListAlertsForRepo toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/secret-scanning/alerts"
@@ -2668,7 +2679,7 @@ secretScanningListAlertsForRepo toMsg =
         }
 
 
-secretScanningGetAlert : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+secretScanningGetAlert : (Result Http.Error todo -> msg) -> Cmd msg
 secretScanningGetAlert toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/secret-scanning/alerts/{alert_number}"
@@ -2676,7 +2687,7 @@ secretScanningGetAlert toMsg =
         }
 
 
-secretScanningListLocationsForAlert : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+secretScanningListLocationsForAlert : (Result Http.Error todo -> msg) -> Cmd msg
 secretScanningListLocationsForAlert toMsg =
     Http.get
         { url =
@@ -2685,7 +2696,7 @@ secretScanningListLocationsForAlert toMsg =
         }
 
 
-activityListStargazersForRepo : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+activityListStargazersForRepo : (Result Http.Error todo -> msg) -> Cmd msg
 activityListStargazersForRepo toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/stargazers"
@@ -2693,7 +2704,7 @@ activityListStargazersForRepo toMsg =
         }
 
 
-reposGetCodeFrequencyStats : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+reposGetCodeFrequencyStats : (Result Http.Error todo -> msg) -> Cmd msg
 reposGetCodeFrequencyStats toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/stats/code_frequency"
@@ -2701,7 +2712,7 @@ reposGetCodeFrequencyStats toMsg =
         }
 
 
-reposGetCommitActivityStats : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+reposGetCommitActivityStats : (Result Http.Error todo -> msg) -> Cmd msg
 reposGetCommitActivityStats toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/stats/commit_activity"
@@ -2709,7 +2720,7 @@ reposGetCommitActivityStats toMsg =
         }
 
 
-reposGetContributorsStats : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+reposGetContributorsStats : (Result Http.Error todo -> msg) -> Cmd msg
 reposGetContributorsStats toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/stats/contributors"
@@ -2717,7 +2728,7 @@ reposGetContributorsStats toMsg =
         }
 
 
-reposGetParticipationStats : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+reposGetParticipationStats : (Result Http.Error todo -> msg) -> Cmd msg
 reposGetParticipationStats toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/stats/participation"
@@ -2725,7 +2736,7 @@ reposGetParticipationStats toMsg =
         }
 
 
-reposGetPunchCardStats : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+reposGetPunchCardStats : (Result Http.Error todo -> msg) -> Cmd msg
 reposGetPunchCardStats toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/stats/punch_card"
@@ -2733,7 +2744,7 @@ reposGetPunchCardStats toMsg =
         }
 
 
-activityListWatchersForRepo : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+activityListWatchersForRepo : (Result Http.Error todo -> msg) -> Cmd msg
 activityListWatchersForRepo toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/subscribers"
@@ -2741,7 +2752,7 @@ activityListWatchersForRepo toMsg =
         }
 
 
-activityGetRepoSubscription : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+activityGetRepoSubscription : (Result Http.Error todo -> msg) -> Cmd msg
 activityGetRepoSubscription toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/subscription"
@@ -2749,7 +2760,7 @@ activityGetRepoSubscription toMsg =
         }
 
 
-reposListTags : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+reposListTags : (Result Http.Error todo -> msg) -> Cmd msg
 reposListTags toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/tags"
@@ -2757,7 +2768,7 @@ reposListTags toMsg =
         }
 
 
-reposListTagProtection : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+reposListTagProtection : (Result Http.Error todo -> msg) -> Cmd msg
 reposListTagProtection toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/tags/protection"
@@ -2765,7 +2776,7 @@ reposListTagProtection toMsg =
         }
 
 
-reposDownloadTarballArchive : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+reposDownloadTarballArchive : (Result Http.Error todo -> msg) -> Cmd msg
 reposDownloadTarballArchive toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/tarball/{ref}"
@@ -2773,7 +2784,7 @@ reposDownloadTarballArchive toMsg =
         }
 
 
-reposListTeams : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+reposListTeams : (Result Http.Error todo -> msg) -> Cmd msg
 reposListTeams toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/teams"
@@ -2781,7 +2792,7 @@ reposListTeams toMsg =
         }
 
 
-reposGetAllTopics : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+reposGetAllTopics : (Result Http.Error todo -> msg) -> Cmd msg
 reposGetAllTopics toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/topics"
@@ -2789,7 +2800,7 @@ reposGetAllTopics toMsg =
         }
 
 
-reposGetClones : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+reposGetClones : (Result Http.Error todo -> msg) -> Cmd msg
 reposGetClones toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/traffic/clones"
@@ -2797,7 +2808,7 @@ reposGetClones toMsg =
         }
 
 
-reposGetTopPaths : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+reposGetTopPaths : (Result Http.Error todo -> msg) -> Cmd msg
 reposGetTopPaths toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/traffic/popular/paths"
@@ -2805,7 +2816,7 @@ reposGetTopPaths toMsg =
         }
 
 
-reposGetTopReferrers : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+reposGetTopReferrers : (Result Http.Error todo -> msg) -> Cmd msg
 reposGetTopReferrers toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/traffic/popular/referrers"
@@ -2813,7 +2824,7 @@ reposGetTopReferrers toMsg =
         }
 
 
-reposGetViews : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+reposGetViews : (Result Http.Error todo -> msg) -> Cmd msg
 reposGetViews toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/traffic/views"
@@ -2821,7 +2832,7 @@ reposGetViews toMsg =
         }
 
 
-reposCheckVulnerabilityAlerts : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+reposCheckVulnerabilityAlerts : (Result Http.Error todo -> msg) -> Cmd msg
 reposCheckVulnerabilityAlerts toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/vulnerability-alerts"
@@ -2829,7 +2840,7 @@ reposCheckVulnerabilityAlerts toMsg =
         }
 
 
-reposDownloadZipballArchive : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+reposDownloadZipballArchive : (Result Http.Error todo -> msg) -> Cmd msg
 reposDownloadZipballArchive toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/zipball/{ref}"
@@ -2837,7 +2848,7 @@ reposDownloadZipballArchive toMsg =
         }
 
 
-reposListPublic : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+reposListPublic : (Result Http.Error todo -> msg) -> Cmd msg
 reposListPublic toMsg =
     Http.get
         { url = "/repositories"
@@ -2845,7 +2856,7 @@ reposListPublic toMsg =
         }
 
 
-actionsListEnvironmentSecrets : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+actionsListEnvironmentSecrets : (Result Http.Error todo -> msg) -> Cmd msg
 actionsListEnvironmentSecrets toMsg =
     Http.get
         { url =
@@ -2854,7 +2865,7 @@ actionsListEnvironmentSecrets toMsg =
         }
 
 
-actionsGetEnvironmentPublicKey : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+actionsGetEnvironmentPublicKey : (Result Http.Error todo -> msg) -> Cmd msg
 actionsGetEnvironmentPublicKey toMsg =
     Http.get
         { url =
@@ -2863,7 +2874,7 @@ actionsGetEnvironmentPublicKey toMsg =
         }
 
 
-actionsGetEnvironmentSecret : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+actionsGetEnvironmentSecret : (Result Http.Error todo -> msg) -> Cmd msg
 actionsGetEnvironmentSecret toMsg =
     Http.get
         { url =
@@ -2872,7 +2883,7 @@ actionsGetEnvironmentSecret toMsg =
         }
 
 
-searchCode : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+searchCode : (Result Http.Error todo -> msg) -> Cmd msg
 searchCode toMsg =
     Http.get
         { url = "/search/code"
@@ -2880,7 +2891,7 @@ searchCode toMsg =
         }
 
 
-searchCommits : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+searchCommits : (Result Http.Error todo -> msg) -> Cmd msg
 searchCommits toMsg =
     Http.get
         { url = "/search/commits"
@@ -2888,7 +2899,7 @@ searchCommits toMsg =
         }
 
 
-searchIssuesAndPullRequests : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+searchIssuesAndPullRequests : (Result Http.Error todo -> msg) -> Cmd msg
 searchIssuesAndPullRequests toMsg =
     Http.get
         { url = "/search/issues"
@@ -2896,7 +2907,7 @@ searchIssuesAndPullRequests toMsg =
         }
 
 
-searchLabels : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+searchLabels : (Result Http.Error todo -> msg) -> Cmd msg
 searchLabels toMsg =
     Http.get
         { url = "/search/labels"
@@ -2904,7 +2915,7 @@ searchLabels toMsg =
         }
 
 
-searchRepos : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+searchRepos : (Result Http.Error todo -> msg) -> Cmd msg
 searchRepos toMsg =
     Http.get
         { url = "/search/repositories"
@@ -2912,7 +2923,7 @@ searchRepos toMsg =
         }
 
 
-searchTopics : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+searchTopics : (Result Http.Error todo -> msg) -> Cmd msg
 searchTopics toMsg =
     Http.get
         { url = "/search/topics"
@@ -2920,7 +2931,7 @@ searchTopics toMsg =
         }
 
 
-searchUsers : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+searchUsers : (Result Http.Error todo -> msg) -> Cmd msg
 searchUsers toMsg =
     Http.get
         { url = "/search/users"
@@ -2928,7 +2939,7 @@ searchUsers toMsg =
         }
 
 
-teamsGetLegacy : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+teamsGetLegacy : (Result Http.Error todo -> msg) -> Cmd msg
 teamsGetLegacy toMsg =
     Http.get
         { url = "/teams/{team_id}"
@@ -2936,7 +2947,7 @@ teamsGetLegacy toMsg =
         }
 
 
-teamsListDiscussionsLegacy : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+teamsListDiscussionsLegacy : (Result Http.Error todo -> msg) -> Cmd msg
 teamsListDiscussionsLegacy toMsg =
     Http.get
         { url = "/teams/{team_id}/discussions"
@@ -2944,7 +2955,7 @@ teamsListDiscussionsLegacy toMsg =
         }
 
 
-teamsGetDiscussionLegacy : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+teamsGetDiscussionLegacy : (Result Http.Error todo -> msg) -> Cmd msg
 teamsGetDiscussionLegacy toMsg =
     Http.get
         { url = "/teams/{team_id}/discussions/{discussion_number}"
@@ -2952,7 +2963,7 @@ teamsGetDiscussionLegacy toMsg =
         }
 
 
-teamsListDiscussionCommentsLegacy : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+teamsListDiscussionCommentsLegacy : (Result Http.Error todo -> msg) -> Cmd msg
 teamsListDiscussionCommentsLegacy toMsg =
     Http.get
         { url = "/teams/{team_id}/discussions/{discussion_number}/comments"
@@ -2960,7 +2971,7 @@ teamsListDiscussionCommentsLegacy toMsg =
         }
 
 
-teamsGetDiscussionCommentLegacy : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+teamsGetDiscussionCommentLegacy : (Result Http.Error todo -> msg) -> Cmd msg
 teamsGetDiscussionCommentLegacy toMsg =
     Http.get
         { url =
@@ -2970,7 +2981,7 @@ teamsGetDiscussionCommentLegacy toMsg =
 
 
 reactionsListForTeamDiscussionCommentLegacy :
-    (expectJsonUnpack -> toMsg) -> Cmd toMsg
+    (Result Http.Error todo -> msg) -> Cmd msg
 reactionsListForTeamDiscussionCommentLegacy toMsg =
     Http.get
         { url =
@@ -2979,7 +2990,8 @@ reactionsListForTeamDiscussionCommentLegacy toMsg =
         }
 
 
-reactionsListForTeamDiscussionLegacy : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+reactionsListForTeamDiscussionLegacy :
+    (Result Http.Error todo -> msg) -> Cmd msg
 reactionsListForTeamDiscussionLegacy toMsg =
     Http.get
         { url = "/teams/{team_id}/discussions/{discussion_number}/reactions"
@@ -2987,7 +2999,7 @@ reactionsListForTeamDiscussionLegacy toMsg =
         }
 
 
-teamsListPendingInvitationsLegacy : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+teamsListPendingInvitationsLegacy : (Result Http.Error todo -> msg) -> Cmd msg
 teamsListPendingInvitationsLegacy toMsg =
     Http.get
         { url = "/teams/{team_id}/invitations"
@@ -2995,7 +3007,7 @@ teamsListPendingInvitationsLegacy toMsg =
         }
 
 
-teamsListMembersLegacy : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+teamsListMembersLegacy : (Result Http.Error todo -> msg) -> Cmd msg
 teamsListMembersLegacy toMsg =
     Http.get
         { url = "/teams/{team_id}/members"
@@ -3003,7 +3015,7 @@ teamsListMembersLegacy toMsg =
         }
 
 
-teamsGetMemberLegacy : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+teamsGetMemberLegacy : (Result Http.Error todo -> msg) -> Cmd msg
 teamsGetMemberLegacy toMsg =
     Http.get
         { url = "/teams/{team_id}/members/{username}"
@@ -3011,7 +3023,7 @@ teamsGetMemberLegacy toMsg =
         }
 
 
-teamsGetMembershipForUserLegacy : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+teamsGetMembershipForUserLegacy : (Result Http.Error todo -> msg) -> Cmd msg
 teamsGetMembershipForUserLegacy toMsg =
     Http.get
         { url = "/teams/{team_id}/memberships/{username}"
@@ -3019,7 +3031,7 @@ teamsGetMembershipForUserLegacy toMsg =
         }
 
 
-teamsListProjectsLegacy : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+teamsListProjectsLegacy : (Result Http.Error todo -> msg) -> Cmd msg
 teamsListProjectsLegacy toMsg =
     Http.get
         { url = "/teams/{team_id}/projects"
@@ -3027,7 +3039,8 @@ teamsListProjectsLegacy toMsg =
         }
 
 
-teamsCheckPermissionsForProjectLegacy : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+teamsCheckPermissionsForProjectLegacy :
+    (Result Http.Error todo -> msg) -> Cmd msg
 teamsCheckPermissionsForProjectLegacy toMsg =
     Http.get
         { url = "/teams/{team_id}/projects/{project_id}"
@@ -3035,7 +3048,7 @@ teamsCheckPermissionsForProjectLegacy toMsg =
         }
 
 
-teamsListReposLegacy : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+teamsListReposLegacy : (Result Http.Error todo -> msg) -> Cmd msg
 teamsListReposLegacy toMsg =
     Http.get
         { url = "/teams/{team_id}/repos"
@@ -3043,7 +3056,7 @@ teamsListReposLegacy toMsg =
         }
 
 
-teamsCheckPermissionsForRepoLegacy : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+teamsCheckPermissionsForRepoLegacy : (Result Http.Error todo -> msg) -> Cmd msg
 teamsCheckPermissionsForRepoLegacy toMsg =
     Http.get
         { url = "/teams/{team_id}/repos/{owner}/{repo}"
@@ -3051,7 +3064,7 @@ teamsCheckPermissionsForRepoLegacy toMsg =
         }
 
 
-teamsListChildLegacy : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+teamsListChildLegacy : (Result Http.Error todo -> msg) -> Cmd msg
 teamsListChildLegacy toMsg =
     Http.get
         { url = "/teams/{team_id}/teams"
@@ -3059,13 +3072,13 @@ teamsListChildLegacy toMsg =
         }
 
 
-usersGetAuthenticated : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+usersGetAuthenticated : (Result Http.Error todo -> msg) -> Cmd msg
 usersGetAuthenticated toMsg =
     Http.get
         { url = "/user", expect = Http.expectJson toMsg (Debug.todo "todo") }
 
 
-usersListBlockedByAuthenticatedUser : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+usersListBlockedByAuthenticatedUser : (Result Http.Error todo -> msg) -> Cmd msg
 usersListBlockedByAuthenticatedUser toMsg =
     Http.get
         { url = "/user/blocks"
@@ -3073,7 +3086,7 @@ usersListBlockedByAuthenticatedUser toMsg =
         }
 
 
-usersCheckBlocked : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+usersCheckBlocked : (Result Http.Error todo -> msg) -> Cmd msg
 usersCheckBlocked toMsg =
     Http.get
         { url = "/user/blocks/{username}"
@@ -3081,7 +3094,7 @@ usersCheckBlocked toMsg =
         }
 
 
-codespacesListForAuthenticatedUser : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+codespacesListForAuthenticatedUser : (Result Http.Error todo -> msg) -> Cmd msg
 codespacesListForAuthenticatedUser toMsg =
     Http.get
         { url = "/user/codespaces"
@@ -3090,7 +3103,7 @@ codespacesListForAuthenticatedUser toMsg =
 
 
 codespacesListSecretsForAuthenticatedUser :
-    (expectJsonUnpack -> toMsg) -> Cmd toMsg
+    (Result Http.Error todo -> msg) -> Cmd msg
 codespacesListSecretsForAuthenticatedUser toMsg =
     Http.get
         { url = "/user/codespaces/secrets"
@@ -3099,7 +3112,7 @@ codespacesListSecretsForAuthenticatedUser toMsg =
 
 
 codespacesGetPublicKeyForAuthenticatedUser :
-    (expectJsonUnpack -> toMsg) -> Cmd toMsg
+    (Result Http.Error todo -> msg) -> Cmd msg
 codespacesGetPublicKeyForAuthenticatedUser toMsg =
     Http.get
         { url = "/user/codespaces/secrets/public-key"
@@ -3108,7 +3121,7 @@ codespacesGetPublicKeyForAuthenticatedUser toMsg =
 
 
 codespacesGetSecretForAuthenticatedUser :
-    (expectJsonUnpack -> toMsg) -> Cmd toMsg
+    (Result Http.Error todo -> msg) -> Cmd msg
 codespacesGetSecretForAuthenticatedUser toMsg =
     Http.get
         { url = "/user/codespaces/secrets/{secret_name}"
@@ -3117,7 +3130,7 @@ codespacesGetSecretForAuthenticatedUser toMsg =
 
 
 codespacesListRepositoriesForSecretForAuthenticatedUser :
-    (expectJsonUnpack -> toMsg) -> Cmd toMsg
+    (Result Http.Error todo -> msg) -> Cmd msg
 codespacesListRepositoriesForSecretForAuthenticatedUser toMsg =
     Http.get
         { url = "/user/codespaces/secrets/{secret_name}/repositories"
@@ -3125,7 +3138,7 @@ codespacesListRepositoriesForSecretForAuthenticatedUser toMsg =
         }
 
 
-codespacesGetForAuthenticatedUser : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+codespacesGetForAuthenticatedUser : (Result Http.Error todo -> msg) -> Cmd msg
 codespacesGetForAuthenticatedUser toMsg =
     Http.get
         { url = "/user/codespaces/{codespace_name}"
@@ -3134,7 +3147,7 @@ codespacesGetForAuthenticatedUser toMsg =
 
 
 codespacesGetExportDetailsForAuthenticatedUser :
-    (expectJsonUnpack -> toMsg) -> Cmd toMsg
+    (Result Http.Error todo -> msg) -> Cmd msg
 codespacesGetExportDetailsForAuthenticatedUser toMsg =
     Http.get
         { url = "/user/codespaces/{codespace_name}/exports/{export_id}"
@@ -3143,7 +3156,7 @@ codespacesGetExportDetailsForAuthenticatedUser toMsg =
 
 
 codespacesCodespaceMachinesForAuthenticatedUser :
-    (expectJsonUnpack -> toMsg) -> Cmd toMsg
+    (Result Http.Error todo -> msg) -> Cmd msg
 codespacesCodespaceMachinesForAuthenticatedUser toMsg =
     Http.get
         { url = "/user/codespaces/{codespace_name}/machines"
@@ -3151,7 +3164,7 @@ codespacesCodespaceMachinesForAuthenticatedUser toMsg =
         }
 
 
-usersListEmailsForAuthenticatedUser : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+usersListEmailsForAuthenticatedUser : (Result Http.Error todo -> msg) -> Cmd msg
 usersListEmailsForAuthenticatedUser toMsg =
     Http.get
         { url = "/user/emails"
@@ -3160,7 +3173,7 @@ usersListEmailsForAuthenticatedUser toMsg =
 
 
 usersListFollowersForAuthenticatedUser :
-    (expectJsonUnpack -> toMsg) -> Cmd toMsg
+    (Result Http.Error todo -> msg) -> Cmd msg
 usersListFollowersForAuthenticatedUser toMsg =
     Http.get
         { url = "/user/followers"
@@ -3168,7 +3181,8 @@ usersListFollowersForAuthenticatedUser toMsg =
         }
 
 
-usersListFollowedByAuthenticatedUser : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+usersListFollowedByAuthenticatedUser :
+    (Result Http.Error todo -> msg) -> Cmd msg
 usersListFollowedByAuthenticatedUser toMsg =
     Http.get
         { url = "/user/following"
@@ -3177,7 +3191,7 @@ usersListFollowedByAuthenticatedUser toMsg =
 
 
 usersCheckPersonIsFollowedByAuthenticated :
-    (expectJsonUnpack -> toMsg) -> Cmd toMsg
+    (Result Http.Error todo -> msg) -> Cmd msg
 usersCheckPersonIsFollowedByAuthenticated toMsg =
     Http.get
         { url = "/user/following/{username}"
@@ -3185,7 +3199,8 @@ usersCheckPersonIsFollowedByAuthenticated toMsg =
         }
 
 
-usersListGpgKeysForAuthenticatedUser : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+usersListGpgKeysForAuthenticatedUser :
+    (Result Http.Error todo -> msg) -> Cmd msg
 usersListGpgKeysForAuthenticatedUser toMsg =
     Http.get
         { url = "/user/gpg_keys"
@@ -3193,7 +3208,7 @@ usersListGpgKeysForAuthenticatedUser toMsg =
         }
 
 
-usersGetGpgKeyForAuthenticatedUser : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+usersGetGpgKeyForAuthenticatedUser : (Result Http.Error todo -> msg) -> Cmd msg
 usersGetGpgKeyForAuthenticatedUser toMsg =
     Http.get
         { url = "/user/gpg_keys/{gpg_key_id}"
@@ -3202,7 +3217,7 @@ usersGetGpgKeyForAuthenticatedUser toMsg =
 
 
 appsListInstallationsForAuthenticatedUser :
-    (expectJsonUnpack -> toMsg) -> Cmd toMsg
+    (Result Http.Error todo -> msg) -> Cmd msg
 appsListInstallationsForAuthenticatedUser toMsg =
     Http.get
         { url = "/user/installations"
@@ -3211,7 +3226,7 @@ appsListInstallationsForAuthenticatedUser toMsg =
 
 
 appsListInstallationReposForAuthenticatedUser :
-    (expectJsonUnpack -> toMsg) -> Cmd toMsg
+    (Result Http.Error todo -> msg) -> Cmd msg
 appsListInstallationReposForAuthenticatedUser toMsg =
     Http.get
         { url = "/user/installations/{installation_id}/repositories"
@@ -3220,7 +3235,7 @@ appsListInstallationReposForAuthenticatedUser toMsg =
 
 
 interactionsGetRestrictionsForAuthenticatedUser :
-    (expectJsonUnpack -> toMsg) -> Cmd toMsg
+    (Result Http.Error todo -> msg) -> Cmd msg
 interactionsGetRestrictionsForAuthenticatedUser toMsg =
     Http.get
         { url = "/user/interaction-limits"
@@ -3228,7 +3243,7 @@ interactionsGetRestrictionsForAuthenticatedUser toMsg =
         }
 
 
-issuesListForAuthenticatedUser : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+issuesListForAuthenticatedUser : (Result Http.Error todo -> msg) -> Cmd msg
 issuesListForAuthenticatedUser toMsg =
     Http.get
         { url = "/user/issues"
@@ -3237,7 +3252,7 @@ issuesListForAuthenticatedUser toMsg =
 
 
 usersListPublicSshKeysForAuthenticatedUser :
-    (expectJsonUnpack -> toMsg) -> Cmd toMsg
+    (Result Http.Error todo -> msg) -> Cmd msg
 usersListPublicSshKeysForAuthenticatedUser toMsg =
     Http.get
         { url = "/user/keys"
@@ -3246,7 +3261,7 @@ usersListPublicSshKeysForAuthenticatedUser toMsg =
 
 
 usersGetPublicSshKeyForAuthenticatedUser :
-    (expectJsonUnpack -> toMsg) -> Cmd toMsg
+    (Result Http.Error todo -> msg) -> Cmd msg
 usersGetPublicSshKeyForAuthenticatedUser toMsg =
     Http.get
         { url = "/user/keys/{key_id}"
@@ -3255,7 +3270,7 @@ usersGetPublicSshKeyForAuthenticatedUser toMsg =
 
 
 appsListSubscriptionsForAuthenticatedUser :
-    (expectJsonUnpack -> toMsg) -> Cmd toMsg
+    (Result Http.Error todo -> msg) -> Cmd msg
 appsListSubscriptionsForAuthenticatedUser toMsg =
     Http.get
         { url = "/user/marketplace_purchases"
@@ -3264,7 +3279,7 @@ appsListSubscriptionsForAuthenticatedUser toMsg =
 
 
 appsListSubscriptionsForAuthenticatedUserStubbed :
-    (expectJsonUnpack -> toMsg) -> Cmd toMsg
+    (Result Http.Error todo -> msg) -> Cmd msg
 appsListSubscriptionsForAuthenticatedUserStubbed toMsg =
     Http.get
         { url = "/user/marketplace_purchases/stubbed"
@@ -3273,7 +3288,7 @@ appsListSubscriptionsForAuthenticatedUserStubbed toMsg =
 
 
 orgsListMembershipsForAuthenticatedUser :
-    (expectJsonUnpack -> toMsg) -> Cmd toMsg
+    (Result Http.Error todo -> msg) -> Cmd msg
 orgsListMembershipsForAuthenticatedUser toMsg =
     Http.get
         { url = "/user/memberships/orgs"
@@ -3281,7 +3296,8 @@ orgsListMembershipsForAuthenticatedUser toMsg =
         }
 
 
-orgsGetMembershipForAuthenticatedUser : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+orgsGetMembershipForAuthenticatedUser :
+    (Result Http.Error todo -> msg) -> Cmd msg
 orgsGetMembershipForAuthenticatedUser toMsg =
     Http.get
         { url = "/user/memberships/orgs/{org}"
@@ -3289,7 +3305,7 @@ orgsGetMembershipForAuthenticatedUser toMsg =
         }
 
 
-migrationsListForAuthenticatedUser : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+migrationsListForAuthenticatedUser : (Result Http.Error todo -> msg) -> Cmd msg
 migrationsListForAuthenticatedUser toMsg =
     Http.get
         { url = "/user/migrations"
@@ -3298,7 +3314,7 @@ migrationsListForAuthenticatedUser toMsg =
 
 
 migrationsGetStatusForAuthenticatedUser :
-    (expectJsonUnpack -> toMsg) -> Cmd toMsg
+    (Result Http.Error todo -> msg) -> Cmd msg
 migrationsGetStatusForAuthenticatedUser toMsg =
     Http.get
         { url = "/user/migrations/{migration_id}"
@@ -3307,7 +3323,7 @@ migrationsGetStatusForAuthenticatedUser toMsg =
 
 
 migrationsGetArchiveForAuthenticatedUser :
-    (expectJsonUnpack -> toMsg) -> Cmd toMsg
+    (Result Http.Error todo -> msg) -> Cmd msg
 migrationsGetArchiveForAuthenticatedUser toMsg =
     Http.get
         { url = "/user/migrations/{migration_id}/archive"
@@ -3316,7 +3332,7 @@ migrationsGetArchiveForAuthenticatedUser toMsg =
 
 
 migrationsListReposForAuthenticatedUser :
-    (expectJsonUnpack -> toMsg) -> Cmd toMsg
+    (Result Http.Error todo -> msg) -> Cmd msg
 migrationsListReposForAuthenticatedUser toMsg =
     Http.get
         { url = "/user/migrations/{migration_id}/repositories"
@@ -3324,7 +3340,7 @@ migrationsListReposForAuthenticatedUser toMsg =
         }
 
 
-orgsListForAuthenticatedUser : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+orgsListForAuthenticatedUser : (Result Http.Error todo -> msg) -> Cmd msg
 orgsListForAuthenticatedUser toMsg =
     Http.get
         { url = "/user/orgs"
@@ -3333,7 +3349,7 @@ orgsListForAuthenticatedUser toMsg =
 
 
 packagesListPackagesForAuthenticatedUser :
-    (expectJsonUnpack -> toMsg) -> Cmd toMsg
+    (Result Http.Error todo -> msg) -> Cmd msg
 packagesListPackagesForAuthenticatedUser toMsg =
     Http.get
         { url = "/user/packages"
@@ -3342,7 +3358,7 @@ packagesListPackagesForAuthenticatedUser toMsg =
 
 
 packagesGetPackageForAuthenticatedUser :
-    (expectJsonUnpack -> toMsg) -> Cmd toMsg
+    (Result Http.Error todo -> msg) -> Cmd msg
 packagesGetPackageForAuthenticatedUser toMsg =
     Http.get
         { url = "/user/packages/{package_type}/{package_name}"
@@ -3351,7 +3367,7 @@ packagesGetPackageForAuthenticatedUser toMsg =
 
 
 packagesGetAllPackageVersionsForPackageOwnedByAuthenticatedUser :
-    (expectJsonUnpack -> toMsg) -> Cmd toMsg
+    (Result Http.Error todo -> msg) -> Cmd msg
 packagesGetAllPackageVersionsForPackageOwnedByAuthenticatedUser toMsg =
     Http.get
         { url = "/user/packages/{package_type}/{package_name}/versions"
@@ -3360,7 +3376,7 @@ packagesGetAllPackageVersionsForPackageOwnedByAuthenticatedUser toMsg =
 
 
 packagesGetPackageVersionForAuthenticatedUser :
-    (expectJsonUnpack -> toMsg) -> Cmd toMsg
+    (Result Http.Error todo -> msg) -> Cmd msg
 packagesGetPackageVersionForAuthenticatedUser toMsg =
     Http.get
         { url =
@@ -3370,7 +3386,7 @@ packagesGetPackageVersionForAuthenticatedUser toMsg =
 
 
 usersListPublicEmailsForAuthenticatedUser :
-    (expectJsonUnpack -> toMsg) -> Cmd toMsg
+    (Result Http.Error todo -> msg) -> Cmd msg
 usersListPublicEmailsForAuthenticatedUser toMsg =
     Http.get
         { url = "/user/public_emails"
@@ -3378,7 +3394,7 @@ usersListPublicEmailsForAuthenticatedUser toMsg =
         }
 
 
-reposListForAuthenticatedUser : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+reposListForAuthenticatedUser : (Result Http.Error todo -> msg) -> Cmd msg
 reposListForAuthenticatedUser toMsg =
     Http.get
         { url = "/user/repos"
@@ -3387,7 +3403,7 @@ reposListForAuthenticatedUser toMsg =
 
 
 reposListInvitationsForAuthenticatedUser :
-    (expectJsonUnpack -> toMsg) -> Cmd toMsg
+    (Result Http.Error todo -> msg) -> Cmd msg
 reposListInvitationsForAuthenticatedUser toMsg =
     Http.get
         { url = "/user/repository_invitations"
@@ -3396,7 +3412,7 @@ reposListInvitationsForAuthenticatedUser toMsg =
 
 
 usersListSshSigningKeysForAuthenticatedUser :
-    (expectJsonUnpack -> toMsg) -> Cmd toMsg
+    (Result Http.Error todo -> msg) -> Cmd msg
 usersListSshSigningKeysForAuthenticatedUser toMsg =
     Http.get
         { url = "/user/ssh_signing_keys"
@@ -3405,7 +3421,7 @@ usersListSshSigningKeysForAuthenticatedUser toMsg =
 
 
 usersGetSshSigningKeyForAuthenticatedUser :
-    (expectJsonUnpack -> toMsg) -> Cmd toMsg
+    (Result Http.Error todo -> msg) -> Cmd msg
 usersGetSshSigningKeyForAuthenticatedUser toMsg =
     Http.get
         { url = "/user/ssh_signing_keys/{ssh_signing_key_id}"
@@ -3414,7 +3430,7 @@ usersGetSshSigningKeyForAuthenticatedUser toMsg =
 
 
 activityListReposStarredByAuthenticatedUser :
-    (expectJsonUnpack -> toMsg) -> Cmd toMsg
+    (Result Http.Error todo -> msg) -> Cmd msg
 activityListReposStarredByAuthenticatedUser toMsg =
     Http.get
         { url = "/user/starred"
@@ -3423,7 +3439,7 @@ activityListReposStarredByAuthenticatedUser toMsg =
 
 
 activityCheckRepoIsStarredByAuthenticatedUser :
-    (expectJsonUnpack -> toMsg) -> Cmd toMsg
+    (Result Http.Error todo -> msg) -> Cmd msg
 activityCheckRepoIsStarredByAuthenticatedUser toMsg =
     Http.get
         { url = "/user/starred/{owner}/{repo}"
@@ -3432,7 +3448,7 @@ activityCheckRepoIsStarredByAuthenticatedUser toMsg =
 
 
 activityListWatchedReposForAuthenticatedUser :
-    (expectJsonUnpack -> toMsg) -> Cmd toMsg
+    (Result Http.Error todo -> msg) -> Cmd msg
 activityListWatchedReposForAuthenticatedUser toMsg =
     Http.get
         { url = "/user/subscriptions"
@@ -3440,7 +3456,7 @@ activityListWatchedReposForAuthenticatedUser toMsg =
         }
 
 
-teamsListForAuthenticatedUser : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+teamsListForAuthenticatedUser : (Result Http.Error todo -> msg) -> Cmd msg
 teamsListForAuthenticatedUser toMsg =
     Http.get
         { url = "/user/teams"
@@ -3448,13 +3464,13 @@ teamsListForAuthenticatedUser toMsg =
         }
 
 
-usersList : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+usersList : (Result Http.Error todo -> msg) -> Cmd msg
 usersList toMsg =
     Http.get
         { url = "/users", expect = Http.expectJson toMsg (Debug.todo "todo") }
 
 
-usersGetByUsername : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+usersGetByUsername : (Result Http.Error todo -> msg) -> Cmd msg
 usersGetByUsername toMsg =
     Http.get
         { url = "/users/{username}"
@@ -3463,7 +3479,7 @@ usersGetByUsername toMsg =
 
 
 activityListEventsForAuthenticatedUser :
-    (expectJsonUnpack -> toMsg) -> Cmd toMsg
+    (Result Http.Error todo -> msg) -> Cmd msg
 activityListEventsForAuthenticatedUser toMsg =
     Http.get
         { url = "/users/{username}/events"
@@ -3472,7 +3488,7 @@ activityListEventsForAuthenticatedUser toMsg =
 
 
 activityListOrgEventsForAuthenticatedUser :
-    (expectJsonUnpack -> toMsg) -> Cmd toMsg
+    (Result Http.Error todo -> msg) -> Cmd msg
 activityListOrgEventsForAuthenticatedUser toMsg =
     Http.get
         { url = "/users/{username}/events/orgs/{org}"
@@ -3480,7 +3496,7 @@ activityListOrgEventsForAuthenticatedUser toMsg =
         }
 
 
-activityListPublicEventsForUser : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+activityListPublicEventsForUser : (Result Http.Error todo -> msg) -> Cmd msg
 activityListPublicEventsForUser toMsg =
     Http.get
         { url = "/users/{username}/events/public"
@@ -3488,7 +3504,7 @@ activityListPublicEventsForUser toMsg =
         }
 
 
-usersListFollowersForUser : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+usersListFollowersForUser : (Result Http.Error todo -> msg) -> Cmd msg
 usersListFollowersForUser toMsg =
     Http.get
         { url = "/users/{username}/followers"
@@ -3496,7 +3512,7 @@ usersListFollowersForUser toMsg =
         }
 
 
-usersListFollowingForUser : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+usersListFollowingForUser : (Result Http.Error todo -> msg) -> Cmd msg
 usersListFollowingForUser toMsg =
     Http.get
         { url = "/users/{username}/following"
@@ -3504,7 +3520,7 @@ usersListFollowingForUser toMsg =
         }
 
 
-usersCheckFollowingForUser : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+usersCheckFollowingForUser : (Result Http.Error todo -> msg) -> Cmd msg
 usersCheckFollowingForUser toMsg =
     Http.get
         { url = "/users/{username}/following/{target_user}"
@@ -3512,7 +3528,7 @@ usersCheckFollowingForUser toMsg =
         }
 
 
-gistsListForUser : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+gistsListForUser : (Result Http.Error todo -> msg) -> Cmd msg
 gistsListForUser toMsg =
     Http.get
         { url = "/users/{username}/gists"
@@ -3520,7 +3536,7 @@ gistsListForUser toMsg =
         }
 
 
-usersListGpgKeysForUser : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+usersListGpgKeysForUser : (Result Http.Error todo -> msg) -> Cmd msg
 usersListGpgKeysForUser toMsg =
     Http.get
         { url = "/users/{username}/gpg_keys"
@@ -3528,7 +3544,7 @@ usersListGpgKeysForUser toMsg =
         }
 
 
-usersGetContextForUser : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+usersGetContextForUser : (Result Http.Error todo -> msg) -> Cmd msg
 usersGetContextForUser toMsg =
     Http.get
         { url = "/users/{username}/hovercard"
@@ -3536,7 +3552,7 @@ usersGetContextForUser toMsg =
         }
 
 
-appsGetUserInstallation : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+appsGetUserInstallation : (Result Http.Error todo -> msg) -> Cmd msg
 appsGetUserInstallation toMsg =
     Http.get
         { url = "/users/{username}/installation"
@@ -3544,7 +3560,7 @@ appsGetUserInstallation toMsg =
         }
 
 
-usersListPublicKeysForUser : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+usersListPublicKeysForUser : (Result Http.Error todo -> msg) -> Cmd msg
 usersListPublicKeysForUser toMsg =
     Http.get
         { url = "/users/{username}/keys"
@@ -3552,7 +3568,7 @@ usersListPublicKeysForUser toMsg =
         }
 
 
-orgsListForUser : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+orgsListForUser : (Result Http.Error todo -> msg) -> Cmd msg
 orgsListForUser toMsg =
     Http.get
         { url = "/users/{username}/orgs"
@@ -3560,7 +3576,7 @@ orgsListForUser toMsg =
         }
 
 
-packagesListPackagesForUser : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+packagesListPackagesForUser : (Result Http.Error todo -> msg) -> Cmd msg
 packagesListPackagesForUser toMsg =
     Http.get
         { url = "/users/{username}/packages"
@@ -3568,7 +3584,7 @@ packagesListPackagesForUser toMsg =
         }
 
 
-packagesGetPackageForUser : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+packagesGetPackageForUser : (Result Http.Error todo -> msg) -> Cmd msg
 packagesGetPackageForUser toMsg =
     Http.get
         { url = "/users/{username}/packages/{package_type}/{package_name}"
@@ -3577,7 +3593,7 @@ packagesGetPackageForUser toMsg =
 
 
 packagesGetAllPackageVersionsForPackageOwnedByUser :
-    (expectJsonUnpack -> toMsg) -> Cmd toMsg
+    (Result Http.Error todo -> msg) -> Cmd msg
 packagesGetAllPackageVersionsForPackageOwnedByUser toMsg =
     Http.get
         { url =
@@ -3586,7 +3602,7 @@ packagesGetAllPackageVersionsForPackageOwnedByUser toMsg =
         }
 
 
-packagesGetPackageVersionForUser : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+packagesGetPackageVersionForUser : (Result Http.Error todo -> msg) -> Cmd msg
 packagesGetPackageVersionForUser toMsg =
     Http.get
         { url =
@@ -3595,7 +3611,7 @@ packagesGetPackageVersionForUser toMsg =
         }
 
 
-projectsListForUser : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+projectsListForUser : (Result Http.Error todo -> msg) -> Cmd msg
 projectsListForUser toMsg =
     Http.get
         { url = "/users/{username}/projects"
@@ -3603,7 +3619,7 @@ projectsListForUser toMsg =
         }
 
 
-activityListReceivedEventsForUser : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+activityListReceivedEventsForUser : (Result Http.Error todo -> msg) -> Cmd msg
 activityListReceivedEventsForUser toMsg =
     Http.get
         { url = "/users/{username}/received_events"
@@ -3612,7 +3628,7 @@ activityListReceivedEventsForUser toMsg =
 
 
 activityListReceivedPublicEventsForUser :
-    (expectJsonUnpack -> toMsg) -> Cmd toMsg
+    (Result Http.Error todo -> msg) -> Cmd msg
 activityListReceivedPublicEventsForUser toMsg =
     Http.get
         { url = "/users/{username}/received_events/public"
@@ -3620,7 +3636,7 @@ activityListReceivedPublicEventsForUser toMsg =
         }
 
 
-reposListForUser : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+reposListForUser : (Result Http.Error todo -> msg) -> Cmd msg
 reposListForUser toMsg =
     Http.get
         { url = "/users/{username}/repos"
@@ -3628,7 +3644,7 @@ reposListForUser toMsg =
         }
 
 
-billingGetGithubActionsBillingUser : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+billingGetGithubActionsBillingUser : (Result Http.Error todo -> msg) -> Cmd msg
 billingGetGithubActionsBillingUser toMsg =
     Http.get
         { url = "/users/{username}/settings/billing/actions"
@@ -3636,7 +3652,7 @@ billingGetGithubActionsBillingUser toMsg =
         }
 
 
-billingGetGithubPackagesBillingUser : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+billingGetGithubPackagesBillingUser : (Result Http.Error todo -> msg) -> Cmd msg
 billingGetGithubPackagesBillingUser toMsg =
     Http.get
         { url = "/users/{username}/settings/billing/packages"
@@ -3644,7 +3660,7 @@ billingGetGithubPackagesBillingUser toMsg =
         }
 
 
-billingGetSharedStorageBillingUser : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+billingGetSharedStorageBillingUser : (Result Http.Error todo -> msg) -> Cmd msg
 billingGetSharedStorageBillingUser toMsg =
     Http.get
         { url = "/users/{username}/settings/billing/shared-storage"
@@ -3652,7 +3668,7 @@ billingGetSharedStorageBillingUser toMsg =
         }
 
 
-usersListSshSigningKeysForUser : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+usersListSshSigningKeysForUser : (Result Http.Error todo -> msg) -> Cmd msg
 usersListSshSigningKeysForUser toMsg =
     Http.get
         { url = "/users/{username}/ssh_signing_keys"
@@ -3660,7 +3676,7 @@ usersListSshSigningKeysForUser toMsg =
         }
 
 
-activityListReposStarredByUser : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+activityListReposStarredByUser : (Result Http.Error todo -> msg) -> Cmd msg
 activityListReposStarredByUser toMsg =
     Http.get
         { url = "/users/{username}/starred"
@@ -3668,7 +3684,7 @@ activityListReposStarredByUser toMsg =
         }
 
 
-activityListReposWatchedByUser : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+activityListReposWatchedByUser : (Result Http.Error todo -> msg) -> Cmd msg
 activityListReposWatchedByUser toMsg =
     Http.get
         { url = "/users/{username}/subscriptions"
@@ -3676,7 +3692,7 @@ activityListReposWatchedByUser toMsg =
         }
 
 
-metaGetZen : (expectJsonUnpack -> toMsg) -> Cmd toMsg
+metaGetZen : (Result Http.Error todo -> msg) -> Cmd msg
 metaGetZen toMsg =
     Http.get
         { url = "/zen", expect = Http.expectJson toMsg (Debug.todo "todo") }

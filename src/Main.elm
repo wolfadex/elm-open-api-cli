@@ -11,6 +11,8 @@ import Gen.Http
 import Gen.Json.Decode
 import Gen.Json.Decode.Extra
 import Gen.Json.Encode
+import Gen.Platform.Cmd
+import Gen.Result
 import Json.Decode
 import Json.Encode exposing (Value)
 import Json.Schema
@@ -20,7 +22,9 @@ import OpenApi.Components
 import OpenApi.Info
 import OpenApi.Operation
 import OpenApi.Path
+import OpenApi.Response
 import OpenApi.Schema
+import OpenApi.Types
 import String.Extra
 
 
@@ -87,6 +91,12 @@ update msg model =
                                             |> OpenApi.Path.get
                                             |> Maybe.map
                                                 (\operation ->
+                                                    let
+                                                        maybeFirstSuccessResponse =
+                                                            operation
+                                                                |> OpenApi.Operation.responses
+                                                                |> getFirstSuccessResponse
+                                                    in
                                                     Elm.Declare.fn
                                                         ((OpenApi.Operation.operationId operation
                                                             |> Maybe.withDefault url
@@ -95,7 +105,13 @@ update msg model =
                                                             |> removeInvlidChars
                                                             |> String.Extra.camelize
                                                         )
-                                                        ( "toMsg", Nothing )
+                                                        ( "toMsg"
+                                                        , Just
+                                                            (Elm.Annotation.function
+                                                                [ Gen.Result.annotation_.result Gen.Http.annotation_.error (Elm.Annotation.var "todo") ]
+                                                                (Elm.Annotation.var "msg")
+                                                            )
+                                                        )
                                                         (\toMsg ->
                                                             Gen.Http.get
                                                                 { url = url
@@ -157,6 +173,15 @@ update msg model =
                         |> Json.Decode.errorToString
                         |> writeMsg
                     )
+
+
+getFirstSuccessResponse : Dict.Dict String (OpenApi.Types.ReferenceOr OpenApi.Response.Response) -> Maybe (OpenApi.Types.ReferenceOr OpenApi.Response.Response)
+getFirstSuccessResponse responses =
+    responses
+        |> Dict.toList
+        |> List.filter (\( statusCode, _ ) -> String.startsWith "2" statusCode)
+        |> List.head
+        |> Maybe.map Tuple.second
 
 
 nullableType =

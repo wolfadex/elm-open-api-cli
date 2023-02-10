@@ -3628,8 +3628,6 @@ var $mdgriffith$elm_codegen$Elm$Annotation$alias = F4(
 				}()
 			});
 	});
-var $author$project$Gen$Json$Decode$moduleName_ = _List_fromArray(
-	['Json', 'Decode']);
 var $elm$core$Dict$empty = $elm$core$Dict$RBEmpty_elm_builtin;
 var $mdgriffith$elm_codegen$Internal$Compiler$emptyAliases = $elm$core$Dict$empty;
 var $mdgriffith$elm_codegen$Elm$Annotation$getAliases = function (_v0) {
@@ -3637,6 +3635,33 @@ var $mdgriffith$elm_codegen$Elm$Annotation$getAliases = function (_v0) {
 	return ann.aliases;
 };
 var $mdgriffith$elm_codegen$Internal$Compiler$nodifyAll = $elm$core$List$map($mdgriffith$elm_codegen$Internal$Compiler$nodify);
+var $mdgriffith$elm_codegen$Elm$Annotation$typed = F3(
+	function (mod, name, args) {
+		return $mdgriffith$elm_codegen$Internal$Compiler$Annotation(
+			{
+				aliases: A3(
+					$elm$core$List$foldl,
+					F2(
+						function (ann, aliases) {
+							return A2(
+								$mdgriffith$elm_codegen$Internal$Compiler$mergeAliases,
+								$mdgriffith$elm_codegen$Elm$Annotation$getAliases(ann),
+								aliases);
+						}),
+					$mdgriffith$elm_codegen$Internal$Compiler$emptyAliases,
+					args),
+				annotation: A2(
+					$stil4m$elm_syntax$Elm$Syntax$TypeAnnotation$Typed,
+					$mdgriffith$elm_codegen$Internal$Compiler$nodify(
+						_Utils_Tuple2(mod, name)),
+					$mdgriffith$elm_codegen$Internal$Compiler$nodifyAll(
+						A2($elm$core$List$map, $mdgriffith$elm_codegen$Internal$Compiler$getInnerAnnotation, args))),
+				imports: A2($elm$core$List$concatMap, $mdgriffith$elm_codegen$Internal$Compiler$getAnnotationImports, args)
+			});
+	});
+var $mdgriffith$elm_codegen$Elm$Annotation$int = A3($mdgriffith$elm_codegen$Elm$Annotation$typed, _List_Nil, 'Int', _List_Nil);
+var $author$project$Gen$Http$moduleName_ = _List_fromArray(
+	['Http']);
 var $mdgriffith$elm_codegen$Elm$Annotation$namedWith = F3(
 	function (mod, name, args) {
 		return $mdgriffith$elm_codegen$Internal$Compiler$Annotation(
@@ -3666,6 +3691,175 @@ var $mdgriffith$elm_codegen$Elm$Annotation$namedWith = F3(
 					A2($elm$core$List$concatMap, $mdgriffith$elm_codegen$Internal$Compiler$getAnnotationImports, args))
 			});
 	});
+var $stil4m$elm_syntax$Elm$Syntax$TypeAnnotation$Record = function (a) {
+	return {$: 'Record', a: a};
+};
+var $elm$core$Basics$composeR = F3(
+	function (f, g, x) {
+		return g(
+			f(x));
+	});
+var $mdgriffith$elm_codegen$Internal$Format$sanitize = function (str) {
+	switch (str) {
+		case 'in':
+			return 'in_';
+		case 'type':
+			return 'type_';
+		case 'case':
+			return 'case_';
+		case 'let':
+			return 'let_';
+		case 'module':
+			return 'module_';
+		case 'exposing':
+			return 'exposing_';
+		case 'where':
+			return 'where_';
+		case 'main':
+			return 'main_';
+		case 'port':
+			return 'port_';
+		case 'as':
+			return 'as_';
+		case 'if':
+			return 'if_';
+		case 'import':
+			return 'import_';
+		default:
+			return str;
+	}
+};
+var $elm$core$String$toLower = _String_toLower;
+var $mdgriffith$elm_codegen$Internal$Format$formatValue = function (str) {
+	var formatted = _Utils_ap(
+		$elm$core$String$toLower(
+			A2($elm$core$String$left, 1, str)),
+		A2($elm$core$String$dropLeft, 1, str));
+	return $mdgriffith$elm_codegen$Internal$Format$sanitize(formatted);
+};
+var $elm$core$Tuple$second = function (_v0) {
+	var y = _v0.b;
+	return y;
+};
+var $mdgriffith$elm_codegen$Elm$Annotation$record = function (fields) {
+	return $mdgriffith$elm_codegen$Internal$Compiler$Annotation(
+		{
+			aliases: A3(
+				$elm$core$List$foldl,
+				F2(
+					function (_v0, aliases) {
+						var ann = _v0.b;
+						return A2(
+							$mdgriffith$elm_codegen$Internal$Compiler$mergeAliases,
+							$mdgriffith$elm_codegen$Elm$Annotation$getAliases(ann),
+							aliases);
+					}),
+				$mdgriffith$elm_codegen$Internal$Compiler$emptyAliases,
+				fields),
+			annotation: $stil4m$elm_syntax$Elm$Syntax$TypeAnnotation$Record(
+				$mdgriffith$elm_codegen$Internal$Compiler$nodifyAll(
+					A2(
+						$elm$core$List$map,
+						function (_v1) {
+							var name = _v1.a;
+							var ann = _v1.b;
+							return _Utils_Tuple2(
+								$mdgriffith$elm_codegen$Internal$Compiler$nodify(
+									$mdgriffith$elm_codegen$Internal$Format$formatValue(name)),
+								$mdgriffith$elm_codegen$Internal$Compiler$nodify(
+									$mdgriffith$elm_codegen$Internal$Compiler$getInnerAnnotation(ann)));
+						},
+						fields))),
+			imports: A2(
+				$elm$core$List$concatMap,
+				A2($elm$core$Basics$composeR, $elm$core$Tuple$second, $mdgriffith$elm_codegen$Internal$Compiler$getAnnotationImports),
+				fields)
+		});
+};
+var $mdgriffith$elm_codegen$Elm$Annotation$string = A3($mdgriffith$elm_codegen$Elm$Annotation$typed, _List_Nil, 'String', _List_Nil);
+var $author$project$Gen$Http$annotation_ = {
+	body: A3(
+		$mdgriffith$elm_codegen$Elm$Annotation$namedWith,
+		_List_fromArray(
+			['Http']),
+		'Body',
+		_List_Nil),
+	error: A3(
+		$mdgriffith$elm_codegen$Elm$Annotation$namedWith,
+		_List_fromArray(
+			['Http']),
+		'Error',
+		_List_Nil),
+	expect: function (expectArg0) {
+		return A3(
+			$mdgriffith$elm_codegen$Elm$Annotation$namedWith,
+			_List_fromArray(
+				['Http']),
+			'Expect',
+			_List_fromArray(
+				[expectArg0]));
+	},
+	header: A3(
+		$mdgriffith$elm_codegen$Elm$Annotation$namedWith,
+		_List_fromArray(
+			['Http']),
+		'Header',
+		_List_Nil),
+	metadata: A4(
+		$mdgriffith$elm_codegen$Elm$Annotation$alias,
+		$author$project$Gen$Http$moduleName_,
+		'Metadata',
+		_List_Nil,
+		$mdgriffith$elm_codegen$Elm$Annotation$record(
+			_List_fromArray(
+				[
+					_Utils_Tuple2('url', $mdgriffith$elm_codegen$Elm$Annotation$string),
+					_Utils_Tuple2('statusCode', $mdgriffith$elm_codegen$Elm$Annotation$int),
+					_Utils_Tuple2('statusText', $mdgriffith$elm_codegen$Elm$Annotation$string),
+					_Utils_Tuple2(
+					'headers',
+					A3(
+						$mdgriffith$elm_codegen$Elm$Annotation$namedWith,
+						_List_fromArray(
+							['Dict']),
+						'Dict',
+						_List_fromArray(
+							[$mdgriffith$elm_codegen$Elm$Annotation$string, $mdgriffith$elm_codegen$Elm$Annotation$string])))
+				]))),
+	part: A3(
+		$mdgriffith$elm_codegen$Elm$Annotation$namedWith,
+		_List_fromArray(
+			['Http']),
+		'Part',
+		_List_Nil),
+	progress: A3(
+		$mdgriffith$elm_codegen$Elm$Annotation$namedWith,
+		_List_fromArray(
+			['Http']),
+		'Progress',
+		_List_Nil),
+	resolver: F2(
+		function (resolverArg0, resolverArg1) {
+			return A3(
+				$mdgriffith$elm_codegen$Elm$Annotation$namedWith,
+				_List_fromArray(
+					['Http']),
+				'Resolver',
+				_List_fromArray(
+					[resolverArg0, resolverArg1]));
+		}),
+	response: function (responseArg0) {
+		return A3(
+			$mdgriffith$elm_codegen$Elm$Annotation$namedWith,
+			_List_fromArray(
+				['Http']),
+			'Response',
+			_List_fromArray(
+				[responseArg0]));
+	}
+};
+var $author$project$Gen$Json$Decode$moduleName_ = _List_fromArray(
+	['Json', 'Decode']);
 var $author$project$Gen$Json$Decode$annotation_ = {
 	decoder: function (decoderArg0) {
 		return A3(
@@ -3701,6 +3895,17 @@ var $author$project$Gen$Json$Encode$annotation_ = {
 			['Json', 'Encode']),
 		'Value',
 		_List_Nil)
+};
+var $author$project$Gen$Result$annotation_ = {
+	result: F2(
+		function (resultArg0, resultArg1) {
+			return A3(
+				$mdgriffith$elm_codegen$Elm$Annotation$namedWith,
+				_List_Nil,
+				'Result',
+				_List_fromArray(
+					[resultArg0, resultArg1]));
+		})
 };
 var $stil4m$elm_syntax$Elm$Syntax$Expression$Application = function (a) {
 	return {$: 'Application', a: a};
@@ -4229,9 +4434,6 @@ var $mdgriffith$elm_codegen$Internal$Compiler$makeFunction = F2(
 			$elm$core$List$reverse(args));
 	});
 var $mdgriffith$elm_codegen$Internal$Compiler$MismatchedTypeVariables = {$: 'MismatchedTypeVariables'};
-var $stil4m$elm_syntax$Elm$Syntax$TypeAnnotation$Record = function (a) {
-	return {$: 'Record', a: a};
-};
 var $stil4m$elm_syntax$Elm$Syntax$TypeAnnotation$Tupled = function (a) {
 	return {$: 'Tupled', a: a};
 };
@@ -4269,11 +4471,6 @@ var $mdgriffith$elm_codegen$Internal$Compiler$getAlias = F2(
 var $mdgriffith$elm_codegen$Internal$Compiler$CouldNotFindField = function (a) {
 	return {$: 'CouldNotFindField', a: a};
 };
-var $elm$core$Basics$composeR = F3(
-	function (f, g, x) {
-		return g(
-			f(x));
-	});
 var $mdgriffith$elm_codegen$Internal$Compiler$getField = F4(
 	function (name, val, fields, captured) {
 		getField:
@@ -4559,10 +4756,6 @@ var $stil4m$elm_syntax$Elm$Writer$parensIfContainsSpaces = function (w) {
 				w,
 				$stil4m$structured_writer$StructuredWriter$string(')')
 			])) : w;
-};
-var $elm$core$Tuple$second = function (_v0) {
-	var y = _v0.b;
-	return y;
 };
 var $stil4m$structured_writer$StructuredWriter$sepByComma = $stil4m$structured_writer$StructuredWriter$Sep(
 	_Utils_Tuple3('', ', ', ''));
@@ -9009,44 +9202,6 @@ var $mdgriffith$elm_codegen$Elm$betaReduce = function (e) {
 	} else {
 		return e;
 	}
-};
-var $mdgriffith$elm_codegen$Internal$Format$sanitize = function (str) {
-	switch (str) {
-		case 'in':
-			return 'in_';
-		case 'type':
-			return 'type_';
-		case 'case':
-			return 'case_';
-		case 'let':
-			return 'let_';
-		case 'module':
-			return 'module_';
-		case 'exposing':
-			return 'exposing_';
-		case 'where':
-			return 'where_';
-		case 'main':
-			return 'main_';
-		case 'port':
-			return 'port_';
-		case 'as':
-			return 'as_';
-		case 'if':
-			return 'if_';
-		case 'import':
-			return 'import_';
-		default:
-			return str;
-	}
-};
-var $elm$core$String$toLower = _String_toLower;
-var $mdgriffith$elm_codegen$Internal$Format$formatValue = function (str) {
-	var formatted = _Utils_ap(
-		$elm$core$String$toLower(
-			A2($elm$core$String$left, 1, str)),
-		A2($elm$core$String$dropLeft, 1, str));
-	return $mdgriffith$elm_codegen$Internal$Format$sanitize(formatted);
 };
 var $mdgriffith$elm_codegen$Internal$Index$indexToString = function (_v0) {
 	var top = _v0.a;
@@ -14150,41 +14305,6 @@ var $mdgriffith$elm_codegen$Elm$record = function (fields) {
 			};
 		});
 };
-var $mdgriffith$elm_codegen$Elm$Annotation$record = function (fields) {
-	return $mdgriffith$elm_codegen$Internal$Compiler$Annotation(
-		{
-			aliases: A3(
-				$elm$core$List$foldl,
-				F2(
-					function (_v0, aliases) {
-						var ann = _v0.b;
-						return A2(
-							$mdgriffith$elm_codegen$Internal$Compiler$mergeAliases,
-							$mdgriffith$elm_codegen$Elm$Annotation$getAliases(ann),
-							aliases);
-					}),
-				$mdgriffith$elm_codegen$Internal$Compiler$emptyAliases,
-				fields),
-			annotation: $stil4m$elm_syntax$Elm$Syntax$TypeAnnotation$Record(
-				$mdgriffith$elm_codegen$Internal$Compiler$nodifyAll(
-					A2(
-						$elm$core$List$map,
-						function (_v1) {
-							var name = _v1.a;
-							var ann = _v1.b;
-							return _Utils_Tuple2(
-								$mdgriffith$elm_codegen$Internal$Compiler$nodify(
-									$mdgriffith$elm_codegen$Internal$Format$formatValue(name)),
-								$mdgriffith$elm_codegen$Internal$Compiler$nodify(
-									$mdgriffith$elm_codegen$Internal$Compiler$getInnerAnnotation(ann)));
-						},
-						fields))),
-			imports: A2(
-				$elm$core$List$concatMap,
-				A2($elm$core$Basics$composeR, $elm$core$Tuple$second, $mdgriffith$elm_codegen$Internal$Compiler$getAnnotationImports),
-				fields)
-		});
-};
 var $stil4m$elm_syntax$Elm$Syntax$Expression$Literal = function (a) {
 	return {$: 'Literal', a: a};
 };
@@ -14207,31 +14327,6 @@ var $mdgriffith$elm_codegen$Elm$string = function (literal) {
 			};
 		});
 };
-var $mdgriffith$elm_codegen$Elm$Annotation$typed = F3(
-	function (mod, name, args) {
-		return $mdgriffith$elm_codegen$Internal$Compiler$Annotation(
-			{
-				aliases: A3(
-					$elm$core$List$foldl,
-					F2(
-						function (ann, aliases) {
-							return A2(
-								$mdgriffith$elm_codegen$Internal$Compiler$mergeAliases,
-								$mdgriffith$elm_codegen$Elm$Annotation$getAliases(ann),
-								aliases);
-						}),
-					$mdgriffith$elm_codegen$Internal$Compiler$emptyAliases,
-					args),
-				annotation: A2(
-					$stil4m$elm_syntax$Elm$Syntax$TypeAnnotation$Typed,
-					$mdgriffith$elm_codegen$Internal$Compiler$nodify(
-						_Utils_Tuple2(mod, name)),
-					$mdgriffith$elm_codegen$Internal$Compiler$nodifyAll(
-						A2($elm$core$List$map, $mdgriffith$elm_codegen$Internal$Compiler$getInnerAnnotation, args))),
-				imports: A2($elm$core$List$concatMap, $mdgriffith$elm_codegen$Internal$Compiler$getAnnotationImports, args)
-			});
-	});
-var $mdgriffith$elm_codegen$Elm$Annotation$string = A3($mdgriffith$elm_codegen$Elm$Annotation$typed, _List_Nil, 'String', _List_Nil);
 var $author$project$Gen$Http$get = function (getArg) {
 	return A2(
 		$mdgriffith$elm_codegen$Elm$apply,
@@ -14508,7 +14603,6 @@ var $author$project$Main$elmifyName = function (name) {
 				$author$project$Main$typifyName(name))));
 };
 var $mdgriffith$elm_codegen$Elm$Annotation$float = A3($mdgriffith$elm_codegen$Elm$Annotation$typed, _List_Nil, 'Float', _List_Nil);
-var $mdgriffith$elm_codegen$Elm$Annotation$int = A3($mdgriffith$elm_codegen$Elm$Annotation$typed, _List_Nil, 'Int', _List_Nil);
 var $mdgriffith$elm_codegen$Elm$Annotation$list = function (inner) {
 	return A3(
 		$mdgriffith$elm_codegen$Elm$Annotation$typed,
@@ -14524,8 +14618,8 @@ var $author$project$Main$schemaToAnnotation = function (schema) {
 		return _Debug_todo(
 			'Main',
 			{
-				start: {line: 491, column: 13},
-				end: {line: 491, column: 23}
+				start: {line: 507, column: 13},
+				end: {line: 507, column: 23}
 			})('');
 	} else {
 		var subSchema = schema.a;
@@ -14564,8 +14658,8 @@ var $author$project$Main$schemaToAnnotation = function (schema) {
 					return _Debug_todo(
 						'Main',
 						{
-							start: {line: 520, column: 29},
-							end: {line: 520, column: 39}
+							start: {line: 536, column: 29},
+							end: {line: 536, column: 39}
 						})('');
 				default:
 					var _v17 = subSchema.items;
@@ -14574,15 +14668,15 @@ var $author$project$Main$schemaToAnnotation = function (schema) {
 							return _Debug_todo(
 								'Main',
 								{
-									start: {line: 525, column: 37},
-									end: {line: 525, column: 47}
+									start: {line: 541, column: 37},
+									end: {line: 541, column: 47}
 								})('err');
 						case 'ArrayOfItems':
 							return _Debug_todo(
 								'Main',
 								{
-									start: {line: 528, column: 37},
-									end: {line: 528, column: 47}
+									start: {line: 544, column: 37},
+									end: {line: 544, column: 47}
 								})('');
 						default:
 							var itemSchema = _v17.a;
@@ -14677,8 +14771,8 @@ var $author$project$Main$schemaToAnnotation = function (schema) {
 						return _Debug_todo(
 							'Main',
 							{
-								start: {line: 575, column: 37},
-								end: {line: 575, column: 47}
+								start: {line: 591, column: 37},
+								end: {line: 591, column: 47}
 							})('other ref: ' + ref);
 					}
 				}
@@ -14697,8 +14791,8 @@ var $author$project$Main$schemaToAnnotation = function (schema) {
 				return _Debug_todo(
 					'Main',
 					{
-						start: {line: 583, column: 21},
-						end: {line: 583, column: 31}
+						start: {line: 599, column: 21},
+						end: {line: 599, column: 31}
 					})('union type');
 		}
 	}
@@ -15177,8 +15271,8 @@ var $author$project$Main$schemaToDecoder = function (schema) {
 		return _Debug_todo(
 			'Main',
 			{
-				start: {line: 342, column: 13},
-				end: {line: 342, column: 23}
+				start: {line: 358, column: 13},
+				end: {line: 358, column: 23}
 			})('');
 	} else {
 		var subSchema = schema.a;
@@ -15260,8 +15354,8 @@ var $author$project$Main$schemaToDecoder = function (schema) {
 					return _Debug_todo(
 						'Main',
 						{
-							start: {line: 397, column: 29},
-							end: {line: 397, column: 39}
+							start: {line: 413, column: 29},
+							end: {line: 413, column: 39}
 						})('');
 				default:
 					var _v19 = subSchema.items;
@@ -15270,15 +15364,15 @@ var $author$project$Main$schemaToDecoder = function (schema) {
 							return _Debug_todo(
 								'Main',
 								{
-									start: {line: 402, column: 37},
-									end: {line: 402, column: 47}
+									start: {line: 418, column: 37},
+									end: {line: 418, column: 47}
 								})('err');
 						case 'ArrayOfItems':
 							return _Debug_todo(
 								'Main',
 								{
-									start: {line: 405, column: 37},
-									end: {line: 405, column: 47}
+									start: {line: 421, column: 37},
+									end: {line: 421, column: 47}
 								})('');
 						default:
 							var itemSchema = _v19.a;
@@ -15380,8 +15474,8 @@ var $author$project$Main$schemaToDecoder = function (schema) {
 						return _Debug_todo(
 							'Main',
 							{
-								start: {line: 468, column: 37},
-								end: {line: 468, column: 47}
+								start: {line: 484, column: 37},
+								end: {line: 484, column: 47}
 							})('other ref: ' + ref);
 					}
 				}
@@ -15412,8 +15506,8 @@ var $author$project$Main$schemaToDecoder = function (schema) {
 				return _Debug_todo(
 					'Main',
 					{
-						start: {line: 484, column: 21},
-						end: {line: 484, column: 31}
+						start: {line: 500, column: 21},
+						end: {line: 500, column: 31}
 					})('union type');
 		}
 	}
@@ -16034,8 +16128,8 @@ var $author$project$Main$schemaToEncoder = function (schema) {
 		return _Debug_todo(
 			'Main',
 			{
-				start: {line: 191, column: 13},
-				end: {line: 191, column: 23}
+				start: {line: 204, column: 13},
+				end: {line: 204, column: 23}
 			})('');
 	} else {
 		var subSchema = schema.a;
@@ -16113,8 +16207,8 @@ var $author$project$Main$schemaToEncoder = function (schema) {
 					return _Debug_todo(
 						'Main',
 						{
-							start: {line: 241, column: 29},
-							end: {line: 241, column: 39}
+							start: {line: 254, column: 29},
+							end: {line: 254, column: 39}
 						})('');
 				default:
 					var _v17 = subSchema.items;
@@ -16123,15 +16217,15 @@ var $author$project$Main$schemaToEncoder = function (schema) {
 							return _Debug_todo(
 								'Main',
 								{
-									start: {line: 246, column: 37},
-									end: {line: 246, column: 47}
+									start: {line: 259, column: 37},
+									end: {line: 259, column: 47}
 								})('err');
 						case 'ArrayOfItems':
 							return _Debug_todo(
 								'Main',
 								{
-									start: {line: 249, column: 37},
-									end: {line: 249, column: 47}
+									start: {line: 262, column: 37},
+									end: {line: 262, column: 47}
 								})('');
 						default:
 							var itemSchema = _v17.a;
@@ -16164,97 +16258,111 @@ var $author$project$Main$schemaToEncoder = function (schema) {
 						return $mdgriffith$elm_codegen$Elm$val('identity');
 					} else {
 						var anyOf = _v3.a;
-						if ((anyOf.b && anyOf.b.b) && (!anyOf.b.b.b)) {
-							var firstSchema = anyOf.a;
-							var _v5 = anyOf.b;
-							var secondSchema = _v5.a;
-							var _v6 = _Utils_Tuple2(firstSchema, secondSchema);
-							if ((_v6.a.$ === 'ObjectSchema') && (_v6.b.$ === 'ObjectSchema')) {
-								var firstSubSchema = _v6.a.a;
-								var secondSubSchema = _v6.b.a;
-								var _v7 = _Utils_Tuple2(firstSubSchema.type_, secondSubSchema.type_);
-								if ((_v7.a.$ === 'SingleType') && (_v7.a.a.$ === 'NullType')) {
-									var _v8 = _v7.a.a;
-									return A2(
-										$mdgriffith$elm_codegen$Elm$fn,
-										_Utils_Tuple2('nullableValue', $elm$core$Maybe$Nothing),
-										function (nullableValue) {
-											return A3(
-												$mdgriffith$elm_codegen$Elm$Case$custom,
-												nullableValue,
-												A3(
-													$mdgriffith$elm_codegen$Elm$Annotation$namedWith,
-													_List_Nil,
-													'Nullable',
-													_List_fromArray(
-														[
-															$mdgriffith$elm_codegen$Elm$Annotation$var('value')
-														])),
-												_List_fromArray(
-													[
-														A2($mdgriffith$elm_codegen$Elm$Case$branch0, 'Null', $author$project$Gen$Json$Encode$null),
-														A3(
-														$mdgriffith$elm_codegen$Elm$Case$branch1,
-														'Present',
-														_Utils_Tuple2(
-															'value',
-															$mdgriffith$elm_codegen$Elm$Annotation$var('value')),
-														function (value) {
-															return A2(
-																$mdgriffith$elm_codegen$Elm$apply,
-																$author$project$Main$schemaToEncoder(secondSchema),
-																_List_fromArray(
-																	[value]));
-														})
-													]));
-										});
+						_v4$2:
+						while (true) {
+							if (anyOf.b) {
+								if (!anyOf.b.b) {
+									var onlySchema = anyOf.a;
+									return $author$project$Gen$Debug$todo('decode anyOf: exactly 1 item');
 								} else {
-									if ((_v7.b.$ === 'SingleType') && (_v7.b.a.$ === 'NullType')) {
-										var _v9 = _v7.b.a;
-										return A2(
-											$mdgriffith$elm_codegen$Elm$fn,
-											_Utils_Tuple2('nullableValue', $elm$core$Maybe$Nothing),
-											function (nullableValue) {
-												return A3(
-													$mdgriffith$elm_codegen$Elm$Case$custom,
-													nullableValue,
-													A3(
-														$mdgriffith$elm_codegen$Elm$Annotation$namedWith,
-														_List_Nil,
-														'Nullable',
-														_List_fromArray(
-															[
-																$mdgriffith$elm_codegen$Elm$Annotation$var('value')
-															])),
-													_List_fromArray(
-														[
-															A2($mdgriffith$elm_codegen$Elm$Case$branch0, 'Null', $author$project$Gen$Json$Encode$null),
+									if (!anyOf.b.b.b) {
+										var firstSchema = anyOf.a;
+										var _v5 = anyOf.b;
+										var secondSchema = _v5.a;
+										var _v6 = _Utils_Tuple2(firstSchema, secondSchema);
+										if ((_v6.a.$ === 'ObjectSchema') && (_v6.b.$ === 'ObjectSchema')) {
+											var firstSubSchema = _v6.a.a;
+											var secondSubSchema = _v6.b.a;
+											var _v7 = _Utils_Tuple2(firstSubSchema.type_, secondSubSchema.type_);
+											if ((_v7.a.$ === 'SingleType') && (_v7.a.a.$ === 'NullType')) {
+												var _v8 = _v7.a.a;
+												return A2(
+													$mdgriffith$elm_codegen$Elm$fn,
+													_Utils_Tuple2('nullableValue', $elm$core$Maybe$Nothing),
+													function (nullableValue) {
+														return A3(
+															$mdgriffith$elm_codegen$Elm$Case$custom,
+															nullableValue,
 															A3(
-															$mdgriffith$elm_codegen$Elm$Case$branch1,
-															'Present',
-															_Utils_Tuple2(
-																'value',
-																$mdgriffith$elm_codegen$Elm$Annotation$var('value')),
-															function (value) {
-																return A2(
-																	$mdgriffith$elm_codegen$Elm$apply,
-																	$author$project$Main$schemaToEncoder(firstSchema),
+																$mdgriffith$elm_codegen$Elm$Annotation$namedWith,
+																_List_Nil,
+																'Nullable',
+																_List_fromArray(
+																	[
+																		$mdgriffith$elm_codegen$Elm$Annotation$var('value')
+																	])),
+															_List_fromArray(
+																[
+																	A2($mdgriffith$elm_codegen$Elm$Case$branch0, 'Null', $author$project$Gen$Json$Encode$null),
+																	A3(
+																	$mdgriffith$elm_codegen$Elm$Case$branch1,
+																	'Present',
+																	_Utils_Tuple2(
+																		'value',
+																		$mdgriffith$elm_codegen$Elm$Annotation$var('value')),
+																	function (value) {
+																		return A2(
+																			$mdgriffith$elm_codegen$Elm$apply,
+																			$author$project$Main$schemaToEncoder(secondSchema),
+																			_List_fromArray(
+																				[value]));
+																	})
+																]));
+													});
+											} else {
+												if ((_v7.b.$ === 'SingleType') && (_v7.b.a.$ === 'NullType')) {
+													var _v9 = _v7.b.a;
+													return A2(
+														$mdgriffith$elm_codegen$Elm$fn,
+														_Utils_Tuple2('nullableValue', $elm$core$Maybe$Nothing),
+														function (nullableValue) {
+															return A3(
+																$mdgriffith$elm_codegen$Elm$Case$custom,
+																nullableValue,
+																A3(
+																	$mdgriffith$elm_codegen$Elm$Annotation$namedWith,
+																	_List_Nil,
+																	'Nullable',
 																	_List_fromArray(
-																		[value]));
-															})
-														]));
-											});
+																		[
+																			$mdgriffith$elm_codegen$Elm$Annotation$var('value')
+																		])),
+																_List_fromArray(
+																	[
+																		A2($mdgriffith$elm_codegen$Elm$Case$branch0, 'Null', $author$project$Gen$Json$Encode$null),
+																		A3(
+																		$mdgriffith$elm_codegen$Elm$Case$branch1,
+																		'Present',
+																		_Utils_Tuple2(
+																			'value',
+																			$mdgriffith$elm_codegen$Elm$Annotation$var('value')),
+																		function (value) {
+																			return A2(
+																				$mdgriffith$elm_codegen$Elm$apply,
+																				$author$project$Main$schemaToEncoder(firstSchema),
+																				_List_fromArray(
+																					[value]));
+																		})
+																	]));
+														});
+												} else {
+													return $author$project$Gen$Debug$todo(
+														'decode anyOf 2: not nullable:: ' + ($elm$core$Debug$toString(firstSubSchema) + (' ,,, ' + $elm$core$Debug$toString(secondSubSchema))));
+												}
+											}
+										} else {
+											return $author$project$Gen$Debug$todo('decode anyOf 2: not both object schemas');
+										}
 									} else {
-										return $author$project$Gen$Debug$todo(
-											'decode anyOf 2: not nullable:: ' + ($elm$core$Debug$toString(firstSubSchema) + (' ,,, ' + $elm$core$Debug$toString(secondSubSchema))));
+										break _v4$2;
 									}
 								}
 							} else {
-								return $author$project$Gen$Debug$todo('decode anyOf 2: not both object schemas');
+								break _v4$2;
 							}
-						} else {
-							return $author$project$Gen$Debug$todo('decode anyOf: not exactly 2 items');
 						}
+						var manySchemas = anyOf;
+						return $author$project$Gen$Debug$todo('decode anyOf: not exactly 2 items');
 					}
 				} else {
 					var ref = _v2.a;
@@ -16270,8 +16378,8 @@ var $author$project$Main$schemaToEncoder = function (schema) {
 						return _Debug_todo(
 							'Main',
 							{
-								start: {line: 319, column: 37},
-								end: {line: 319, column: 47}
+								start: {line: 335, column: 37},
+								end: {line: 335, column: 47}
 							})('other ref: ' + ref);
 					}
 				}
@@ -16315,8 +16423,8 @@ var $author$project$Main$schemaToEncoder = function (schema) {
 				return _Debug_todo(
 					'Main',
 					{
-						start: {line: 335, column: 21},
-						end: {line: 335, column: 31}
+						start: {line: 351, column: 21},
+						end: {line: 351, column: 31}
 					})('union type');
 		}
 	}
@@ -16386,7 +16494,19 @@ var $author$project$Main$update = F2(
 																		$elm$core$Maybe$withDefault,
 																		url,
 																		$author$project$OpenApi$Operation$operationId(operation))))),
-														_Utils_Tuple2('toMsg', $elm$core$Maybe$Nothing),
+														_Utils_Tuple2(
+															'toMsg',
+															$elm$core$Maybe$Just(
+																A2(
+																	$mdgriffith$elm_codegen$Elm$Annotation$function,
+																	_List_fromArray(
+																		[
+																			A2(
+																			$author$project$Gen$Result$annotation_.result,
+																			$author$project$Gen$Http$annotation_.error,
+																			$mdgriffith$elm_codegen$Elm$Annotation$var('todo'))
+																		]),
+																	$mdgriffith$elm_codegen$Elm$Annotation$var('msg')))),
 														function (toMsg) {
 															return $author$project$Gen$Http$get(
 																{

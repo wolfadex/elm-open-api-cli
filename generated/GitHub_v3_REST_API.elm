@@ -5,6 +5,7 @@ module GitHub_v3_REST_API exposing (..)
 
 
 import Debug
+import Debug.Todo
 import Http
 import Json.Decode
 import Json.Decode.Extra
@@ -4094,7 +4095,7 @@ type alias WorkflowRun =
     , rerunUrl : String
     , previousAttemptUrl : Nullable String
     , workflowUrl : String
-    , headCommit : Debug.Todo
+    , headCommit : Nullable SimpleCommit
     , repository : MinimalRepository
     , headRepository : MinimalRepository
     , headRepositoryId : Int
@@ -4379,7 +4380,17 @@ encodeWorkflowRun rec =
                 rec.previousAttemptUrl
           )
         , ( "workflow_url", Json.Encode.string rec.workflowUrl )
-        , ( "head_commit", Debug.todo "decode anyOf" rec.headCommit )
+        , ( "head_commit"
+          , (\nullableValue ->
+                case nullableValue of
+                    Null ->
+                        Json.Encode.null
+
+                    Present value ->
+                        encodeSimpleCommit value
+            )
+                rec.headCommit
+          )
         , ( "repository", encodeMinimalRepository rec.repository )
         , ( "head_repository", encodeMinimalRepository rec.headRepository )
         , ( "head_repository_id", Json.Encode.int rec.headRepositoryId )
@@ -4847,7 +4858,7 @@ decodeWebhookConfigInsecureSsl =
 
 encodeWebhookConfigInsecureSsl : WebhookConfigInsecureSsl -> Json.Encode.Value
 encodeWebhookConfigInsecureSsl =
-    Json.Decode.value
+    identity
 
 
 type alias WebhookConfigContentType =
@@ -5116,7 +5127,7 @@ encodeValidationError rec =
                         , ( "message", Json.Encode.string rec0.message )
                         , ( "code", Json.Encode.string rec0.code )
                         , ( "index", Json.Encode.int rec0.index )
-                        , ( "value", Json.Decode.value rec0.value )
+                        , ( "value", identity rec0.value )
                         ]
                 )
                 rec.errors
@@ -5598,7 +5609,7 @@ type alias UnlabeledIssueEvent =
     , commitId : Nullable String
     , commitUrl : Nullable String
     , createdAt : String
-    , performedViaGithubApp : Debug.Todo
+    , performedViaGithubApp : Nullable Integration
     , label : { name : String, color : String }
     }
 
@@ -5700,7 +5711,15 @@ encodeUnlabeledIssueEvent rec =
           )
         , ( "created_at", Json.Encode.string rec.createdAt )
         , ( "performed_via_github_app"
-          , Debug.todo "decode anyOf" rec.performedViaGithubApp
+          , (\nullableValue ->
+                case nullableValue of
+                    Null ->
+                        Json.Encode.null
+
+                    Present value ->
+                        encodeIntegration value
+            )
+                rec.performedViaGithubApp
           )
         , ( "label"
           , (\rec0 ->
@@ -5723,7 +5742,7 @@ type alias UnassignedIssueEvent =
     , commitId : Nullable String
     , commitUrl : Nullable String
     , createdAt : String
-    , performedViaGithubApp : Debug.Todo
+    , performedViaGithubApp : Nullable Integration
     , assignee : SimpleUser
     , assigner : SimpleUser
     }
@@ -5820,7 +5839,15 @@ encodeUnassignedIssueEvent rec =
           )
         , ( "created_at", Json.Encode.string rec.createdAt )
         , ( "performed_via_github_app"
-          , Debug.todo "decode anyOf" rec.performedViaGithubApp
+          , (\nullableValue ->
+                case nullableValue of
+                    Null ->
+                        Json.Encode.null
+
+                    Present value ->
+                        encodeIntegration value
+            )
+                rec.performedViaGithubApp
           )
         , ( "assignee", encodeSimpleUser rec.assignee )
         , ( "assigner", encodeSimpleUser rec.assigner )
@@ -6274,7 +6301,7 @@ type alias TimelineUnassignedIssueEvent =
     , commitId : Nullable String
     , commitUrl : Nullable String
     , createdAt : String
-    , performedViaGithubApp : Debug.Todo
+    , performedViaGithubApp : Nullable Integration
     , assignee : SimpleUser
     }
 
@@ -6369,7 +6396,15 @@ encodeTimelineUnassignedIssueEvent rec =
           )
         , ( "created_at", Json.Encode.string rec.createdAt )
         , ( "performed_via_github_app"
-          , Debug.todo "decode anyOf" rec.performedViaGithubApp
+          , (\nullableValue ->
+                case nullableValue of
+                    Null ->
+                        Json.Encode.null
+
+                    Present value ->
+                        encodeIntegration value
+            )
+                rec.performedViaGithubApp
           )
         , ( "assignee", encodeSimpleUser rec.assignee )
         ]
@@ -6925,7 +6960,7 @@ type alias TimelineCommentEvent =
     , updatedAt : String
     , issueUrl : String
     , authorAssociation : AuthorAssociation
-    , performedViaGithubApp : Debug.Todo
+    , performedViaGithubApp : Nullable Integration
     , reactions : ReactionRollup
     }
 
@@ -7009,7 +7044,15 @@ encodeTimelineCommentEvent rec =
           , encodeAuthorAssociation rec.authorAssociation
           )
         , ( "performed_via_github_app"
-          , Debug.todo "decode anyOf" rec.performedViaGithubApp
+          , (\nullableValue ->
+                case nullableValue of
+                    Null ->
+                        Json.Encode.null
+
+                    Present value ->
+                        encodeIntegration value
+            )
+                rec.performedViaGithubApp
           )
         , ( "reactions", encodeReactionRollup rec.reactions )
         ]
@@ -7024,7 +7067,7 @@ type alias TimelineAssignedIssueEvent =
     , commitId : Nullable String
     , commitUrl : Nullable String
     , createdAt : String
-    , performedViaGithubApp : Debug.Todo
+    , performedViaGithubApp : Nullable Integration
     , assignee : SimpleUser
     }
 
@@ -7119,7 +7162,15 @@ encodeTimelineAssignedIssueEvent rec =
           )
         , ( "created_at", Json.Encode.string rec.createdAt )
         , ( "performed_via_github_app"
-          , Debug.todo "decode anyOf" rec.performedViaGithubApp
+          , (\nullableValue ->
+                case nullableValue of
+                    Null ->
+                        Json.Encode.null
+
+                    Present value ->
+                        encodeIntegration value
+            )
+                rec.performedViaGithubApp
           )
         , ( "assignee", encodeSimpleUser rec.assignee )
         ]
@@ -7426,7 +7477,7 @@ type alias TeamRepository =
     , nodeId : String
     , name : String
     , fullName : String
-    , license : Debug.Todo
+    , license : Nullable LicenseSimple
     , forks : Int
     , permissions :
         { admin : Bool
@@ -7436,7 +7487,7 @@ type alias TeamRepository =
         , maintain : Bool
         }
     , roleName : String
-    , owner : Debug.Todo
+    , owner : Nullable SimpleUser
     , private : Bool
     , htmlUrl : String
     , description : Nullable String
@@ -7505,7 +7556,7 @@ type alias TeamRepository =
     , createdAt : Nullable String
     , updatedAt : Nullable String
     , allowRebaseMerge : Bool
-    , templateRepository : Debug.Todo
+    , templateRepository : Nullable Repository
     , tempCloneToken : String
     , allowSquashMerge : Bool
     , allowAutoMerge : Bool
@@ -7893,7 +7944,17 @@ encodeTeamRepository rec =
         , ( "node_id", Json.Encode.string rec.nodeId )
         , ( "name", Json.Encode.string rec.name )
         , ( "full_name", Json.Encode.string rec.fullName )
-        , ( "license", Debug.todo "decode anyOf" rec.license )
+        , ( "license"
+          , (\nullableValue ->
+                case nullableValue of
+                    Null ->
+                        Json.Encode.null
+
+                    Present value ->
+                        encodeLicenseSimple value
+            )
+                rec.license
+          )
         , ( "forks", Json.Encode.int rec.forks )
         , ( "permissions"
           , (\rec0 ->
@@ -7908,7 +7969,17 @@ encodeTeamRepository rec =
                 rec.permissions
           )
         , ( "role_name", Json.Encode.string rec.roleName )
-        , ( "owner", Debug.todo "decode anyOf" rec.owner )
+        , ( "owner"
+          , (\nullableValue ->
+                case nullableValue of
+                    Null ->
+                        Json.Encode.null
+
+                    Present value ->
+                        encodeSimpleUser value
+            )
+                rec.owner
+          )
         , ( "private", Json.Encode.bool rec.private )
         , ( "html_url", Json.Encode.string rec.htmlUrl )
         , ( "description"
@@ -8048,7 +8119,15 @@ encodeTeamRepository rec =
           )
         , ( "allow_rebase_merge", Json.Encode.bool rec.allowRebaseMerge )
         , ( "template_repository"
-          , Debug.todo "decode anyOf" rec.templateRepository
+          , (\nullableValue ->
+                case nullableValue of
+                    Null ->
+                        Json.Encode.null
+
+                    Present value ->
+                        encodeRepository value
+            )
+                rec.templateRepository
           )
         , ( "temp_clone_token", Json.Encode.string rec.tempCloneToken )
         , ( "allow_squash_merge", Json.Encode.bool rec.allowSquashMerge )
@@ -8746,7 +8825,7 @@ type alias TeamFull =
     , permission : String
     , membersUrl : String
     , repositoriesUrl : String
-    , parent : Debug.Todo
+    , parent : Nullable TeamSimple
     , membersCount : Int
     , reposCount : Int
     , createdAt : String
@@ -8854,7 +8933,17 @@ encodeTeamFull rec =
         , ( "permission", Json.Encode.string rec.permission )
         , ( "members_url", Json.Encode.string rec.membersUrl )
         , ( "repositories_url", Json.Encode.string rec.repositoriesUrl )
-        , ( "parent", Debug.todo "decode anyOf" rec.parent )
+        , ( "parent"
+          , (\nullableValue ->
+                case nullableValue of
+                    Null ->
+                        Json.Encode.null
+
+                    Present value ->
+                        encodeTeamSimple value
+            )
+                rec.parent
+          )
         , ( "members_count", Json.Encode.int rec.membersCount )
         , ( "repos_count", Json.Encode.int rec.reposCount )
         , ( "created_at", Json.Encode.string rec.createdAt )
@@ -8865,7 +8954,7 @@ encodeTeamFull rec =
 
 
 type alias TeamDiscussionComment =
-    { author : Debug.Todo
+    { author : Nullable SimpleUser
     , body : String
     , bodyHtml : String
     , bodyVersion : String
@@ -8943,7 +9032,17 @@ decodeTeamDiscussionComment =
 encodeTeamDiscussionComment : TeamDiscussionComment -> Json.Encode.Value
 encodeTeamDiscussionComment rec =
     Json.Encode.object
-        [ ( "author", Debug.todo "decode anyOf" rec.author )
+        [ ( "author"
+          , (\nullableValue ->
+                case nullableValue of
+                    Null ->
+                        Json.Encode.null
+
+                    Present value ->
+                        encodeSimpleUser value
+            )
+                rec.author
+          )
         , ( "body", Json.Encode.string rec.body )
         , ( "body_html", Json.Encode.string rec.bodyHtml )
         , ( "body_version", Json.Encode.string rec.bodyVersion )
@@ -8970,7 +9069,7 @@ encodeTeamDiscussionComment rec =
 
 
 type alias TeamDiscussion =
-    { author : Debug.Todo
+    { author : Nullable SimpleUser
     , body : String
     , bodyHtml : String
     , bodyVersion : String
@@ -9068,7 +9167,17 @@ decodeTeamDiscussion =
 encodeTeamDiscussion : TeamDiscussion -> Json.Encode.Value
 encodeTeamDiscussion rec =
     Json.Encode.object
-        [ ( "author", Debug.todo "decode anyOf" rec.author )
+        [ ( "author"
+          , (\nullableValue ->
+                case nullableValue of
+                    Null ->
+                        Json.Encode.null
+
+                    Present value ->
+                        encodeSimpleUser value
+            )
+                rec.author
+          )
         , ( "body", Json.Encode.string rec.body )
         , ( "body_html", Json.Encode.string rec.bodyHtml )
         , ( "body_version", Json.Encode.string rec.bodyVersion )
@@ -9118,7 +9227,7 @@ type alias Team =
     , htmlUrl : String
     , membersUrl : String
     , repositoriesUrl : String
-    , parent : Debug.Todo
+    , parent : Nullable TeamSimple
     }
 
 
@@ -9239,7 +9348,17 @@ encodeTeam rec =
         , ( "html_url", Json.Encode.string rec.htmlUrl )
         , ( "members_url", Json.Encode.string rec.membersUrl )
         , ( "repositories_url", Json.Encode.string rec.repositoriesUrl )
-        , ( "parent", Debug.todo "decode anyOf" rec.parent )
+        , ( "parent"
+          , (\nullableValue ->
+                case nullableValue of
+                    Null ->
+                        Json.Encode.null
+
+                    Present value ->
+                        encodeTeamSimple value
+            )
+                rec.parent
+          )
         ]
 
 
@@ -9434,7 +9553,7 @@ type alias Status =
     , context : String
     , createdAt : String
     , updatedAt : String
-    , creator : Debug.Todo
+    , creator : Nullable SimpleUser
     }
 
 
@@ -9548,7 +9667,17 @@ encodeStatus rec =
         , ( "context", Json.Encode.string rec.context )
         , ( "created_at", Json.Encode.string rec.createdAt )
         , ( "updated_at", Json.Encode.string rec.updatedAt )
-        , ( "creator", Debug.todo "decode anyOf" rec.creator )
+        , ( "creator"
+          , (\nullableValue ->
+                case nullableValue of
+                    Null ->
+                        Json.Encode.null
+
+                    Present value ->
+                        encodeSimpleUser value
+            )
+                rec.creator
+          )
         ]
 
 
@@ -9561,7 +9690,7 @@ type alias StateChangeIssueEvent =
     , commitId : Nullable String
     , commitUrl : Nullable String
     , createdAt : String
-    , performedViaGithubApp : Debug.Todo
+    , performedViaGithubApp : Nullable Integration
     , stateReason : Nullable String
     }
 
@@ -9661,7 +9790,15 @@ encodeStateChangeIssueEvent rec =
           )
         , ( "created_at", Json.Encode.string rec.createdAt )
         , ( "performed_via_github_app"
-          , Debug.todo "decode anyOf" rec.performedViaGithubApp
+          , (\nullableValue ->
+                case nullableValue of
+                    Null ->
+                        Json.Encode.null
+
+                    Present value ->
+                        encodeIntegration value
+            )
+                rec.performedViaGithubApp
           )
         , ( "state_reason"
           , (\nullableValue ->
@@ -9699,7 +9836,7 @@ encodeStarredRepository rec =
 
 
 type alias Stargazer =
-    { starredAt : String, user : Debug.Todo }
+    { starredAt : String, user : Nullable SimpleUser }
 
 
 decodeStargazer : Json.Decode.Decoder Stargazer
@@ -9723,7 +9860,17 @@ encodeStargazer : Stargazer -> Json.Encode.Value
 encodeStargazer rec =
     Json.Encode.object
         [ ( "starred_at", Json.Encode.string rec.starredAt )
-        , ( "user", Debug.todo "decode anyOf" rec.user )
+        , ( "user"
+          , (\nullableValue ->
+                case nullableValue of
+                    Null ->
+                        Json.Encode.null
+
+                    Present value ->
+                        encodeSimpleUser value
+            )
+                rec.user
+          )
         ]
 
 
@@ -11526,7 +11673,7 @@ encodeSecretScanningLocation : SecretScanningLocation -> Json.Encode.Value
 encodeSecretScanningLocation rec =
     Json.Encode.object
         [ ( "type", Json.Encode.string rec.type_ )
-        , ( "details", Json.Decode.value rec.details )
+        , ( "details", identity rec.details )
         ]
 
 
@@ -11598,12 +11745,12 @@ type alias SecretScanningAlert =
     , state : SecretScanningAlertState
     , resolution : SecretScanningAlertResolution
     , resolvedAt : Nullable String
-    , resolvedBy : Debug.Todo
+    , resolvedBy : Nullable SimpleUser
     , secretType : String
     , secretTypeDisplayName : String
     , secret : String
     , pushProtectionBypassed : Nullable Bool
-    , pushProtectionBypassedBy : Debug.Todo
+    , pushProtectionBypassedBy : Nullable SimpleUser
     , pushProtectionBypassedAt : Nullable String
     , resolutionComment : Nullable String
     }
@@ -11731,7 +11878,17 @@ encodeSecretScanningAlert rec =
             )
                 rec.resolvedAt
           )
-        , ( "resolved_by", Debug.todo "decode anyOf" rec.resolvedBy )
+        , ( "resolved_by"
+          , (\nullableValue ->
+                case nullableValue of
+                    Null ->
+                        Json.Encode.null
+
+                    Present value ->
+                        encodeSimpleUser value
+            )
+                rec.resolvedBy
+          )
         , ( "secret_type", Json.Encode.string rec.secretType )
         , ( "secret_type_display_name"
           , Json.Encode.string rec.secretTypeDisplayName
@@ -11749,7 +11906,15 @@ encodeSecretScanningAlert rec =
                 rec.pushProtectionBypassed
           )
         , ( "push_protection_bypassed_by"
-          , Debug.todo "decode anyOf" rec.pushProtectionBypassedBy
+          , (\nullableValue ->
+                case nullableValue of
+                    Null ->
+                        Json.Encode.null
+
+                    Present value ->
+                        encodeSimpleUser value
+            )
+                rec.pushProtectionBypassedBy
           )
         , ( "push_protection_bypassed_at"
           , (\nullableValue ->
@@ -12571,7 +12736,7 @@ type alias ReviewRequestedIssueEvent =
     , commitId : Nullable String
     , commitUrl : Nullable String
     , createdAt : String
-    , performedViaGithubApp : Debug.Todo
+    , performedViaGithubApp : Nullable Integration
     , reviewRequester : SimpleUser
     , requestedTeam : Team
     , requestedReviewer : SimpleUser
@@ -12672,7 +12837,15 @@ encodeReviewRequestedIssueEvent rec =
           )
         , ( "created_at", Json.Encode.string rec.createdAt )
         , ( "performed_via_github_app"
-          , Debug.todo "decode anyOf" rec.performedViaGithubApp
+          , (\nullableValue ->
+                case nullableValue of
+                    Null ->
+                        Json.Encode.null
+
+                    Present value ->
+                        encodeIntegration value
+            )
+                rec.performedViaGithubApp
           )
         , ( "review_requester", encodeSimpleUser rec.reviewRequester )
         , ( "requested_team", encodeTeam rec.requestedTeam )
@@ -12689,7 +12862,7 @@ type alias ReviewRequestRemovedIssueEvent =
     , commitId : Nullable String
     , commitUrl : Nullable String
     , createdAt : String
-    , performedViaGithubApp : Debug.Todo
+    , performedViaGithubApp : Nullable Integration
     , reviewRequester : SimpleUser
     , requestedTeam : Team
     , requestedReviewer : SimpleUser
@@ -12792,7 +12965,15 @@ encodeReviewRequestRemovedIssueEvent rec =
           )
         , ( "created_at", Json.Encode.string rec.createdAt )
         , ( "performed_via_github_app"
-          , Debug.todo "decode anyOf" rec.performedViaGithubApp
+          , (\nullableValue ->
+                case nullableValue of
+                    Null ->
+                        Json.Encode.null
+
+                    Present value ->
+                        encodeIntegration value
+            )
+                rec.performedViaGithubApp
           )
         , ( "review_requester", encodeSimpleUser rec.reviewRequester )
         , ( "requested_team", encodeTeam rec.requestedTeam )
@@ -12809,7 +12990,7 @@ type alias ReviewDismissedIssueEvent =
     , commitId : Nullable String
     , commitUrl : Nullable String
     , createdAt : String
-    , performedViaGithubApp : Debug.Todo
+    , performedViaGithubApp : Nullable Integration
     , dismissedReview :
         { state : String
         , reviewId : Int
@@ -12936,7 +13117,15 @@ encodeReviewDismissedIssueEvent rec =
           )
         , ( "created_at", Json.Encode.string rec.createdAt )
         , ( "performed_via_github_app"
-          , Debug.todo "decode anyOf" rec.performedViaGithubApp
+          , (\nullableValue ->
+                case nullableValue of
+                    Null ->
+                        Json.Encode.null
+
+                    Present value ->
+                        encodeIntegration value
+            )
+                rec.performedViaGithubApp
           )
         , ( "dismissed_review"
           , (\rec0 ->
@@ -12976,7 +13165,7 @@ type alias ReviewComment =
     , commitId : String
     , originalCommitId : String
     , inReplyToId : Int
-    , user : Debug.Todo
+    , user : Nullable SimpleUser
     , body : String
     , createdAt : String
     , updatedAt : String
@@ -13174,7 +13363,17 @@ encodeReviewComment rec =
         , ( "commit_id", Json.Encode.string rec.commitId )
         , ( "original_commit_id", Json.Encode.string rec.originalCommitId )
         , ( "in_reply_to_id", Json.Encode.int rec.inReplyToId )
-        , ( "user", Debug.todo "decode anyOf" rec.user )
+        , ( "user"
+          , (\nullableValue ->
+                case nullableValue of
+                    Null ->
+                        Json.Encode.null
+
+                    Present value ->
+                        encodeSimpleUser value
+            )
+                rec.user
+          )
         , ( "body", Json.Encode.string rec.body )
         , ( "created_at", Json.Encode.string rec.createdAt )
         , ( "updated_at", Json.Encode.string rec.updatedAt )
@@ -13302,8 +13501,8 @@ encodeRepositorySubscription rec =
 type alias RepositoryInvitation =
     { id : Int
     , repository : MinimalRepository
-    , invitee : Debug.Todo
-    , inviter : Debug.Todo
+    , invitee : Nullable SimpleUser
+    , inviter : Nullable SimpleUser
     , permissions : String
     , createdAt : String
     , expired : Bool
@@ -13368,8 +13567,28 @@ encodeRepositoryInvitation rec =
     Json.Encode.object
         [ ( "id", Json.Encode.int rec.id )
         , ( "repository", encodeMinimalRepository rec.repository )
-        , ( "invitee", Debug.todo "decode anyOf" rec.invitee )
-        , ( "inviter", Debug.todo "decode anyOf" rec.inviter )
+        , ( "invitee"
+          , (\nullableValue ->
+                case nullableValue of
+                    Null ->
+                        Json.Encode.null
+
+                    Present value ->
+                        encodeSimpleUser value
+            )
+                rec.invitee
+          )
+        , ( "inviter"
+          , (\nullableValue ->
+                case nullableValue of
+                    Null ->
+                        Json.Encode.null
+
+                    Present value ->
+                        encodeSimpleUser value
+            )
+                rec.inviter
+          )
         , ( "permissions", Json.Encode.string rec.permissions )
         , ( "created_at", Json.Encode.string rec.createdAt )
         , ( "expired", Json.Encode.bool rec.expired )
@@ -13380,7 +13599,7 @@ encodeRepositoryInvitation rec =
 
 
 type alias RepositoryCollaboratorPermission =
-    { permission : String, roleName : String, user : Debug.Todo }
+    { permission : String, roleName : String, user : Nullable Collaborator }
 
 
 decodeRepositoryCollaboratorPermission :
@@ -13411,7 +13630,17 @@ encodeRepositoryCollaboratorPermission rec =
     Json.Encode.object
         [ ( "permission", Json.Encode.string rec.permission )
         , ( "role_name", Json.Encode.string rec.roleName )
-        , ( "user", Debug.todo "decode anyOf" rec.user )
+        , ( "user"
+          , (\nullableValue ->
+                case nullableValue of
+                    Null ->
+                        Json.Encode.null
+
+                    Present value ->
+                        encodeCollaborator value
+            )
+                rec.user
+          )
         ]
 
 
@@ -13420,8 +13649,8 @@ type alias Repository =
     , nodeId : String
     , name : String
     , fullName : String
-    , license : Debug.Todo
-    , organization : Debug.Todo
+    , license : Nullable LicenseSimple
+    , organization : Nullable SimpleUser
     , forks : Int
     , permissions :
         { admin : Bool
@@ -14653,8 +14882,28 @@ encodeRepository rec =
         , ( "node_id", Json.Encode.string rec.nodeId )
         , ( "name", Json.Encode.string rec.name )
         , ( "full_name", Json.Encode.string rec.fullName )
-        , ( "license", Debug.todo "decode anyOf" rec.license )
-        , ( "organization", Debug.todo "decode anyOf" rec.organization )
+        , ( "license"
+          , (\nullableValue ->
+                case nullableValue of
+                    Null ->
+                        Json.Encode.null
+
+                    Present value ->
+                        encodeLicenseSimple value
+            )
+                rec.license
+          )
+        , ( "organization"
+          , (\nullableValue ->
+                case nullableValue of
+                    Null ->
+                        Json.Encode.null
+
+                    Present value ->
+                        encodeSimpleUser value
+            )
+                rec.organization
+          )
         , ( "forks", Json.Encode.int rec.forks )
         , ( "permissions"
           , (\rec0 ->
@@ -15199,7 +15448,7 @@ type alias RepoSearchResultItem =
     , nodeId : String
     , name : String
     , fullName : String
-    , owner : Debug.Todo
+    , owner : Nullable SimpleUser
     , private : Bool
     , htmlUrl : String
     , description : Nullable String
@@ -15271,7 +15520,7 @@ type alias RepoSearchResultItem =
     , archived : Bool
     , disabled : Bool
     , visibility : String
-    , license : Debug.Todo
+    , license : Nullable LicenseSimple
     , permissions :
         { admin : Bool
         , maintain : Bool
@@ -15630,7 +15879,17 @@ encodeRepoSearchResultItem rec =
         , ( "node_id", Json.Encode.string rec.nodeId )
         , ( "name", Json.Encode.string rec.name )
         , ( "full_name", Json.Encode.string rec.fullName )
-        , ( "owner", Debug.todo "decode anyOf" rec.owner )
+        , ( "owner"
+          , (\nullableValue ->
+                case nullableValue of
+                    Null ->
+                        Json.Encode.null
+
+                    Present value ->
+                        encodeSimpleUser value
+            )
+                rec.owner
+          )
         , ( "private", Json.Encode.bool rec.private )
         , ( "html_url", Json.Encode.string rec.htmlUrl )
         , ( "description"
@@ -15742,7 +16001,17 @@ encodeRepoSearchResultItem rec =
         , ( "archived", Json.Encode.bool rec.archived )
         , ( "disabled", Json.Encode.bool rec.disabled )
         , ( "visibility", Json.Encode.string rec.visibility )
-        , ( "license", Debug.todo "decode anyOf" rec.license )
+        , ( "license"
+          , (\nullableValue ->
+                case nullableValue of
+                    Null ->
+                        Json.Encode.null
+
+                    Present value ->
+                        encodeLicenseSimple value
+            )
+                rec.license
+          )
         , ( "permissions"
           , (\rec0 ->
                 Json.Encode.object
@@ -15806,7 +16075,7 @@ type alias RenamedIssueEvent =
     , commitId : Nullable String
     , commitUrl : Nullable String
     , createdAt : String
-    , performedViaGithubApp : Debug.Todo
+    , performedViaGithubApp : Nullable Integration
     , rename : { from : String, to : String }
     }
 
@@ -15907,7 +16176,15 @@ encodeRenamedIssueEvent rec =
           )
         , ( "created_at", Json.Encode.string rec.createdAt )
         , ( "performed_via_github_app"
-          , Debug.todo "decode anyOf" rec.performedViaGithubApp
+          , (\nullableValue ->
+                case nullableValue of
+                    Null ->
+                        Json.Encode.null
+
+                    Present value ->
+                        encodeIntegration value
+            )
+                rec.performedViaGithubApp
           )
         , ( "rename"
           , (\rec0 ->
@@ -15930,7 +16207,7 @@ type alias RemovedFromProjectIssueEvent =
     , commitId : Nullable String
     , commitUrl : Nullable String
     , createdAt : String
-    , performedViaGithubApp : Debug.Todo
+    , performedViaGithubApp : Nullable Integration
     , projectCard :
         { id : Int
         , url : String
@@ -16060,7 +16337,15 @@ encodeRemovedFromProjectIssueEvent rec =
           )
         , ( "created_at", Json.Encode.string rec.createdAt )
         , ( "performed_via_github_app"
-          , Debug.todo "decode anyOf" rec.performedViaGithubApp
+          , (\nullableValue ->
+                case nullableValue of
+                    Null ->
+                        Json.Encode.null
+
+                    Present value ->
+                        encodeIntegration value
+            )
+                rec.performedViaGithubApp
           )
         , ( "project_card"
           , (\rec0 ->
@@ -16114,7 +16399,7 @@ type alias ReleaseAsset =
     , downloadCount : Int
     , createdAt : String
     , updatedAt : String
-    , uploader : Debug.Todo
+    , uploader : Nullable SimpleUser
     }
 
 
@@ -16201,7 +16486,17 @@ encodeReleaseAsset rec =
         , ( "download_count", Json.Encode.int rec.downloadCount )
         , ( "created_at", Json.Encode.string rec.createdAt )
         , ( "updated_at", Json.Encode.string rec.updatedAt )
-        , ( "uploader", Debug.todo "decode anyOf" rec.uploader )
+        , ( "uploader"
+          , (\nullableValue ->
+                case nullableValue of
+                    Null ->
+                        Json.Encode.null
+
+                    Present value ->
+                        encodeSimpleUser value
+            )
+                rec.uploader
+          )
         ]
 
 
@@ -16531,7 +16826,7 @@ encodeReactionRollup rec =
 type alias Reaction =
     { id : Int
     , nodeId : String
-    , user : Debug.Todo
+    , user : Nullable SimpleUser
     , content : String
     , createdAt : String
     }
@@ -16571,7 +16866,17 @@ encodeReaction rec =
     Json.Encode.object
         [ ( "id", Json.Encode.int rec.id )
         , ( "node_id", Json.Encode.string rec.nodeId )
-        , ( "user", Debug.todo "decode anyOf" rec.user )
+        , ( "user"
+          , (\nullableValue ->
+                case nullableValue of
+                    Null ->
+                        Json.Encode.null
+
+                    Present value ->
+                        encodeSimpleUser value
+            )
+                rec.user
+          )
         , ( "content", Json.Encode.string rec.content )
         , ( "created_at", Json.Encode.string rec.createdAt )
         ]
@@ -16723,7 +17028,7 @@ type alias PullRequestSimple =
     , state : String
     , locked : Bool
     , title : String
-    , user : Debug.Todo
+    , user : Nullable SimpleUser
     , body : Nullable String
     , labels :
         List { id : Int
@@ -16734,14 +17039,14 @@ type alias PullRequestSimple =
         , color : String
         , default : Bool
         }
-    , milestone : Debug.Todo
+    , milestone : Nullable Milestone
     , activeLockReason : Nullable String
     , createdAt : String
     , updatedAt : String
     , closedAt : Nullable String
     , mergedAt : Nullable String
     , mergeCommitSha : Nullable String
-    , assignee : Debug.Todo
+    , assignee : Nullable SimpleUser
     , assignees : Nullable (List SimpleUser)
     , requestedReviewers : Nullable (List SimpleUser)
     , requestedTeams : Nullable (List Team)
@@ -16750,14 +17055,14 @@ type alias PullRequestSimple =
         , ref : String
         , repo : Repository
         , sha : String
-        , user : Debug.Todo
+        , user : Nullable SimpleUser
         }
     , base :
         { label : String
         , ref : String
         , repo : Repository
         , sha : String
-        , user : Debug.Todo
+        , user : Nullable SimpleUser
         }
     , links :
         { comments : Link
@@ -17106,7 +17411,17 @@ encodePullRequestSimple rec =
         , ( "state", Json.Encode.string rec.state )
         , ( "locked", Json.Encode.bool rec.locked )
         , ( "title", Json.Encode.string rec.title )
-        , ( "user", Debug.todo "decode anyOf" rec.user )
+        , ( "user"
+          , (\nullableValue ->
+                case nullableValue of
+                    Null ->
+                        Json.Encode.null
+
+                    Present value ->
+                        encodeSimpleUser value
+            )
+                rec.user
+          )
         , ( "body"
           , (\nullableValue ->
                 case nullableValue of
@@ -17133,7 +17448,17 @@ encodePullRequestSimple rec =
                 )
                 rec.labels
           )
-        , ( "milestone", Debug.todo "decode anyOf" rec.milestone )
+        , ( "milestone"
+          , (\nullableValue ->
+                case nullableValue of
+                    Null ->
+                        Json.Encode.null
+
+                    Present value ->
+                        encodeMilestone value
+            )
+                rec.milestone
+          )
         , ( "active_lock_reason"
           , (\nullableValue ->
                 case nullableValue of
@@ -17180,7 +17505,17 @@ encodePullRequestSimple rec =
             )
                 rec.mergeCommitSha
           )
-        , ( "assignee", Debug.todo "decode anyOf" rec.assignee )
+        , ( "assignee"
+          , (\nullableValue ->
+                case nullableValue of
+                    Null ->
+                        Json.Encode.null
+
+                    Present value ->
+                        encodeSimpleUser value
+            )
+                rec.assignee
+          )
         , ( "assignees"
           , (\nullableValue ->
                 case nullableValue of
@@ -17221,7 +17556,17 @@ encodePullRequestSimple rec =
                     , ( "ref", Json.Encode.string rec0.ref )
                     , ( "repo", encodeRepository rec0.repo )
                     , ( "sha", Json.Encode.string rec0.sha )
-                    , ( "user", Debug.todo "decode anyOf" rec0.user )
+                    , ( "user"
+                      , (\nullableValue ->
+                            case nullableValue of
+                                Null ->
+                                    Json.Encode.null
+
+                                Present value ->
+                                    encodeSimpleUser value
+                        )
+                            rec0.user
+                      )
                     ]
             )
                 rec.head
@@ -17233,7 +17578,17 @@ encodePullRequestSimple rec =
                     , ( "ref", Json.Encode.string rec0.ref )
                     , ( "repo", encodeRepository rec0.repo )
                     , ( "sha", Json.Encode.string rec0.sha )
-                    , ( "user", Debug.todo "decode anyOf" rec0.user )
+                    , ( "user"
+                      , (\nullableValue ->
+                            case nullableValue of
+                                Null ->
+                                    Json.Encode.null
+
+                                Present value ->
+                                    encodeSimpleUser value
+                        )
+                            rec0.user
+                      )
                     ]
             )
                 rec.base
@@ -17586,7 +17941,7 @@ encodePullRequestReviewComment rec =
 type alias PullRequestReview =
     { id : Int
     , nodeId : String
-    , user : Debug.Todo
+    , user : Nullable SimpleUser
     , body : String
     , state : String
     , htmlUrl : String
@@ -17683,7 +18038,17 @@ encodePullRequestReview rec =
     Json.Encode.object
         [ ( "id", Json.Encode.int rec.id )
         , ( "node_id", Json.Encode.string rec.nodeId )
-        , ( "user", Debug.todo "decode anyOf" rec.user )
+        , ( "user"
+          , (\nullableValue ->
+                case nullableValue of
+                    Null ->
+                        Json.Encode.null
+
+                    Present value ->
+                        encodeSimpleUser value
+            )
+                rec.user
+          )
         , ( "body", Json.Encode.string rec.body )
         , ( "state", Json.Encode.string rec.state )
         , ( "html_url", Json.Encode.string rec.htmlUrl )
@@ -17911,7 +18276,7 @@ type alias PullRequest =
     , state : String
     , locked : Bool
     , title : String
-    , user : Debug.Todo
+    , user : Nullable SimpleUser
     , body : Nullable String
     , labels :
         List { id : Int
@@ -17922,14 +18287,14 @@ type alias PullRequest =
         , color : String
         , default : Bool
         }
-    , milestone : Debug.Todo
+    , milestone : Nullable Milestone
     , activeLockReason : Nullable String
     , createdAt : String
     , updatedAt : String
     , closedAt : Nullable String
     , mergedAt : Nullable String
     , mergeCommitSha : Nullable String
-    , assignee : Debug.Todo
+    , assignee : Nullable SimpleUser
     , assignees : Nullable (List SimpleUser)
     , requestedReviewers : Nullable (List SimpleUser)
     , requestedTeams : Nullable (List TeamSimple)
@@ -18175,7 +18540,7 @@ type alias PullRequest =
             , allowMergeCommit : Bool
             , allowSquashMerge : Bool
             , allowRebaseMerge : Bool
-            , license : Debug.Todo
+            , license : Nullable LicenseSimple
             , pushedAt : String
             , size : Int
             , sshUrl : String
@@ -18228,7 +18593,7 @@ type alias PullRequest =
     , mergeable : Nullable Bool
     , rebaseable : Nullable Bool
     , mergeableState : String
-    , mergedBy : Debug.Todo
+    , mergedBy : Nullable SimpleUser
     , comments : Int
     , reviewComments : Int
     , maintainerCanModify : Bool
@@ -20284,7 +20649,17 @@ encodePullRequest rec =
         , ( "state", Json.Encode.string rec.state )
         , ( "locked", Json.Encode.bool rec.locked )
         , ( "title", Json.Encode.string rec.title )
-        , ( "user", Debug.todo "decode anyOf" rec.user )
+        , ( "user"
+          , (\nullableValue ->
+                case nullableValue of
+                    Null ->
+                        Json.Encode.null
+
+                    Present value ->
+                        encodeSimpleUser value
+            )
+                rec.user
+          )
         , ( "body"
           , (\nullableValue ->
                 case nullableValue of
@@ -20321,7 +20696,17 @@ encodePullRequest rec =
                 )
                 rec.labels
           )
-        , ( "milestone", Debug.todo "decode anyOf" rec.milestone )
+        , ( "milestone"
+          , (\nullableValue ->
+                case nullableValue of
+                    Null ->
+                        Json.Encode.null
+
+                    Present value ->
+                        encodeMilestone value
+            )
+                rec.milestone
+          )
         , ( "active_lock_reason"
           , (\nullableValue ->
                 case nullableValue of
@@ -20368,7 +20753,17 @@ encodePullRequest rec =
             )
                 rec.mergeCommitSha
           )
-        , ( "assignee", Debug.todo "decode anyOf" rec.assignee )
+        , ( "assignee"
+          , (\nullableValue ->
+                case nullableValue of
+                    Null ->
+                        Json.Encode.null
+
+                    Present value ->
+                        encodeSimpleUser value
+            )
+                rec.assignee
+          )
         , ( "assignees"
           , (\nullableValue ->
                 case nullableValue of
@@ -21464,7 +21859,14 @@ encodePullRequest rec =
                                         rec_0_3_1_1_0_32_1_0_0.allowRebaseMerge
                                   )
                                 , ( "license"
-                                  , Debug.todo "decode anyOf"
+                                  , (\nullableValue ->
+                                        case nullableValue of
+                                            Null ->
+                                                Json.Encode.null
+
+                                            Present value ->
+                                                encodeLicenseSimple value
+                                    )
                                         rec_0_3_1_1_0_32_1_0_0.license
                                   )
                                 , ( "pushed_at"
@@ -21652,7 +22054,17 @@ encodePullRequest rec =
                 rec.rebaseable
           )
         , ( "mergeable_state", Json.Encode.string rec.mergeableState )
-        , ( "merged_by", Debug.todo "decode anyOf" rec.mergedBy )
+        , ( "merged_by"
+          , (\nullableValue ->
+                case nullableValue of
+                    Null ->
+                        Json.Encode.null
+
+                    Present value ->
+                        encodeSimpleUser value
+            )
+                rec.mergedBy
+          )
         , ( "comments", Json.Encode.int rec.comments )
         , ( "review_comments", Json.Encode.int rec.reviewComments )
         , ( "maintainer_can_modify", Json.Encode.bool rec.maintainerCanModify )
@@ -22723,7 +23135,7 @@ encodeProjectColumn rec =
 
 
 type alias ProjectCollaboratorPermission =
-    { permission : String, user : Debug.Todo }
+    { permission : String, user : Nullable SimpleUser }
 
 
 decodeProjectCollaboratorPermission :
@@ -22749,7 +23161,17 @@ encodeProjectCollaboratorPermission :
 encodeProjectCollaboratorPermission rec =
     Json.Encode.object
         [ ( "permission", Json.Encode.string rec.permission )
-        , ( "user", Debug.todo "decode anyOf" rec.user )
+        , ( "user"
+          , (\nullableValue ->
+                case nullableValue of
+                    Null ->
+                        Json.Encode.null
+
+                    Present value ->
+                        encodeSimpleUser value
+            )
+                rec.user
+          )
         ]
 
 
@@ -22758,7 +23180,7 @@ type alias ProjectCard =
     , id : Int
     , nodeId : String
     , note : Nullable String
-    , creator : Debug.Todo
+    , creator : Nullable SimpleUser
     , createdAt : String
     , updatedAt : String
     , archived : Bool
@@ -22846,7 +23268,17 @@ encodeProjectCard rec =
             )
                 rec.note
           )
-        , ( "creator", Debug.todo "decode anyOf" rec.creator )
+        , ( "creator"
+          , (\nullableValue ->
+                case nullableValue of
+                    Null ->
+                        Json.Encode.null
+
+                    Present value ->
+                        encodeSimpleUser value
+            )
+                rec.creator
+          )
         , ( "created_at", Json.Encode.string rec.createdAt )
         , ( "updated_at", Json.Encode.string rec.updatedAt )
         , ( "archived", Json.Encode.bool rec.archived )
@@ -22869,7 +23301,7 @@ type alias Project =
     , body : Nullable String
     , number : Int
     , state : String
-    , creator : Debug.Todo
+    , creator : Nullable SimpleUser
     , createdAt : String
     , updatedAt : String
     , organizationPermission : String
@@ -22964,7 +23396,17 @@ encodeProject rec =
           )
         , ( "number", Json.Encode.int rec.number )
         , ( "state", Json.Encode.string rec.state )
-        , ( "creator", Debug.todo "decode anyOf" rec.creator )
+        , ( "creator"
+          , (\nullableValue ->
+                case nullableValue of
+                    Null ->
+                        Json.Encode.null
+
+                    Present value ->
+                        encodeSimpleUser value
+            )
+                rec.creator
+          )
         , ( "created_at", Json.Encode.string rec.createdAt )
         , ( "updated_at", Json.Encode.string rec.updatedAt )
         , ( "organization_permission"
@@ -23492,7 +23934,10 @@ type alias PendingDeployment =
     , waitTimer : Int
     , waitTimerStartedAt : Nullable String
     , currentUserCanApprove : Bool
-    , reviewers : List { type_ : DeploymentReviewerType, reviewer : Debug.Todo }
+    , reviewers :
+        List { type_ : DeploymentReviewerType
+        , reviewer : Debug.Todo.AnyOfOneNotNullable
+        }
     }
 
 
@@ -23604,7 +24049,9 @@ encodePendingDeployment rec =
                     Json.Encode.object
                         [ ( "type", encodeDeploymentReviewerType rec0.type_ )
                         , ( "reviewer"
-                          , Debug.todo "decode anyOf" rec0.reviewer
+                          , Debug.todo
+                                "decode anyOf 2: not nullable:: { additionalItems = Nothing, additionalProperties = Nothing, allOf = Nothing, anyOf = Nothing, const = Nothing, contains = Nothing, default = Nothing, definitions = Nothing, dependencies = [], description = Nothing, enum = Nothing, examples = Nothing, exclusiveMaximum = Nothing, exclusiveMinimum = Nothing, format = Nothing, id = Nothing, items = NoItems, maxItems = Nothing, maxLength = Nothing, maxProperties = Nothing, maximum = Nothing, minItems = Nothing, minLength = Nothing, minProperties = Nothing, minimum = Nothing, multipleOf = Nothing, not = Nothing, oneOf = Nothing, pattern = Nothing, patternProperties = Nothing, properties = Nothing, propertyNames = Nothing, ref = Just \"#/components/schemas/simple-user\", required = Nothing, source = <internals>, title = Nothing, type_ = AnyType, uniqueItems = Nothing } ,,, { additionalItems = Nothing, additionalProperties = Nothing, allOf = Nothing, anyOf = Nothing, const = Nothing, contains = Nothing, default = Nothing, definitions = Nothing, dependencies = [], description = Nothing, enum = Nothing, examples = Nothing, exclusiveMaximum = Nothing, exclusiveMinimum = Nothing, format = Nothing, id = Nothing, items = NoItems, maxItems = Nothing, maxLength = Nothing, maxProperties = Nothing, maximum = Nothing, minItems = Nothing, minLength = Nothing, minProperties = Nothing, minimum = Nothing, multipleOf = Nothing, not = Nothing, oneOf = Nothing, pattern = Nothing, patternProperties = Nothing, properties = Nothing, propertyNames = Nothing, ref = Just \"#/components/schemas/team\", required = Nothing, source = <internals>, title = Nothing, type_ = AnyType, uniqueItems = Nothing }"
+                                rec0.reviewer
                           )
                         ]
                 )
@@ -24780,7 +25227,7 @@ type alias PageBuild =
     { url : String
     , status : String
     , error : { message : Nullable String }
-    , pusher : Debug.Todo
+    , pusher : Nullable SimpleUser
     , commit : String
     , duration : Int
     , createdAt : String
@@ -24862,7 +25309,17 @@ encodePageBuild rec =
             )
                 rec.error
           )
-        , ( "pusher", Debug.todo "decode anyOf" rec.pusher )
+        , ( "pusher"
+          , (\nullableValue ->
+                case nullableValue of
+                    Null ->
+                        Json.Encode.null
+
+                    Present value ->
+                        encodeSimpleUser value
+            )
+                rec.pusher
+          )
         , ( "commit", Json.Encode.string rec.commit )
         , ( "duration", Json.Encode.int rec.duration )
         , ( "created_at", Json.Encode.string rec.createdAt )
@@ -25222,8 +25679,8 @@ type alias Package =
     , htmlUrl : String
     , versionCount : Int
     , visibility : String
-    , owner : Debug.Todo
-    , repository : Debug.Todo
+    , owner : Nullable SimpleUser
+    , repository : Nullable MinimalRepository
     , createdAt : String
     , updatedAt : String
     }
@@ -25292,8 +25749,28 @@ encodePackage rec =
         , ( "html_url", Json.Encode.string rec.htmlUrl )
         , ( "version_count", Json.Encode.int rec.versionCount )
         , ( "visibility", Json.Encode.string rec.visibility )
-        , ( "owner", Debug.todo "decode anyOf" rec.owner )
-        , ( "repository", Debug.todo "decode anyOf" rec.repository )
+        , ( "owner"
+          , (\nullableValue ->
+                case nullableValue of
+                    Null ->
+                        Json.Encode.null
+
+                    Present value ->
+                        encodeSimpleUser value
+            )
+                rec.owner
+          )
+        , ( "repository"
+          , (\nullableValue ->
+                case nullableValue of
+                    Null ->
+                        Json.Encode.null
+
+                    Present value ->
+                        encodeMinimalRepository value
+            )
+                rec.repository
+          )
         , ( "created_at", Json.Encode.string rec.createdAt )
         , ( "updated_at", Json.Encode.string rec.updatedAt )
         ]
@@ -25395,20 +25872,20 @@ encodeOrganizationSimple rec =
 type alias OrganizationSecretScanningAlert =
     { number : AlertNumber
     , createdAt : AlertCreatedAt
-    , updatedAt : Debug.Todo
+    , updatedAt : Nullable AlertUpdatedAt
     , url : AlertUrl
     , htmlUrl : AlertHtmlUrl
     , locationsUrl : String
     , state : SecretScanningAlertState
     , resolution : SecretScanningAlertResolution
     , resolvedAt : Nullable String
-    , resolvedBy : Debug.Todo
+    , resolvedBy : Nullable SimpleUser
     , secretType : String
     , secretTypeDisplayName : String
     , secret : String
     , repository : SimpleRepository
     , pushProtectionBypassed : Nullable Bool
-    , pushProtectionBypassedBy : Debug.Todo
+    , pushProtectionBypassedBy : Nullable SimpleUser
     , pushProtectionBypassedAt : Nullable String
     , resolutionComment : Nullable String
     }
@@ -25531,7 +26008,17 @@ encodeOrganizationSecretScanningAlert rec =
     Json.Encode.object
         [ ( "number", encodeAlertNumber rec.number )
         , ( "created_at", encodeAlertCreatedAt rec.createdAt )
-        , ( "updated_at", Debug.todo "decode anyOf" rec.updatedAt )
+        , ( "updated_at"
+          , (\nullableValue ->
+                case nullableValue of
+                    Null ->
+                        Json.Encode.null
+
+                    Present value ->
+                        encodeAlertUpdatedAt value
+            )
+                rec.updatedAt
+          )
         , ( "url", encodeAlertUrl rec.url )
         , ( "html_url", encodeAlertHtmlUrl rec.htmlUrl )
         , ( "locations_url", Json.Encode.string rec.locationsUrl )
@@ -25548,7 +26035,17 @@ encodeOrganizationSecretScanningAlert rec =
             )
                 rec.resolvedAt
           )
-        , ( "resolved_by", Debug.todo "decode anyOf" rec.resolvedBy )
+        , ( "resolved_by"
+          , (\nullableValue ->
+                case nullableValue of
+                    Null ->
+                        Json.Encode.null
+
+                    Present value ->
+                        encodeSimpleUser value
+            )
+                rec.resolvedBy
+          )
         , ( "secret_type", Json.Encode.string rec.secretType )
         , ( "secret_type_display_name"
           , Json.Encode.string rec.secretTypeDisplayName
@@ -25567,7 +26064,15 @@ encodeOrganizationSecretScanningAlert rec =
                 rec.pushProtectionBypassed
           )
         , ( "push_protection_bypassed_by"
-          , Debug.todo "decode anyOf" rec.pushProtectionBypassedBy
+          , (\nullableValue ->
+                case nullableValue of
+                    Null ->
+                        Json.Encode.null
+
+                    Present value ->
+                        encodeSimpleUser value
+            )
+                rec.pushProtectionBypassedBy
           )
         , ( "push_protection_bypassed_at"
           , (\nullableValue ->
@@ -26510,7 +27015,7 @@ type alias OrgMembership =
     , role : String
     , organizationUrl : String
     , organization : OrganizationSimple
-    , user : Debug.Todo
+    , user : Nullable SimpleUser
     , permissions : { canCreateRepository : Bool }
     }
 
@@ -26570,7 +27075,17 @@ encodeOrgMembership rec =
         , ( "role", Json.Encode.string rec.role )
         , ( "organization_url", Json.Encode.string rec.organizationUrl )
         , ( "organization", encodeOrganizationSimple rec.organization )
-        , ( "user", Debug.todo "decode anyOf" rec.user )
+        , ( "user"
+          , (\nullableValue ->
+                case nullableValue of
+                    Null ->
+                        Json.Encode.null
+
+                    Present value ->
+                        encodeSimpleUser value
+            )
+                rec.user
+          )
         , ( "permissions"
           , (\rec0 ->
                 Json.Encode.object
@@ -26698,7 +27213,7 @@ type alias MovedColumnInProjectIssueEvent =
     , commitId : Nullable String
     , commitUrl : Nullable String
     , createdAt : String
-    , performedViaGithubApp : Debug.Todo
+    , performedViaGithubApp : Nullable Integration
     , projectCard :
         { id : Int
         , url : String
@@ -26828,7 +27343,15 @@ encodeMovedColumnInProjectIssueEvent rec =
           )
         , ( "created_at", Json.Encode.string rec.createdAt )
         , ( "performed_via_github_app"
-          , Debug.todo "decode anyOf" rec.performedViaGithubApp
+          , (\nullableValue ->
+                case nullableValue of
+                    Null ->
+                        Json.Encode.null
+
+                    Present value ->
+                        encodeIntegration value
+            )
+                rec.performedViaGithubApp
           )
         , ( "project_card"
           , (\rec0 ->
@@ -27507,7 +28030,7 @@ type alias MilestonedIssueEvent =
     , commitId : Nullable String
     , commitUrl : Nullable String
     , createdAt : String
-    , performedViaGithubApp : Debug.Todo
+    , performedViaGithubApp : Nullable Integration
     , milestone : { title : String }
     }
 
@@ -27606,7 +28129,15 @@ encodeMilestonedIssueEvent rec =
           )
         , ( "created_at", Json.Encode.string rec.createdAt )
         , ( "performed_via_github_app"
-          , Debug.todo "decode anyOf" rec.performedViaGithubApp
+          , (\nullableValue ->
+                case nullableValue of
+                    Null ->
+                        Json.Encode.null
+
+                    Present value ->
+                        encodeIntegration value
+            )
+                rec.performedViaGithubApp
           )
         , ( "milestone"
           , (\rec0 ->
@@ -27628,7 +28159,7 @@ type alias Milestone =
     , state : String
     , title : String
     , description : Nullable String
-    , creator : Debug.Todo
+    , creator : Nullable SimpleUser
     , openIssues : Int
     , closedIssues : Int
     , createdAt : String
@@ -27741,7 +28272,17 @@ encodeMilestone rec =
             )
                 rec.description
           )
-        , ( "creator", Debug.todo "decode anyOf" rec.creator )
+        , ( "creator"
+          , (\nullableValue ->
+                case nullableValue of
+                    Null ->
+                        Json.Encode.null
+
+                    Present value ->
+                        encodeSimpleUser value
+            )
+                rec.creator
+          )
         , ( "open_issues", Json.Encode.int rec.openIssues )
         , ( "closed_issues", Json.Encode.int rec.closedIssues )
         , ( "created_at", Json.Encode.string rec.createdAt )
@@ -27773,7 +28314,7 @@ encodeMilestone rec =
 
 type alias Migration =
     { id : Int
-    , owner : Debug.Todo
+    , owner : Nullable SimpleUser
     , guid : String
     , state : String
     , lockRepositories : Bool
@@ -27867,7 +28408,17 @@ encodeMigration : Migration -> Json.Encode.Value
 encodeMigration rec =
     Json.Encode.object
         [ ( "id", Json.Encode.int rec.id )
-        , ( "owner", Debug.todo "decode anyOf" rec.owner )
+        , ( "owner"
+          , (\nullableValue ->
+                case nullableValue of
+                    Null ->
+                        Json.Encode.null
+
+                    Present value ->
+                        encodeSimpleUser value
+            )
+                rec.owner
+          )
         , ( "guid", Json.Encode.string rec.guid )
         , ( "state", Json.Encode.string rec.state )
         , ( "lock_repositories", Json.Encode.bool rec.lockRepositories )
@@ -27885,7 +28436,7 @@ encodeMigration rec =
         , ( "updated_at", Json.Encode.string rec.updatedAt )
         , ( "node_id", Json.Encode.string rec.nodeId )
         , ( "archive_url", Json.Encode.string rec.archiveUrl )
-        , ( "exclude", Json.Encode.list Json.Decode.value rec.exclude )
+        , ( "exclude", Json.Encode.list identity rec.exclude )
         ]
 
 
@@ -28438,7 +28989,7 @@ type alias LockedIssueEvent =
     , commitId : Nullable String
     , commitUrl : Nullable String
     , createdAt : String
-    , performedViaGithubApp : Debug.Todo
+    , performedViaGithubApp : Nullable Integration
     , lockReason : Nullable String
     }
 
@@ -28538,7 +29089,15 @@ encodeLockedIssueEvent rec =
           )
         , ( "created_at", Json.Encode.string rec.createdAt )
         , ( "performed_via_github_app"
-          , Debug.todo "decode anyOf" rec.performedViaGithubApp
+          , (\nullableValue ->
+                case nullableValue of
+                    Null ->
+                        Json.Encode.null
+
+                    Present value ->
+                        encodeIntegration value
+            )
+                rec.performedViaGithubApp
           )
         , ( "lock_reason"
           , (\nullableValue ->
@@ -28685,7 +29244,7 @@ type alias LicenseContent =
     , content : String
     , encoding : String
     , links : { git : Nullable String, html : Nullable String, self : String }
-    , license : Debug.Todo
+    , license : Nullable LicenseSimple
     }
 
 
@@ -28860,7 +29419,17 @@ encodeLicenseContent rec =
             )
                 rec.links
           )
-        , ( "license", Debug.todo "decode anyOf" rec.license )
+        , ( "license"
+          , (\nullableValue ->
+                case nullableValue of
+                    Null ->
+                        Json.Encode.null
+
+                    Present value ->
+                        encodeLicenseSimple value
+            )
+                rec.license
+          )
         ]
 
 
@@ -29012,7 +29581,7 @@ type alias LabeledIssueEvent =
     , commitId : Nullable String
     , commitUrl : Nullable String
     , createdAt : String
-    , performedViaGithubApp : Debug.Todo
+    , performedViaGithubApp : Nullable Integration
     , label : { name : String, color : String }
     }
 
@@ -29114,7 +29683,15 @@ encodeLabeledIssueEvent rec =
           )
         , ( "created_at", Json.Encode.string rec.createdAt )
         , ( "performed_via_github_app"
-          , Debug.todo "decode anyOf" rec.performedViaGithubApp
+          , (\nullableValue ->
+                case nullableValue of
+                    Null ->
+                        Json.Encode.null
+
+                    Present value ->
+                        encodeIntegration value
+            )
+                rec.performedViaGithubApp
           )
         , ( "label"
           , (\rec0 ->
@@ -29689,7 +30266,7 @@ type alias IssueSearchResultItem =
     , locked : Bool
     , activeLockReason : Nullable String
     , assignees : Nullable (List SimpleUser)
-    , user : Debug.Todo
+    , user : Nullable SimpleUser
     , labels :
         List { id : Int
         , nodeId : String
@@ -29701,8 +30278,8 @@ type alias IssueSearchResultItem =
         }
     , state : String
     , stateReason : Nullable String
-    , assignee : Debug.Todo
-    , milestone : Debug.Todo
+    , assignee : Nullable SimpleUser
+    , milestone : Nullable Milestone
     , comments : Int
     , createdAt : String
     , updatedAt : String
@@ -29723,7 +30300,7 @@ type alias IssueSearchResultItem =
     , bodyHtml : String
     , bodyText : String
     , timelineUrl : String
-    , performedViaGithubApp : Debug.Todo
+    , performedViaGithubApp : Nullable Integration
     , reactions : ReactionRollup
     }
 
@@ -30025,7 +30602,17 @@ encodeIssueSearchResultItem rec =
             )
                 rec.assignees
           )
-        , ( "user", Debug.todo "decode anyOf" rec.user )
+        , ( "user"
+          , (\nullableValue ->
+                case nullableValue of
+                    Null ->
+                        Json.Encode.null
+
+                    Present value ->
+                        encodeSimpleUser value
+            )
+                rec.user
+          )
         , ( "labels"
           , Json.Encode.list
                 (\rec0 ->
@@ -30063,8 +30650,28 @@ encodeIssueSearchResultItem rec =
             )
                 rec.stateReason
           )
-        , ( "assignee", Debug.todo "decode anyOf" rec.assignee )
-        , ( "milestone", Debug.todo "decode anyOf" rec.milestone )
+        , ( "assignee"
+          , (\nullableValue ->
+                case nullableValue of
+                    Null ->
+                        Json.Encode.null
+
+                    Present value ->
+                        encodeSimpleUser value
+            )
+                rec.assignee
+          )
+        , ( "milestone"
+          , (\nullableValue ->
+                case nullableValue of
+                    Null ->
+                        Json.Encode.null
+
+                    Present value ->
+                        encodeMilestone value
+            )
+                rec.milestone
+          )
         , ( "comments", Json.Encode.int rec.comments )
         , ( "created_at", Json.Encode.string rec.createdAt )
         , ( "updated_at", Json.Encode.string rec.updatedAt )
@@ -30153,7 +30760,15 @@ encodeIssueSearchResultItem rec =
         , ( "body_text", Json.Encode.string rec.bodyText )
         , ( "timeline_url", Json.Encode.string rec.timelineUrl )
         , ( "performed_via_github_app"
-          , Debug.todo "decode anyOf" rec.performedViaGithubApp
+          , (\nullableValue ->
+                case nullableValue of
+                    Null ->
+                        Json.Encode.null
+
+                    Present value ->
+                        encodeIntegration value
+            )
+                rec.performedViaGithubApp
           )
         , ( "reactions", encodeReactionRollup rec.reactions )
         ]
@@ -30297,7 +30912,7 @@ encodeIssueEventLabel rec =
 
 
 type alias IssueEventForIssue =
-    Debug.Todo
+    Debug.Todo.AnyOfNotExactly2Items
 
 
 decodeIssueEventForIssue : Json.Decode.Decoder IssueEventForIssue
@@ -30307,7 +30922,7 @@ decodeIssueEventForIssue =
 
 encodeIssueEventForIssue : IssueEventForIssue -> Json.Encode.Value
 encodeIssueEventForIssue =
-    Debug.todo "decode anyOf"
+    Debug.todo "decode anyOf: not exactly 2 items"
 
 
 type alias IssueEventDismissedReview =
@@ -30386,17 +31001,17 @@ type alias IssueEvent =
     { id : Int
     , nodeId : String
     , url : String
-    , actor : Debug.Todo
+    , actor : Nullable SimpleUser
     , event : String
     , commitId : Nullable String
     , commitUrl : Nullable String
     , createdAt : String
-    , issue : Debug.Todo
+    , issue : Nullable Issue
     , label : IssueEventLabel
-    , assignee : Debug.Todo
-    , assigner : Debug.Todo
-    , reviewRequester : Debug.Todo
-    , requestedReviewer : Debug.Todo
+    , assignee : Nullable SimpleUser
+    , assigner : Nullable SimpleUser
+    , reviewRequester : Nullable SimpleUser
+    , requestedReviewer : Nullable SimpleUser
     , requestedTeam : Team
     , dismissedReview : IssueEventDismissedReview
     , milestone : IssueEventMilestone
@@ -30404,7 +31019,7 @@ type alias IssueEvent =
     , rename : IssueEventRename
     , authorAssociation : AuthorAssociation
     , lockReason : Nullable String
-    , performedViaGithubApp : Debug.Todo
+    , performedViaGithubApp : Nullable Integration
     }
 
 
@@ -30559,7 +31174,17 @@ encodeIssueEvent rec =
         [ ( "id", Json.Encode.int rec.id )
         , ( "node_id", Json.Encode.string rec.nodeId )
         , ( "url", Json.Encode.string rec.url )
-        , ( "actor", Debug.todo "decode anyOf" rec.actor )
+        , ( "actor"
+          , (\nullableValue ->
+                case nullableValue of
+                    Null ->
+                        Json.Encode.null
+
+                    Present value ->
+                        encodeSimpleUser value
+            )
+                rec.actor
+          )
         , ( "event", Json.Encode.string rec.event )
         , ( "commit_id"
           , (\nullableValue ->
@@ -30584,13 +31209,61 @@ encodeIssueEvent rec =
                 rec.commitUrl
           )
         , ( "created_at", Json.Encode.string rec.createdAt )
-        , ( "issue", Debug.todo "decode anyOf" rec.issue )
+        , ( "issue"
+          , (\nullableValue ->
+                case nullableValue of
+                    Null ->
+                        Json.Encode.null
+
+                    Present value ->
+                        encodeIssue value
+            )
+                rec.issue
+          )
         , ( "label", encodeIssueEventLabel rec.label )
-        , ( "assignee", Debug.todo "decode anyOf" rec.assignee )
-        , ( "assigner", Debug.todo "decode anyOf" rec.assigner )
-        , ( "review_requester", Debug.todo "decode anyOf" rec.reviewRequester )
+        , ( "assignee"
+          , (\nullableValue ->
+                case nullableValue of
+                    Null ->
+                        Json.Encode.null
+
+                    Present value ->
+                        encodeSimpleUser value
+            )
+                rec.assignee
+          )
+        , ( "assigner"
+          , (\nullableValue ->
+                case nullableValue of
+                    Null ->
+                        Json.Encode.null
+
+                    Present value ->
+                        encodeSimpleUser value
+            )
+                rec.assigner
+          )
+        , ( "review_requester"
+          , (\nullableValue ->
+                case nullableValue of
+                    Null ->
+                        Json.Encode.null
+
+                    Present value ->
+                        encodeSimpleUser value
+            )
+                rec.reviewRequester
+          )
         , ( "requested_reviewer"
-          , Debug.todo "decode anyOf" rec.requestedReviewer
+          , (\nullableValue ->
+                case nullableValue of
+                    Null ->
+                        Json.Encode.null
+
+                    Present value ->
+                        encodeSimpleUser value
+            )
+                rec.requestedReviewer
           )
         , ( "requested_team", encodeTeam rec.requestedTeam )
         , ( "dismissed_review"
@@ -30614,7 +31287,15 @@ encodeIssueEvent rec =
                 rec.lockReason
           )
         , ( "performed_via_github_app"
-          , Debug.todo "decode anyOf" rec.performedViaGithubApp
+          , (\nullableValue ->
+                case nullableValue of
+                    Null ->
+                        Json.Encode.null
+
+                    Present value ->
+                        encodeIntegration value
+            )
+                rec.performedViaGithubApp
           )
         ]
 
@@ -30627,12 +31308,12 @@ type alias IssueComment =
     , bodyText : String
     , bodyHtml : String
     , htmlUrl : String
-    , user : Debug.Todo
+    , user : Nullable SimpleUser
     , createdAt : String
     , updatedAt : String
     , issueUrl : String
     , authorAssociation : AuthorAssociation
-    , performedViaGithubApp : Debug.Todo
+    , performedViaGithubApp : Nullable Integration
     , reactions : ReactionRollup
     }
 
@@ -30709,7 +31390,17 @@ encodeIssueComment rec =
         , ( "body_text", Json.Encode.string rec.bodyText )
         , ( "body_html", Json.Encode.string rec.bodyHtml )
         , ( "html_url", Json.Encode.string rec.htmlUrl )
-        , ( "user", Debug.todo "decode anyOf" rec.user )
+        , ( "user"
+          , (\nullableValue ->
+                case nullableValue of
+                    Null ->
+                        Json.Encode.null
+
+                    Present value ->
+                        encodeSimpleUser value
+            )
+                rec.user
+          )
         , ( "created_at", Json.Encode.string rec.createdAt )
         , ( "updated_at", Json.Encode.string rec.updatedAt )
         , ( "issue_url", Json.Encode.string rec.issueUrl )
@@ -30717,7 +31408,15 @@ encodeIssueComment rec =
           , encodeAuthorAssociation rec.authorAssociation
           )
         , ( "performed_via_github_app"
-          , Debug.todo "decode anyOf" rec.performedViaGithubApp
+          , (\nullableValue ->
+                case nullableValue of
+                    Null ->
+                        Json.Encode.null
+
+                    Present value ->
+                        encodeIntegration value
+            )
+                rec.performedViaGithubApp
           )
         , ( "reactions", encodeReactionRollup rec.reactions )
         ]
@@ -30737,11 +31436,11 @@ type alias Issue =
     , stateReason : Nullable String
     , title : String
     , body : Nullable String
-    , user : Debug.Todo
+    , user : Nullable SimpleUser
     , labels : List Json.Encode.Value
-    , assignee : Debug.Todo
+    , assignee : Nullable SimpleUser
     , assignees : Nullable (List SimpleUser)
-    , milestone : Debug.Todo
+    , milestone : Nullable Milestone
     , locked : Bool
     , activeLockReason : Nullable String
     , comments : Int
@@ -30756,12 +31455,12 @@ type alias Issue =
     , createdAt : String
     , updatedAt : String
     , draft : Bool
-    , closedBy : Debug.Todo
+    , closedBy : Nullable SimpleUser
     , bodyHtml : String
     , bodyText : String
     , timelineUrl : String
     , repository : Repository
-    , performedViaGithubApp : Debug.Todo
+    , performedViaGithubApp : Nullable Integration
     , authorAssociation : AuthorAssociation
     , reactions : ReactionRollup
     }
@@ -31038,9 +31737,29 @@ encodeIssue rec =
             )
                 rec.body
           )
-        , ( "user", Debug.todo "decode anyOf" rec.user )
-        , ( "labels", Json.Encode.list Json.Decode.value rec.labels )
-        , ( "assignee", Debug.todo "decode anyOf" rec.assignee )
+        , ( "user"
+          , (\nullableValue ->
+                case nullableValue of
+                    Null ->
+                        Json.Encode.null
+
+                    Present value ->
+                        encodeSimpleUser value
+            )
+                rec.user
+          )
+        , ( "labels", Json.Encode.list identity rec.labels )
+        , ( "assignee"
+          , (\nullableValue ->
+                case nullableValue of
+                    Null ->
+                        Json.Encode.null
+
+                    Present value ->
+                        encodeSimpleUser value
+            )
+                rec.assignee
+          )
         , ( "assignees"
           , (\nullableValue ->
                 case nullableValue of
@@ -31052,7 +31771,17 @@ encodeIssue rec =
             )
                 rec.assignees
           )
-        , ( "milestone", Debug.todo "decode anyOf" rec.milestone )
+        , ( "milestone"
+          , (\nullableValue ->
+                case nullableValue of
+                    Null ->
+                        Json.Encode.null
+
+                    Present value ->
+                        encodeMilestone value
+            )
+                rec.milestone
+          )
         , ( "locked", Json.Encode.bool rec.locked )
         , ( "active_lock_reason"
           , (\nullableValue ->
@@ -31142,13 +31871,31 @@ encodeIssue rec =
         , ( "created_at", Json.Encode.string rec.createdAt )
         , ( "updated_at", Json.Encode.string rec.updatedAt )
         , ( "draft", Json.Encode.bool rec.draft )
-        , ( "closed_by", Debug.todo "decode anyOf" rec.closedBy )
+        , ( "closed_by"
+          , (\nullableValue ->
+                case nullableValue of
+                    Null ->
+                        Json.Encode.null
+
+                    Present value ->
+                        encodeSimpleUser value
+            )
+                rec.closedBy
+          )
         , ( "body_html", Json.Encode.string rec.bodyHtml )
         , ( "body_text", Json.Encode.string rec.bodyText )
         , ( "timeline_url", Json.Encode.string rec.timelineUrl )
         , ( "repository", encodeRepository rec.repository )
         , ( "performed_via_github_app"
-          , Debug.todo "decode anyOf" rec.performedViaGithubApp
+          , (\nullableValue ->
+                case nullableValue of
+                    Null ->
+                        Json.Encode.null
+
+                    Present value ->
+                        encodeIntegration value
+            )
+                rec.performedViaGithubApp
           )
         , ( "author_association"
           , encodeAuthorAssociation rec.authorAssociation
@@ -31237,7 +31984,7 @@ type alias Integration =
     { id : Int
     , slug : String
     , nodeId : String
-    , owner : Debug.Todo
+    , owner : Nullable SimpleUser
     , name : String
     , description : Nullable String
     , externalUrl : String
@@ -31366,7 +32113,17 @@ encodeIntegration rec =
         [ ( "id", Json.Encode.int rec.id )
         , ( "slug", Json.Encode.string rec.slug )
         , ( "node_id", Json.Encode.string rec.nodeId )
-        , ( "owner", Debug.todo "decode anyOf" rec.owner )
+        , ( "owner"
+          , (\nullableValue ->
+                case nullableValue of
+                    Null ->
+                        Json.Encode.null
+
+                    Present value ->
+                        encodeSimpleUser value
+            )
+                rec.owner
+          )
         , ( "name", Json.Encode.string rec.name )
         , ( "description"
           , (\nullableValue ->
@@ -31500,7 +32257,7 @@ type alias Installation =
     , hasMultipleSingleFiles : Bool
     , singleFilePaths : List String
     , appSlug : String
-    , suspendedBy : Debug.Todo
+    , suspendedBy : Nullable SimpleUser
     , suspendedAt : Nullable String
     , contactEmail : Nullable String
     }
@@ -31654,7 +32411,17 @@ encodeInstallation rec =
           , Json.Encode.list Json.Encode.string rec.singleFilePaths
           )
         , ( "app_slug", Json.Encode.string rec.appSlug )
-        , ( "suspended_by", Debug.todo "decode anyOf" rec.suspendedBy )
+        , ( "suspended_by"
+          , (\nullableValue ->
+                case nullableValue of
+                    Null ->
+                        Json.Encode.null
+
+                    Present value ->
+                        encodeSimpleUser value
+            )
+                rec.suspendedBy
+          )
         , ( "suspended_at"
           , (\nullableValue ->
                 case nullableValue of
@@ -32881,12 +33648,8 @@ encodeGpgKey rec =
                           )
                         , ( "key_id", Json.Encode.string rec0.keyId )
                         , ( "public_key", Json.Encode.string rec0.publicKey )
-                        , ( "emails"
-                          , Json.Encode.list Json.Decode.value rec0.emails
-                          )
-                        , ( "subkeys"
-                          , Json.Encode.list Json.Decode.value rec0.subkeys
-                          )
+                        , ( "emails", Json.Encode.list identity rec0.emails )
+                        , ( "subkeys", Json.Encode.list identity rec0.subkeys )
                         , ( "can_sign", Json.Encode.bool rec0.canSign )
                         , ( "can_encrypt_comms"
                           , Json.Encode.bool rec0.canEncryptComms
@@ -33471,9 +34234,9 @@ type alias GistSimple =
         , updatedAt : String
         , description : Nullable String
         , comments : Int
-        , user : Debug.Todo
+        , user : Nullable SimpleUser
         , commentsUrl : String
-        , owner : Debug.Todo
+        , owner : Nullable SimpleUser
         , truncated : Bool
         , forks : List Json.Encode.Value
         , history : List Json.Encode.Value
@@ -33849,24 +34612,38 @@ encodeGistSimple rec =
                                   )
                                 , ( "comments", Json.Encode.int rec0.comments )
                                 , ( "user"
-                                  , Debug.todo "decode anyOf" rec0.user
+                                  , (\nullableValue0 ->
+                                        case nullableValue0 of
+                                            Null ->
+                                                Json.Encode.null
+
+                                            Present value0 ->
+                                                encodeSimpleUser value0
+                                    )
+                                        rec0.user
                                   )
                                 , ( "comments_url"
                                   , Json.Encode.string rec0.commentsUrl
                                   )
                                 , ( "owner"
-                                  , Debug.todo "decode anyOf" rec0.owner
+                                  , (\nullableValue0 ->
+                                        case nullableValue0 of
+                                            Null ->
+                                                Json.Encode.null
+
+                                            Present value0 ->
+                                                encodeSimpleUser value0
+                                    )
+                                        rec0.owner
                                   )
                                 , ( "truncated"
                                   , Json.Encode.bool rec0.truncated
                                   )
                                 , ( "forks"
-                                  , Json.Encode.list Json.Decode.value
-                                        rec0.forks
+                                  , Json.Encode.list identity rec0.forks
                                   )
                                 , ( "history"
-                                  , Json.Encode.list Json.Decode.value
-                                        rec0.history
+                                  , Json.Encode.list identity rec0.history
                                   )
                                 ]
                         )
@@ -33916,7 +34693,7 @@ encodeGistSimple rec =
 
 
 type alias GistHistory =
-    { user : Debug.Todo
+    { user : Nullable SimpleUser
     , version : String
     , committedAt : String
     , changeStatus : { total : Int, additions : Int, deletions : Int }
@@ -33972,7 +34749,17 @@ decodeGistHistory =
 encodeGistHistory : GistHistory -> Json.Encode.Value
 encodeGistHistory rec =
     Json.Encode.object
-        [ ( "user", Debug.todo "decode anyOf" rec.user )
+        [ ( "user"
+          , (\nullableValue ->
+                case nullableValue of
+                    Null ->
+                        Json.Encode.null
+
+                    Present value ->
+                        encodeSimpleUser value
+            )
+                rec.user
+          )
         , ( "version", Json.Encode.string rec.version )
         , ( "committed_at", Json.Encode.string rec.committedAt )
         , ( "change_status"
@@ -33992,7 +34779,7 @@ encodeGistHistory rec =
 type alias GistCommit =
     { url : String
     , version : String
-    , user : Debug.Todo
+    , user : Nullable SimpleUser
     , changeStatus : { total : Int, additions : Int, deletions : Int }
     , committedAt : String
     }
@@ -34048,7 +34835,17 @@ encodeGistCommit rec =
     Json.Encode.object
         [ ( "url", Json.Encode.string rec.url )
         , ( "version", Json.Encode.string rec.version )
-        , ( "user", Debug.todo "decode anyOf" rec.user )
+        , ( "user"
+          , (\nullableValue ->
+                case nullableValue of
+                    Null ->
+                        Json.Encode.null
+
+                    Present value ->
+                        encodeSimpleUser value
+            )
+                rec.user
+          )
         , ( "change_status"
           , (\rec0 ->
                 Json.Encode.object
@@ -34068,7 +34865,7 @@ type alias GistComment =
     , nodeId : String
     , url : String
     , body : String
-    , user : Debug.Todo
+    , user : Nullable SimpleUser
     , createdAt : String
     , updatedAt : String
     , authorAssociation : AuthorAssociation
@@ -34119,7 +34916,17 @@ encodeGistComment rec =
         , ( "node_id", Json.Encode.string rec.nodeId )
         , ( "url", Json.Encode.string rec.url )
         , ( "body", Json.Encode.string rec.body )
-        , ( "user", Debug.todo "decode anyOf" rec.user )
+        , ( "user"
+          , (\nullableValue ->
+                case nullableValue of
+                    Null ->
+                        Json.Encode.null
+
+                    Present value ->
+                        encodeSimpleUser value
+            )
+                rec.user
+          )
         , ( "created_at", Json.Encode.string rec.createdAt )
         , ( "updated_at", Json.Encode.string rec.updatedAt )
         , ( "author_association"
@@ -34209,7 +35016,7 @@ type alias FullRepository =
         , pull : Bool
         }
     , allowRebaseMerge : Bool
-    , templateRepository : Debug.Todo
+    , templateRepository : Nullable Repository
     , tempCloneToken : Nullable String
     , allowSquashMerge : Bool
     , allowAutoMerge : Bool
@@ -34225,8 +35032,8 @@ type alias FullRepository =
     , webCommitSignoffRequired : Bool
     , subscribersCount : Int
     , networkCount : Int
-    , license : Debug.Todo
-    , organization : Debug.Todo
+    , license : Nullable LicenseSimple
+    , organization : Nullable SimpleUser
     , parent : Repository
     , source : Repository
     , forks : Int
@@ -34753,7 +35560,15 @@ encodeFullRepository rec =
           )
         , ( "allow_rebase_merge", Json.Encode.bool rec.allowRebaseMerge )
         , ( "template_repository"
-          , Debug.todo "decode anyOf" rec.templateRepository
+          , (\nullableValue ->
+                case nullableValue of
+                    Null ->
+                        Json.Encode.null
+
+                    Present value ->
+                        encodeRepository value
+            )
+                rec.templateRepository
           )
         , ( "temp_clone_token"
           , (\nullableValue ->
@@ -34788,8 +35603,28 @@ encodeFullRepository rec =
           )
         , ( "subscribers_count", Json.Encode.int rec.subscribersCount )
         , ( "network_count", Json.Encode.int rec.networkCount )
-        , ( "license", Debug.todo "decode anyOf" rec.license )
-        , ( "organization", Debug.todo "decode anyOf" rec.organization )
+        , ( "license"
+          , (\nullableValue ->
+                case nullableValue of
+                    Null ->
+                        Json.Encode.null
+
+                    Present value ->
+                        encodeLicenseSimple value
+            )
+                rec.license
+          )
+        , ( "organization"
+          , (\nullableValue ->
+                case nullableValue of
+                    Null ->
+                        Json.Encode.null
+
+                    Present value ->
+                        encodeSimpleUser value
+            )
+                rec.organization
+          )
         , ( "parent", encodeRepository rec.parent )
         , ( "source", encodeRepository rec.source )
         , ( "forks", Json.Encode.int rec.forks )
@@ -35741,7 +36576,7 @@ type alias Environment =
     , htmlUrl : String
     , createdAt : String
     , updatedAt : String
-    , protectionRules : List Debug.Todo
+    , protectionRules : List Debug.Todo.AnyOfNotExactly2Items
     , deploymentBranchPolicy : DeploymentBranchPolicySettings
     }
 
@@ -35798,7 +36633,8 @@ encodeEnvironment rec =
         , ( "created_at", Json.Encode.string rec.createdAt )
         , ( "updated_at", Json.Encode.string rec.updatedAt )
         , ( "protection_rules"
-          , Json.Encode.list (Debug.todo "decode anyOf") rec.protectionRules
+          , Json.Encode.list (Debug.todo "decode anyOf: not exactly 2 items")
+                rec.protectionRules
           )
         , ( "deployment_branch_policy"
           , encodeDeploymentBranchPolicySettings rec.deploymentBranchPolicy
@@ -36115,7 +36951,7 @@ type alias DeploymentStatus =
     , id : Int
     , nodeId : String
     , state : String
-    , creator : Debug.Todo
+    , creator : Nullable SimpleUser
     , description : String
     , environment : String
     , targetUrl : String
@@ -36125,7 +36961,7 @@ type alias DeploymentStatus =
     , repositoryUrl : String
     , environmentUrl : String
     , logUrl : String
-    , performedViaGithubApp : Debug.Todo
+    , performedViaGithubApp : Nullable Integration
     }
 
 
@@ -36201,7 +37037,17 @@ encodeDeploymentStatus rec =
         , ( "id", Json.Encode.int rec.id )
         , ( "node_id", Json.Encode.string rec.nodeId )
         , ( "state", Json.Encode.string rec.state )
-        , ( "creator", Debug.todo "decode anyOf" rec.creator )
+        , ( "creator"
+          , (\nullableValue ->
+                case nullableValue of
+                    Null ->
+                        Json.Encode.null
+
+                    Present value ->
+                        encodeSimpleUser value
+            )
+                rec.creator
+          )
         , ( "description", Json.Encode.string rec.description )
         , ( "environment", Json.Encode.string rec.environment )
         , ( "target_url", Json.Encode.string rec.targetUrl )
@@ -36212,7 +37058,15 @@ encodeDeploymentStatus rec =
         , ( "environment_url", Json.Encode.string rec.environmentUrl )
         , ( "log_url", Json.Encode.string rec.logUrl )
         , ( "performed_via_github_app"
-          , Debug.todo "decode anyOf" rec.performedViaGithubApp
+          , (\nullableValue ->
+                case nullableValue of
+                    Null ->
+                        Json.Encode.null
+
+                    Present value ->
+                        encodeIntegration value
+            )
+                rec.performedViaGithubApp
           )
         ]
 
@@ -36231,7 +37085,7 @@ type alias DeploymentSimple =
     , repositoryUrl : String
     , transientEnvironment : Bool
     , productionEnvironment : Bool
-    , performedViaGithubApp : Debug.Todo
+    , performedViaGithubApp : Nullable Integration
     }
 
 
@@ -36326,7 +37180,15 @@ encodeDeploymentSimple rec =
           , Json.Encode.bool rec.productionEnvironment
           )
         , ( "performed_via_github_app"
-          , Debug.todo "decode anyOf" rec.performedViaGithubApp
+          , (\nullableValue ->
+                case nullableValue of
+                    Null ->
+                        Json.Encode.null
+
+                    Present value ->
+                        encodeIntegration value
+            )
+                rec.performedViaGithubApp
           )
         ]
 
@@ -36445,14 +37307,14 @@ type alias Deployment =
     , originalEnvironment : String
     , environment : String
     , description : Nullable String
-    , creator : Debug.Todo
+    , creator : Nullable SimpleUser
     , createdAt : String
     , updatedAt : String
     , statusesUrl : String
     , repositoryUrl : String
     , transientEnvironment : Bool
     , productionEnvironment : Bool
-    , performedViaGithubApp : Debug.Todo
+    , performedViaGithubApp : Nullable Integration
     }
 
 
@@ -36544,7 +37406,7 @@ encodeDeployment rec =
         , ( "sha", Json.Encode.string rec.sha )
         , ( "ref", Json.Encode.string rec.ref )
         , ( "task", Json.Encode.string rec.task )
-        , ( "payload", Json.Decode.value rec.payload )
+        , ( "payload", identity rec.payload )
         , ( "original_environment", Json.Encode.string rec.originalEnvironment )
         , ( "environment", Json.Encode.string rec.environment )
         , ( "description"
@@ -36558,7 +37420,17 @@ encodeDeployment rec =
             )
                 rec.description
           )
-        , ( "creator", Debug.todo "decode anyOf" rec.creator )
+        , ( "creator"
+          , (\nullableValue ->
+                case nullableValue of
+                    Null ->
+                        Json.Encode.null
+
+                    Present value ->
+                        encodeSimpleUser value
+            )
+                rec.creator
+          )
         , ( "created_at", Json.Encode.string rec.createdAt )
         , ( "updated_at", Json.Encode.string rec.updatedAt )
         , ( "statuses_url", Json.Encode.string rec.statusesUrl )
@@ -36568,7 +37440,15 @@ encodeDeployment rec =
           , Json.Encode.bool rec.productionEnvironment
           )
         , ( "performed_via_github_app"
-          , Debug.todo "decode anyOf" rec.performedViaGithubApp
+          , (\nullableValue ->
+                case nullableValue of
+                    Null ->
+                        Json.Encode.null
+
+                    Present value ->
+                        encodeIntegration value
+            )
+                rec.performedViaGithubApp
           )
         ]
 
@@ -37269,7 +38149,7 @@ type alias DependabotAlert =
     , createdAt : AlertCreatedAt
     , updatedAt : AlertUpdatedAt
     , dismissedAt : AlertDismissedAt
-    , dismissedBy : Debug.Todo
+    , dismissedBy : Nullable SimpleUser
     , dismissedReason : Nullable String
     , dismissedComment : Nullable String
     , fixedAt : AlertFixedAt
@@ -37414,7 +38294,17 @@ encodeDependabotAlert rec =
         , ( "created_at", encodeAlertCreatedAt rec.createdAt )
         , ( "updated_at", encodeAlertUpdatedAt rec.updatedAt )
         , ( "dismissed_at", encodeAlertDismissedAt rec.dismissedAt )
-        , ( "dismissed_by", Debug.todo "decode anyOf" rec.dismissedBy )
+        , ( "dismissed_by"
+          , (\nullableValue ->
+                case nullableValue of
+                    Null ->
+                        Json.Encode.null
+
+                    Present value ->
+                        encodeSimpleUser value
+            )
+                rec.dismissedBy
+          )
         , ( "dismissed_reason"
           , (\nullableValue ->
                 case nullableValue of
@@ -37450,7 +38340,7 @@ type alias DemilestonedIssueEvent =
     , commitId : Nullable String
     , commitUrl : Nullable String
     , createdAt : String
-    , performedViaGithubApp : Debug.Todo
+    , performedViaGithubApp : Nullable Integration
     , milestone : { title : String }
     }
 
@@ -37549,7 +38439,15 @@ encodeDemilestonedIssueEvent rec =
           )
         , ( "created_at", Json.Encode.string rec.createdAt )
         , ( "performed_via_github_app"
-          , Debug.todo "decode anyOf" rec.performedViaGithubApp
+          , (\nullableValue ->
+                case nullableValue of
+                    Null ->
+                        Json.Encode.null
+
+                    Present value ->
+                        encodeIntegration value
+            )
+                rec.performedViaGithubApp
           )
         , ( "milestone"
           , (\rec0 ->
@@ -37714,7 +38612,7 @@ encodeConvertedNoteToIssueIssueEvent rec =
 
 
 type alias ContributorActivity =
-    { author : Debug.Todo
+    { author : Nullable SimpleUser
     , total : Int
     , weeks : List { w : Int, a : Int, d : Int, c : Int }
     }
@@ -37756,7 +38654,17 @@ decodeContributorActivity =
 encodeContributorActivity : ContributorActivity -> Json.Encode.Value
 encodeContributorActivity rec =
     Json.Encode.object
-        [ ( "author", Debug.todo "decode anyOf" rec.author )
+        [ ( "author"
+          , (\nullableValue ->
+                case nullableValue of
+                    Null ->
+                        Json.Encode.null
+
+                    Present value ->
+                        encodeSimpleUser value
+            )
+                rec.author
+          )
         , ( "total", Json.Encode.int rec.total )
         , ( "weeks"
           , Json.Encode.list
@@ -39034,13 +39942,13 @@ type alias CommunityProfile =
     , description : Nullable String
     , documentation : Nullable String
     , files :
-        { codeOfConduct : Debug.Todo
-        , codeOfConductFile : Debug.Todo
-        , license : Debug.Todo
-        , contributing : Debug.Todo
-        , readme : Debug.Todo
-        , issueTemplate : Debug.Todo
-        , pullRequestTemplate : Debug.Todo
+        { codeOfConduct : Nullable CodeOfConductSimple
+        , codeOfConductFile : Nullable CommunityHealthFile
+        , license : Nullable LicenseSimple
+        , contributing : Nullable CommunityHealthFile
+        , readme : Nullable CommunityHealthFile
+        , issueTemplate : Nullable CommunityHealthFile
+        , pullRequestTemplate : Nullable CommunityHealthFile
         }
     , updatedAt : Nullable String
     , contentReportsEnabled : Bool
@@ -39213,21 +40121,81 @@ encodeCommunityProfile rec =
           , (\rec0 ->
                 Json.Encode.object
                     [ ( "code_of_conduct"
-                      , Debug.todo "decode anyOf" rec0.codeOfConduct
+                      , (\nullableValue ->
+                            case nullableValue of
+                                Null ->
+                                    Json.Encode.null
+
+                                Present value ->
+                                    encodeCodeOfConductSimple value
+                        )
+                            rec0.codeOfConduct
                       )
                     , ( "code_of_conduct_file"
-                      , Debug.todo "decode anyOf" rec0.codeOfConductFile
+                      , (\nullableValue ->
+                            case nullableValue of
+                                Null ->
+                                    Json.Encode.null
+
+                                Present value ->
+                                    encodeCommunityHealthFile value
+                        )
+                            rec0.codeOfConductFile
                       )
-                    , ( "license", Debug.todo "decode anyOf" rec0.license )
+                    , ( "license"
+                      , (\nullableValue ->
+                            case nullableValue of
+                                Null ->
+                                    Json.Encode.null
+
+                                Present value ->
+                                    encodeLicenseSimple value
+                        )
+                            rec0.license
+                      )
                     , ( "contributing"
-                      , Debug.todo "decode anyOf" rec0.contributing
+                      , (\nullableValue ->
+                            case nullableValue of
+                                Null ->
+                                    Json.Encode.null
+
+                                Present value ->
+                                    encodeCommunityHealthFile value
+                        )
+                            rec0.contributing
                       )
-                    , ( "readme", Debug.todo "decode anyOf" rec0.readme )
+                    , ( "readme"
+                      , (\nullableValue ->
+                            case nullableValue of
+                                Null ->
+                                    Json.Encode.null
+
+                                Present value ->
+                                    encodeCommunityHealthFile value
+                        )
+                            rec0.readme
+                      )
                     , ( "issue_template"
-                      , Debug.todo "decode anyOf" rec0.issueTemplate
+                      , (\nullableValue ->
+                            case nullableValue of
+                                Null ->
+                                    Json.Encode.null
+
+                                Present value ->
+                                    encodeCommunityHealthFile value
+                        )
+                            rec0.issueTemplate
                       )
                     , ( "pull_request_template"
-                      , Debug.todo "decode anyOf" rec0.pullRequestTemplate
+                      , (\nullableValue ->
+                            case nullableValue of
+                                Null ->
+                                    Json.Encode.null
+
+                                Present value ->
+                                    encodeCommunityHealthFile value
+                        )
+                            rec0.pullRequestTemplate
                       )
                     ]
             )
@@ -39277,15 +40245,15 @@ type alias CommitSearchResultItem =
     , commentsUrl : String
     , commit :
         { author : { name : String, email : String, date : String }
-        , committer : Debug.Todo
+        , committer : Nullable GitUser
         , commentCount : Int
         , message : String
         , tree : { sha : String, url : String }
         , url : String
         , verification : Verification
         }
-    , author : Debug.Todo
-    , committer : Debug.Todo
+    , author : Nullable SimpleUser
+    , committer : Nullable GitUser
     , parents : List { url : String, htmlUrl : String, sha : String }
     , repository : MinimalRepository
     , score : Float
@@ -39456,7 +40424,17 @@ encodeCommitSearchResultItem rec =
                         )
                             rec0.author
                       )
-                    , ( "committer", Debug.todo "decode anyOf" rec0.committer )
+                    , ( "committer"
+                      , (\nullableValue ->
+                            case nullableValue of
+                                Null ->
+                                    Json.Encode.null
+
+                                Present value ->
+                                    encodeGitUser value
+                        )
+                            rec0.committer
+                      )
                     , ( "comment_count", Json.Encode.int rec0.commentCount )
                     , ( "message", Json.Encode.string rec0.message )
                     , ( "tree"
@@ -39478,8 +40456,28 @@ encodeCommitSearchResultItem rec =
             )
                 rec.commit
           )
-        , ( "author", Debug.todo "decode anyOf" rec.author )
-        , ( "committer", Debug.todo "decode anyOf" rec.committer )
+        , ( "author"
+          , (\nullableValue ->
+                case nullableValue of
+                    Null ->
+                        Json.Encode.null
+
+                    Present value ->
+                        encodeSimpleUser value
+            )
+                rec.author
+          )
+        , ( "committer"
+          , (\nullableValue ->
+                case nullableValue of
+                    Null ->
+                        Json.Encode.null
+
+                    Present value ->
+                        encodeGitUser value
+            )
+                rec.committer
+          )
         , ( "parents"
           , Json.Encode.list
                 (\rec0 ->
@@ -39590,7 +40588,7 @@ type alias CommitComment =
     , position : Nullable Int
     , line : Nullable Int
     , commitId : String
-    , user : Debug.Todo
+    , user : Nullable SimpleUser
     , createdAt : String
     , updatedAt : String
     , authorAssociation : AuthorAssociation
@@ -39716,7 +40714,17 @@ encodeCommitComment rec =
                 rec.line
           )
         , ( "commit_id", Json.Encode.string rec.commitId )
-        , ( "user", Debug.todo "decode anyOf" rec.user )
+        , ( "user"
+          , (\nullableValue ->
+                case nullableValue of
+                    Null ->
+                        Json.Encode.null
+
+                    Present value ->
+                        encodeSimpleUser value
+            )
+                rec.user
+          )
         , ( "created_at", Json.Encode.string rec.createdAt )
         , ( "updated_at", Json.Encode.string rec.updatedAt )
         , ( "author_association"
@@ -39757,15 +40765,15 @@ type alias Commit =
     , commentsUrl : String
     , commit :
         { url : String
-        , author : Debug.Todo
-        , committer : Debug.Todo
+        , author : Nullable GitUser
+        , committer : Nullable GitUser
         , message : String
         , commentCount : Int
         , tree : { sha : String, url : String }
         , verification : Verification
         }
-    , author : Debug.Todo
-    , committer : Debug.Todo
+    , author : Nullable SimpleUser
+    , committer : Nullable SimpleUser
     , parents : List { sha : String, url : String, htmlUrl : String }
     , stats : { additions : Int, deletions : Int, total : Int }
     , files : List DiffEntry
@@ -39919,8 +40927,28 @@ encodeCommit rec =
           , (\rec0 ->
                 Json.Encode.object
                     [ ( "url", Json.Encode.string rec0.url )
-                    , ( "author", Debug.todo "decode anyOf" rec0.author )
-                    , ( "committer", Debug.todo "decode anyOf" rec0.committer )
+                    , ( "author"
+                      , (\nullableValue ->
+                            case nullableValue of
+                                Null ->
+                                    Json.Encode.null
+
+                                Present value ->
+                                    encodeGitUser value
+                        )
+                            rec0.author
+                      )
+                    , ( "committer"
+                      , (\nullableValue ->
+                            case nullableValue of
+                                Null ->
+                                    Json.Encode.null
+
+                                Present value ->
+                                    encodeGitUser value
+                        )
+                            rec0.committer
+                      )
                     , ( "message", Json.Encode.string rec0.message )
                     , ( "comment_count", Json.Encode.int rec0.commentCount )
                     , ( "tree"
@@ -39941,8 +40969,28 @@ encodeCommit rec =
             )
                 rec.commit
           )
-        , ( "author", Debug.todo "decode anyOf" rec.author )
-        , ( "committer", Debug.todo "decode anyOf" rec.committer )
+        , ( "author"
+          , (\nullableValue ->
+                case nullableValue of
+                    Null ->
+                        Json.Encode.null
+
+                    Present value ->
+                        encodeSimpleUser value
+            )
+                rec.author
+          )
+        , ( "committer"
+          , (\nullableValue ->
+                case nullableValue of
+                    Null ->
+                        Json.Encode.null
+
+                    Present value ->
+                        encodeSimpleUser value
+            )
+                rec.committer
+          )
         , ( "parents"
           , Json.Encode.list
                 (\rec0 ->
@@ -40649,7 +41697,7 @@ type alias Codespace =
     , owner : SimpleUser
     , billableOwner : SimpleUser
     , repository : MinimalRepository
-    , machine : Debug.Todo
+    , machine : Nullable CodespaceMachine
     , devcontainerPath : Nullable String
     , prebuild : Nullable Bool
     , createdAt : String
@@ -40953,7 +42001,17 @@ encodeCodespace rec =
         , ( "owner", encodeSimpleUser rec.owner )
         , ( "billable_owner", encodeSimpleUser rec.billableOwner )
         , ( "repository", encodeMinimalRepository rec.repository )
-        , ( "machine", Debug.todo "decode anyOf" rec.machine )
+        , ( "machine"
+          , (\nullableValue ->
+                case nullableValue of
+                    Null ->
+                        Json.Encode.null
+
+                    Present value ->
+                        encodeCodespaceMachine value
+            )
+                rec.machine
+          )
         , ( "devcontainer_path"
           , (\nullableValue ->
                 case nullableValue of
@@ -41417,7 +42475,7 @@ type alias CodeScanningOrganizationAlertItems =
     , instancesUrl : AlertInstancesUrl
     , state : CodeScanningAlertState
     , fixedAt : AlertFixedAt
-    , dismissedBy : Debug.Todo
+    , dismissedBy : Nullable SimpleUser
     , dismissedAt : AlertDismissedAt
     , dismissedReason : CodeScanningAlertDismissedReason
     , dismissedComment : CodeScanningAlertDismissedComment
@@ -41512,7 +42570,17 @@ encodeCodeScanningOrganizationAlertItems rec =
         , ( "instances_url", encodeAlertInstancesUrl rec.instancesUrl )
         , ( "state", encodeCodeScanningAlertState rec.state )
         , ( "fixed_at", encodeAlertFixedAt rec.fixedAt )
-        , ( "dismissed_by", Debug.todo "decode anyOf" rec.dismissedBy )
+        , ( "dismissed_by"
+          , (\nullableValue ->
+                case nullableValue of
+                    Null ->
+                        Json.Encode.null
+
+                    Present value ->
+                        encodeSimpleUser value
+            )
+                rec.dismissedBy
+          )
         , ( "dismissed_at", encodeAlertDismissedAt rec.dismissedAt )
         , ( "dismissed_reason"
           , encodeCodeScanningAlertDismissedReason rec.dismissedReason
@@ -42314,7 +43382,7 @@ type alias CodeScanningAlertItems =
     , instancesUrl : AlertInstancesUrl
     , state : CodeScanningAlertState
     , fixedAt : AlertFixedAt
-    , dismissedBy : Debug.Todo
+    , dismissedBy : Nullable SimpleUser
     , dismissedAt : AlertDismissedAt
     , dismissedReason : CodeScanningAlertDismissedReason
     , dismissedComment : CodeScanningAlertDismissedComment
@@ -42403,7 +43471,17 @@ encodeCodeScanningAlertItems rec =
         , ( "instances_url", encodeAlertInstancesUrl rec.instancesUrl )
         , ( "state", encodeCodeScanningAlertState rec.state )
         , ( "fixed_at", encodeAlertFixedAt rec.fixedAt )
-        , ( "dismissed_by", Debug.todo "decode anyOf" rec.dismissedBy )
+        , ( "dismissed_by"
+          , (\nullableValue ->
+                case nullableValue of
+                    Null ->
+                        Json.Encode.null
+
+                    Present value ->
+                        encodeSimpleUser value
+            )
+                rec.dismissedBy
+          )
         , ( "dismissed_at", encodeAlertDismissedAt rec.dismissedAt )
         , ( "dismissed_reason"
           , encodeCodeScanningAlertDismissedReason rec.dismissedReason
@@ -42600,7 +43678,7 @@ type alias CodeScanningAlert =
     , instancesUrl : AlertInstancesUrl
     , state : CodeScanningAlertState
     , fixedAt : AlertFixedAt
-    , dismissedBy : Debug.Todo
+    , dismissedBy : Nullable SimpleUser
     , dismissedAt : AlertDismissedAt
     , dismissedReason : CodeScanningAlertDismissedReason
     , dismissedComment : CodeScanningAlertDismissedComment
@@ -42689,7 +43767,17 @@ encodeCodeScanningAlert rec =
         , ( "instances_url", encodeAlertInstancesUrl rec.instancesUrl )
         , ( "state", encodeCodeScanningAlertState rec.state )
         , ( "fixed_at", encodeAlertFixedAt rec.fixedAt )
-        , ( "dismissed_by", Debug.todo "decode anyOf" rec.dismissedBy )
+        , ( "dismissed_by"
+          , (\nullableValue ->
+                case nullableValue of
+                    Null ->
+                        Json.Encode.null
+
+                    Present value ->
+                        encodeSimpleUser value
+            )
+                rec.dismissedBy
+          )
         , ( "dismissed_at", encodeAlertDismissedAt rec.dismissedAt )
         , ( "dismissed_reason"
           , encodeCodeScanningAlertDismissedReason rec.dismissedReason
@@ -42930,7 +44018,7 @@ type alias CheckSuite =
     , before : Nullable String
     , after : Nullable String
     , pullRequests : Nullable (List PullRequestMinimal)
-    , app : Debug.Todo
+    , app : Nullable Integration
     , repository : MinimalRepository
     , createdAt : Nullable String
     , updatedAt : Nullable String
@@ -43161,7 +44249,17 @@ encodeCheckSuite rec =
             )
                 rec.pullRequests
           )
-        , ( "app", Debug.todo "decode anyOf" rec.app )
+        , ( "app"
+          , (\nullableValue ->
+                case nullableValue of
+                    Null ->
+                        Json.Encode.null
+
+                    Present value ->
+                        encodeIntegration value
+            )
+                rec.app
+          )
         , ( "repository", encodeMinimalRepository rec.repository )
         , ( "created_at"
           , (\nullableValue ->
@@ -43216,7 +44314,7 @@ type alias CheckRun =
         }
     , name : String
     , checkSuite : Nullable { id : Int }
-    , app : Debug.Todo
+    , app : Nullable Integration
     , pullRequests : List PullRequestMinimal
     , deployment : DeploymentSimple
     }
@@ -43522,7 +44620,17 @@ encodeCheckRun rec =
             )
                 rec.checkSuite
           )
-        , ( "app", Debug.todo "decode anyOf" rec.app )
+        , ( "app"
+          , (\nullableValue ->
+                case nullableValue of
+                    Null ->
+                        Json.Encode.null
+
+                    Present value ->
+                        encodeIntegration value
+            )
+                rec.app
+          )
         , ( "pull_requests"
           , Json.Encode.list encodePullRequestMinimal rec.pullRequests
           )
@@ -44827,7 +45935,7 @@ type alias BaseGist =
     , updatedAt : String
     , description : Nullable String
     , comments : Int
-    , user : Debug.Todo
+    , user : Nullable SimpleUser
     , commentsUrl : String
     , owner : SimpleUser
     , truncated : Bool
@@ -44942,12 +46050,22 @@ encodeBaseGist rec =
                 rec.description
           )
         , ( "comments", Json.Encode.int rec.comments )
-        , ( "user", Debug.todo "decode anyOf" rec.user )
+        , ( "user"
+          , (\nullableValue ->
+                case nullableValue of
+                    Null ->
+                        Json.Encode.null
+
+                    Present value ->
+                        encodeSimpleUser value
+            )
+                rec.user
+          )
         , ( "comments_url", Json.Encode.string rec.commentsUrl )
         , ( "owner", encodeSimpleUser rec.owner )
         , ( "truncated", Json.Encode.bool rec.truncated )
-        , ( "forks", Json.Encode.list Json.Decode.value rec.forks )
-        , ( "history", Json.Encode.list Json.Decode.value rec.history )
+        , ( "forks", Json.Encode.list identity rec.forks )
+        , ( "history", Json.Encode.list identity rec.history )
         ]
 
 
@@ -45053,8 +46171,8 @@ type alias Authorization =
     , updatedAt : String
     , createdAt : String
     , fingerprint : Nullable String
-    , user : Debug.Todo
-    , installation : Debug.Todo
+    , user : Nullable SimpleUser
+    , installation : Nullable ScopedInstallation
     , expiresAt : Nullable String
     }
 
@@ -45272,8 +46390,28 @@ encodeAuthorization rec =
             )
                 rec.fingerprint
           )
-        , ( "user", Debug.todo "decode anyOf" rec.user )
-        , ( "installation", Debug.todo "decode anyOf" rec.installation )
+        , ( "user"
+          , (\nullableValue ->
+                case nullableValue of
+                    Null ->
+                        Json.Encode.null
+
+                    Present value ->
+                        encodeSimpleUser value
+            )
+                rec.user
+          )
+        , ( "installation"
+          , (\nullableValue ->
+                case nullableValue of
+                    Null ->
+                        Json.Encode.null
+
+                    Present value ->
+                        encodeScopedInstallation value
+            )
+                rec.installation
+          )
         , ( "expires_at"
           , (\nullableValue ->
                 case nullableValue of
@@ -46247,7 +47385,7 @@ type alias AddedToProjectIssueEvent =
     , commitId : Nullable String
     , commitUrl : Nullable String
     , createdAt : String
-    , performedViaGithubApp : Debug.Todo
+    , performedViaGithubApp : Nullable Integration
     , projectCard :
         { id : Int
         , url : String
@@ -46375,7 +47513,15 @@ encodeAddedToProjectIssueEvent rec =
           )
         , ( "created_at", Json.Encode.string rec.createdAt )
         , ( "performed_via_github_app"
-          , Debug.todo "decode anyOf" rec.performedViaGithubApp
+          , (\nullableValue ->
+                case nullableValue of
+                    Null ->
+                        Json.Encode.null
+
+                    Present value ->
+                        encodeIntegration value
+            )
+                rec.performedViaGithubApp
           )
         , ( "project_card"
           , (\rec0 ->

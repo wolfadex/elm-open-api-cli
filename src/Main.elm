@@ -267,11 +267,51 @@ schemaToEncoder schema =
                         Nothing ->
                             case subSchema.anyOf of
                                 Nothing ->
-                                    Gen.Json.Decode.value
+                                    Elm.val "identity"
 
                                 Just anyOf ->
-                                    -- Elm.Annotation.named [ "Debug" ] "Todo"
-                                    Gen.Debug.todo "decode anyOf"
+                                    case anyOf of
+                                        [ onlySchema ] ->
+                                            Gen.Debug.todo "decode anyOf: exactly 1 item"
+
+                                        [ firstSchema, secondSchema ] ->
+                                            case ( firstSchema, secondSchema ) of
+                                                ( Json.Schema.Definitions.ObjectSchema firstSubSchema, Json.Schema.Definitions.ObjectSchema secondSubSchema ) ->
+                                                    case ( firstSubSchema.type_, secondSubSchema.type_ ) of
+                                                        ( Json.Schema.Definitions.SingleType Json.Schema.Definitions.NullType, _ ) ->
+                                                            Elm.fn ( "nullableValue", Nothing )
+                                                                (\nullableValue ->
+                                                                    Elm.Case.custom
+                                                                        nullableValue
+                                                                        (Elm.Annotation.namedWith [] "Nullable" [ Elm.Annotation.var "value" ])
+                                                                        [ Elm.Case.branch0 "Null" Gen.Json.Encode.null
+                                                                        , Elm.Case.branch1 "Present"
+                                                                            ( "value", Elm.Annotation.var "value" )
+                                                                            (\value -> Elm.apply (schemaToEncoder secondSchema) [ value ])
+                                                                        ]
+                                                                )
+
+                                                        ( _, Json.Schema.Definitions.SingleType Json.Schema.Definitions.NullType ) ->
+                                                            Elm.fn ( "nullableValue", Nothing )
+                                                                (\nullableValue ->
+                                                                    Elm.Case.custom
+                                                                        nullableValue
+                                                                        (Elm.Annotation.namedWith [] "Nullable" [ Elm.Annotation.var "value" ])
+                                                                        [ Elm.Case.branch0 "Null" Gen.Json.Encode.null
+                                                                        , Elm.Case.branch1 "Present"
+                                                                            ( "value", Elm.Annotation.var "value" )
+                                                                            (\value -> Elm.apply (schemaToEncoder firstSchema) [ value ])
+                                                                        ]
+                                                                )
+
+                                                        _ ->
+                                                            Gen.Debug.todo ("decode anyOf 2: not nullable:: " ++ Debug.toString firstSubSchema ++ " ,,, " ++ Debug.toString secondSubSchema)
+
+                                                _ ->
+                                                    Gen.Debug.todo "decode anyOf 2: not both object schemas"
+
+                                        manySchemas ->
+                                            Gen.Debug.todo "decode anyOf: not exactly 2 items"
 
                         Just ref ->
                             case String.split "/" ref of
@@ -505,7 +545,29 @@ schemaToAnnotation schema =
                                     Elm.Annotation.named [ "Json", "Encode" ] "Value"
 
                                 Just anyOf ->
-                                    Elm.Annotation.named [ "Debug" ] "Todo"
+                                    case anyOf of
+                                        [ firstSchema, secondSchema ] ->
+                                            case ( firstSchema, secondSchema ) of
+                                                ( Json.Schema.Definitions.ObjectSchema firstSubSchema, Json.Schema.Definitions.ObjectSchema secondSubSchema ) ->
+                                                    case ( firstSubSchema.type_, secondSubSchema.type_ ) of
+                                                        ( Json.Schema.Definitions.SingleType Json.Schema.Definitions.NullType, _ ) ->
+                                                            Elm.Annotation.namedWith []
+                                                                "Nullable"
+                                                                [ schemaToAnnotation secondSchema ]
+
+                                                        ( _, Json.Schema.Definitions.SingleType Json.Schema.Definitions.NullType ) ->
+                                                            Elm.Annotation.namedWith []
+                                                                "Nullable"
+                                                                [ schemaToAnnotation firstSchema ]
+
+                                                        _ ->
+                                                            Elm.Annotation.named [ "Debug", "Todo" ] "AnyOfOneNotNullable"
+
+                                                _ ->
+                                                    Elm.Annotation.named [ "Debug", "Todo" ] "AnyOfNotBothObjectSchemas"
+
+                                        _ ->
+                                            Elm.Annotation.named [ "Debug", "Todo" ] "AnyOfNotExactly2Items"
 
                         Just ref ->
                             case String.split "/" ref of

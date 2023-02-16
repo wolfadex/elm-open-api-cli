@@ -7,4 +7,5 @@ A very basic template for an [Elm](https://elm-lang.org/) project, using [Nix](h
 - Make sure you have both Nix and direnv installed
 - Clone this repo, or use the GitHub `Use this template` button
 - Inside your cloned repo, run `direnv allow`
-- Start coding!
+- Start coding in `./script/src/Cli.elm`!
+- Run `npm run dev <path to oas spec>.json`

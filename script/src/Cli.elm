@@ -1,11 +1,18 @@
-port module Main exposing (main)
+module Cli exposing (run)
 
+import Ansi.Color
+import BackendTask
+import BackendTask.File
+import Cli.Option
+import Cli.OptionsParser
+import Cli.Program
 import Dict
 import Elm
 import Elm.Annotation
 import Elm.Case
 import Elm.Declare
 import Elm.Op
+import FatalError
 import Gen.Debug
 import Gen.Http
 import Gen.Json.Decode
@@ -25,154 +32,175 @@ import OpenApi.Path
 import OpenApi.Response
 import OpenApi.Schema
 import OpenApi.Types
+import Pages.Script
+import Path
 import String.Extra
 
 
-main : Program () Model Msg
-main =
-    Platform.worker
-        { init = init
-        , update = update
-        , subscriptions = subscriptions
-        }
+type alias CliOptions =
+    { entryFilePath : String
+    , outputFile : Maybe String
+    }
 
 
-type alias Model =
-    {}
+program : Cli.Program.Config CliOptions
+program =
+    Cli.Program.config
+        |> Cli.Program.add
+            (Cli.OptionsParser.build CliOptions
+                |> Cli.OptionsParser.with
+                    (Cli.Option.requiredPositionalArg "entryFilePath")
+                |> Cli.OptionsParser.with
+                    (Cli.Option.optionalKeywordArg "output")
+            )
 
 
-init : () -> ( Model, Cmd Msg )
-init () =
-    ( {}
-    , Cmd.none
-    )
+run : Pages.Script.Script
+run =
+    Pages.Script.withCliOptions program
+        (\{ entryFilePath, outputFile } ->
+            BackendTask.File.rawFile entryFilePath
+                |> BackendTask.mapError
+                    (\error ->
+                        FatalError.fromString <|
+                            Ansi.Color.fontColor Ansi.Color.brightRed <|
+                                case error.recoverable of
+                                    BackendTask.File.FileDoesntExist ->
+                                        "Uh oh! There is no file at " ++ entryFilePath
+
+                                    BackendTask.File.FileReadError str ->
+                                        "Uh oh! Can't read!"
+
+                                    BackendTask.File.DecodingError decodeErr ->
+                                        "Uh oh! Decoding failure!"
+                    )
+                |> BackendTask.andThen decodeOpenApiSpecOrFail
+                |> BackendTask.andThen (generateFileFromOpenApiSpec outputFile)
+        )
 
 
-subscriptions : Model -> Sub Msg
-subscriptions model =
-    gotSpec GotSpec
+decodeOpenApiSpecOrFail : String -> BackendTask.BackendTask FatalError.FatalError OpenApi.OpenApi
+decodeOpenApiSpecOrFail =
+    Json.Decode.decodeString OpenApi.decode
+        >> Result.mapError
+            (Json.Decode.errorToString
+                >> Ansi.Color.fontColor Ansi.Color.brightRed
+                >> FatalError.fromString
+            )
+        >> BackendTask.fromResult
 
 
-port gotSpec : (Value -> msg) -> Sub msg
+generateFileFromOpenApiSpec : Maybe String -> OpenApi.OpenApi -> BackendTask.BackendTask FatalError.FatalError ()
+generateFileFromOpenApiSpec outputFile apiSpec =
+    let
+        namespace : String
+        namespace =
+            apiSpec
+                |> OpenApi.info
+                |> OpenApi.Info.title
+                |> makeNamespaceValid
+                |> removeInvlidChars
 
-
-port writeMsg : String -> Cmd msg
-
-
-port writeFile : ( String, String ) -> Cmd msg
-
-
-type Msg
-    = GotSpec Value
-
-
-update : Msg -> Model -> ( Model, Cmd Msg )
-update msg model =
-    case msg of
-        GotSpec specValue ->
-            case Json.Decode.decodeValue OpenApi.decode specValue of
-                Ok apiSpec ->
-                    ( model
-                    , let
-                        namespace : String
-                        namespace =
-                            apiSpec
-                                |> OpenApi.info
-                                |> OpenApi.Info.title
-                                |> makeNamespaceValid
-                                |> removeInvlidChars
-
-                        pathDeclarations =
-                            apiSpec
-                                |> OpenApi.paths
-                                |> Dict.foldl
-                                    (\url path res ->
-                                        [ path
-                                            |> OpenApi.Path.get
-                                            |> Maybe.map
-                                                (\operation ->
-                                                    let
-                                                        maybeFirstSuccessResponse =
-                                                            operation
-                                                                |> OpenApi.Operation.responses
-                                                                |> getFirstSuccessResponse
-                                                    in
-                                                    Elm.Declare.fn
-                                                        ((OpenApi.Operation.operationId operation
-                                                            |> Maybe.withDefault url
-                                                         )
-                                                            |> makeNamespaceValid
-                                                            |> removeInvlidChars
-                                                            |> String.Extra.camelize
-                                                        )
-                                                        ( "toMsg"
-                                                        , Just
-                                                            (Elm.Annotation.function
-                                                                [ Gen.Result.annotation_.result Gen.Http.annotation_.error (Elm.Annotation.var "todo") ]
-                                                                (Elm.Annotation.var "msg")
-                                                            )
-                                                        )
-                                                        (\toMsg ->
-                                                            Gen.Http.get
-                                                                { url = url
-                                                                , expect =
-                                                                    Gen.Http.expectJson
-                                                                        (\result -> Elm.apply toMsg [ result ])
-                                                                        (Gen.Debug.todo "todo")
-                                                                }
-                                                        )
-                                                        |> .declaration
-                                                )
-                                        ]
-                                            |> List.filterMap identity
-                                            |> (++) res
-                                    )
-                                    []
-
-                        componentDeclarations =
-                            apiSpec
-                                |> OpenApi.components
-                                |> Maybe.map OpenApi.Components.schemas
-                                |> Maybe.withDefault Dict.empty
-                                |> Dict.foldl
-                                    (\name schema res ->
-                                        [ Elm.alias (typifyName name)
-                                            (schemaToAnnotation (OpenApi.Schema.get schema))
-                                        , Elm.Declare.function ("decode" ++ typifyName name)
-                                            []
-                                            (\_ ->
-                                                schemaToDecoder (OpenApi.Schema.get schema)
-                                                    |> Elm.withType (Gen.Json.Decode.annotation_.decoder (Elm.Annotation.named [] (typifyName name)))
+        pathDeclarations =
+            apiSpec
+                |> OpenApi.paths
+                |> Dict.foldl
+                    (\url path res ->
+                        [ path
+                            |> OpenApi.Path.get
+                            |> Maybe.map
+                                (\operation ->
+                                    let
+                                        maybeFirstSuccessResponse =
+                                            operation
+                                                |> OpenApi.Operation.responses
+                                                |> getFirstSuccessResponse
+                                    in
+                                    Elm.Declare.fn
+                                        ((OpenApi.Operation.operationId operation
+                                            |> Maybe.withDefault url
+                                         )
+                                            |> makeNamespaceValid
+                                            |> removeInvlidChars
+                                            |> String.Extra.camelize
+                                        )
+                                        ( "toMsg"
+                                        , Just
+                                            (Elm.Annotation.function
+                                                [ Gen.Result.annotation_.result Gen.Http.annotation_.error (Elm.Annotation.var "todo") ]
+                                                (Elm.Annotation.var "msg")
                                             )
-                                            |> .declaration
-                                        , Elm.Declare.function ("encode" ++ typifyName name)
-                                            []
-                                            (\_ ->
-                                                schemaToEncoder (OpenApi.Schema.get schema)
-                                                    |> Elm.withType (Elm.Annotation.function [ Elm.Annotation.named [] (typifyName name) ] Gen.Json.Encode.annotation_.value)
-                                            )
-                                            |> .declaration
-                                        ]
-                                            :: res
-                                    )
-                                    []
-                                |> List.concat
-
-                        file =
-                            Elm.file [ namespace ]
-                                (pathDeclarations
-                                    ++ (nullableType :: componentDeclarations)
+                                        )
+                                        (\toMsg ->
+                                            Gen.Http.get
+                                                { url = url
+                                                , expect =
+                                                    Gen.Http.expectJson
+                                                        (\result -> Elm.apply toMsg [ result ])
+                                                        (Gen.Debug.todo "todo")
+                                                }
+                                        )
+                                        |> .declaration
                                 )
-                      in
-                      writeFile ( file.path, file.contents )
+                        ]
+                            |> List.filterMap identity
+                            |> (++) res
                     )
+                    []
 
-                Err err ->
-                    ( model
-                    , err
-                        |> Json.Decode.errorToString
-                        |> writeMsg
+        componentDeclarations =
+            apiSpec
+                |> OpenApi.components
+                |> Maybe.map OpenApi.Components.schemas
+                |> Maybe.withDefault Dict.empty
+                |> Dict.foldl
+                    (\name schema res ->
+                        [ Elm.alias (typifyName name)
+                            (schemaToAnnotation (OpenApi.Schema.get schema))
+                        , Elm.Declare.function ("decode" ++ typifyName name)
+                            []
+                            (\_ ->
+                                schemaToDecoder (OpenApi.Schema.get schema)
+                                    |> Elm.withType (Gen.Json.Decode.annotation_.decoder (Elm.Annotation.named [] (typifyName name)))
+                            )
+                            |> .declaration
+                        , Elm.Declare.function ("encode" ++ typifyName name)
+                            []
+                            (\_ ->
+                                schemaToEncoder (OpenApi.Schema.get schema)
+                                    |> Elm.withType (Elm.Annotation.function [ Elm.Annotation.named [] (typifyName name) ] Gen.Json.Encode.annotation_.value)
+                            )
+                            |> .declaration
+                        ]
+                            :: res
                     )
+                    []
+                |> List.concat
+
+        file =
+            Elm.file [ namespace ]
+                (pathDeclarations
+                    ++ (nullableType :: componentDeclarations)
+                )
+
+        outputPath =
+            [ "generated", file.path ]
+                |> Path.join
+                |> Path.toRelative
+    in
+    Pages.Script.writeFile
+        { path = outputPath
+        , body = file.contents
+        }
+        |> BackendTask.mapError
+            (\error ->
+                FatalError.fromString <|
+                    Ansi.Color.fontColor Ansi.Color.brightRed <|
+                        case error.recoverable of
+                            Pages.Script.FileWriteError ->
+                                "Uh oh! Failed to write file"
+            )
+        |> BackendTask.andThen (\() -> Pages.Script.log ("SDK generated at " ++ outputPath))
 
 
 getFirstSuccessResponse : Dict.Dict String (OpenApi.Types.ReferenceOr OpenApi.Response.Response) -> Maybe (OpenApi.Types.ReferenceOr OpenApi.Response.Response)

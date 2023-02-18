@@ -2,7 +2,6 @@
     "type": "application",
     "source-directories": [
         "src",
-        "elm-vendored/elm-open-api/src",
         "codegen",
         "script/src"
     ],
@@ -23,7 +22,8 @@
             "elm-community/string-extra": "4.0.1",
             "json-tools/json-schema": "1.0.2",
             "mdgriffith/elm-codegen": "2.0.0",
-            "wolfadex/elm-ansi": "1.1.0"
+            "wolfadex/elm-ansi": "1.1.0",
+            "wolfadex/elm-open-api": "1.0.0"
         },
         "indirect": {
             "Chadtech/elm-bool-extra": "2.4.2",

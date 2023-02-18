@@ -29,9 +29,9 @@ import OpenApi.Components
 import OpenApi.Info
 import OpenApi.Operation
 import OpenApi.Path
+import OpenApi.Reference
 import OpenApi.Response
 import OpenApi.Schema
-import OpenApi.Types
 import Pages.Script
 import Path
 import String.Extra
@@ -203,7 +203,7 @@ generateFileFromOpenApiSpec outputFile apiSpec =
         |> BackendTask.andThen (\() -> Pages.Script.log ("SDK generated at " ++ outputPath))
 
 
-getFirstSuccessResponse : Dict.Dict String (OpenApi.Types.ReferenceOr OpenApi.Response.Response) -> Maybe (OpenApi.Types.ReferenceOr OpenApi.Response.Response)
+getFirstSuccessResponse : Dict.Dict String (OpenApi.Reference.ReferenceOr OpenApi.Response.Response) -> Maybe (OpenApi.Reference.ReferenceOr OpenApi.Response.Response)
 getFirstSuccessResponse responses =
     responses
         |> Dict.toList

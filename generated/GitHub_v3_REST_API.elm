@@ -13,22 +13,21 @@ import Json.Encode
 import Result
 
 
-metaRoot : (Result Http.Error todo -> msg) -> Cmd msg
+metaRoot : (Result Http.Error Root -> msg) -> Cmd msg
 metaRoot toMsg =
-    Http.get { url = "/", expect = Http.expectJson toMsg (Debug.todo "todo") }
+    Http.get { url = "/", expect = Http.expectJson toMsg decodeRoot }
 
 
-appsGetAuthenticated : (Result Http.Error todo -> msg) -> Cmd msg
+appsGetAuthenticated : (Result Http.Error Integration -> msg) -> Cmd msg
 appsGetAuthenticated toMsg =
-    Http.get
-        { url = "/app", expect = Http.expectJson toMsg (Debug.todo "todo") }
+    Http.get { url = "/app", expect = Http.expectJson toMsg decodeIntegration }
 
 
-appsGetWebhookConfigForApp : (Result Http.Error todo -> msg) -> Cmd msg
+appsGetWebhookConfigForApp : (Result Http.Error WebhookConfig -> msg) -> Cmd msg
 appsGetWebhookConfigForApp toMsg =
     Http.get
         { url = "/app/hook/config"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeWebhookConfig
         }
 
 
@@ -36,15 +35,16 @@ appsListWebhookDeliveries : (Result Http.Error todo -> msg) -> Cmd msg
 appsListWebhookDeliveries toMsg =
     Http.get
         { url = "/app/hook/deliveries"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
-appsGetWebhookDelivery : (Result Http.Error todo -> msg) -> Cmd msg
+appsGetWebhookDelivery : (Result Http.Error HookDelivery -> msg) -> Cmd msg
 appsGetWebhookDelivery toMsg =
     Http.get
         { url = "/app/hook/deliveries/{delivery_id}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeHookDelivery
         }
 
 
@@ -52,23 +52,24 @@ appsListInstallations : (Result Http.Error todo -> msg) -> Cmd msg
 appsListInstallations toMsg =
     Http.get
         { url = "/app/installations"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
-appsGetInstallation : (Result Http.Error todo -> msg) -> Cmd msg
+appsGetInstallation : (Result Http.Error Installation -> msg) -> Cmd msg
 appsGetInstallation toMsg =
     Http.get
         { url = "/app/installations/{installation_id}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeInstallation
         }
 
 
-appsGetBySlug : (Result Http.Error todo -> msg) -> Cmd msg
+appsGetBySlug : (Result Http.Error Integration -> msg) -> Cmd msg
 appsGetBySlug toMsg =
     Http.get
         { url = "/apps/{app_slug}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeIntegration
         }
 
 
@@ -76,47 +77,53 @@ codesOfConductGetAllCodesOfConduct : (Result Http.Error todo -> msg) -> Cmd msg
 codesOfConductGetAllCodesOfConduct toMsg =
     Http.get
         { url = "/codes_of_conduct"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
-codesOfConductGetConductCode : (Result Http.Error todo -> msg) -> Cmd msg
+codesOfConductGetConductCode :
+    (Result Http.Error CodeOfConduct -> msg) -> Cmd msg
 codesOfConductGetConductCode toMsg =
     Http.get
         { url = "/codes_of_conduct/{key}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeCodeOfConduct
         }
 
 
 emojisGet : (Result Http.Error todo -> msg) -> Cmd msg
 emojisGet toMsg =
     Http.get
-        { url = "/emojis", expect = Http.expectJson toMsg (Debug.todo "todo") }
+        { url = "/emojis"
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
+        }
 
 
-enterpriseAdminGetServerStatistics : (Result Http.Error todo -> msg) -> Cmd msg
+enterpriseAdminGetServerStatistics :
+    (Result Http.Error ServerStatistics -> msg) -> Cmd msg
 enterpriseAdminGetServerStatistics toMsg =
     Http.get
         { url = "/enterprise-installation/{enterprise_or_org}/server-statistics"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeServerStatistics
         }
 
 
 actionsGetActionsCacheUsageForEnterprise :
-    (Result Http.Error todo -> msg) -> Cmd msg
+    (Result Http.Error ActionsCacheUsageOrgEnterprise -> msg) -> Cmd msg
 actionsGetActionsCacheUsageForEnterprise toMsg =
     Http.get
         { url = "/enterprises/{enterprise}/actions/cache/usage"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeActionsCacheUsageOrgEnterprise
         }
 
 
 enterpriseAdminGetGithubActionsPermissionsEnterprise :
-    (Result Http.Error todo -> msg) -> Cmd msg
+    (Result Http.Error ActionsEnterprisePermissions -> msg) -> Cmd msg
 enterpriseAdminGetGithubActionsPermissionsEnterprise toMsg =
     Http.get
         { url = "/enterprises/{enterprise}/actions/permissions"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeActionsEnterprisePermissions
         }
 
 
@@ -125,25 +132,27 @@ enterpriseAdminListSelectedOrganizationsEnabledGithubActionsEnterprise :
 enterpriseAdminListSelectedOrganizationsEnabledGithubActionsEnterprise toMsg =
     Http.get
         { url = "/enterprises/{enterprise}/actions/permissions/organizations"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
 enterpriseAdminGetAllowedActionsEnterprise :
-    (Result Http.Error todo -> msg) -> Cmd msg
+    (Result Http.Error SelectedActions -> msg) -> Cmd msg
 enterpriseAdminGetAllowedActionsEnterprise toMsg =
     Http.get
         { url = "/enterprises/{enterprise}/actions/permissions/selected-actions"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeSelectedActions
         }
 
 
 actionsGetGithubActionsDefaultWorkflowPermissionsEnterprise :
-    (Result Http.Error todo -> msg) -> Cmd msg
+    (Result Http.Error ActionsGetDefaultWorkflowPermissions -> msg) -> Cmd msg
 actionsGetGithubActionsDefaultWorkflowPermissionsEnterprise toMsg =
     Http.get
         { url = "/enterprises/{enterprise}/actions/permissions/workflow"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg decodeActionsGetDefaultWorkflowPermissions
         }
 
 
@@ -152,17 +161,18 @@ enterpriseAdminListSelfHostedRunnerGroupsForEnterprise :
 enterpriseAdminListSelfHostedRunnerGroupsForEnterprise toMsg =
     Http.get
         { url = "/enterprises/{enterprise}/actions/runner-groups"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
 enterpriseAdminGetSelfHostedRunnerGroupForEnterprise :
-    (Result Http.Error todo -> msg) -> Cmd msg
+    (Result Http.Error RunnerGroupsEnterprise -> msg) -> Cmd msg
 enterpriseAdminGetSelfHostedRunnerGroupForEnterprise toMsg =
     Http.get
         { url =
             "/enterprises/{enterprise}/actions/runner-groups/{runner_group_id}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeRunnerGroupsEnterprise
         }
 
 
@@ -172,7 +182,8 @@ enterpriseAdminListOrgAccessToSelfHostedRunnerGroupInEnterprise toMsg =
     Http.get
         { url =
             "/enterprises/{enterprise}/actions/runner-groups/{runner_group_id}/organizations"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -182,7 +193,8 @@ enterpriseAdminListSelfHostedRunnersInGroupForEnterprise toMsg =
     Http.get
         { url =
             "/enterprises/{enterprise}/actions/runner-groups/{runner_group_id}/runners"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -191,7 +203,8 @@ enterpriseAdminListSelfHostedRunnersForEnterprise :
 enterpriseAdminListSelfHostedRunnersForEnterprise toMsg =
     Http.get
         { url = "/enterprises/{enterprise}/actions/runners"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -200,16 +213,17 @@ enterpriseAdminListRunnerApplicationsForEnterprise :
 enterpriseAdminListRunnerApplicationsForEnterprise toMsg =
     Http.get
         { url = "/enterprises/{enterprise}/actions/runners/downloads"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
 enterpriseAdminGetSelfHostedRunnerForEnterprise :
-    (Result Http.Error todo -> msg) -> Cmd msg
+    (Result Http.Error Runner -> msg) -> Cmd msg
 enterpriseAdminGetSelfHostedRunnerForEnterprise toMsg =
     Http.get
         { url = "/enterprises/{enterprise}/actions/runners/{runner_id}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeRunner
         }
 
 
@@ -218,7 +232,8 @@ enterpriseAdminListLabelsForSelfHostedRunnerForEnterprise :
 enterpriseAdminListLabelsForSelfHostedRunnerForEnterprise toMsg =
     Http.get
         { url = "/enterprises/{enterprise}/actions/runners/{runner_id}/labels"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -226,7 +241,8 @@ codeScanningListAlertsForEnterprise : (Result Http.Error todo -> msg) -> Cmd msg
 codeScanningListAlertsForEnterprise toMsg =
     Http.get
         { url = "/enterprises/{enterprise}/code-scanning/alerts"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -235,42 +251,49 @@ secretScanningListAlertsForEnterprise :
 secretScanningListAlertsForEnterprise toMsg =
     Http.get
         { url = "/enterprises/{enterprise}/secret-scanning/alerts"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
 billingGetGithubAdvancedSecurityBillingGhe :
-    (Result Http.Error todo -> msg) -> Cmd msg
+    (Result Http.Error AdvancedSecurityActiveCommitters -> msg) -> Cmd msg
 billingGetGithubAdvancedSecurityBillingGhe toMsg =
     Http.get
         { url = "/enterprises/{enterprise}/settings/billing/advanced-security"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeAdvancedSecurityActiveCommitters
         }
 
 
 activityListPublicEvents : (Result Http.Error todo -> msg) -> Cmd msg
 activityListPublicEvents toMsg =
     Http.get
-        { url = "/events", expect = Http.expectJson toMsg (Debug.todo "todo") }
+        { url = "/events"
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
+        }
 
 
-activityGetFeeds : (Result Http.Error todo -> msg) -> Cmd msg
+activityGetFeeds : (Result Http.Error Feed -> msg) -> Cmd msg
 activityGetFeeds toMsg =
-    Http.get
-        { url = "/feeds", expect = Http.expectJson toMsg (Debug.todo "todo") }
+    Http.get { url = "/feeds", expect = Http.expectJson toMsg decodeFeed }
 
 
 gistsList : (Result Http.Error todo -> msg) -> Cmd msg
 gistsList toMsg =
     Http.get
-        { url = "/gists", expect = Http.expectJson toMsg (Debug.todo "todo") }
+        { url = "/gists"
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
+        }
 
 
 gistsListPublic : (Result Http.Error todo -> msg) -> Cmd msg
 gistsListPublic toMsg =
     Http.get
         { url = "/gists/public"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -278,15 +301,16 @@ gistsListStarred : (Result Http.Error todo -> msg) -> Cmd msg
 gistsListStarred toMsg =
     Http.get
         { url = "/gists/starred"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
-gistsGet : (Result Http.Error todo -> msg) -> Cmd msg
+gistsGet : (Result Http.Error GistSimple -> msg) -> Cmd msg
 gistsGet toMsg =
     Http.get
         { url = "/gists/{gist_id}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeGistSimple
         }
 
 
@@ -294,15 +318,16 @@ gistsListComments : (Result Http.Error todo -> msg) -> Cmd msg
 gistsListComments toMsg =
     Http.get
         { url = "/gists/{gist_id}/comments"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
-gistsGetComment : (Result Http.Error todo -> msg) -> Cmd msg
+gistsGetComment : (Result Http.Error GistComment -> msg) -> Cmd msg
 gistsGetComment toMsg =
     Http.get
         { url = "/gists/{gist_id}/comments/{comment_id}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeGistComment
         }
 
 
@@ -310,7 +335,8 @@ gistsListCommits : (Result Http.Error todo -> msg) -> Cmd msg
 gistsListCommits toMsg =
     Http.get
         { url = "/gists/{gist_id}/commits"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -318,7 +344,8 @@ gistsListForks : (Result Http.Error todo -> msg) -> Cmd msg
 gistsListForks toMsg =
     Http.get
         { url = "/gists/{gist_id}/forks"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -326,15 +353,16 @@ gistsCheckIsStarred : (Result Http.Error todo -> msg) -> Cmd msg
 gistsCheckIsStarred toMsg =
     Http.get
         { url = "/gists/{gist_id}/star"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
-gistsGetRevision : (Result Http.Error todo -> msg) -> Cmd msg
+gistsGetRevision : (Result Http.Error GistSimple -> msg) -> Cmd msg
 gistsGetRevision toMsg =
     Http.get
         { url = "/gists/{gist_id}/{sha}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeGistSimple
         }
 
 
@@ -342,15 +370,16 @@ gitignoreGetAllTemplates : (Result Http.Error todo -> msg) -> Cmd msg
 gitignoreGetAllTemplates toMsg =
     Http.get
         { url = "/gitignore/templates"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
-gitignoreGetTemplate : (Result Http.Error todo -> msg) -> Cmd msg
+gitignoreGetTemplate : (Result Http.Error GitignoreTemplate -> msg) -> Cmd msg
 gitignoreGetTemplate toMsg =
     Http.get
         { url = "/gitignore/templates/{name}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeGitignoreTemplate
         }
 
 
@@ -359,37 +388,43 @@ appsListReposAccessibleToInstallation :
 appsListReposAccessibleToInstallation toMsg =
     Http.get
         { url = "/installation/repositories"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
 issuesList : (Result Http.Error todo -> msg) -> Cmd msg
 issuesList toMsg =
     Http.get
-        { url = "/issues", expect = Http.expectJson toMsg (Debug.todo "todo") }
+        { url = "/issues"
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
+        }
 
 
 licensesGetAllCommonlyUsed : (Result Http.Error todo -> msg) -> Cmd msg
 licensesGetAllCommonlyUsed toMsg =
     Http.get
         { url = "/licenses"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
-licensesGet : (Result Http.Error todo -> msg) -> Cmd msg
+licensesGet : (Result Http.Error License -> msg) -> Cmd msg
 licensesGet toMsg =
     Http.get
         { url = "/licenses/{license}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeLicense
         }
 
 
-appsGetSubscriptionPlanForAccount : (Result Http.Error todo -> msg) -> Cmd msg
+appsGetSubscriptionPlanForAccount :
+    (Result Http.Error MarketplacePurchase -> msg) -> Cmd msg
 appsGetSubscriptionPlanForAccount toMsg =
     Http.get
         { url = "/marketplace_listing/accounts/{account_id}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeMarketplacePurchase
         }
 
 
@@ -397,7 +432,8 @@ appsListPlans : (Result Http.Error todo -> msg) -> Cmd msg
 appsListPlans toMsg =
     Http.get
         { url = "/marketplace_listing/plans"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -405,16 +441,17 @@ appsListAccountsForPlan : (Result Http.Error todo -> msg) -> Cmd msg
 appsListAccountsForPlan toMsg =
     Http.get
         { url = "/marketplace_listing/plans/{plan_id}/accounts"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
 appsGetSubscriptionPlanForAccountStubbed :
-    (Result Http.Error todo -> msg) -> Cmd msg
+    (Result Http.Error MarketplacePurchase -> msg) -> Cmd msg
 appsGetSubscriptionPlanForAccountStubbed toMsg =
     Http.get
         { url = "/marketplace_listing/stubbed/accounts/{account_id}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeMarketplacePurchase
         }
 
 
@@ -422,7 +459,8 @@ appsListPlansStubbed : (Result Http.Error todo -> msg) -> Cmd msg
 appsListPlansStubbed toMsg =
     Http.get
         { url = "/marketplace_listing/stubbed/plans"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -430,14 +468,14 @@ appsListAccountsForPlanStubbed : (Result Http.Error todo -> msg) -> Cmd msg
 appsListAccountsForPlanStubbed toMsg =
     Http.get
         { url = "/marketplace_listing/stubbed/plans/{plan_id}/accounts"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
-metaGet : (Result Http.Error todo -> msg) -> Cmd msg
+metaGet : (Result Http.Error ApiOverview -> msg) -> Cmd msg
 metaGet toMsg =
-    Http.get
-        { url = "/meta", expect = Http.expectJson toMsg (Debug.todo "todo") }
+    Http.get { url = "/meta", expect = Http.expectJson toMsg decodeApiOverview }
 
 
 activityListPublicEventsForRepoNetwork :
@@ -445,7 +483,8 @@ activityListPublicEventsForRepoNetwork :
 activityListPublicEventsForRepoNetwork toMsg =
     Http.get
         { url = "/networks/{owner}/{repo}/events"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -454,38 +493,43 @@ activityListNotificationsForAuthenticatedUser :
 activityListNotificationsForAuthenticatedUser toMsg =
     Http.get
         { url = "/notifications"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
-activityGetThread : (Result Http.Error todo -> msg) -> Cmd msg
+activityGetThread : (Result Http.Error Thread -> msg) -> Cmd msg
 activityGetThread toMsg =
     Http.get
         { url = "/notifications/threads/{thread_id}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeThread
         }
 
 
 activityGetThreadSubscriptionForAuthenticatedUser :
-    (Result Http.Error todo -> msg) -> Cmd msg
+    (Result Http.Error ThreadSubscription -> msg) -> Cmd msg
 activityGetThreadSubscriptionForAuthenticatedUser toMsg =
     Http.get
         { url = "/notifications/threads/{thread_id}/subscription"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeThreadSubscription
         }
 
 
 metaGetOctocat : (Result Http.Error todo -> msg) -> Cmd msg
 metaGetOctocat toMsg =
     Http.get
-        { url = "/octocat", expect = Http.expectJson toMsg (Debug.todo "todo") }
+        { url = "/octocat"
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
+        }
 
 
 orgsList : (Result Http.Error todo -> msg) -> Cmd msg
 orgsList toMsg =
     Http.get
         { url = "/organizations"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -493,23 +537,25 @@ orgsListCustomRoles : (Result Http.Error todo -> msg) -> Cmd msg
 orgsListCustomRoles toMsg =
     Http.get
         { url = "/organizations/{organization_id}/custom_roles"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
-orgsGet : (Result Http.Error todo -> msg) -> Cmd msg
+orgsGet : (Result Http.Error OrganizationFull -> msg) -> Cmd msg
 orgsGet toMsg =
     Http.get
         { url = "/orgs/{org}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeOrganizationFull
         }
 
 
-actionsGetActionsCacheUsageForOrg : (Result Http.Error todo -> msg) -> Cmd msg
+actionsGetActionsCacheUsageForOrg :
+    (Result Http.Error ActionsCacheUsageOrgEnterprise -> msg) -> Cmd msg
 actionsGetActionsCacheUsageForOrg toMsg =
     Http.get
         { url = "/orgs/{org}/actions/cache/usage"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeActionsCacheUsageOrgEnterprise
         }
 
 
@@ -518,16 +564,17 @@ actionsGetActionsCacheUsageByRepoForOrg :
 actionsGetActionsCacheUsageByRepoForOrg toMsg =
     Http.get
         { url = "/orgs/{org}/actions/cache/usage-by-repository"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
 actionsGetGithubActionsPermissionsOrganization :
-    (Result Http.Error todo -> msg) -> Cmd msg
+    (Result Http.Error ActionsOrganizationPermissions -> msg) -> Cmd msg
 actionsGetGithubActionsPermissionsOrganization toMsg =
     Http.get
         { url = "/orgs/{org}/actions/permissions"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeActionsOrganizationPermissions
         }
 
 
@@ -536,25 +583,27 @@ actionsListSelectedRepositoriesEnabledGithubActionsOrganization :
 actionsListSelectedRepositoriesEnabledGithubActionsOrganization toMsg =
     Http.get
         { url = "/orgs/{org}/actions/permissions/repositories"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
 actionsGetAllowedActionsOrganization :
-    (Result Http.Error todo -> msg) -> Cmd msg
+    (Result Http.Error SelectedActions -> msg) -> Cmd msg
 actionsGetAllowedActionsOrganization toMsg =
     Http.get
         { url = "/orgs/{org}/actions/permissions/selected-actions"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeSelectedActions
         }
 
 
 actionsGetGithubActionsDefaultWorkflowPermissionsOrganization :
-    (Result Http.Error todo -> msg) -> Cmd msg
+    (Result Http.Error ActionsGetDefaultWorkflowPermissions -> msg) -> Cmd msg
 actionsGetGithubActionsDefaultWorkflowPermissionsOrganization toMsg =
     Http.get
         { url = "/orgs/{org}/actions/permissions/workflow"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg decodeActionsGetDefaultWorkflowPermissions
         }
 
 
@@ -563,16 +612,17 @@ actionsListSelfHostedRunnerGroupsForOrg :
 actionsListSelfHostedRunnerGroupsForOrg toMsg =
     Http.get
         { url = "/orgs/{org}/actions/runner-groups"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
 actionsGetSelfHostedRunnerGroupForOrg :
-    (Result Http.Error todo -> msg) -> Cmd msg
+    (Result Http.Error RunnerGroupsOrg -> msg) -> Cmd msg
 actionsGetSelfHostedRunnerGroupForOrg toMsg =
     Http.get
         { url = "/orgs/{org}/actions/runner-groups/{runner_group_id}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeRunnerGroupsOrg
         }
 
 
@@ -582,7 +632,8 @@ actionsListRepoAccessToSelfHostedRunnerGroupInOrg toMsg =
     Http.get
         { url =
             "/orgs/{org}/actions/runner-groups/{runner_group_id}/repositories"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -591,7 +642,8 @@ actionsListSelfHostedRunnersInGroupForOrg :
 actionsListSelfHostedRunnersInGroupForOrg toMsg =
     Http.get
         { url = "/orgs/{org}/actions/runner-groups/{runner_group_id}/runners"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -599,7 +651,8 @@ actionsListSelfHostedRunnersForOrg : (Result Http.Error todo -> msg) -> Cmd msg
 actionsListSelfHostedRunnersForOrg toMsg =
     Http.get
         { url = "/orgs/{org}/actions/runners"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -607,15 +660,16 @@ actionsListRunnerApplicationsForOrg : (Result Http.Error todo -> msg) -> Cmd msg
 actionsListRunnerApplicationsForOrg toMsg =
     Http.get
         { url = "/orgs/{org}/actions/runners/downloads"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
-actionsGetSelfHostedRunnerForOrg : (Result Http.Error todo -> msg) -> Cmd msg
+actionsGetSelfHostedRunnerForOrg : (Result Http.Error Runner -> msg) -> Cmd msg
 actionsGetSelfHostedRunnerForOrg toMsg =
     Http.get
         { url = "/orgs/{org}/actions/runners/{runner_id}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeRunner
         }
 
 
@@ -624,7 +678,8 @@ actionsListLabelsForSelfHostedRunnerForOrg :
 actionsListLabelsForSelfHostedRunnerForOrg toMsg =
     Http.get
         { url = "/orgs/{org}/actions/runners/{runner_id}/labels"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -632,23 +687,25 @@ actionsListOrgSecrets : (Result Http.Error todo -> msg) -> Cmd msg
 actionsListOrgSecrets toMsg =
     Http.get
         { url = "/orgs/{org}/actions/secrets"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
-actionsGetOrgPublicKey : (Result Http.Error todo -> msg) -> Cmd msg
+actionsGetOrgPublicKey : (Result Http.Error ActionsPublicKey -> msg) -> Cmd msg
 actionsGetOrgPublicKey toMsg =
     Http.get
         { url = "/orgs/{org}/actions/secrets/public-key"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeActionsPublicKey
         }
 
 
-actionsGetOrgSecret : (Result Http.Error todo -> msg) -> Cmd msg
+actionsGetOrgSecret :
+    (Result Http.Error OrganizationActionsSecret -> msg) -> Cmd msg
 actionsGetOrgSecret toMsg =
     Http.get
         { url = "/orgs/{org}/actions/secrets/{secret_name}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeOrganizationActionsSecret
         }
 
 
@@ -657,7 +714,8 @@ actionsListSelectedReposForOrgSecret :
 actionsListSelectedReposForOrgSecret toMsg =
     Http.get
         { url = "/orgs/{org}/actions/secrets/{secret_name}/repositories"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -665,7 +723,8 @@ orgsListBlockedUsers : (Result Http.Error todo -> msg) -> Cmd msg
 orgsListBlockedUsers toMsg =
     Http.get
         { url = "/orgs/{org}/blocks"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -673,7 +732,8 @@ orgsCheckBlockedUser : (Result Http.Error todo -> msg) -> Cmd msg
 orgsCheckBlockedUser toMsg =
     Http.get
         { url = "/orgs/{org}/blocks/{username}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -681,7 +741,8 @@ codeScanningListAlertsForOrg : (Result Http.Error todo -> msg) -> Cmd msg
 codeScanningListAlertsForOrg toMsg =
     Http.get
         { url = "/orgs/{org}/code-scanning/alerts"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -689,7 +750,8 @@ codespacesListInOrganization : (Result Http.Error todo -> msg) -> Cmd msg
 codespacesListInOrganization toMsg =
     Http.get
         { url = "/orgs/{org}/codespaces"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -697,23 +759,26 @@ codespacesListOrgSecrets : (Result Http.Error todo -> msg) -> Cmd msg
 codespacesListOrgSecrets toMsg =
     Http.get
         { url = "/orgs/{org}/codespaces/secrets"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
-codespacesGetOrgPublicKey : (Result Http.Error todo -> msg) -> Cmd msg
+codespacesGetOrgPublicKey :
+    (Result Http.Error CodespacesPublicKey -> msg) -> Cmd msg
 codespacesGetOrgPublicKey toMsg =
     Http.get
         { url = "/orgs/{org}/codespaces/secrets/public-key"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeCodespacesPublicKey
         }
 
 
-codespacesGetOrgSecret : (Result Http.Error todo -> msg) -> Cmd msg
+codespacesGetOrgSecret :
+    (Result Http.Error CodespacesOrgSecret -> msg) -> Cmd msg
 codespacesGetOrgSecret toMsg =
     Http.get
         { url = "/orgs/{org}/codespaces/secrets/{secret_name}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeCodespacesOrgSecret
         }
 
 
@@ -722,7 +787,8 @@ codespacesListSelectedReposForOrgSecret :
 codespacesListSelectedReposForOrgSecret toMsg =
     Http.get
         { url = "/orgs/{org}/codespaces/secrets/{secret_name}/repositories"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -730,23 +796,26 @@ dependabotListOrgSecrets : (Result Http.Error todo -> msg) -> Cmd msg
 dependabotListOrgSecrets toMsg =
     Http.get
         { url = "/orgs/{org}/dependabot/secrets"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
-dependabotGetOrgPublicKey : (Result Http.Error todo -> msg) -> Cmd msg
+dependabotGetOrgPublicKey :
+    (Result Http.Error DependabotPublicKey -> msg) -> Cmd msg
 dependabotGetOrgPublicKey toMsg =
     Http.get
         { url = "/orgs/{org}/dependabot/secrets/public-key"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeDependabotPublicKey
         }
 
 
-dependabotGetOrgSecret : (Result Http.Error todo -> msg) -> Cmd msg
+dependabotGetOrgSecret :
+    (Result Http.Error OrganizationDependabotSecret -> msg) -> Cmd msg
 dependabotGetOrgSecret toMsg =
     Http.get
         { url = "/orgs/{org}/dependabot/secrets/{secret_name}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeOrganizationDependabotSecret
         }
 
 
@@ -755,7 +824,8 @@ dependabotListSelectedReposForOrgSecret :
 dependabotListSelectedReposForOrgSecret toMsg =
     Http.get
         { url = "/orgs/{org}/dependabot/secrets/{secret_name}/repositories"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -763,7 +833,8 @@ activityListPublicOrgEvents : (Result Http.Error todo -> msg) -> Cmd msg
 activityListPublicOrgEvents toMsg =
     Http.get
         { url = "/orgs/{org}/events"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -771,7 +842,8 @@ orgsListFailedInvitations : (Result Http.Error todo -> msg) -> Cmd msg
 orgsListFailedInvitations toMsg =
     Http.get
         { url = "/orgs/{org}/failed_invitations"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -779,7 +851,8 @@ orgsListFineGrainedPermissions : (Result Http.Error todo -> msg) -> Cmd msg
 orgsListFineGrainedPermissions toMsg =
     Http.get
         { url = "/orgs/{org}/fine_grained_permissions"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -787,23 +860,24 @@ orgsListWebhooks : (Result Http.Error todo -> msg) -> Cmd msg
 orgsListWebhooks toMsg =
     Http.get
         { url = "/orgs/{org}/hooks"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
-orgsGetWebhook : (Result Http.Error todo -> msg) -> Cmd msg
+orgsGetWebhook : (Result Http.Error OrgHook -> msg) -> Cmd msg
 orgsGetWebhook toMsg =
     Http.get
         { url = "/orgs/{org}/hooks/{hook_id}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeOrgHook
         }
 
 
-orgsGetWebhookConfigForOrg : (Result Http.Error todo -> msg) -> Cmd msg
+orgsGetWebhookConfigForOrg : (Result Http.Error WebhookConfig -> msg) -> Cmd msg
 orgsGetWebhookConfigForOrg toMsg =
     Http.get
         { url = "/orgs/{org}/hooks/{hook_id}/config"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeWebhookConfig
         }
 
 
@@ -811,23 +885,24 @@ orgsListWebhookDeliveries : (Result Http.Error todo -> msg) -> Cmd msg
 orgsListWebhookDeliveries toMsg =
     Http.get
         { url = "/orgs/{org}/hooks/{hook_id}/deliveries"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
-orgsGetWebhookDelivery : (Result Http.Error todo -> msg) -> Cmd msg
+orgsGetWebhookDelivery : (Result Http.Error HookDelivery -> msg) -> Cmd msg
 orgsGetWebhookDelivery toMsg =
     Http.get
         { url = "/orgs/{org}/hooks/{hook_id}/deliveries/{delivery_id}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeHookDelivery
         }
 
 
-appsGetOrgInstallation : (Result Http.Error todo -> msg) -> Cmd msg
+appsGetOrgInstallation : (Result Http.Error Installation -> msg) -> Cmd msg
 appsGetOrgInstallation toMsg =
     Http.get
         { url = "/orgs/{org}/installation"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeInstallation
         }
 
 
@@ -835,7 +910,8 @@ orgsListAppInstallations : (Result Http.Error todo -> msg) -> Cmd msg
 orgsListAppInstallations toMsg =
     Http.get
         { url = "/orgs/{org}/installations"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -843,7 +919,8 @@ interactionsGetRestrictionsForOrg : (Result Http.Error todo -> msg) -> Cmd msg
 interactionsGetRestrictionsForOrg toMsg =
     Http.get
         { url = "/orgs/{org}/interaction-limits"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -851,7 +928,8 @@ orgsListPendingInvitations : (Result Http.Error todo -> msg) -> Cmd msg
 orgsListPendingInvitations toMsg =
     Http.get
         { url = "/orgs/{org}/invitations"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -859,7 +937,8 @@ orgsListInvitationTeams : (Result Http.Error todo -> msg) -> Cmd msg
 orgsListInvitationTeams toMsg =
     Http.get
         { url = "/orgs/{org}/invitations/{invitation_id}/teams"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -867,7 +946,8 @@ issuesListForOrg : (Result Http.Error todo -> msg) -> Cmd msg
 issuesListForOrg toMsg =
     Http.get
         { url = "/orgs/{org}/issues"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -875,7 +955,8 @@ orgsListMembers : (Result Http.Error todo -> msg) -> Cmd msg
 orgsListMembers toMsg =
     Http.get
         { url = "/orgs/{org}/members"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -883,7 +964,8 @@ orgsCheckMembershipForUser : (Result Http.Error todo -> msg) -> Cmd msg
 orgsCheckMembershipForUser toMsg =
     Http.get
         { url = "/orgs/{org}/members/{username}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -891,15 +973,16 @@ codespacesGetCodespacesForUserInOrg : (Result Http.Error todo -> msg) -> Cmd msg
 codespacesGetCodespacesForUserInOrg toMsg =
     Http.get
         { url = "/orgs/{org}/members/{username}/codespaces"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
-orgsGetMembershipForUser : (Result Http.Error todo -> msg) -> Cmd msg
+orgsGetMembershipForUser : (Result Http.Error OrgMembership -> msg) -> Cmd msg
 orgsGetMembershipForUser toMsg =
     Http.get
         { url = "/orgs/{org}/memberships/{username}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeOrgMembership
         }
 
 
@@ -907,15 +990,16 @@ migrationsListForOrg : (Result Http.Error todo -> msg) -> Cmd msg
 migrationsListForOrg toMsg =
     Http.get
         { url = "/orgs/{org}/migrations"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
-migrationsGetStatusForOrg : (Result Http.Error todo -> msg) -> Cmd msg
+migrationsGetStatusForOrg : (Result Http.Error Migration -> msg) -> Cmd msg
 migrationsGetStatusForOrg toMsg =
     Http.get
         { url = "/orgs/{org}/migrations/{migration_id}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeMigration
         }
 
 
@@ -923,7 +1007,8 @@ migrationsDownloadArchiveForOrg : (Result Http.Error todo -> msg) -> Cmd msg
 migrationsDownloadArchiveForOrg toMsg =
     Http.get
         { url = "/orgs/{org}/migrations/{migration_id}/archive"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -931,7 +1016,8 @@ migrationsListReposForOrg : (Result Http.Error todo -> msg) -> Cmd msg
 migrationsListReposForOrg toMsg =
     Http.get
         { url = "/orgs/{org}/migrations/{migration_id}/repositories"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -939,7 +1025,8 @@ orgsListOutsideCollaborators : (Result Http.Error todo -> msg) -> Cmd msg
 orgsListOutsideCollaborators toMsg =
     Http.get
         { url = "/orgs/{org}/outside_collaborators"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -947,15 +1034,17 @@ packagesListPackagesForOrganization : (Result Http.Error todo -> msg) -> Cmd msg
 packagesListPackagesForOrganization toMsg =
     Http.get
         { url = "/orgs/{org}/packages"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
-packagesGetPackageForOrganization : (Result Http.Error todo -> msg) -> Cmd msg
+packagesGetPackageForOrganization :
+    (Result Http.Error Package -> msg) -> Cmd msg
 packagesGetPackageForOrganization toMsg =
     Http.get
         { url = "/orgs/{org}/packages/{package_type}/{package_name}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodePackage
         }
 
 
@@ -964,17 +1053,18 @@ packagesGetAllPackageVersionsForPackageOwnedByOrg :
 packagesGetAllPackageVersionsForPackageOwnedByOrg toMsg =
     Http.get
         { url = "/orgs/{org}/packages/{package_type}/{package_name}/versions"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
 packagesGetPackageVersionForOrganization :
-    (Result Http.Error todo -> msg) -> Cmd msg
+    (Result Http.Error PackageVersion -> msg) -> Cmd msg
 packagesGetPackageVersionForOrganization toMsg =
     Http.get
         { url =
             "/orgs/{org}/packages/{package_type}/{package_name}/versions/{package_version_id}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodePackageVersion
         }
 
 
@@ -982,7 +1072,8 @@ projectsListForOrg : (Result Http.Error todo -> msg) -> Cmd msg
 projectsListForOrg toMsg =
     Http.get
         { url = "/orgs/{org}/projects"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -990,7 +1081,8 @@ orgsListPublicMembers : (Result Http.Error todo -> msg) -> Cmd msg
 orgsListPublicMembers toMsg =
     Http.get
         { url = "/orgs/{org}/public_members"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -998,7 +1090,8 @@ orgsCheckPublicMembershipForUser : (Result Http.Error todo -> msg) -> Cmd msg
 orgsCheckPublicMembershipForUser toMsg =
     Http.get
         { url = "/orgs/{org}/public_members/{username}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -1006,7 +1099,8 @@ reposListForOrg : (Result Http.Error todo -> msg) -> Cmd msg
 reposListForOrg toMsg =
     Http.get
         { url = "/orgs/{org}/repos"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -1014,7 +1108,8 @@ secretScanningListAlertsForOrg : (Result Http.Error todo -> msg) -> Cmd msg
 secretScanningListAlertsForOrg toMsg =
     Http.get
         { url = "/orgs/{org}/secret-scanning/alerts"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -1022,40 +1117,44 @@ orgsListSecurityManagerTeams : (Result Http.Error todo -> msg) -> Cmd msg
 orgsListSecurityManagerTeams toMsg =
     Http.get
         { url = "/orgs/{org}/security-managers"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
-billingGetGithubActionsBillingOrg : (Result Http.Error todo -> msg) -> Cmd msg
+billingGetGithubActionsBillingOrg :
+    (Result Http.Error ActionsBillingUsage -> msg) -> Cmd msg
 billingGetGithubActionsBillingOrg toMsg =
     Http.get
         { url = "/orgs/{org}/settings/billing/actions"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeActionsBillingUsage
         }
 
 
 billingGetGithubAdvancedSecurityBillingOrg :
-    (Result Http.Error todo -> msg) -> Cmd msg
+    (Result Http.Error AdvancedSecurityActiveCommitters -> msg) -> Cmd msg
 billingGetGithubAdvancedSecurityBillingOrg toMsg =
     Http.get
         { url = "/orgs/{org}/settings/billing/advanced-security"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeAdvancedSecurityActiveCommitters
         }
 
 
-billingGetGithubPackagesBillingOrg : (Result Http.Error todo -> msg) -> Cmd msg
+billingGetGithubPackagesBillingOrg :
+    (Result Http.Error PackagesBillingUsage -> msg) -> Cmd msg
 billingGetGithubPackagesBillingOrg toMsg =
     Http.get
         { url = "/orgs/{org}/settings/billing/packages"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodePackagesBillingUsage
         }
 
 
-billingGetSharedStorageBillingOrg : (Result Http.Error todo -> msg) -> Cmd msg
+billingGetSharedStorageBillingOrg :
+    (Result Http.Error CombinedBillingUsage -> msg) -> Cmd msg
 billingGetSharedStorageBillingOrg toMsg =
     Http.get
         { url = "/orgs/{org}/settings/billing/shared-storage"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeCombinedBillingUsage
         }
 
 
@@ -1063,15 +1162,16 @@ teamsList : (Result Http.Error todo -> msg) -> Cmd msg
 teamsList toMsg =
     Http.get
         { url = "/orgs/{org}/teams"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
-teamsGetByName : (Result Http.Error todo -> msg) -> Cmd msg
+teamsGetByName : (Result Http.Error TeamFull -> msg) -> Cmd msg
 teamsGetByName toMsg =
     Http.get
         { url = "/orgs/{org}/teams/{team_slug}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeTeamFull
         }
 
 
@@ -1079,15 +1179,16 @@ teamsListDiscussionsInOrg : (Result Http.Error todo -> msg) -> Cmd msg
 teamsListDiscussionsInOrg toMsg =
     Http.get
         { url = "/orgs/{org}/teams/{team_slug}/discussions"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
-teamsGetDiscussionInOrg : (Result Http.Error todo -> msg) -> Cmd msg
+teamsGetDiscussionInOrg : (Result Http.Error TeamDiscussion -> msg) -> Cmd msg
 teamsGetDiscussionInOrg toMsg =
     Http.get
         { url = "/orgs/{org}/teams/{team_slug}/discussions/{discussion_number}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeTeamDiscussion
         }
 
 
@@ -1096,16 +1197,18 @@ teamsListDiscussionCommentsInOrg toMsg =
     Http.get
         { url =
             "/orgs/{org}/teams/{team_slug}/discussions/{discussion_number}/comments"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
-teamsGetDiscussionCommentInOrg : (Result Http.Error todo -> msg) -> Cmd msg
+teamsGetDiscussionCommentInOrg :
+    (Result Http.Error TeamDiscussionComment -> msg) -> Cmd msg
 teamsGetDiscussionCommentInOrg toMsg =
     Http.get
         { url =
             "/orgs/{org}/teams/{team_slug}/discussions/{discussion_number}/comments/{comment_number}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeTeamDiscussionComment
         }
 
 
@@ -1115,7 +1218,8 @@ reactionsListForTeamDiscussionCommentInOrg toMsg =
     Http.get
         { url =
             "/orgs/{org}/teams/{team_slug}/discussions/{discussion_number}/comments/{comment_number}/reactions"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -1124,7 +1228,8 @@ reactionsListForTeamDiscussionInOrg toMsg =
     Http.get
         { url =
             "/orgs/{org}/teams/{team_slug}/discussions/{discussion_number}/reactions"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -1132,7 +1237,8 @@ teamsListPendingInvitationsInOrg : (Result Http.Error todo -> msg) -> Cmd msg
 teamsListPendingInvitationsInOrg toMsg =
     Http.get
         { url = "/orgs/{org}/teams/{team_slug}/invitations"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -1140,15 +1246,17 @@ teamsListMembersInOrg : (Result Http.Error todo -> msg) -> Cmd msg
 teamsListMembersInOrg toMsg =
     Http.get
         { url = "/orgs/{org}/teams/{team_slug}/members"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
-teamsGetMembershipForUserInOrg : (Result Http.Error todo -> msg) -> Cmd msg
+teamsGetMembershipForUserInOrg :
+    (Result Http.Error TeamMembership -> msg) -> Cmd msg
 teamsGetMembershipForUserInOrg toMsg =
     Http.get
         { url = "/orgs/{org}/teams/{team_slug}/memberships/{username}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeTeamMembership
         }
 
 
@@ -1156,16 +1264,17 @@ teamsListProjectsInOrg : (Result Http.Error todo -> msg) -> Cmd msg
 teamsListProjectsInOrg toMsg =
     Http.get
         { url = "/orgs/{org}/teams/{team_slug}/projects"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
 teamsCheckPermissionsForProjectInOrg :
-    (Result Http.Error todo -> msg) -> Cmd msg
+    (Result Http.Error TeamProject -> msg) -> Cmd msg
 teamsCheckPermissionsForProjectInOrg toMsg =
     Http.get
         { url = "/orgs/{org}/teams/{team_slug}/projects/{project_id}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeTeamProject
         }
 
 
@@ -1173,15 +1282,17 @@ teamsListReposInOrg : (Result Http.Error todo -> msg) -> Cmd msg
 teamsListReposInOrg toMsg =
     Http.get
         { url = "/orgs/{org}/teams/{team_slug}/repos"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
-teamsCheckPermissionsForRepoInOrg : (Result Http.Error todo -> msg) -> Cmd msg
+teamsCheckPermissionsForRepoInOrg :
+    (Result Http.Error TeamRepository -> msg) -> Cmd msg
 teamsCheckPermissionsForRepoInOrg toMsg =
     Http.get
         { url = "/orgs/{org}/teams/{team_slug}/repos/{owner}/{repo}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeTeamRepository
         }
 
 
@@ -1189,23 +1300,24 @@ teamsListChildInOrg : (Result Http.Error todo -> msg) -> Cmd msg
 teamsListChildInOrg toMsg =
     Http.get
         { url = "/orgs/{org}/teams/{team_slug}/teams"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
-projectsGetCard : (Result Http.Error todo -> msg) -> Cmd msg
+projectsGetCard : (Result Http.Error ProjectCard -> msg) -> Cmd msg
 projectsGetCard toMsg =
     Http.get
         { url = "/projects/columns/cards/{card_id}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeProjectCard
         }
 
 
-projectsGetColumn : (Result Http.Error todo -> msg) -> Cmd msg
+projectsGetColumn : (Result Http.Error ProjectColumn -> msg) -> Cmd msg
 projectsGetColumn toMsg =
     Http.get
         { url = "/projects/columns/{column_id}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeProjectColumn
         }
 
 
@@ -1213,15 +1325,16 @@ projectsListCards : (Result Http.Error todo -> msg) -> Cmd msg
 projectsListCards toMsg =
     Http.get
         { url = "/projects/columns/{column_id}/cards"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
-projectsGet : (Result Http.Error todo -> msg) -> Cmd msg
+projectsGet : (Result Http.Error Project -> msg) -> Cmd msg
 projectsGet toMsg =
     Http.get
         { url = "/projects/{project_id}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeProject
         }
 
 
@@ -1229,15 +1342,17 @@ projectsListCollaborators : (Result Http.Error todo -> msg) -> Cmd msg
 projectsListCollaborators toMsg =
     Http.get
         { url = "/projects/{project_id}/collaborators"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
-projectsGetPermissionForUser : (Result Http.Error todo -> msg) -> Cmd msg
+projectsGetPermissionForUser :
+    (Result Http.Error ProjectCollaboratorPermission -> msg) -> Cmd msg
 projectsGetPermissionForUser toMsg =
     Http.get
         { url = "/projects/{project_id}/collaborators/{username}/permission"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeProjectCollaboratorPermission
         }
 
 
@@ -1245,23 +1360,24 @@ projectsListColumns : (Result Http.Error todo -> msg) -> Cmd msg
 projectsListColumns toMsg =
     Http.get
         { url = "/projects/{project_id}/columns"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
-rateLimitGet : (Result Http.Error todo -> msg) -> Cmd msg
+rateLimitGet : (Result Http.Error RateLimitOverview -> msg) -> Cmd msg
 rateLimitGet toMsg =
     Http.get
         { url = "/rate_limit"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeRateLimitOverview
         }
 
 
-reposGet : (Result Http.Error todo -> msg) -> Cmd msg
+reposGet : (Result Http.Error FullRepository -> msg) -> Cmd msg
 reposGet toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeFullRepository
         }
 
 
@@ -1269,15 +1385,16 @@ actionsListArtifactsForRepo : (Result Http.Error todo -> msg) -> Cmd msg
 actionsListArtifactsForRepo toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/actions/artifacts"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
-actionsGetArtifact : (Result Http.Error todo -> msg) -> Cmd msg
+actionsGetArtifact : (Result Http.Error Artifact -> msg) -> Cmd msg
 actionsGetArtifact toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/actions/artifacts/{artifact_id}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeArtifact
         }
 
 
@@ -1286,31 +1403,34 @@ actionsDownloadArtifact toMsg =
     Http.get
         { url =
             "/repos/{owner}/{repo}/actions/artifacts/{artifact_id}/{archive_format}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
-actionsGetActionsCacheUsage : (Result Http.Error todo -> msg) -> Cmd msg
+actionsGetActionsCacheUsage :
+    (Result Http.Error ActionsCacheUsageByRepository -> msg) -> Cmd msg
 actionsGetActionsCacheUsage toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/actions/cache/usage"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeActionsCacheUsageByRepository
         }
 
 
-actionsGetActionsCacheList : (Result Http.Error todo -> msg) -> Cmd msg
+actionsGetActionsCacheList :
+    (Result Http.Error ActionsCacheList -> msg) -> Cmd msg
 actionsGetActionsCacheList toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/actions/caches"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeActionsCacheList
         }
 
 
-actionsGetJobForWorkflowRun : (Result Http.Error todo -> msg) -> Cmd msg
+actionsGetJobForWorkflowRun : (Result Http.Error Job -> msg) -> Cmd msg
 actionsGetJobForWorkflowRun toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/actions/jobs/{job_id}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeJob
         }
 
 
@@ -1319,42 +1439,45 @@ actionsDownloadJobLogsForWorkflowRun :
 actionsDownloadJobLogsForWorkflowRun toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/actions/jobs/{job_id}/logs"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
 actionsGetGithubActionsPermissionsRepository :
-    (Result Http.Error todo -> msg) -> Cmd msg
+    (Result Http.Error ActionsRepositoryPermissions -> msg) -> Cmd msg
 actionsGetGithubActionsPermissionsRepository toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/actions/permissions"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeActionsRepositoryPermissions
         }
 
 
 actionsGetWorkflowAccessToRepository :
-    (Result Http.Error todo -> msg) -> Cmd msg
+    (Result Http.Error ActionsWorkflowAccessToRepository -> msg) -> Cmd msg
 actionsGetWorkflowAccessToRepository toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/actions/permissions/access"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeActionsWorkflowAccessToRepository
         }
 
 
-actionsGetAllowedActionsRepository : (Result Http.Error todo -> msg) -> Cmd msg
+actionsGetAllowedActionsRepository :
+    (Result Http.Error SelectedActions -> msg) -> Cmd msg
 actionsGetAllowedActionsRepository toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/actions/permissions/selected-actions"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeSelectedActions
         }
 
 
 actionsGetGithubActionsDefaultWorkflowPermissionsRepository :
-    (Result Http.Error todo -> msg) -> Cmd msg
+    (Result Http.Error ActionsGetDefaultWorkflowPermissions -> msg) -> Cmd msg
 actionsGetGithubActionsDefaultWorkflowPermissionsRepository toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/actions/permissions/workflow"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg decodeActionsGetDefaultWorkflowPermissions
         }
 
 
@@ -1362,7 +1485,8 @@ actionsListSelfHostedRunnersForRepo : (Result Http.Error todo -> msg) -> Cmd msg
 actionsListSelfHostedRunnersForRepo toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/actions/runners"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -1371,15 +1495,16 @@ actionsListRunnerApplicationsForRepo :
 actionsListRunnerApplicationsForRepo toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/actions/runners/downloads"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
-actionsGetSelfHostedRunnerForRepo : (Result Http.Error todo -> msg) -> Cmd msg
+actionsGetSelfHostedRunnerForRepo : (Result Http.Error Runner -> msg) -> Cmd msg
 actionsGetSelfHostedRunnerForRepo toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/actions/runners/{runner_id}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeRunner
         }
 
 
@@ -1388,7 +1513,8 @@ actionsListLabelsForSelfHostedRunnerForRepo :
 actionsListLabelsForSelfHostedRunnerForRepo toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/actions/runners/{runner_id}/labels"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -1396,15 +1522,16 @@ actionsListWorkflowRunsForRepo : (Result Http.Error todo -> msg) -> Cmd msg
 actionsListWorkflowRunsForRepo toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/actions/runs"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
-actionsGetWorkflowRun : (Result Http.Error todo -> msg) -> Cmd msg
+actionsGetWorkflowRun : (Result Http.Error WorkflowRun -> msg) -> Cmd msg
 actionsGetWorkflowRun toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/actions/runs/{run_id}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeWorkflowRun
         }
 
 
@@ -1412,7 +1539,8 @@ actionsGetReviewsForRun : (Result Http.Error todo -> msg) -> Cmd msg
 actionsGetReviewsForRun toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/actions/runs/{run_id}/approvals"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -1420,16 +1548,17 @@ actionsListWorkflowRunArtifacts : (Result Http.Error todo -> msg) -> Cmd msg
 actionsListWorkflowRunArtifacts toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/actions/runs/{run_id}/artifacts"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
-actionsGetWorkflowRunAttempt : (Result Http.Error todo -> msg) -> Cmd msg
+actionsGetWorkflowRunAttempt : (Result Http.Error WorkflowRun -> msg) -> Cmd msg
 actionsGetWorkflowRunAttempt toMsg =
     Http.get
         { url =
             "/repos/{owner}/{repo}/actions/runs/{run_id}/attempts/{attempt_number}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeWorkflowRun
         }
 
 
@@ -1439,7 +1568,8 @@ actionsListJobsForWorkflowRunAttempt toMsg =
     Http.get
         { url =
             "/repos/{owner}/{repo}/actions/runs/{run_id}/attempts/{attempt_number}/jobs"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -1449,7 +1579,8 @@ actionsDownloadWorkflowRunAttemptLogs toMsg =
     Http.get
         { url =
             "/repos/{owner}/{repo}/actions/runs/{run_id}/attempts/{attempt_number}/logs"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -1457,7 +1588,8 @@ actionsListJobsForWorkflowRun : (Result Http.Error todo -> msg) -> Cmd msg
 actionsListJobsForWorkflowRun toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/actions/runs/{run_id}/jobs"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -1465,7 +1597,8 @@ actionsDownloadWorkflowRunLogs : (Result Http.Error todo -> msg) -> Cmd msg
 actionsDownloadWorkflowRunLogs toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/actions/runs/{run_id}/logs"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -1474,15 +1607,17 @@ actionsGetPendingDeploymentsForRun toMsg =
     Http.get
         { url =
             "/repos/{owner}/{repo}/actions/runs/{run_id}/pending_deployments"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
-actionsGetWorkflowRunUsage : (Result Http.Error todo -> msg) -> Cmd msg
+actionsGetWorkflowRunUsage :
+    (Result Http.Error WorkflowRunUsage -> msg) -> Cmd msg
 actionsGetWorkflowRunUsage toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/actions/runs/{run_id}/timing"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeWorkflowRunUsage
         }
 
 
@@ -1490,23 +1625,24 @@ actionsListRepoSecrets : (Result Http.Error todo -> msg) -> Cmd msg
 actionsListRepoSecrets toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/actions/secrets"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
-actionsGetRepoPublicKey : (Result Http.Error todo -> msg) -> Cmd msg
+actionsGetRepoPublicKey : (Result Http.Error ActionsPublicKey -> msg) -> Cmd msg
 actionsGetRepoPublicKey toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/actions/secrets/public-key"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeActionsPublicKey
         }
 
 
-actionsGetRepoSecret : (Result Http.Error todo -> msg) -> Cmd msg
+actionsGetRepoSecret : (Result Http.Error ActionsSecret -> msg) -> Cmd msg
 actionsGetRepoSecret toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/actions/secrets/{secret_name}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeActionsSecret
         }
 
 
@@ -1514,15 +1650,16 @@ actionsListRepoWorkflows : (Result Http.Error todo -> msg) -> Cmd msg
 actionsListRepoWorkflows toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/actions/workflows"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
-actionsGetWorkflow : (Result Http.Error todo -> msg) -> Cmd msg
+actionsGetWorkflow : (Result Http.Error Workflow -> msg) -> Cmd msg
 actionsGetWorkflow toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/actions/workflows/{workflow_id}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeWorkflow
         }
 
 
@@ -1530,15 +1667,16 @@ actionsListWorkflowRuns : (Result Http.Error todo -> msg) -> Cmd msg
 actionsListWorkflowRuns toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/actions/workflows/{workflow_id}/runs"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
-actionsGetWorkflowUsage : (Result Http.Error todo -> msg) -> Cmd msg
+actionsGetWorkflowUsage : (Result Http.Error WorkflowUsage -> msg) -> Cmd msg
 actionsGetWorkflowUsage toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/actions/workflows/{workflow_id}/timing"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeWorkflowUsage
         }
 
 
@@ -1546,7 +1684,8 @@ issuesListAssignees : (Result Http.Error todo -> msg) -> Cmd msg
 issuesListAssignees toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/assignees"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -1554,7 +1693,8 @@ issuesCheckUserCanBeAssigned : (Result Http.Error todo -> msg) -> Cmd msg
 issuesCheckUserCanBeAssigned toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/assignees/{assignee}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -1562,15 +1702,16 @@ reposListAutolinks : (Result Http.Error todo -> msg) -> Cmd msg
 reposListAutolinks toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/autolinks"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
-reposGetAutolink : (Result Http.Error todo -> msg) -> Cmd msg
+reposGetAutolink : (Result Http.Error Autolink -> msg) -> Cmd msg
 reposGetAutolink toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/autolinks/{autolink_id}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeAutolink
         }
 
 
@@ -1578,59 +1719,65 @@ reposListBranches : (Result Http.Error todo -> msg) -> Cmd msg
 reposListBranches toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/branches"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
-reposGetBranch : (Result Http.Error todo -> msg) -> Cmd msg
+reposGetBranch : (Result Http.Error BranchWithProtection -> msg) -> Cmd msg
 reposGetBranch toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/branches/{branch}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeBranchWithProtection
         }
 
 
-reposGetBranchProtection : (Result Http.Error todo -> msg) -> Cmd msg
+reposGetBranchProtection :
+    (Result Http.Error BranchProtection -> msg) -> Cmd msg
 reposGetBranchProtection toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/branches/{branch}/protection"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeBranchProtection
         }
 
 
-reposGetAdminBranchProtection : (Result Http.Error todo -> msg) -> Cmd msg
+reposGetAdminBranchProtection :
+    (Result Http.Error ProtectedBranchAdminEnforced -> msg) -> Cmd msg
 reposGetAdminBranchProtection toMsg =
     Http.get
         { url =
             "/repos/{owner}/{repo}/branches/{branch}/protection/enforce_admins"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeProtectedBranchAdminEnforced
         }
 
 
-reposGetPullRequestReviewProtection : (Result Http.Error todo -> msg) -> Cmd msg
+reposGetPullRequestReviewProtection :
+    (Result Http.Error ProtectedBranchPullRequestReview -> msg) -> Cmd msg
 reposGetPullRequestReviewProtection toMsg =
     Http.get
         { url =
             "/repos/{owner}/{repo}/branches/{branch}/protection/required_pull_request_reviews"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeProtectedBranchPullRequestReview
         }
 
 
-reposGetCommitSignatureProtection : (Result Http.Error todo -> msg) -> Cmd msg
+reposGetCommitSignatureProtection :
+    (Result Http.Error ProtectedBranchAdminEnforced -> msg) -> Cmd msg
 reposGetCommitSignatureProtection toMsg =
     Http.get
         { url =
             "/repos/{owner}/{repo}/branches/{branch}/protection/required_signatures"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeProtectedBranchAdminEnforced
         }
 
 
-reposGetStatusChecksProtection : (Result Http.Error todo -> msg) -> Cmd msg
+reposGetStatusChecksProtection :
+    (Result Http.Error StatusCheckPolicy -> msg) -> Cmd msg
 reposGetStatusChecksProtection toMsg =
     Http.get
         { url =
             "/repos/{owner}/{repo}/branches/{branch}/protection/required_status_checks"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeStatusCheckPolicy
         }
 
 
@@ -1639,16 +1786,18 @@ reposGetAllStatusCheckContexts toMsg =
     Http.get
         { url =
             "/repos/{owner}/{repo}/branches/{branch}/protection/required_status_checks/contexts"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
-reposGetAccessRestrictions : (Result Http.Error todo -> msg) -> Cmd msg
+reposGetAccessRestrictions :
+    (Result Http.Error BranchRestrictionPolicy -> msg) -> Cmd msg
 reposGetAccessRestrictions toMsg =
     Http.get
         { url =
             "/repos/{owner}/{repo}/branches/{branch}/protection/restrictions"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeBranchRestrictionPolicy
         }
 
 
@@ -1658,7 +1807,8 @@ reposGetAppsWithAccessToProtectedBranch toMsg =
     Http.get
         { url =
             "/repos/{owner}/{repo}/branches/{branch}/protection/restrictions/apps"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -1668,7 +1818,8 @@ reposGetTeamsWithAccessToProtectedBranch toMsg =
     Http.get
         { url =
             "/repos/{owner}/{repo}/branches/{branch}/protection/restrictions/teams"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -1678,15 +1829,16 @@ reposGetUsersWithAccessToProtectedBranch toMsg =
     Http.get
         { url =
             "/repos/{owner}/{repo}/branches/{branch}/protection/restrictions/users"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
-checksGet : (Result Http.Error todo -> msg) -> Cmd msg
+checksGet : (Result Http.Error CheckRun -> msg) -> Cmd msg
 checksGet toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/check-runs/{check_run_id}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeCheckRun
         }
 
 
@@ -1694,15 +1846,16 @@ checksListAnnotations : (Result Http.Error todo -> msg) -> Cmd msg
 checksListAnnotations toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/check-runs/{check_run_id}/annotations"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
-checksGetSuite : (Result Http.Error todo -> msg) -> Cmd msg
+checksGetSuite : (Result Http.Error CheckSuite -> msg) -> Cmd msg
 checksGetSuite toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/check-suites/{check_suite_id}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeCheckSuite
         }
 
 
@@ -1710,7 +1863,8 @@ checksListForSuite : (Result Http.Error todo -> msg) -> Cmd msg
 checksListForSuite toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/check-suites/{check_suite_id}/check-runs"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -1718,15 +1872,16 @@ codeScanningListAlertsForRepo : (Result Http.Error todo -> msg) -> Cmd msg
 codeScanningListAlertsForRepo toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/code-scanning/alerts"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
-codeScanningGetAlert : (Result Http.Error todo -> msg) -> Cmd msg
+codeScanningGetAlert : (Result Http.Error CodeScanningAlert -> msg) -> Cmd msg
 codeScanningGetAlert toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/code-scanning/alerts/{alert_number}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeCodeScanningAlert
         }
 
 
@@ -1735,7 +1890,8 @@ codeScanningListAlertInstances toMsg =
     Http.get
         { url =
             "/repos/{owner}/{repo}/code-scanning/alerts/{alert_number}/instances"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -1743,15 +1899,17 @@ codeScanningListRecentAnalyses : (Result Http.Error todo -> msg) -> Cmd msg
 codeScanningListRecentAnalyses toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/code-scanning/analyses"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
-codeScanningGetAnalysis : (Result Http.Error todo -> msg) -> Cmd msg
+codeScanningGetAnalysis :
+    (Result Http.Error CodeScanningAnalysis -> msg) -> Cmd msg
 codeScanningGetAnalysis toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/code-scanning/analyses/{analysis_id}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeCodeScanningAnalysis
         }
 
 
@@ -1759,32 +1917,35 @@ codeScanningListCodeqlDatabases : (Result Http.Error todo -> msg) -> Cmd msg
 codeScanningListCodeqlDatabases toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/code-scanning/codeql/databases"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
-codeScanningGetCodeqlDatabase : (Result Http.Error todo -> msg) -> Cmd msg
+codeScanningGetCodeqlDatabase :
+    (Result Http.Error CodeScanningCodeqlDatabase -> msg) -> Cmd msg
 codeScanningGetCodeqlDatabase toMsg =
     Http.get
         { url =
             "/repos/{owner}/{repo}/code-scanning/codeql/databases/{language}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeCodeScanningCodeqlDatabase
         }
 
 
-codeScanningGetSarif : (Result Http.Error todo -> msg) -> Cmd msg
+codeScanningGetSarif :
+    (Result Http.Error CodeScanningSarifsStatus -> msg) -> Cmd msg
 codeScanningGetSarif toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/code-scanning/sarifs/{sarif_id}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeCodeScanningSarifsStatus
         }
 
 
-reposCodeownersErrors : (Result Http.Error todo -> msg) -> Cmd msg
+reposCodeownersErrors : (Result Http.Error CodeownersErrors -> msg) -> Cmd msg
 reposCodeownersErrors toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/codeowners/errors"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeCodeownersErrors
         }
 
 
@@ -1793,7 +1954,8 @@ codespacesListInRepositoryForAuthenticatedUser :
 codespacesListInRepositoryForAuthenticatedUser toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/codespaces"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -1802,7 +1964,8 @@ codespacesListDevcontainersInRepositoryForAuthenticatedUser :
 codespacesListDevcontainersInRepositoryForAuthenticatedUser toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/codespaces/devcontainers"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -1811,7 +1974,8 @@ codespacesRepoMachinesForAuthenticatedUser :
 codespacesRepoMachinesForAuthenticatedUser toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/codespaces/machines"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -1820,7 +1984,8 @@ codespacesPreFlightWithRepoForAuthenticatedUser :
 codespacesPreFlightWithRepoForAuthenticatedUser toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/codespaces/new"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -1828,23 +1993,26 @@ codespacesListRepoSecrets : (Result Http.Error todo -> msg) -> Cmd msg
 codespacesListRepoSecrets toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/codespaces/secrets"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
-codespacesGetRepoPublicKey : (Result Http.Error todo -> msg) -> Cmd msg
+codespacesGetRepoPublicKey :
+    (Result Http.Error CodespacesPublicKey -> msg) -> Cmd msg
 codespacesGetRepoPublicKey toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/codespaces/secrets/public-key"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeCodespacesPublicKey
         }
 
 
-codespacesGetRepoSecret : (Result Http.Error todo -> msg) -> Cmd msg
+codespacesGetRepoSecret :
+    (Result Http.Error RepoCodespacesSecret -> msg) -> Cmd msg
 codespacesGetRepoSecret toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/codespaces/secrets/{secret_name}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeRepoCodespacesSecret
         }
 
 
@@ -1852,7 +2020,8 @@ reposListCollaborators : (Result Http.Error todo -> msg) -> Cmd msg
 reposListCollaborators toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/collaborators"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -1860,15 +2029,17 @@ reposCheckCollaborator : (Result Http.Error todo -> msg) -> Cmd msg
 reposCheckCollaborator toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/collaborators/{username}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
-reposGetCollaboratorPermissionLevel : (Result Http.Error todo -> msg) -> Cmd msg
+reposGetCollaboratorPermissionLevel :
+    (Result Http.Error RepositoryCollaboratorPermission -> msg) -> Cmd msg
 reposGetCollaboratorPermissionLevel toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/collaborators/{username}/permission"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeRepositoryCollaboratorPermission
         }
 
 
@@ -1876,15 +2047,16 @@ reposListCommitCommentsForRepo : (Result Http.Error todo -> msg) -> Cmd msg
 reposListCommitCommentsForRepo toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/comments"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
-reposGetCommitComment : (Result Http.Error todo -> msg) -> Cmd msg
+reposGetCommitComment : (Result Http.Error CommitComment -> msg) -> Cmd msg
 reposGetCommitComment toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/comments/{comment_id}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeCommitComment
         }
 
 
@@ -1892,7 +2064,8 @@ reactionsListForCommitComment : (Result Http.Error todo -> msg) -> Cmd msg
 reactionsListForCommitComment toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/comments/{comment_id}/reactions"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -1900,7 +2073,8 @@ reposListCommits : (Result Http.Error todo -> msg) -> Cmd msg
 reposListCommits toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/commits"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -1908,7 +2082,8 @@ reposListBranchesForHeadCommit : (Result Http.Error todo -> msg) -> Cmd msg
 reposListBranchesForHeadCommit toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/commits/{commit_sha}/branches-where-head"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -1916,7 +2091,8 @@ reposListCommentsForCommit : (Result Http.Error todo -> msg) -> Cmd msg
 reposListCommentsForCommit toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/commits/{commit_sha}/comments"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -1925,15 +2101,16 @@ reposListPullRequestsAssociatedWithCommit :
 reposListPullRequestsAssociatedWithCommit toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/commits/{commit_sha}/pulls"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
-reposGetCommit : (Result Http.Error todo -> msg) -> Cmd msg
+reposGetCommit : (Result Http.Error Commit -> msg) -> Cmd msg
 reposGetCommit toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/commits/{ref}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeCommit
         }
 
 
@@ -1941,7 +2118,8 @@ checksListForRef : (Result Http.Error todo -> msg) -> Cmd msg
 checksListForRef toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/commits/{ref}/check-runs"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -1949,15 +2127,17 @@ checksListSuitesForRef : (Result Http.Error todo -> msg) -> Cmd msg
 checksListSuitesForRef toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/commits/{ref}/check-suites"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
-reposGetCombinedStatusForRef : (Result Http.Error todo -> msg) -> Cmd msg
+reposGetCombinedStatusForRef :
+    (Result Http.Error CombinedCommitStatus -> msg) -> Cmd msg
 reposGetCombinedStatusForRef toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/commits/{ref}/status"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeCombinedCommitStatus
         }
 
 
@@ -1965,23 +2145,25 @@ reposListCommitStatusesForRef : (Result Http.Error todo -> msg) -> Cmd msg
 reposListCommitStatusesForRef toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/commits/{ref}/statuses"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
-reposGetCommunityProfileMetrics : (Result Http.Error todo -> msg) -> Cmd msg
+reposGetCommunityProfileMetrics :
+    (Result Http.Error CommunityProfile -> msg) -> Cmd msg
 reposGetCommunityProfileMetrics toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/community/profile"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeCommunityProfile
         }
 
 
-reposCompareCommits : (Result Http.Error todo -> msg) -> Cmd msg
+reposCompareCommits : (Result Http.Error CommitComparison -> msg) -> Cmd msg
 reposCompareCommits toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/compare/{basehead}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeCommitComparison
         }
 
 
@@ -1989,7 +2171,8 @@ reposGetContent : (Result Http.Error todo -> msg) -> Cmd msg
 reposGetContent toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/contents/{path}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -1997,7 +2180,8 @@ reposListContributors : (Result Http.Error todo -> msg) -> Cmd msg
 reposListContributors toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/contributors"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -2005,15 +2189,16 @@ dependabotListAlertsForRepo : (Result Http.Error todo -> msg) -> Cmd msg
 dependabotListAlertsForRepo toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/dependabot/alerts"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
-dependabotGetAlert : (Result Http.Error todo -> msg) -> Cmd msg
+dependabotGetAlert : (Result Http.Error DependabotAlert -> msg) -> Cmd msg
 dependabotGetAlert toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/dependabot/alerts/{alert_number}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeDependabotAlert
         }
 
 
@@ -2021,31 +2206,34 @@ dependabotListRepoSecrets : (Result Http.Error todo -> msg) -> Cmd msg
 dependabotListRepoSecrets toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/dependabot/secrets"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
-dependabotGetRepoPublicKey : (Result Http.Error todo -> msg) -> Cmd msg
+dependabotGetRepoPublicKey :
+    (Result Http.Error DependabotPublicKey -> msg) -> Cmd msg
 dependabotGetRepoPublicKey toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/dependabot/secrets/public-key"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeDependabotPublicKey
         }
 
 
-dependabotGetRepoSecret : (Result Http.Error todo -> msg) -> Cmd msg
+dependabotGetRepoSecret : (Result Http.Error DependabotSecret -> msg) -> Cmd msg
 dependabotGetRepoSecret toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/dependabot/secrets/{secret_name}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeDependabotSecret
         }
 
 
-dependencyGraphDiffRange : (Result Http.Error todo -> msg) -> Cmd msg
+dependencyGraphDiffRange :
+    (Result Http.Error DependencyGraphDiff -> msg) -> Cmd msg
 dependencyGraphDiffRange toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/dependency-graph/compare/{basehead}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeDependencyGraphDiff
         }
 
 
@@ -2053,15 +2241,16 @@ reposListDeployments : (Result Http.Error todo -> msg) -> Cmd msg
 reposListDeployments toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/deployments"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
-reposGetDeployment : (Result Http.Error todo -> msg) -> Cmd msg
+reposGetDeployment : (Result Http.Error Deployment -> msg) -> Cmd msg
 reposGetDeployment toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/deployments/{deployment_id}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeDeployment
         }
 
 
@@ -2069,16 +2258,18 @@ reposListDeploymentStatuses : (Result Http.Error todo -> msg) -> Cmd msg
 reposListDeploymentStatuses toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/deployments/{deployment_id}/statuses"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
-reposGetDeploymentStatus : (Result Http.Error todo -> msg) -> Cmd msg
+reposGetDeploymentStatus :
+    (Result Http.Error DeploymentStatus -> msg) -> Cmd msg
 reposGetDeploymentStatus toMsg =
     Http.get
         { url =
             "/repos/{owner}/{repo}/deployments/{deployment_id}/statuses/{status_id}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeDeploymentStatus
         }
 
 
@@ -2086,15 +2277,16 @@ reposGetAllEnvironments : (Result Http.Error todo -> msg) -> Cmd msg
 reposGetAllEnvironments toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/environments"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
-reposGetEnvironment : (Result Http.Error todo -> msg) -> Cmd msg
+reposGetEnvironment : (Result Http.Error Environment -> msg) -> Cmd msg
 reposGetEnvironment toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/environments/{environment_name}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeEnvironment
         }
 
 
@@ -2103,16 +2295,18 @@ reposListDeploymentBranchPolicies toMsg =
     Http.get
         { url =
             "/repos/{owner}/{repo}/environments/{environment_name}/deployment-branch-policies"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
-reposGetDeploymentBranchPolicy : (Result Http.Error todo -> msg) -> Cmd msg
+reposGetDeploymentBranchPolicy :
+    (Result Http.Error DeploymentBranchPolicy -> msg) -> Cmd msg
 reposGetDeploymentBranchPolicy toMsg =
     Http.get
         { url =
             "/repos/{owner}/{repo}/environments/{environment_name}/deployment-branch-policies/{branch_policy_id}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeDeploymentBranchPolicy
         }
 
 
@@ -2120,7 +2314,8 @@ activityListRepoEvents : (Result Http.Error todo -> msg) -> Cmd msg
 activityListRepoEvents toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/events"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -2128,23 +2323,24 @@ reposListForks : (Result Http.Error todo -> msg) -> Cmd msg
 reposListForks toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/forks"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
-gitGetBlob : (Result Http.Error todo -> msg) -> Cmd msg
+gitGetBlob : (Result Http.Error Blob -> msg) -> Cmd msg
 gitGetBlob toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/git/blobs/{file_sha}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeBlob
         }
 
 
-gitGetCommit : (Result Http.Error todo -> msg) -> Cmd msg
+gitGetCommit : (Result Http.Error GitCommit -> msg) -> Cmd msg
 gitGetCommit toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/git/commits/{commit_sha}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeGitCommit
         }
 
 
@@ -2152,31 +2348,32 @@ gitListMatchingRefs : (Result Http.Error todo -> msg) -> Cmd msg
 gitListMatchingRefs toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/git/matching-refs/{ref}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
-gitGetRef : (Result Http.Error todo -> msg) -> Cmd msg
+gitGetRef : (Result Http.Error GitRef -> msg) -> Cmd msg
 gitGetRef toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/git/ref/{ref}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeGitRef
         }
 
 
-gitGetTag : (Result Http.Error todo -> msg) -> Cmd msg
+gitGetTag : (Result Http.Error GitTag -> msg) -> Cmd msg
 gitGetTag toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/git/tags/{tag_sha}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeGitTag
         }
 
 
-gitGetTree : (Result Http.Error todo -> msg) -> Cmd msg
+gitGetTree : (Result Http.Error GitTree -> msg) -> Cmd msg
 gitGetTree toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/git/trees/{tree_sha}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeGitTree
         }
 
 
@@ -2184,23 +2381,25 @@ reposListWebhooks : (Result Http.Error todo -> msg) -> Cmd msg
 reposListWebhooks toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/hooks"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
-reposGetWebhook : (Result Http.Error todo -> msg) -> Cmd msg
+reposGetWebhook : (Result Http.Error Hook -> msg) -> Cmd msg
 reposGetWebhook toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/hooks/{hook_id}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeHook
         }
 
 
-reposGetWebhookConfigForRepo : (Result Http.Error todo -> msg) -> Cmd msg
+reposGetWebhookConfigForRepo :
+    (Result Http.Error WebhookConfig -> msg) -> Cmd msg
 reposGetWebhookConfigForRepo toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/hooks/{hook_id}/config"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeWebhookConfig
         }
 
 
@@ -2208,23 +2407,24 @@ reposListWebhookDeliveries : (Result Http.Error todo -> msg) -> Cmd msg
 reposListWebhookDeliveries toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/hooks/{hook_id}/deliveries"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
-reposGetWebhookDelivery : (Result Http.Error todo -> msg) -> Cmd msg
+reposGetWebhookDelivery : (Result Http.Error HookDelivery -> msg) -> Cmd msg
 reposGetWebhookDelivery toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/hooks/{hook_id}/deliveries/{delivery_id}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeHookDelivery
         }
 
 
-migrationsGetImportStatus : (Result Http.Error todo -> msg) -> Cmd msg
+migrationsGetImportStatus : (Result Http.Error Import -> msg) -> Cmd msg
 migrationsGetImportStatus toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/import"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeImport
         }
 
 
@@ -2232,7 +2432,8 @@ migrationsGetCommitAuthors : (Result Http.Error todo -> msg) -> Cmd msg
 migrationsGetCommitAuthors toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/import/authors"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -2240,15 +2441,16 @@ migrationsGetLargeFiles : (Result Http.Error todo -> msg) -> Cmd msg
 migrationsGetLargeFiles toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/import/large_files"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
-appsGetRepoInstallation : (Result Http.Error todo -> msg) -> Cmd msg
+appsGetRepoInstallation : (Result Http.Error Installation -> msg) -> Cmd msg
 appsGetRepoInstallation toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/installation"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeInstallation
         }
 
 
@@ -2256,7 +2458,8 @@ interactionsGetRestrictionsForRepo : (Result Http.Error todo -> msg) -> Cmd msg
 interactionsGetRestrictionsForRepo toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/interaction-limits"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -2264,7 +2467,8 @@ reposListInvitations : (Result Http.Error todo -> msg) -> Cmd msg
 reposListInvitations toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/invitations"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -2272,7 +2476,8 @@ issuesListForRepo : (Result Http.Error todo -> msg) -> Cmd msg
 issuesListForRepo toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/issues"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -2280,15 +2485,16 @@ issuesListCommentsForRepo : (Result Http.Error todo -> msg) -> Cmd msg
 issuesListCommentsForRepo toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/issues/comments"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
-issuesGetComment : (Result Http.Error todo -> msg) -> Cmd msg
+issuesGetComment : (Result Http.Error IssueComment -> msg) -> Cmd msg
 issuesGetComment toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/issues/comments/{comment_id}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeIssueComment
         }
 
 
@@ -2296,7 +2502,8 @@ reactionsListForIssueComment : (Result Http.Error todo -> msg) -> Cmd msg
 reactionsListForIssueComment toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/issues/comments/{comment_id}/reactions"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -2304,23 +2511,24 @@ issuesListEventsForRepo : (Result Http.Error todo -> msg) -> Cmd msg
 issuesListEventsForRepo toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/issues/events"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
-issuesGetEvent : (Result Http.Error todo -> msg) -> Cmd msg
+issuesGetEvent : (Result Http.Error IssueEvent -> msg) -> Cmd msg
 issuesGetEvent toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/issues/events/{event_id}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeIssueEvent
         }
 
 
-issuesGet : (Result Http.Error todo -> msg) -> Cmd msg
+issuesGet : (Result Http.Error Issue -> msg) -> Cmd msg
 issuesGet toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/issues/{issue_number}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeIssue
         }
 
 
@@ -2328,7 +2536,8 @@ issuesListComments : (Result Http.Error todo -> msg) -> Cmd msg
 issuesListComments toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/issues/{issue_number}/comments"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -2336,7 +2545,8 @@ issuesListEvents : (Result Http.Error todo -> msg) -> Cmd msg
 issuesListEvents toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/issues/{issue_number}/events"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -2344,7 +2554,8 @@ issuesListLabelsOnIssue : (Result Http.Error todo -> msg) -> Cmd msg
 issuesListLabelsOnIssue toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/issues/{issue_number}/labels"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -2352,7 +2563,8 @@ reactionsListForIssue : (Result Http.Error todo -> msg) -> Cmd msg
 reactionsListForIssue toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/issues/{issue_number}/reactions"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -2360,7 +2572,8 @@ issuesListEventsForTimeline : (Result Http.Error todo -> msg) -> Cmd msg
 issuesListEventsForTimeline toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/issues/{issue_number}/timeline"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -2368,15 +2581,16 @@ reposListDeployKeys : (Result Http.Error todo -> msg) -> Cmd msg
 reposListDeployKeys toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/keys"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
-reposGetDeployKey : (Result Http.Error todo -> msg) -> Cmd msg
+reposGetDeployKey : (Result Http.Error DeployKey -> msg) -> Cmd msg
 reposGetDeployKey toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/keys/{key_id}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeDeployKey
         }
 
 
@@ -2384,31 +2598,32 @@ issuesListLabelsForRepo : (Result Http.Error todo -> msg) -> Cmd msg
 issuesListLabelsForRepo toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/labels"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
-issuesGetLabel : (Result Http.Error todo -> msg) -> Cmd msg
+issuesGetLabel : (Result Http.Error Label -> msg) -> Cmd msg
 issuesGetLabel toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/labels/{name}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeLabel
         }
 
 
-reposListLanguages : (Result Http.Error todo -> msg) -> Cmd msg
+reposListLanguages : (Result Http.Error Language -> msg) -> Cmd msg
 reposListLanguages toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/languages"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeLanguage
         }
 
 
-licensesGetForRepo : (Result Http.Error todo -> msg) -> Cmd msg
+licensesGetForRepo : (Result Http.Error LicenseContent -> msg) -> Cmd msg
 licensesGetForRepo toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/license"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeLicenseContent
         }
 
 
@@ -2416,15 +2631,16 @@ issuesListMilestones : (Result Http.Error todo -> msg) -> Cmd msg
 issuesListMilestones toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/milestones"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
-issuesGetMilestone : (Result Http.Error todo -> msg) -> Cmd msg
+issuesGetMilestone : (Result Http.Error Milestone -> msg) -> Cmd msg
 issuesGetMilestone toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/milestones/{milestone_number}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeMilestone
         }
 
 
@@ -2432,7 +2648,8 @@ issuesListLabelsForMilestone : (Result Http.Error todo -> msg) -> Cmd msg
 issuesListLabelsForMilestone toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/milestones/{milestone_number}/labels"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -2441,15 +2658,16 @@ activityListRepoNotificationsForAuthenticatedUser :
 activityListRepoNotificationsForAuthenticatedUser toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/notifications"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
-reposGetPages : (Result Http.Error todo -> msg) -> Cmd msg
+reposGetPages : (Result Http.Error Page -> msg) -> Cmd msg
 reposGetPages toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/pages"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodePage
         }
 
 
@@ -2457,31 +2675,33 @@ reposListPagesBuilds : (Result Http.Error todo -> msg) -> Cmd msg
 reposListPagesBuilds toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/pages/builds"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
-reposGetLatestPagesBuild : (Result Http.Error todo -> msg) -> Cmd msg
+reposGetLatestPagesBuild : (Result Http.Error PageBuild -> msg) -> Cmd msg
 reposGetLatestPagesBuild toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/pages/builds/latest"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodePageBuild
         }
 
 
-reposGetPagesBuild : (Result Http.Error todo -> msg) -> Cmd msg
+reposGetPagesBuild : (Result Http.Error PageBuild -> msg) -> Cmd msg
 reposGetPagesBuild toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/pages/builds/{build_id}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodePageBuild
         }
 
 
-reposGetPagesHealthCheck : (Result Http.Error todo -> msg) -> Cmd msg
+reposGetPagesHealthCheck :
+    (Result Http.Error PagesHealthCheck -> msg) -> Cmd msg
 reposGetPagesHealthCheck toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/pages/health"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodePagesHealthCheck
         }
 
 
@@ -2489,7 +2709,8 @@ projectsListForRepo : (Result Http.Error todo -> msg) -> Cmd msg
 projectsListForRepo toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/projects"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -2497,7 +2718,8 @@ pullsList : (Result Http.Error todo -> msg) -> Cmd msg
 pullsList toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/pulls"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -2505,15 +2727,17 @@ pullsListReviewCommentsForRepo : (Result Http.Error todo -> msg) -> Cmd msg
 pullsListReviewCommentsForRepo toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/pulls/comments"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
-pullsGetReviewComment : (Result Http.Error todo -> msg) -> Cmd msg
+pullsGetReviewComment :
+    (Result Http.Error PullRequestReviewComment -> msg) -> Cmd msg
 pullsGetReviewComment toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/pulls/comments/{comment_id}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodePullRequestReviewComment
         }
 
 
@@ -2522,15 +2746,16 @@ reactionsListForPullRequestReviewComment :
 reactionsListForPullRequestReviewComment toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/pulls/comments/{comment_id}/reactions"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
-pullsGet : (Result Http.Error todo -> msg) -> Cmd msg
+pullsGet : (Result Http.Error PullRequest -> msg) -> Cmd msg
 pullsGet toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/pulls/{pull_number}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodePullRequest
         }
 
 
@@ -2538,7 +2763,8 @@ pullsListReviewComments : (Result Http.Error todo -> msg) -> Cmd msg
 pullsListReviewComments toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/pulls/{pull_number}/comments"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -2546,7 +2772,8 @@ pullsListCommits : (Result Http.Error todo -> msg) -> Cmd msg
 pullsListCommits toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/pulls/{pull_number}/commits"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -2554,7 +2781,8 @@ pullsListFiles : (Result Http.Error todo -> msg) -> Cmd msg
 pullsListFiles toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/pulls/{pull_number}/files"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -2562,15 +2790,17 @@ pullsCheckIfMerged : (Result Http.Error todo -> msg) -> Cmd msg
 pullsCheckIfMerged toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/pulls/{pull_number}/merge"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
-pullsListRequestedReviewers : (Result Http.Error todo -> msg) -> Cmd msg
+pullsListRequestedReviewers :
+    (Result Http.Error PullRequestReviewRequest -> msg) -> Cmd msg
 pullsListRequestedReviewers toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/pulls/{pull_number}/requested_reviewers"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodePullRequestReviewRequest
         }
 
 
@@ -2578,15 +2808,16 @@ pullsListReviews : (Result Http.Error todo -> msg) -> Cmd msg
 pullsListReviews toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/pulls/{pull_number}/reviews"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
-pullsGetReview : (Result Http.Error todo -> msg) -> Cmd msg
+pullsGetReview : (Result Http.Error PullRequestReview -> msg) -> Cmd msg
 pullsGetReview toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/pulls/{pull_number}/reviews/{review_id}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodePullRequestReview
         }
 
 
@@ -2595,23 +2826,24 @@ pullsListCommentsForReview toMsg =
     Http.get
         { url =
             "/repos/{owner}/{repo}/pulls/{pull_number}/reviews/{review_id}/comments"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
-reposGetReadme : (Result Http.Error todo -> msg) -> Cmd msg
+reposGetReadme : (Result Http.Error ContentFile -> msg) -> Cmd msg
 reposGetReadme toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/readme"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeContentFile
         }
 
 
-reposGetReadmeInDirectory : (Result Http.Error todo -> msg) -> Cmd msg
+reposGetReadmeInDirectory : (Result Http.Error ContentFile -> msg) -> Cmd msg
 reposGetReadmeInDirectory toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/readme/{dir}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeContentFile
         }
 
 
@@ -2619,39 +2851,40 @@ reposListReleases : (Result Http.Error todo -> msg) -> Cmd msg
 reposListReleases toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/releases"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
-reposGetReleaseAsset : (Result Http.Error todo -> msg) -> Cmd msg
+reposGetReleaseAsset : (Result Http.Error ReleaseAsset -> msg) -> Cmd msg
 reposGetReleaseAsset toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/releases/assets/{asset_id}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeReleaseAsset
         }
 
 
-reposGetLatestRelease : (Result Http.Error todo -> msg) -> Cmd msg
+reposGetLatestRelease : (Result Http.Error Release -> msg) -> Cmd msg
 reposGetLatestRelease toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/releases/latest"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeRelease
         }
 
 
-reposGetReleaseByTag : (Result Http.Error todo -> msg) -> Cmd msg
+reposGetReleaseByTag : (Result Http.Error Release -> msg) -> Cmd msg
 reposGetReleaseByTag toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/releases/tags/{tag}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeRelease
         }
 
 
-reposGetRelease : (Result Http.Error todo -> msg) -> Cmd msg
+reposGetRelease : (Result Http.Error Release -> msg) -> Cmd msg
 reposGetRelease toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/releases/{release_id}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeRelease
         }
 
 
@@ -2659,7 +2892,8 @@ reposListReleaseAssets : (Result Http.Error todo -> msg) -> Cmd msg
 reposListReleaseAssets toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/releases/{release_id}/assets"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -2667,7 +2901,8 @@ reactionsListForRelease : (Result Http.Error todo -> msg) -> Cmd msg
 reactionsListForRelease toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/releases/{release_id}/reactions"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -2675,15 +2910,17 @@ secretScanningListAlertsForRepo : (Result Http.Error todo -> msg) -> Cmd msg
 secretScanningListAlertsForRepo toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/secret-scanning/alerts"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
-secretScanningGetAlert : (Result Http.Error todo -> msg) -> Cmd msg
+secretScanningGetAlert :
+    (Result Http.Error SecretScanningAlert -> msg) -> Cmd msg
 secretScanningGetAlert toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/secret-scanning/alerts/{alert_number}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeSecretScanningAlert
         }
 
 
@@ -2692,7 +2929,8 @@ secretScanningListLocationsForAlert toMsg =
     Http.get
         { url =
             "/repos/{owner}/{repo}/secret-scanning/alerts/{alert_number}/locations"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -2700,7 +2938,8 @@ activityListStargazersForRepo : (Result Http.Error todo -> msg) -> Cmd msg
 activityListStargazersForRepo toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/stargazers"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -2708,7 +2947,8 @@ reposGetCodeFrequencyStats : (Result Http.Error todo -> msg) -> Cmd msg
 reposGetCodeFrequencyStats toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/stats/code_frequency"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -2716,7 +2956,8 @@ reposGetCommitActivityStats : (Result Http.Error todo -> msg) -> Cmd msg
 reposGetCommitActivityStats toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/stats/commit_activity"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -2724,15 +2965,17 @@ reposGetContributorsStats : (Result Http.Error todo -> msg) -> Cmd msg
 reposGetContributorsStats toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/stats/contributors"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
-reposGetParticipationStats : (Result Http.Error todo -> msg) -> Cmd msg
+reposGetParticipationStats :
+    (Result Http.Error ParticipationStats -> msg) -> Cmd msg
 reposGetParticipationStats toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/stats/participation"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeParticipationStats
         }
 
 
@@ -2740,7 +2983,8 @@ reposGetPunchCardStats : (Result Http.Error todo -> msg) -> Cmd msg
 reposGetPunchCardStats toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/stats/punch_card"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -2748,15 +2992,17 @@ activityListWatchersForRepo : (Result Http.Error todo -> msg) -> Cmd msg
 activityListWatchersForRepo toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/subscribers"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
-activityGetRepoSubscription : (Result Http.Error todo -> msg) -> Cmd msg
+activityGetRepoSubscription :
+    (Result Http.Error RepositorySubscription -> msg) -> Cmd msg
 activityGetRepoSubscription toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/subscription"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeRepositorySubscription
         }
 
 
@@ -2764,7 +3010,8 @@ reposListTags : (Result Http.Error todo -> msg) -> Cmd msg
 reposListTags toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/tags"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -2772,7 +3019,8 @@ reposListTagProtection : (Result Http.Error todo -> msg) -> Cmd msg
 reposListTagProtection toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/tags/protection"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -2780,7 +3028,8 @@ reposDownloadTarballArchive : (Result Http.Error todo -> msg) -> Cmd msg
 reposDownloadTarballArchive toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/tarball/{ref}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -2788,23 +3037,24 @@ reposListTeams : (Result Http.Error todo -> msg) -> Cmd msg
 reposListTeams toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/teams"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
-reposGetAllTopics : (Result Http.Error todo -> msg) -> Cmd msg
+reposGetAllTopics : (Result Http.Error Topic -> msg) -> Cmd msg
 reposGetAllTopics toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/topics"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeTopic
         }
 
 
-reposGetClones : (Result Http.Error todo -> msg) -> Cmd msg
+reposGetClones : (Result Http.Error CloneTraffic -> msg) -> Cmd msg
 reposGetClones toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/traffic/clones"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeCloneTraffic
         }
 
 
@@ -2812,7 +3062,8 @@ reposGetTopPaths : (Result Http.Error todo -> msg) -> Cmd msg
 reposGetTopPaths toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/traffic/popular/paths"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -2820,15 +3071,16 @@ reposGetTopReferrers : (Result Http.Error todo -> msg) -> Cmd msg
 reposGetTopReferrers toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/traffic/popular/referrers"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
-reposGetViews : (Result Http.Error todo -> msg) -> Cmd msg
+reposGetViews : (Result Http.Error ViewTraffic -> msg) -> Cmd msg
 reposGetViews toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/traffic/views"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeViewTraffic
         }
 
 
@@ -2836,7 +3088,8 @@ reposCheckVulnerabilityAlerts : (Result Http.Error todo -> msg) -> Cmd msg
 reposCheckVulnerabilityAlerts toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/vulnerability-alerts"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -2844,7 +3097,8 @@ reposDownloadZipballArchive : (Result Http.Error todo -> msg) -> Cmd msg
 reposDownloadZipballArchive toMsg =
     Http.get
         { url = "/repos/{owner}/{repo}/zipball/{ref}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -2852,7 +3106,8 @@ reposListPublic : (Result Http.Error todo -> msg) -> Cmd msg
 reposListPublic toMsg =
     Http.get
         { url = "/repositories"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -2861,25 +3116,28 @@ actionsListEnvironmentSecrets toMsg =
     Http.get
         { url =
             "/repositories/{repository_id}/environments/{environment_name}/secrets"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
-actionsGetEnvironmentPublicKey : (Result Http.Error todo -> msg) -> Cmd msg
+actionsGetEnvironmentPublicKey :
+    (Result Http.Error ActionsPublicKey -> msg) -> Cmd msg
 actionsGetEnvironmentPublicKey toMsg =
     Http.get
         { url =
             "/repositories/{repository_id}/environments/{environment_name}/secrets/public-key"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeActionsPublicKey
         }
 
 
-actionsGetEnvironmentSecret : (Result Http.Error todo -> msg) -> Cmd msg
+actionsGetEnvironmentSecret :
+    (Result Http.Error ActionsSecret -> msg) -> Cmd msg
 actionsGetEnvironmentSecret toMsg =
     Http.get
         { url =
             "/repositories/{repository_id}/environments/{environment_name}/secrets/{secret_name}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeActionsSecret
         }
 
 
@@ -2887,7 +3145,8 @@ searchCode : (Result Http.Error todo -> msg) -> Cmd msg
 searchCode toMsg =
     Http.get
         { url = "/search/code"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -2895,7 +3154,8 @@ searchCommits : (Result Http.Error todo -> msg) -> Cmd msg
 searchCommits toMsg =
     Http.get
         { url = "/search/commits"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -2903,7 +3163,8 @@ searchIssuesAndPullRequests : (Result Http.Error todo -> msg) -> Cmd msg
 searchIssuesAndPullRequests toMsg =
     Http.get
         { url = "/search/issues"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -2911,7 +3172,8 @@ searchLabels : (Result Http.Error todo -> msg) -> Cmd msg
 searchLabels toMsg =
     Http.get
         { url = "/search/labels"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -2919,7 +3181,8 @@ searchRepos : (Result Http.Error todo -> msg) -> Cmd msg
 searchRepos toMsg =
     Http.get
         { url = "/search/repositories"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -2927,7 +3190,8 @@ searchTopics : (Result Http.Error todo -> msg) -> Cmd msg
 searchTopics toMsg =
     Http.get
         { url = "/search/topics"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -2935,15 +3199,16 @@ searchUsers : (Result Http.Error todo -> msg) -> Cmd msg
 searchUsers toMsg =
     Http.get
         { url = "/search/users"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
-teamsGetLegacy : (Result Http.Error todo -> msg) -> Cmd msg
+teamsGetLegacy : (Result Http.Error TeamFull -> msg) -> Cmd msg
 teamsGetLegacy toMsg =
     Http.get
         { url = "/teams/{team_id}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeTeamFull
         }
 
 
@@ -2951,15 +3216,16 @@ teamsListDiscussionsLegacy : (Result Http.Error todo -> msg) -> Cmd msg
 teamsListDiscussionsLegacy toMsg =
     Http.get
         { url = "/teams/{team_id}/discussions"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
-teamsGetDiscussionLegacy : (Result Http.Error todo -> msg) -> Cmd msg
+teamsGetDiscussionLegacy : (Result Http.Error TeamDiscussion -> msg) -> Cmd msg
 teamsGetDiscussionLegacy toMsg =
     Http.get
         { url = "/teams/{team_id}/discussions/{discussion_number}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeTeamDiscussion
         }
 
 
@@ -2967,16 +3233,18 @@ teamsListDiscussionCommentsLegacy : (Result Http.Error todo -> msg) -> Cmd msg
 teamsListDiscussionCommentsLegacy toMsg =
     Http.get
         { url = "/teams/{team_id}/discussions/{discussion_number}/comments"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
-teamsGetDiscussionCommentLegacy : (Result Http.Error todo -> msg) -> Cmd msg
+teamsGetDiscussionCommentLegacy :
+    (Result Http.Error TeamDiscussionComment -> msg) -> Cmd msg
 teamsGetDiscussionCommentLegacy toMsg =
     Http.get
         { url =
             "/teams/{team_id}/discussions/{discussion_number}/comments/{comment_number}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeTeamDiscussionComment
         }
 
 
@@ -2986,7 +3254,8 @@ reactionsListForTeamDiscussionCommentLegacy toMsg =
     Http.get
         { url =
             "/teams/{team_id}/discussions/{discussion_number}/comments/{comment_number}/reactions"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -2995,7 +3264,8 @@ reactionsListForTeamDiscussionLegacy :
 reactionsListForTeamDiscussionLegacy toMsg =
     Http.get
         { url = "/teams/{team_id}/discussions/{discussion_number}/reactions"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -3003,7 +3273,8 @@ teamsListPendingInvitationsLegacy : (Result Http.Error todo -> msg) -> Cmd msg
 teamsListPendingInvitationsLegacy toMsg =
     Http.get
         { url = "/teams/{team_id}/invitations"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -3011,7 +3282,8 @@ teamsListMembersLegacy : (Result Http.Error todo -> msg) -> Cmd msg
 teamsListMembersLegacy toMsg =
     Http.get
         { url = "/teams/{team_id}/members"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -3019,15 +3291,17 @@ teamsGetMemberLegacy : (Result Http.Error todo -> msg) -> Cmd msg
 teamsGetMemberLegacy toMsg =
     Http.get
         { url = "/teams/{team_id}/members/{username}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
-teamsGetMembershipForUserLegacy : (Result Http.Error todo -> msg) -> Cmd msg
+teamsGetMembershipForUserLegacy :
+    (Result Http.Error TeamMembership -> msg) -> Cmd msg
 teamsGetMembershipForUserLegacy toMsg =
     Http.get
         { url = "/teams/{team_id}/memberships/{username}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeTeamMembership
         }
 
 
@@ -3035,16 +3309,17 @@ teamsListProjectsLegacy : (Result Http.Error todo -> msg) -> Cmd msg
 teamsListProjectsLegacy toMsg =
     Http.get
         { url = "/teams/{team_id}/projects"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
 teamsCheckPermissionsForProjectLegacy :
-    (Result Http.Error todo -> msg) -> Cmd msg
+    (Result Http.Error TeamProject -> msg) -> Cmd msg
 teamsCheckPermissionsForProjectLegacy toMsg =
     Http.get
         { url = "/teams/{team_id}/projects/{project_id}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeTeamProject
         }
 
 
@@ -3052,15 +3327,17 @@ teamsListReposLegacy : (Result Http.Error todo -> msg) -> Cmd msg
 teamsListReposLegacy toMsg =
     Http.get
         { url = "/teams/{team_id}/repos"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
-teamsCheckPermissionsForRepoLegacy : (Result Http.Error todo -> msg) -> Cmd msg
+teamsCheckPermissionsForRepoLegacy :
+    (Result Http.Error TeamRepository -> msg) -> Cmd msg
 teamsCheckPermissionsForRepoLegacy toMsg =
     Http.get
         { url = "/teams/{team_id}/repos/{owner}/{repo}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeTeamRepository
         }
 
 
@@ -3068,21 +3345,26 @@ teamsListChildLegacy : (Result Http.Error todo -> msg) -> Cmd msg
 teamsListChildLegacy toMsg =
     Http.get
         { url = "/teams/{team_id}/teams"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
 usersGetAuthenticated : (Result Http.Error todo -> msg) -> Cmd msg
 usersGetAuthenticated toMsg =
     Http.get
-        { url = "/user", expect = Http.expectJson toMsg (Debug.todo "todo") }
+        { url = "/user"
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
+        }
 
 
 usersListBlockedByAuthenticatedUser : (Result Http.Error todo -> msg) -> Cmd msg
 usersListBlockedByAuthenticatedUser toMsg =
     Http.get
         { url = "/user/blocks"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -3090,7 +3372,8 @@ usersCheckBlocked : (Result Http.Error todo -> msg) -> Cmd msg
 usersCheckBlocked toMsg =
     Http.get
         { url = "/user/blocks/{username}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -3098,7 +3381,8 @@ codespacesListForAuthenticatedUser : (Result Http.Error todo -> msg) -> Cmd msg
 codespacesListForAuthenticatedUser toMsg =
     Http.get
         { url = "/user/codespaces"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -3107,25 +3391,26 @@ codespacesListSecretsForAuthenticatedUser :
 codespacesListSecretsForAuthenticatedUser toMsg =
     Http.get
         { url = "/user/codespaces/secrets"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
 codespacesGetPublicKeyForAuthenticatedUser :
-    (Result Http.Error todo -> msg) -> Cmd msg
+    (Result Http.Error CodespacesUserPublicKey -> msg) -> Cmd msg
 codespacesGetPublicKeyForAuthenticatedUser toMsg =
     Http.get
         { url = "/user/codespaces/secrets/public-key"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeCodespacesUserPublicKey
         }
 
 
 codespacesGetSecretForAuthenticatedUser :
-    (Result Http.Error todo -> msg) -> Cmd msg
+    (Result Http.Error CodespacesSecret -> msg) -> Cmd msg
 codespacesGetSecretForAuthenticatedUser toMsg =
     Http.get
         { url = "/user/codespaces/secrets/{secret_name}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeCodespacesSecret
         }
 
 
@@ -3134,24 +3419,26 @@ codespacesListRepositoriesForSecretForAuthenticatedUser :
 codespacesListRepositoriesForSecretForAuthenticatedUser toMsg =
     Http.get
         { url = "/user/codespaces/secrets/{secret_name}/repositories"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
-codespacesGetForAuthenticatedUser : (Result Http.Error todo -> msg) -> Cmd msg
+codespacesGetForAuthenticatedUser :
+    (Result Http.Error Codespace -> msg) -> Cmd msg
 codespacesGetForAuthenticatedUser toMsg =
     Http.get
         { url = "/user/codespaces/{codespace_name}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeCodespace
         }
 
 
 codespacesGetExportDetailsForAuthenticatedUser :
-    (Result Http.Error todo -> msg) -> Cmd msg
+    (Result Http.Error CodespaceExportDetails -> msg) -> Cmd msg
 codespacesGetExportDetailsForAuthenticatedUser toMsg =
     Http.get
         { url = "/user/codespaces/{codespace_name}/exports/{export_id}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeCodespaceExportDetails
         }
 
 
@@ -3160,7 +3447,8 @@ codespacesCodespaceMachinesForAuthenticatedUser :
 codespacesCodespaceMachinesForAuthenticatedUser toMsg =
     Http.get
         { url = "/user/codespaces/{codespace_name}/machines"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -3168,7 +3456,8 @@ usersListEmailsForAuthenticatedUser : (Result Http.Error todo -> msg) -> Cmd msg
 usersListEmailsForAuthenticatedUser toMsg =
     Http.get
         { url = "/user/emails"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -3177,7 +3466,8 @@ usersListFollowersForAuthenticatedUser :
 usersListFollowersForAuthenticatedUser toMsg =
     Http.get
         { url = "/user/followers"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -3186,7 +3476,8 @@ usersListFollowedByAuthenticatedUser :
 usersListFollowedByAuthenticatedUser toMsg =
     Http.get
         { url = "/user/following"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -3195,7 +3486,8 @@ usersCheckPersonIsFollowedByAuthenticated :
 usersCheckPersonIsFollowedByAuthenticated toMsg =
     Http.get
         { url = "/user/following/{username}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -3204,15 +3496,17 @@ usersListGpgKeysForAuthenticatedUser :
 usersListGpgKeysForAuthenticatedUser toMsg =
     Http.get
         { url = "/user/gpg_keys"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
-usersGetGpgKeyForAuthenticatedUser : (Result Http.Error todo -> msg) -> Cmd msg
+usersGetGpgKeyForAuthenticatedUser :
+    (Result Http.Error GpgKey -> msg) -> Cmd msg
 usersGetGpgKeyForAuthenticatedUser toMsg =
     Http.get
         { url = "/user/gpg_keys/{gpg_key_id}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeGpgKey
         }
 
 
@@ -3221,7 +3515,8 @@ appsListInstallationsForAuthenticatedUser :
 appsListInstallationsForAuthenticatedUser toMsg =
     Http.get
         { url = "/user/installations"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -3230,7 +3525,8 @@ appsListInstallationReposForAuthenticatedUser :
 appsListInstallationReposForAuthenticatedUser toMsg =
     Http.get
         { url = "/user/installations/{installation_id}/repositories"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -3239,7 +3535,8 @@ interactionsGetRestrictionsForAuthenticatedUser :
 interactionsGetRestrictionsForAuthenticatedUser toMsg =
     Http.get
         { url = "/user/interaction-limits"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -3247,7 +3544,8 @@ issuesListForAuthenticatedUser : (Result Http.Error todo -> msg) -> Cmd msg
 issuesListForAuthenticatedUser toMsg =
     Http.get
         { url = "/user/issues"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -3256,16 +3554,17 @@ usersListPublicSshKeysForAuthenticatedUser :
 usersListPublicSshKeysForAuthenticatedUser toMsg =
     Http.get
         { url = "/user/keys"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
 usersGetPublicSshKeyForAuthenticatedUser :
-    (Result Http.Error todo -> msg) -> Cmd msg
+    (Result Http.Error Key -> msg) -> Cmd msg
 usersGetPublicSshKeyForAuthenticatedUser toMsg =
     Http.get
         { url = "/user/keys/{key_id}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeKey
         }
 
 
@@ -3274,7 +3573,8 @@ appsListSubscriptionsForAuthenticatedUser :
 appsListSubscriptionsForAuthenticatedUser toMsg =
     Http.get
         { url = "/user/marketplace_purchases"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -3283,7 +3583,8 @@ appsListSubscriptionsForAuthenticatedUserStubbed :
 appsListSubscriptionsForAuthenticatedUserStubbed toMsg =
     Http.get
         { url = "/user/marketplace_purchases/stubbed"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -3292,16 +3593,17 @@ orgsListMembershipsForAuthenticatedUser :
 orgsListMembershipsForAuthenticatedUser toMsg =
     Http.get
         { url = "/user/memberships/orgs"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
 orgsGetMembershipForAuthenticatedUser :
-    (Result Http.Error todo -> msg) -> Cmd msg
+    (Result Http.Error OrgMembership -> msg) -> Cmd msg
 orgsGetMembershipForAuthenticatedUser toMsg =
     Http.get
         { url = "/user/memberships/orgs/{org}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeOrgMembership
         }
 
 
@@ -3309,16 +3611,17 @@ migrationsListForAuthenticatedUser : (Result Http.Error todo -> msg) -> Cmd msg
 migrationsListForAuthenticatedUser toMsg =
     Http.get
         { url = "/user/migrations"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
 migrationsGetStatusForAuthenticatedUser :
-    (Result Http.Error todo -> msg) -> Cmd msg
+    (Result Http.Error Migration -> msg) -> Cmd msg
 migrationsGetStatusForAuthenticatedUser toMsg =
     Http.get
         { url = "/user/migrations/{migration_id}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeMigration
         }
 
 
@@ -3327,7 +3630,8 @@ migrationsGetArchiveForAuthenticatedUser :
 migrationsGetArchiveForAuthenticatedUser toMsg =
     Http.get
         { url = "/user/migrations/{migration_id}/archive"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -3336,7 +3640,8 @@ migrationsListReposForAuthenticatedUser :
 migrationsListReposForAuthenticatedUser toMsg =
     Http.get
         { url = "/user/migrations/{migration_id}/repositories"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -3344,7 +3649,8 @@ orgsListForAuthenticatedUser : (Result Http.Error todo -> msg) -> Cmd msg
 orgsListForAuthenticatedUser toMsg =
     Http.get
         { url = "/user/orgs"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -3353,16 +3659,17 @@ packagesListPackagesForAuthenticatedUser :
 packagesListPackagesForAuthenticatedUser toMsg =
     Http.get
         { url = "/user/packages"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
 packagesGetPackageForAuthenticatedUser :
-    (Result Http.Error todo -> msg) -> Cmd msg
+    (Result Http.Error Package -> msg) -> Cmd msg
 packagesGetPackageForAuthenticatedUser toMsg =
     Http.get
         { url = "/user/packages/{package_type}/{package_name}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodePackage
         }
 
 
@@ -3371,17 +3678,18 @@ packagesGetAllPackageVersionsForPackageOwnedByAuthenticatedUser :
 packagesGetAllPackageVersionsForPackageOwnedByAuthenticatedUser toMsg =
     Http.get
         { url = "/user/packages/{package_type}/{package_name}/versions"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
 packagesGetPackageVersionForAuthenticatedUser :
-    (Result Http.Error todo -> msg) -> Cmd msg
+    (Result Http.Error PackageVersion -> msg) -> Cmd msg
 packagesGetPackageVersionForAuthenticatedUser toMsg =
     Http.get
         { url =
             "/user/packages/{package_type}/{package_name}/versions/{package_version_id}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodePackageVersion
         }
 
 
@@ -3390,7 +3698,8 @@ usersListPublicEmailsForAuthenticatedUser :
 usersListPublicEmailsForAuthenticatedUser toMsg =
     Http.get
         { url = "/user/public_emails"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -3398,7 +3707,8 @@ reposListForAuthenticatedUser : (Result Http.Error todo -> msg) -> Cmd msg
 reposListForAuthenticatedUser toMsg =
     Http.get
         { url = "/user/repos"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -3407,7 +3717,8 @@ reposListInvitationsForAuthenticatedUser :
 reposListInvitationsForAuthenticatedUser toMsg =
     Http.get
         { url = "/user/repository_invitations"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -3416,16 +3727,17 @@ usersListSshSigningKeysForAuthenticatedUser :
 usersListSshSigningKeysForAuthenticatedUser toMsg =
     Http.get
         { url = "/user/ssh_signing_keys"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
 usersGetSshSigningKeyForAuthenticatedUser :
-    (Result Http.Error todo -> msg) -> Cmd msg
+    (Result Http.Error SshSigningKey -> msg) -> Cmd msg
 usersGetSshSigningKeyForAuthenticatedUser toMsg =
     Http.get
         { url = "/user/ssh_signing_keys/{ssh_signing_key_id}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeSshSigningKey
         }
 
 
@@ -3434,7 +3746,8 @@ activityListReposStarredByAuthenticatedUser :
 activityListReposStarredByAuthenticatedUser toMsg =
     Http.get
         { url = "/user/starred"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -3443,7 +3756,8 @@ activityCheckRepoIsStarredByAuthenticatedUser :
 activityCheckRepoIsStarredByAuthenticatedUser toMsg =
     Http.get
         { url = "/user/starred/{owner}/{repo}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -3452,7 +3766,8 @@ activityListWatchedReposForAuthenticatedUser :
 activityListWatchedReposForAuthenticatedUser toMsg =
     Http.get
         { url = "/user/subscriptions"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -3460,21 +3775,26 @@ teamsListForAuthenticatedUser : (Result Http.Error todo -> msg) -> Cmd msg
 teamsListForAuthenticatedUser toMsg =
     Http.get
         { url = "/user/teams"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
 usersList : (Result Http.Error todo -> msg) -> Cmd msg
 usersList toMsg =
     Http.get
-        { url = "/users", expect = Http.expectJson toMsg (Debug.todo "todo") }
+        { url = "/users"
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
+        }
 
 
 usersGetByUsername : (Result Http.Error todo -> msg) -> Cmd msg
 usersGetByUsername toMsg =
     Http.get
         { url = "/users/{username}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -3483,7 +3803,8 @@ activityListEventsForAuthenticatedUser :
 activityListEventsForAuthenticatedUser toMsg =
     Http.get
         { url = "/users/{username}/events"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -3492,7 +3813,8 @@ activityListOrgEventsForAuthenticatedUser :
 activityListOrgEventsForAuthenticatedUser toMsg =
     Http.get
         { url = "/users/{username}/events/orgs/{org}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -3500,7 +3822,8 @@ activityListPublicEventsForUser : (Result Http.Error todo -> msg) -> Cmd msg
 activityListPublicEventsForUser toMsg =
     Http.get
         { url = "/users/{username}/events/public"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -3508,7 +3831,8 @@ usersListFollowersForUser : (Result Http.Error todo -> msg) -> Cmd msg
 usersListFollowersForUser toMsg =
     Http.get
         { url = "/users/{username}/followers"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -3516,7 +3840,8 @@ usersListFollowingForUser : (Result Http.Error todo -> msg) -> Cmd msg
 usersListFollowingForUser toMsg =
     Http.get
         { url = "/users/{username}/following"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -3524,7 +3849,8 @@ usersCheckFollowingForUser : (Result Http.Error todo -> msg) -> Cmd msg
 usersCheckFollowingForUser toMsg =
     Http.get
         { url = "/users/{username}/following/{target_user}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -3532,7 +3858,8 @@ gistsListForUser : (Result Http.Error todo -> msg) -> Cmd msg
 gistsListForUser toMsg =
     Http.get
         { url = "/users/{username}/gists"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -3540,23 +3867,24 @@ usersListGpgKeysForUser : (Result Http.Error todo -> msg) -> Cmd msg
 usersListGpgKeysForUser toMsg =
     Http.get
         { url = "/users/{username}/gpg_keys"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
-usersGetContextForUser : (Result Http.Error todo -> msg) -> Cmd msg
+usersGetContextForUser : (Result Http.Error Hovercard -> msg) -> Cmd msg
 usersGetContextForUser toMsg =
     Http.get
         { url = "/users/{username}/hovercard"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeHovercard
         }
 
 
-appsGetUserInstallation : (Result Http.Error todo -> msg) -> Cmd msg
+appsGetUserInstallation : (Result Http.Error Installation -> msg) -> Cmd msg
 appsGetUserInstallation toMsg =
     Http.get
         { url = "/users/{username}/installation"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeInstallation
         }
 
 
@@ -3564,7 +3892,8 @@ usersListPublicKeysForUser : (Result Http.Error todo -> msg) -> Cmd msg
 usersListPublicKeysForUser toMsg =
     Http.get
         { url = "/users/{username}/keys"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -3572,7 +3901,8 @@ orgsListForUser : (Result Http.Error todo -> msg) -> Cmd msg
 orgsListForUser toMsg =
     Http.get
         { url = "/users/{username}/orgs"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -3580,15 +3910,16 @@ packagesListPackagesForUser : (Result Http.Error todo -> msg) -> Cmd msg
 packagesListPackagesForUser toMsg =
     Http.get
         { url = "/users/{username}/packages"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
-packagesGetPackageForUser : (Result Http.Error todo -> msg) -> Cmd msg
+packagesGetPackageForUser : (Result Http.Error Package -> msg) -> Cmd msg
 packagesGetPackageForUser toMsg =
     Http.get
         { url = "/users/{username}/packages/{package_type}/{package_name}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodePackage
         }
 
 
@@ -3598,16 +3929,18 @@ packagesGetAllPackageVersionsForPackageOwnedByUser toMsg =
     Http.get
         { url =
             "/users/{username}/packages/{package_type}/{package_name}/versions"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
-packagesGetPackageVersionForUser : (Result Http.Error todo -> msg) -> Cmd msg
+packagesGetPackageVersionForUser :
+    (Result Http.Error PackageVersion -> msg) -> Cmd msg
 packagesGetPackageVersionForUser toMsg =
     Http.get
         { url =
             "/users/{username}/packages/{package_type}/{package_name}/versions/{package_version_id}"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodePackageVersion
         }
 
 
@@ -3615,7 +3948,8 @@ projectsListForUser : (Result Http.Error todo -> msg) -> Cmd msg
 projectsListForUser toMsg =
     Http.get
         { url = "/users/{username}/projects"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -3623,7 +3957,8 @@ activityListReceivedEventsForUser : (Result Http.Error todo -> msg) -> Cmd msg
 activityListReceivedEventsForUser toMsg =
     Http.get
         { url = "/users/{username}/received_events"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -3632,7 +3967,8 @@ activityListReceivedPublicEventsForUser :
 activityListReceivedPublicEventsForUser toMsg =
     Http.get
         { url = "/users/{username}/received_events/public"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -3640,31 +3976,35 @@ reposListForUser : (Result Http.Error todo -> msg) -> Cmd msg
 reposListForUser toMsg =
     Http.get
         { url = "/users/{username}/repos"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
-billingGetGithubActionsBillingUser : (Result Http.Error todo -> msg) -> Cmd msg
+billingGetGithubActionsBillingUser :
+    (Result Http.Error ActionsBillingUsage -> msg) -> Cmd msg
 billingGetGithubActionsBillingUser toMsg =
     Http.get
         { url = "/users/{username}/settings/billing/actions"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeActionsBillingUsage
         }
 
 
-billingGetGithubPackagesBillingUser : (Result Http.Error todo -> msg) -> Cmd msg
+billingGetGithubPackagesBillingUser :
+    (Result Http.Error PackagesBillingUsage -> msg) -> Cmd msg
 billingGetGithubPackagesBillingUser toMsg =
     Http.get
         { url = "/users/{username}/settings/billing/packages"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodePackagesBillingUsage
         }
 
 
-billingGetSharedStorageBillingUser : (Result Http.Error todo -> msg) -> Cmd msg
+billingGetSharedStorageBillingUser :
+    (Result Http.Error CombinedBillingUsage -> msg) -> Cmd msg
 billingGetSharedStorageBillingUser toMsg =
     Http.get
         { url = "/users/{username}/settings/billing/shared-storage"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect = Http.expectJson toMsg decodeCombinedBillingUsage
         }
 
 
@@ -3672,7 +4012,8 @@ usersListSshSigningKeysForUser : (Result Http.Error todo -> msg) -> Cmd msg
 usersListSshSigningKeysForUser toMsg =
     Http.get
         { url = "/users/{username}/ssh_signing_keys"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -3680,7 +4021,8 @@ activityListReposStarredByUser : (Result Http.Error todo -> msg) -> Cmd msg
 activityListReposStarredByUser toMsg =
     Http.get
         { url = "/users/{username}/starred"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
@@ -3688,14 +4030,18 @@ activityListReposWatchedByUser : (Result Http.Error todo -> msg) -> Cmd msg
 activityListReposWatchedByUser toMsg =
     Http.get
         { url = "/users/{username}/subscriptions"
-        , expect = Http.expectJson toMsg (Debug.todo "todo")
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
         }
 
 
 metaGetZen : (Result Http.Error todo -> msg) -> Cmd msg
 metaGetZen toMsg =
     Http.get
-        { url = "/zen", expect = Http.expectJson toMsg (Debug.todo "todo") }
+        { url = "/zen"
+        , expect =
+            Http.expectJson toMsg Debug.todo "Couldn't find a response decoder"
+        }
 
 
 type Nullable value

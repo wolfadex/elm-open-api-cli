@@ -27,6 +27,7 @@ import Json.Schema.Definitions
 import OpenApi exposing (OpenApi)
 import OpenApi.Components
 import OpenApi.Info
+import OpenApi.MediaType
 import OpenApi.Operation
 import OpenApi.Path
 import OpenApi.Reference
@@ -111,10 +112,28 @@ generateFileFromOpenApiSpec outputFile apiSpec =
                             |> Maybe.map
                                 (\operation ->
                                     let
-                                        maybeFirstSuccessResponse =
+                                        maybeSuccessType =
                                             operation
                                                 |> OpenApi.Operation.responses
                                                 |> getFirstSuccessResponse
+                                                |> Maybe.andThen OpenApi.Reference.toConcrete
+                                                |> Maybe.map OpenApi.Response.content
+                                                |> Maybe.withDefault Dict.empty
+                                                |> Dict.get "application/json"
+                                                |> Maybe.andThen OpenApi.MediaType.schema
+                                                |> Maybe.andThen (OpenApi.Schema.get >> toObjectSchema)
+                                                |> Maybe.andThen .ref
+                                                |> Maybe.andThen (schemaTypeRef apiSpec)
+
+                                        successDecoder =
+                                            maybeSuccessType
+                                                |> Maybe.map (\typeName -> Elm.val ("decode" ++ typeName))
+                                                |> Maybe.withDefault (Elm.val "Debug.todo \"Couldn't find a response decoder\"")
+
+                                        successType =
+                                            maybeSuccessType
+                                                |> Maybe.map (Elm.Annotation.named [])
+                                                |> Maybe.withDefault (Elm.Annotation.var "todo")
                                     in
                                     Elm.Declare.fn
                                         ((OpenApi.Operation.operationId operation
@@ -127,7 +146,7 @@ generateFileFromOpenApiSpec outputFile apiSpec =
                                         ( "toMsg"
                                         , Just
                                             (Elm.Annotation.function
-                                                [ Gen.Result.annotation_.result Gen.Http.annotation_.error (Elm.Annotation.var "todo") ]
+                                                [ Gen.Result.annotation_.result Gen.Http.annotation_.error successType ]
                                                 (Elm.Annotation.var "msg")
                                             )
                                         )
@@ -137,7 +156,7 @@ generateFileFromOpenApiSpec outputFile apiSpec =
                                                 , expect =
                                                     Gen.Http.expectJson
                                                         (\result -> Elm.apply toMsg [ result ])
-                                                        (Gen.Debug.todo "todo")
+                                                        successDecoder
                                                 }
                                         )
                                         |> .declaration
@@ -201,6 +220,26 @@ generateFileFromOpenApiSpec outputFile apiSpec =
                                 "Uh oh! Failed to write file"
             )
         |> BackendTask.andThen (\() -> Pages.Script.log ("SDK generated at " ++ outputPath))
+
+
+schemaTypeRef : OpenApi -> String -> Maybe String
+schemaTypeRef openApi refUri =
+    case String.split "/" refUri of
+        [ "#", "components", "schemas", schemaName ] ->
+            Just (typifyName schemaName)
+
+        _ ->
+            Nothing
+
+
+toObjectSchema : Json.Schema.Definitions.Schema -> Maybe Json.Schema.Definitions.SubSchema
+toObjectSchema schema =
+    case schema of
+        Json.Schema.Definitions.BooleanSchema _ ->
+            Nothing
+
+        Json.Schema.Definitions.ObjectSchema subSchema ->
+            Just subSchema
 
 
 getFirstSuccessResponse : Dict.Dict String (OpenApi.Reference.ReferenceOr OpenApi.Response.Response) -> Maybe (OpenApi.Reference.ReferenceOr OpenApi.Response.Response)

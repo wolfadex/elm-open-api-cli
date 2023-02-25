@@ -280,7 +280,7 @@ schemaToEncoder : Json.Schema.Definitions.Schema -> Elm.Expression
 schemaToEncoder schema =
     case schema of
         Json.Schema.Definitions.BooleanSchema bool ->
-            Debug.todo ""
+            Gen.Debug.todo ""
 
         Json.Schema.Definitions.ObjectSchema subSchema ->
             let
@@ -314,15 +314,15 @@ schemaToEncoder schema =
                             Gen.Json.Encode.values_.bool
 
                         Json.Schema.Definitions.NullType ->
-                            Debug.todo ""
+                            Gen.Debug.todo ""
 
                         Json.Schema.Definitions.ArrayType ->
                             case subSchema.items of
                                 Json.Schema.Definitions.NoItems ->
-                                    Debug.todo "err"
+                                    Gen.Debug.todo "err"
 
                                 Json.Schema.Definitions.ArrayOfItems _ ->
-                                    Debug.todo ""
+                                    Gen.Debug.todo ""
 
                                 Json.Schema.Definitions.ItemDefinition itemSchema ->
                                     Elm.apply
@@ -390,7 +390,7 @@ schemaToEncoder schema =
                                     Elm.val ("encode" ++ typifyName schemaName)
 
                                 _ ->
-                                    Debug.todo ("other ref: " ++ ref)
+                                    Gen.Debug.todo ("other ref: " ++ ref)
 
                 Json.Schema.Definitions.NullableType singleType ->
                     Elm.fn ( "nullableValue", Nothing )
@@ -406,14 +406,14 @@ schemaToEncoder schema =
                         )
 
                 Json.Schema.Definitions.UnionType singleTypes ->
-                    Debug.todo "union type"
+                    Gen.Debug.todo "union type"
 
 
 schemaToDecoder : Json.Schema.Definitions.Schema -> Elm.Expression
 schemaToDecoder schema =
     case schema of
         Json.Schema.Definitions.BooleanSchema bool ->
-            Debug.todo ""
+            Gen.Debug.todo ""
 
         Json.Schema.Definitions.ObjectSchema subSchema ->
             let
@@ -463,15 +463,15 @@ schemaToDecoder schema =
                             Gen.Json.Decode.bool
 
                         Json.Schema.Definitions.NullType ->
-                            Debug.todo ""
+                            Gen.Debug.todo ""
 
                         Json.Schema.Definitions.ArrayType ->
                             case subSchema.items of
                                 Json.Schema.Definitions.NoItems ->
-                                    Debug.todo "err"
+                                    Gen.Debug.todo "err"
 
                                 Json.Schema.Definitions.ArrayOfItems _ ->
-                                    Debug.todo ""
+                                    Gen.Debug.todo ""
 
                                 Json.Schema.Definitions.ItemDefinition itemSchema ->
                                     Gen.Json.Decode.list (schemaToDecoder itemSchema)
@@ -524,7 +524,7 @@ schemaToDecoder schema =
                                     Elm.val ("decode" ++ typifyName schemaName)
 
                                 _ ->
-                                    Debug.todo ("other ref: " ++ ref)
+                                    Gen.Debug.todo ("other ref: " ++ ref)
 
                 Json.Schema.Definitions.NullableType singleType ->
                     Gen.Json.Decode.oneOf
@@ -535,7 +535,7 @@ schemaToDecoder schema =
                         ]
 
                 Json.Schema.Definitions.UnionType singleTypes ->
-                    Debug.todo "union type"
+                    Gen.Debug.todo "union type"
 
 
 schemaToAnnotation : Json.Schema.Definitions.Schema -> Elm.Annotation.Annotation

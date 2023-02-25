@@ -128,7 +128,7 @@ generateFileFromOpenApiSpec outputFile apiSpec =
                                         successDecoder =
                                             maybeSuccessType
                                                 |> Maybe.map (\typeName -> Elm.val ("decode" ++ typeName))
-                                                |> Maybe.withDefault (Elm.val "Debug.todo \"Couldn't find a response decoder\"")
+                                                |> Maybe.withDefault (Gen.Debug.todo "Couldn't find a response decoder")
 
                                         successType =
                                             maybeSuccessType

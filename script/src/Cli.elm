@@ -24,6 +24,7 @@ import Json.Decode
 import Json.Encode exposing (Value)
 import Json.Schema
 import Json.Schema.Definitions
+import List.Extra
 import OpenApi exposing (OpenApi)
 import OpenApi.Components
 import OpenApi.Info
@@ -42,6 +43,7 @@ import String.Extra
 type alias CliOptions =
     { entryFilePath : String
     , outputFile : Maybe String
+    , namespace : Maybe String
     }
 
 
@@ -54,13 +56,15 @@ program =
                     (Cli.Option.requiredPositionalArg "entryFilePath")
                 |> Cli.OptionsParser.with
                     (Cli.Option.optionalKeywordArg "output")
+                |> Cli.OptionsParser.with
+                    (Cli.Option.optionalKeywordArg "namespace")
             )
 
 
 run : Pages.Script.Script
 run =
     Pages.Script.withCliOptions program
-        (\{ entryFilePath, outputFile } ->
+        (\{ entryFilePath, outputFile, namespace } ->
             BackendTask.File.rawFile entryFilePath
                 |> BackendTask.mapError
                     (\error ->
@@ -77,7 +81,7 @@ run =
                                         "Uh oh! Decoding failure!"
                     )
                 |> BackendTask.andThen decodeOpenApiSpecOrFail
-                |> BackendTask.andThen (generateFileFromOpenApiSpec outputFile)
+                |> BackendTask.andThen (generateFileFromOpenApiSpec { outputFile = outputFile, namespace = namespace })
         )
 
 
@@ -92,16 +96,48 @@ decodeOpenApiSpecOrFail =
         >> BackendTask.fromResult
 
 
-generateFileFromOpenApiSpec : Maybe String -> OpenApi.OpenApi -> BackendTask.BackendTask FatalError.FatalError ()
-generateFileFromOpenApiSpec outputFile apiSpec =
+generateFileFromOpenApiSpec : { outputFile : Maybe String, namespace : Maybe String } -> OpenApi.OpenApi -> BackendTask.BackendTask FatalError.FatalError ()
+generateFileFromOpenApiSpec { outputFile, namespace } apiSpec =
     let
-        namespace : String
-        namespace =
+        defaultNamespace =
             apiSpec
                 |> OpenApi.info
                 |> OpenApi.Info.title
                 |> makeNamespaceValid
                 |> removeInvalidChars
+
+        fileNamespace : String
+        fileNamespace =
+            case namespace of
+                Just n ->
+                    n
+
+                Nothing ->
+                    case outputFile of
+                        Just path ->
+                            let
+                                split : List String
+                                split =
+                                    String.split "/" path
+                            in
+                            case List.Extra.dropWhile ((/=) "generated") split of
+                                "generated" :: rest ->
+                                    rest
+                                        |> String.join "."
+                                        |> String.replace ".elm" ""
+
+                                _ ->
+                                    case List.Extra.dropWhile ((/=) "src") split of
+                                        "src" :: rest ->
+                                            rest
+                                                |> String.join "."
+                                                |> String.replace ".elm" ""
+
+                                        _ ->
+                                            defaultNamespace
+
+                        Nothing ->
+                            defaultNamespace
 
         pathDeclarations =
             apiSpec
@@ -209,15 +245,18 @@ generateFileFromOpenApiSpec outputFile apiSpec =
                    )
 
         file =
-            Elm.file [ namespace ]
+            Elm.file [ fileNamespace ]
                 (pathDeclarations
                     ++ (nullableType :: componentDeclarations)
                 )
 
         outputPath =
-            [ "generated", file.path ]
-                |> Path.join
-                |> Path.toRelative
+            Maybe.withDefault
+                ([ "generated", file.path ]
+                    |> Path.join
+                    |> Path.toRelative
+                )
+                outputFile
     in
     Pages.Script.writeFile
         { path = outputPath

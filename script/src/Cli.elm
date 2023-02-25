@@ -35,6 +35,7 @@ import OpenApi.Response
 import OpenApi.Schema
 import Pages.Script
 import Path
+import Result.Extra
 import String.Extra
 
 
@@ -173,28 +174,39 @@ generateFileFromOpenApiSpec outputFile apiSpec =
                 |> Maybe.map OpenApi.Components.schemas
                 |> Maybe.withDefault Dict.empty
                 |> Dict.foldl
-                    (\name schema res ->
-                        [ Elm.alias (typifyName name)
-                            (schemaToAnnotation (OpenApi.Schema.get schema))
-                        , Elm.Declare.function ("decode" ++ typifyName name)
-                            []
-                            (\_ ->
-                                schemaToDecoder (OpenApi.Schema.get schema)
-                                    |> Elm.withType (Gen.Json.Decode.annotation_.decoder (Elm.Annotation.named [] (typifyName name)))
-                            )
-                            |> .declaration
-                        , Elm.Declare.function ("encode" ++ typifyName name)
-                            []
-                            (\_ ->
-                                schemaToEncoder (OpenApi.Schema.get schema)
-                                    |> Elm.withType (Elm.Annotation.function [ Elm.Annotation.named [] (typifyName name) ] Gen.Json.Encode.annotation_.value)
-                            )
-                            |> .declaration
-                        ]
-                            :: res
+                    (\name schema ->
+                        schemaToAnnotation (OpenApi.Schema.get schema)
+                            |> Result.mapError (\( path, msg ) -> ( name :: path, msg ))
+                            |> Result.map2
+                                (\ann res ->
+                                    [ Elm.alias (typifyName name) ann
+                                    , Elm.Declare.function ("decode" ++ typifyName name)
+                                        []
+                                        (\_ ->
+                                            schemaToDecoder (OpenApi.Schema.get schema)
+                                                |> Elm.withType (Gen.Json.Decode.annotation_.decoder (Elm.Annotation.named [] (typifyName name)))
+                                        )
+                                        |> .declaration
+                                    , Elm.Declare.function ("encode" ++ typifyName name)
+                                        []
+                                        (\_ ->
+                                            schemaToEncoder (OpenApi.Schema.get schema)
+                                                |> Elm.withType (Elm.Annotation.function [ Elm.Annotation.named [] (typifyName name) ] Gen.Json.Encode.annotation_.value)
+                                        )
+                                        |> .declaration
+                                    ]
+                                        :: res
+                                )
                     )
-                    []
-                |> List.concat
+                    (Ok [])
+                |> (\r ->
+                        case r of
+                            Ok lst ->
+                                List.concat lst
+
+                            Err ( path, e ) ->
+                                Debug.todo <| "Error " ++ e ++ " at path " ++ String.join "." path
+                   )
 
         file =
             Elm.file [ namespace ]
@@ -538,11 +550,25 @@ schemaToDecoder schema =
                     Gen.Debug.todo "union type"
 
 
-schemaToAnnotation : Json.Schema.Definitions.Schema -> Elm.Annotation.Annotation
+type alias Path =
+    List String
+
+
+schemaToAnnotation : Json.Schema.Definitions.Schema -> Result ( Path, String ) Elm.Annotation.Annotation
 schemaToAnnotation schema =
+    let
+        nullable : Result ( Path, String ) Elm.Annotation.Annotation -> Result ( Path, String ) Elm.Annotation.Annotation
+        nullable =
+            Result.map
+                (\ann ->
+                    Elm.Annotation.namedWith []
+                        "Nullable"
+                        [ ann ]
+                )
+    in
     case schema of
         Json.Schema.Definitions.BooleanSchema bool ->
-            Debug.todo ""
+            Err ( [], "Todo: boolean schema" )
 
         Json.Schema.Definitions.ObjectSchema subSchema ->
             let
@@ -552,37 +578,42 @@ schemaToAnnotation schema =
                             subSchema.properties
                                 |> Maybe.map (\(Json.Schema.Definitions.Schemata schemata) -> schemata)
                                 |> Maybe.withDefault []
-                                |> List.map
+                                |> Result.Extra.combineMap
                                     (\( key, valueSchema ) ->
-                                        ( elmifyName key, schemaToAnnotation valueSchema )
+                                        case schemaToAnnotation valueSchema of
+                                            Ok ann ->
+                                                Ok ( elmifyName key, ann )
+
+                                            Err ( path, msg ) ->
+                                                Err ( key :: path, msg )
                                     )
-                                |> Elm.Annotation.record
+                                |> Result.map Elm.Annotation.record
 
                         Json.Schema.Definitions.StringType ->
-                            Elm.Annotation.string
+                            Ok Elm.Annotation.string
 
                         Json.Schema.Definitions.IntegerType ->
-                            Elm.Annotation.int
+                            Ok Elm.Annotation.int
 
                         Json.Schema.Definitions.NumberType ->
-                            Elm.Annotation.float
+                            Ok Elm.Annotation.float
 
                         Json.Schema.Definitions.BooleanType ->
-                            Elm.Annotation.bool
+                            Ok Elm.Annotation.bool
 
                         Json.Schema.Definitions.NullType ->
-                            Debug.todo ""
+                            Err ( [], "Null type annotation not supported yet" )
 
                         Json.Schema.Definitions.ArrayType ->
                             case subSchema.items of
                                 Json.Schema.Definitions.NoItems ->
-                                    Debug.todo "err"
+                                    Err ( [], "Found an array type but no items definition" )
 
                                 Json.Schema.Definitions.ArrayOfItems _ ->
-                                    Debug.todo ""
+                                    Err ( [], "Array of items not supported as item definition yet" )
 
                                 Json.Schema.Definitions.ItemDefinition itemSchema ->
-                                    Elm.Annotation.list (schemaToAnnotation itemSchema)
+                                    Result.map Elm.Annotation.list (schemaToAnnotation itemSchema)
             in
             case subSchema.type_ of
                 Json.Schema.Definitions.SingleType singleType ->
@@ -593,7 +624,7 @@ schemaToAnnotation schema =
                         Nothing ->
                             case subSchema.anyOf of
                                 Nothing ->
-                                    Elm.Annotation.named [ "Json", "Encode" ] "Value"
+                                    Ok <| Gen.Json.Encode.annotation_.value
 
                                 Just anyOf ->
                                     case anyOf of
@@ -602,36 +633,30 @@ schemaToAnnotation schema =
                                                 ( Json.Schema.Definitions.ObjectSchema firstSubSchema, Json.Schema.Definitions.ObjectSchema secondSubSchema ) ->
                                                     case ( firstSubSchema.type_, secondSubSchema.type_ ) of
                                                         ( Json.Schema.Definitions.SingleType Json.Schema.Definitions.NullType, _ ) ->
-                                                            Elm.Annotation.namedWith []
-                                                                "Nullable"
-                                                                [ schemaToAnnotation secondSchema ]
+                                                            nullable (schemaToAnnotation secondSchema)
 
                                                         ( _, Json.Schema.Definitions.SingleType Json.Schema.Definitions.NullType ) ->
-                                                            Elm.Annotation.namedWith []
-                                                                "Nullable"
-                                                                [ schemaToAnnotation firstSchema ]
+                                                            nullable (schemaToAnnotation firstSchema)
 
                                                         _ ->
-                                                            Elm.Annotation.named [ "Debug", "Todo" ] "AnyOfOneNotNullable"
+                                                            Err ( [], "Todo: AnyOf (except if one is nullable)" )
 
                                                 _ ->
-                                                    Elm.Annotation.named [ "Debug", "Todo" ] "AnyOfNotBothObjectSchemas"
+                                                    Err ( [], "Todo: AnyOf (when not both ObjectSchemas)" )
 
                                         _ ->
-                                            Elm.Annotation.named [ "Debug", "Todo" ] "AnyOfNotExactly2Items"
+                                            Err ( [], "Todo: AnyOf (when not exactly 2 items)" )
 
                         Just ref ->
                             case String.split "/" ref of
                                 [ "#", "components", "schemas", schemaName ] ->
-                                    Elm.Annotation.named [] (typifyName schemaName)
+                                    Ok <| Elm.Annotation.named [] (typifyName schemaName)
 
                                 _ ->
-                                    Debug.todo ("other ref: " ++ ref)
+                                    Err ( [], "Todo: some other ref: " ++ ref )
 
                 Json.Schema.Definitions.NullableType singleType ->
-                    Elm.Annotation.namedWith []
-                        "Nullable"
-                        [ singleTypeToAnnotation singleType ]
+                    nullable (singleTypeToAnnotation singleType)
 
                 Json.Schema.Definitions.UnionType singleTypes ->
                     Debug.todo "union type"

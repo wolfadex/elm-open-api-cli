@@ -101,7 +101,7 @@ generateFileFromOpenApiSpec outputFile apiSpec =
                 |> OpenApi.info
                 |> OpenApi.Info.title
                 |> makeNamespaceValid
-                |> removeInvlidChars
+                |> removeInvalidChars
 
         pathDeclarations =
             apiSpec
@@ -141,7 +141,7 @@ generateFileFromOpenApiSpec outputFile apiSpec =
                                             |> Maybe.withDefault url
                                          )
                                             |> makeNamespaceValid
-                                            |> removeInvlidChars
+                                            |> removeInvalidChars
                                             |> String.Extra.camelize
                                         )
                                         ( "toMsg"
@@ -675,8 +675,8 @@ makeNamespaceValid str =
         str
 
 
-removeInvlidChars : String -> String
-removeInvlidChars str =
+removeInvalidChars : String -> String
+removeInvalidChars str =
     String.filter (\char -> char /= '\'') str
 
 

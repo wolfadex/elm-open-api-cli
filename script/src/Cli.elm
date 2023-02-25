@@ -302,32 +302,16 @@ schemaToEncoder schema =
                                 )
 
                         Json.Schema.Definitions.StringType ->
-                            Elm.value
-                                { importFrom = [ "Json", "Encode" ]
-                                , name = "string"
-                                , annotation = Nothing
-                                }
+                            Gen.Json.Encode.values_.string
 
                         Json.Schema.Definitions.IntegerType ->
-                            Elm.value
-                                { importFrom = [ "Json", "Encode" ]
-                                , name = "int"
-                                , annotation = Nothing
-                                }
+                            Gen.Json.Encode.values_.int
 
                         Json.Schema.Definitions.NumberType ->
-                            Elm.value
-                                { importFrom = [ "Json", "Encode" ]
-                                , name = "float"
-                                , annotation = Nothing
-                                }
+                            Gen.Json.Encode.values_.float
 
                         Json.Schema.Definitions.BooleanType ->
-                            Elm.value
-                                { importFrom = [ "Json", "Encode" ]
-                                , name = "bool"
-                                , annotation = Nothing
-                                }
+                            Gen.Json.Encode.values_.bool
 
                         Json.Schema.Definitions.NullType ->
                             Debug.todo ""
@@ -342,12 +326,7 @@ schemaToEncoder schema =
 
                                 Json.Schema.Definitions.ItemDefinition itemSchema ->
                                     Elm.apply
-                                        (Elm.value
-                                            { importFrom = [ "Json", "Encode" ]
-                                            , name = "list"
-                                            , annotation = Nothing
-                                            }
-                                        )
+                                        Gen.Json.Encode.values_.list
                                         [ schemaToEncoder itemSchema ]
             in
             case subSchema.type_ of
@@ -451,12 +430,7 @@ schemaToDecoder schema =
                                 (\( key, valueSchema ) prevExpr ->
                                     Elm.Op.pipe
                                         (Elm.apply
-                                            (Elm.value
-                                                { importFrom = [ "Json", "Decode", "Extra" ]
-                                                , name = "andMap"
-                                                , annotation = Nothing
-                                                }
-                                            )
+                                            Gen.Json.Decode.Extra.values_.andMap
                                             [ Gen.Json.Decode.field key (schemaToDecoder valueSchema) ]
                                         )
                                         prevExpr
@@ -522,12 +496,7 @@ schemaToDecoder schema =
                                                         ( Json.Schema.Definitions.SingleType Json.Schema.Definitions.NullType, _ ) ->
                                                             Gen.Json.Decode.oneOf
                                                                 [ Elm.apply
-                                                                    (Elm.value
-                                                                        { importFrom = [ "Json", "Decode" ]
-                                                                        , name = "map"
-                                                                        , annotation = Nothing
-                                                                        }
-                                                                    )
+                                                                    Gen.Json.Decode.values_.map
                                                                     [ Elm.val "Present", schemaToDecoder secondSchema ]
                                                                 , Gen.Json.Decode.null (Elm.val "Null")
                                                                 ]
@@ -535,12 +504,7 @@ schemaToDecoder schema =
                                                         ( _, Json.Schema.Definitions.SingleType Json.Schema.Definitions.NullType ) ->
                                                             Gen.Json.Decode.oneOf
                                                                 [ Elm.apply
-                                                                    (Elm.value
-                                                                        { importFrom = [ "Json", "Decode" ]
-                                                                        , name = "map"
-                                                                        , annotation = Nothing
-                                                                        }
-                                                                    )
+                                                                    Gen.Json.Decode.values_.map
                                                                     [ Elm.val "Present", schemaToDecoder firstSchema ]
                                                                 , Gen.Json.Decode.null (Elm.val "Null")
                                                                 ]
@@ -565,12 +529,7 @@ schemaToDecoder schema =
                 Json.Schema.Definitions.NullableType singleType ->
                     Gen.Json.Decode.oneOf
                         [ Elm.apply
-                            (Elm.value
-                                { importFrom = [ "Json", "Decode" ]
-                                , name = "map"
-                                , annotation = Nothing
-                                }
-                            )
+                            Gen.Json.Decode.values_.map
                             [ Elm.val "Present", singleTypeToDecoder singleType ]
                         , Gen.Json.Decode.null (Elm.val "Null")
                         ]

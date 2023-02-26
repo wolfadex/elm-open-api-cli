@@ -296,18 +296,36 @@ toRequestFunction apiSpec url operation =
                         ++ " possible responses, there was no successfull one."
                     )
                     getFirstSuccessResponse
-                |> stepOrFail "I found a successfull response, but I couldn't convert it to a concrete one"
-                    OpenApi.Reference.toConcrete
-                |> stepOrFail "The response doesn't have an application/json content option"
-                    (OpenApi.Response.content
-                        >> Dict.get "application/json"
+                |> Result.andThen
+                    (\response ->
+                        case OpenApi.Reference.toConcrete response of
+                            Just concrete ->
+                                Ok concrete
+                                    |> stepOrFail "The response doesn't have an application/json content option"
+                                        (OpenApi.Response.content
+                                            >> Dict.get "application/json"
+                                        )
+                                    |> stepOrFail "The response's application/json content option doesn't have a schema"
+                                        OpenApi.MediaType.schema
+                                    |> stepOrFail "Couldn't get the object schema for the response"
+                                        (OpenApi.Schema.get >> toObjectSchema)
+                                    |> stepOrFail "Couldn't get the type ref for the response [concrete]"
+                                        (.ref >> Maybe.andThen (schemaTypeRef apiSpec))
+
+                            Nothing ->
+                                Ok response
+                                    |> stepOrFail "I found a successfull response, but I couldn't convert it to a concrete one"
+                                        OpenApi.Reference.toReference
+                                    |> (\mr ->
+                                            mr
+                                                |> stepOrFail
+                                                    ("Couldn't get the type ref for the response [ref = "
+                                                        ++ Result.withDefault "?" (Result.map OpenApi.Reference.ref mr)
+                                                        ++ "]"
+                                                    )
+                                                    (OpenApi.Reference.ref >> schemaTypeRef apiSpec)
+                                       )
                     )
-                |> stepOrFail "The response's application/json content option doesn't have a schema"
-                    OpenApi.MediaType.schema
-                |> stepOrFail "Couldn't get the object schema for the response"
-                    (OpenApi.Schema.get >> toObjectSchema)
-                |> stepOrFail "Couldn't get the type ref for the response"
-                    (.ref >> Maybe.andThen (schemaTypeRef apiSpec))
                 |> Result.map
                     (\st ->
                         ( Elm.Annotation.named [] st

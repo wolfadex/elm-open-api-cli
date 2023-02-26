@@ -18,11 +18,8 @@ import Gen.Http
 import Gen.Json.Decode
 import Gen.Json.Decode.Extra
 import Gen.Json.Encode
-import Gen.Platform.Cmd
 import Gen.Result
 import Json.Decode
-import Json.Encode exposing (Value)
-import Json.Schema
 import Json.Schema.Definitions
 import List.Extra
 import OpenApi exposing (OpenApi)
@@ -99,13 +96,6 @@ decodeOpenApiSpecOrFail =
 generateFileFromOpenApiSpec : { outputFile : Maybe String, namespace : Maybe String } -> OpenApi.OpenApi -> BackendTask.BackendTask FatalError.FatalError ()
 generateFileFromOpenApiSpec { outputFile, namespace } apiSpec =
     let
-        defaultNamespace =
-            apiSpec
-                |> OpenApi.info
-                |> OpenApi.Info.title
-                |> makeNamespaceValid
-                |> removeInvalidChars
-
         fileNamespace : String
         fileNamespace =
             case namespace of
@@ -113,6 +103,14 @@ generateFileFromOpenApiSpec { outputFile, namespace } apiSpec =
                     n
 
                 Nothing ->
+                    let
+                        defaultNamespace =
+                            apiSpec
+                                |> OpenApi.info
+                                |> OpenApi.Info.title
+                                |> makeNamespaceValid
+                                |> removeInvalidChars
+                    in
                     case outputFile of
                         Just path ->
                             let

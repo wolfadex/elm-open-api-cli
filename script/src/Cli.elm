@@ -144,7 +144,13 @@ generateFileFromOpenApiSpec { outputFile, namespace } apiSpec =
                     (\url path res ->
                         [ path
                             |> OpenApi.Path.get
-                            |> Maybe.map (toRequestFunction apiSpec url)
+                            |> Maybe.map
+                                (toRequestFunction apiSpec url
+                                    >> Elm.exposeWith
+                                        { exposeConstructor = False
+                                        , group = Just "Request functions"
+                                        }
+                                )
                         ]
                             |> List.filterMap identity
                             |> (\decl -> decl ++ res)
@@ -163,6 +169,10 @@ generateFileFromOpenApiSpec { outputFile, namespace } apiSpec =
                             |> Result.map2
                                 (\ann res ->
                                     [ Elm.alias (typifyName name) ann
+                                        |> Elm.exposeWith
+                                            { exposeConstructor = False
+                                            , group = Just "Types"
+                                            }
                                     , Elm.Declare.function ("decode" ++ typifyName name)
                                         []
                                         (\_ ->
@@ -170,6 +180,10 @@ generateFileFromOpenApiSpec { outputFile, namespace } apiSpec =
                                                 |> Elm.withType (Gen.Json.Decode.annotation_.decoder (Elm.Annotation.named [] (typifyName name)))
                                         )
                                         |> .declaration
+                                        |> Elm.exposeWith
+                                            { exposeConstructor = False
+                                            , group = Just "Decoders"
+                                            }
                                     , Elm.Declare.function ("encode" ++ typifyName name)
                                         []
                                         (\_ ->
@@ -177,6 +191,10 @@ generateFileFromOpenApiSpec { outputFile, namespace } apiSpec =
                                                 |> Elm.withType (Elm.Annotation.function [ Elm.Annotation.named [] (typifyName name) ] Gen.Json.Encode.annotation_.value)
                                         )
                                         |> .declaration
+                                        |> Elm.exposeWith
+                                            { exposeConstructor = False
+                                            , group = Just "Encoders"
+                                            }
                                     ]
                                         :: res
                                 )
@@ -192,7 +210,29 @@ generateFileFromOpenApiSpec { outputFile, namespace } apiSpec =
                    )
 
         file =
-            Elm.file [ fileNamespace ]
+            Elm.fileWith [ fileNamespace ]
+                { docs =
+                    List.sortBy
+                        (\{ group } ->
+                            case group of
+                                Just "Request functions" ->
+                                    1
+
+                                Just "Types" ->
+                                    2
+
+                                Just "Encoders" ->
+                                    3
+
+                                Just "Decoders" ->
+                                    4
+
+                                _ ->
+                                    5
+                        )
+                        >> List.map Elm.docs
+                , aliases = []
+                }
                 (pathDeclarations
                     ++ (nullableType :: componentDeclarations)
                 )
@@ -338,6 +378,10 @@ nullableType =
         [ Elm.variant "Null"
         , Elm.variantWith "Present" [ Elm.Annotation.var "value" ]
         ]
+        |> Elm.exposeWith
+            { exposeConstructor = True
+            , group = Just "Types"
+            }
 
 
 typifyName : String -> String

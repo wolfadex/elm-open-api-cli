@@ -144,58 +144,7 @@ generateFileFromOpenApiSpec { outputFile, namespace } apiSpec =
                     (\url path res ->
                         [ path
                             |> OpenApi.Path.get
-                            |> Maybe.map
-                                (\operation ->
-                                    let
-                                        maybeSuccessType =
-                                            operation
-                                                |> OpenApi.Operation.responses
-                                                |> getFirstSuccessResponse
-                                                |> Maybe.andThen OpenApi.Reference.toConcrete
-                                                |> Maybe.map OpenApi.Response.content
-                                                |> Maybe.withDefault Dict.empty
-                                                |> Dict.get "application/json"
-                                                |> Maybe.andThen OpenApi.MediaType.schema
-                                                |> Maybe.andThen (OpenApi.Schema.get >> toObjectSchema)
-                                                |> Maybe.andThen .ref
-                                                |> Maybe.andThen (schemaTypeRef apiSpec)
-
-                                        successDecoder =
-                                            maybeSuccessType
-                                                |> Maybe.map (\typeName -> Elm.val ("decode" ++ typeName))
-                                                |> Maybe.withDefault (Gen.Debug.todo "Couldn't find a response decoder")
-
-                                        successType =
-                                            maybeSuccessType
-                                                |> Maybe.map (Elm.Annotation.named [])
-                                                |> Maybe.withDefault (Elm.Annotation.var "todo")
-                                    in
-                                    Elm.Declare.fn
-                                        ((OpenApi.Operation.operationId operation
-                                            |> Maybe.withDefault url
-                                         )
-                                            |> makeNamespaceValid
-                                            |> removeInvalidChars
-                                            |> String.Extra.camelize
-                                        )
-                                        ( "toMsg"
-                                        , Just
-                                            (Elm.Annotation.function
-                                                [ Gen.Result.annotation_.result Gen.Http.annotation_.error successType ]
-                                                (Elm.Annotation.var "msg")
-                                            )
-                                        )
-                                        (\toMsg ->
-                                            Gen.Http.get
-                                                { url = url
-                                                , expect =
-                                                    Gen.Http.expectJson
-                                                        (\result -> Elm.apply toMsg [ result ])
-                                                        successDecoder
-                                                }
-                                        )
-                                        |> .declaration
-                                )
+                            |> Maybe.map (toRequestFunction apiSpec url)
                         ]
                             |> List.filterMap identity
                             |> (++) res
@@ -269,6 +218,89 @@ generateFileFromOpenApiSpec { outputFile, namespace } apiSpec =
                                 "Uh oh! Failed to write file"
             )
         |> BackendTask.andThen (\() -> Pages.Script.log ("SDK generated at " ++ outputPath))
+
+
+toRequestFunction : OpenApi -> String -> OpenApi.Operation.Operation -> Elm.Declaration
+toRequestFunction apiSpec url operation =
+    let
+        responses : Dict.Dict String (OpenApi.Reference.ReferenceOr OpenApi.Response.Response)
+        responses =
+            OpenApi.Operation.responses operation
+
+        stepOrFail msg f =
+            Result.andThen
+                (\y ->
+                    case f y of
+                        Just z ->
+                            Ok z
+
+                        Nothing ->
+                            Err <| "Couldn't find a response decoder. " ++ msg
+                )
+
+        fromResult r =
+            case r of
+                Ok t ->
+                    t
+
+                Err msg ->
+                    ( Elm.Annotation.var "todo"
+                    , Gen.Debug.todo msg
+                    )
+
+        ( successType, successDecoder ) =
+            Ok responses
+                |> stepOrFail
+                    ("Among the "
+                        ++ String.fromInt (Dict.size responses)
+                        ++ " possible responses, there was no successfull one."
+                    )
+                    getFirstSuccessResponse
+                |> stepOrFail "I found a successfull response, but I couldn't convert it to a concrete one"
+                    OpenApi.Reference.toConcrete
+                |> stepOrFail "The response doesn't have an application/json content option"
+                    (OpenApi.Response.content
+                        >> Dict.get "application/json"
+                    )
+                |> stepOrFail "The response's application/json content option doesn't have a schema"
+                    OpenApi.MediaType.schema
+                |> stepOrFail "Couldn't get the object schema for the response"
+                    (OpenApi.Schema.get >> toObjectSchema)
+                |> stepOrFail "Couldn't get the type ref for the response"
+                    (.ref >> Maybe.andThen (schemaTypeRef apiSpec))
+                |> Result.map
+                    (\st ->
+                        ( Elm.Annotation.named [] st
+                        , Elm.val ("decode" ++ st)
+                        )
+                    )
+                |> fromResult
+    in
+    Elm.Declare.fn
+        ((OpenApi.Operation.operationId operation
+            |> Maybe.withDefault url
+         )
+            |> makeNamespaceValid
+            |> removeInvalidChars
+            |> String.Extra.camelize
+        )
+        ( "toMsg"
+        , Just
+            (Elm.Annotation.function
+                [ Gen.Result.annotation_.result Gen.Http.annotation_.error successType ]
+                (Elm.Annotation.var "msg")
+            )
+        )
+        (\toMsg ->
+            Gen.Http.get
+                { url = url
+                , expect =
+                    Gen.Http.expectJson
+                        (\result -> Elm.apply toMsg [ result ])
+                        successDecoder
+                }
+        )
+        |> .declaration
 
 
 schemaTypeRef : OpenApi -> String -> Maybe String

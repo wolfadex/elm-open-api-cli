@@ -147,7 +147,7 @@ generateFileFromOpenApiSpec { outputFile, namespace } apiSpec =
                             |> Maybe.map (toRequestFunction apiSpec url)
                         ]
                             |> List.filterMap identity
-                            |> (++) res
+                            |> (\decl -> decl ++ res)
                     )
                     []
 
@@ -332,6 +332,7 @@ getFirstSuccessResponse responses =
         |> Maybe.map Tuple.second
 
 
+nullableType : Elm.Declaration
 nullableType =
     Elm.customType "Nullable"
         [ Elm.variant "Null"

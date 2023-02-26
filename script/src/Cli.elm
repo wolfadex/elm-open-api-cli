@@ -157,6 +157,26 @@ generateFileFromOpenApiSpec { outputFile, namespace } apiSpec =
                     )
                     []
 
+        responsesDeclarations =
+            apiSpec
+                |> OpenApi.components
+                |> Maybe.map OpenApi.Components.responses
+                |> Maybe.withDefault Dict.empty
+                |> Dict.foldl
+                    (\name schema ->
+                        Result.map2 (::)
+                            (responseToDeclarations name schema)
+                    )
+                    (Ok [])
+                |> (\r ->
+                        case r of
+                            Ok lst ->
+                                List.concat lst
+
+                            Err ( path, e ) ->
+                                Debug.todo <| "Error " ++ e ++ " at path " ++ String.join "." path
+                   )
+
         componentDeclarations =
             apiSpec
                 |> OpenApi.components
@@ -164,40 +184,8 @@ generateFileFromOpenApiSpec { outputFile, namespace } apiSpec =
                 |> Maybe.withDefault Dict.empty
                 |> Dict.foldl
                     (\name schema ->
-                        schemaToAnnotation (OpenApi.Schema.get schema)
-                            |> Result.mapError (\( path, msg ) -> ( name :: path, msg ))
-                            |> Result.map2
-                                (\ann res ->
-                                    [ Elm.alias (typifyName name) ann
-                                        |> Elm.exposeWith
-                                            { exposeConstructor = False
-                                            , group = Just "Types"
-                                            }
-                                    , Elm.Declare.function ("decode" ++ typifyName name)
-                                        []
-                                        (\_ ->
-                                            schemaToDecoder (OpenApi.Schema.get schema)
-                                                |> Elm.withType (Gen.Json.Decode.annotation_.decoder (Elm.Annotation.named [] (typifyName name)))
-                                        )
-                                        |> .declaration
-                                        |> Elm.exposeWith
-                                            { exposeConstructor = False
-                                            , group = Just "Decoders"
-                                            }
-                                    , Elm.Declare.function ("encode" ++ typifyName name)
-                                        []
-                                        (\_ ->
-                                            schemaToEncoder (OpenApi.Schema.get schema)
-                                                |> Elm.withType (Elm.Annotation.function [ Elm.Annotation.named [] (typifyName name) ] Gen.Json.Encode.annotation_.value)
-                                        )
-                                        |> .declaration
-                                        |> Elm.exposeWith
-                                            { exposeConstructor = False
-                                            , group = Just "Encoders"
-                                            }
-                                    ]
-                                        :: res
-                                )
+                        Result.map2 (::)
+                            (schemaToDeclarations name (OpenApi.Schema.get schema))
                     )
                     (Ok [])
                 |> (\r ->
@@ -234,7 +222,7 @@ generateFileFromOpenApiSpec { outputFile, namespace } apiSpec =
                 , aliases = []
                 }
                 (pathDeclarations
-                    ++ (nullableType :: componentDeclarations)
+                    ++ (nullableType :: componentDeclarations ++ responsesDeclarations)
                 )
 
         outputPath =
@@ -260,23 +248,78 @@ generateFileFromOpenApiSpec { outputFile, namespace } apiSpec =
         |> BackendTask.andThen (\() -> Pages.Script.log ("SDK generated at " ++ outputPath))
 
 
+schemaToDeclarations : String -> Json.Schema.Definitions.Schema -> Result ( Path, String ) (List Elm.Declaration)
+schemaToDeclarations name schema =
+    case schemaToAnnotation schema of
+        Ok ann ->
+            [ Elm.alias (typifyName name) ann
+                |> Elm.exposeWith
+                    { exposeConstructor = False
+                    , group = Just "Types"
+                    }
+            , Elm.Declare.function ("decode" ++ typifyName name)
+                []
+                (\_ ->
+                    schemaToDecoder schema
+                        |> Elm.withType (Gen.Json.Decode.annotation_.decoder (Elm.Annotation.named [] (typifyName name)))
+                )
+                |> .declaration
+                |> Elm.exposeWith
+                    { exposeConstructor = False
+                    , group = Just "Decoders"
+                    }
+            , Elm.Declare.function ("encode" ++ typifyName name)
+                []
+                (\_ ->
+                    schemaToEncoder schema
+                        |> Elm.withType (Elm.Annotation.function [ Elm.Annotation.named [] (typifyName name) ] Gen.Json.Encode.annotation_.value)
+                )
+                |> .declaration
+                |> Elm.exposeWith
+                    { exposeConstructor = False
+                    , group = Just "Encoders"
+                    }
+            ]
+                |> Ok
+
+        Err ( path, msg ) ->
+            Err ( name :: path, msg )
+
+
+responseToDeclarations : String -> OpenApi.Reference.ReferenceOr OpenApi.Response.Response -> Result ( Path, String ) (List Elm.Declaration)
+responseToDeclarations name reference =
+    case OpenApi.Reference.toConcrete reference of
+        Just response ->
+            case responseToSchema response of
+                Ok schema ->
+                    schemaToDeclarations name schema
+
+                Err msg ->
+                    Err ( [ name ], msg )
+
+        Nothing ->
+            Err ( [ name ], "Could not convert reference to concrete value" )
+
+
+stepOrFail : String -> (a -> Maybe value) -> Result String a -> Result String value
+stepOrFail msg f =
+    Result.andThen
+        (\y ->
+            case f y of
+                Just z ->
+                    Ok z
+
+                Nothing ->
+                    Err <| "Couldn't find a response decoder. " ++ msg
+        )
+
+
 toRequestFunction : OpenApi -> String -> OpenApi.Operation.Operation -> Elm.Declaration
 toRequestFunction apiSpec url operation =
     let
         responses : Dict.Dict String (OpenApi.Reference.ReferenceOr OpenApi.Response.Response)
         responses =
             OpenApi.Operation.responses operation
-
-        stepOrFail msg f =
-            Result.andThen
-                (\y ->
-                    case f y of
-                        Just z ->
-                            Ok z
-
-                        Nothing ->
-                            Err <| "Couldn't find a response decoder. " ++ msg
-                )
 
         fromResult r =
             case r of
@@ -297,10 +340,10 @@ toRequestFunction apiSpec url operation =
                     )
                     getFirstSuccessResponse
                 |> Result.andThen
-                    (\response ->
-                        case OpenApi.Reference.toConcrete response of
-                            Just concrete ->
-                                Ok concrete
+                    (\responseOrRef ->
+                        case OpenApi.Reference.toConcrete responseOrRef of
+                            Just response ->
+                                Ok response
                                     |> stepOrFail "The response doesn't have an application/json content option"
                                         (OpenApi.Response.content
                                             >> Dict.get "application/json"
@@ -313,7 +356,7 @@ toRequestFunction apiSpec url operation =
                                         (.ref >> Maybe.andThen (schemaTypeRef apiSpec))
 
                             Nothing ->
-                                Ok response
+                                Ok responseOrRef
                                     |> stepOrFail "I found a successfull response, but I couldn't convert it to a concrete one"
                                         OpenApi.Reference.toReference
                                     |> (\mr ->
@@ -366,6 +409,9 @@ schemaTypeRef openApi refUri =
     case String.split "/" refUri of
         [ "#", "components", "schemas", schemaName ] ->
             Just (typifyName schemaName)
+
+        [ "#", "components", "responses", responseName ] ->
+            Just (typifyName responseName)
 
         _ ->
             Nothing
@@ -680,6 +726,18 @@ schemaToDecoder schema =
 
                 Json.Schema.Definitions.UnionType singleTypes ->
                     Gen.Debug.todo "union type"
+
+
+responseToSchema : OpenApi.Response.Response -> Result String Json.Schema.Definitions.Schema
+responseToSchema response =
+    Ok response
+        |> stepOrFail "Could not get application's application/json content"
+            (OpenApi.Response.content
+                >> Dict.get "application/json"
+            )
+        |> stepOrFail "The response's application/json content option doesn't have a schema"
+            OpenApi.MediaType.schema
+        |> Result.map OpenApi.Schema.get
 
 
 type alias Path =

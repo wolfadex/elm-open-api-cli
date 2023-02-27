@@ -296,12 +296,21 @@ responseToDeclarations : String -> OpenApi.Reference.ReferenceOr OpenApi.Respons
 responseToDeclarations name reference =
     case OpenApi.Reference.toConcrete reference of
         Just response ->
-            case responseToSchema response of
-                Ok schema ->
-                    schemaToDeclarations name schema
+            let
+                content =
+                    OpenApi.Response.content response
+            in
+            if Dict.isEmpty content then
+                -- If there is no content then we go with the unit value, `()` as the response type
+                Ok []
 
-                Err msg ->
-                    Err ( [ name ], msg )
+            else
+                case responseToSchema response of
+                    Ok schema ->
+                        schemaToDeclarations name schema
+
+                    Err msg ->
+                        Err ( [ name ], msg )
 
         Nothing ->
             Err ( [ name ], "Could not convert reference to concrete value" )

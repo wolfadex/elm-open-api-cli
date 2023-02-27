@@ -140,20 +140,26 @@ generateFileFromOpenApiSpec { outputFile, namespace } apiSpec =
         pathDeclarations =
             apiSpec
                 |> OpenApi.paths
-                |> Dict.foldl
+                |> Dict.foldr
                     (\url path res ->
-                        [ path
-                            |> OpenApi.Path.get
-                            |> Maybe.map
-                                (toRequestFunction apiSpec url
-                                    >> Elm.exposeWith
-                                        { exposeConstructor = False
-                                        , group = Just "Request functions"
-                                        }
-                                )
-                        ]
-                            |> List.filterMap identity
-                            |> (\decl -> decl ++ res)
+                        let
+                            decl =
+                                path
+                                    |> OpenApi.Path.get
+                                    |> Maybe.map
+                                        (toRequestFunction apiSpec url
+                                            >> Elm.exposeWith
+                                                { exposeConstructor = False
+                                                , group = Just "Request functions"
+                                                }
+                                        )
+                        in
+                        case decl of
+                            Nothing ->
+                                res
+
+                            Just d ->
+                                d :: res
                     )
                     []
 

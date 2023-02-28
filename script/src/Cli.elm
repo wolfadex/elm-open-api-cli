@@ -13,6 +13,7 @@ import Elm.Case
 import Elm.Declare
 import Elm.Op
 import FatalError
+import Gen.Bytes
 import Gen.Debug
 import Gen.Http
 import Gen.Json.Decode
@@ -383,37 +384,52 @@ stepOrFail msg f =
         )
 
 
+type BodyType
+    = EmptyBody
+    | JsonBody Elm.Annotation.Annotation Elm.Expression
+    | BytesBody String
+
+
 toRequestFunction : String -> OpenApi -> String -> OpenApi.Operation.Operation -> Elm.Declaration
 toRequestFunction method apiSpec url operation =
     let
-        body : Result String (Maybe ( Elm.Annotation.Annotation, Elm.Expression ))
+        body : Result String BodyType
         body =
             case OpenApi.Operation.requestBody operation of
                 Nothing ->
-                    Ok Nothing
+                    Ok EmptyBody
 
                 Just requestOrRef ->
                     case OpenApi.Reference.toConcrete requestOrRef of
                         Just request ->
-                            Ok request
-                                |> stepOrFail "The request doesn't have an application/json content option"
-                                    (OpenApi.RequestBody.content
-                                        >> Dict.get "application/json"
-                                    )
-                                |> stepOrFail "The request's application/json content option doesn't have a schema"
-                                    (OpenApi.MediaType.schema >> Maybe.map OpenApi.Schema.get)
-                                |> Result.andThen
-                                    (\schema ->
-                                        Result.map
-                                            (\ann ->
-                                                Just
-                                                    ( ann
-                                                    , schemaToEncoder schema
-                                                    )
+                            let
+                                content =
+                                    OpenApi.RequestBody.content request
+
+                                default _ =
+                                    Ok content
+                                        |> stepOrFail ("The request doesn't have an application/json content option, it has " ++ String.join " " (Dict.keys content))
+                                            (Dict.get "application/json")
+                                        |> stepOrFail "The request's application/json content option doesn't have a schema"
+                                            (OpenApi.MediaType.schema >> Maybe.map OpenApi.Schema.get)
+                                        |> Result.andThen
+                                            (\schema ->
+                                                Result.map
+                                                    (\ann -> JsonBody ann (schemaToEncoder schema))
+                                                    (schemaToAnnotation schema)
+                                                    |> Result.mapError Tuple.second
                                             )
-                                            (schemaToAnnotation schema)
-                                            |> Result.mapError Tuple.second
-                                    )
+                            in
+                            case Dict.keys content of
+                                [ single ] ->
+                                    if String.startsWith "image/" single || single == "application/octet-stream" then
+                                        Ok (BytesBody single)
+
+                                    else
+                                        default ()
+
+                                _ ->
+                                    default ()
 
                         Nothing ->
                             Ok requestOrRef
@@ -430,10 +446,9 @@ toRequestFunction method apiSpec url operation =
                                    )
                                 |> Result.map
                                     (\st ->
-                                        Just
-                                            ( Elm.Annotation.named [] st
-                                            , Elm.val ("decode" ++ st)
-                                            )
+                                        JsonBody
+                                            (Elm.Annotation.named [] st)
+                                            (Elm.val ("decode" ++ st))
                                     )
 
         fullUrl : String
@@ -472,7 +487,7 @@ toRequestFunction method apiSpec url operation =
 
         function =
             case body of
-                Ok Nothing ->
+                Ok EmptyBody ->
                     Elm.Declare.fn functionName
                         toMsgParam
                         (\toMsg ->
@@ -496,7 +511,7 @@ toRequestFunction method apiSpec url operation =
                         )
                         |> .declaration
 
-                Ok (Just ( bodyType, bodyEncoder )) ->
+                Ok (JsonBody bodyType bodyEncoder) ->
                     Elm.Declare.fn2 functionName
                         toMsgParam
                         ( "body", Just bodyType )
@@ -517,6 +532,31 @@ toRequestFunction method apiSpec url operation =
                                         Nothing ->
                                             Gen.Http.expectWhatever (\result -> Elm.apply toMsg [ result ])
                                 , body = Gen.Http.jsonBody <| Elm.apply bodyEncoder [ bodyValue ]
+                                }
+                        )
+                        |> .declaration
+
+                Ok (BytesBody mime) ->
+                    Elm.Declare.fn2 functionName
+                        toMsgParam
+                        ( "body", Just Gen.Bytes.annotation_.bytes )
+                        (\toMsg bodyValue ->
+                            Gen.Http.request
+                                { method = method
+                                , headers = []
+                                , timeout = Gen.Maybe.make_.nothing
+                                , tracker = Gen.Maybe.make_.nothing
+                                , url = fullUrl
+                                , expect =
+                                    case maybeSuccessDecoder of
+                                        Just successDecoder ->
+                                            Gen.Http.expectJson
+                                                (\result -> Elm.apply toMsg [ result ])
+                                                successDecoder
+
+                                        Nothing ->
+                                            Gen.Http.expectWhatever (\result -> Elm.apply toMsg [ result ])
+                                , body = Gen.Http.bytesBody mime bodyValue
                                 }
                         )
                         |> .declaration
@@ -565,27 +605,30 @@ operationToSuccessTypeAndDecoder apiSpec operation =
             )
             getFirstSuccessResponse
         |> Result.andThen
-            (\( code, responseOrRef ) ->
+            (\( _, responseOrRef ) ->
                 case OpenApi.Reference.toConcrete responseOrRef of
                     Just response ->
-                        if code == "204" && Dict.get "application/json" (OpenApi.Response.content response) == Nothing then
-                            Ok ( Elm.Annotation.unit, Nothing )
+                        let
+                            content =
+                                OpenApi.Response.content response
+                        in
+                        case Dict.keys content of
+                            [] ->
+                                Ok ( Elm.Annotation.unit, Nothing )
 
-                        else
-                            Ok response
-                                |> stepOrFail "The response doesn't have an application/json content option"
-                                    (OpenApi.Response.content
-                                        >> Dict.get "application/json"
-                                    )
-                                |> stepOrFail "The response's application/json content option doesn't have a schema"
-                                    (OpenApi.MediaType.schema >> Maybe.map OpenApi.Schema.get)
-                                |> Result.andThen
-                                    (\schema ->
-                                        Result.map2 Tuple.pair
-                                            (schemaToAnnotation schema)
-                                            (Result.map Just <| schemaToDecoder schema)
-                                            |> Result.mapError Tuple.second
-                                    )
+                            _ ->
+                                Ok content
+                                    |> stepOrFail ("The response doesn't have an application/json content option, it has " ++ String.join " " (Dict.keys content))
+                                        (Dict.get "application/json")
+                                    |> stepOrFail "The response's application/json content option doesn't have a schema"
+                                        (OpenApi.MediaType.schema >> Maybe.map OpenApi.Schema.get)
+                                    |> Result.andThen
+                                        (\schema ->
+                                            Result.map2 Tuple.pair
+                                                (schemaToAnnotation schema)
+                                                (Result.map Just <| schemaToDecoder schema)
+                                                |> Result.mapError Tuple.second
+                                        )
 
                     Nothing ->
                         Ok responseOrRef

@@ -204,6 +204,35 @@ generateFileFromOpenApiSpec { outputFile, namespace } apiSpec =
                                 Debug.todo <| "Error " ++ e ++ " at path " ++ String.join "." path
                    )
 
+        helperDeclarations =
+            List.range 1 15
+                |> List.map
+                    (\i ->
+                        intToWord i
+                            |> Result.andThen
+                                (\intWord ->
+                                    let
+                                        typeName =
+                                            typifyName ("enum_" ++ intWord)
+                                    in
+                                    List.range 1 i
+                                        |> List.foldr
+                                            (\j res ->
+                                                Result.map2
+                                                    (\jWord r ->
+                                                        Elm.variantWith (typifyName (typeName ++ "_" ++ jWord)) [ Elm.Annotation.var jWord ]
+                                                            :: r
+                                                    )
+                                                    (intToWord j)
+                                                    res
+                                            )
+                                            (Ok [])
+                                        |> Result.map (Elm.customType typeName)
+                                )
+                    )
+                |> Result.Extra.combine
+                |> Result.withDefault []
+
         file =
             Elm.fileWith [ fileNamespace ]
                 { docs =
@@ -229,7 +258,7 @@ generateFileFromOpenApiSpec { outputFile, namespace } apiSpec =
                 , aliases = []
                 }
                 (pathDeclarations
-                    ++ (nullableType :: componentDeclarations ++ responsesDeclarations)
+                    ++ (nullableType :: componentDeclarations ++ responsesDeclarations ++ helperDeclarations)
                 )
 
         outputPath =
@@ -775,22 +804,21 @@ type alias Path =
 
 schemaToAnnotation : Json.Schema.Definitions.Schema -> Result ( Path, String ) Elm.Annotation.Annotation
 schemaToAnnotation schema =
-    let
-        nullable : Result ( Path, String ) Elm.Annotation.Annotation -> Result ( Path, String ) Elm.Annotation.Annotation
-        nullable =
-            Result.map
-                (\ann ->
-                    Elm.Annotation.namedWith []
-                        "Nullable"
-                        [ ann ]
-                )
-    in
     case schema of
         Json.Schema.Definitions.BooleanSchema bool ->
             Err ( [], "Todo: boolean schema" )
 
         Json.Schema.Definitions.ObjectSchema subSchema ->
             let
+                nullable : Result ( Path, String ) Elm.Annotation.Annotation -> Result ( Path, String ) Elm.Annotation.Annotation
+                nullable =
+                    Result.map
+                        (\ann ->
+                            Elm.Annotation.namedWith []
+                                "Nullable"
+                                [ ann ]
+                        )
+
                 singleTypeToAnnotation singleType =
                     case singleType of
                         Json.Schema.Definitions.ObjectType ->
@@ -833,6 +861,24 @@ schemaToAnnotation schema =
 
                                 Json.Schema.Definitions.ItemDefinition itemSchema ->
                                     Result.map Elm.Annotation.list (schemaToAnnotation itemSchema)
+
+                enumAnnotation : List Json.Schema.Definitions.Schema -> Result ( Path, String ) Elm.Annotation.Annotation
+                enumAnnotation anyOf =
+                    intToWord (List.length anyOf)
+                        |> Result.mapError (Tuple.pair [])
+                        |> Result.andThen
+                            (\intWord ->
+                                anyOf
+                                    |> List.foldr
+                                        (\next res ->
+                                            Result.map2 (::)
+                                                (schemaToAnnotation next)
+                                                res
+                                        )
+                                        (Ok [])
+                                    |> Result.map
+                                        (Elm.Annotation.namedWith [] (typifyName ("enum_" ++ intWord)))
+                            )
             in
             case subSchema.type_ of
                 Json.Schema.Definitions.SingleType singleType ->
@@ -850,6 +896,9 @@ schemaToAnnotation schema =
                                         [ firstSchema, secondSchema ] ->
                                             case ( firstSchema, secondSchema ) of
                                                 ( Json.Schema.Definitions.ObjectSchema firstSubSchema, Json.Schema.Definitions.ObjectSchema secondSubSchema ) ->
+                                                    -- The first 2 cases here are for pseudo-nullable schemas where the higher level schema type is AnyOf
+                                                    -- but it's actually made up of only 2 types and 1 of them is nullable. This acts as a hack of sorts to
+                                                    -- mark a value as nullable in the schema.
                                                     case ( firstSubSchema.type_, secondSubSchema.type_ ) of
                                                         ( Json.Schema.Definitions.SingleType Json.Schema.Definitions.NullType, _ ) ->
                                                             nullable (schemaToAnnotation secondSchema)
@@ -858,13 +907,13 @@ schemaToAnnotation schema =
                                                             nullable (schemaToAnnotation firstSchema)
 
                                                         _ ->
-                                                            Err ( [], "Todo: AnyOf (except if one is nullable)" )
+                                                            enumAnnotation anyOf
 
                                                 _ ->
-                                                    Err ( [], "Todo: AnyOf (when not both ObjectSchemas)" )
+                                                    enumAnnotation anyOf
 
                                         _ ->
-                                            Err ( [], "Todo: AnyOf (when not exactly 2 items)" )
+                                            enumAnnotation anyOf
 
                         Just ref ->
                             case String.split "/" ref of
@@ -908,3 +957,59 @@ invalidModuleNameChars =
     , '}'
     , '-'
     ]
+
+
+intToWord : Int -> Result String String
+intToWord i =
+    case i of
+        1 ->
+            Ok "one"
+
+        2 ->
+            Ok "two"
+
+        3 ->
+            Ok "three"
+
+        4 ->
+            Ok "four"
+
+        5 ->
+            Ok "five"
+
+        6 ->
+            Ok "six"
+
+        7 ->
+            Ok "seven"
+
+        8 ->
+            Ok "eight"
+
+        9 ->
+            Ok "nine"
+
+        10 ->
+            Ok "ten"
+
+        11 ->
+            Ok "eleven"
+
+        12 ->
+            Ok "twelve"
+
+        13 ->
+            Ok "thirteen"
+
+        14 ->
+            Ok "fourteen"
+
+        15 ->
+            Ok "fifteen"
+
+        _ ->
+            if i < 0 then
+                Err "Negative numbers aren't supported"
+
+            else
+                Err ("Numbers larger than 7 aren't currently supported and I got an " ++ String.fromInt i)

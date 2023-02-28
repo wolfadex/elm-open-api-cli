@@ -474,27 +474,34 @@ toRequestFunction method apiSpec url operation =
                 |> removeInvalidChars
                 |> String.Extra.camelize
 
-        toMsgParam =
-            ( "toMsg"
+        configParam : List ( String, Elm.Annotation.Annotation ) -> ( String, Maybe Elm.Annotation.Annotation )
+        configParam additionalParams =
+            ( "config"
             , Just
-                (Elm.Annotation.function
-                    [ Gen.Result.annotation_.result Gen.Http.annotation_.error successType ]
-                    (Elm.Annotation.var "msg")
+                (Elm.Annotation.record
+                    (( "toMsg"
+                     , Elm.Annotation.function
+                        [ Gen.Result.annotation_.result Gen.Http.annotation_.error successType ]
+                        (Elm.Annotation.var "msg")
+                     )
+                        :: additionalParams
+                    )
                 )
             )
 
         ( successType, maybeSuccessDecoder ) =
             operationToSuccessTypeAndDecoder apiSpec operation
 
-        function headers =
+        function : (Elm.Expression -> List Elm.Expression) -> List ( String, Elm.Annotation.Annotation ) -> Elm.Expression
+        function headers additionalParams =
             case body of
                 Ok EmptyBody ->
                     Elm.fn
-                        toMsgParam
-                        (\toMsg ->
+                        (configParam additionalParams)
+                        (\config ->
                             Gen.Http.request
                                 { method = method
-                                , headers = headers
+                                , headers = headers config
                                 , timeout = Gen.Maybe.make_.nothing
                                 , tracker = Gen.Maybe.make_.nothing
                                 , url = fullUrl
@@ -502,23 +509,22 @@ toRequestFunction method apiSpec url operation =
                                     case maybeSuccessDecoder of
                                         Just successDecoder ->
                                             Gen.Http.expectJson
-                                                (\result -> Elm.apply toMsg [ result ])
+                                                (\result -> Elm.apply (Elm.get "toMsg" config) [ result ])
                                                 successDecoder
 
                                         Nothing ->
-                                            Gen.Http.expectWhatever (\result -> Elm.apply toMsg [ result ])
+                                            Gen.Http.expectWhatever (\result -> Elm.apply (Elm.get "toMsg" config) [ result ])
                                 , body = Gen.Http.emptyBody
                                 }
                         )
 
                 Ok (JsonBody bodyType bodyEncoder) ->
-                    Elm.fn2
-                        toMsgParam
-                        ( "body", Just bodyType )
-                        (\toMsg bodyValue ->
+                    Elm.fn
+                        (configParam (( "body", bodyType ) :: additionalParams))
+                        (\config ->
                             Gen.Http.request
                                 { method = method
-                                , headers = headers
+                                , headers = headers config
                                 , timeout = Gen.Maybe.make_.nothing
                                 , tracker = Gen.Maybe.make_.nothing
                                 , url = fullUrl
@@ -526,23 +532,22 @@ toRequestFunction method apiSpec url operation =
                                     case maybeSuccessDecoder of
                                         Just successDecoder ->
                                             Gen.Http.expectJson
-                                                (\result -> Elm.apply toMsg [ result ])
+                                                (\result -> Elm.apply (Elm.get "toMsg" config) [ result ])
                                                 successDecoder
 
                                         Nothing ->
-                                            Gen.Http.expectWhatever (\result -> Elm.apply toMsg [ result ])
-                                , body = Gen.Http.jsonBody <| Elm.apply bodyEncoder [ bodyValue ]
+                                            Gen.Http.expectWhatever (\result -> Elm.apply (Elm.get "toMsg" config) [ result ])
+                                , body = Gen.Http.jsonBody <| Elm.apply bodyEncoder [ Elm.get "body" config ]
                                 }
                         )
 
                 Ok (BytesBody mime) ->
-                    Elm.fn2
-                        toMsgParam
-                        ( "body", Just Gen.Bytes.annotation_.bytes )
-                        (\toMsg bodyValue ->
+                    Elm.fn
+                        (configParam (( "body", Gen.Bytes.annotation_.bytes ) :: additionalParams))
+                        (\config ->
                             Gen.Http.request
                                 { method = method
-                                , headers = headers
+                                , headers = headers config
                                 , timeout = Gen.Maybe.make_.nothing
                                 , tracker = Gen.Maybe.make_.nothing
                                 , url = fullUrl
@@ -550,12 +555,12 @@ toRequestFunction method apiSpec url operation =
                                     case maybeSuccessDecoder of
                                         Just successDecoder ->
                                             Gen.Http.expectJson
-                                                (\result -> Elm.apply toMsg [ result ])
+                                                (\result -> Elm.apply (Elm.get "toMsg" config) [ result ])
                                                 successDecoder
 
                                         Nothing ->
-                                            Gen.Http.expectWhatever (\result -> Elm.apply toMsg [ result ])
-                                , body = Gen.Http.bytesBody mime bodyValue
+                                            Gen.Http.expectWhatever (\result -> Elm.apply (Elm.get "toMsg" config) [ result ])
+                                , body = Gen.Http.bytesBody mime (Elm.get "body" config)
                                 }
                         )
 
@@ -575,35 +580,29 @@ toRequestFunction method apiSpec url operation =
                     (OpenApi.Operation.security operation)
             of
                 [] ->
-                    ( function [], [] )
+                    ( function (\_ -> []) [], [] )
 
                 [ [ ( "oauth_2_0", ss ) ] ] ->
-                    ( Elm.fn
-                        ( "token"
-                        , Just
-                            (Elm.Annotation.record
-                                [ ( "authorization"
-                                  , Elm.Annotation.record
-                                        [ ( "bearer"
-                                          , Elm.Annotation.string
-                                          )
-                                        ]
+                    ( function
+                        (\config ->
+                            [ Gen.Http.call_.header (Elm.string "Authorization")
+                                (Elm.Op.append
+                                    (Elm.string "Bearer ")
+                                    (config
+                                        |> Elm.get "authorization"
+                                        |> Elm.get "bearer"
+                                    )
+                                )
+                            ]
+                        )
+                        [ ( "authorization"
+                          , Elm.Annotation.record
+                                [ ( "bearer"
+                                  , Elm.Annotation.string
                                   )
                                 ]
-                            )
-                        )
-                        (\token ->
-                            function
-                                [ Gen.Http.call_.header (Elm.string "Authorization")
-                                    (Elm.Op.append
-                                        (Elm.string "Bearer ")
-                                        (token
-                                            |> Elm.get "authorization"
-                                            |> Elm.get "bearer"
-                                        )
-                                    )
-                                ]
-                        )
+                          )
+                        ]
                     , ss
                     )
 

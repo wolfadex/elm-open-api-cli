@@ -420,6 +420,7 @@ toRequestFunction apiSpec url operation =
                             Just response ->
                                 Ok response
                                     |> stepOrFail "The response doesn't have an application/json content option"
+                                        -- TODO: This is expected to fail when the repsonse status code is 204, how to handle?
                                         (OpenApi.Response.content
                                             >> Dict.get "application/json"
                                         )

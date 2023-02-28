@@ -22,7 +22,7 @@ type alias Model =
 init : () -> ( Model, Cmd Msg )
 init () =
     ( {}
-    , GitHub_v3_REST_API.metaRoot
+    , GitHub_v3_REST_API.metaRoot RootResponsed
     )
 
 
@@ -32,13 +32,13 @@ subscriptions _ =
 
 
 type Msg
-    = RootResponse (Result Http.Error GitHub_v3_REST_API.Root)
+    = RootResponsed (Result Http.Error GitHub_v3_REST_API.Root)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        RootResponse response ->
+        RootResponsed response ->
             ( model, Cmd.none )
 
 

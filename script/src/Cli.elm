@@ -213,6 +213,7 @@ generateFileFromOpenApiSpec { outputFile, namespace } apiSpec =
                             |> Result.andThen
                                 (\intWord ->
                                     let
+                                        typeName : String
                                         typeName =
                                             typifyName ("enum_" ++ intWord)
                                     in
@@ -221,7 +222,7 @@ generateFileFromOpenApiSpec { outputFile, namespace } apiSpec =
                                             (\j res ->
                                                 Result.map2
                                                     (\jWord r ->
-                                                        Elm.variantWith (typifyName (typeName ++ "_" ++ jWord)) [ Elm.Annotation.var jWord ]
+                                                        Elm.variantWith (typifyName (typeName ++ "_" ++ jWord)) [ Elm.Annotation.var (elmifyName jWord) ]
                                                             :: r
                                                     )
                                                     (intToWord j)
@@ -518,7 +519,9 @@ nullableType =
 typifyName : String -> String
 typifyName name =
     name
-        |> String.replace "-" " "
+        |> String.uncons
+        |> Maybe.map (\( first, rest ) -> String.cons first (String.replace "-" " " rest))
+        |> Maybe.withDefault ""
         |> String.replace "_" " "
         |> String.Extra.toTitleCase
         |> String.replace " " ""
@@ -531,6 +534,17 @@ elmifyName name =
         |> String.uncons
         |> Maybe.map (\( first, rest ) -> String.cons (Char.toLower first) rest)
         |> Maybe.withDefault ""
+        |> deSymbolify
+
+
+{-| Sometimes a word in the schema contains invalid characers for an Elm name.
+We don't want to completely remove them though.
+-}
+deSymbolify : String -> String
+deSymbolify str =
+    str
+        |> String.replace "+" "plus"
+        |> String.replace "-" "minus"
 
 
 schemaToEncoder : Json.Schema.Definitions.Schema -> Elm.Expression

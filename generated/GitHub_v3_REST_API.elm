@@ -18397,8 +18397,8 @@ encodeReferencedWorkflow rec =
 type alias ReactionRollup =
     { url : String
     , totalCount : Int
-    , +1 : Int
-    , 1 : Int
+    , plus1 : Int
+    , minus1 : Int
     , laugh : Int
     , confused : Int
     , heart : Int
@@ -18411,11 +18411,11 @@ type alias ReactionRollup =
 decodeReactionRollup : Json.Decode.Decoder ReactionRollup
 decodeReactionRollup =
     Json.Decode.succeed
-     (\url totalCount +1 1 laugh confused heart hooray eyes rocket ->
+     (\url totalCount plus1 minus1 laugh confused heart hooray eyes rocket ->
          { url = url
          , totalCount = totalCount
-         , +1 = +1
-         , 1 = 1
+         , plus1 = plus1
+         , minus1 = minus1
          , laugh = laugh
          , confused = confused
          , heart = heart
@@ -18443,8 +18443,8 @@ encodeReactionRollup rec =
     Json.Encode.object
         [ ( "url", Json.Encode.string rec.url )
         , ( "total_count", Json.Encode.int rec.totalCount )
-        , ( "+1", Json.Encode.int rec.+1 )
-        , ( "-1", Json.Encode.int rec.1 )
+        , ( "+1", Json.Encode.int rec.plus1 )
+        , ( "-1", Json.Encode.int rec.minus1 )
         , ( "laugh", Json.Encode.int rec.laugh )
         , ( "confused", Json.Encode.int rec.confused )
         , ( "heart", Json.Encode.int rec.heart )
@@ -50495,7 +50495,7 @@ type EnumTwenty one two three four five six seven eight nine ten eleven twelve t
     | EnumTwentyTwenty twenty
 
 
-type EnumTwentyOne one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twenty-one
+type EnumTwentyOne one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twentyOne
     = EnumTwentyOneOne one
     | EnumTwentyOneTwo two
     | EnumTwentyOneThree three
@@ -50516,10 +50516,10 @@ type EnumTwentyOne one two three four five six seven eight nine ten eleven twelv
     | EnumTwentyOneEighteen eighteen
     | EnumTwentyOneNineteen nineteen
     | EnumTwentyOneTwenty twenty
-    | EnumTwentyOneTwentyOne twenty-one
+    | EnumTwentyOneTwentyOne twentyOne
 
 
-type EnumTwentyTwo one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twenty-one twenty-two
+type EnumTwentyTwo one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twentyOne twentyTwo
     = EnumTwentyTwoOne one
     | EnumTwentyTwoTwo two
     | EnumTwentyTwoThree three
@@ -50540,11 +50540,11 @@ type EnumTwentyTwo one two three four five six seven eight nine ten eleven twelv
     | EnumTwentyTwoEighteen eighteen
     | EnumTwentyTwoNineteen nineteen
     | EnumTwentyTwoTwenty twenty
-    | EnumTwentyTwoTwentyOne twenty-one
-    | EnumTwentyTwoTwentyTwo twenty-two
+    | EnumTwentyTwoTwentyOne twentyOne
+    | EnumTwentyTwoTwentyTwo twentyTwo
 
 
-type EnumTwentyThree one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twenty-one twenty-two twenty-three
+type EnumTwentyThree one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twentyOne twentyTwo twentyThree
     = EnumTwentyThreeOne one
     | EnumTwentyThreeTwo two
     | EnumTwentyThreeThree three
@@ -50565,12 +50565,12 @@ type EnumTwentyThree one two three four five six seven eight nine ten eleven twe
     | EnumTwentyThreeEighteen eighteen
     | EnumTwentyThreeNineteen nineteen
     | EnumTwentyThreeTwenty twenty
-    | EnumTwentyThreeTwentyOne twenty-one
-    | EnumTwentyThreeTwentyTwo twenty-two
-    | EnumTwentyThreeTwentyThree twenty-three
+    | EnumTwentyThreeTwentyOne twentyOne
+    | EnumTwentyThreeTwentyTwo twentyTwo
+    | EnumTwentyThreeTwentyThree twentyThree
 
 
-type EnumTwentyFour one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twenty-one twenty-two twenty-three twenty-four
+type EnumTwentyFour one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twentyOne twentyTwo twentyThree twentyFour
     = EnumTwentyFourOne one
     | EnumTwentyFourTwo two
     | EnumTwentyFourThree three
@@ -50591,13 +50591,13 @@ type EnumTwentyFour one two three four five six seven eight nine ten eleven twel
     | EnumTwentyFourEighteen eighteen
     | EnumTwentyFourNineteen nineteen
     | EnumTwentyFourTwenty twenty
-    | EnumTwentyFourTwentyOne twenty-one
-    | EnumTwentyFourTwentyTwo twenty-two
-    | EnumTwentyFourTwentyThree twenty-three
-    | EnumTwentyFourTwentyFour twenty-four
+    | EnumTwentyFourTwentyOne twentyOne
+    | EnumTwentyFourTwentyTwo twentyTwo
+    | EnumTwentyFourTwentyThree twentyThree
+    | EnumTwentyFourTwentyFour twentyFour
 
 
-type EnumTwentyFive one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twenty-one twenty-two twenty-three twenty-four twenty-five
+type EnumTwentyFive one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twentyOne twentyTwo twentyThree twentyFour twentyFive
     = EnumTwentyFiveOne one
     | EnumTwentyFiveTwo two
     | EnumTwentyFiveThree three
@@ -50618,14 +50618,14 @@ type EnumTwentyFive one two three four five six seven eight nine ten eleven twel
     | EnumTwentyFiveEighteen eighteen
     | EnumTwentyFiveNineteen nineteen
     | EnumTwentyFiveTwenty twenty
-    | EnumTwentyFiveTwentyOne twenty-one
-    | EnumTwentyFiveTwentyTwo twenty-two
-    | EnumTwentyFiveTwentyThree twenty-three
-    | EnumTwentyFiveTwentyFour twenty-four
-    | EnumTwentyFiveTwentyFive twenty-five
+    | EnumTwentyFiveTwentyOne twentyOne
+    | EnumTwentyFiveTwentyTwo twentyTwo
+    | EnumTwentyFiveTwentyThree twentyThree
+    | EnumTwentyFiveTwentyFour twentyFour
+    | EnumTwentyFiveTwentyFive twentyFive
 
 
-type EnumTwentySix one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twenty-one twenty-two twenty-three twenty-four twenty-five twenty-six
+type EnumTwentySix one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twentyOne twentyTwo twentyThree twentyFour twentyFive twentySix
     = EnumTwentySixOne one
     | EnumTwentySixTwo two
     | EnumTwentySixThree three
@@ -50646,15 +50646,15 @@ type EnumTwentySix one two three four five six seven eight nine ten eleven twelv
     | EnumTwentySixEighteen eighteen
     | EnumTwentySixNineteen nineteen
     | EnumTwentySixTwenty twenty
-    | EnumTwentySixTwentyOne twenty-one
-    | EnumTwentySixTwentyTwo twenty-two
-    | EnumTwentySixTwentyThree twenty-three
-    | EnumTwentySixTwentyFour twenty-four
-    | EnumTwentySixTwentyFive twenty-five
-    | EnumTwentySixTwentySix twenty-six
+    | EnumTwentySixTwentyOne twentyOne
+    | EnumTwentySixTwentyTwo twentyTwo
+    | EnumTwentySixTwentyThree twentyThree
+    | EnumTwentySixTwentyFour twentyFour
+    | EnumTwentySixTwentyFive twentyFive
+    | EnumTwentySixTwentySix twentySix
 
 
-type EnumTwentySeven one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twenty-one twenty-two twenty-three twenty-four twenty-five twenty-six twenty-seven
+type EnumTwentySeven one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twentyOne twentyTwo twentyThree twentyFour twentyFive twentySix twentySeven
     = EnumTwentySevenOne one
     | EnumTwentySevenTwo two
     | EnumTwentySevenThree three
@@ -50675,16 +50675,16 @@ type EnumTwentySeven one two three four five six seven eight nine ten eleven twe
     | EnumTwentySevenEighteen eighteen
     | EnumTwentySevenNineteen nineteen
     | EnumTwentySevenTwenty twenty
-    | EnumTwentySevenTwentyOne twenty-one
-    | EnumTwentySevenTwentyTwo twenty-two
-    | EnumTwentySevenTwentyThree twenty-three
-    | EnumTwentySevenTwentyFour twenty-four
-    | EnumTwentySevenTwentyFive twenty-five
-    | EnumTwentySevenTwentySix twenty-six
-    | EnumTwentySevenTwentySeven twenty-seven
+    | EnumTwentySevenTwentyOne twentyOne
+    | EnumTwentySevenTwentyTwo twentyTwo
+    | EnumTwentySevenTwentyThree twentyThree
+    | EnumTwentySevenTwentyFour twentyFour
+    | EnumTwentySevenTwentyFive twentyFive
+    | EnumTwentySevenTwentySix twentySix
+    | EnumTwentySevenTwentySeven twentySeven
 
 
-type EnumTwentyEight one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twenty-one twenty-two twenty-three twenty-four twenty-five twenty-six twenty-seven twenty-eight
+type EnumTwentyEight one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twentyOne twentyTwo twentyThree twentyFour twentyFive twentySix twentySeven twentyEight
     = EnumTwentyEightOne one
     | EnumTwentyEightTwo two
     | EnumTwentyEightThree three
@@ -50705,17 +50705,17 @@ type EnumTwentyEight one two three four five six seven eight nine ten eleven twe
     | EnumTwentyEightEighteen eighteen
     | EnumTwentyEightNineteen nineteen
     | EnumTwentyEightTwenty twenty
-    | EnumTwentyEightTwentyOne twenty-one
-    | EnumTwentyEightTwentyTwo twenty-two
-    | EnumTwentyEightTwentyThree twenty-three
-    | EnumTwentyEightTwentyFour twenty-four
-    | EnumTwentyEightTwentyFive twenty-five
-    | EnumTwentyEightTwentySix twenty-six
-    | EnumTwentyEightTwentySeven twenty-seven
-    | EnumTwentyEightTwentyEight twenty-eight
+    | EnumTwentyEightTwentyOne twentyOne
+    | EnumTwentyEightTwentyTwo twentyTwo
+    | EnumTwentyEightTwentyThree twentyThree
+    | EnumTwentyEightTwentyFour twentyFour
+    | EnumTwentyEightTwentyFive twentyFive
+    | EnumTwentyEightTwentySix twentySix
+    | EnumTwentyEightTwentySeven twentySeven
+    | EnumTwentyEightTwentyEight twentyEight
 
 
-type EnumTwentyNine one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twenty-one twenty-two twenty-three twenty-four twenty-five twenty-six twenty-seven twenty-eight twenty-nine
+type EnumTwentyNine one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twentyOne twentyTwo twentyThree twentyFour twentyFive twentySix twentySeven twentyEight twentyNine
     = EnumTwentyNineOne one
     | EnumTwentyNineTwo two
     | EnumTwentyNineThree three
@@ -50736,18 +50736,18 @@ type EnumTwentyNine one two three four five six seven eight nine ten eleven twel
     | EnumTwentyNineEighteen eighteen
     | EnumTwentyNineNineteen nineteen
     | EnumTwentyNineTwenty twenty
-    | EnumTwentyNineTwentyOne twenty-one
-    | EnumTwentyNineTwentyTwo twenty-two
-    | EnumTwentyNineTwentyThree twenty-three
-    | EnumTwentyNineTwentyFour twenty-four
-    | EnumTwentyNineTwentyFive twenty-five
-    | EnumTwentyNineTwentySix twenty-six
-    | EnumTwentyNineTwentySeven twenty-seven
-    | EnumTwentyNineTwentyEight twenty-eight
-    | EnumTwentyNineTwentyNine twenty-nine
+    | EnumTwentyNineTwentyOne twentyOne
+    | EnumTwentyNineTwentyTwo twentyTwo
+    | EnumTwentyNineTwentyThree twentyThree
+    | EnumTwentyNineTwentyFour twentyFour
+    | EnumTwentyNineTwentyFive twentyFive
+    | EnumTwentyNineTwentySix twentySix
+    | EnumTwentyNineTwentySeven twentySeven
+    | EnumTwentyNineTwentyEight twentyEight
+    | EnumTwentyNineTwentyNine twentyNine
 
 
-type EnumThirty one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twenty-one twenty-two twenty-three twenty-four twenty-five twenty-six twenty-seven twenty-eight twenty-nine thirty
+type EnumThirty one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twentyOne twentyTwo twentyThree twentyFour twentyFive twentySix twentySeven twentyEight twentyNine thirty
     = EnumThirtyOne one
     | EnumThirtyTwo two
     | EnumThirtyThree three
@@ -50768,19 +50768,19 @@ type EnumThirty one two three four five six seven eight nine ten eleven twelve t
     | EnumThirtyEighteen eighteen
     | EnumThirtyNineteen nineteen
     | EnumThirtyTwenty twenty
-    | EnumThirtyTwentyOne twenty-one
-    | EnumThirtyTwentyTwo twenty-two
-    | EnumThirtyTwentyThree twenty-three
-    | EnumThirtyTwentyFour twenty-four
-    | EnumThirtyTwentyFive twenty-five
-    | EnumThirtyTwentySix twenty-six
-    | EnumThirtyTwentySeven twenty-seven
-    | EnumThirtyTwentyEight twenty-eight
-    | EnumThirtyTwentyNine twenty-nine
+    | EnumThirtyTwentyOne twentyOne
+    | EnumThirtyTwentyTwo twentyTwo
+    | EnumThirtyTwentyThree twentyThree
+    | EnumThirtyTwentyFour twentyFour
+    | EnumThirtyTwentyFive twentyFive
+    | EnumThirtyTwentySix twentySix
+    | EnumThirtyTwentySeven twentySeven
+    | EnumThirtyTwentyEight twentyEight
+    | EnumThirtyTwentyNine twentyNine
     | EnumThirtyThirty thirty
 
 
-type EnumThirtyOne one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twenty-one twenty-two twenty-three twenty-four twenty-five twenty-six twenty-seven twenty-eight twenty-nine thirty thirty-one
+type EnumThirtyOne one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twentyOne twentyTwo twentyThree twentyFour twentyFive twentySix twentySeven twentyEight twentyNine thirty thirtyOne
     = EnumThirtyOneOne one
     | EnumThirtyOneTwo two
     | EnumThirtyOneThree three
@@ -50801,20 +50801,20 @@ type EnumThirtyOne one two three four five six seven eight nine ten eleven twelv
     | EnumThirtyOneEighteen eighteen
     | EnumThirtyOneNineteen nineteen
     | EnumThirtyOneTwenty twenty
-    | EnumThirtyOneTwentyOne twenty-one
-    | EnumThirtyOneTwentyTwo twenty-two
-    | EnumThirtyOneTwentyThree twenty-three
-    | EnumThirtyOneTwentyFour twenty-four
-    | EnumThirtyOneTwentyFive twenty-five
-    | EnumThirtyOneTwentySix twenty-six
-    | EnumThirtyOneTwentySeven twenty-seven
-    | EnumThirtyOneTwentyEight twenty-eight
-    | EnumThirtyOneTwentyNine twenty-nine
+    | EnumThirtyOneTwentyOne twentyOne
+    | EnumThirtyOneTwentyTwo twentyTwo
+    | EnumThirtyOneTwentyThree twentyThree
+    | EnumThirtyOneTwentyFour twentyFour
+    | EnumThirtyOneTwentyFive twentyFive
+    | EnumThirtyOneTwentySix twentySix
+    | EnumThirtyOneTwentySeven twentySeven
+    | EnumThirtyOneTwentyEight twentyEight
+    | EnumThirtyOneTwentyNine twentyNine
     | EnumThirtyOneThirty thirty
-    | EnumThirtyOneThirtyOne thirty-one
+    | EnumThirtyOneThirtyOne thirtyOne
 
 
-type EnumThirtyTwo one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twenty-one twenty-two twenty-three twenty-four twenty-five twenty-six twenty-seven twenty-eight twenty-nine thirty thirty-one thirty-two
+type EnumThirtyTwo one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twentyOne twentyTwo twentyThree twentyFour twentyFive twentySix twentySeven twentyEight twentyNine thirty thirtyOne thirtyTwo
     = EnumThirtyTwoOne one
     | EnumThirtyTwoTwo two
     | EnumThirtyTwoThree three
@@ -50835,21 +50835,21 @@ type EnumThirtyTwo one two three four five six seven eight nine ten eleven twelv
     | EnumThirtyTwoEighteen eighteen
     | EnumThirtyTwoNineteen nineteen
     | EnumThirtyTwoTwenty twenty
-    | EnumThirtyTwoTwentyOne twenty-one
-    | EnumThirtyTwoTwentyTwo twenty-two
-    | EnumThirtyTwoTwentyThree twenty-three
-    | EnumThirtyTwoTwentyFour twenty-four
-    | EnumThirtyTwoTwentyFive twenty-five
-    | EnumThirtyTwoTwentySix twenty-six
-    | EnumThirtyTwoTwentySeven twenty-seven
-    | EnumThirtyTwoTwentyEight twenty-eight
-    | EnumThirtyTwoTwentyNine twenty-nine
+    | EnumThirtyTwoTwentyOne twentyOne
+    | EnumThirtyTwoTwentyTwo twentyTwo
+    | EnumThirtyTwoTwentyThree twentyThree
+    | EnumThirtyTwoTwentyFour twentyFour
+    | EnumThirtyTwoTwentyFive twentyFive
+    | EnumThirtyTwoTwentySix twentySix
+    | EnumThirtyTwoTwentySeven twentySeven
+    | EnumThirtyTwoTwentyEight twentyEight
+    | EnumThirtyTwoTwentyNine twentyNine
     | EnumThirtyTwoThirty thirty
-    | EnumThirtyTwoThirtyOne thirty-one
-    | EnumThirtyTwoThirtyTwo thirty-two
+    | EnumThirtyTwoThirtyOne thirtyOne
+    | EnumThirtyTwoThirtyTwo thirtyTwo
 
 
-type EnumThirtyThree one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twenty-one twenty-two twenty-three twenty-four twenty-five twenty-six twenty-seven twenty-eight twenty-nine thirty thirty-one thirty-two thirty-three
+type EnumThirtyThree one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twentyOne twentyTwo twentyThree twentyFour twentyFive twentySix twentySeven twentyEight twentyNine thirty thirtyOne thirtyTwo thirtyThree
     = EnumThirtyThreeOne one
     | EnumThirtyThreeTwo two
     | EnumThirtyThreeThree three
@@ -50870,22 +50870,22 @@ type EnumThirtyThree one two three four five six seven eight nine ten eleven twe
     | EnumThirtyThreeEighteen eighteen
     | EnumThirtyThreeNineteen nineteen
     | EnumThirtyThreeTwenty twenty
-    | EnumThirtyThreeTwentyOne twenty-one
-    | EnumThirtyThreeTwentyTwo twenty-two
-    | EnumThirtyThreeTwentyThree twenty-three
-    | EnumThirtyThreeTwentyFour twenty-four
-    | EnumThirtyThreeTwentyFive twenty-five
-    | EnumThirtyThreeTwentySix twenty-six
-    | EnumThirtyThreeTwentySeven twenty-seven
-    | EnumThirtyThreeTwentyEight twenty-eight
-    | EnumThirtyThreeTwentyNine twenty-nine
+    | EnumThirtyThreeTwentyOne twentyOne
+    | EnumThirtyThreeTwentyTwo twentyTwo
+    | EnumThirtyThreeTwentyThree twentyThree
+    | EnumThirtyThreeTwentyFour twentyFour
+    | EnumThirtyThreeTwentyFive twentyFive
+    | EnumThirtyThreeTwentySix twentySix
+    | EnumThirtyThreeTwentySeven twentySeven
+    | EnumThirtyThreeTwentyEight twentyEight
+    | EnumThirtyThreeTwentyNine twentyNine
     | EnumThirtyThreeThirty thirty
-    | EnumThirtyThreeThirtyOne thirty-one
-    | EnumThirtyThreeThirtyTwo thirty-two
-    | EnumThirtyThreeThirtyThree thirty-three
+    | EnumThirtyThreeThirtyOne thirtyOne
+    | EnumThirtyThreeThirtyTwo thirtyTwo
+    | EnumThirtyThreeThirtyThree thirtyThree
 
 
-type EnumThirtyFour one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twenty-one twenty-two twenty-three twenty-four twenty-five twenty-six twenty-seven twenty-eight twenty-nine thirty thirty-one thirty-two thirty-three thirty-four
+type EnumThirtyFour one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twentyOne twentyTwo twentyThree twentyFour twentyFive twentySix twentySeven twentyEight twentyNine thirty thirtyOne thirtyTwo thirtyThree thirtyFour
     = EnumThirtyFourOne one
     | EnumThirtyFourTwo two
     | EnumThirtyFourThree three
@@ -50906,23 +50906,23 @@ type EnumThirtyFour one two three four five six seven eight nine ten eleven twel
     | EnumThirtyFourEighteen eighteen
     | EnumThirtyFourNineteen nineteen
     | EnumThirtyFourTwenty twenty
-    | EnumThirtyFourTwentyOne twenty-one
-    | EnumThirtyFourTwentyTwo twenty-two
-    | EnumThirtyFourTwentyThree twenty-three
-    | EnumThirtyFourTwentyFour twenty-four
-    | EnumThirtyFourTwentyFive twenty-five
-    | EnumThirtyFourTwentySix twenty-six
-    | EnumThirtyFourTwentySeven twenty-seven
-    | EnumThirtyFourTwentyEight twenty-eight
-    | EnumThirtyFourTwentyNine twenty-nine
+    | EnumThirtyFourTwentyOne twentyOne
+    | EnumThirtyFourTwentyTwo twentyTwo
+    | EnumThirtyFourTwentyThree twentyThree
+    | EnumThirtyFourTwentyFour twentyFour
+    | EnumThirtyFourTwentyFive twentyFive
+    | EnumThirtyFourTwentySix twentySix
+    | EnumThirtyFourTwentySeven twentySeven
+    | EnumThirtyFourTwentyEight twentyEight
+    | EnumThirtyFourTwentyNine twentyNine
     | EnumThirtyFourThirty thirty
-    | EnumThirtyFourThirtyOne thirty-one
-    | EnumThirtyFourThirtyTwo thirty-two
-    | EnumThirtyFourThirtyThree thirty-three
-    | EnumThirtyFourThirtyFour thirty-four
+    | EnumThirtyFourThirtyOne thirtyOne
+    | EnumThirtyFourThirtyTwo thirtyTwo
+    | EnumThirtyFourThirtyThree thirtyThree
+    | EnumThirtyFourThirtyFour thirtyFour
 
 
-type EnumThirtyFive one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twenty-one twenty-two twenty-three twenty-four twenty-five twenty-six twenty-seven twenty-eight twenty-nine thirty thirty-one thirty-two thirty-three thirty-four thirty-five
+type EnumThirtyFive one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twentyOne twentyTwo twentyThree twentyFour twentyFive twentySix twentySeven twentyEight twentyNine thirty thirtyOne thirtyTwo thirtyThree thirtyFour thirtyFive
     = EnumThirtyFiveOne one
     | EnumThirtyFiveTwo two
     | EnumThirtyFiveThree three
@@ -50943,24 +50943,24 @@ type EnumThirtyFive one two three four five six seven eight nine ten eleven twel
     | EnumThirtyFiveEighteen eighteen
     | EnumThirtyFiveNineteen nineteen
     | EnumThirtyFiveTwenty twenty
-    | EnumThirtyFiveTwentyOne twenty-one
-    | EnumThirtyFiveTwentyTwo twenty-two
-    | EnumThirtyFiveTwentyThree twenty-three
-    | EnumThirtyFiveTwentyFour twenty-four
-    | EnumThirtyFiveTwentyFive twenty-five
-    | EnumThirtyFiveTwentySix twenty-six
-    | EnumThirtyFiveTwentySeven twenty-seven
-    | EnumThirtyFiveTwentyEight twenty-eight
-    | EnumThirtyFiveTwentyNine twenty-nine
+    | EnumThirtyFiveTwentyOne twentyOne
+    | EnumThirtyFiveTwentyTwo twentyTwo
+    | EnumThirtyFiveTwentyThree twentyThree
+    | EnumThirtyFiveTwentyFour twentyFour
+    | EnumThirtyFiveTwentyFive twentyFive
+    | EnumThirtyFiveTwentySix twentySix
+    | EnumThirtyFiveTwentySeven twentySeven
+    | EnumThirtyFiveTwentyEight twentyEight
+    | EnumThirtyFiveTwentyNine twentyNine
     | EnumThirtyFiveThirty thirty
-    | EnumThirtyFiveThirtyOne thirty-one
-    | EnumThirtyFiveThirtyTwo thirty-two
-    | EnumThirtyFiveThirtyThree thirty-three
-    | EnumThirtyFiveThirtyFour thirty-four
-    | EnumThirtyFiveThirtyFive thirty-five
+    | EnumThirtyFiveThirtyOne thirtyOne
+    | EnumThirtyFiveThirtyTwo thirtyTwo
+    | EnumThirtyFiveThirtyThree thirtyThree
+    | EnumThirtyFiveThirtyFour thirtyFour
+    | EnumThirtyFiveThirtyFive thirtyFive
 
 
-type EnumThirtySix one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twenty-one twenty-two twenty-three twenty-four twenty-five twenty-six twenty-seven twenty-eight twenty-nine thirty thirty-one thirty-two thirty-three thirty-four thirty-five thirty-six
+type EnumThirtySix one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twentyOne twentyTwo twentyThree twentyFour twentyFive twentySix twentySeven twentyEight twentyNine thirty thirtyOne thirtyTwo thirtyThree thirtyFour thirtyFive thirtySix
     = EnumThirtySixOne one
     | EnumThirtySixTwo two
     | EnumThirtySixThree three
@@ -50981,25 +50981,25 @@ type EnumThirtySix one two three four five six seven eight nine ten eleven twelv
     | EnumThirtySixEighteen eighteen
     | EnumThirtySixNineteen nineteen
     | EnumThirtySixTwenty twenty
-    | EnumThirtySixTwentyOne twenty-one
-    | EnumThirtySixTwentyTwo twenty-two
-    | EnumThirtySixTwentyThree twenty-three
-    | EnumThirtySixTwentyFour twenty-four
-    | EnumThirtySixTwentyFive twenty-five
-    | EnumThirtySixTwentySix twenty-six
-    | EnumThirtySixTwentySeven twenty-seven
-    | EnumThirtySixTwentyEight twenty-eight
-    | EnumThirtySixTwentyNine twenty-nine
+    | EnumThirtySixTwentyOne twentyOne
+    | EnumThirtySixTwentyTwo twentyTwo
+    | EnumThirtySixTwentyThree twentyThree
+    | EnumThirtySixTwentyFour twentyFour
+    | EnumThirtySixTwentyFive twentyFive
+    | EnumThirtySixTwentySix twentySix
+    | EnumThirtySixTwentySeven twentySeven
+    | EnumThirtySixTwentyEight twentyEight
+    | EnumThirtySixTwentyNine twentyNine
     | EnumThirtySixThirty thirty
-    | EnumThirtySixThirtyOne thirty-one
-    | EnumThirtySixThirtyTwo thirty-two
-    | EnumThirtySixThirtyThree thirty-three
-    | EnumThirtySixThirtyFour thirty-four
-    | EnumThirtySixThirtyFive thirty-five
-    | EnumThirtySixThirtySix thirty-six
+    | EnumThirtySixThirtyOne thirtyOne
+    | EnumThirtySixThirtyTwo thirtyTwo
+    | EnumThirtySixThirtyThree thirtyThree
+    | EnumThirtySixThirtyFour thirtyFour
+    | EnumThirtySixThirtyFive thirtyFive
+    | EnumThirtySixThirtySix thirtySix
 
 
-type EnumThirtySeven one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twenty-one twenty-two twenty-three twenty-four twenty-five twenty-six twenty-seven twenty-eight twenty-nine thirty thirty-one thirty-two thirty-three thirty-four thirty-five thirty-six thirty-seven
+type EnumThirtySeven one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twentyOne twentyTwo twentyThree twentyFour twentyFive twentySix twentySeven twentyEight twentyNine thirty thirtyOne thirtyTwo thirtyThree thirtyFour thirtyFive thirtySix thirtySeven
     = EnumThirtySevenOne one
     | EnumThirtySevenTwo two
     | EnumThirtySevenThree three
@@ -51020,26 +51020,26 @@ type EnumThirtySeven one two three four five six seven eight nine ten eleven twe
     | EnumThirtySevenEighteen eighteen
     | EnumThirtySevenNineteen nineteen
     | EnumThirtySevenTwenty twenty
-    | EnumThirtySevenTwentyOne twenty-one
-    | EnumThirtySevenTwentyTwo twenty-two
-    | EnumThirtySevenTwentyThree twenty-three
-    | EnumThirtySevenTwentyFour twenty-four
-    | EnumThirtySevenTwentyFive twenty-five
-    | EnumThirtySevenTwentySix twenty-six
-    | EnumThirtySevenTwentySeven twenty-seven
-    | EnumThirtySevenTwentyEight twenty-eight
-    | EnumThirtySevenTwentyNine twenty-nine
+    | EnumThirtySevenTwentyOne twentyOne
+    | EnumThirtySevenTwentyTwo twentyTwo
+    | EnumThirtySevenTwentyThree twentyThree
+    | EnumThirtySevenTwentyFour twentyFour
+    | EnumThirtySevenTwentyFive twentyFive
+    | EnumThirtySevenTwentySix twentySix
+    | EnumThirtySevenTwentySeven twentySeven
+    | EnumThirtySevenTwentyEight twentyEight
+    | EnumThirtySevenTwentyNine twentyNine
     | EnumThirtySevenThirty thirty
-    | EnumThirtySevenThirtyOne thirty-one
-    | EnumThirtySevenThirtyTwo thirty-two
-    | EnumThirtySevenThirtyThree thirty-three
-    | EnumThirtySevenThirtyFour thirty-four
-    | EnumThirtySevenThirtyFive thirty-five
-    | EnumThirtySevenThirtySix thirty-six
-    | EnumThirtySevenThirtySeven thirty-seven
+    | EnumThirtySevenThirtyOne thirtyOne
+    | EnumThirtySevenThirtyTwo thirtyTwo
+    | EnumThirtySevenThirtyThree thirtyThree
+    | EnumThirtySevenThirtyFour thirtyFour
+    | EnumThirtySevenThirtyFive thirtyFive
+    | EnumThirtySevenThirtySix thirtySix
+    | EnumThirtySevenThirtySeven thirtySeven
 
 
-type EnumThirtyEight one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twenty-one twenty-two twenty-three twenty-four twenty-five twenty-six twenty-seven twenty-eight twenty-nine thirty thirty-one thirty-two thirty-three thirty-four thirty-five thirty-six thirty-seven thirty-eight
+type EnumThirtyEight one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twentyOne twentyTwo twentyThree twentyFour twentyFive twentySix twentySeven twentyEight twentyNine thirty thirtyOne thirtyTwo thirtyThree thirtyFour thirtyFive thirtySix thirtySeven thirtyEight
     = EnumThirtyEightOne one
     | EnumThirtyEightTwo two
     | EnumThirtyEightThree three
@@ -51060,27 +51060,27 @@ type EnumThirtyEight one two three four five six seven eight nine ten eleven twe
     | EnumThirtyEightEighteen eighteen
     | EnumThirtyEightNineteen nineteen
     | EnumThirtyEightTwenty twenty
-    | EnumThirtyEightTwentyOne twenty-one
-    | EnumThirtyEightTwentyTwo twenty-two
-    | EnumThirtyEightTwentyThree twenty-three
-    | EnumThirtyEightTwentyFour twenty-four
-    | EnumThirtyEightTwentyFive twenty-five
-    | EnumThirtyEightTwentySix twenty-six
-    | EnumThirtyEightTwentySeven twenty-seven
-    | EnumThirtyEightTwentyEight twenty-eight
-    | EnumThirtyEightTwentyNine twenty-nine
+    | EnumThirtyEightTwentyOne twentyOne
+    | EnumThirtyEightTwentyTwo twentyTwo
+    | EnumThirtyEightTwentyThree twentyThree
+    | EnumThirtyEightTwentyFour twentyFour
+    | EnumThirtyEightTwentyFive twentyFive
+    | EnumThirtyEightTwentySix twentySix
+    | EnumThirtyEightTwentySeven twentySeven
+    | EnumThirtyEightTwentyEight twentyEight
+    | EnumThirtyEightTwentyNine twentyNine
     | EnumThirtyEightThirty thirty
-    | EnumThirtyEightThirtyOne thirty-one
-    | EnumThirtyEightThirtyTwo thirty-two
-    | EnumThirtyEightThirtyThree thirty-three
-    | EnumThirtyEightThirtyFour thirty-four
-    | EnumThirtyEightThirtyFive thirty-five
-    | EnumThirtyEightThirtySix thirty-six
-    | EnumThirtyEightThirtySeven thirty-seven
-    | EnumThirtyEightThirtyEight thirty-eight
+    | EnumThirtyEightThirtyOne thirtyOne
+    | EnumThirtyEightThirtyTwo thirtyTwo
+    | EnumThirtyEightThirtyThree thirtyThree
+    | EnumThirtyEightThirtyFour thirtyFour
+    | EnumThirtyEightThirtyFive thirtyFive
+    | EnumThirtyEightThirtySix thirtySix
+    | EnumThirtyEightThirtySeven thirtySeven
+    | EnumThirtyEightThirtyEight thirtyEight
 
 
-type EnumThirtyNine one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twenty-one twenty-two twenty-three twenty-four twenty-five twenty-six twenty-seven twenty-eight twenty-nine thirty thirty-one thirty-two thirty-three thirty-four thirty-five thirty-six thirty-seven thirty-eight thirty-nine
+type EnumThirtyNine one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twentyOne twentyTwo twentyThree twentyFour twentyFive twentySix twentySeven twentyEight twentyNine thirty thirtyOne thirtyTwo thirtyThree thirtyFour thirtyFive thirtySix thirtySeven thirtyEight thirtyNine
     = EnumThirtyNineOne one
     | EnumThirtyNineTwo two
     | EnumThirtyNineThree three
@@ -51101,28 +51101,28 @@ type EnumThirtyNine one two three four five six seven eight nine ten eleven twel
     | EnumThirtyNineEighteen eighteen
     | EnumThirtyNineNineteen nineteen
     | EnumThirtyNineTwenty twenty
-    | EnumThirtyNineTwentyOne twenty-one
-    | EnumThirtyNineTwentyTwo twenty-two
-    | EnumThirtyNineTwentyThree twenty-three
-    | EnumThirtyNineTwentyFour twenty-four
-    | EnumThirtyNineTwentyFive twenty-five
-    | EnumThirtyNineTwentySix twenty-six
-    | EnumThirtyNineTwentySeven twenty-seven
-    | EnumThirtyNineTwentyEight twenty-eight
-    | EnumThirtyNineTwentyNine twenty-nine
+    | EnumThirtyNineTwentyOne twentyOne
+    | EnumThirtyNineTwentyTwo twentyTwo
+    | EnumThirtyNineTwentyThree twentyThree
+    | EnumThirtyNineTwentyFour twentyFour
+    | EnumThirtyNineTwentyFive twentyFive
+    | EnumThirtyNineTwentySix twentySix
+    | EnumThirtyNineTwentySeven twentySeven
+    | EnumThirtyNineTwentyEight twentyEight
+    | EnumThirtyNineTwentyNine twentyNine
     | EnumThirtyNineThirty thirty
-    | EnumThirtyNineThirtyOne thirty-one
-    | EnumThirtyNineThirtyTwo thirty-two
-    | EnumThirtyNineThirtyThree thirty-three
-    | EnumThirtyNineThirtyFour thirty-four
-    | EnumThirtyNineThirtyFive thirty-five
-    | EnumThirtyNineThirtySix thirty-six
-    | EnumThirtyNineThirtySeven thirty-seven
-    | EnumThirtyNineThirtyEight thirty-eight
-    | EnumThirtyNineThirtyNine thirty-nine
+    | EnumThirtyNineThirtyOne thirtyOne
+    | EnumThirtyNineThirtyTwo thirtyTwo
+    | EnumThirtyNineThirtyThree thirtyThree
+    | EnumThirtyNineThirtyFour thirtyFour
+    | EnumThirtyNineThirtyFive thirtyFive
+    | EnumThirtyNineThirtySix thirtySix
+    | EnumThirtyNineThirtySeven thirtySeven
+    | EnumThirtyNineThirtyEight thirtyEight
+    | EnumThirtyNineThirtyNine thirtyNine
 
 
-type EnumForty one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twenty-one twenty-two twenty-three twenty-four twenty-five twenty-six twenty-seven twenty-eight twenty-nine thirty thirty-one thirty-two thirty-three thirty-four thirty-five thirty-six thirty-seven thirty-eight thirty-nine forty
+type EnumForty one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twentyOne twentyTwo twentyThree twentyFour twentyFive twentySix twentySeven twentyEight twentyNine thirty thirtyOne thirtyTwo thirtyThree thirtyFour thirtyFive thirtySix thirtySeven thirtyEight thirtyNine forty
     = EnumFortyOne one
     | EnumFortyTwo two
     | EnumFortyThree three
@@ -51143,29 +51143,29 @@ type EnumForty one two three four five six seven eight nine ten eleven twelve th
     | EnumFortyEighteen eighteen
     | EnumFortyNineteen nineteen
     | EnumFortyTwenty twenty
-    | EnumFortyTwentyOne twenty-one
-    | EnumFortyTwentyTwo twenty-two
-    | EnumFortyTwentyThree twenty-three
-    | EnumFortyTwentyFour twenty-four
-    | EnumFortyTwentyFive twenty-five
-    | EnumFortyTwentySix twenty-six
-    | EnumFortyTwentySeven twenty-seven
-    | EnumFortyTwentyEight twenty-eight
-    | EnumFortyTwentyNine twenty-nine
+    | EnumFortyTwentyOne twentyOne
+    | EnumFortyTwentyTwo twentyTwo
+    | EnumFortyTwentyThree twentyThree
+    | EnumFortyTwentyFour twentyFour
+    | EnumFortyTwentyFive twentyFive
+    | EnumFortyTwentySix twentySix
+    | EnumFortyTwentySeven twentySeven
+    | EnumFortyTwentyEight twentyEight
+    | EnumFortyTwentyNine twentyNine
     | EnumFortyThirty thirty
-    | EnumFortyThirtyOne thirty-one
-    | EnumFortyThirtyTwo thirty-two
-    | EnumFortyThirtyThree thirty-three
-    | EnumFortyThirtyFour thirty-four
-    | EnumFortyThirtyFive thirty-five
-    | EnumFortyThirtySix thirty-six
-    | EnumFortyThirtySeven thirty-seven
-    | EnumFortyThirtyEight thirty-eight
-    | EnumFortyThirtyNine thirty-nine
+    | EnumFortyThirtyOne thirtyOne
+    | EnumFortyThirtyTwo thirtyTwo
+    | EnumFortyThirtyThree thirtyThree
+    | EnumFortyThirtyFour thirtyFour
+    | EnumFortyThirtyFive thirtyFive
+    | EnumFortyThirtySix thirtySix
+    | EnumFortyThirtySeven thirtySeven
+    | EnumFortyThirtyEight thirtyEight
+    | EnumFortyThirtyNine thirtyNine
     | EnumFortyForty forty
 
 
-type EnumFortyOne one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twenty-one twenty-two twenty-three twenty-four twenty-five twenty-six twenty-seven twenty-eight twenty-nine thirty thirty-one thirty-two thirty-three thirty-four thirty-five thirty-six thirty-seven thirty-eight thirty-nine forty forty-one
+type EnumFortyOne one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twentyOne twentyTwo twentyThree twentyFour twentyFive twentySix twentySeven twentyEight twentyNine thirty thirtyOne thirtyTwo thirtyThree thirtyFour thirtyFive thirtySix thirtySeven thirtyEight thirtyNine forty fortyOne
     = EnumFortyOneOne one
     | EnumFortyOneTwo two
     | EnumFortyOneThree three
@@ -51186,30 +51186,30 @@ type EnumFortyOne one two three four five six seven eight nine ten eleven twelve
     | EnumFortyOneEighteen eighteen
     | EnumFortyOneNineteen nineteen
     | EnumFortyOneTwenty twenty
-    | EnumFortyOneTwentyOne twenty-one
-    | EnumFortyOneTwentyTwo twenty-two
-    | EnumFortyOneTwentyThree twenty-three
-    | EnumFortyOneTwentyFour twenty-four
-    | EnumFortyOneTwentyFive twenty-five
-    | EnumFortyOneTwentySix twenty-six
-    | EnumFortyOneTwentySeven twenty-seven
-    | EnumFortyOneTwentyEight twenty-eight
-    | EnumFortyOneTwentyNine twenty-nine
+    | EnumFortyOneTwentyOne twentyOne
+    | EnumFortyOneTwentyTwo twentyTwo
+    | EnumFortyOneTwentyThree twentyThree
+    | EnumFortyOneTwentyFour twentyFour
+    | EnumFortyOneTwentyFive twentyFive
+    | EnumFortyOneTwentySix twentySix
+    | EnumFortyOneTwentySeven twentySeven
+    | EnumFortyOneTwentyEight twentyEight
+    | EnumFortyOneTwentyNine twentyNine
     | EnumFortyOneThirty thirty
-    | EnumFortyOneThirtyOne thirty-one
-    | EnumFortyOneThirtyTwo thirty-two
-    | EnumFortyOneThirtyThree thirty-three
-    | EnumFortyOneThirtyFour thirty-four
-    | EnumFortyOneThirtyFive thirty-five
-    | EnumFortyOneThirtySix thirty-six
-    | EnumFortyOneThirtySeven thirty-seven
-    | EnumFortyOneThirtyEight thirty-eight
-    | EnumFortyOneThirtyNine thirty-nine
+    | EnumFortyOneThirtyOne thirtyOne
+    | EnumFortyOneThirtyTwo thirtyTwo
+    | EnumFortyOneThirtyThree thirtyThree
+    | EnumFortyOneThirtyFour thirtyFour
+    | EnumFortyOneThirtyFive thirtyFive
+    | EnumFortyOneThirtySix thirtySix
+    | EnumFortyOneThirtySeven thirtySeven
+    | EnumFortyOneThirtyEight thirtyEight
+    | EnumFortyOneThirtyNine thirtyNine
     | EnumFortyOneForty forty
-    | EnumFortyOneFortyOne forty-one
+    | EnumFortyOneFortyOne fortyOne
 
 
-type EnumFortyTwo one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twenty-one twenty-two twenty-three twenty-four twenty-five twenty-six twenty-seven twenty-eight twenty-nine thirty thirty-one thirty-two thirty-three thirty-four thirty-five thirty-six thirty-seven thirty-eight thirty-nine forty forty-one forty-two
+type EnumFortyTwo one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twentyOne twentyTwo twentyThree twentyFour twentyFive twentySix twentySeven twentyEight twentyNine thirty thirtyOne thirtyTwo thirtyThree thirtyFour thirtyFive thirtySix thirtySeven thirtyEight thirtyNine forty fortyOne fortyTwo
     = EnumFortyTwoOne one
     | EnumFortyTwoTwo two
     | EnumFortyTwoThree three
@@ -51230,31 +51230,31 @@ type EnumFortyTwo one two three four five six seven eight nine ten eleven twelve
     | EnumFortyTwoEighteen eighteen
     | EnumFortyTwoNineteen nineteen
     | EnumFortyTwoTwenty twenty
-    | EnumFortyTwoTwentyOne twenty-one
-    | EnumFortyTwoTwentyTwo twenty-two
-    | EnumFortyTwoTwentyThree twenty-three
-    | EnumFortyTwoTwentyFour twenty-four
-    | EnumFortyTwoTwentyFive twenty-five
-    | EnumFortyTwoTwentySix twenty-six
-    | EnumFortyTwoTwentySeven twenty-seven
-    | EnumFortyTwoTwentyEight twenty-eight
-    | EnumFortyTwoTwentyNine twenty-nine
+    | EnumFortyTwoTwentyOne twentyOne
+    | EnumFortyTwoTwentyTwo twentyTwo
+    | EnumFortyTwoTwentyThree twentyThree
+    | EnumFortyTwoTwentyFour twentyFour
+    | EnumFortyTwoTwentyFive twentyFive
+    | EnumFortyTwoTwentySix twentySix
+    | EnumFortyTwoTwentySeven twentySeven
+    | EnumFortyTwoTwentyEight twentyEight
+    | EnumFortyTwoTwentyNine twentyNine
     | EnumFortyTwoThirty thirty
-    | EnumFortyTwoThirtyOne thirty-one
-    | EnumFortyTwoThirtyTwo thirty-two
-    | EnumFortyTwoThirtyThree thirty-three
-    | EnumFortyTwoThirtyFour thirty-four
-    | EnumFortyTwoThirtyFive thirty-five
-    | EnumFortyTwoThirtySix thirty-six
-    | EnumFortyTwoThirtySeven thirty-seven
-    | EnumFortyTwoThirtyEight thirty-eight
-    | EnumFortyTwoThirtyNine thirty-nine
+    | EnumFortyTwoThirtyOne thirtyOne
+    | EnumFortyTwoThirtyTwo thirtyTwo
+    | EnumFortyTwoThirtyThree thirtyThree
+    | EnumFortyTwoThirtyFour thirtyFour
+    | EnumFortyTwoThirtyFive thirtyFive
+    | EnumFortyTwoThirtySix thirtySix
+    | EnumFortyTwoThirtySeven thirtySeven
+    | EnumFortyTwoThirtyEight thirtyEight
+    | EnumFortyTwoThirtyNine thirtyNine
     | EnumFortyTwoForty forty
-    | EnumFortyTwoFortyOne forty-one
-    | EnumFortyTwoFortyTwo forty-two
+    | EnumFortyTwoFortyOne fortyOne
+    | EnumFortyTwoFortyTwo fortyTwo
 
 
-type EnumFortyThree one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twenty-one twenty-two twenty-three twenty-four twenty-five twenty-six twenty-seven twenty-eight twenty-nine thirty thirty-one thirty-two thirty-three thirty-four thirty-five thirty-six thirty-seven thirty-eight thirty-nine forty forty-one forty-two forty-three
+type EnumFortyThree one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twentyOne twentyTwo twentyThree twentyFour twentyFive twentySix twentySeven twentyEight twentyNine thirty thirtyOne thirtyTwo thirtyThree thirtyFour thirtyFive thirtySix thirtySeven thirtyEight thirtyNine forty fortyOne fortyTwo fortyThree
     = EnumFortyThreeOne one
     | EnumFortyThreeTwo two
     | EnumFortyThreeThree three
@@ -51275,32 +51275,32 @@ type EnumFortyThree one two three four five six seven eight nine ten eleven twel
     | EnumFortyThreeEighteen eighteen
     | EnumFortyThreeNineteen nineteen
     | EnumFortyThreeTwenty twenty
-    | EnumFortyThreeTwentyOne twenty-one
-    | EnumFortyThreeTwentyTwo twenty-two
-    | EnumFortyThreeTwentyThree twenty-three
-    | EnumFortyThreeTwentyFour twenty-four
-    | EnumFortyThreeTwentyFive twenty-five
-    | EnumFortyThreeTwentySix twenty-six
-    | EnumFortyThreeTwentySeven twenty-seven
-    | EnumFortyThreeTwentyEight twenty-eight
-    | EnumFortyThreeTwentyNine twenty-nine
+    | EnumFortyThreeTwentyOne twentyOne
+    | EnumFortyThreeTwentyTwo twentyTwo
+    | EnumFortyThreeTwentyThree twentyThree
+    | EnumFortyThreeTwentyFour twentyFour
+    | EnumFortyThreeTwentyFive twentyFive
+    | EnumFortyThreeTwentySix twentySix
+    | EnumFortyThreeTwentySeven twentySeven
+    | EnumFortyThreeTwentyEight twentyEight
+    | EnumFortyThreeTwentyNine twentyNine
     | EnumFortyThreeThirty thirty
-    | EnumFortyThreeThirtyOne thirty-one
-    | EnumFortyThreeThirtyTwo thirty-two
-    | EnumFortyThreeThirtyThree thirty-three
-    | EnumFortyThreeThirtyFour thirty-four
-    | EnumFortyThreeThirtyFive thirty-five
-    | EnumFortyThreeThirtySix thirty-six
-    | EnumFortyThreeThirtySeven thirty-seven
-    | EnumFortyThreeThirtyEight thirty-eight
-    | EnumFortyThreeThirtyNine thirty-nine
+    | EnumFortyThreeThirtyOne thirtyOne
+    | EnumFortyThreeThirtyTwo thirtyTwo
+    | EnumFortyThreeThirtyThree thirtyThree
+    | EnumFortyThreeThirtyFour thirtyFour
+    | EnumFortyThreeThirtyFive thirtyFive
+    | EnumFortyThreeThirtySix thirtySix
+    | EnumFortyThreeThirtySeven thirtySeven
+    | EnumFortyThreeThirtyEight thirtyEight
+    | EnumFortyThreeThirtyNine thirtyNine
     | EnumFortyThreeForty forty
-    | EnumFortyThreeFortyOne forty-one
-    | EnumFortyThreeFortyTwo forty-two
-    | EnumFortyThreeFortyThree forty-three
+    | EnumFortyThreeFortyOne fortyOne
+    | EnumFortyThreeFortyTwo fortyTwo
+    | EnumFortyThreeFortyThree fortyThree
 
 
-type EnumFortyFour one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twenty-one twenty-two twenty-three twenty-four twenty-five twenty-six twenty-seven twenty-eight twenty-nine thirty thirty-one thirty-two thirty-three thirty-four thirty-five thirty-six thirty-seven thirty-eight thirty-nine forty forty-one forty-two forty-three forty-four
+type EnumFortyFour one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twentyOne twentyTwo twentyThree twentyFour twentyFive twentySix twentySeven twentyEight twentyNine thirty thirtyOne thirtyTwo thirtyThree thirtyFour thirtyFive thirtySix thirtySeven thirtyEight thirtyNine forty fortyOne fortyTwo fortyThree fortyFour
     = EnumFortyFourOne one
     | EnumFortyFourTwo two
     | EnumFortyFourThree three
@@ -51321,33 +51321,33 @@ type EnumFortyFour one two three four five six seven eight nine ten eleven twelv
     | EnumFortyFourEighteen eighteen
     | EnumFortyFourNineteen nineteen
     | EnumFortyFourTwenty twenty
-    | EnumFortyFourTwentyOne twenty-one
-    | EnumFortyFourTwentyTwo twenty-two
-    | EnumFortyFourTwentyThree twenty-three
-    | EnumFortyFourTwentyFour twenty-four
-    | EnumFortyFourTwentyFive twenty-five
-    | EnumFortyFourTwentySix twenty-six
-    | EnumFortyFourTwentySeven twenty-seven
-    | EnumFortyFourTwentyEight twenty-eight
-    | EnumFortyFourTwentyNine twenty-nine
+    | EnumFortyFourTwentyOne twentyOne
+    | EnumFortyFourTwentyTwo twentyTwo
+    | EnumFortyFourTwentyThree twentyThree
+    | EnumFortyFourTwentyFour twentyFour
+    | EnumFortyFourTwentyFive twentyFive
+    | EnumFortyFourTwentySix twentySix
+    | EnumFortyFourTwentySeven twentySeven
+    | EnumFortyFourTwentyEight twentyEight
+    | EnumFortyFourTwentyNine twentyNine
     | EnumFortyFourThirty thirty
-    | EnumFortyFourThirtyOne thirty-one
-    | EnumFortyFourThirtyTwo thirty-two
-    | EnumFortyFourThirtyThree thirty-three
-    | EnumFortyFourThirtyFour thirty-four
-    | EnumFortyFourThirtyFive thirty-five
-    | EnumFortyFourThirtySix thirty-six
-    | EnumFortyFourThirtySeven thirty-seven
-    | EnumFortyFourThirtyEight thirty-eight
-    | EnumFortyFourThirtyNine thirty-nine
+    | EnumFortyFourThirtyOne thirtyOne
+    | EnumFortyFourThirtyTwo thirtyTwo
+    | EnumFortyFourThirtyThree thirtyThree
+    | EnumFortyFourThirtyFour thirtyFour
+    | EnumFortyFourThirtyFive thirtyFive
+    | EnumFortyFourThirtySix thirtySix
+    | EnumFortyFourThirtySeven thirtySeven
+    | EnumFortyFourThirtyEight thirtyEight
+    | EnumFortyFourThirtyNine thirtyNine
     | EnumFortyFourForty forty
-    | EnumFortyFourFortyOne forty-one
-    | EnumFortyFourFortyTwo forty-two
-    | EnumFortyFourFortyThree forty-three
-    | EnumFortyFourFortyFour forty-four
+    | EnumFortyFourFortyOne fortyOne
+    | EnumFortyFourFortyTwo fortyTwo
+    | EnumFortyFourFortyThree fortyThree
+    | EnumFortyFourFortyFour fortyFour
 
 
-type EnumFortyFive one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twenty-one twenty-two twenty-three twenty-four twenty-five twenty-six twenty-seven twenty-eight twenty-nine thirty thirty-one thirty-two thirty-three thirty-four thirty-five thirty-six thirty-seven thirty-eight thirty-nine forty forty-one forty-two forty-three forty-four forty-five
+type EnumFortyFive one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twentyOne twentyTwo twentyThree twentyFour twentyFive twentySix twentySeven twentyEight twentyNine thirty thirtyOne thirtyTwo thirtyThree thirtyFour thirtyFive thirtySix thirtySeven thirtyEight thirtyNine forty fortyOne fortyTwo fortyThree fortyFour fortyFive
     = EnumFortyFiveOne one
     | EnumFortyFiveTwo two
     | EnumFortyFiveThree three
@@ -51368,34 +51368,34 @@ type EnumFortyFive one two three four five six seven eight nine ten eleven twelv
     | EnumFortyFiveEighteen eighteen
     | EnumFortyFiveNineteen nineteen
     | EnumFortyFiveTwenty twenty
-    | EnumFortyFiveTwentyOne twenty-one
-    | EnumFortyFiveTwentyTwo twenty-two
-    | EnumFortyFiveTwentyThree twenty-three
-    | EnumFortyFiveTwentyFour twenty-four
-    | EnumFortyFiveTwentyFive twenty-five
-    | EnumFortyFiveTwentySix twenty-six
-    | EnumFortyFiveTwentySeven twenty-seven
-    | EnumFortyFiveTwentyEight twenty-eight
-    | EnumFortyFiveTwentyNine twenty-nine
+    | EnumFortyFiveTwentyOne twentyOne
+    | EnumFortyFiveTwentyTwo twentyTwo
+    | EnumFortyFiveTwentyThree twentyThree
+    | EnumFortyFiveTwentyFour twentyFour
+    | EnumFortyFiveTwentyFive twentyFive
+    | EnumFortyFiveTwentySix twentySix
+    | EnumFortyFiveTwentySeven twentySeven
+    | EnumFortyFiveTwentyEight twentyEight
+    | EnumFortyFiveTwentyNine twentyNine
     | EnumFortyFiveThirty thirty
-    | EnumFortyFiveThirtyOne thirty-one
-    | EnumFortyFiveThirtyTwo thirty-two
-    | EnumFortyFiveThirtyThree thirty-three
-    | EnumFortyFiveThirtyFour thirty-four
-    | EnumFortyFiveThirtyFive thirty-five
-    | EnumFortyFiveThirtySix thirty-six
-    | EnumFortyFiveThirtySeven thirty-seven
-    | EnumFortyFiveThirtyEight thirty-eight
-    | EnumFortyFiveThirtyNine thirty-nine
+    | EnumFortyFiveThirtyOne thirtyOne
+    | EnumFortyFiveThirtyTwo thirtyTwo
+    | EnumFortyFiveThirtyThree thirtyThree
+    | EnumFortyFiveThirtyFour thirtyFour
+    | EnumFortyFiveThirtyFive thirtyFive
+    | EnumFortyFiveThirtySix thirtySix
+    | EnumFortyFiveThirtySeven thirtySeven
+    | EnumFortyFiveThirtyEight thirtyEight
+    | EnumFortyFiveThirtyNine thirtyNine
     | EnumFortyFiveForty forty
-    | EnumFortyFiveFortyOne forty-one
-    | EnumFortyFiveFortyTwo forty-two
-    | EnumFortyFiveFortyThree forty-three
-    | EnumFortyFiveFortyFour forty-four
-    | EnumFortyFiveFortyFive forty-five
+    | EnumFortyFiveFortyOne fortyOne
+    | EnumFortyFiveFortyTwo fortyTwo
+    | EnumFortyFiveFortyThree fortyThree
+    | EnumFortyFiveFortyFour fortyFour
+    | EnumFortyFiveFortyFive fortyFive
 
 
-type EnumFortySix one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twenty-one twenty-two twenty-three twenty-four twenty-five twenty-six twenty-seven twenty-eight twenty-nine thirty thirty-one thirty-two thirty-three thirty-four thirty-five thirty-six thirty-seven thirty-eight thirty-nine forty forty-one forty-two forty-three forty-four forty-five forty-six
+type EnumFortySix one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twentyOne twentyTwo twentyThree twentyFour twentyFive twentySix twentySeven twentyEight twentyNine thirty thirtyOne thirtyTwo thirtyThree thirtyFour thirtyFive thirtySix thirtySeven thirtyEight thirtyNine forty fortyOne fortyTwo fortyThree fortyFour fortyFive fortySix
     = EnumFortySixOne one
     | EnumFortySixTwo two
     | EnumFortySixThree three
@@ -51416,35 +51416,35 @@ type EnumFortySix one two three four five six seven eight nine ten eleven twelve
     | EnumFortySixEighteen eighteen
     | EnumFortySixNineteen nineteen
     | EnumFortySixTwenty twenty
-    | EnumFortySixTwentyOne twenty-one
-    | EnumFortySixTwentyTwo twenty-two
-    | EnumFortySixTwentyThree twenty-three
-    | EnumFortySixTwentyFour twenty-four
-    | EnumFortySixTwentyFive twenty-five
-    | EnumFortySixTwentySix twenty-six
-    | EnumFortySixTwentySeven twenty-seven
-    | EnumFortySixTwentyEight twenty-eight
-    | EnumFortySixTwentyNine twenty-nine
+    | EnumFortySixTwentyOne twentyOne
+    | EnumFortySixTwentyTwo twentyTwo
+    | EnumFortySixTwentyThree twentyThree
+    | EnumFortySixTwentyFour twentyFour
+    | EnumFortySixTwentyFive twentyFive
+    | EnumFortySixTwentySix twentySix
+    | EnumFortySixTwentySeven twentySeven
+    | EnumFortySixTwentyEight twentyEight
+    | EnumFortySixTwentyNine twentyNine
     | EnumFortySixThirty thirty
-    | EnumFortySixThirtyOne thirty-one
-    | EnumFortySixThirtyTwo thirty-two
-    | EnumFortySixThirtyThree thirty-three
-    | EnumFortySixThirtyFour thirty-four
-    | EnumFortySixThirtyFive thirty-five
-    | EnumFortySixThirtySix thirty-six
-    | EnumFortySixThirtySeven thirty-seven
-    | EnumFortySixThirtyEight thirty-eight
-    | EnumFortySixThirtyNine thirty-nine
+    | EnumFortySixThirtyOne thirtyOne
+    | EnumFortySixThirtyTwo thirtyTwo
+    | EnumFortySixThirtyThree thirtyThree
+    | EnumFortySixThirtyFour thirtyFour
+    | EnumFortySixThirtyFive thirtyFive
+    | EnumFortySixThirtySix thirtySix
+    | EnumFortySixThirtySeven thirtySeven
+    | EnumFortySixThirtyEight thirtyEight
+    | EnumFortySixThirtyNine thirtyNine
     | EnumFortySixForty forty
-    | EnumFortySixFortyOne forty-one
-    | EnumFortySixFortyTwo forty-two
-    | EnumFortySixFortyThree forty-three
-    | EnumFortySixFortyFour forty-four
-    | EnumFortySixFortyFive forty-five
-    | EnumFortySixFortySix forty-six
+    | EnumFortySixFortyOne fortyOne
+    | EnumFortySixFortyTwo fortyTwo
+    | EnumFortySixFortyThree fortyThree
+    | EnumFortySixFortyFour fortyFour
+    | EnumFortySixFortyFive fortyFive
+    | EnumFortySixFortySix fortySix
 
 
-type EnumFortySeven one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twenty-one twenty-two twenty-three twenty-four twenty-five twenty-six twenty-seven twenty-eight twenty-nine thirty thirty-one thirty-two thirty-three thirty-four thirty-five thirty-six thirty-seven thirty-eight thirty-nine forty forty-one forty-two forty-three forty-four forty-five forty-six forty-seven
+type EnumFortySeven one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twentyOne twentyTwo twentyThree twentyFour twentyFive twentySix twentySeven twentyEight twentyNine thirty thirtyOne thirtyTwo thirtyThree thirtyFour thirtyFive thirtySix thirtySeven thirtyEight thirtyNine forty fortyOne fortyTwo fortyThree fortyFour fortyFive fortySix fortySeven
     = EnumFortySevenOne one
     | EnumFortySevenTwo two
     | EnumFortySevenThree three
@@ -51465,36 +51465,36 @@ type EnumFortySeven one two three four five six seven eight nine ten eleven twel
     | EnumFortySevenEighteen eighteen
     | EnumFortySevenNineteen nineteen
     | EnumFortySevenTwenty twenty
-    | EnumFortySevenTwentyOne twenty-one
-    | EnumFortySevenTwentyTwo twenty-two
-    | EnumFortySevenTwentyThree twenty-three
-    | EnumFortySevenTwentyFour twenty-four
-    | EnumFortySevenTwentyFive twenty-five
-    | EnumFortySevenTwentySix twenty-six
-    | EnumFortySevenTwentySeven twenty-seven
-    | EnumFortySevenTwentyEight twenty-eight
-    | EnumFortySevenTwentyNine twenty-nine
+    | EnumFortySevenTwentyOne twentyOne
+    | EnumFortySevenTwentyTwo twentyTwo
+    | EnumFortySevenTwentyThree twentyThree
+    | EnumFortySevenTwentyFour twentyFour
+    | EnumFortySevenTwentyFive twentyFive
+    | EnumFortySevenTwentySix twentySix
+    | EnumFortySevenTwentySeven twentySeven
+    | EnumFortySevenTwentyEight twentyEight
+    | EnumFortySevenTwentyNine twentyNine
     | EnumFortySevenThirty thirty
-    | EnumFortySevenThirtyOne thirty-one
-    | EnumFortySevenThirtyTwo thirty-two
-    | EnumFortySevenThirtyThree thirty-three
-    | EnumFortySevenThirtyFour thirty-four
-    | EnumFortySevenThirtyFive thirty-five
-    | EnumFortySevenThirtySix thirty-six
-    | EnumFortySevenThirtySeven thirty-seven
-    | EnumFortySevenThirtyEight thirty-eight
-    | EnumFortySevenThirtyNine thirty-nine
+    | EnumFortySevenThirtyOne thirtyOne
+    | EnumFortySevenThirtyTwo thirtyTwo
+    | EnumFortySevenThirtyThree thirtyThree
+    | EnumFortySevenThirtyFour thirtyFour
+    | EnumFortySevenThirtyFive thirtyFive
+    | EnumFortySevenThirtySix thirtySix
+    | EnumFortySevenThirtySeven thirtySeven
+    | EnumFortySevenThirtyEight thirtyEight
+    | EnumFortySevenThirtyNine thirtyNine
     | EnumFortySevenForty forty
-    | EnumFortySevenFortyOne forty-one
-    | EnumFortySevenFortyTwo forty-two
-    | EnumFortySevenFortyThree forty-three
-    | EnumFortySevenFortyFour forty-four
-    | EnumFortySevenFortyFive forty-five
-    | EnumFortySevenFortySix forty-six
-    | EnumFortySevenFortySeven forty-seven
+    | EnumFortySevenFortyOne fortyOne
+    | EnumFortySevenFortyTwo fortyTwo
+    | EnumFortySevenFortyThree fortyThree
+    | EnumFortySevenFortyFour fortyFour
+    | EnumFortySevenFortyFive fortyFive
+    | EnumFortySevenFortySix fortySix
+    | EnumFortySevenFortySeven fortySeven
 
 
-type EnumFortyEight one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twenty-one twenty-two twenty-three twenty-four twenty-five twenty-six twenty-seven twenty-eight twenty-nine thirty thirty-one thirty-two thirty-three thirty-four thirty-five thirty-six thirty-seven thirty-eight thirty-nine forty forty-one forty-two forty-three forty-four forty-five forty-six forty-seven forty-eight
+type EnumFortyEight one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twentyOne twentyTwo twentyThree twentyFour twentyFive twentySix twentySeven twentyEight twentyNine thirty thirtyOne thirtyTwo thirtyThree thirtyFour thirtyFive thirtySix thirtySeven thirtyEight thirtyNine forty fortyOne fortyTwo fortyThree fortyFour fortyFive fortySix fortySeven fortyEight
     = EnumFortyEightOne one
     | EnumFortyEightTwo two
     | EnumFortyEightThree three
@@ -51515,37 +51515,37 @@ type EnumFortyEight one two three four five six seven eight nine ten eleven twel
     | EnumFortyEightEighteen eighteen
     | EnumFortyEightNineteen nineteen
     | EnumFortyEightTwenty twenty
-    | EnumFortyEightTwentyOne twenty-one
-    | EnumFortyEightTwentyTwo twenty-two
-    | EnumFortyEightTwentyThree twenty-three
-    | EnumFortyEightTwentyFour twenty-four
-    | EnumFortyEightTwentyFive twenty-five
-    | EnumFortyEightTwentySix twenty-six
-    | EnumFortyEightTwentySeven twenty-seven
-    | EnumFortyEightTwentyEight twenty-eight
-    | EnumFortyEightTwentyNine twenty-nine
+    | EnumFortyEightTwentyOne twentyOne
+    | EnumFortyEightTwentyTwo twentyTwo
+    | EnumFortyEightTwentyThree twentyThree
+    | EnumFortyEightTwentyFour twentyFour
+    | EnumFortyEightTwentyFive twentyFive
+    | EnumFortyEightTwentySix twentySix
+    | EnumFortyEightTwentySeven twentySeven
+    | EnumFortyEightTwentyEight twentyEight
+    | EnumFortyEightTwentyNine twentyNine
     | EnumFortyEightThirty thirty
-    | EnumFortyEightThirtyOne thirty-one
-    | EnumFortyEightThirtyTwo thirty-two
-    | EnumFortyEightThirtyThree thirty-three
-    | EnumFortyEightThirtyFour thirty-four
-    | EnumFortyEightThirtyFive thirty-five
-    | EnumFortyEightThirtySix thirty-six
-    | EnumFortyEightThirtySeven thirty-seven
-    | EnumFortyEightThirtyEight thirty-eight
-    | EnumFortyEightThirtyNine thirty-nine
+    | EnumFortyEightThirtyOne thirtyOne
+    | EnumFortyEightThirtyTwo thirtyTwo
+    | EnumFortyEightThirtyThree thirtyThree
+    | EnumFortyEightThirtyFour thirtyFour
+    | EnumFortyEightThirtyFive thirtyFive
+    | EnumFortyEightThirtySix thirtySix
+    | EnumFortyEightThirtySeven thirtySeven
+    | EnumFortyEightThirtyEight thirtyEight
+    | EnumFortyEightThirtyNine thirtyNine
     | EnumFortyEightForty forty
-    | EnumFortyEightFortyOne forty-one
-    | EnumFortyEightFortyTwo forty-two
-    | EnumFortyEightFortyThree forty-three
-    | EnumFortyEightFortyFour forty-four
-    | EnumFortyEightFortyFive forty-five
-    | EnumFortyEightFortySix forty-six
-    | EnumFortyEightFortySeven forty-seven
-    | EnumFortyEightFortyEight forty-eight
+    | EnumFortyEightFortyOne fortyOne
+    | EnumFortyEightFortyTwo fortyTwo
+    | EnumFortyEightFortyThree fortyThree
+    | EnumFortyEightFortyFour fortyFour
+    | EnumFortyEightFortyFive fortyFive
+    | EnumFortyEightFortySix fortySix
+    | EnumFortyEightFortySeven fortySeven
+    | EnumFortyEightFortyEight fortyEight
 
 
-type EnumFortyNine one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twenty-one twenty-two twenty-three twenty-four twenty-five twenty-six twenty-seven twenty-eight twenty-nine thirty thirty-one thirty-two thirty-three thirty-four thirty-five thirty-six thirty-seven thirty-eight thirty-nine forty forty-one forty-two forty-three forty-four forty-five forty-six forty-seven forty-eight forty-nine
+type EnumFortyNine one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twentyOne twentyTwo twentyThree twentyFour twentyFive twentySix twentySeven twentyEight twentyNine thirty thirtyOne thirtyTwo thirtyThree thirtyFour thirtyFive thirtySix thirtySeven thirtyEight thirtyNine forty fortyOne fortyTwo fortyThree fortyFour fortyFive fortySix fortySeven fortyEight fortyNine
     = EnumFortyNineOne one
     | EnumFortyNineTwo two
     | EnumFortyNineThree three
@@ -51566,38 +51566,38 @@ type EnumFortyNine one two three four five six seven eight nine ten eleven twelv
     | EnumFortyNineEighteen eighteen
     | EnumFortyNineNineteen nineteen
     | EnumFortyNineTwenty twenty
-    | EnumFortyNineTwentyOne twenty-one
-    | EnumFortyNineTwentyTwo twenty-two
-    | EnumFortyNineTwentyThree twenty-three
-    | EnumFortyNineTwentyFour twenty-four
-    | EnumFortyNineTwentyFive twenty-five
-    | EnumFortyNineTwentySix twenty-six
-    | EnumFortyNineTwentySeven twenty-seven
-    | EnumFortyNineTwentyEight twenty-eight
-    | EnumFortyNineTwentyNine twenty-nine
+    | EnumFortyNineTwentyOne twentyOne
+    | EnumFortyNineTwentyTwo twentyTwo
+    | EnumFortyNineTwentyThree twentyThree
+    | EnumFortyNineTwentyFour twentyFour
+    | EnumFortyNineTwentyFive twentyFive
+    | EnumFortyNineTwentySix twentySix
+    | EnumFortyNineTwentySeven twentySeven
+    | EnumFortyNineTwentyEight twentyEight
+    | EnumFortyNineTwentyNine twentyNine
     | EnumFortyNineThirty thirty
-    | EnumFortyNineThirtyOne thirty-one
-    | EnumFortyNineThirtyTwo thirty-two
-    | EnumFortyNineThirtyThree thirty-three
-    | EnumFortyNineThirtyFour thirty-four
-    | EnumFortyNineThirtyFive thirty-five
-    | EnumFortyNineThirtySix thirty-six
-    | EnumFortyNineThirtySeven thirty-seven
-    | EnumFortyNineThirtyEight thirty-eight
-    | EnumFortyNineThirtyNine thirty-nine
+    | EnumFortyNineThirtyOne thirtyOne
+    | EnumFortyNineThirtyTwo thirtyTwo
+    | EnumFortyNineThirtyThree thirtyThree
+    | EnumFortyNineThirtyFour thirtyFour
+    | EnumFortyNineThirtyFive thirtyFive
+    | EnumFortyNineThirtySix thirtySix
+    | EnumFortyNineThirtySeven thirtySeven
+    | EnumFortyNineThirtyEight thirtyEight
+    | EnumFortyNineThirtyNine thirtyNine
     | EnumFortyNineForty forty
-    | EnumFortyNineFortyOne forty-one
-    | EnumFortyNineFortyTwo forty-two
-    | EnumFortyNineFortyThree forty-three
-    | EnumFortyNineFortyFour forty-four
-    | EnumFortyNineFortyFive forty-five
-    | EnumFortyNineFortySix forty-six
-    | EnumFortyNineFortySeven forty-seven
-    | EnumFortyNineFortyEight forty-eight
-    | EnumFortyNineFortyNine forty-nine
+    | EnumFortyNineFortyOne fortyOne
+    | EnumFortyNineFortyTwo fortyTwo
+    | EnumFortyNineFortyThree fortyThree
+    | EnumFortyNineFortyFour fortyFour
+    | EnumFortyNineFortyFive fortyFive
+    | EnumFortyNineFortySix fortySix
+    | EnumFortyNineFortySeven fortySeven
+    | EnumFortyNineFortyEight fortyEight
+    | EnumFortyNineFortyNine fortyNine
 
 
-type EnumFifty one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twenty-one twenty-two twenty-three twenty-four twenty-five twenty-six twenty-seven twenty-eight twenty-nine thirty thirty-one thirty-two thirty-three thirty-four thirty-five thirty-six thirty-seven thirty-eight thirty-nine forty forty-one forty-two forty-three forty-four forty-five forty-six forty-seven forty-eight forty-nine fifty
+type EnumFifty one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twentyOne twentyTwo twentyThree twentyFour twentyFive twentySix twentySeven twentyEight twentyNine thirty thirtyOne thirtyTwo thirtyThree thirtyFour thirtyFive thirtySix thirtySeven thirtyEight thirtyNine forty fortyOne fortyTwo fortyThree fortyFour fortyFive fortySix fortySeven fortyEight fortyNine fifty
     = EnumFiftyOne one
     | EnumFiftyTwo two
     | EnumFiftyThree three
@@ -51618,39 +51618,39 @@ type EnumFifty one two three four five six seven eight nine ten eleven twelve th
     | EnumFiftyEighteen eighteen
     | EnumFiftyNineteen nineteen
     | EnumFiftyTwenty twenty
-    | EnumFiftyTwentyOne twenty-one
-    | EnumFiftyTwentyTwo twenty-two
-    | EnumFiftyTwentyThree twenty-three
-    | EnumFiftyTwentyFour twenty-four
-    | EnumFiftyTwentyFive twenty-five
-    | EnumFiftyTwentySix twenty-six
-    | EnumFiftyTwentySeven twenty-seven
-    | EnumFiftyTwentyEight twenty-eight
-    | EnumFiftyTwentyNine twenty-nine
+    | EnumFiftyTwentyOne twentyOne
+    | EnumFiftyTwentyTwo twentyTwo
+    | EnumFiftyTwentyThree twentyThree
+    | EnumFiftyTwentyFour twentyFour
+    | EnumFiftyTwentyFive twentyFive
+    | EnumFiftyTwentySix twentySix
+    | EnumFiftyTwentySeven twentySeven
+    | EnumFiftyTwentyEight twentyEight
+    | EnumFiftyTwentyNine twentyNine
     | EnumFiftyThirty thirty
-    | EnumFiftyThirtyOne thirty-one
-    | EnumFiftyThirtyTwo thirty-two
-    | EnumFiftyThirtyThree thirty-three
-    | EnumFiftyThirtyFour thirty-four
-    | EnumFiftyThirtyFive thirty-five
-    | EnumFiftyThirtySix thirty-six
-    | EnumFiftyThirtySeven thirty-seven
-    | EnumFiftyThirtyEight thirty-eight
-    | EnumFiftyThirtyNine thirty-nine
+    | EnumFiftyThirtyOne thirtyOne
+    | EnumFiftyThirtyTwo thirtyTwo
+    | EnumFiftyThirtyThree thirtyThree
+    | EnumFiftyThirtyFour thirtyFour
+    | EnumFiftyThirtyFive thirtyFive
+    | EnumFiftyThirtySix thirtySix
+    | EnumFiftyThirtySeven thirtySeven
+    | EnumFiftyThirtyEight thirtyEight
+    | EnumFiftyThirtyNine thirtyNine
     | EnumFiftyForty forty
-    | EnumFiftyFortyOne forty-one
-    | EnumFiftyFortyTwo forty-two
-    | EnumFiftyFortyThree forty-three
-    | EnumFiftyFortyFour forty-four
-    | EnumFiftyFortyFive forty-five
-    | EnumFiftyFortySix forty-six
-    | EnumFiftyFortySeven forty-seven
-    | EnumFiftyFortyEight forty-eight
-    | EnumFiftyFortyNine forty-nine
+    | EnumFiftyFortyOne fortyOne
+    | EnumFiftyFortyTwo fortyTwo
+    | EnumFiftyFortyThree fortyThree
+    | EnumFiftyFortyFour fortyFour
+    | EnumFiftyFortyFive fortyFive
+    | EnumFiftyFortySix fortySix
+    | EnumFiftyFortySeven fortySeven
+    | EnumFiftyFortyEight fortyEight
+    | EnumFiftyFortyNine fortyNine
     | EnumFiftyFifty fifty
 
 
-type EnumFiftyOne one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twenty-one twenty-two twenty-three twenty-four twenty-five twenty-six twenty-seven twenty-eight twenty-nine thirty thirty-one thirty-two thirty-three thirty-four thirty-five thirty-six thirty-seven thirty-eight thirty-nine forty forty-one forty-two forty-three forty-four forty-five forty-six forty-seven forty-eight forty-nine fifty fifty-one
+type EnumFiftyOne one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twentyOne twentyTwo twentyThree twentyFour twentyFive twentySix twentySeven twentyEight twentyNine thirty thirtyOne thirtyTwo thirtyThree thirtyFour thirtyFive thirtySix thirtySeven thirtyEight thirtyNine forty fortyOne fortyTwo fortyThree fortyFour fortyFive fortySix fortySeven fortyEight fortyNine fifty fiftyOne
     = EnumFiftyOneOne one
     | EnumFiftyOneTwo two
     | EnumFiftyOneThree three
@@ -51671,40 +51671,40 @@ type EnumFiftyOne one two three four five six seven eight nine ten eleven twelve
     | EnumFiftyOneEighteen eighteen
     | EnumFiftyOneNineteen nineteen
     | EnumFiftyOneTwenty twenty
-    | EnumFiftyOneTwentyOne twenty-one
-    | EnumFiftyOneTwentyTwo twenty-two
-    | EnumFiftyOneTwentyThree twenty-three
-    | EnumFiftyOneTwentyFour twenty-four
-    | EnumFiftyOneTwentyFive twenty-five
-    | EnumFiftyOneTwentySix twenty-six
-    | EnumFiftyOneTwentySeven twenty-seven
-    | EnumFiftyOneTwentyEight twenty-eight
-    | EnumFiftyOneTwentyNine twenty-nine
+    | EnumFiftyOneTwentyOne twentyOne
+    | EnumFiftyOneTwentyTwo twentyTwo
+    | EnumFiftyOneTwentyThree twentyThree
+    | EnumFiftyOneTwentyFour twentyFour
+    | EnumFiftyOneTwentyFive twentyFive
+    | EnumFiftyOneTwentySix twentySix
+    | EnumFiftyOneTwentySeven twentySeven
+    | EnumFiftyOneTwentyEight twentyEight
+    | EnumFiftyOneTwentyNine twentyNine
     | EnumFiftyOneThirty thirty
-    | EnumFiftyOneThirtyOne thirty-one
-    | EnumFiftyOneThirtyTwo thirty-two
-    | EnumFiftyOneThirtyThree thirty-three
-    | EnumFiftyOneThirtyFour thirty-four
-    | EnumFiftyOneThirtyFive thirty-five
-    | EnumFiftyOneThirtySix thirty-six
-    | EnumFiftyOneThirtySeven thirty-seven
-    | EnumFiftyOneThirtyEight thirty-eight
-    | EnumFiftyOneThirtyNine thirty-nine
+    | EnumFiftyOneThirtyOne thirtyOne
+    | EnumFiftyOneThirtyTwo thirtyTwo
+    | EnumFiftyOneThirtyThree thirtyThree
+    | EnumFiftyOneThirtyFour thirtyFour
+    | EnumFiftyOneThirtyFive thirtyFive
+    | EnumFiftyOneThirtySix thirtySix
+    | EnumFiftyOneThirtySeven thirtySeven
+    | EnumFiftyOneThirtyEight thirtyEight
+    | EnumFiftyOneThirtyNine thirtyNine
     | EnumFiftyOneForty forty
-    | EnumFiftyOneFortyOne forty-one
-    | EnumFiftyOneFortyTwo forty-two
-    | EnumFiftyOneFortyThree forty-three
-    | EnumFiftyOneFortyFour forty-four
-    | EnumFiftyOneFortyFive forty-five
-    | EnumFiftyOneFortySix forty-six
-    | EnumFiftyOneFortySeven forty-seven
-    | EnumFiftyOneFortyEight forty-eight
-    | EnumFiftyOneFortyNine forty-nine
+    | EnumFiftyOneFortyOne fortyOne
+    | EnumFiftyOneFortyTwo fortyTwo
+    | EnumFiftyOneFortyThree fortyThree
+    | EnumFiftyOneFortyFour fortyFour
+    | EnumFiftyOneFortyFive fortyFive
+    | EnumFiftyOneFortySix fortySix
+    | EnumFiftyOneFortySeven fortySeven
+    | EnumFiftyOneFortyEight fortyEight
+    | EnumFiftyOneFortyNine fortyNine
     | EnumFiftyOneFifty fifty
-    | EnumFiftyOneFiftyOne fifty-one
+    | EnumFiftyOneFiftyOne fiftyOne
 
 
-type EnumFiftyTwo one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twenty-one twenty-two twenty-three twenty-four twenty-five twenty-six twenty-seven twenty-eight twenty-nine thirty thirty-one thirty-two thirty-three thirty-four thirty-five thirty-six thirty-seven thirty-eight thirty-nine forty forty-one forty-two forty-three forty-four forty-five forty-six forty-seven forty-eight forty-nine fifty fifty-one fifty-two
+type EnumFiftyTwo one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twentyOne twentyTwo twentyThree twentyFour twentyFive twentySix twentySeven twentyEight twentyNine thirty thirtyOne thirtyTwo thirtyThree thirtyFour thirtyFive thirtySix thirtySeven thirtyEight thirtyNine forty fortyOne fortyTwo fortyThree fortyFour fortyFive fortySix fortySeven fortyEight fortyNine fifty fiftyOne fiftyTwo
     = EnumFiftyTwoOne one
     | EnumFiftyTwoTwo two
     | EnumFiftyTwoThree three
@@ -51725,41 +51725,41 @@ type EnumFiftyTwo one two three four five six seven eight nine ten eleven twelve
     | EnumFiftyTwoEighteen eighteen
     | EnumFiftyTwoNineteen nineteen
     | EnumFiftyTwoTwenty twenty
-    | EnumFiftyTwoTwentyOne twenty-one
-    | EnumFiftyTwoTwentyTwo twenty-two
-    | EnumFiftyTwoTwentyThree twenty-three
-    | EnumFiftyTwoTwentyFour twenty-four
-    | EnumFiftyTwoTwentyFive twenty-five
-    | EnumFiftyTwoTwentySix twenty-six
-    | EnumFiftyTwoTwentySeven twenty-seven
-    | EnumFiftyTwoTwentyEight twenty-eight
-    | EnumFiftyTwoTwentyNine twenty-nine
+    | EnumFiftyTwoTwentyOne twentyOne
+    | EnumFiftyTwoTwentyTwo twentyTwo
+    | EnumFiftyTwoTwentyThree twentyThree
+    | EnumFiftyTwoTwentyFour twentyFour
+    | EnumFiftyTwoTwentyFive twentyFive
+    | EnumFiftyTwoTwentySix twentySix
+    | EnumFiftyTwoTwentySeven twentySeven
+    | EnumFiftyTwoTwentyEight twentyEight
+    | EnumFiftyTwoTwentyNine twentyNine
     | EnumFiftyTwoThirty thirty
-    | EnumFiftyTwoThirtyOne thirty-one
-    | EnumFiftyTwoThirtyTwo thirty-two
-    | EnumFiftyTwoThirtyThree thirty-three
-    | EnumFiftyTwoThirtyFour thirty-four
-    | EnumFiftyTwoThirtyFive thirty-five
-    | EnumFiftyTwoThirtySix thirty-six
-    | EnumFiftyTwoThirtySeven thirty-seven
-    | EnumFiftyTwoThirtyEight thirty-eight
-    | EnumFiftyTwoThirtyNine thirty-nine
+    | EnumFiftyTwoThirtyOne thirtyOne
+    | EnumFiftyTwoThirtyTwo thirtyTwo
+    | EnumFiftyTwoThirtyThree thirtyThree
+    | EnumFiftyTwoThirtyFour thirtyFour
+    | EnumFiftyTwoThirtyFive thirtyFive
+    | EnumFiftyTwoThirtySix thirtySix
+    | EnumFiftyTwoThirtySeven thirtySeven
+    | EnumFiftyTwoThirtyEight thirtyEight
+    | EnumFiftyTwoThirtyNine thirtyNine
     | EnumFiftyTwoForty forty
-    | EnumFiftyTwoFortyOne forty-one
-    | EnumFiftyTwoFortyTwo forty-two
-    | EnumFiftyTwoFortyThree forty-three
-    | EnumFiftyTwoFortyFour forty-four
-    | EnumFiftyTwoFortyFive forty-five
-    | EnumFiftyTwoFortySix forty-six
-    | EnumFiftyTwoFortySeven forty-seven
-    | EnumFiftyTwoFortyEight forty-eight
-    | EnumFiftyTwoFortyNine forty-nine
+    | EnumFiftyTwoFortyOne fortyOne
+    | EnumFiftyTwoFortyTwo fortyTwo
+    | EnumFiftyTwoFortyThree fortyThree
+    | EnumFiftyTwoFortyFour fortyFour
+    | EnumFiftyTwoFortyFive fortyFive
+    | EnumFiftyTwoFortySix fortySix
+    | EnumFiftyTwoFortySeven fortySeven
+    | EnumFiftyTwoFortyEight fortyEight
+    | EnumFiftyTwoFortyNine fortyNine
     | EnumFiftyTwoFifty fifty
-    | EnumFiftyTwoFiftyOne fifty-one
-    | EnumFiftyTwoFiftyTwo fifty-two
+    | EnumFiftyTwoFiftyOne fiftyOne
+    | EnumFiftyTwoFiftyTwo fiftyTwo
 
 
-type EnumFiftyThree one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twenty-one twenty-two twenty-three twenty-four twenty-five twenty-six twenty-seven twenty-eight twenty-nine thirty thirty-one thirty-two thirty-three thirty-four thirty-five thirty-six thirty-seven thirty-eight thirty-nine forty forty-one forty-two forty-three forty-four forty-five forty-six forty-seven forty-eight forty-nine fifty fifty-one fifty-two fifty-three
+type EnumFiftyThree one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twentyOne twentyTwo twentyThree twentyFour twentyFive twentySix twentySeven twentyEight twentyNine thirty thirtyOne thirtyTwo thirtyThree thirtyFour thirtyFive thirtySix thirtySeven thirtyEight thirtyNine forty fortyOne fortyTwo fortyThree fortyFour fortyFive fortySix fortySeven fortyEight fortyNine fifty fiftyOne fiftyTwo fiftyThree
     = EnumFiftyThreeOne one
     | EnumFiftyThreeTwo two
     | EnumFiftyThreeThree three
@@ -51780,42 +51780,42 @@ type EnumFiftyThree one two three four five six seven eight nine ten eleven twel
     | EnumFiftyThreeEighteen eighteen
     | EnumFiftyThreeNineteen nineteen
     | EnumFiftyThreeTwenty twenty
-    | EnumFiftyThreeTwentyOne twenty-one
-    | EnumFiftyThreeTwentyTwo twenty-two
-    | EnumFiftyThreeTwentyThree twenty-three
-    | EnumFiftyThreeTwentyFour twenty-four
-    | EnumFiftyThreeTwentyFive twenty-five
-    | EnumFiftyThreeTwentySix twenty-six
-    | EnumFiftyThreeTwentySeven twenty-seven
-    | EnumFiftyThreeTwentyEight twenty-eight
-    | EnumFiftyThreeTwentyNine twenty-nine
+    | EnumFiftyThreeTwentyOne twentyOne
+    | EnumFiftyThreeTwentyTwo twentyTwo
+    | EnumFiftyThreeTwentyThree twentyThree
+    | EnumFiftyThreeTwentyFour twentyFour
+    | EnumFiftyThreeTwentyFive twentyFive
+    | EnumFiftyThreeTwentySix twentySix
+    | EnumFiftyThreeTwentySeven twentySeven
+    | EnumFiftyThreeTwentyEight twentyEight
+    | EnumFiftyThreeTwentyNine twentyNine
     | EnumFiftyThreeThirty thirty
-    | EnumFiftyThreeThirtyOne thirty-one
-    | EnumFiftyThreeThirtyTwo thirty-two
-    | EnumFiftyThreeThirtyThree thirty-three
-    | EnumFiftyThreeThirtyFour thirty-four
-    | EnumFiftyThreeThirtyFive thirty-five
-    | EnumFiftyThreeThirtySix thirty-six
-    | EnumFiftyThreeThirtySeven thirty-seven
-    | EnumFiftyThreeThirtyEight thirty-eight
-    | EnumFiftyThreeThirtyNine thirty-nine
+    | EnumFiftyThreeThirtyOne thirtyOne
+    | EnumFiftyThreeThirtyTwo thirtyTwo
+    | EnumFiftyThreeThirtyThree thirtyThree
+    | EnumFiftyThreeThirtyFour thirtyFour
+    | EnumFiftyThreeThirtyFive thirtyFive
+    | EnumFiftyThreeThirtySix thirtySix
+    | EnumFiftyThreeThirtySeven thirtySeven
+    | EnumFiftyThreeThirtyEight thirtyEight
+    | EnumFiftyThreeThirtyNine thirtyNine
     | EnumFiftyThreeForty forty
-    | EnumFiftyThreeFortyOne forty-one
-    | EnumFiftyThreeFortyTwo forty-two
-    | EnumFiftyThreeFortyThree forty-three
-    | EnumFiftyThreeFortyFour forty-four
-    | EnumFiftyThreeFortyFive forty-five
-    | EnumFiftyThreeFortySix forty-six
-    | EnumFiftyThreeFortySeven forty-seven
-    | EnumFiftyThreeFortyEight forty-eight
-    | EnumFiftyThreeFortyNine forty-nine
+    | EnumFiftyThreeFortyOne fortyOne
+    | EnumFiftyThreeFortyTwo fortyTwo
+    | EnumFiftyThreeFortyThree fortyThree
+    | EnumFiftyThreeFortyFour fortyFour
+    | EnumFiftyThreeFortyFive fortyFive
+    | EnumFiftyThreeFortySix fortySix
+    | EnumFiftyThreeFortySeven fortySeven
+    | EnumFiftyThreeFortyEight fortyEight
+    | EnumFiftyThreeFortyNine fortyNine
     | EnumFiftyThreeFifty fifty
-    | EnumFiftyThreeFiftyOne fifty-one
-    | EnumFiftyThreeFiftyTwo fifty-two
-    | EnumFiftyThreeFiftyThree fifty-three
+    | EnumFiftyThreeFiftyOne fiftyOne
+    | EnumFiftyThreeFiftyTwo fiftyTwo
+    | EnumFiftyThreeFiftyThree fiftyThree
 
 
-type EnumFiftyFour one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twenty-one twenty-two twenty-three twenty-four twenty-five twenty-six twenty-seven twenty-eight twenty-nine thirty thirty-one thirty-two thirty-three thirty-four thirty-five thirty-six thirty-seven thirty-eight thirty-nine forty forty-one forty-two forty-three forty-four forty-five forty-six forty-seven forty-eight forty-nine fifty fifty-one fifty-two fifty-three fifty-four
+type EnumFiftyFour one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twentyOne twentyTwo twentyThree twentyFour twentyFive twentySix twentySeven twentyEight twentyNine thirty thirtyOne thirtyTwo thirtyThree thirtyFour thirtyFive thirtySix thirtySeven thirtyEight thirtyNine forty fortyOne fortyTwo fortyThree fortyFour fortyFive fortySix fortySeven fortyEight fortyNine fifty fiftyOne fiftyTwo fiftyThree fiftyFour
     = EnumFiftyFourOne one
     | EnumFiftyFourTwo two
     | EnumFiftyFourThree three
@@ -51836,43 +51836,43 @@ type EnumFiftyFour one two three four five six seven eight nine ten eleven twelv
     | EnumFiftyFourEighteen eighteen
     | EnumFiftyFourNineteen nineteen
     | EnumFiftyFourTwenty twenty
-    | EnumFiftyFourTwentyOne twenty-one
-    | EnumFiftyFourTwentyTwo twenty-two
-    | EnumFiftyFourTwentyThree twenty-three
-    | EnumFiftyFourTwentyFour twenty-four
-    | EnumFiftyFourTwentyFive twenty-five
-    | EnumFiftyFourTwentySix twenty-six
-    | EnumFiftyFourTwentySeven twenty-seven
-    | EnumFiftyFourTwentyEight twenty-eight
-    | EnumFiftyFourTwentyNine twenty-nine
+    | EnumFiftyFourTwentyOne twentyOne
+    | EnumFiftyFourTwentyTwo twentyTwo
+    | EnumFiftyFourTwentyThree twentyThree
+    | EnumFiftyFourTwentyFour twentyFour
+    | EnumFiftyFourTwentyFive twentyFive
+    | EnumFiftyFourTwentySix twentySix
+    | EnumFiftyFourTwentySeven twentySeven
+    | EnumFiftyFourTwentyEight twentyEight
+    | EnumFiftyFourTwentyNine twentyNine
     | EnumFiftyFourThirty thirty
-    | EnumFiftyFourThirtyOne thirty-one
-    | EnumFiftyFourThirtyTwo thirty-two
-    | EnumFiftyFourThirtyThree thirty-three
-    | EnumFiftyFourThirtyFour thirty-four
-    | EnumFiftyFourThirtyFive thirty-five
-    | EnumFiftyFourThirtySix thirty-six
-    | EnumFiftyFourThirtySeven thirty-seven
-    | EnumFiftyFourThirtyEight thirty-eight
-    | EnumFiftyFourThirtyNine thirty-nine
+    | EnumFiftyFourThirtyOne thirtyOne
+    | EnumFiftyFourThirtyTwo thirtyTwo
+    | EnumFiftyFourThirtyThree thirtyThree
+    | EnumFiftyFourThirtyFour thirtyFour
+    | EnumFiftyFourThirtyFive thirtyFive
+    | EnumFiftyFourThirtySix thirtySix
+    | EnumFiftyFourThirtySeven thirtySeven
+    | EnumFiftyFourThirtyEight thirtyEight
+    | EnumFiftyFourThirtyNine thirtyNine
     | EnumFiftyFourForty forty
-    | EnumFiftyFourFortyOne forty-one
-    | EnumFiftyFourFortyTwo forty-two
-    | EnumFiftyFourFortyThree forty-three
-    | EnumFiftyFourFortyFour forty-four
-    | EnumFiftyFourFortyFive forty-five
-    | EnumFiftyFourFortySix forty-six
-    | EnumFiftyFourFortySeven forty-seven
-    | EnumFiftyFourFortyEight forty-eight
-    | EnumFiftyFourFortyNine forty-nine
+    | EnumFiftyFourFortyOne fortyOne
+    | EnumFiftyFourFortyTwo fortyTwo
+    | EnumFiftyFourFortyThree fortyThree
+    | EnumFiftyFourFortyFour fortyFour
+    | EnumFiftyFourFortyFive fortyFive
+    | EnumFiftyFourFortySix fortySix
+    | EnumFiftyFourFortySeven fortySeven
+    | EnumFiftyFourFortyEight fortyEight
+    | EnumFiftyFourFortyNine fortyNine
     | EnumFiftyFourFifty fifty
-    | EnumFiftyFourFiftyOne fifty-one
-    | EnumFiftyFourFiftyTwo fifty-two
-    | EnumFiftyFourFiftyThree fifty-three
-    | EnumFiftyFourFiftyFour fifty-four
+    | EnumFiftyFourFiftyOne fiftyOne
+    | EnumFiftyFourFiftyTwo fiftyTwo
+    | EnumFiftyFourFiftyThree fiftyThree
+    | EnumFiftyFourFiftyFour fiftyFour
 
 
-type EnumFiftyFive one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twenty-one twenty-two twenty-three twenty-four twenty-five twenty-six twenty-seven twenty-eight twenty-nine thirty thirty-one thirty-two thirty-three thirty-four thirty-five thirty-six thirty-seven thirty-eight thirty-nine forty forty-one forty-two forty-three forty-four forty-five forty-six forty-seven forty-eight forty-nine fifty fifty-one fifty-two fifty-three fifty-four fifty-five
+type EnumFiftyFive one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twentyOne twentyTwo twentyThree twentyFour twentyFive twentySix twentySeven twentyEight twentyNine thirty thirtyOne thirtyTwo thirtyThree thirtyFour thirtyFive thirtySix thirtySeven thirtyEight thirtyNine forty fortyOne fortyTwo fortyThree fortyFour fortyFive fortySix fortySeven fortyEight fortyNine fifty fiftyOne fiftyTwo fiftyThree fiftyFour fiftyFive
     = EnumFiftyFiveOne one
     | EnumFiftyFiveTwo two
     | EnumFiftyFiveThree three
@@ -51893,44 +51893,44 @@ type EnumFiftyFive one two three four five six seven eight nine ten eleven twelv
     | EnumFiftyFiveEighteen eighteen
     | EnumFiftyFiveNineteen nineteen
     | EnumFiftyFiveTwenty twenty
-    | EnumFiftyFiveTwentyOne twenty-one
-    | EnumFiftyFiveTwentyTwo twenty-two
-    | EnumFiftyFiveTwentyThree twenty-three
-    | EnumFiftyFiveTwentyFour twenty-four
-    | EnumFiftyFiveTwentyFive twenty-five
-    | EnumFiftyFiveTwentySix twenty-six
-    | EnumFiftyFiveTwentySeven twenty-seven
-    | EnumFiftyFiveTwentyEight twenty-eight
-    | EnumFiftyFiveTwentyNine twenty-nine
+    | EnumFiftyFiveTwentyOne twentyOne
+    | EnumFiftyFiveTwentyTwo twentyTwo
+    | EnumFiftyFiveTwentyThree twentyThree
+    | EnumFiftyFiveTwentyFour twentyFour
+    | EnumFiftyFiveTwentyFive twentyFive
+    | EnumFiftyFiveTwentySix twentySix
+    | EnumFiftyFiveTwentySeven twentySeven
+    | EnumFiftyFiveTwentyEight twentyEight
+    | EnumFiftyFiveTwentyNine twentyNine
     | EnumFiftyFiveThirty thirty
-    | EnumFiftyFiveThirtyOne thirty-one
-    | EnumFiftyFiveThirtyTwo thirty-two
-    | EnumFiftyFiveThirtyThree thirty-three
-    | EnumFiftyFiveThirtyFour thirty-four
-    | EnumFiftyFiveThirtyFive thirty-five
-    | EnumFiftyFiveThirtySix thirty-six
-    | EnumFiftyFiveThirtySeven thirty-seven
-    | EnumFiftyFiveThirtyEight thirty-eight
-    | EnumFiftyFiveThirtyNine thirty-nine
+    | EnumFiftyFiveThirtyOne thirtyOne
+    | EnumFiftyFiveThirtyTwo thirtyTwo
+    | EnumFiftyFiveThirtyThree thirtyThree
+    | EnumFiftyFiveThirtyFour thirtyFour
+    | EnumFiftyFiveThirtyFive thirtyFive
+    | EnumFiftyFiveThirtySix thirtySix
+    | EnumFiftyFiveThirtySeven thirtySeven
+    | EnumFiftyFiveThirtyEight thirtyEight
+    | EnumFiftyFiveThirtyNine thirtyNine
     | EnumFiftyFiveForty forty
-    | EnumFiftyFiveFortyOne forty-one
-    | EnumFiftyFiveFortyTwo forty-two
-    | EnumFiftyFiveFortyThree forty-three
-    | EnumFiftyFiveFortyFour forty-four
-    | EnumFiftyFiveFortyFive forty-five
-    | EnumFiftyFiveFortySix forty-six
-    | EnumFiftyFiveFortySeven forty-seven
-    | EnumFiftyFiveFortyEight forty-eight
-    | EnumFiftyFiveFortyNine forty-nine
+    | EnumFiftyFiveFortyOne fortyOne
+    | EnumFiftyFiveFortyTwo fortyTwo
+    | EnumFiftyFiveFortyThree fortyThree
+    | EnumFiftyFiveFortyFour fortyFour
+    | EnumFiftyFiveFortyFive fortyFive
+    | EnumFiftyFiveFortySix fortySix
+    | EnumFiftyFiveFortySeven fortySeven
+    | EnumFiftyFiveFortyEight fortyEight
+    | EnumFiftyFiveFortyNine fortyNine
     | EnumFiftyFiveFifty fifty
-    | EnumFiftyFiveFiftyOne fifty-one
-    | EnumFiftyFiveFiftyTwo fifty-two
-    | EnumFiftyFiveFiftyThree fifty-three
-    | EnumFiftyFiveFiftyFour fifty-four
-    | EnumFiftyFiveFiftyFive fifty-five
+    | EnumFiftyFiveFiftyOne fiftyOne
+    | EnumFiftyFiveFiftyTwo fiftyTwo
+    | EnumFiftyFiveFiftyThree fiftyThree
+    | EnumFiftyFiveFiftyFour fiftyFour
+    | EnumFiftyFiveFiftyFive fiftyFive
 
 
-type EnumFiftySix one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twenty-one twenty-two twenty-three twenty-four twenty-five twenty-six twenty-seven twenty-eight twenty-nine thirty thirty-one thirty-two thirty-three thirty-four thirty-five thirty-six thirty-seven thirty-eight thirty-nine forty forty-one forty-two forty-three forty-four forty-five forty-six forty-seven forty-eight forty-nine fifty fifty-one fifty-two fifty-three fifty-four fifty-five fifty-six
+type EnumFiftySix one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twentyOne twentyTwo twentyThree twentyFour twentyFive twentySix twentySeven twentyEight twentyNine thirty thirtyOne thirtyTwo thirtyThree thirtyFour thirtyFive thirtySix thirtySeven thirtyEight thirtyNine forty fortyOne fortyTwo fortyThree fortyFour fortyFive fortySix fortySeven fortyEight fortyNine fifty fiftyOne fiftyTwo fiftyThree fiftyFour fiftyFive fiftySix
     = EnumFiftySixOne one
     | EnumFiftySixTwo two
     | EnumFiftySixThree three
@@ -51951,45 +51951,45 @@ type EnumFiftySix one two three four five six seven eight nine ten eleven twelve
     | EnumFiftySixEighteen eighteen
     | EnumFiftySixNineteen nineteen
     | EnumFiftySixTwenty twenty
-    | EnumFiftySixTwentyOne twenty-one
-    | EnumFiftySixTwentyTwo twenty-two
-    | EnumFiftySixTwentyThree twenty-three
-    | EnumFiftySixTwentyFour twenty-four
-    | EnumFiftySixTwentyFive twenty-five
-    | EnumFiftySixTwentySix twenty-six
-    | EnumFiftySixTwentySeven twenty-seven
-    | EnumFiftySixTwentyEight twenty-eight
-    | EnumFiftySixTwentyNine twenty-nine
+    | EnumFiftySixTwentyOne twentyOne
+    | EnumFiftySixTwentyTwo twentyTwo
+    | EnumFiftySixTwentyThree twentyThree
+    | EnumFiftySixTwentyFour twentyFour
+    | EnumFiftySixTwentyFive twentyFive
+    | EnumFiftySixTwentySix twentySix
+    | EnumFiftySixTwentySeven twentySeven
+    | EnumFiftySixTwentyEight twentyEight
+    | EnumFiftySixTwentyNine twentyNine
     | EnumFiftySixThirty thirty
-    | EnumFiftySixThirtyOne thirty-one
-    | EnumFiftySixThirtyTwo thirty-two
-    | EnumFiftySixThirtyThree thirty-three
-    | EnumFiftySixThirtyFour thirty-four
-    | EnumFiftySixThirtyFive thirty-five
-    | EnumFiftySixThirtySix thirty-six
-    | EnumFiftySixThirtySeven thirty-seven
-    | EnumFiftySixThirtyEight thirty-eight
-    | EnumFiftySixThirtyNine thirty-nine
+    | EnumFiftySixThirtyOne thirtyOne
+    | EnumFiftySixThirtyTwo thirtyTwo
+    | EnumFiftySixThirtyThree thirtyThree
+    | EnumFiftySixThirtyFour thirtyFour
+    | EnumFiftySixThirtyFive thirtyFive
+    | EnumFiftySixThirtySix thirtySix
+    | EnumFiftySixThirtySeven thirtySeven
+    | EnumFiftySixThirtyEight thirtyEight
+    | EnumFiftySixThirtyNine thirtyNine
     | EnumFiftySixForty forty
-    | EnumFiftySixFortyOne forty-one
-    | EnumFiftySixFortyTwo forty-two
-    | EnumFiftySixFortyThree forty-three
-    | EnumFiftySixFortyFour forty-four
-    | EnumFiftySixFortyFive forty-five
-    | EnumFiftySixFortySix forty-six
-    | EnumFiftySixFortySeven forty-seven
-    | EnumFiftySixFortyEight forty-eight
-    | EnumFiftySixFortyNine forty-nine
+    | EnumFiftySixFortyOne fortyOne
+    | EnumFiftySixFortyTwo fortyTwo
+    | EnumFiftySixFortyThree fortyThree
+    | EnumFiftySixFortyFour fortyFour
+    | EnumFiftySixFortyFive fortyFive
+    | EnumFiftySixFortySix fortySix
+    | EnumFiftySixFortySeven fortySeven
+    | EnumFiftySixFortyEight fortyEight
+    | EnumFiftySixFortyNine fortyNine
     | EnumFiftySixFifty fifty
-    | EnumFiftySixFiftyOne fifty-one
-    | EnumFiftySixFiftyTwo fifty-two
-    | EnumFiftySixFiftyThree fifty-three
-    | EnumFiftySixFiftyFour fifty-four
-    | EnumFiftySixFiftyFive fifty-five
-    | EnumFiftySixFiftySix fifty-six
+    | EnumFiftySixFiftyOne fiftyOne
+    | EnumFiftySixFiftyTwo fiftyTwo
+    | EnumFiftySixFiftyThree fiftyThree
+    | EnumFiftySixFiftyFour fiftyFour
+    | EnumFiftySixFiftyFive fiftyFive
+    | EnumFiftySixFiftySix fiftySix
 
 
-type EnumFiftySeven one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twenty-one twenty-two twenty-three twenty-four twenty-five twenty-six twenty-seven twenty-eight twenty-nine thirty thirty-one thirty-two thirty-three thirty-four thirty-five thirty-six thirty-seven thirty-eight thirty-nine forty forty-one forty-two forty-three forty-four forty-five forty-six forty-seven forty-eight forty-nine fifty fifty-one fifty-two fifty-three fifty-four fifty-five fifty-six fifty-seven
+type EnumFiftySeven one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twentyOne twentyTwo twentyThree twentyFour twentyFive twentySix twentySeven twentyEight twentyNine thirty thirtyOne thirtyTwo thirtyThree thirtyFour thirtyFive thirtySix thirtySeven thirtyEight thirtyNine forty fortyOne fortyTwo fortyThree fortyFour fortyFive fortySix fortySeven fortyEight fortyNine fifty fiftyOne fiftyTwo fiftyThree fiftyFour fiftyFive fiftySix fiftySeven
     = EnumFiftySevenOne one
     | EnumFiftySevenTwo two
     | EnumFiftySevenThree three
@@ -52010,46 +52010,46 @@ type EnumFiftySeven one two three four five six seven eight nine ten eleven twel
     | EnumFiftySevenEighteen eighteen
     | EnumFiftySevenNineteen nineteen
     | EnumFiftySevenTwenty twenty
-    | EnumFiftySevenTwentyOne twenty-one
-    | EnumFiftySevenTwentyTwo twenty-two
-    | EnumFiftySevenTwentyThree twenty-three
-    | EnumFiftySevenTwentyFour twenty-four
-    | EnumFiftySevenTwentyFive twenty-five
-    | EnumFiftySevenTwentySix twenty-six
-    | EnumFiftySevenTwentySeven twenty-seven
-    | EnumFiftySevenTwentyEight twenty-eight
-    | EnumFiftySevenTwentyNine twenty-nine
+    | EnumFiftySevenTwentyOne twentyOne
+    | EnumFiftySevenTwentyTwo twentyTwo
+    | EnumFiftySevenTwentyThree twentyThree
+    | EnumFiftySevenTwentyFour twentyFour
+    | EnumFiftySevenTwentyFive twentyFive
+    | EnumFiftySevenTwentySix twentySix
+    | EnumFiftySevenTwentySeven twentySeven
+    | EnumFiftySevenTwentyEight twentyEight
+    | EnumFiftySevenTwentyNine twentyNine
     | EnumFiftySevenThirty thirty
-    | EnumFiftySevenThirtyOne thirty-one
-    | EnumFiftySevenThirtyTwo thirty-two
-    | EnumFiftySevenThirtyThree thirty-three
-    | EnumFiftySevenThirtyFour thirty-four
-    | EnumFiftySevenThirtyFive thirty-five
-    | EnumFiftySevenThirtySix thirty-six
-    | EnumFiftySevenThirtySeven thirty-seven
-    | EnumFiftySevenThirtyEight thirty-eight
-    | EnumFiftySevenThirtyNine thirty-nine
+    | EnumFiftySevenThirtyOne thirtyOne
+    | EnumFiftySevenThirtyTwo thirtyTwo
+    | EnumFiftySevenThirtyThree thirtyThree
+    | EnumFiftySevenThirtyFour thirtyFour
+    | EnumFiftySevenThirtyFive thirtyFive
+    | EnumFiftySevenThirtySix thirtySix
+    | EnumFiftySevenThirtySeven thirtySeven
+    | EnumFiftySevenThirtyEight thirtyEight
+    | EnumFiftySevenThirtyNine thirtyNine
     | EnumFiftySevenForty forty
-    | EnumFiftySevenFortyOne forty-one
-    | EnumFiftySevenFortyTwo forty-two
-    | EnumFiftySevenFortyThree forty-three
-    | EnumFiftySevenFortyFour forty-four
-    | EnumFiftySevenFortyFive forty-five
-    | EnumFiftySevenFortySix forty-six
-    | EnumFiftySevenFortySeven forty-seven
-    | EnumFiftySevenFortyEight forty-eight
-    | EnumFiftySevenFortyNine forty-nine
+    | EnumFiftySevenFortyOne fortyOne
+    | EnumFiftySevenFortyTwo fortyTwo
+    | EnumFiftySevenFortyThree fortyThree
+    | EnumFiftySevenFortyFour fortyFour
+    | EnumFiftySevenFortyFive fortyFive
+    | EnumFiftySevenFortySix fortySix
+    | EnumFiftySevenFortySeven fortySeven
+    | EnumFiftySevenFortyEight fortyEight
+    | EnumFiftySevenFortyNine fortyNine
     | EnumFiftySevenFifty fifty
-    | EnumFiftySevenFiftyOne fifty-one
-    | EnumFiftySevenFiftyTwo fifty-two
-    | EnumFiftySevenFiftyThree fifty-three
-    | EnumFiftySevenFiftyFour fifty-four
-    | EnumFiftySevenFiftyFive fifty-five
-    | EnumFiftySevenFiftySix fifty-six
-    | EnumFiftySevenFiftySeven fifty-seven
+    | EnumFiftySevenFiftyOne fiftyOne
+    | EnumFiftySevenFiftyTwo fiftyTwo
+    | EnumFiftySevenFiftyThree fiftyThree
+    | EnumFiftySevenFiftyFour fiftyFour
+    | EnumFiftySevenFiftyFive fiftyFive
+    | EnumFiftySevenFiftySix fiftySix
+    | EnumFiftySevenFiftySeven fiftySeven
 
 
-type EnumFiftyEight one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twenty-one twenty-two twenty-three twenty-four twenty-five twenty-six twenty-seven twenty-eight twenty-nine thirty thirty-one thirty-two thirty-three thirty-four thirty-five thirty-six thirty-seven thirty-eight thirty-nine forty forty-one forty-two forty-three forty-four forty-five forty-six forty-seven forty-eight forty-nine fifty fifty-one fifty-two fifty-three fifty-four fifty-five fifty-six fifty-seven fifty-eight
+type EnumFiftyEight one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twentyOne twentyTwo twentyThree twentyFour twentyFive twentySix twentySeven twentyEight twentyNine thirty thirtyOne thirtyTwo thirtyThree thirtyFour thirtyFive thirtySix thirtySeven thirtyEight thirtyNine forty fortyOne fortyTwo fortyThree fortyFour fortyFive fortySix fortySeven fortyEight fortyNine fifty fiftyOne fiftyTwo fiftyThree fiftyFour fiftyFive fiftySix fiftySeven fiftyEight
     = EnumFiftyEightOne one
     | EnumFiftyEightTwo two
     | EnumFiftyEightThree three
@@ -52070,47 +52070,47 @@ type EnumFiftyEight one two three four five six seven eight nine ten eleven twel
     | EnumFiftyEightEighteen eighteen
     | EnumFiftyEightNineteen nineteen
     | EnumFiftyEightTwenty twenty
-    | EnumFiftyEightTwentyOne twenty-one
-    | EnumFiftyEightTwentyTwo twenty-two
-    | EnumFiftyEightTwentyThree twenty-three
-    | EnumFiftyEightTwentyFour twenty-four
-    | EnumFiftyEightTwentyFive twenty-five
-    | EnumFiftyEightTwentySix twenty-six
-    | EnumFiftyEightTwentySeven twenty-seven
-    | EnumFiftyEightTwentyEight twenty-eight
-    | EnumFiftyEightTwentyNine twenty-nine
+    | EnumFiftyEightTwentyOne twentyOne
+    | EnumFiftyEightTwentyTwo twentyTwo
+    | EnumFiftyEightTwentyThree twentyThree
+    | EnumFiftyEightTwentyFour twentyFour
+    | EnumFiftyEightTwentyFive twentyFive
+    | EnumFiftyEightTwentySix twentySix
+    | EnumFiftyEightTwentySeven twentySeven
+    | EnumFiftyEightTwentyEight twentyEight
+    | EnumFiftyEightTwentyNine twentyNine
     | EnumFiftyEightThirty thirty
-    | EnumFiftyEightThirtyOne thirty-one
-    | EnumFiftyEightThirtyTwo thirty-two
-    | EnumFiftyEightThirtyThree thirty-three
-    | EnumFiftyEightThirtyFour thirty-four
-    | EnumFiftyEightThirtyFive thirty-five
-    | EnumFiftyEightThirtySix thirty-six
-    | EnumFiftyEightThirtySeven thirty-seven
-    | EnumFiftyEightThirtyEight thirty-eight
-    | EnumFiftyEightThirtyNine thirty-nine
+    | EnumFiftyEightThirtyOne thirtyOne
+    | EnumFiftyEightThirtyTwo thirtyTwo
+    | EnumFiftyEightThirtyThree thirtyThree
+    | EnumFiftyEightThirtyFour thirtyFour
+    | EnumFiftyEightThirtyFive thirtyFive
+    | EnumFiftyEightThirtySix thirtySix
+    | EnumFiftyEightThirtySeven thirtySeven
+    | EnumFiftyEightThirtyEight thirtyEight
+    | EnumFiftyEightThirtyNine thirtyNine
     | EnumFiftyEightForty forty
-    | EnumFiftyEightFortyOne forty-one
-    | EnumFiftyEightFortyTwo forty-two
-    | EnumFiftyEightFortyThree forty-three
-    | EnumFiftyEightFortyFour forty-four
-    | EnumFiftyEightFortyFive forty-five
-    | EnumFiftyEightFortySix forty-six
-    | EnumFiftyEightFortySeven forty-seven
-    | EnumFiftyEightFortyEight forty-eight
-    | EnumFiftyEightFortyNine forty-nine
+    | EnumFiftyEightFortyOne fortyOne
+    | EnumFiftyEightFortyTwo fortyTwo
+    | EnumFiftyEightFortyThree fortyThree
+    | EnumFiftyEightFortyFour fortyFour
+    | EnumFiftyEightFortyFive fortyFive
+    | EnumFiftyEightFortySix fortySix
+    | EnumFiftyEightFortySeven fortySeven
+    | EnumFiftyEightFortyEight fortyEight
+    | EnumFiftyEightFortyNine fortyNine
     | EnumFiftyEightFifty fifty
-    | EnumFiftyEightFiftyOne fifty-one
-    | EnumFiftyEightFiftyTwo fifty-two
-    | EnumFiftyEightFiftyThree fifty-three
-    | EnumFiftyEightFiftyFour fifty-four
-    | EnumFiftyEightFiftyFive fifty-five
-    | EnumFiftyEightFiftySix fifty-six
-    | EnumFiftyEightFiftySeven fifty-seven
-    | EnumFiftyEightFiftyEight fifty-eight
+    | EnumFiftyEightFiftyOne fiftyOne
+    | EnumFiftyEightFiftyTwo fiftyTwo
+    | EnumFiftyEightFiftyThree fiftyThree
+    | EnumFiftyEightFiftyFour fiftyFour
+    | EnumFiftyEightFiftyFive fiftyFive
+    | EnumFiftyEightFiftySix fiftySix
+    | EnumFiftyEightFiftySeven fiftySeven
+    | EnumFiftyEightFiftyEight fiftyEight
 
 
-type EnumFiftyNine one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twenty-one twenty-two twenty-three twenty-four twenty-five twenty-six twenty-seven twenty-eight twenty-nine thirty thirty-one thirty-two thirty-three thirty-four thirty-five thirty-six thirty-seven thirty-eight thirty-nine forty forty-one forty-two forty-three forty-four forty-five forty-six forty-seven forty-eight forty-nine fifty fifty-one fifty-two fifty-three fifty-four fifty-five fifty-six fifty-seven fifty-eight fifty-nine
+type EnumFiftyNine one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twentyOne twentyTwo twentyThree twentyFour twentyFive twentySix twentySeven twentyEight twentyNine thirty thirtyOne thirtyTwo thirtyThree thirtyFour thirtyFive thirtySix thirtySeven thirtyEight thirtyNine forty fortyOne fortyTwo fortyThree fortyFour fortyFive fortySix fortySeven fortyEight fortyNine fifty fiftyOne fiftyTwo fiftyThree fiftyFour fiftyFive fiftySix fiftySeven fiftyEight fiftyNine
     = EnumFiftyNineOne one
     | EnumFiftyNineTwo two
     | EnumFiftyNineThree three
@@ -52131,48 +52131,48 @@ type EnumFiftyNine one two three four five six seven eight nine ten eleven twelv
     | EnumFiftyNineEighteen eighteen
     | EnumFiftyNineNineteen nineteen
     | EnumFiftyNineTwenty twenty
-    | EnumFiftyNineTwentyOne twenty-one
-    | EnumFiftyNineTwentyTwo twenty-two
-    | EnumFiftyNineTwentyThree twenty-three
-    | EnumFiftyNineTwentyFour twenty-four
-    | EnumFiftyNineTwentyFive twenty-five
-    | EnumFiftyNineTwentySix twenty-six
-    | EnumFiftyNineTwentySeven twenty-seven
-    | EnumFiftyNineTwentyEight twenty-eight
-    | EnumFiftyNineTwentyNine twenty-nine
+    | EnumFiftyNineTwentyOne twentyOne
+    | EnumFiftyNineTwentyTwo twentyTwo
+    | EnumFiftyNineTwentyThree twentyThree
+    | EnumFiftyNineTwentyFour twentyFour
+    | EnumFiftyNineTwentyFive twentyFive
+    | EnumFiftyNineTwentySix twentySix
+    | EnumFiftyNineTwentySeven twentySeven
+    | EnumFiftyNineTwentyEight twentyEight
+    | EnumFiftyNineTwentyNine twentyNine
     | EnumFiftyNineThirty thirty
-    | EnumFiftyNineThirtyOne thirty-one
-    | EnumFiftyNineThirtyTwo thirty-two
-    | EnumFiftyNineThirtyThree thirty-three
-    | EnumFiftyNineThirtyFour thirty-four
-    | EnumFiftyNineThirtyFive thirty-five
-    | EnumFiftyNineThirtySix thirty-six
-    | EnumFiftyNineThirtySeven thirty-seven
-    | EnumFiftyNineThirtyEight thirty-eight
-    | EnumFiftyNineThirtyNine thirty-nine
+    | EnumFiftyNineThirtyOne thirtyOne
+    | EnumFiftyNineThirtyTwo thirtyTwo
+    | EnumFiftyNineThirtyThree thirtyThree
+    | EnumFiftyNineThirtyFour thirtyFour
+    | EnumFiftyNineThirtyFive thirtyFive
+    | EnumFiftyNineThirtySix thirtySix
+    | EnumFiftyNineThirtySeven thirtySeven
+    | EnumFiftyNineThirtyEight thirtyEight
+    | EnumFiftyNineThirtyNine thirtyNine
     | EnumFiftyNineForty forty
-    | EnumFiftyNineFortyOne forty-one
-    | EnumFiftyNineFortyTwo forty-two
-    | EnumFiftyNineFortyThree forty-three
-    | EnumFiftyNineFortyFour forty-four
-    | EnumFiftyNineFortyFive forty-five
-    | EnumFiftyNineFortySix forty-six
-    | EnumFiftyNineFortySeven forty-seven
-    | EnumFiftyNineFortyEight forty-eight
-    | EnumFiftyNineFortyNine forty-nine
+    | EnumFiftyNineFortyOne fortyOne
+    | EnumFiftyNineFortyTwo fortyTwo
+    | EnumFiftyNineFortyThree fortyThree
+    | EnumFiftyNineFortyFour fortyFour
+    | EnumFiftyNineFortyFive fortyFive
+    | EnumFiftyNineFortySix fortySix
+    | EnumFiftyNineFortySeven fortySeven
+    | EnumFiftyNineFortyEight fortyEight
+    | EnumFiftyNineFortyNine fortyNine
     | EnumFiftyNineFifty fifty
-    | EnumFiftyNineFiftyOne fifty-one
-    | EnumFiftyNineFiftyTwo fifty-two
-    | EnumFiftyNineFiftyThree fifty-three
-    | EnumFiftyNineFiftyFour fifty-four
-    | EnumFiftyNineFiftyFive fifty-five
-    | EnumFiftyNineFiftySix fifty-six
-    | EnumFiftyNineFiftySeven fifty-seven
-    | EnumFiftyNineFiftyEight fifty-eight
-    | EnumFiftyNineFiftyNine fifty-nine
+    | EnumFiftyNineFiftyOne fiftyOne
+    | EnumFiftyNineFiftyTwo fiftyTwo
+    | EnumFiftyNineFiftyThree fiftyThree
+    | EnumFiftyNineFiftyFour fiftyFour
+    | EnumFiftyNineFiftyFive fiftyFive
+    | EnumFiftyNineFiftySix fiftySix
+    | EnumFiftyNineFiftySeven fiftySeven
+    | EnumFiftyNineFiftyEight fiftyEight
+    | EnumFiftyNineFiftyNine fiftyNine
 
 
-type EnumSixty one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twenty-one twenty-two twenty-three twenty-four twenty-five twenty-six twenty-seven twenty-eight twenty-nine thirty thirty-one thirty-two thirty-three thirty-four thirty-five thirty-six thirty-seven thirty-eight thirty-nine forty forty-one forty-two forty-three forty-four forty-five forty-six forty-seven forty-eight forty-nine fifty fifty-one fifty-two fifty-three fifty-four fifty-five fifty-six fifty-seven fifty-eight fifty-nine sixty
+type EnumSixty one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twentyOne twentyTwo twentyThree twentyFour twentyFive twentySix twentySeven twentyEight twentyNine thirty thirtyOne thirtyTwo thirtyThree thirtyFour thirtyFive thirtySix thirtySeven thirtyEight thirtyNine forty fortyOne fortyTwo fortyThree fortyFour fortyFive fortySix fortySeven fortyEight fortyNine fifty fiftyOne fiftyTwo fiftyThree fiftyFour fiftyFive fiftySix fiftySeven fiftyEight fiftyNine sixty
     = EnumSixtyOne one
     | EnumSixtyTwo two
     | EnumSixtyThree three
@@ -52193,49 +52193,49 @@ type EnumSixty one two three four five six seven eight nine ten eleven twelve th
     | EnumSixtyEighteen eighteen
     | EnumSixtyNineteen nineteen
     | EnumSixtyTwenty twenty
-    | EnumSixtyTwentyOne twenty-one
-    | EnumSixtyTwentyTwo twenty-two
-    | EnumSixtyTwentyThree twenty-three
-    | EnumSixtyTwentyFour twenty-four
-    | EnumSixtyTwentyFive twenty-five
-    | EnumSixtyTwentySix twenty-six
-    | EnumSixtyTwentySeven twenty-seven
-    | EnumSixtyTwentyEight twenty-eight
-    | EnumSixtyTwentyNine twenty-nine
+    | EnumSixtyTwentyOne twentyOne
+    | EnumSixtyTwentyTwo twentyTwo
+    | EnumSixtyTwentyThree twentyThree
+    | EnumSixtyTwentyFour twentyFour
+    | EnumSixtyTwentyFive twentyFive
+    | EnumSixtyTwentySix twentySix
+    | EnumSixtyTwentySeven twentySeven
+    | EnumSixtyTwentyEight twentyEight
+    | EnumSixtyTwentyNine twentyNine
     | EnumSixtyThirty thirty
-    | EnumSixtyThirtyOne thirty-one
-    | EnumSixtyThirtyTwo thirty-two
-    | EnumSixtyThirtyThree thirty-three
-    | EnumSixtyThirtyFour thirty-four
-    | EnumSixtyThirtyFive thirty-five
-    | EnumSixtyThirtySix thirty-six
-    | EnumSixtyThirtySeven thirty-seven
-    | EnumSixtyThirtyEight thirty-eight
-    | EnumSixtyThirtyNine thirty-nine
+    | EnumSixtyThirtyOne thirtyOne
+    | EnumSixtyThirtyTwo thirtyTwo
+    | EnumSixtyThirtyThree thirtyThree
+    | EnumSixtyThirtyFour thirtyFour
+    | EnumSixtyThirtyFive thirtyFive
+    | EnumSixtyThirtySix thirtySix
+    | EnumSixtyThirtySeven thirtySeven
+    | EnumSixtyThirtyEight thirtyEight
+    | EnumSixtyThirtyNine thirtyNine
     | EnumSixtyForty forty
-    | EnumSixtyFortyOne forty-one
-    | EnumSixtyFortyTwo forty-two
-    | EnumSixtyFortyThree forty-three
-    | EnumSixtyFortyFour forty-four
-    | EnumSixtyFortyFive forty-five
-    | EnumSixtyFortySix forty-six
-    | EnumSixtyFortySeven forty-seven
-    | EnumSixtyFortyEight forty-eight
-    | EnumSixtyFortyNine forty-nine
+    | EnumSixtyFortyOne fortyOne
+    | EnumSixtyFortyTwo fortyTwo
+    | EnumSixtyFortyThree fortyThree
+    | EnumSixtyFortyFour fortyFour
+    | EnumSixtyFortyFive fortyFive
+    | EnumSixtyFortySix fortySix
+    | EnumSixtyFortySeven fortySeven
+    | EnumSixtyFortyEight fortyEight
+    | EnumSixtyFortyNine fortyNine
     | EnumSixtyFifty fifty
-    | EnumSixtyFiftyOne fifty-one
-    | EnumSixtyFiftyTwo fifty-two
-    | EnumSixtyFiftyThree fifty-three
-    | EnumSixtyFiftyFour fifty-four
-    | EnumSixtyFiftyFive fifty-five
-    | EnumSixtyFiftySix fifty-six
-    | EnumSixtyFiftySeven fifty-seven
-    | EnumSixtyFiftyEight fifty-eight
-    | EnumSixtyFiftyNine fifty-nine
+    | EnumSixtyFiftyOne fiftyOne
+    | EnumSixtyFiftyTwo fiftyTwo
+    | EnumSixtyFiftyThree fiftyThree
+    | EnumSixtyFiftyFour fiftyFour
+    | EnumSixtyFiftyFive fiftyFive
+    | EnumSixtyFiftySix fiftySix
+    | EnumSixtyFiftySeven fiftySeven
+    | EnumSixtyFiftyEight fiftyEight
+    | EnumSixtyFiftyNine fiftyNine
     | EnumSixtySixty sixty
 
 
-type EnumSixtyOne one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twenty-one twenty-two twenty-three twenty-four twenty-five twenty-six twenty-seven twenty-eight twenty-nine thirty thirty-one thirty-two thirty-three thirty-four thirty-five thirty-six thirty-seven thirty-eight thirty-nine forty forty-one forty-two forty-three forty-four forty-five forty-six forty-seven forty-eight forty-nine fifty fifty-one fifty-two fifty-three fifty-four fifty-five fifty-six fifty-seven fifty-eight fifty-nine sixty sixty-one
+type EnumSixtyOne one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twentyOne twentyTwo twentyThree twentyFour twentyFive twentySix twentySeven twentyEight twentyNine thirty thirtyOne thirtyTwo thirtyThree thirtyFour thirtyFive thirtySix thirtySeven thirtyEight thirtyNine forty fortyOne fortyTwo fortyThree fortyFour fortyFive fortySix fortySeven fortyEight fortyNine fifty fiftyOne fiftyTwo fiftyThree fiftyFour fiftyFive fiftySix fiftySeven fiftyEight fiftyNine sixty sixtyOne
     = EnumSixtyOneOne one
     | EnumSixtyOneTwo two
     | EnumSixtyOneThree three
@@ -52256,50 +52256,50 @@ type EnumSixtyOne one two three four five six seven eight nine ten eleven twelve
     | EnumSixtyOneEighteen eighteen
     | EnumSixtyOneNineteen nineteen
     | EnumSixtyOneTwenty twenty
-    | EnumSixtyOneTwentyOne twenty-one
-    | EnumSixtyOneTwentyTwo twenty-two
-    | EnumSixtyOneTwentyThree twenty-three
-    | EnumSixtyOneTwentyFour twenty-four
-    | EnumSixtyOneTwentyFive twenty-five
-    | EnumSixtyOneTwentySix twenty-six
-    | EnumSixtyOneTwentySeven twenty-seven
-    | EnumSixtyOneTwentyEight twenty-eight
-    | EnumSixtyOneTwentyNine twenty-nine
+    | EnumSixtyOneTwentyOne twentyOne
+    | EnumSixtyOneTwentyTwo twentyTwo
+    | EnumSixtyOneTwentyThree twentyThree
+    | EnumSixtyOneTwentyFour twentyFour
+    | EnumSixtyOneTwentyFive twentyFive
+    | EnumSixtyOneTwentySix twentySix
+    | EnumSixtyOneTwentySeven twentySeven
+    | EnumSixtyOneTwentyEight twentyEight
+    | EnumSixtyOneTwentyNine twentyNine
     | EnumSixtyOneThirty thirty
-    | EnumSixtyOneThirtyOne thirty-one
-    | EnumSixtyOneThirtyTwo thirty-two
-    | EnumSixtyOneThirtyThree thirty-three
-    | EnumSixtyOneThirtyFour thirty-four
-    | EnumSixtyOneThirtyFive thirty-five
-    | EnumSixtyOneThirtySix thirty-six
-    | EnumSixtyOneThirtySeven thirty-seven
-    | EnumSixtyOneThirtyEight thirty-eight
-    | EnumSixtyOneThirtyNine thirty-nine
+    | EnumSixtyOneThirtyOne thirtyOne
+    | EnumSixtyOneThirtyTwo thirtyTwo
+    | EnumSixtyOneThirtyThree thirtyThree
+    | EnumSixtyOneThirtyFour thirtyFour
+    | EnumSixtyOneThirtyFive thirtyFive
+    | EnumSixtyOneThirtySix thirtySix
+    | EnumSixtyOneThirtySeven thirtySeven
+    | EnumSixtyOneThirtyEight thirtyEight
+    | EnumSixtyOneThirtyNine thirtyNine
     | EnumSixtyOneForty forty
-    | EnumSixtyOneFortyOne forty-one
-    | EnumSixtyOneFortyTwo forty-two
-    | EnumSixtyOneFortyThree forty-three
-    | EnumSixtyOneFortyFour forty-four
-    | EnumSixtyOneFortyFive forty-five
-    | EnumSixtyOneFortySix forty-six
-    | EnumSixtyOneFortySeven forty-seven
-    | EnumSixtyOneFortyEight forty-eight
-    | EnumSixtyOneFortyNine forty-nine
+    | EnumSixtyOneFortyOne fortyOne
+    | EnumSixtyOneFortyTwo fortyTwo
+    | EnumSixtyOneFortyThree fortyThree
+    | EnumSixtyOneFortyFour fortyFour
+    | EnumSixtyOneFortyFive fortyFive
+    | EnumSixtyOneFortySix fortySix
+    | EnumSixtyOneFortySeven fortySeven
+    | EnumSixtyOneFortyEight fortyEight
+    | EnumSixtyOneFortyNine fortyNine
     | EnumSixtyOneFifty fifty
-    | EnumSixtyOneFiftyOne fifty-one
-    | EnumSixtyOneFiftyTwo fifty-two
-    | EnumSixtyOneFiftyThree fifty-three
-    | EnumSixtyOneFiftyFour fifty-four
-    | EnumSixtyOneFiftyFive fifty-five
-    | EnumSixtyOneFiftySix fifty-six
-    | EnumSixtyOneFiftySeven fifty-seven
-    | EnumSixtyOneFiftyEight fifty-eight
-    | EnumSixtyOneFiftyNine fifty-nine
+    | EnumSixtyOneFiftyOne fiftyOne
+    | EnumSixtyOneFiftyTwo fiftyTwo
+    | EnumSixtyOneFiftyThree fiftyThree
+    | EnumSixtyOneFiftyFour fiftyFour
+    | EnumSixtyOneFiftyFive fiftyFive
+    | EnumSixtyOneFiftySix fiftySix
+    | EnumSixtyOneFiftySeven fiftySeven
+    | EnumSixtyOneFiftyEight fiftyEight
+    | EnumSixtyOneFiftyNine fiftyNine
     | EnumSixtyOneSixty sixty
-    | EnumSixtyOneSixtyOne sixty-one
+    | EnumSixtyOneSixtyOne sixtyOne
 
 
-type EnumSixtyTwo one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twenty-one twenty-two twenty-three twenty-four twenty-five twenty-six twenty-seven twenty-eight twenty-nine thirty thirty-one thirty-two thirty-three thirty-four thirty-five thirty-six thirty-seven thirty-eight thirty-nine forty forty-one forty-two forty-three forty-four forty-five forty-six forty-seven forty-eight forty-nine fifty fifty-one fifty-two fifty-three fifty-four fifty-five fifty-six fifty-seven fifty-eight fifty-nine sixty sixty-one sixty-two
+type EnumSixtyTwo one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twentyOne twentyTwo twentyThree twentyFour twentyFive twentySix twentySeven twentyEight twentyNine thirty thirtyOne thirtyTwo thirtyThree thirtyFour thirtyFive thirtySix thirtySeven thirtyEight thirtyNine forty fortyOne fortyTwo fortyThree fortyFour fortyFive fortySix fortySeven fortyEight fortyNine fifty fiftyOne fiftyTwo fiftyThree fiftyFour fiftyFive fiftySix fiftySeven fiftyEight fiftyNine sixty sixtyOne sixtyTwo
     = EnumSixtyTwoOne one
     | EnumSixtyTwoTwo two
     | EnumSixtyTwoThree three
@@ -52320,51 +52320,51 @@ type EnumSixtyTwo one two three four five six seven eight nine ten eleven twelve
     | EnumSixtyTwoEighteen eighteen
     | EnumSixtyTwoNineteen nineteen
     | EnumSixtyTwoTwenty twenty
-    | EnumSixtyTwoTwentyOne twenty-one
-    | EnumSixtyTwoTwentyTwo twenty-two
-    | EnumSixtyTwoTwentyThree twenty-three
-    | EnumSixtyTwoTwentyFour twenty-four
-    | EnumSixtyTwoTwentyFive twenty-five
-    | EnumSixtyTwoTwentySix twenty-six
-    | EnumSixtyTwoTwentySeven twenty-seven
-    | EnumSixtyTwoTwentyEight twenty-eight
-    | EnumSixtyTwoTwentyNine twenty-nine
+    | EnumSixtyTwoTwentyOne twentyOne
+    | EnumSixtyTwoTwentyTwo twentyTwo
+    | EnumSixtyTwoTwentyThree twentyThree
+    | EnumSixtyTwoTwentyFour twentyFour
+    | EnumSixtyTwoTwentyFive twentyFive
+    | EnumSixtyTwoTwentySix twentySix
+    | EnumSixtyTwoTwentySeven twentySeven
+    | EnumSixtyTwoTwentyEight twentyEight
+    | EnumSixtyTwoTwentyNine twentyNine
     | EnumSixtyTwoThirty thirty
-    | EnumSixtyTwoThirtyOne thirty-one
-    | EnumSixtyTwoThirtyTwo thirty-two
-    | EnumSixtyTwoThirtyThree thirty-three
-    | EnumSixtyTwoThirtyFour thirty-four
-    | EnumSixtyTwoThirtyFive thirty-five
-    | EnumSixtyTwoThirtySix thirty-six
-    | EnumSixtyTwoThirtySeven thirty-seven
-    | EnumSixtyTwoThirtyEight thirty-eight
-    | EnumSixtyTwoThirtyNine thirty-nine
+    | EnumSixtyTwoThirtyOne thirtyOne
+    | EnumSixtyTwoThirtyTwo thirtyTwo
+    | EnumSixtyTwoThirtyThree thirtyThree
+    | EnumSixtyTwoThirtyFour thirtyFour
+    | EnumSixtyTwoThirtyFive thirtyFive
+    | EnumSixtyTwoThirtySix thirtySix
+    | EnumSixtyTwoThirtySeven thirtySeven
+    | EnumSixtyTwoThirtyEight thirtyEight
+    | EnumSixtyTwoThirtyNine thirtyNine
     | EnumSixtyTwoForty forty
-    | EnumSixtyTwoFortyOne forty-one
-    | EnumSixtyTwoFortyTwo forty-two
-    | EnumSixtyTwoFortyThree forty-three
-    | EnumSixtyTwoFortyFour forty-four
-    | EnumSixtyTwoFortyFive forty-five
-    | EnumSixtyTwoFortySix forty-six
-    | EnumSixtyTwoFortySeven forty-seven
-    | EnumSixtyTwoFortyEight forty-eight
-    | EnumSixtyTwoFortyNine forty-nine
+    | EnumSixtyTwoFortyOne fortyOne
+    | EnumSixtyTwoFortyTwo fortyTwo
+    | EnumSixtyTwoFortyThree fortyThree
+    | EnumSixtyTwoFortyFour fortyFour
+    | EnumSixtyTwoFortyFive fortyFive
+    | EnumSixtyTwoFortySix fortySix
+    | EnumSixtyTwoFortySeven fortySeven
+    | EnumSixtyTwoFortyEight fortyEight
+    | EnumSixtyTwoFortyNine fortyNine
     | EnumSixtyTwoFifty fifty
-    | EnumSixtyTwoFiftyOne fifty-one
-    | EnumSixtyTwoFiftyTwo fifty-two
-    | EnumSixtyTwoFiftyThree fifty-three
-    | EnumSixtyTwoFiftyFour fifty-four
-    | EnumSixtyTwoFiftyFive fifty-five
-    | EnumSixtyTwoFiftySix fifty-six
-    | EnumSixtyTwoFiftySeven fifty-seven
-    | EnumSixtyTwoFiftyEight fifty-eight
-    | EnumSixtyTwoFiftyNine fifty-nine
+    | EnumSixtyTwoFiftyOne fiftyOne
+    | EnumSixtyTwoFiftyTwo fiftyTwo
+    | EnumSixtyTwoFiftyThree fiftyThree
+    | EnumSixtyTwoFiftyFour fiftyFour
+    | EnumSixtyTwoFiftyFive fiftyFive
+    | EnumSixtyTwoFiftySix fiftySix
+    | EnumSixtyTwoFiftySeven fiftySeven
+    | EnumSixtyTwoFiftyEight fiftyEight
+    | EnumSixtyTwoFiftyNine fiftyNine
     | EnumSixtyTwoSixty sixty
-    | EnumSixtyTwoSixtyOne sixty-one
-    | EnumSixtyTwoSixtyTwo sixty-two
+    | EnumSixtyTwoSixtyOne sixtyOne
+    | EnumSixtyTwoSixtyTwo sixtyTwo
 
 
-type EnumSixtyThree one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twenty-one twenty-two twenty-three twenty-four twenty-five twenty-six twenty-seven twenty-eight twenty-nine thirty thirty-one thirty-two thirty-three thirty-four thirty-five thirty-six thirty-seven thirty-eight thirty-nine forty forty-one forty-two forty-three forty-four forty-five forty-six forty-seven forty-eight forty-nine fifty fifty-one fifty-two fifty-three fifty-four fifty-five fifty-six fifty-seven fifty-eight fifty-nine sixty sixty-one sixty-two sixty-three
+type EnumSixtyThree one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twentyOne twentyTwo twentyThree twentyFour twentyFive twentySix twentySeven twentyEight twentyNine thirty thirtyOne thirtyTwo thirtyThree thirtyFour thirtyFive thirtySix thirtySeven thirtyEight thirtyNine forty fortyOne fortyTwo fortyThree fortyFour fortyFive fortySix fortySeven fortyEight fortyNine fifty fiftyOne fiftyTwo fiftyThree fiftyFour fiftyFive fiftySix fiftySeven fiftyEight fiftyNine sixty sixtyOne sixtyTwo sixtyThree
     = EnumSixtyThreeOne one
     | EnumSixtyThreeTwo two
     | EnumSixtyThreeThree three
@@ -52385,52 +52385,52 @@ type EnumSixtyThree one two three four five six seven eight nine ten eleven twel
     | EnumSixtyThreeEighteen eighteen
     | EnumSixtyThreeNineteen nineteen
     | EnumSixtyThreeTwenty twenty
-    | EnumSixtyThreeTwentyOne twenty-one
-    | EnumSixtyThreeTwentyTwo twenty-two
-    | EnumSixtyThreeTwentyThree twenty-three
-    | EnumSixtyThreeTwentyFour twenty-four
-    | EnumSixtyThreeTwentyFive twenty-five
-    | EnumSixtyThreeTwentySix twenty-six
-    | EnumSixtyThreeTwentySeven twenty-seven
-    | EnumSixtyThreeTwentyEight twenty-eight
-    | EnumSixtyThreeTwentyNine twenty-nine
+    | EnumSixtyThreeTwentyOne twentyOne
+    | EnumSixtyThreeTwentyTwo twentyTwo
+    | EnumSixtyThreeTwentyThree twentyThree
+    | EnumSixtyThreeTwentyFour twentyFour
+    | EnumSixtyThreeTwentyFive twentyFive
+    | EnumSixtyThreeTwentySix twentySix
+    | EnumSixtyThreeTwentySeven twentySeven
+    | EnumSixtyThreeTwentyEight twentyEight
+    | EnumSixtyThreeTwentyNine twentyNine
     | EnumSixtyThreeThirty thirty
-    | EnumSixtyThreeThirtyOne thirty-one
-    | EnumSixtyThreeThirtyTwo thirty-two
-    | EnumSixtyThreeThirtyThree thirty-three
-    | EnumSixtyThreeThirtyFour thirty-four
-    | EnumSixtyThreeThirtyFive thirty-five
-    | EnumSixtyThreeThirtySix thirty-six
-    | EnumSixtyThreeThirtySeven thirty-seven
-    | EnumSixtyThreeThirtyEight thirty-eight
-    | EnumSixtyThreeThirtyNine thirty-nine
+    | EnumSixtyThreeThirtyOne thirtyOne
+    | EnumSixtyThreeThirtyTwo thirtyTwo
+    | EnumSixtyThreeThirtyThree thirtyThree
+    | EnumSixtyThreeThirtyFour thirtyFour
+    | EnumSixtyThreeThirtyFive thirtyFive
+    | EnumSixtyThreeThirtySix thirtySix
+    | EnumSixtyThreeThirtySeven thirtySeven
+    | EnumSixtyThreeThirtyEight thirtyEight
+    | EnumSixtyThreeThirtyNine thirtyNine
     | EnumSixtyThreeForty forty
-    | EnumSixtyThreeFortyOne forty-one
-    | EnumSixtyThreeFortyTwo forty-two
-    | EnumSixtyThreeFortyThree forty-three
-    | EnumSixtyThreeFortyFour forty-four
-    | EnumSixtyThreeFortyFive forty-five
-    | EnumSixtyThreeFortySix forty-six
-    | EnumSixtyThreeFortySeven forty-seven
-    | EnumSixtyThreeFortyEight forty-eight
-    | EnumSixtyThreeFortyNine forty-nine
+    | EnumSixtyThreeFortyOne fortyOne
+    | EnumSixtyThreeFortyTwo fortyTwo
+    | EnumSixtyThreeFortyThree fortyThree
+    | EnumSixtyThreeFortyFour fortyFour
+    | EnumSixtyThreeFortyFive fortyFive
+    | EnumSixtyThreeFortySix fortySix
+    | EnumSixtyThreeFortySeven fortySeven
+    | EnumSixtyThreeFortyEight fortyEight
+    | EnumSixtyThreeFortyNine fortyNine
     | EnumSixtyThreeFifty fifty
-    | EnumSixtyThreeFiftyOne fifty-one
-    | EnumSixtyThreeFiftyTwo fifty-two
-    | EnumSixtyThreeFiftyThree fifty-three
-    | EnumSixtyThreeFiftyFour fifty-four
-    | EnumSixtyThreeFiftyFive fifty-five
-    | EnumSixtyThreeFiftySix fifty-six
-    | EnumSixtyThreeFiftySeven fifty-seven
-    | EnumSixtyThreeFiftyEight fifty-eight
-    | EnumSixtyThreeFiftyNine fifty-nine
+    | EnumSixtyThreeFiftyOne fiftyOne
+    | EnumSixtyThreeFiftyTwo fiftyTwo
+    | EnumSixtyThreeFiftyThree fiftyThree
+    | EnumSixtyThreeFiftyFour fiftyFour
+    | EnumSixtyThreeFiftyFive fiftyFive
+    | EnumSixtyThreeFiftySix fiftySix
+    | EnumSixtyThreeFiftySeven fiftySeven
+    | EnumSixtyThreeFiftyEight fiftyEight
+    | EnumSixtyThreeFiftyNine fiftyNine
     | EnumSixtyThreeSixty sixty
-    | EnumSixtyThreeSixtyOne sixty-one
-    | EnumSixtyThreeSixtyTwo sixty-two
-    | EnumSixtyThreeSixtyThree sixty-three
+    | EnumSixtyThreeSixtyOne sixtyOne
+    | EnumSixtyThreeSixtyTwo sixtyTwo
+    | EnumSixtyThreeSixtyThree sixtyThree
 
 
-type EnumSixtyFour one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twenty-one twenty-two twenty-three twenty-four twenty-five twenty-six twenty-seven twenty-eight twenty-nine thirty thirty-one thirty-two thirty-three thirty-four thirty-five thirty-six thirty-seven thirty-eight thirty-nine forty forty-one forty-two forty-three forty-four forty-five forty-six forty-seven forty-eight forty-nine fifty fifty-one fifty-two fifty-three fifty-four fifty-five fifty-six fifty-seven fifty-eight fifty-nine sixty sixty-one sixty-two sixty-three sixty-four
+type EnumSixtyFour one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twentyOne twentyTwo twentyThree twentyFour twentyFive twentySix twentySeven twentyEight twentyNine thirty thirtyOne thirtyTwo thirtyThree thirtyFour thirtyFive thirtySix thirtySeven thirtyEight thirtyNine forty fortyOne fortyTwo fortyThree fortyFour fortyFive fortySix fortySeven fortyEight fortyNine fifty fiftyOne fiftyTwo fiftyThree fiftyFour fiftyFive fiftySix fiftySeven fiftyEight fiftyNine sixty sixtyOne sixtyTwo sixtyThree sixtyFour
     = EnumSixtyFourOne one
     | EnumSixtyFourTwo two
     | EnumSixtyFourThree three
@@ -52451,53 +52451,53 @@ type EnumSixtyFour one two three four five six seven eight nine ten eleven twelv
     | EnumSixtyFourEighteen eighteen
     | EnumSixtyFourNineteen nineteen
     | EnumSixtyFourTwenty twenty
-    | EnumSixtyFourTwentyOne twenty-one
-    | EnumSixtyFourTwentyTwo twenty-two
-    | EnumSixtyFourTwentyThree twenty-three
-    | EnumSixtyFourTwentyFour twenty-four
-    | EnumSixtyFourTwentyFive twenty-five
-    | EnumSixtyFourTwentySix twenty-six
-    | EnumSixtyFourTwentySeven twenty-seven
-    | EnumSixtyFourTwentyEight twenty-eight
-    | EnumSixtyFourTwentyNine twenty-nine
+    | EnumSixtyFourTwentyOne twentyOne
+    | EnumSixtyFourTwentyTwo twentyTwo
+    | EnumSixtyFourTwentyThree twentyThree
+    | EnumSixtyFourTwentyFour twentyFour
+    | EnumSixtyFourTwentyFive twentyFive
+    | EnumSixtyFourTwentySix twentySix
+    | EnumSixtyFourTwentySeven twentySeven
+    | EnumSixtyFourTwentyEight twentyEight
+    | EnumSixtyFourTwentyNine twentyNine
     | EnumSixtyFourThirty thirty
-    | EnumSixtyFourThirtyOne thirty-one
-    | EnumSixtyFourThirtyTwo thirty-two
-    | EnumSixtyFourThirtyThree thirty-three
-    | EnumSixtyFourThirtyFour thirty-four
-    | EnumSixtyFourThirtyFive thirty-five
-    | EnumSixtyFourThirtySix thirty-six
-    | EnumSixtyFourThirtySeven thirty-seven
-    | EnumSixtyFourThirtyEight thirty-eight
-    | EnumSixtyFourThirtyNine thirty-nine
+    | EnumSixtyFourThirtyOne thirtyOne
+    | EnumSixtyFourThirtyTwo thirtyTwo
+    | EnumSixtyFourThirtyThree thirtyThree
+    | EnumSixtyFourThirtyFour thirtyFour
+    | EnumSixtyFourThirtyFive thirtyFive
+    | EnumSixtyFourThirtySix thirtySix
+    | EnumSixtyFourThirtySeven thirtySeven
+    | EnumSixtyFourThirtyEight thirtyEight
+    | EnumSixtyFourThirtyNine thirtyNine
     | EnumSixtyFourForty forty
-    | EnumSixtyFourFortyOne forty-one
-    | EnumSixtyFourFortyTwo forty-two
-    | EnumSixtyFourFortyThree forty-three
-    | EnumSixtyFourFortyFour forty-four
-    | EnumSixtyFourFortyFive forty-five
-    | EnumSixtyFourFortySix forty-six
-    | EnumSixtyFourFortySeven forty-seven
-    | EnumSixtyFourFortyEight forty-eight
-    | EnumSixtyFourFortyNine forty-nine
+    | EnumSixtyFourFortyOne fortyOne
+    | EnumSixtyFourFortyTwo fortyTwo
+    | EnumSixtyFourFortyThree fortyThree
+    | EnumSixtyFourFortyFour fortyFour
+    | EnumSixtyFourFortyFive fortyFive
+    | EnumSixtyFourFortySix fortySix
+    | EnumSixtyFourFortySeven fortySeven
+    | EnumSixtyFourFortyEight fortyEight
+    | EnumSixtyFourFortyNine fortyNine
     | EnumSixtyFourFifty fifty
-    | EnumSixtyFourFiftyOne fifty-one
-    | EnumSixtyFourFiftyTwo fifty-two
-    | EnumSixtyFourFiftyThree fifty-three
-    | EnumSixtyFourFiftyFour fifty-four
-    | EnumSixtyFourFiftyFive fifty-five
-    | EnumSixtyFourFiftySix fifty-six
-    | EnumSixtyFourFiftySeven fifty-seven
-    | EnumSixtyFourFiftyEight fifty-eight
-    | EnumSixtyFourFiftyNine fifty-nine
+    | EnumSixtyFourFiftyOne fiftyOne
+    | EnumSixtyFourFiftyTwo fiftyTwo
+    | EnumSixtyFourFiftyThree fiftyThree
+    | EnumSixtyFourFiftyFour fiftyFour
+    | EnumSixtyFourFiftyFive fiftyFive
+    | EnumSixtyFourFiftySix fiftySix
+    | EnumSixtyFourFiftySeven fiftySeven
+    | EnumSixtyFourFiftyEight fiftyEight
+    | EnumSixtyFourFiftyNine fiftyNine
     | EnumSixtyFourSixty sixty
-    | EnumSixtyFourSixtyOne sixty-one
-    | EnumSixtyFourSixtyTwo sixty-two
-    | EnumSixtyFourSixtyThree sixty-three
-    | EnumSixtyFourSixtyFour sixty-four
+    | EnumSixtyFourSixtyOne sixtyOne
+    | EnumSixtyFourSixtyTwo sixtyTwo
+    | EnumSixtyFourSixtyThree sixtyThree
+    | EnumSixtyFourSixtyFour sixtyFour
 
 
-type EnumSixtyFive one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twenty-one twenty-two twenty-three twenty-four twenty-five twenty-six twenty-seven twenty-eight twenty-nine thirty thirty-one thirty-two thirty-three thirty-four thirty-five thirty-six thirty-seven thirty-eight thirty-nine forty forty-one forty-two forty-three forty-four forty-five forty-six forty-seven forty-eight forty-nine fifty fifty-one fifty-two fifty-three fifty-four fifty-five fifty-six fifty-seven fifty-eight fifty-nine sixty sixty-one sixty-two sixty-three sixty-four sixty-five
+type EnumSixtyFive one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twentyOne twentyTwo twentyThree twentyFour twentyFive twentySix twentySeven twentyEight twentyNine thirty thirtyOne thirtyTwo thirtyThree thirtyFour thirtyFive thirtySix thirtySeven thirtyEight thirtyNine forty fortyOne fortyTwo fortyThree fortyFour fortyFive fortySix fortySeven fortyEight fortyNine fifty fiftyOne fiftyTwo fiftyThree fiftyFour fiftyFive fiftySix fiftySeven fiftyEight fiftyNine sixty sixtyOne sixtyTwo sixtyThree sixtyFour sixtyFive
     = EnumSixtyFiveOne one
     | EnumSixtyFiveTwo two
     | EnumSixtyFiveThree three
@@ -52518,54 +52518,54 @@ type EnumSixtyFive one two three four five six seven eight nine ten eleven twelv
     | EnumSixtyFiveEighteen eighteen
     | EnumSixtyFiveNineteen nineteen
     | EnumSixtyFiveTwenty twenty
-    | EnumSixtyFiveTwentyOne twenty-one
-    | EnumSixtyFiveTwentyTwo twenty-two
-    | EnumSixtyFiveTwentyThree twenty-three
-    | EnumSixtyFiveTwentyFour twenty-four
-    | EnumSixtyFiveTwentyFive twenty-five
-    | EnumSixtyFiveTwentySix twenty-six
-    | EnumSixtyFiveTwentySeven twenty-seven
-    | EnumSixtyFiveTwentyEight twenty-eight
-    | EnumSixtyFiveTwentyNine twenty-nine
+    | EnumSixtyFiveTwentyOne twentyOne
+    | EnumSixtyFiveTwentyTwo twentyTwo
+    | EnumSixtyFiveTwentyThree twentyThree
+    | EnumSixtyFiveTwentyFour twentyFour
+    | EnumSixtyFiveTwentyFive twentyFive
+    | EnumSixtyFiveTwentySix twentySix
+    | EnumSixtyFiveTwentySeven twentySeven
+    | EnumSixtyFiveTwentyEight twentyEight
+    | EnumSixtyFiveTwentyNine twentyNine
     | EnumSixtyFiveThirty thirty
-    | EnumSixtyFiveThirtyOne thirty-one
-    | EnumSixtyFiveThirtyTwo thirty-two
-    | EnumSixtyFiveThirtyThree thirty-three
-    | EnumSixtyFiveThirtyFour thirty-four
-    | EnumSixtyFiveThirtyFive thirty-five
-    | EnumSixtyFiveThirtySix thirty-six
-    | EnumSixtyFiveThirtySeven thirty-seven
-    | EnumSixtyFiveThirtyEight thirty-eight
-    | EnumSixtyFiveThirtyNine thirty-nine
+    | EnumSixtyFiveThirtyOne thirtyOne
+    | EnumSixtyFiveThirtyTwo thirtyTwo
+    | EnumSixtyFiveThirtyThree thirtyThree
+    | EnumSixtyFiveThirtyFour thirtyFour
+    | EnumSixtyFiveThirtyFive thirtyFive
+    | EnumSixtyFiveThirtySix thirtySix
+    | EnumSixtyFiveThirtySeven thirtySeven
+    | EnumSixtyFiveThirtyEight thirtyEight
+    | EnumSixtyFiveThirtyNine thirtyNine
     | EnumSixtyFiveForty forty
-    | EnumSixtyFiveFortyOne forty-one
-    | EnumSixtyFiveFortyTwo forty-two
-    | EnumSixtyFiveFortyThree forty-three
-    | EnumSixtyFiveFortyFour forty-four
-    | EnumSixtyFiveFortyFive forty-five
-    | EnumSixtyFiveFortySix forty-six
-    | EnumSixtyFiveFortySeven forty-seven
-    | EnumSixtyFiveFortyEight forty-eight
-    | EnumSixtyFiveFortyNine forty-nine
+    | EnumSixtyFiveFortyOne fortyOne
+    | EnumSixtyFiveFortyTwo fortyTwo
+    | EnumSixtyFiveFortyThree fortyThree
+    | EnumSixtyFiveFortyFour fortyFour
+    | EnumSixtyFiveFortyFive fortyFive
+    | EnumSixtyFiveFortySix fortySix
+    | EnumSixtyFiveFortySeven fortySeven
+    | EnumSixtyFiveFortyEight fortyEight
+    | EnumSixtyFiveFortyNine fortyNine
     | EnumSixtyFiveFifty fifty
-    | EnumSixtyFiveFiftyOne fifty-one
-    | EnumSixtyFiveFiftyTwo fifty-two
-    | EnumSixtyFiveFiftyThree fifty-three
-    | EnumSixtyFiveFiftyFour fifty-four
-    | EnumSixtyFiveFiftyFive fifty-five
-    | EnumSixtyFiveFiftySix fifty-six
-    | EnumSixtyFiveFiftySeven fifty-seven
-    | EnumSixtyFiveFiftyEight fifty-eight
-    | EnumSixtyFiveFiftyNine fifty-nine
+    | EnumSixtyFiveFiftyOne fiftyOne
+    | EnumSixtyFiveFiftyTwo fiftyTwo
+    | EnumSixtyFiveFiftyThree fiftyThree
+    | EnumSixtyFiveFiftyFour fiftyFour
+    | EnumSixtyFiveFiftyFive fiftyFive
+    | EnumSixtyFiveFiftySix fiftySix
+    | EnumSixtyFiveFiftySeven fiftySeven
+    | EnumSixtyFiveFiftyEight fiftyEight
+    | EnumSixtyFiveFiftyNine fiftyNine
     | EnumSixtyFiveSixty sixty
-    | EnumSixtyFiveSixtyOne sixty-one
-    | EnumSixtyFiveSixtyTwo sixty-two
-    | EnumSixtyFiveSixtyThree sixty-three
-    | EnumSixtyFiveSixtyFour sixty-four
-    | EnumSixtyFiveSixtyFive sixty-five
+    | EnumSixtyFiveSixtyOne sixtyOne
+    | EnumSixtyFiveSixtyTwo sixtyTwo
+    | EnumSixtyFiveSixtyThree sixtyThree
+    | EnumSixtyFiveSixtyFour sixtyFour
+    | EnumSixtyFiveSixtyFive sixtyFive
 
 
-type EnumSixtySix one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twenty-one twenty-two twenty-three twenty-four twenty-five twenty-six twenty-seven twenty-eight twenty-nine thirty thirty-one thirty-two thirty-three thirty-four thirty-five thirty-six thirty-seven thirty-eight thirty-nine forty forty-one forty-two forty-three forty-four forty-five forty-six forty-seven forty-eight forty-nine fifty fifty-one fifty-two fifty-three fifty-four fifty-five fifty-six fifty-seven fifty-eight fifty-nine sixty sixty-one sixty-two sixty-three sixty-four sixty-five sixty-six
+type EnumSixtySix one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twentyOne twentyTwo twentyThree twentyFour twentyFive twentySix twentySeven twentyEight twentyNine thirty thirtyOne thirtyTwo thirtyThree thirtyFour thirtyFive thirtySix thirtySeven thirtyEight thirtyNine forty fortyOne fortyTwo fortyThree fortyFour fortyFive fortySix fortySeven fortyEight fortyNine fifty fiftyOne fiftyTwo fiftyThree fiftyFour fiftyFive fiftySix fiftySeven fiftyEight fiftyNine sixty sixtyOne sixtyTwo sixtyThree sixtyFour sixtyFive sixtySix
     = EnumSixtySixOne one
     | EnumSixtySixTwo two
     | EnumSixtySixThree three
@@ -52586,55 +52586,55 @@ type EnumSixtySix one two three four five six seven eight nine ten eleven twelve
     | EnumSixtySixEighteen eighteen
     | EnumSixtySixNineteen nineteen
     | EnumSixtySixTwenty twenty
-    | EnumSixtySixTwentyOne twenty-one
-    | EnumSixtySixTwentyTwo twenty-two
-    | EnumSixtySixTwentyThree twenty-three
-    | EnumSixtySixTwentyFour twenty-four
-    | EnumSixtySixTwentyFive twenty-five
-    | EnumSixtySixTwentySix twenty-six
-    | EnumSixtySixTwentySeven twenty-seven
-    | EnumSixtySixTwentyEight twenty-eight
-    | EnumSixtySixTwentyNine twenty-nine
+    | EnumSixtySixTwentyOne twentyOne
+    | EnumSixtySixTwentyTwo twentyTwo
+    | EnumSixtySixTwentyThree twentyThree
+    | EnumSixtySixTwentyFour twentyFour
+    | EnumSixtySixTwentyFive twentyFive
+    | EnumSixtySixTwentySix twentySix
+    | EnumSixtySixTwentySeven twentySeven
+    | EnumSixtySixTwentyEight twentyEight
+    | EnumSixtySixTwentyNine twentyNine
     | EnumSixtySixThirty thirty
-    | EnumSixtySixThirtyOne thirty-one
-    | EnumSixtySixThirtyTwo thirty-two
-    | EnumSixtySixThirtyThree thirty-three
-    | EnumSixtySixThirtyFour thirty-four
-    | EnumSixtySixThirtyFive thirty-five
-    | EnumSixtySixThirtySix thirty-six
-    | EnumSixtySixThirtySeven thirty-seven
-    | EnumSixtySixThirtyEight thirty-eight
-    | EnumSixtySixThirtyNine thirty-nine
+    | EnumSixtySixThirtyOne thirtyOne
+    | EnumSixtySixThirtyTwo thirtyTwo
+    | EnumSixtySixThirtyThree thirtyThree
+    | EnumSixtySixThirtyFour thirtyFour
+    | EnumSixtySixThirtyFive thirtyFive
+    | EnumSixtySixThirtySix thirtySix
+    | EnumSixtySixThirtySeven thirtySeven
+    | EnumSixtySixThirtyEight thirtyEight
+    | EnumSixtySixThirtyNine thirtyNine
     | EnumSixtySixForty forty
-    | EnumSixtySixFortyOne forty-one
-    | EnumSixtySixFortyTwo forty-two
-    | EnumSixtySixFortyThree forty-three
-    | EnumSixtySixFortyFour forty-four
-    | EnumSixtySixFortyFive forty-five
-    | EnumSixtySixFortySix forty-six
-    | EnumSixtySixFortySeven forty-seven
-    | EnumSixtySixFortyEight forty-eight
-    | EnumSixtySixFortyNine forty-nine
+    | EnumSixtySixFortyOne fortyOne
+    | EnumSixtySixFortyTwo fortyTwo
+    | EnumSixtySixFortyThree fortyThree
+    | EnumSixtySixFortyFour fortyFour
+    | EnumSixtySixFortyFive fortyFive
+    | EnumSixtySixFortySix fortySix
+    | EnumSixtySixFortySeven fortySeven
+    | EnumSixtySixFortyEight fortyEight
+    | EnumSixtySixFortyNine fortyNine
     | EnumSixtySixFifty fifty
-    | EnumSixtySixFiftyOne fifty-one
-    | EnumSixtySixFiftyTwo fifty-two
-    | EnumSixtySixFiftyThree fifty-three
-    | EnumSixtySixFiftyFour fifty-four
-    | EnumSixtySixFiftyFive fifty-five
-    | EnumSixtySixFiftySix fifty-six
-    | EnumSixtySixFiftySeven fifty-seven
-    | EnumSixtySixFiftyEight fifty-eight
-    | EnumSixtySixFiftyNine fifty-nine
+    | EnumSixtySixFiftyOne fiftyOne
+    | EnumSixtySixFiftyTwo fiftyTwo
+    | EnumSixtySixFiftyThree fiftyThree
+    | EnumSixtySixFiftyFour fiftyFour
+    | EnumSixtySixFiftyFive fiftyFive
+    | EnumSixtySixFiftySix fiftySix
+    | EnumSixtySixFiftySeven fiftySeven
+    | EnumSixtySixFiftyEight fiftyEight
+    | EnumSixtySixFiftyNine fiftyNine
     | EnumSixtySixSixty sixty
-    | EnumSixtySixSixtyOne sixty-one
-    | EnumSixtySixSixtyTwo sixty-two
-    | EnumSixtySixSixtyThree sixty-three
-    | EnumSixtySixSixtyFour sixty-four
-    | EnumSixtySixSixtyFive sixty-five
-    | EnumSixtySixSixtySix sixty-six
+    | EnumSixtySixSixtyOne sixtyOne
+    | EnumSixtySixSixtyTwo sixtyTwo
+    | EnumSixtySixSixtyThree sixtyThree
+    | EnumSixtySixSixtyFour sixtyFour
+    | EnumSixtySixSixtyFive sixtyFive
+    | EnumSixtySixSixtySix sixtySix
 
 
-type EnumSixtySeven one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twenty-one twenty-two twenty-three twenty-four twenty-five twenty-six twenty-seven twenty-eight twenty-nine thirty thirty-one thirty-two thirty-three thirty-four thirty-five thirty-six thirty-seven thirty-eight thirty-nine forty forty-one forty-two forty-three forty-four forty-five forty-six forty-seven forty-eight forty-nine fifty fifty-one fifty-two fifty-three fifty-four fifty-five fifty-six fifty-seven fifty-eight fifty-nine sixty sixty-one sixty-two sixty-three sixty-four sixty-five sixty-six sixty-seven
+type EnumSixtySeven one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twentyOne twentyTwo twentyThree twentyFour twentyFive twentySix twentySeven twentyEight twentyNine thirty thirtyOne thirtyTwo thirtyThree thirtyFour thirtyFive thirtySix thirtySeven thirtyEight thirtyNine forty fortyOne fortyTwo fortyThree fortyFour fortyFive fortySix fortySeven fortyEight fortyNine fifty fiftyOne fiftyTwo fiftyThree fiftyFour fiftyFive fiftySix fiftySeven fiftyEight fiftyNine sixty sixtyOne sixtyTwo sixtyThree sixtyFour sixtyFive sixtySix sixtySeven
     = EnumSixtySevenOne one
     | EnumSixtySevenTwo two
     | EnumSixtySevenThree three
@@ -52655,56 +52655,56 @@ type EnumSixtySeven one two three four five six seven eight nine ten eleven twel
     | EnumSixtySevenEighteen eighteen
     | EnumSixtySevenNineteen nineteen
     | EnumSixtySevenTwenty twenty
-    | EnumSixtySevenTwentyOne twenty-one
-    | EnumSixtySevenTwentyTwo twenty-two
-    | EnumSixtySevenTwentyThree twenty-three
-    | EnumSixtySevenTwentyFour twenty-four
-    | EnumSixtySevenTwentyFive twenty-five
-    | EnumSixtySevenTwentySix twenty-six
-    | EnumSixtySevenTwentySeven twenty-seven
-    | EnumSixtySevenTwentyEight twenty-eight
-    | EnumSixtySevenTwentyNine twenty-nine
+    | EnumSixtySevenTwentyOne twentyOne
+    | EnumSixtySevenTwentyTwo twentyTwo
+    | EnumSixtySevenTwentyThree twentyThree
+    | EnumSixtySevenTwentyFour twentyFour
+    | EnumSixtySevenTwentyFive twentyFive
+    | EnumSixtySevenTwentySix twentySix
+    | EnumSixtySevenTwentySeven twentySeven
+    | EnumSixtySevenTwentyEight twentyEight
+    | EnumSixtySevenTwentyNine twentyNine
     | EnumSixtySevenThirty thirty
-    | EnumSixtySevenThirtyOne thirty-one
-    | EnumSixtySevenThirtyTwo thirty-two
-    | EnumSixtySevenThirtyThree thirty-three
-    | EnumSixtySevenThirtyFour thirty-four
-    | EnumSixtySevenThirtyFive thirty-five
-    | EnumSixtySevenThirtySix thirty-six
-    | EnumSixtySevenThirtySeven thirty-seven
-    | EnumSixtySevenThirtyEight thirty-eight
-    | EnumSixtySevenThirtyNine thirty-nine
+    | EnumSixtySevenThirtyOne thirtyOne
+    | EnumSixtySevenThirtyTwo thirtyTwo
+    | EnumSixtySevenThirtyThree thirtyThree
+    | EnumSixtySevenThirtyFour thirtyFour
+    | EnumSixtySevenThirtyFive thirtyFive
+    | EnumSixtySevenThirtySix thirtySix
+    | EnumSixtySevenThirtySeven thirtySeven
+    | EnumSixtySevenThirtyEight thirtyEight
+    | EnumSixtySevenThirtyNine thirtyNine
     | EnumSixtySevenForty forty
-    | EnumSixtySevenFortyOne forty-one
-    | EnumSixtySevenFortyTwo forty-two
-    | EnumSixtySevenFortyThree forty-three
-    | EnumSixtySevenFortyFour forty-four
-    | EnumSixtySevenFortyFive forty-five
-    | EnumSixtySevenFortySix forty-six
-    | EnumSixtySevenFortySeven forty-seven
-    | EnumSixtySevenFortyEight forty-eight
-    | EnumSixtySevenFortyNine forty-nine
+    | EnumSixtySevenFortyOne fortyOne
+    | EnumSixtySevenFortyTwo fortyTwo
+    | EnumSixtySevenFortyThree fortyThree
+    | EnumSixtySevenFortyFour fortyFour
+    | EnumSixtySevenFortyFive fortyFive
+    | EnumSixtySevenFortySix fortySix
+    | EnumSixtySevenFortySeven fortySeven
+    | EnumSixtySevenFortyEight fortyEight
+    | EnumSixtySevenFortyNine fortyNine
     | EnumSixtySevenFifty fifty
-    | EnumSixtySevenFiftyOne fifty-one
-    | EnumSixtySevenFiftyTwo fifty-two
-    | EnumSixtySevenFiftyThree fifty-three
-    | EnumSixtySevenFiftyFour fifty-four
-    | EnumSixtySevenFiftyFive fifty-five
-    | EnumSixtySevenFiftySix fifty-six
-    | EnumSixtySevenFiftySeven fifty-seven
-    | EnumSixtySevenFiftyEight fifty-eight
-    | EnumSixtySevenFiftyNine fifty-nine
+    | EnumSixtySevenFiftyOne fiftyOne
+    | EnumSixtySevenFiftyTwo fiftyTwo
+    | EnumSixtySevenFiftyThree fiftyThree
+    | EnumSixtySevenFiftyFour fiftyFour
+    | EnumSixtySevenFiftyFive fiftyFive
+    | EnumSixtySevenFiftySix fiftySix
+    | EnumSixtySevenFiftySeven fiftySeven
+    | EnumSixtySevenFiftyEight fiftyEight
+    | EnumSixtySevenFiftyNine fiftyNine
     | EnumSixtySevenSixty sixty
-    | EnumSixtySevenSixtyOne sixty-one
-    | EnumSixtySevenSixtyTwo sixty-two
-    | EnumSixtySevenSixtyThree sixty-three
-    | EnumSixtySevenSixtyFour sixty-four
-    | EnumSixtySevenSixtyFive sixty-five
-    | EnumSixtySevenSixtySix sixty-six
-    | EnumSixtySevenSixtySeven sixty-seven
+    | EnumSixtySevenSixtyOne sixtyOne
+    | EnumSixtySevenSixtyTwo sixtyTwo
+    | EnumSixtySevenSixtyThree sixtyThree
+    | EnumSixtySevenSixtyFour sixtyFour
+    | EnumSixtySevenSixtyFive sixtyFive
+    | EnumSixtySevenSixtySix sixtySix
+    | EnumSixtySevenSixtySeven sixtySeven
 
 
-type EnumSixtyEight one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twenty-one twenty-two twenty-three twenty-four twenty-five twenty-six twenty-seven twenty-eight twenty-nine thirty thirty-one thirty-two thirty-three thirty-four thirty-five thirty-six thirty-seven thirty-eight thirty-nine forty forty-one forty-two forty-three forty-four forty-five forty-six forty-seven forty-eight forty-nine fifty fifty-one fifty-two fifty-three fifty-four fifty-five fifty-six fifty-seven fifty-eight fifty-nine sixty sixty-one sixty-two sixty-three sixty-four sixty-five sixty-six sixty-seven sixty-eight
+type EnumSixtyEight one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twentyOne twentyTwo twentyThree twentyFour twentyFive twentySix twentySeven twentyEight twentyNine thirty thirtyOne thirtyTwo thirtyThree thirtyFour thirtyFive thirtySix thirtySeven thirtyEight thirtyNine forty fortyOne fortyTwo fortyThree fortyFour fortyFive fortySix fortySeven fortyEight fortyNine fifty fiftyOne fiftyTwo fiftyThree fiftyFour fiftyFive fiftySix fiftySeven fiftyEight fiftyNine sixty sixtyOne sixtyTwo sixtyThree sixtyFour sixtyFive sixtySix sixtySeven sixtyEight
     = EnumSixtyEightOne one
     | EnumSixtyEightTwo two
     | EnumSixtyEightThree three
@@ -52725,57 +52725,57 @@ type EnumSixtyEight one two three four five six seven eight nine ten eleven twel
     | EnumSixtyEightEighteen eighteen
     | EnumSixtyEightNineteen nineteen
     | EnumSixtyEightTwenty twenty
-    | EnumSixtyEightTwentyOne twenty-one
-    | EnumSixtyEightTwentyTwo twenty-two
-    | EnumSixtyEightTwentyThree twenty-three
-    | EnumSixtyEightTwentyFour twenty-four
-    | EnumSixtyEightTwentyFive twenty-five
-    | EnumSixtyEightTwentySix twenty-six
-    | EnumSixtyEightTwentySeven twenty-seven
-    | EnumSixtyEightTwentyEight twenty-eight
-    | EnumSixtyEightTwentyNine twenty-nine
+    | EnumSixtyEightTwentyOne twentyOne
+    | EnumSixtyEightTwentyTwo twentyTwo
+    | EnumSixtyEightTwentyThree twentyThree
+    | EnumSixtyEightTwentyFour twentyFour
+    | EnumSixtyEightTwentyFive twentyFive
+    | EnumSixtyEightTwentySix twentySix
+    | EnumSixtyEightTwentySeven twentySeven
+    | EnumSixtyEightTwentyEight twentyEight
+    | EnumSixtyEightTwentyNine twentyNine
     | EnumSixtyEightThirty thirty
-    | EnumSixtyEightThirtyOne thirty-one
-    | EnumSixtyEightThirtyTwo thirty-two
-    | EnumSixtyEightThirtyThree thirty-three
-    | EnumSixtyEightThirtyFour thirty-four
-    | EnumSixtyEightThirtyFive thirty-five
-    | EnumSixtyEightThirtySix thirty-six
-    | EnumSixtyEightThirtySeven thirty-seven
-    | EnumSixtyEightThirtyEight thirty-eight
-    | EnumSixtyEightThirtyNine thirty-nine
+    | EnumSixtyEightThirtyOne thirtyOne
+    | EnumSixtyEightThirtyTwo thirtyTwo
+    | EnumSixtyEightThirtyThree thirtyThree
+    | EnumSixtyEightThirtyFour thirtyFour
+    | EnumSixtyEightThirtyFive thirtyFive
+    | EnumSixtyEightThirtySix thirtySix
+    | EnumSixtyEightThirtySeven thirtySeven
+    | EnumSixtyEightThirtyEight thirtyEight
+    | EnumSixtyEightThirtyNine thirtyNine
     | EnumSixtyEightForty forty
-    | EnumSixtyEightFortyOne forty-one
-    | EnumSixtyEightFortyTwo forty-two
-    | EnumSixtyEightFortyThree forty-three
-    | EnumSixtyEightFortyFour forty-four
-    | EnumSixtyEightFortyFive forty-five
-    | EnumSixtyEightFortySix forty-six
-    | EnumSixtyEightFortySeven forty-seven
-    | EnumSixtyEightFortyEight forty-eight
-    | EnumSixtyEightFortyNine forty-nine
+    | EnumSixtyEightFortyOne fortyOne
+    | EnumSixtyEightFortyTwo fortyTwo
+    | EnumSixtyEightFortyThree fortyThree
+    | EnumSixtyEightFortyFour fortyFour
+    | EnumSixtyEightFortyFive fortyFive
+    | EnumSixtyEightFortySix fortySix
+    | EnumSixtyEightFortySeven fortySeven
+    | EnumSixtyEightFortyEight fortyEight
+    | EnumSixtyEightFortyNine fortyNine
     | EnumSixtyEightFifty fifty
-    | EnumSixtyEightFiftyOne fifty-one
-    | EnumSixtyEightFiftyTwo fifty-two
-    | EnumSixtyEightFiftyThree fifty-three
-    | EnumSixtyEightFiftyFour fifty-four
-    | EnumSixtyEightFiftyFive fifty-five
-    | EnumSixtyEightFiftySix fifty-six
-    | EnumSixtyEightFiftySeven fifty-seven
-    | EnumSixtyEightFiftyEight fifty-eight
-    | EnumSixtyEightFiftyNine fifty-nine
+    | EnumSixtyEightFiftyOne fiftyOne
+    | EnumSixtyEightFiftyTwo fiftyTwo
+    | EnumSixtyEightFiftyThree fiftyThree
+    | EnumSixtyEightFiftyFour fiftyFour
+    | EnumSixtyEightFiftyFive fiftyFive
+    | EnumSixtyEightFiftySix fiftySix
+    | EnumSixtyEightFiftySeven fiftySeven
+    | EnumSixtyEightFiftyEight fiftyEight
+    | EnumSixtyEightFiftyNine fiftyNine
     | EnumSixtyEightSixty sixty
-    | EnumSixtyEightSixtyOne sixty-one
-    | EnumSixtyEightSixtyTwo sixty-two
-    | EnumSixtyEightSixtyThree sixty-three
-    | EnumSixtyEightSixtyFour sixty-four
-    | EnumSixtyEightSixtyFive sixty-five
-    | EnumSixtyEightSixtySix sixty-six
-    | EnumSixtyEightSixtySeven sixty-seven
-    | EnumSixtyEightSixtyEight sixty-eight
+    | EnumSixtyEightSixtyOne sixtyOne
+    | EnumSixtyEightSixtyTwo sixtyTwo
+    | EnumSixtyEightSixtyThree sixtyThree
+    | EnumSixtyEightSixtyFour sixtyFour
+    | EnumSixtyEightSixtyFive sixtyFive
+    | EnumSixtyEightSixtySix sixtySix
+    | EnumSixtyEightSixtySeven sixtySeven
+    | EnumSixtyEightSixtyEight sixtyEight
 
 
-type EnumSixtyNine one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twenty-one twenty-two twenty-three twenty-four twenty-five twenty-six twenty-seven twenty-eight twenty-nine thirty thirty-one thirty-two thirty-three thirty-four thirty-five thirty-six thirty-seven thirty-eight thirty-nine forty forty-one forty-two forty-three forty-four forty-five forty-six forty-seven forty-eight forty-nine fifty fifty-one fifty-two fifty-three fifty-four fifty-five fifty-six fifty-seven fifty-eight fifty-nine sixty sixty-one sixty-two sixty-three sixty-four sixty-five sixty-six sixty-seven sixty-eight sixty-nine
+type EnumSixtyNine one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twentyOne twentyTwo twentyThree twentyFour twentyFive twentySix twentySeven twentyEight twentyNine thirty thirtyOne thirtyTwo thirtyThree thirtyFour thirtyFive thirtySix thirtySeven thirtyEight thirtyNine forty fortyOne fortyTwo fortyThree fortyFour fortyFive fortySix fortySeven fortyEight fortyNine fifty fiftyOne fiftyTwo fiftyThree fiftyFour fiftyFive fiftySix fiftySeven fiftyEight fiftyNine sixty sixtyOne sixtyTwo sixtyThree sixtyFour sixtyFive sixtySix sixtySeven sixtyEight sixtyNine
     = EnumSixtyNineOne one
     | EnumSixtyNineTwo two
     | EnumSixtyNineThree three
@@ -52796,58 +52796,58 @@ type EnumSixtyNine one two three four five six seven eight nine ten eleven twelv
     | EnumSixtyNineEighteen eighteen
     | EnumSixtyNineNineteen nineteen
     | EnumSixtyNineTwenty twenty
-    | EnumSixtyNineTwentyOne twenty-one
-    | EnumSixtyNineTwentyTwo twenty-two
-    | EnumSixtyNineTwentyThree twenty-three
-    | EnumSixtyNineTwentyFour twenty-four
-    | EnumSixtyNineTwentyFive twenty-five
-    | EnumSixtyNineTwentySix twenty-six
-    | EnumSixtyNineTwentySeven twenty-seven
-    | EnumSixtyNineTwentyEight twenty-eight
-    | EnumSixtyNineTwentyNine twenty-nine
+    | EnumSixtyNineTwentyOne twentyOne
+    | EnumSixtyNineTwentyTwo twentyTwo
+    | EnumSixtyNineTwentyThree twentyThree
+    | EnumSixtyNineTwentyFour twentyFour
+    | EnumSixtyNineTwentyFive twentyFive
+    | EnumSixtyNineTwentySix twentySix
+    | EnumSixtyNineTwentySeven twentySeven
+    | EnumSixtyNineTwentyEight twentyEight
+    | EnumSixtyNineTwentyNine twentyNine
     | EnumSixtyNineThirty thirty
-    | EnumSixtyNineThirtyOne thirty-one
-    | EnumSixtyNineThirtyTwo thirty-two
-    | EnumSixtyNineThirtyThree thirty-three
-    | EnumSixtyNineThirtyFour thirty-four
-    | EnumSixtyNineThirtyFive thirty-five
-    | EnumSixtyNineThirtySix thirty-six
-    | EnumSixtyNineThirtySeven thirty-seven
-    | EnumSixtyNineThirtyEight thirty-eight
-    | EnumSixtyNineThirtyNine thirty-nine
+    | EnumSixtyNineThirtyOne thirtyOne
+    | EnumSixtyNineThirtyTwo thirtyTwo
+    | EnumSixtyNineThirtyThree thirtyThree
+    | EnumSixtyNineThirtyFour thirtyFour
+    | EnumSixtyNineThirtyFive thirtyFive
+    | EnumSixtyNineThirtySix thirtySix
+    | EnumSixtyNineThirtySeven thirtySeven
+    | EnumSixtyNineThirtyEight thirtyEight
+    | EnumSixtyNineThirtyNine thirtyNine
     | EnumSixtyNineForty forty
-    | EnumSixtyNineFortyOne forty-one
-    | EnumSixtyNineFortyTwo forty-two
-    | EnumSixtyNineFortyThree forty-three
-    | EnumSixtyNineFortyFour forty-four
-    | EnumSixtyNineFortyFive forty-five
-    | EnumSixtyNineFortySix forty-six
-    | EnumSixtyNineFortySeven forty-seven
-    | EnumSixtyNineFortyEight forty-eight
-    | EnumSixtyNineFortyNine forty-nine
+    | EnumSixtyNineFortyOne fortyOne
+    | EnumSixtyNineFortyTwo fortyTwo
+    | EnumSixtyNineFortyThree fortyThree
+    | EnumSixtyNineFortyFour fortyFour
+    | EnumSixtyNineFortyFive fortyFive
+    | EnumSixtyNineFortySix fortySix
+    | EnumSixtyNineFortySeven fortySeven
+    | EnumSixtyNineFortyEight fortyEight
+    | EnumSixtyNineFortyNine fortyNine
     | EnumSixtyNineFifty fifty
-    | EnumSixtyNineFiftyOne fifty-one
-    | EnumSixtyNineFiftyTwo fifty-two
-    | EnumSixtyNineFiftyThree fifty-three
-    | EnumSixtyNineFiftyFour fifty-four
-    | EnumSixtyNineFiftyFive fifty-five
-    | EnumSixtyNineFiftySix fifty-six
-    | EnumSixtyNineFiftySeven fifty-seven
-    | EnumSixtyNineFiftyEight fifty-eight
-    | EnumSixtyNineFiftyNine fifty-nine
+    | EnumSixtyNineFiftyOne fiftyOne
+    | EnumSixtyNineFiftyTwo fiftyTwo
+    | EnumSixtyNineFiftyThree fiftyThree
+    | EnumSixtyNineFiftyFour fiftyFour
+    | EnumSixtyNineFiftyFive fiftyFive
+    | EnumSixtyNineFiftySix fiftySix
+    | EnumSixtyNineFiftySeven fiftySeven
+    | EnumSixtyNineFiftyEight fiftyEight
+    | EnumSixtyNineFiftyNine fiftyNine
     | EnumSixtyNineSixty sixty
-    | EnumSixtyNineSixtyOne sixty-one
-    | EnumSixtyNineSixtyTwo sixty-two
-    | EnumSixtyNineSixtyThree sixty-three
-    | EnumSixtyNineSixtyFour sixty-four
-    | EnumSixtyNineSixtyFive sixty-five
-    | EnumSixtyNineSixtySix sixty-six
-    | EnumSixtyNineSixtySeven sixty-seven
-    | EnumSixtyNineSixtyEight sixty-eight
-    | EnumSixtyNineSixtyNine sixty-nine
+    | EnumSixtyNineSixtyOne sixtyOne
+    | EnumSixtyNineSixtyTwo sixtyTwo
+    | EnumSixtyNineSixtyThree sixtyThree
+    | EnumSixtyNineSixtyFour sixtyFour
+    | EnumSixtyNineSixtyFive sixtyFive
+    | EnumSixtyNineSixtySix sixtySix
+    | EnumSixtyNineSixtySeven sixtySeven
+    | EnumSixtyNineSixtyEight sixtyEight
+    | EnumSixtyNineSixtyNine sixtyNine
 
 
-type EnumSeventy one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twenty-one twenty-two twenty-three twenty-four twenty-five twenty-six twenty-seven twenty-eight twenty-nine thirty thirty-one thirty-two thirty-three thirty-four thirty-five thirty-six thirty-seven thirty-eight thirty-nine forty forty-one forty-two forty-three forty-four forty-five forty-six forty-seven forty-eight forty-nine fifty fifty-one fifty-two fifty-three fifty-four fifty-five fifty-six fifty-seven fifty-eight fifty-nine sixty sixty-one sixty-two sixty-three sixty-four sixty-five sixty-six sixty-seven sixty-eight sixty-nine seventy
+type EnumSeventy one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twentyOne twentyTwo twentyThree twentyFour twentyFive twentySix twentySeven twentyEight twentyNine thirty thirtyOne thirtyTwo thirtyThree thirtyFour thirtyFive thirtySix thirtySeven thirtyEight thirtyNine forty fortyOne fortyTwo fortyThree fortyFour fortyFive fortySix fortySeven fortyEight fortyNine fifty fiftyOne fiftyTwo fiftyThree fiftyFour fiftyFive fiftySix fiftySeven fiftyEight fiftyNine sixty sixtyOne sixtyTwo sixtyThree sixtyFour sixtyFive sixtySix sixtySeven sixtyEight sixtyNine seventy
     = EnumSeventyOne one
     | EnumSeventyTwo two
     | EnumSeventyThree three
@@ -52868,59 +52868,59 @@ type EnumSeventy one two three four five six seven eight nine ten eleven twelve 
     | EnumSeventyEighteen eighteen
     | EnumSeventyNineteen nineteen
     | EnumSeventyTwenty twenty
-    | EnumSeventyTwentyOne twenty-one
-    | EnumSeventyTwentyTwo twenty-two
-    | EnumSeventyTwentyThree twenty-three
-    | EnumSeventyTwentyFour twenty-four
-    | EnumSeventyTwentyFive twenty-five
-    | EnumSeventyTwentySix twenty-six
-    | EnumSeventyTwentySeven twenty-seven
-    | EnumSeventyTwentyEight twenty-eight
-    | EnumSeventyTwentyNine twenty-nine
+    | EnumSeventyTwentyOne twentyOne
+    | EnumSeventyTwentyTwo twentyTwo
+    | EnumSeventyTwentyThree twentyThree
+    | EnumSeventyTwentyFour twentyFour
+    | EnumSeventyTwentyFive twentyFive
+    | EnumSeventyTwentySix twentySix
+    | EnumSeventyTwentySeven twentySeven
+    | EnumSeventyTwentyEight twentyEight
+    | EnumSeventyTwentyNine twentyNine
     | EnumSeventyThirty thirty
-    | EnumSeventyThirtyOne thirty-one
-    | EnumSeventyThirtyTwo thirty-two
-    | EnumSeventyThirtyThree thirty-three
-    | EnumSeventyThirtyFour thirty-four
-    | EnumSeventyThirtyFive thirty-five
-    | EnumSeventyThirtySix thirty-six
-    | EnumSeventyThirtySeven thirty-seven
-    | EnumSeventyThirtyEight thirty-eight
-    | EnumSeventyThirtyNine thirty-nine
+    | EnumSeventyThirtyOne thirtyOne
+    | EnumSeventyThirtyTwo thirtyTwo
+    | EnumSeventyThirtyThree thirtyThree
+    | EnumSeventyThirtyFour thirtyFour
+    | EnumSeventyThirtyFive thirtyFive
+    | EnumSeventyThirtySix thirtySix
+    | EnumSeventyThirtySeven thirtySeven
+    | EnumSeventyThirtyEight thirtyEight
+    | EnumSeventyThirtyNine thirtyNine
     | EnumSeventyForty forty
-    | EnumSeventyFortyOne forty-one
-    | EnumSeventyFortyTwo forty-two
-    | EnumSeventyFortyThree forty-three
-    | EnumSeventyFortyFour forty-four
-    | EnumSeventyFortyFive forty-five
-    | EnumSeventyFortySix forty-six
-    | EnumSeventyFortySeven forty-seven
-    | EnumSeventyFortyEight forty-eight
-    | EnumSeventyFortyNine forty-nine
+    | EnumSeventyFortyOne fortyOne
+    | EnumSeventyFortyTwo fortyTwo
+    | EnumSeventyFortyThree fortyThree
+    | EnumSeventyFortyFour fortyFour
+    | EnumSeventyFortyFive fortyFive
+    | EnumSeventyFortySix fortySix
+    | EnumSeventyFortySeven fortySeven
+    | EnumSeventyFortyEight fortyEight
+    | EnumSeventyFortyNine fortyNine
     | EnumSeventyFifty fifty
-    | EnumSeventyFiftyOne fifty-one
-    | EnumSeventyFiftyTwo fifty-two
-    | EnumSeventyFiftyThree fifty-three
-    | EnumSeventyFiftyFour fifty-four
-    | EnumSeventyFiftyFive fifty-five
-    | EnumSeventyFiftySix fifty-six
-    | EnumSeventyFiftySeven fifty-seven
-    | EnumSeventyFiftyEight fifty-eight
-    | EnumSeventyFiftyNine fifty-nine
+    | EnumSeventyFiftyOne fiftyOne
+    | EnumSeventyFiftyTwo fiftyTwo
+    | EnumSeventyFiftyThree fiftyThree
+    | EnumSeventyFiftyFour fiftyFour
+    | EnumSeventyFiftyFive fiftyFive
+    | EnumSeventyFiftySix fiftySix
+    | EnumSeventyFiftySeven fiftySeven
+    | EnumSeventyFiftyEight fiftyEight
+    | EnumSeventyFiftyNine fiftyNine
     | EnumSeventySixty sixty
-    | EnumSeventySixtyOne sixty-one
-    | EnumSeventySixtyTwo sixty-two
-    | EnumSeventySixtyThree sixty-three
-    | EnumSeventySixtyFour sixty-four
-    | EnumSeventySixtyFive sixty-five
-    | EnumSeventySixtySix sixty-six
-    | EnumSeventySixtySeven sixty-seven
-    | EnumSeventySixtyEight sixty-eight
-    | EnumSeventySixtyNine sixty-nine
+    | EnumSeventySixtyOne sixtyOne
+    | EnumSeventySixtyTwo sixtyTwo
+    | EnumSeventySixtyThree sixtyThree
+    | EnumSeventySixtyFour sixtyFour
+    | EnumSeventySixtyFive sixtyFive
+    | EnumSeventySixtySix sixtySix
+    | EnumSeventySixtySeven sixtySeven
+    | EnumSeventySixtyEight sixtyEight
+    | EnumSeventySixtyNine sixtyNine
     | EnumSeventySeventy seventy
 
 
-type EnumSeventyOne one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twenty-one twenty-two twenty-three twenty-four twenty-five twenty-six twenty-seven twenty-eight twenty-nine thirty thirty-one thirty-two thirty-three thirty-four thirty-five thirty-six thirty-seven thirty-eight thirty-nine forty forty-one forty-two forty-three forty-four forty-five forty-six forty-seven forty-eight forty-nine fifty fifty-one fifty-two fifty-three fifty-four fifty-five fifty-six fifty-seven fifty-eight fifty-nine sixty sixty-one sixty-two sixty-three sixty-four sixty-five sixty-six sixty-seven sixty-eight sixty-nine seventy seventy-one
+type EnumSeventyOne one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twentyOne twentyTwo twentyThree twentyFour twentyFive twentySix twentySeven twentyEight twentyNine thirty thirtyOne thirtyTwo thirtyThree thirtyFour thirtyFive thirtySix thirtySeven thirtyEight thirtyNine forty fortyOne fortyTwo fortyThree fortyFour fortyFive fortySix fortySeven fortyEight fortyNine fifty fiftyOne fiftyTwo fiftyThree fiftyFour fiftyFive fiftySix fiftySeven fiftyEight fiftyNine sixty sixtyOne sixtyTwo sixtyThree sixtyFour sixtyFive sixtySix sixtySeven sixtyEight sixtyNine seventy seventyOne
     = EnumSeventyOneOne one
     | EnumSeventyOneTwo two
     | EnumSeventyOneThree three
@@ -52941,60 +52941,60 @@ type EnumSeventyOne one two three four five six seven eight nine ten eleven twel
     | EnumSeventyOneEighteen eighteen
     | EnumSeventyOneNineteen nineteen
     | EnumSeventyOneTwenty twenty
-    | EnumSeventyOneTwentyOne twenty-one
-    | EnumSeventyOneTwentyTwo twenty-two
-    | EnumSeventyOneTwentyThree twenty-three
-    | EnumSeventyOneTwentyFour twenty-four
-    | EnumSeventyOneTwentyFive twenty-five
-    | EnumSeventyOneTwentySix twenty-six
-    | EnumSeventyOneTwentySeven twenty-seven
-    | EnumSeventyOneTwentyEight twenty-eight
-    | EnumSeventyOneTwentyNine twenty-nine
+    | EnumSeventyOneTwentyOne twentyOne
+    | EnumSeventyOneTwentyTwo twentyTwo
+    | EnumSeventyOneTwentyThree twentyThree
+    | EnumSeventyOneTwentyFour twentyFour
+    | EnumSeventyOneTwentyFive twentyFive
+    | EnumSeventyOneTwentySix twentySix
+    | EnumSeventyOneTwentySeven twentySeven
+    | EnumSeventyOneTwentyEight twentyEight
+    | EnumSeventyOneTwentyNine twentyNine
     | EnumSeventyOneThirty thirty
-    | EnumSeventyOneThirtyOne thirty-one
-    | EnumSeventyOneThirtyTwo thirty-two
-    | EnumSeventyOneThirtyThree thirty-three
-    | EnumSeventyOneThirtyFour thirty-four
-    | EnumSeventyOneThirtyFive thirty-five
-    | EnumSeventyOneThirtySix thirty-six
-    | EnumSeventyOneThirtySeven thirty-seven
-    | EnumSeventyOneThirtyEight thirty-eight
-    | EnumSeventyOneThirtyNine thirty-nine
+    | EnumSeventyOneThirtyOne thirtyOne
+    | EnumSeventyOneThirtyTwo thirtyTwo
+    | EnumSeventyOneThirtyThree thirtyThree
+    | EnumSeventyOneThirtyFour thirtyFour
+    | EnumSeventyOneThirtyFive thirtyFive
+    | EnumSeventyOneThirtySix thirtySix
+    | EnumSeventyOneThirtySeven thirtySeven
+    | EnumSeventyOneThirtyEight thirtyEight
+    | EnumSeventyOneThirtyNine thirtyNine
     | EnumSeventyOneForty forty
-    | EnumSeventyOneFortyOne forty-one
-    | EnumSeventyOneFortyTwo forty-two
-    | EnumSeventyOneFortyThree forty-three
-    | EnumSeventyOneFortyFour forty-four
-    | EnumSeventyOneFortyFive forty-five
-    | EnumSeventyOneFortySix forty-six
-    | EnumSeventyOneFortySeven forty-seven
-    | EnumSeventyOneFortyEight forty-eight
-    | EnumSeventyOneFortyNine forty-nine
+    | EnumSeventyOneFortyOne fortyOne
+    | EnumSeventyOneFortyTwo fortyTwo
+    | EnumSeventyOneFortyThree fortyThree
+    | EnumSeventyOneFortyFour fortyFour
+    | EnumSeventyOneFortyFive fortyFive
+    | EnumSeventyOneFortySix fortySix
+    | EnumSeventyOneFortySeven fortySeven
+    | EnumSeventyOneFortyEight fortyEight
+    | EnumSeventyOneFortyNine fortyNine
     | EnumSeventyOneFifty fifty
-    | EnumSeventyOneFiftyOne fifty-one
-    | EnumSeventyOneFiftyTwo fifty-two
-    | EnumSeventyOneFiftyThree fifty-three
-    | EnumSeventyOneFiftyFour fifty-four
-    | EnumSeventyOneFiftyFive fifty-five
-    | EnumSeventyOneFiftySix fifty-six
-    | EnumSeventyOneFiftySeven fifty-seven
-    | EnumSeventyOneFiftyEight fifty-eight
-    | EnumSeventyOneFiftyNine fifty-nine
+    | EnumSeventyOneFiftyOne fiftyOne
+    | EnumSeventyOneFiftyTwo fiftyTwo
+    | EnumSeventyOneFiftyThree fiftyThree
+    | EnumSeventyOneFiftyFour fiftyFour
+    | EnumSeventyOneFiftyFive fiftyFive
+    | EnumSeventyOneFiftySix fiftySix
+    | EnumSeventyOneFiftySeven fiftySeven
+    | EnumSeventyOneFiftyEight fiftyEight
+    | EnumSeventyOneFiftyNine fiftyNine
     | EnumSeventyOneSixty sixty
-    | EnumSeventyOneSixtyOne sixty-one
-    | EnumSeventyOneSixtyTwo sixty-two
-    | EnumSeventyOneSixtyThree sixty-three
-    | EnumSeventyOneSixtyFour sixty-four
-    | EnumSeventyOneSixtyFive sixty-five
-    | EnumSeventyOneSixtySix sixty-six
-    | EnumSeventyOneSixtySeven sixty-seven
-    | EnumSeventyOneSixtyEight sixty-eight
-    | EnumSeventyOneSixtyNine sixty-nine
+    | EnumSeventyOneSixtyOne sixtyOne
+    | EnumSeventyOneSixtyTwo sixtyTwo
+    | EnumSeventyOneSixtyThree sixtyThree
+    | EnumSeventyOneSixtyFour sixtyFour
+    | EnumSeventyOneSixtyFive sixtyFive
+    | EnumSeventyOneSixtySix sixtySix
+    | EnumSeventyOneSixtySeven sixtySeven
+    | EnumSeventyOneSixtyEight sixtyEight
+    | EnumSeventyOneSixtyNine sixtyNine
     | EnumSeventyOneSeventy seventy
-    | EnumSeventyOneSeventyOne seventy-one
+    | EnumSeventyOneSeventyOne seventyOne
 
 
-type EnumSeventyTwo one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twenty-one twenty-two twenty-three twenty-four twenty-five twenty-six twenty-seven twenty-eight twenty-nine thirty thirty-one thirty-two thirty-three thirty-four thirty-five thirty-six thirty-seven thirty-eight thirty-nine forty forty-one forty-two forty-three forty-four forty-five forty-six forty-seven forty-eight forty-nine fifty fifty-one fifty-two fifty-three fifty-four fifty-five fifty-six fifty-seven fifty-eight fifty-nine sixty sixty-one sixty-two sixty-three sixty-four sixty-five sixty-six sixty-seven sixty-eight sixty-nine seventy seventy-one seventy-two
+type EnumSeventyTwo one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twentyOne twentyTwo twentyThree twentyFour twentyFive twentySix twentySeven twentyEight twentyNine thirty thirtyOne thirtyTwo thirtyThree thirtyFour thirtyFive thirtySix thirtySeven thirtyEight thirtyNine forty fortyOne fortyTwo fortyThree fortyFour fortyFive fortySix fortySeven fortyEight fortyNine fifty fiftyOne fiftyTwo fiftyThree fiftyFour fiftyFive fiftySix fiftySeven fiftyEight fiftyNine sixty sixtyOne sixtyTwo sixtyThree sixtyFour sixtyFive sixtySix sixtySeven sixtyEight sixtyNine seventy seventyOne seventyTwo
     = EnumSeventyTwoOne one
     | EnumSeventyTwoTwo two
     | EnumSeventyTwoThree three
@@ -53015,61 +53015,61 @@ type EnumSeventyTwo one two three four five six seven eight nine ten eleven twel
     | EnumSeventyTwoEighteen eighteen
     | EnumSeventyTwoNineteen nineteen
     | EnumSeventyTwoTwenty twenty
-    | EnumSeventyTwoTwentyOne twenty-one
-    | EnumSeventyTwoTwentyTwo twenty-two
-    | EnumSeventyTwoTwentyThree twenty-three
-    | EnumSeventyTwoTwentyFour twenty-four
-    | EnumSeventyTwoTwentyFive twenty-five
-    | EnumSeventyTwoTwentySix twenty-six
-    | EnumSeventyTwoTwentySeven twenty-seven
-    | EnumSeventyTwoTwentyEight twenty-eight
-    | EnumSeventyTwoTwentyNine twenty-nine
+    | EnumSeventyTwoTwentyOne twentyOne
+    | EnumSeventyTwoTwentyTwo twentyTwo
+    | EnumSeventyTwoTwentyThree twentyThree
+    | EnumSeventyTwoTwentyFour twentyFour
+    | EnumSeventyTwoTwentyFive twentyFive
+    | EnumSeventyTwoTwentySix twentySix
+    | EnumSeventyTwoTwentySeven twentySeven
+    | EnumSeventyTwoTwentyEight twentyEight
+    | EnumSeventyTwoTwentyNine twentyNine
     | EnumSeventyTwoThirty thirty
-    | EnumSeventyTwoThirtyOne thirty-one
-    | EnumSeventyTwoThirtyTwo thirty-two
-    | EnumSeventyTwoThirtyThree thirty-three
-    | EnumSeventyTwoThirtyFour thirty-four
-    | EnumSeventyTwoThirtyFive thirty-five
-    | EnumSeventyTwoThirtySix thirty-six
-    | EnumSeventyTwoThirtySeven thirty-seven
-    | EnumSeventyTwoThirtyEight thirty-eight
-    | EnumSeventyTwoThirtyNine thirty-nine
+    | EnumSeventyTwoThirtyOne thirtyOne
+    | EnumSeventyTwoThirtyTwo thirtyTwo
+    | EnumSeventyTwoThirtyThree thirtyThree
+    | EnumSeventyTwoThirtyFour thirtyFour
+    | EnumSeventyTwoThirtyFive thirtyFive
+    | EnumSeventyTwoThirtySix thirtySix
+    | EnumSeventyTwoThirtySeven thirtySeven
+    | EnumSeventyTwoThirtyEight thirtyEight
+    | EnumSeventyTwoThirtyNine thirtyNine
     | EnumSeventyTwoForty forty
-    | EnumSeventyTwoFortyOne forty-one
-    | EnumSeventyTwoFortyTwo forty-two
-    | EnumSeventyTwoFortyThree forty-three
-    | EnumSeventyTwoFortyFour forty-four
-    | EnumSeventyTwoFortyFive forty-five
-    | EnumSeventyTwoFortySix forty-six
-    | EnumSeventyTwoFortySeven forty-seven
-    | EnumSeventyTwoFortyEight forty-eight
-    | EnumSeventyTwoFortyNine forty-nine
+    | EnumSeventyTwoFortyOne fortyOne
+    | EnumSeventyTwoFortyTwo fortyTwo
+    | EnumSeventyTwoFortyThree fortyThree
+    | EnumSeventyTwoFortyFour fortyFour
+    | EnumSeventyTwoFortyFive fortyFive
+    | EnumSeventyTwoFortySix fortySix
+    | EnumSeventyTwoFortySeven fortySeven
+    | EnumSeventyTwoFortyEight fortyEight
+    | EnumSeventyTwoFortyNine fortyNine
     | EnumSeventyTwoFifty fifty
-    | EnumSeventyTwoFiftyOne fifty-one
-    | EnumSeventyTwoFiftyTwo fifty-two
-    | EnumSeventyTwoFiftyThree fifty-three
-    | EnumSeventyTwoFiftyFour fifty-four
-    | EnumSeventyTwoFiftyFive fifty-five
-    | EnumSeventyTwoFiftySix fifty-six
-    | EnumSeventyTwoFiftySeven fifty-seven
-    | EnumSeventyTwoFiftyEight fifty-eight
-    | EnumSeventyTwoFiftyNine fifty-nine
+    | EnumSeventyTwoFiftyOne fiftyOne
+    | EnumSeventyTwoFiftyTwo fiftyTwo
+    | EnumSeventyTwoFiftyThree fiftyThree
+    | EnumSeventyTwoFiftyFour fiftyFour
+    | EnumSeventyTwoFiftyFive fiftyFive
+    | EnumSeventyTwoFiftySix fiftySix
+    | EnumSeventyTwoFiftySeven fiftySeven
+    | EnumSeventyTwoFiftyEight fiftyEight
+    | EnumSeventyTwoFiftyNine fiftyNine
     | EnumSeventyTwoSixty sixty
-    | EnumSeventyTwoSixtyOne sixty-one
-    | EnumSeventyTwoSixtyTwo sixty-two
-    | EnumSeventyTwoSixtyThree sixty-three
-    | EnumSeventyTwoSixtyFour sixty-four
-    | EnumSeventyTwoSixtyFive sixty-five
-    | EnumSeventyTwoSixtySix sixty-six
-    | EnumSeventyTwoSixtySeven sixty-seven
-    | EnumSeventyTwoSixtyEight sixty-eight
-    | EnumSeventyTwoSixtyNine sixty-nine
+    | EnumSeventyTwoSixtyOne sixtyOne
+    | EnumSeventyTwoSixtyTwo sixtyTwo
+    | EnumSeventyTwoSixtyThree sixtyThree
+    | EnumSeventyTwoSixtyFour sixtyFour
+    | EnumSeventyTwoSixtyFive sixtyFive
+    | EnumSeventyTwoSixtySix sixtySix
+    | EnumSeventyTwoSixtySeven sixtySeven
+    | EnumSeventyTwoSixtyEight sixtyEight
+    | EnumSeventyTwoSixtyNine sixtyNine
     | EnumSeventyTwoSeventy seventy
-    | EnumSeventyTwoSeventyOne seventy-one
-    | EnumSeventyTwoSeventyTwo seventy-two
+    | EnumSeventyTwoSeventyOne seventyOne
+    | EnumSeventyTwoSeventyTwo seventyTwo
 
 
-type EnumSeventyThree one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twenty-one twenty-two twenty-three twenty-four twenty-five twenty-six twenty-seven twenty-eight twenty-nine thirty thirty-one thirty-two thirty-three thirty-four thirty-five thirty-six thirty-seven thirty-eight thirty-nine forty forty-one forty-two forty-three forty-four forty-five forty-six forty-seven forty-eight forty-nine fifty fifty-one fifty-two fifty-three fifty-four fifty-five fifty-six fifty-seven fifty-eight fifty-nine sixty sixty-one sixty-two sixty-three sixty-four sixty-five sixty-six sixty-seven sixty-eight sixty-nine seventy seventy-one seventy-two seventy-three
+type EnumSeventyThree one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twentyOne twentyTwo twentyThree twentyFour twentyFive twentySix twentySeven twentyEight twentyNine thirty thirtyOne thirtyTwo thirtyThree thirtyFour thirtyFive thirtySix thirtySeven thirtyEight thirtyNine forty fortyOne fortyTwo fortyThree fortyFour fortyFive fortySix fortySeven fortyEight fortyNine fifty fiftyOne fiftyTwo fiftyThree fiftyFour fiftyFive fiftySix fiftySeven fiftyEight fiftyNine sixty sixtyOne sixtyTwo sixtyThree sixtyFour sixtyFive sixtySix sixtySeven sixtyEight sixtyNine seventy seventyOne seventyTwo seventyThree
     = EnumSeventyThreeOne one
     | EnumSeventyThreeTwo two
     | EnumSeventyThreeThree three
@@ -53090,62 +53090,62 @@ type EnumSeventyThree one two three four five six seven eight nine ten eleven tw
     | EnumSeventyThreeEighteen eighteen
     | EnumSeventyThreeNineteen nineteen
     | EnumSeventyThreeTwenty twenty
-    | EnumSeventyThreeTwentyOne twenty-one
-    | EnumSeventyThreeTwentyTwo twenty-two
-    | EnumSeventyThreeTwentyThree twenty-three
-    | EnumSeventyThreeTwentyFour twenty-four
-    | EnumSeventyThreeTwentyFive twenty-five
-    | EnumSeventyThreeTwentySix twenty-six
-    | EnumSeventyThreeTwentySeven twenty-seven
-    | EnumSeventyThreeTwentyEight twenty-eight
-    | EnumSeventyThreeTwentyNine twenty-nine
+    | EnumSeventyThreeTwentyOne twentyOne
+    | EnumSeventyThreeTwentyTwo twentyTwo
+    | EnumSeventyThreeTwentyThree twentyThree
+    | EnumSeventyThreeTwentyFour twentyFour
+    | EnumSeventyThreeTwentyFive twentyFive
+    | EnumSeventyThreeTwentySix twentySix
+    | EnumSeventyThreeTwentySeven twentySeven
+    | EnumSeventyThreeTwentyEight twentyEight
+    | EnumSeventyThreeTwentyNine twentyNine
     | EnumSeventyThreeThirty thirty
-    | EnumSeventyThreeThirtyOne thirty-one
-    | EnumSeventyThreeThirtyTwo thirty-two
-    | EnumSeventyThreeThirtyThree thirty-three
-    | EnumSeventyThreeThirtyFour thirty-four
-    | EnumSeventyThreeThirtyFive thirty-five
-    | EnumSeventyThreeThirtySix thirty-six
-    | EnumSeventyThreeThirtySeven thirty-seven
-    | EnumSeventyThreeThirtyEight thirty-eight
-    | EnumSeventyThreeThirtyNine thirty-nine
+    | EnumSeventyThreeThirtyOne thirtyOne
+    | EnumSeventyThreeThirtyTwo thirtyTwo
+    | EnumSeventyThreeThirtyThree thirtyThree
+    | EnumSeventyThreeThirtyFour thirtyFour
+    | EnumSeventyThreeThirtyFive thirtyFive
+    | EnumSeventyThreeThirtySix thirtySix
+    | EnumSeventyThreeThirtySeven thirtySeven
+    | EnumSeventyThreeThirtyEight thirtyEight
+    | EnumSeventyThreeThirtyNine thirtyNine
     | EnumSeventyThreeForty forty
-    | EnumSeventyThreeFortyOne forty-one
-    | EnumSeventyThreeFortyTwo forty-two
-    | EnumSeventyThreeFortyThree forty-three
-    | EnumSeventyThreeFortyFour forty-four
-    | EnumSeventyThreeFortyFive forty-five
-    | EnumSeventyThreeFortySix forty-six
-    | EnumSeventyThreeFortySeven forty-seven
-    | EnumSeventyThreeFortyEight forty-eight
-    | EnumSeventyThreeFortyNine forty-nine
+    | EnumSeventyThreeFortyOne fortyOne
+    | EnumSeventyThreeFortyTwo fortyTwo
+    | EnumSeventyThreeFortyThree fortyThree
+    | EnumSeventyThreeFortyFour fortyFour
+    | EnumSeventyThreeFortyFive fortyFive
+    | EnumSeventyThreeFortySix fortySix
+    | EnumSeventyThreeFortySeven fortySeven
+    | EnumSeventyThreeFortyEight fortyEight
+    | EnumSeventyThreeFortyNine fortyNine
     | EnumSeventyThreeFifty fifty
-    | EnumSeventyThreeFiftyOne fifty-one
-    | EnumSeventyThreeFiftyTwo fifty-two
-    | EnumSeventyThreeFiftyThree fifty-three
-    | EnumSeventyThreeFiftyFour fifty-four
-    | EnumSeventyThreeFiftyFive fifty-five
-    | EnumSeventyThreeFiftySix fifty-six
-    | EnumSeventyThreeFiftySeven fifty-seven
-    | EnumSeventyThreeFiftyEight fifty-eight
-    | EnumSeventyThreeFiftyNine fifty-nine
+    | EnumSeventyThreeFiftyOne fiftyOne
+    | EnumSeventyThreeFiftyTwo fiftyTwo
+    | EnumSeventyThreeFiftyThree fiftyThree
+    | EnumSeventyThreeFiftyFour fiftyFour
+    | EnumSeventyThreeFiftyFive fiftyFive
+    | EnumSeventyThreeFiftySix fiftySix
+    | EnumSeventyThreeFiftySeven fiftySeven
+    | EnumSeventyThreeFiftyEight fiftyEight
+    | EnumSeventyThreeFiftyNine fiftyNine
     | EnumSeventyThreeSixty sixty
-    | EnumSeventyThreeSixtyOne sixty-one
-    | EnumSeventyThreeSixtyTwo sixty-two
-    | EnumSeventyThreeSixtyThree sixty-three
-    | EnumSeventyThreeSixtyFour sixty-four
-    | EnumSeventyThreeSixtyFive sixty-five
-    | EnumSeventyThreeSixtySix sixty-six
-    | EnumSeventyThreeSixtySeven sixty-seven
-    | EnumSeventyThreeSixtyEight sixty-eight
-    | EnumSeventyThreeSixtyNine sixty-nine
+    | EnumSeventyThreeSixtyOne sixtyOne
+    | EnumSeventyThreeSixtyTwo sixtyTwo
+    | EnumSeventyThreeSixtyThree sixtyThree
+    | EnumSeventyThreeSixtyFour sixtyFour
+    | EnumSeventyThreeSixtyFive sixtyFive
+    | EnumSeventyThreeSixtySix sixtySix
+    | EnumSeventyThreeSixtySeven sixtySeven
+    | EnumSeventyThreeSixtyEight sixtyEight
+    | EnumSeventyThreeSixtyNine sixtyNine
     | EnumSeventyThreeSeventy seventy
-    | EnumSeventyThreeSeventyOne seventy-one
-    | EnumSeventyThreeSeventyTwo seventy-two
-    | EnumSeventyThreeSeventyThree seventy-three
+    | EnumSeventyThreeSeventyOne seventyOne
+    | EnumSeventyThreeSeventyTwo seventyTwo
+    | EnumSeventyThreeSeventyThree seventyThree
 
 
-type EnumSeventyFour one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twenty-one twenty-two twenty-three twenty-four twenty-five twenty-six twenty-seven twenty-eight twenty-nine thirty thirty-one thirty-two thirty-three thirty-four thirty-five thirty-six thirty-seven thirty-eight thirty-nine forty forty-one forty-two forty-three forty-four forty-five forty-six forty-seven forty-eight forty-nine fifty fifty-one fifty-two fifty-three fifty-four fifty-five fifty-six fifty-seven fifty-eight fifty-nine sixty sixty-one sixty-two sixty-three sixty-four sixty-five sixty-six sixty-seven sixty-eight sixty-nine seventy seventy-one seventy-two seventy-three seventy-four
+type EnumSeventyFour one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twentyOne twentyTwo twentyThree twentyFour twentyFive twentySix twentySeven twentyEight twentyNine thirty thirtyOne thirtyTwo thirtyThree thirtyFour thirtyFive thirtySix thirtySeven thirtyEight thirtyNine forty fortyOne fortyTwo fortyThree fortyFour fortyFive fortySix fortySeven fortyEight fortyNine fifty fiftyOne fiftyTwo fiftyThree fiftyFour fiftyFive fiftySix fiftySeven fiftyEight fiftyNine sixty sixtyOne sixtyTwo sixtyThree sixtyFour sixtyFive sixtySix sixtySeven sixtyEight sixtyNine seventy seventyOne seventyTwo seventyThree seventyFour
     = EnumSeventyFourOne one
     | EnumSeventyFourTwo two
     | EnumSeventyFourThree three
@@ -53166,63 +53166,63 @@ type EnumSeventyFour one two three four five six seven eight nine ten eleven twe
     | EnumSeventyFourEighteen eighteen
     | EnumSeventyFourNineteen nineteen
     | EnumSeventyFourTwenty twenty
-    | EnumSeventyFourTwentyOne twenty-one
-    | EnumSeventyFourTwentyTwo twenty-two
-    | EnumSeventyFourTwentyThree twenty-three
-    | EnumSeventyFourTwentyFour twenty-four
-    | EnumSeventyFourTwentyFive twenty-five
-    | EnumSeventyFourTwentySix twenty-six
-    | EnumSeventyFourTwentySeven twenty-seven
-    | EnumSeventyFourTwentyEight twenty-eight
-    | EnumSeventyFourTwentyNine twenty-nine
+    | EnumSeventyFourTwentyOne twentyOne
+    | EnumSeventyFourTwentyTwo twentyTwo
+    | EnumSeventyFourTwentyThree twentyThree
+    | EnumSeventyFourTwentyFour twentyFour
+    | EnumSeventyFourTwentyFive twentyFive
+    | EnumSeventyFourTwentySix twentySix
+    | EnumSeventyFourTwentySeven twentySeven
+    | EnumSeventyFourTwentyEight twentyEight
+    | EnumSeventyFourTwentyNine twentyNine
     | EnumSeventyFourThirty thirty
-    | EnumSeventyFourThirtyOne thirty-one
-    | EnumSeventyFourThirtyTwo thirty-two
-    | EnumSeventyFourThirtyThree thirty-three
-    | EnumSeventyFourThirtyFour thirty-four
-    | EnumSeventyFourThirtyFive thirty-five
-    | EnumSeventyFourThirtySix thirty-six
-    | EnumSeventyFourThirtySeven thirty-seven
-    | EnumSeventyFourThirtyEight thirty-eight
-    | EnumSeventyFourThirtyNine thirty-nine
+    | EnumSeventyFourThirtyOne thirtyOne
+    | EnumSeventyFourThirtyTwo thirtyTwo
+    | EnumSeventyFourThirtyThree thirtyThree
+    | EnumSeventyFourThirtyFour thirtyFour
+    | EnumSeventyFourThirtyFive thirtyFive
+    | EnumSeventyFourThirtySix thirtySix
+    | EnumSeventyFourThirtySeven thirtySeven
+    | EnumSeventyFourThirtyEight thirtyEight
+    | EnumSeventyFourThirtyNine thirtyNine
     | EnumSeventyFourForty forty
-    | EnumSeventyFourFortyOne forty-one
-    | EnumSeventyFourFortyTwo forty-two
-    | EnumSeventyFourFortyThree forty-three
-    | EnumSeventyFourFortyFour forty-four
-    | EnumSeventyFourFortyFive forty-five
-    | EnumSeventyFourFortySix forty-six
-    | EnumSeventyFourFortySeven forty-seven
-    | EnumSeventyFourFortyEight forty-eight
-    | EnumSeventyFourFortyNine forty-nine
+    | EnumSeventyFourFortyOne fortyOne
+    | EnumSeventyFourFortyTwo fortyTwo
+    | EnumSeventyFourFortyThree fortyThree
+    | EnumSeventyFourFortyFour fortyFour
+    | EnumSeventyFourFortyFive fortyFive
+    | EnumSeventyFourFortySix fortySix
+    | EnumSeventyFourFortySeven fortySeven
+    | EnumSeventyFourFortyEight fortyEight
+    | EnumSeventyFourFortyNine fortyNine
     | EnumSeventyFourFifty fifty
-    | EnumSeventyFourFiftyOne fifty-one
-    | EnumSeventyFourFiftyTwo fifty-two
-    | EnumSeventyFourFiftyThree fifty-three
-    | EnumSeventyFourFiftyFour fifty-four
-    | EnumSeventyFourFiftyFive fifty-five
-    | EnumSeventyFourFiftySix fifty-six
-    | EnumSeventyFourFiftySeven fifty-seven
-    | EnumSeventyFourFiftyEight fifty-eight
-    | EnumSeventyFourFiftyNine fifty-nine
+    | EnumSeventyFourFiftyOne fiftyOne
+    | EnumSeventyFourFiftyTwo fiftyTwo
+    | EnumSeventyFourFiftyThree fiftyThree
+    | EnumSeventyFourFiftyFour fiftyFour
+    | EnumSeventyFourFiftyFive fiftyFive
+    | EnumSeventyFourFiftySix fiftySix
+    | EnumSeventyFourFiftySeven fiftySeven
+    | EnumSeventyFourFiftyEight fiftyEight
+    | EnumSeventyFourFiftyNine fiftyNine
     | EnumSeventyFourSixty sixty
-    | EnumSeventyFourSixtyOne sixty-one
-    | EnumSeventyFourSixtyTwo sixty-two
-    | EnumSeventyFourSixtyThree sixty-three
-    | EnumSeventyFourSixtyFour sixty-four
-    | EnumSeventyFourSixtyFive sixty-five
-    | EnumSeventyFourSixtySix sixty-six
-    | EnumSeventyFourSixtySeven sixty-seven
-    | EnumSeventyFourSixtyEight sixty-eight
-    | EnumSeventyFourSixtyNine sixty-nine
+    | EnumSeventyFourSixtyOne sixtyOne
+    | EnumSeventyFourSixtyTwo sixtyTwo
+    | EnumSeventyFourSixtyThree sixtyThree
+    | EnumSeventyFourSixtyFour sixtyFour
+    | EnumSeventyFourSixtyFive sixtyFive
+    | EnumSeventyFourSixtySix sixtySix
+    | EnumSeventyFourSixtySeven sixtySeven
+    | EnumSeventyFourSixtyEight sixtyEight
+    | EnumSeventyFourSixtyNine sixtyNine
     | EnumSeventyFourSeventy seventy
-    | EnumSeventyFourSeventyOne seventy-one
-    | EnumSeventyFourSeventyTwo seventy-two
-    | EnumSeventyFourSeventyThree seventy-three
-    | EnumSeventyFourSeventyFour seventy-four
+    | EnumSeventyFourSeventyOne seventyOne
+    | EnumSeventyFourSeventyTwo seventyTwo
+    | EnumSeventyFourSeventyThree seventyThree
+    | EnumSeventyFourSeventyFour seventyFour
 
 
-type EnumSeventyFive one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twenty-one twenty-two twenty-three twenty-four twenty-five twenty-six twenty-seven twenty-eight twenty-nine thirty thirty-one thirty-two thirty-three thirty-four thirty-five thirty-six thirty-seven thirty-eight thirty-nine forty forty-one forty-two forty-three forty-four forty-five forty-six forty-seven forty-eight forty-nine fifty fifty-one fifty-two fifty-three fifty-four fifty-five fifty-six fifty-seven fifty-eight fifty-nine sixty sixty-one sixty-two sixty-three sixty-four sixty-five sixty-six sixty-seven sixty-eight sixty-nine seventy seventy-one seventy-two seventy-three seventy-four seventy-five
+type EnumSeventyFive one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twentyOne twentyTwo twentyThree twentyFour twentyFive twentySix twentySeven twentyEight twentyNine thirty thirtyOne thirtyTwo thirtyThree thirtyFour thirtyFive thirtySix thirtySeven thirtyEight thirtyNine forty fortyOne fortyTwo fortyThree fortyFour fortyFive fortySix fortySeven fortyEight fortyNine fifty fiftyOne fiftyTwo fiftyThree fiftyFour fiftyFive fiftySix fiftySeven fiftyEight fiftyNine sixty sixtyOne sixtyTwo sixtyThree sixtyFour sixtyFive sixtySix sixtySeven sixtyEight sixtyNine seventy seventyOne seventyTwo seventyThree seventyFour seventyFive
     = EnumSeventyFiveOne one
     | EnumSeventyFiveTwo two
     | EnumSeventyFiveThree three
@@ -53243,64 +53243,64 @@ type EnumSeventyFive one two three four five six seven eight nine ten eleven twe
     | EnumSeventyFiveEighteen eighteen
     | EnumSeventyFiveNineteen nineteen
     | EnumSeventyFiveTwenty twenty
-    | EnumSeventyFiveTwentyOne twenty-one
-    | EnumSeventyFiveTwentyTwo twenty-two
-    | EnumSeventyFiveTwentyThree twenty-three
-    | EnumSeventyFiveTwentyFour twenty-four
-    | EnumSeventyFiveTwentyFive twenty-five
-    | EnumSeventyFiveTwentySix twenty-six
-    | EnumSeventyFiveTwentySeven twenty-seven
-    | EnumSeventyFiveTwentyEight twenty-eight
-    | EnumSeventyFiveTwentyNine twenty-nine
+    | EnumSeventyFiveTwentyOne twentyOne
+    | EnumSeventyFiveTwentyTwo twentyTwo
+    | EnumSeventyFiveTwentyThree twentyThree
+    | EnumSeventyFiveTwentyFour twentyFour
+    | EnumSeventyFiveTwentyFive twentyFive
+    | EnumSeventyFiveTwentySix twentySix
+    | EnumSeventyFiveTwentySeven twentySeven
+    | EnumSeventyFiveTwentyEight twentyEight
+    | EnumSeventyFiveTwentyNine twentyNine
     | EnumSeventyFiveThirty thirty
-    | EnumSeventyFiveThirtyOne thirty-one
-    | EnumSeventyFiveThirtyTwo thirty-two
-    | EnumSeventyFiveThirtyThree thirty-three
-    | EnumSeventyFiveThirtyFour thirty-four
-    | EnumSeventyFiveThirtyFive thirty-five
-    | EnumSeventyFiveThirtySix thirty-six
-    | EnumSeventyFiveThirtySeven thirty-seven
-    | EnumSeventyFiveThirtyEight thirty-eight
-    | EnumSeventyFiveThirtyNine thirty-nine
+    | EnumSeventyFiveThirtyOne thirtyOne
+    | EnumSeventyFiveThirtyTwo thirtyTwo
+    | EnumSeventyFiveThirtyThree thirtyThree
+    | EnumSeventyFiveThirtyFour thirtyFour
+    | EnumSeventyFiveThirtyFive thirtyFive
+    | EnumSeventyFiveThirtySix thirtySix
+    | EnumSeventyFiveThirtySeven thirtySeven
+    | EnumSeventyFiveThirtyEight thirtyEight
+    | EnumSeventyFiveThirtyNine thirtyNine
     | EnumSeventyFiveForty forty
-    | EnumSeventyFiveFortyOne forty-one
-    | EnumSeventyFiveFortyTwo forty-two
-    | EnumSeventyFiveFortyThree forty-three
-    | EnumSeventyFiveFortyFour forty-four
-    | EnumSeventyFiveFortyFive forty-five
-    | EnumSeventyFiveFortySix forty-six
-    | EnumSeventyFiveFortySeven forty-seven
-    | EnumSeventyFiveFortyEight forty-eight
-    | EnumSeventyFiveFortyNine forty-nine
+    | EnumSeventyFiveFortyOne fortyOne
+    | EnumSeventyFiveFortyTwo fortyTwo
+    | EnumSeventyFiveFortyThree fortyThree
+    | EnumSeventyFiveFortyFour fortyFour
+    | EnumSeventyFiveFortyFive fortyFive
+    | EnumSeventyFiveFortySix fortySix
+    | EnumSeventyFiveFortySeven fortySeven
+    | EnumSeventyFiveFortyEight fortyEight
+    | EnumSeventyFiveFortyNine fortyNine
     | EnumSeventyFiveFifty fifty
-    | EnumSeventyFiveFiftyOne fifty-one
-    | EnumSeventyFiveFiftyTwo fifty-two
-    | EnumSeventyFiveFiftyThree fifty-three
-    | EnumSeventyFiveFiftyFour fifty-four
-    | EnumSeventyFiveFiftyFive fifty-five
-    | EnumSeventyFiveFiftySix fifty-six
-    | EnumSeventyFiveFiftySeven fifty-seven
-    | EnumSeventyFiveFiftyEight fifty-eight
-    | EnumSeventyFiveFiftyNine fifty-nine
+    | EnumSeventyFiveFiftyOne fiftyOne
+    | EnumSeventyFiveFiftyTwo fiftyTwo
+    | EnumSeventyFiveFiftyThree fiftyThree
+    | EnumSeventyFiveFiftyFour fiftyFour
+    | EnumSeventyFiveFiftyFive fiftyFive
+    | EnumSeventyFiveFiftySix fiftySix
+    | EnumSeventyFiveFiftySeven fiftySeven
+    | EnumSeventyFiveFiftyEight fiftyEight
+    | EnumSeventyFiveFiftyNine fiftyNine
     | EnumSeventyFiveSixty sixty
-    | EnumSeventyFiveSixtyOne sixty-one
-    | EnumSeventyFiveSixtyTwo sixty-two
-    | EnumSeventyFiveSixtyThree sixty-three
-    | EnumSeventyFiveSixtyFour sixty-four
-    | EnumSeventyFiveSixtyFive sixty-five
-    | EnumSeventyFiveSixtySix sixty-six
-    | EnumSeventyFiveSixtySeven sixty-seven
-    | EnumSeventyFiveSixtyEight sixty-eight
-    | EnumSeventyFiveSixtyNine sixty-nine
+    | EnumSeventyFiveSixtyOne sixtyOne
+    | EnumSeventyFiveSixtyTwo sixtyTwo
+    | EnumSeventyFiveSixtyThree sixtyThree
+    | EnumSeventyFiveSixtyFour sixtyFour
+    | EnumSeventyFiveSixtyFive sixtyFive
+    | EnumSeventyFiveSixtySix sixtySix
+    | EnumSeventyFiveSixtySeven sixtySeven
+    | EnumSeventyFiveSixtyEight sixtyEight
+    | EnumSeventyFiveSixtyNine sixtyNine
     | EnumSeventyFiveSeventy seventy
-    | EnumSeventyFiveSeventyOne seventy-one
-    | EnumSeventyFiveSeventyTwo seventy-two
-    | EnumSeventyFiveSeventyThree seventy-three
-    | EnumSeventyFiveSeventyFour seventy-four
-    | EnumSeventyFiveSeventyFive seventy-five
+    | EnumSeventyFiveSeventyOne seventyOne
+    | EnumSeventyFiveSeventyTwo seventyTwo
+    | EnumSeventyFiveSeventyThree seventyThree
+    | EnumSeventyFiveSeventyFour seventyFour
+    | EnumSeventyFiveSeventyFive seventyFive
 
 
-type EnumSeventySix one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twenty-one twenty-two twenty-three twenty-four twenty-five twenty-six twenty-seven twenty-eight twenty-nine thirty thirty-one thirty-two thirty-three thirty-four thirty-five thirty-six thirty-seven thirty-eight thirty-nine forty forty-one forty-two forty-three forty-four forty-five forty-six forty-seven forty-eight forty-nine fifty fifty-one fifty-two fifty-three fifty-four fifty-five fifty-six fifty-seven fifty-eight fifty-nine sixty sixty-one sixty-two sixty-three sixty-four sixty-five sixty-six sixty-seven sixty-eight sixty-nine seventy seventy-one seventy-two seventy-three seventy-four seventy-five seventy-six
+type EnumSeventySix one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twentyOne twentyTwo twentyThree twentyFour twentyFive twentySix twentySeven twentyEight twentyNine thirty thirtyOne thirtyTwo thirtyThree thirtyFour thirtyFive thirtySix thirtySeven thirtyEight thirtyNine forty fortyOne fortyTwo fortyThree fortyFour fortyFive fortySix fortySeven fortyEight fortyNine fifty fiftyOne fiftyTwo fiftyThree fiftyFour fiftyFive fiftySix fiftySeven fiftyEight fiftyNine sixty sixtyOne sixtyTwo sixtyThree sixtyFour sixtyFive sixtySix sixtySeven sixtyEight sixtyNine seventy seventyOne seventyTwo seventyThree seventyFour seventyFive seventySix
     = EnumSeventySixOne one
     | EnumSeventySixTwo two
     | EnumSeventySixThree three
@@ -53321,65 +53321,65 @@ type EnumSeventySix one two three four five six seven eight nine ten eleven twel
     | EnumSeventySixEighteen eighteen
     | EnumSeventySixNineteen nineteen
     | EnumSeventySixTwenty twenty
-    | EnumSeventySixTwentyOne twenty-one
-    | EnumSeventySixTwentyTwo twenty-two
-    | EnumSeventySixTwentyThree twenty-three
-    | EnumSeventySixTwentyFour twenty-four
-    | EnumSeventySixTwentyFive twenty-five
-    | EnumSeventySixTwentySix twenty-six
-    | EnumSeventySixTwentySeven twenty-seven
-    | EnumSeventySixTwentyEight twenty-eight
-    | EnumSeventySixTwentyNine twenty-nine
+    | EnumSeventySixTwentyOne twentyOne
+    | EnumSeventySixTwentyTwo twentyTwo
+    | EnumSeventySixTwentyThree twentyThree
+    | EnumSeventySixTwentyFour twentyFour
+    | EnumSeventySixTwentyFive twentyFive
+    | EnumSeventySixTwentySix twentySix
+    | EnumSeventySixTwentySeven twentySeven
+    | EnumSeventySixTwentyEight twentyEight
+    | EnumSeventySixTwentyNine twentyNine
     | EnumSeventySixThirty thirty
-    | EnumSeventySixThirtyOne thirty-one
-    | EnumSeventySixThirtyTwo thirty-two
-    | EnumSeventySixThirtyThree thirty-three
-    | EnumSeventySixThirtyFour thirty-four
-    | EnumSeventySixThirtyFive thirty-five
-    | EnumSeventySixThirtySix thirty-six
-    | EnumSeventySixThirtySeven thirty-seven
-    | EnumSeventySixThirtyEight thirty-eight
-    | EnumSeventySixThirtyNine thirty-nine
+    | EnumSeventySixThirtyOne thirtyOne
+    | EnumSeventySixThirtyTwo thirtyTwo
+    | EnumSeventySixThirtyThree thirtyThree
+    | EnumSeventySixThirtyFour thirtyFour
+    | EnumSeventySixThirtyFive thirtyFive
+    | EnumSeventySixThirtySix thirtySix
+    | EnumSeventySixThirtySeven thirtySeven
+    | EnumSeventySixThirtyEight thirtyEight
+    | EnumSeventySixThirtyNine thirtyNine
     | EnumSeventySixForty forty
-    | EnumSeventySixFortyOne forty-one
-    | EnumSeventySixFortyTwo forty-two
-    | EnumSeventySixFortyThree forty-three
-    | EnumSeventySixFortyFour forty-four
-    | EnumSeventySixFortyFive forty-five
-    | EnumSeventySixFortySix forty-six
-    | EnumSeventySixFortySeven forty-seven
-    | EnumSeventySixFortyEight forty-eight
-    | EnumSeventySixFortyNine forty-nine
+    | EnumSeventySixFortyOne fortyOne
+    | EnumSeventySixFortyTwo fortyTwo
+    | EnumSeventySixFortyThree fortyThree
+    | EnumSeventySixFortyFour fortyFour
+    | EnumSeventySixFortyFive fortyFive
+    | EnumSeventySixFortySix fortySix
+    | EnumSeventySixFortySeven fortySeven
+    | EnumSeventySixFortyEight fortyEight
+    | EnumSeventySixFortyNine fortyNine
     | EnumSeventySixFifty fifty
-    | EnumSeventySixFiftyOne fifty-one
-    | EnumSeventySixFiftyTwo fifty-two
-    | EnumSeventySixFiftyThree fifty-three
-    | EnumSeventySixFiftyFour fifty-four
-    | EnumSeventySixFiftyFive fifty-five
-    | EnumSeventySixFiftySix fifty-six
-    | EnumSeventySixFiftySeven fifty-seven
-    | EnumSeventySixFiftyEight fifty-eight
-    | EnumSeventySixFiftyNine fifty-nine
+    | EnumSeventySixFiftyOne fiftyOne
+    | EnumSeventySixFiftyTwo fiftyTwo
+    | EnumSeventySixFiftyThree fiftyThree
+    | EnumSeventySixFiftyFour fiftyFour
+    | EnumSeventySixFiftyFive fiftyFive
+    | EnumSeventySixFiftySix fiftySix
+    | EnumSeventySixFiftySeven fiftySeven
+    | EnumSeventySixFiftyEight fiftyEight
+    | EnumSeventySixFiftyNine fiftyNine
     | EnumSeventySixSixty sixty
-    | EnumSeventySixSixtyOne sixty-one
-    | EnumSeventySixSixtyTwo sixty-two
-    | EnumSeventySixSixtyThree sixty-three
-    | EnumSeventySixSixtyFour sixty-four
-    | EnumSeventySixSixtyFive sixty-five
-    | EnumSeventySixSixtySix sixty-six
-    | EnumSeventySixSixtySeven sixty-seven
-    | EnumSeventySixSixtyEight sixty-eight
-    | EnumSeventySixSixtyNine sixty-nine
+    | EnumSeventySixSixtyOne sixtyOne
+    | EnumSeventySixSixtyTwo sixtyTwo
+    | EnumSeventySixSixtyThree sixtyThree
+    | EnumSeventySixSixtyFour sixtyFour
+    | EnumSeventySixSixtyFive sixtyFive
+    | EnumSeventySixSixtySix sixtySix
+    | EnumSeventySixSixtySeven sixtySeven
+    | EnumSeventySixSixtyEight sixtyEight
+    | EnumSeventySixSixtyNine sixtyNine
     | EnumSeventySixSeventy seventy
-    | EnumSeventySixSeventyOne seventy-one
-    | EnumSeventySixSeventyTwo seventy-two
-    | EnumSeventySixSeventyThree seventy-three
-    | EnumSeventySixSeventyFour seventy-four
-    | EnumSeventySixSeventyFive seventy-five
-    | EnumSeventySixSeventySix seventy-six
+    | EnumSeventySixSeventyOne seventyOne
+    | EnumSeventySixSeventyTwo seventyTwo
+    | EnumSeventySixSeventyThree seventyThree
+    | EnumSeventySixSeventyFour seventyFour
+    | EnumSeventySixSeventyFive seventyFive
+    | EnumSeventySixSeventySix seventySix
 
 
-type EnumSeventySeven one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twenty-one twenty-two twenty-three twenty-four twenty-five twenty-six twenty-seven twenty-eight twenty-nine thirty thirty-one thirty-two thirty-three thirty-four thirty-five thirty-six thirty-seven thirty-eight thirty-nine forty forty-one forty-two forty-three forty-four forty-five forty-six forty-seven forty-eight forty-nine fifty fifty-one fifty-two fifty-three fifty-four fifty-five fifty-six fifty-seven fifty-eight fifty-nine sixty sixty-one sixty-two sixty-three sixty-four sixty-five sixty-six sixty-seven sixty-eight sixty-nine seventy seventy-one seventy-two seventy-three seventy-four seventy-five seventy-six seventy-seven
+type EnumSeventySeven one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twentyOne twentyTwo twentyThree twentyFour twentyFive twentySix twentySeven twentyEight twentyNine thirty thirtyOne thirtyTwo thirtyThree thirtyFour thirtyFive thirtySix thirtySeven thirtyEight thirtyNine forty fortyOne fortyTwo fortyThree fortyFour fortyFive fortySix fortySeven fortyEight fortyNine fifty fiftyOne fiftyTwo fiftyThree fiftyFour fiftyFive fiftySix fiftySeven fiftyEight fiftyNine sixty sixtyOne sixtyTwo sixtyThree sixtyFour sixtyFive sixtySix sixtySeven sixtyEight sixtyNine seventy seventyOne seventyTwo seventyThree seventyFour seventyFive seventySix seventySeven
     = EnumSeventySevenOne one
     | EnumSeventySevenTwo two
     | EnumSeventySevenThree three
@@ -53400,66 +53400,66 @@ type EnumSeventySeven one two three four five six seven eight nine ten eleven tw
     | EnumSeventySevenEighteen eighteen
     | EnumSeventySevenNineteen nineteen
     | EnumSeventySevenTwenty twenty
-    | EnumSeventySevenTwentyOne twenty-one
-    | EnumSeventySevenTwentyTwo twenty-two
-    | EnumSeventySevenTwentyThree twenty-three
-    | EnumSeventySevenTwentyFour twenty-four
-    | EnumSeventySevenTwentyFive twenty-five
-    | EnumSeventySevenTwentySix twenty-six
-    | EnumSeventySevenTwentySeven twenty-seven
-    | EnumSeventySevenTwentyEight twenty-eight
-    | EnumSeventySevenTwentyNine twenty-nine
+    | EnumSeventySevenTwentyOne twentyOne
+    | EnumSeventySevenTwentyTwo twentyTwo
+    | EnumSeventySevenTwentyThree twentyThree
+    | EnumSeventySevenTwentyFour twentyFour
+    | EnumSeventySevenTwentyFive twentyFive
+    | EnumSeventySevenTwentySix twentySix
+    | EnumSeventySevenTwentySeven twentySeven
+    | EnumSeventySevenTwentyEight twentyEight
+    | EnumSeventySevenTwentyNine twentyNine
     | EnumSeventySevenThirty thirty
-    | EnumSeventySevenThirtyOne thirty-one
-    | EnumSeventySevenThirtyTwo thirty-two
-    | EnumSeventySevenThirtyThree thirty-three
-    | EnumSeventySevenThirtyFour thirty-four
-    | EnumSeventySevenThirtyFive thirty-five
-    | EnumSeventySevenThirtySix thirty-six
-    | EnumSeventySevenThirtySeven thirty-seven
-    | EnumSeventySevenThirtyEight thirty-eight
-    | EnumSeventySevenThirtyNine thirty-nine
+    | EnumSeventySevenThirtyOne thirtyOne
+    | EnumSeventySevenThirtyTwo thirtyTwo
+    | EnumSeventySevenThirtyThree thirtyThree
+    | EnumSeventySevenThirtyFour thirtyFour
+    | EnumSeventySevenThirtyFive thirtyFive
+    | EnumSeventySevenThirtySix thirtySix
+    | EnumSeventySevenThirtySeven thirtySeven
+    | EnumSeventySevenThirtyEight thirtyEight
+    | EnumSeventySevenThirtyNine thirtyNine
     | EnumSeventySevenForty forty
-    | EnumSeventySevenFortyOne forty-one
-    | EnumSeventySevenFortyTwo forty-two
-    | EnumSeventySevenFortyThree forty-three
-    | EnumSeventySevenFortyFour forty-four
-    | EnumSeventySevenFortyFive forty-five
-    | EnumSeventySevenFortySix forty-six
-    | EnumSeventySevenFortySeven forty-seven
-    | EnumSeventySevenFortyEight forty-eight
-    | EnumSeventySevenFortyNine forty-nine
+    | EnumSeventySevenFortyOne fortyOne
+    | EnumSeventySevenFortyTwo fortyTwo
+    | EnumSeventySevenFortyThree fortyThree
+    | EnumSeventySevenFortyFour fortyFour
+    | EnumSeventySevenFortyFive fortyFive
+    | EnumSeventySevenFortySix fortySix
+    | EnumSeventySevenFortySeven fortySeven
+    | EnumSeventySevenFortyEight fortyEight
+    | EnumSeventySevenFortyNine fortyNine
     | EnumSeventySevenFifty fifty
-    | EnumSeventySevenFiftyOne fifty-one
-    | EnumSeventySevenFiftyTwo fifty-two
-    | EnumSeventySevenFiftyThree fifty-three
-    | EnumSeventySevenFiftyFour fifty-four
-    | EnumSeventySevenFiftyFive fifty-five
-    | EnumSeventySevenFiftySix fifty-six
-    | EnumSeventySevenFiftySeven fifty-seven
-    | EnumSeventySevenFiftyEight fifty-eight
-    | EnumSeventySevenFiftyNine fifty-nine
+    | EnumSeventySevenFiftyOne fiftyOne
+    | EnumSeventySevenFiftyTwo fiftyTwo
+    | EnumSeventySevenFiftyThree fiftyThree
+    | EnumSeventySevenFiftyFour fiftyFour
+    | EnumSeventySevenFiftyFive fiftyFive
+    | EnumSeventySevenFiftySix fiftySix
+    | EnumSeventySevenFiftySeven fiftySeven
+    | EnumSeventySevenFiftyEight fiftyEight
+    | EnumSeventySevenFiftyNine fiftyNine
     | EnumSeventySevenSixty sixty
-    | EnumSeventySevenSixtyOne sixty-one
-    | EnumSeventySevenSixtyTwo sixty-two
-    | EnumSeventySevenSixtyThree sixty-three
-    | EnumSeventySevenSixtyFour sixty-four
-    | EnumSeventySevenSixtyFive sixty-five
-    | EnumSeventySevenSixtySix sixty-six
-    | EnumSeventySevenSixtySeven sixty-seven
-    | EnumSeventySevenSixtyEight sixty-eight
-    | EnumSeventySevenSixtyNine sixty-nine
+    | EnumSeventySevenSixtyOne sixtyOne
+    | EnumSeventySevenSixtyTwo sixtyTwo
+    | EnumSeventySevenSixtyThree sixtyThree
+    | EnumSeventySevenSixtyFour sixtyFour
+    | EnumSeventySevenSixtyFive sixtyFive
+    | EnumSeventySevenSixtySix sixtySix
+    | EnumSeventySevenSixtySeven sixtySeven
+    | EnumSeventySevenSixtyEight sixtyEight
+    | EnumSeventySevenSixtyNine sixtyNine
     | EnumSeventySevenSeventy seventy
-    | EnumSeventySevenSeventyOne seventy-one
-    | EnumSeventySevenSeventyTwo seventy-two
-    | EnumSeventySevenSeventyThree seventy-three
-    | EnumSeventySevenSeventyFour seventy-four
-    | EnumSeventySevenSeventyFive seventy-five
-    | EnumSeventySevenSeventySix seventy-six
-    | EnumSeventySevenSeventySeven seventy-seven
+    | EnumSeventySevenSeventyOne seventyOne
+    | EnumSeventySevenSeventyTwo seventyTwo
+    | EnumSeventySevenSeventyThree seventyThree
+    | EnumSeventySevenSeventyFour seventyFour
+    | EnumSeventySevenSeventyFive seventyFive
+    | EnumSeventySevenSeventySix seventySix
+    | EnumSeventySevenSeventySeven seventySeven
 
 
-type EnumSeventyEight one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twenty-one twenty-two twenty-three twenty-four twenty-five twenty-six twenty-seven twenty-eight twenty-nine thirty thirty-one thirty-two thirty-three thirty-four thirty-five thirty-six thirty-seven thirty-eight thirty-nine forty forty-one forty-two forty-three forty-four forty-five forty-six forty-seven forty-eight forty-nine fifty fifty-one fifty-two fifty-three fifty-four fifty-five fifty-six fifty-seven fifty-eight fifty-nine sixty sixty-one sixty-two sixty-three sixty-four sixty-five sixty-six sixty-seven sixty-eight sixty-nine seventy seventy-one seventy-two seventy-three seventy-four seventy-five seventy-six seventy-seven seventy-eight
+type EnumSeventyEight one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twentyOne twentyTwo twentyThree twentyFour twentyFive twentySix twentySeven twentyEight twentyNine thirty thirtyOne thirtyTwo thirtyThree thirtyFour thirtyFive thirtySix thirtySeven thirtyEight thirtyNine forty fortyOne fortyTwo fortyThree fortyFour fortyFive fortySix fortySeven fortyEight fortyNine fifty fiftyOne fiftyTwo fiftyThree fiftyFour fiftyFive fiftySix fiftySeven fiftyEight fiftyNine sixty sixtyOne sixtyTwo sixtyThree sixtyFour sixtyFive sixtySix sixtySeven sixtyEight sixtyNine seventy seventyOne seventyTwo seventyThree seventyFour seventyFive seventySix seventySeven seventyEight
     = EnumSeventyEightOne one
     | EnumSeventyEightTwo two
     | EnumSeventyEightThree three
@@ -53480,67 +53480,67 @@ type EnumSeventyEight one two three four five six seven eight nine ten eleven tw
     | EnumSeventyEightEighteen eighteen
     | EnumSeventyEightNineteen nineteen
     | EnumSeventyEightTwenty twenty
-    | EnumSeventyEightTwentyOne twenty-one
-    | EnumSeventyEightTwentyTwo twenty-two
-    | EnumSeventyEightTwentyThree twenty-three
-    | EnumSeventyEightTwentyFour twenty-four
-    | EnumSeventyEightTwentyFive twenty-five
-    | EnumSeventyEightTwentySix twenty-six
-    | EnumSeventyEightTwentySeven twenty-seven
-    | EnumSeventyEightTwentyEight twenty-eight
-    | EnumSeventyEightTwentyNine twenty-nine
+    | EnumSeventyEightTwentyOne twentyOne
+    | EnumSeventyEightTwentyTwo twentyTwo
+    | EnumSeventyEightTwentyThree twentyThree
+    | EnumSeventyEightTwentyFour twentyFour
+    | EnumSeventyEightTwentyFive twentyFive
+    | EnumSeventyEightTwentySix twentySix
+    | EnumSeventyEightTwentySeven twentySeven
+    | EnumSeventyEightTwentyEight twentyEight
+    | EnumSeventyEightTwentyNine twentyNine
     | EnumSeventyEightThirty thirty
-    | EnumSeventyEightThirtyOne thirty-one
-    | EnumSeventyEightThirtyTwo thirty-two
-    | EnumSeventyEightThirtyThree thirty-three
-    | EnumSeventyEightThirtyFour thirty-four
-    | EnumSeventyEightThirtyFive thirty-five
-    | EnumSeventyEightThirtySix thirty-six
-    | EnumSeventyEightThirtySeven thirty-seven
-    | EnumSeventyEightThirtyEight thirty-eight
-    | EnumSeventyEightThirtyNine thirty-nine
+    | EnumSeventyEightThirtyOne thirtyOne
+    | EnumSeventyEightThirtyTwo thirtyTwo
+    | EnumSeventyEightThirtyThree thirtyThree
+    | EnumSeventyEightThirtyFour thirtyFour
+    | EnumSeventyEightThirtyFive thirtyFive
+    | EnumSeventyEightThirtySix thirtySix
+    | EnumSeventyEightThirtySeven thirtySeven
+    | EnumSeventyEightThirtyEight thirtyEight
+    | EnumSeventyEightThirtyNine thirtyNine
     | EnumSeventyEightForty forty
-    | EnumSeventyEightFortyOne forty-one
-    | EnumSeventyEightFortyTwo forty-two
-    | EnumSeventyEightFortyThree forty-three
-    | EnumSeventyEightFortyFour forty-four
-    | EnumSeventyEightFortyFive forty-five
-    | EnumSeventyEightFortySix forty-six
-    | EnumSeventyEightFortySeven forty-seven
-    | EnumSeventyEightFortyEight forty-eight
-    | EnumSeventyEightFortyNine forty-nine
+    | EnumSeventyEightFortyOne fortyOne
+    | EnumSeventyEightFortyTwo fortyTwo
+    | EnumSeventyEightFortyThree fortyThree
+    | EnumSeventyEightFortyFour fortyFour
+    | EnumSeventyEightFortyFive fortyFive
+    | EnumSeventyEightFortySix fortySix
+    | EnumSeventyEightFortySeven fortySeven
+    | EnumSeventyEightFortyEight fortyEight
+    | EnumSeventyEightFortyNine fortyNine
     | EnumSeventyEightFifty fifty
-    | EnumSeventyEightFiftyOne fifty-one
-    | EnumSeventyEightFiftyTwo fifty-two
-    | EnumSeventyEightFiftyThree fifty-three
-    | EnumSeventyEightFiftyFour fifty-four
-    | EnumSeventyEightFiftyFive fifty-five
-    | EnumSeventyEightFiftySix fifty-six
-    | EnumSeventyEightFiftySeven fifty-seven
-    | EnumSeventyEightFiftyEight fifty-eight
-    | EnumSeventyEightFiftyNine fifty-nine
+    | EnumSeventyEightFiftyOne fiftyOne
+    | EnumSeventyEightFiftyTwo fiftyTwo
+    | EnumSeventyEightFiftyThree fiftyThree
+    | EnumSeventyEightFiftyFour fiftyFour
+    | EnumSeventyEightFiftyFive fiftyFive
+    | EnumSeventyEightFiftySix fiftySix
+    | EnumSeventyEightFiftySeven fiftySeven
+    | EnumSeventyEightFiftyEight fiftyEight
+    | EnumSeventyEightFiftyNine fiftyNine
     | EnumSeventyEightSixty sixty
-    | EnumSeventyEightSixtyOne sixty-one
-    | EnumSeventyEightSixtyTwo sixty-two
-    | EnumSeventyEightSixtyThree sixty-three
-    | EnumSeventyEightSixtyFour sixty-four
-    | EnumSeventyEightSixtyFive sixty-five
-    | EnumSeventyEightSixtySix sixty-six
-    | EnumSeventyEightSixtySeven sixty-seven
-    | EnumSeventyEightSixtyEight sixty-eight
-    | EnumSeventyEightSixtyNine sixty-nine
+    | EnumSeventyEightSixtyOne sixtyOne
+    | EnumSeventyEightSixtyTwo sixtyTwo
+    | EnumSeventyEightSixtyThree sixtyThree
+    | EnumSeventyEightSixtyFour sixtyFour
+    | EnumSeventyEightSixtyFive sixtyFive
+    | EnumSeventyEightSixtySix sixtySix
+    | EnumSeventyEightSixtySeven sixtySeven
+    | EnumSeventyEightSixtyEight sixtyEight
+    | EnumSeventyEightSixtyNine sixtyNine
     | EnumSeventyEightSeventy seventy
-    | EnumSeventyEightSeventyOne seventy-one
-    | EnumSeventyEightSeventyTwo seventy-two
-    | EnumSeventyEightSeventyThree seventy-three
-    | EnumSeventyEightSeventyFour seventy-four
-    | EnumSeventyEightSeventyFive seventy-five
-    | EnumSeventyEightSeventySix seventy-six
-    | EnumSeventyEightSeventySeven seventy-seven
-    | EnumSeventyEightSeventyEight seventy-eight
+    | EnumSeventyEightSeventyOne seventyOne
+    | EnumSeventyEightSeventyTwo seventyTwo
+    | EnumSeventyEightSeventyThree seventyThree
+    | EnumSeventyEightSeventyFour seventyFour
+    | EnumSeventyEightSeventyFive seventyFive
+    | EnumSeventyEightSeventySix seventySix
+    | EnumSeventyEightSeventySeven seventySeven
+    | EnumSeventyEightSeventyEight seventyEight
 
 
-type EnumSeventyNine one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twenty-one twenty-two twenty-three twenty-four twenty-five twenty-six twenty-seven twenty-eight twenty-nine thirty thirty-one thirty-two thirty-three thirty-four thirty-five thirty-six thirty-seven thirty-eight thirty-nine forty forty-one forty-two forty-three forty-four forty-five forty-six forty-seven forty-eight forty-nine fifty fifty-one fifty-two fifty-three fifty-four fifty-five fifty-six fifty-seven fifty-eight fifty-nine sixty sixty-one sixty-two sixty-three sixty-four sixty-five sixty-six sixty-seven sixty-eight sixty-nine seventy seventy-one seventy-two seventy-three seventy-four seventy-five seventy-six seventy-seven seventy-eight seventy-nine
+type EnumSeventyNine one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twentyOne twentyTwo twentyThree twentyFour twentyFive twentySix twentySeven twentyEight twentyNine thirty thirtyOne thirtyTwo thirtyThree thirtyFour thirtyFive thirtySix thirtySeven thirtyEight thirtyNine forty fortyOne fortyTwo fortyThree fortyFour fortyFive fortySix fortySeven fortyEight fortyNine fifty fiftyOne fiftyTwo fiftyThree fiftyFour fiftyFive fiftySix fiftySeven fiftyEight fiftyNine sixty sixtyOne sixtyTwo sixtyThree sixtyFour sixtyFive sixtySix sixtySeven sixtyEight sixtyNine seventy seventyOne seventyTwo seventyThree seventyFour seventyFive seventySix seventySeven seventyEight seventyNine
     = EnumSeventyNineOne one
     | EnumSeventyNineTwo two
     | EnumSeventyNineThree three
@@ -53561,68 +53561,68 @@ type EnumSeventyNine one two three four five six seven eight nine ten eleven twe
     | EnumSeventyNineEighteen eighteen
     | EnumSeventyNineNineteen nineteen
     | EnumSeventyNineTwenty twenty
-    | EnumSeventyNineTwentyOne twenty-one
-    | EnumSeventyNineTwentyTwo twenty-two
-    | EnumSeventyNineTwentyThree twenty-three
-    | EnumSeventyNineTwentyFour twenty-four
-    | EnumSeventyNineTwentyFive twenty-five
-    | EnumSeventyNineTwentySix twenty-six
-    | EnumSeventyNineTwentySeven twenty-seven
-    | EnumSeventyNineTwentyEight twenty-eight
-    | EnumSeventyNineTwentyNine twenty-nine
+    | EnumSeventyNineTwentyOne twentyOne
+    | EnumSeventyNineTwentyTwo twentyTwo
+    | EnumSeventyNineTwentyThree twentyThree
+    | EnumSeventyNineTwentyFour twentyFour
+    | EnumSeventyNineTwentyFive twentyFive
+    | EnumSeventyNineTwentySix twentySix
+    | EnumSeventyNineTwentySeven twentySeven
+    | EnumSeventyNineTwentyEight twentyEight
+    | EnumSeventyNineTwentyNine twentyNine
     | EnumSeventyNineThirty thirty
-    | EnumSeventyNineThirtyOne thirty-one
-    | EnumSeventyNineThirtyTwo thirty-two
-    | EnumSeventyNineThirtyThree thirty-three
-    | EnumSeventyNineThirtyFour thirty-four
-    | EnumSeventyNineThirtyFive thirty-five
-    | EnumSeventyNineThirtySix thirty-six
-    | EnumSeventyNineThirtySeven thirty-seven
-    | EnumSeventyNineThirtyEight thirty-eight
-    | EnumSeventyNineThirtyNine thirty-nine
+    | EnumSeventyNineThirtyOne thirtyOne
+    | EnumSeventyNineThirtyTwo thirtyTwo
+    | EnumSeventyNineThirtyThree thirtyThree
+    | EnumSeventyNineThirtyFour thirtyFour
+    | EnumSeventyNineThirtyFive thirtyFive
+    | EnumSeventyNineThirtySix thirtySix
+    | EnumSeventyNineThirtySeven thirtySeven
+    | EnumSeventyNineThirtyEight thirtyEight
+    | EnumSeventyNineThirtyNine thirtyNine
     | EnumSeventyNineForty forty
-    | EnumSeventyNineFortyOne forty-one
-    | EnumSeventyNineFortyTwo forty-two
-    | EnumSeventyNineFortyThree forty-three
-    | EnumSeventyNineFortyFour forty-four
-    | EnumSeventyNineFortyFive forty-five
-    | EnumSeventyNineFortySix forty-six
-    | EnumSeventyNineFortySeven forty-seven
-    | EnumSeventyNineFortyEight forty-eight
-    | EnumSeventyNineFortyNine forty-nine
+    | EnumSeventyNineFortyOne fortyOne
+    | EnumSeventyNineFortyTwo fortyTwo
+    | EnumSeventyNineFortyThree fortyThree
+    | EnumSeventyNineFortyFour fortyFour
+    | EnumSeventyNineFortyFive fortyFive
+    | EnumSeventyNineFortySix fortySix
+    | EnumSeventyNineFortySeven fortySeven
+    | EnumSeventyNineFortyEight fortyEight
+    | EnumSeventyNineFortyNine fortyNine
     | EnumSeventyNineFifty fifty
-    | EnumSeventyNineFiftyOne fifty-one
-    | EnumSeventyNineFiftyTwo fifty-two
-    | EnumSeventyNineFiftyThree fifty-three
-    | EnumSeventyNineFiftyFour fifty-four
-    | EnumSeventyNineFiftyFive fifty-five
-    | EnumSeventyNineFiftySix fifty-six
-    | EnumSeventyNineFiftySeven fifty-seven
-    | EnumSeventyNineFiftyEight fifty-eight
-    | EnumSeventyNineFiftyNine fifty-nine
+    | EnumSeventyNineFiftyOne fiftyOne
+    | EnumSeventyNineFiftyTwo fiftyTwo
+    | EnumSeventyNineFiftyThree fiftyThree
+    | EnumSeventyNineFiftyFour fiftyFour
+    | EnumSeventyNineFiftyFive fiftyFive
+    | EnumSeventyNineFiftySix fiftySix
+    | EnumSeventyNineFiftySeven fiftySeven
+    | EnumSeventyNineFiftyEight fiftyEight
+    | EnumSeventyNineFiftyNine fiftyNine
     | EnumSeventyNineSixty sixty
-    | EnumSeventyNineSixtyOne sixty-one
-    | EnumSeventyNineSixtyTwo sixty-two
-    | EnumSeventyNineSixtyThree sixty-three
-    | EnumSeventyNineSixtyFour sixty-four
-    | EnumSeventyNineSixtyFive sixty-five
-    | EnumSeventyNineSixtySix sixty-six
-    | EnumSeventyNineSixtySeven sixty-seven
-    | EnumSeventyNineSixtyEight sixty-eight
-    | EnumSeventyNineSixtyNine sixty-nine
+    | EnumSeventyNineSixtyOne sixtyOne
+    | EnumSeventyNineSixtyTwo sixtyTwo
+    | EnumSeventyNineSixtyThree sixtyThree
+    | EnumSeventyNineSixtyFour sixtyFour
+    | EnumSeventyNineSixtyFive sixtyFive
+    | EnumSeventyNineSixtySix sixtySix
+    | EnumSeventyNineSixtySeven sixtySeven
+    | EnumSeventyNineSixtyEight sixtyEight
+    | EnumSeventyNineSixtyNine sixtyNine
     | EnumSeventyNineSeventy seventy
-    | EnumSeventyNineSeventyOne seventy-one
-    | EnumSeventyNineSeventyTwo seventy-two
-    | EnumSeventyNineSeventyThree seventy-three
-    | EnumSeventyNineSeventyFour seventy-four
-    | EnumSeventyNineSeventyFive seventy-five
-    | EnumSeventyNineSeventySix seventy-six
-    | EnumSeventyNineSeventySeven seventy-seven
-    | EnumSeventyNineSeventyEight seventy-eight
-    | EnumSeventyNineSeventyNine seventy-nine
+    | EnumSeventyNineSeventyOne seventyOne
+    | EnumSeventyNineSeventyTwo seventyTwo
+    | EnumSeventyNineSeventyThree seventyThree
+    | EnumSeventyNineSeventyFour seventyFour
+    | EnumSeventyNineSeventyFive seventyFive
+    | EnumSeventyNineSeventySix seventySix
+    | EnumSeventyNineSeventySeven seventySeven
+    | EnumSeventyNineSeventyEight seventyEight
+    | EnumSeventyNineSeventyNine seventyNine
 
 
-type EnumEighty one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twenty-one twenty-two twenty-three twenty-four twenty-five twenty-six twenty-seven twenty-eight twenty-nine thirty thirty-one thirty-two thirty-three thirty-four thirty-five thirty-six thirty-seven thirty-eight thirty-nine forty forty-one forty-two forty-three forty-four forty-five forty-six forty-seven forty-eight forty-nine fifty fifty-one fifty-two fifty-three fifty-four fifty-five fifty-six fifty-seven fifty-eight fifty-nine sixty sixty-one sixty-two sixty-three sixty-four sixty-five sixty-six sixty-seven sixty-eight sixty-nine seventy seventy-one seventy-two seventy-three seventy-four seventy-five seventy-six seventy-seven seventy-eight seventy-nine eighty
+type EnumEighty one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twentyOne twentyTwo twentyThree twentyFour twentyFive twentySix twentySeven twentyEight twentyNine thirty thirtyOne thirtyTwo thirtyThree thirtyFour thirtyFive thirtySix thirtySeven thirtyEight thirtyNine forty fortyOne fortyTwo fortyThree fortyFour fortyFive fortySix fortySeven fortyEight fortyNine fifty fiftyOne fiftyTwo fiftyThree fiftyFour fiftyFive fiftySix fiftySeven fiftyEight fiftyNine sixty sixtyOne sixtyTwo sixtyThree sixtyFour sixtyFive sixtySix sixtySeven sixtyEight sixtyNine seventy seventyOne seventyTwo seventyThree seventyFour seventyFive seventySix seventySeven seventyEight seventyNine eighty
     = EnumEightyOne one
     | EnumEightyTwo two
     | EnumEightyThree three
@@ -53643,69 +53643,69 @@ type EnumEighty one two three four five six seven eight nine ten eleven twelve t
     | EnumEightyEighteen eighteen
     | EnumEightyNineteen nineteen
     | EnumEightyTwenty twenty
-    | EnumEightyTwentyOne twenty-one
-    | EnumEightyTwentyTwo twenty-two
-    | EnumEightyTwentyThree twenty-three
-    | EnumEightyTwentyFour twenty-four
-    | EnumEightyTwentyFive twenty-five
-    | EnumEightyTwentySix twenty-six
-    | EnumEightyTwentySeven twenty-seven
-    | EnumEightyTwentyEight twenty-eight
-    | EnumEightyTwentyNine twenty-nine
+    | EnumEightyTwentyOne twentyOne
+    | EnumEightyTwentyTwo twentyTwo
+    | EnumEightyTwentyThree twentyThree
+    | EnumEightyTwentyFour twentyFour
+    | EnumEightyTwentyFive twentyFive
+    | EnumEightyTwentySix twentySix
+    | EnumEightyTwentySeven twentySeven
+    | EnumEightyTwentyEight twentyEight
+    | EnumEightyTwentyNine twentyNine
     | EnumEightyThirty thirty
-    | EnumEightyThirtyOne thirty-one
-    | EnumEightyThirtyTwo thirty-two
-    | EnumEightyThirtyThree thirty-three
-    | EnumEightyThirtyFour thirty-four
-    | EnumEightyThirtyFive thirty-five
-    | EnumEightyThirtySix thirty-six
-    | EnumEightyThirtySeven thirty-seven
-    | EnumEightyThirtyEight thirty-eight
-    | EnumEightyThirtyNine thirty-nine
+    | EnumEightyThirtyOne thirtyOne
+    | EnumEightyThirtyTwo thirtyTwo
+    | EnumEightyThirtyThree thirtyThree
+    | EnumEightyThirtyFour thirtyFour
+    | EnumEightyThirtyFive thirtyFive
+    | EnumEightyThirtySix thirtySix
+    | EnumEightyThirtySeven thirtySeven
+    | EnumEightyThirtyEight thirtyEight
+    | EnumEightyThirtyNine thirtyNine
     | EnumEightyForty forty
-    | EnumEightyFortyOne forty-one
-    | EnumEightyFortyTwo forty-two
-    | EnumEightyFortyThree forty-three
-    | EnumEightyFortyFour forty-four
-    | EnumEightyFortyFive forty-five
-    | EnumEightyFortySix forty-six
-    | EnumEightyFortySeven forty-seven
-    | EnumEightyFortyEight forty-eight
-    | EnumEightyFortyNine forty-nine
+    | EnumEightyFortyOne fortyOne
+    | EnumEightyFortyTwo fortyTwo
+    | EnumEightyFortyThree fortyThree
+    | EnumEightyFortyFour fortyFour
+    | EnumEightyFortyFive fortyFive
+    | EnumEightyFortySix fortySix
+    | EnumEightyFortySeven fortySeven
+    | EnumEightyFortyEight fortyEight
+    | EnumEightyFortyNine fortyNine
     | EnumEightyFifty fifty
-    | EnumEightyFiftyOne fifty-one
-    | EnumEightyFiftyTwo fifty-two
-    | EnumEightyFiftyThree fifty-three
-    | EnumEightyFiftyFour fifty-four
-    | EnumEightyFiftyFive fifty-five
-    | EnumEightyFiftySix fifty-six
-    | EnumEightyFiftySeven fifty-seven
-    | EnumEightyFiftyEight fifty-eight
-    | EnumEightyFiftyNine fifty-nine
+    | EnumEightyFiftyOne fiftyOne
+    | EnumEightyFiftyTwo fiftyTwo
+    | EnumEightyFiftyThree fiftyThree
+    | EnumEightyFiftyFour fiftyFour
+    | EnumEightyFiftyFive fiftyFive
+    | EnumEightyFiftySix fiftySix
+    | EnumEightyFiftySeven fiftySeven
+    | EnumEightyFiftyEight fiftyEight
+    | EnumEightyFiftyNine fiftyNine
     | EnumEightySixty sixty
-    | EnumEightySixtyOne sixty-one
-    | EnumEightySixtyTwo sixty-two
-    | EnumEightySixtyThree sixty-three
-    | EnumEightySixtyFour sixty-four
-    | EnumEightySixtyFive sixty-five
-    | EnumEightySixtySix sixty-six
-    | EnumEightySixtySeven sixty-seven
-    | EnumEightySixtyEight sixty-eight
-    | EnumEightySixtyNine sixty-nine
+    | EnumEightySixtyOne sixtyOne
+    | EnumEightySixtyTwo sixtyTwo
+    | EnumEightySixtyThree sixtyThree
+    | EnumEightySixtyFour sixtyFour
+    | EnumEightySixtyFive sixtyFive
+    | EnumEightySixtySix sixtySix
+    | EnumEightySixtySeven sixtySeven
+    | EnumEightySixtyEight sixtyEight
+    | EnumEightySixtyNine sixtyNine
     | EnumEightySeventy seventy
-    | EnumEightySeventyOne seventy-one
-    | EnumEightySeventyTwo seventy-two
-    | EnumEightySeventyThree seventy-three
-    | EnumEightySeventyFour seventy-four
-    | EnumEightySeventyFive seventy-five
-    | EnumEightySeventySix seventy-six
-    | EnumEightySeventySeven seventy-seven
-    | EnumEightySeventyEight seventy-eight
-    | EnumEightySeventyNine seventy-nine
+    | EnumEightySeventyOne seventyOne
+    | EnumEightySeventyTwo seventyTwo
+    | EnumEightySeventyThree seventyThree
+    | EnumEightySeventyFour seventyFour
+    | EnumEightySeventyFive seventyFive
+    | EnumEightySeventySix seventySix
+    | EnumEightySeventySeven seventySeven
+    | EnumEightySeventyEight seventyEight
+    | EnumEightySeventyNine seventyNine
     | EnumEightyEighty eighty
 
 
-type EnumEightyOne one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twenty-one twenty-two twenty-three twenty-four twenty-five twenty-six twenty-seven twenty-eight twenty-nine thirty thirty-one thirty-two thirty-three thirty-four thirty-five thirty-six thirty-seven thirty-eight thirty-nine forty forty-one forty-two forty-three forty-four forty-five forty-six forty-seven forty-eight forty-nine fifty fifty-one fifty-two fifty-three fifty-four fifty-five fifty-six fifty-seven fifty-eight fifty-nine sixty sixty-one sixty-two sixty-three sixty-four sixty-five sixty-six sixty-seven sixty-eight sixty-nine seventy seventy-one seventy-two seventy-three seventy-four seventy-five seventy-six seventy-seven seventy-eight seventy-nine eighty eighty-one
+type EnumEightyOne one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twentyOne twentyTwo twentyThree twentyFour twentyFive twentySix twentySeven twentyEight twentyNine thirty thirtyOne thirtyTwo thirtyThree thirtyFour thirtyFive thirtySix thirtySeven thirtyEight thirtyNine forty fortyOne fortyTwo fortyThree fortyFour fortyFive fortySix fortySeven fortyEight fortyNine fifty fiftyOne fiftyTwo fiftyThree fiftyFour fiftyFive fiftySix fiftySeven fiftyEight fiftyNine sixty sixtyOne sixtyTwo sixtyThree sixtyFour sixtyFive sixtySix sixtySeven sixtyEight sixtyNine seventy seventyOne seventyTwo seventyThree seventyFour seventyFive seventySix seventySeven seventyEight seventyNine eighty eightyOne
     = EnumEightyOneOne one
     | EnumEightyOneTwo two
     | EnumEightyOneThree three
@@ -53726,70 +53726,70 @@ type EnumEightyOne one two three four five six seven eight nine ten eleven twelv
     | EnumEightyOneEighteen eighteen
     | EnumEightyOneNineteen nineteen
     | EnumEightyOneTwenty twenty
-    | EnumEightyOneTwentyOne twenty-one
-    | EnumEightyOneTwentyTwo twenty-two
-    | EnumEightyOneTwentyThree twenty-three
-    | EnumEightyOneTwentyFour twenty-four
-    | EnumEightyOneTwentyFive twenty-five
-    | EnumEightyOneTwentySix twenty-six
-    | EnumEightyOneTwentySeven twenty-seven
-    | EnumEightyOneTwentyEight twenty-eight
-    | EnumEightyOneTwentyNine twenty-nine
+    | EnumEightyOneTwentyOne twentyOne
+    | EnumEightyOneTwentyTwo twentyTwo
+    | EnumEightyOneTwentyThree twentyThree
+    | EnumEightyOneTwentyFour twentyFour
+    | EnumEightyOneTwentyFive twentyFive
+    | EnumEightyOneTwentySix twentySix
+    | EnumEightyOneTwentySeven twentySeven
+    | EnumEightyOneTwentyEight twentyEight
+    | EnumEightyOneTwentyNine twentyNine
     | EnumEightyOneThirty thirty
-    | EnumEightyOneThirtyOne thirty-one
-    | EnumEightyOneThirtyTwo thirty-two
-    | EnumEightyOneThirtyThree thirty-three
-    | EnumEightyOneThirtyFour thirty-four
-    | EnumEightyOneThirtyFive thirty-five
-    | EnumEightyOneThirtySix thirty-six
-    | EnumEightyOneThirtySeven thirty-seven
-    | EnumEightyOneThirtyEight thirty-eight
-    | EnumEightyOneThirtyNine thirty-nine
+    | EnumEightyOneThirtyOne thirtyOne
+    | EnumEightyOneThirtyTwo thirtyTwo
+    | EnumEightyOneThirtyThree thirtyThree
+    | EnumEightyOneThirtyFour thirtyFour
+    | EnumEightyOneThirtyFive thirtyFive
+    | EnumEightyOneThirtySix thirtySix
+    | EnumEightyOneThirtySeven thirtySeven
+    | EnumEightyOneThirtyEight thirtyEight
+    | EnumEightyOneThirtyNine thirtyNine
     | EnumEightyOneForty forty
-    | EnumEightyOneFortyOne forty-one
-    | EnumEightyOneFortyTwo forty-two
-    | EnumEightyOneFortyThree forty-three
-    | EnumEightyOneFortyFour forty-four
-    | EnumEightyOneFortyFive forty-five
-    | EnumEightyOneFortySix forty-six
-    | EnumEightyOneFortySeven forty-seven
-    | EnumEightyOneFortyEight forty-eight
-    | EnumEightyOneFortyNine forty-nine
+    | EnumEightyOneFortyOne fortyOne
+    | EnumEightyOneFortyTwo fortyTwo
+    | EnumEightyOneFortyThree fortyThree
+    | EnumEightyOneFortyFour fortyFour
+    | EnumEightyOneFortyFive fortyFive
+    | EnumEightyOneFortySix fortySix
+    | EnumEightyOneFortySeven fortySeven
+    | EnumEightyOneFortyEight fortyEight
+    | EnumEightyOneFortyNine fortyNine
     | EnumEightyOneFifty fifty
-    | EnumEightyOneFiftyOne fifty-one
-    | EnumEightyOneFiftyTwo fifty-two
-    | EnumEightyOneFiftyThree fifty-three
-    | EnumEightyOneFiftyFour fifty-four
-    | EnumEightyOneFiftyFive fifty-five
-    | EnumEightyOneFiftySix fifty-six
-    | EnumEightyOneFiftySeven fifty-seven
-    | EnumEightyOneFiftyEight fifty-eight
-    | EnumEightyOneFiftyNine fifty-nine
+    | EnumEightyOneFiftyOne fiftyOne
+    | EnumEightyOneFiftyTwo fiftyTwo
+    | EnumEightyOneFiftyThree fiftyThree
+    | EnumEightyOneFiftyFour fiftyFour
+    | EnumEightyOneFiftyFive fiftyFive
+    | EnumEightyOneFiftySix fiftySix
+    | EnumEightyOneFiftySeven fiftySeven
+    | EnumEightyOneFiftyEight fiftyEight
+    | EnumEightyOneFiftyNine fiftyNine
     | EnumEightyOneSixty sixty
-    | EnumEightyOneSixtyOne sixty-one
-    | EnumEightyOneSixtyTwo sixty-two
-    | EnumEightyOneSixtyThree sixty-three
-    | EnumEightyOneSixtyFour sixty-four
-    | EnumEightyOneSixtyFive sixty-five
-    | EnumEightyOneSixtySix sixty-six
-    | EnumEightyOneSixtySeven sixty-seven
-    | EnumEightyOneSixtyEight sixty-eight
-    | EnumEightyOneSixtyNine sixty-nine
+    | EnumEightyOneSixtyOne sixtyOne
+    | EnumEightyOneSixtyTwo sixtyTwo
+    | EnumEightyOneSixtyThree sixtyThree
+    | EnumEightyOneSixtyFour sixtyFour
+    | EnumEightyOneSixtyFive sixtyFive
+    | EnumEightyOneSixtySix sixtySix
+    | EnumEightyOneSixtySeven sixtySeven
+    | EnumEightyOneSixtyEight sixtyEight
+    | EnumEightyOneSixtyNine sixtyNine
     | EnumEightyOneSeventy seventy
-    | EnumEightyOneSeventyOne seventy-one
-    | EnumEightyOneSeventyTwo seventy-two
-    | EnumEightyOneSeventyThree seventy-three
-    | EnumEightyOneSeventyFour seventy-four
-    | EnumEightyOneSeventyFive seventy-five
-    | EnumEightyOneSeventySix seventy-six
-    | EnumEightyOneSeventySeven seventy-seven
-    | EnumEightyOneSeventyEight seventy-eight
-    | EnumEightyOneSeventyNine seventy-nine
+    | EnumEightyOneSeventyOne seventyOne
+    | EnumEightyOneSeventyTwo seventyTwo
+    | EnumEightyOneSeventyThree seventyThree
+    | EnumEightyOneSeventyFour seventyFour
+    | EnumEightyOneSeventyFive seventyFive
+    | EnumEightyOneSeventySix seventySix
+    | EnumEightyOneSeventySeven seventySeven
+    | EnumEightyOneSeventyEight seventyEight
+    | EnumEightyOneSeventyNine seventyNine
     | EnumEightyOneEighty eighty
-    | EnumEightyOneEightyOne eighty-one
+    | EnumEightyOneEightyOne eightyOne
 
 
-type EnumEightyTwo one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twenty-one twenty-two twenty-three twenty-four twenty-five twenty-six twenty-seven twenty-eight twenty-nine thirty thirty-one thirty-two thirty-three thirty-four thirty-five thirty-six thirty-seven thirty-eight thirty-nine forty forty-one forty-two forty-three forty-four forty-five forty-six forty-seven forty-eight forty-nine fifty fifty-one fifty-two fifty-three fifty-four fifty-five fifty-six fifty-seven fifty-eight fifty-nine sixty sixty-one sixty-two sixty-three sixty-four sixty-five sixty-six sixty-seven sixty-eight sixty-nine seventy seventy-one seventy-two seventy-three seventy-four seventy-five seventy-six seventy-seven seventy-eight seventy-nine eighty eighty-one eighty-two
+type EnumEightyTwo one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twentyOne twentyTwo twentyThree twentyFour twentyFive twentySix twentySeven twentyEight twentyNine thirty thirtyOne thirtyTwo thirtyThree thirtyFour thirtyFive thirtySix thirtySeven thirtyEight thirtyNine forty fortyOne fortyTwo fortyThree fortyFour fortyFive fortySix fortySeven fortyEight fortyNine fifty fiftyOne fiftyTwo fiftyThree fiftyFour fiftyFive fiftySix fiftySeven fiftyEight fiftyNine sixty sixtyOne sixtyTwo sixtyThree sixtyFour sixtyFive sixtySix sixtySeven sixtyEight sixtyNine seventy seventyOne seventyTwo seventyThree seventyFour seventyFive seventySix seventySeven seventyEight seventyNine eighty eightyOne eightyTwo
     = EnumEightyTwoOne one
     | EnumEightyTwoTwo two
     | EnumEightyTwoThree three
@@ -53810,71 +53810,71 @@ type EnumEightyTwo one two three four five six seven eight nine ten eleven twelv
     | EnumEightyTwoEighteen eighteen
     | EnumEightyTwoNineteen nineteen
     | EnumEightyTwoTwenty twenty
-    | EnumEightyTwoTwentyOne twenty-one
-    | EnumEightyTwoTwentyTwo twenty-two
-    | EnumEightyTwoTwentyThree twenty-three
-    | EnumEightyTwoTwentyFour twenty-four
-    | EnumEightyTwoTwentyFive twenty-five
-    | EnumEightyTwoTwentySix twenty-six
-    | EnumEightyTwoTwentySeven twenty-seven
-    | EnumEightyTwoTwentyEight twenty-eight
-    | EnumEightyTwoTwentyNine twenty-nine
+    | EnumEightyTwoTwentyOne twentyOne
+    | EnumEightyTwoTwentyTwo twentyTwo
+    | EnumEightyTwoTwentyThree twentyThree
+    | EnumEightyTwoTwentyFour twentyFour
+    | EnumEightyTwoTwentyFive twentyFive
+    | EnumEightyTwoTwentySix twentySix
+    | EnumEightyTwoTwentySeven twentySeven
+    | EnumEightyTwoTwentyEight twentyEight
+    | EnumEightyTwoTwentyNine twentyNine
     | EnumEightyTwoThirty thirty
-    | EnumEightyTwoThirtyOne thirty-one
-    | EnumEightyTwoThirtyTwo thirty-two
-    | EnumEightyTwoThirtyThree thirty-three
-    | EnumEightyTwoThirtyFour thirty-four
-    | EnumEightyTwoThirtyFive thirty-five
-    | EnumEightyTwoThirtySix thirty-six
-    | EnumEightyTwoThirtySeven thirty-seven
-    | EnumEightyTwoThirtyEight thirty-eight
-    | EnumEightyTwoThirtyNine thirty-nine
+    | EnumEightyTwoThirtyOne thirtyOne
+    | EnumEightyTwoThirtyTwo thirtyTwo
+    | EnumEightyTwoThirtyThree thirtyThree
+    | EnumEightyTwoThirtyFour thirtyFour
+    | EnumEightyTwoThirtyFive thirtyFive
+    | EnumEightyTwoThirtySix thirtySix
+    | EnumEightyTwoThirtySeven thirtySeven
+    | EnumEightyTwoThirtyEight thirtyEight
+    | EnumEightyTwoThirtyNine thirtyNine
     | EnumEightyTwoForty forty
-    | EnumEightyTwoFortyOne forty-one
-    | EnumEightyTwoFortyTwo forty-two
-    | EnumEightyTwoFortyThree forty-three
-    | EnumEightyTwoFortyFour forty-four
-    | EnumEightyTwoFortyFive forty-five
-    | EnumEightyTwoFortySix forty-six
-    | EnumEightyTwoFortySeven forty-seven
-    | EnumEightyTwoFortyEight forty-eight
-    | EnumEightyTwoFortyNine forty-nine
+    | EnumEightyTwoFortyOne fortyOne
+    | EnumEightyTwoFortyTwo fortyTwo
+    | EnumEightyTwoFortyThree fortyThree
+    | EnumEightyTwoFortyFour fortyFour
+    | EnumEightyTwoFortyFive fortyFive
+    | EnumEightyTwoFortySix fortySix
+    | EnumEightyTwoFortySeven fortySeven
+    | EnumEightyTwoFortyEight fortyEight
+    | EnumEightyTwoFortyNine fortyNine
     | EnumEightyTwoFifty fifty
-    | EnumEightyTwoFiftyOne fifty-one
-    | EnumEightyTwoFiftyTwo fifty-two
-    | EnumEightyTwoFiftyThree fifty-three
-    | EnumEightyTwoFiftyFour fifty-four
-    | EnumEightyTwoFiftyFive fifty-five
-    | EnumEightyTwoFiftySix fifty-six
-    | EnumEightyTwoFiftySeven fifty-seven
-    | EnumEightyTwoFiftyEight fifty-eight
-    | EnumEightyTwoFiftyNine fifty-nine
+    | EnumEightyTwoFiftyOne fiftyOne
+    | EnumEightyTwoFiftyTwo fiftyTwo
+    | EnumEightyTwoFiftyThree fiftyThree
+    | EnumEightyTwoFiftyFour fiftyFour
+    | EnumEightyTwoFiftyFive fiftyFive
+    | EnumEightyTwoFiftySix fiftySix
+    | EnumEightyTwoFiftySeven fiftySeven
+    | EnumEightyTwoFiftyEight fiftyEight
+    | EnumEightyTwoFiftyNine fiftyNine
     | EnumEightyTwoSixty sixty
-    | EnumEightyTwoSixtyOne sixty-one
-    | EnumEightyTwoSixtyTwo sixty-two
-    | EnumEightyTwoSixtyThree sixty-three
-    | EnumEightyTwoSixtyFour sixty-four
-    | EnumEightyTwoSixtyFive sixty-five
-    | EnumEightyTwoSixtySix sixty-six
-    | EnumEightyTwoSixtySeven sixty-seven
-    | EnumEightyTwoSixtyEight sixty-eight
-    | EnumEightyTwoSixtyNine sixty-nine
+    | EnumEightyTwoSixtyOne sixtyOne
+    | EnumEightyTwoSixtyTwo sixtyTwo
+    | EnumEightyTwoSixtyThree sixtyThree
+    | EnumEightyTwoSixtyFour sixtyFour
+    | EnumEightyTwoSixtyFive sixtyFive
+    | EnumEightyTwoSixtySix sixtySix
+    | EnumEightyTwoSixtySeven sixtySeven
+    | EnumEightyTwoSixtyEight sixtyEight
+    | EnumEightyTwoSixtyNine sixtyNine
     | EnumEightyTwoSeventy seventy
-    | EnumEightyTwoSeventyOne seventy-one
-    | EnumEightyTwoSeventyTwo seventy-two
-    | EnumEightyTwoSeventyThree seventy-three
-    | EnumEightyTwoSeventyFour seventy-four
-    | EnumEightyTwoSeventyFive seventy-five
-    | EnumEightyTwoSeventySix seventy-six
-    | EnumEightyTwoSeventySeven seventy-seven
-    | EnumEightyTwoSeventyEight seventy-eight
-    | EnumEightyTwoSeventyNine seventy-nine
+    | EnumEightyTwoSeventyOne seventyOne
+    | EnumEightyTwoSeventyTwo seventyTwo
+    | EnumEightyTwoSeventyThree seventyThree
+    | EnumEightyTwoSeventyFour seventyFour
+    | EnumEightyTwoSeventyFive seventyFive
+    | EnumEightyTwoSeventySix seventySix
+    | EnumEightyTwoSeventySeven seventySeven
+    | EnumEightyTwoSeventyEight seventyEight
+    | EnumEightyTwoSeventyNine seventyNine
     | EnumEightyTwoEighty eighty
-    | EnumEightyTwoEightyOne eighty-one
-    | EnumEightyTwoEightyTwo eighty-two
+    | EnumEightyTwoEightyOne eightyOne
+    | EnumEightyTwoEightyTwo eightyTwo
 
 
-type EnumEightyThree one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twenty-one twenty-two twenty-three twenty-four twenty-five twenty-six twenty-seven twenty-eight twenty-nine thirty thirty-one thirty-two thirty-three thirty-four thirty-five thirty-six thirty-seven thirty-eight thirty-nine forty forty-one forty-two forty-three forty-four forty-five forty-six forty-seven forty-eight forty-nine fifty fifty-one fifty-two fifty-three fifty-four fifty-five fifty-six fifty-seven fifty-eight fifty-nine sixty sixty-one sixty-two sixty-three sixty-four sixty-five sixty-six sixty-seven sixty-eight sixty-nine seventy seventy-one seventy-two seventy-three seventy-four seventy-five seventy-six seventy-seven seventy-eight seventy-nine eighty eighty-one eighty-two eighty-three
+type EnumEightyThree one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twentyOne twentyTwo twentyThree twentyFour twentyFive twentySix twentySeven twentyEight twentyNine thirty thirtyOne thirtyTwo thirtyThree thirtyFour thirtyFive thirtySix thirtySeven thirtyEight thirtyNine forty fortyOne fortyTwo fortyThree fortyFour fortyFive fortySix fortySeven fortyEight fortyNine fifty fiftyOne fiftyTwo fiftyThree fiftyFour fiftyFive fiftySix fiftySeven fiftyEight fiftyNine sixty sixtyOne sixtyTwo sixtyThree sixtyFour sixtyFive sixtySix sixtySeven sixtyEight sixtyNine seventy seventyOne seventyTwo seventyThree seventyFour seventyFive seventySix seventySeven seventyEight seventyNine eighty eightyOne eightyTwo eightyThree
     = EnumEightyThreeOne one
     | EnumEightyThreeTwo two
     | EnumEightyThreeThree three
@@ -53895,72 +53895,72 @@ type EnumEightyThree one two three four five six seven eight nine ten eleven twe
     | EnumEightyThreeEighteen eighteen
     | EnumEightyThreeNineteen nineteen
     | EnumEightyThreeTwenty twenty
-    | EnumEightyThreeTwentyOne twenty-one
-    | EnumEightyThreeTwentyTwo twenty-two
-    | EnumEightyThreeTwentyThree twenty-three
-    | EnumEightyThreeTwentyFour twenty-four
-    | EnumEightyThreeTwentyFive twenty-five
-    | EnumEightyThreeTwentySix twenty-six
-    | EnumEightyThreeTwentySeven twenty-seven
-    | EnumEightyThreeTwentyEight twenty-eight
-    | EnumEightyThreeTwentyNine twenty-nine
+    | EnumEightyThreeTwentyOne twentyOne
+    | EnumEightyThreeTwentyTwo twentyTwo
+    | EnumEightyThreeTwentyThree twentyThree
+    | EnumEightyThreeTwentyFour twentyFour
+    | EnumEightyThreeTwentyFive twentyFive
+    | EnumEightyThreeTwentySix twentySix
+    | EnumEightyThreeTwentySeven twentySeven
+    | EnumEightyThreeTwentyEight twentyEight
+    | EnumEightyThreeTwentyNine twentyNine
     | EnumEightyThreeThirty thirty
-    | EnumEightyThreeThirtyOne thirty-one
-    | EnumEightyThreeThirtyTwo thirty-two
-    | EnumEightyThreeThirtyThree thirty-three
-    | EnumEightyThreeThirtyFour thirty-four
-    | EnumEightyThreeThirtyFive thirty-five
-    | EnumEightyThreeThirtySix thirty-six
-    | EnumEightyThreeThirtySeven thirty-seven
-    | EnumEightyThreeThirtyEight thirty-eight
-    | EnumEightyThreeThirtyNine thirty-nine
+    | EnumEightyThreeThirtyOne thirtyOne
+    | EnumEightyThreeThirtyTwo thirtyTwo
+    | EnumEightyThreeThirtyThree thirtyThree
+    | EnumEightyThreeThirtyFour thirtyFour
+    | EnumEightyThreeThirtyFive thirtyFive
+    | EnumEightyThreeThirtySix thirtySix
+    | EnumEightyThreeThirtySeven thirtySeven
+    | EnumEightyThreeThirtyEight thirtyEight
+    | EnumEightyThreeThirtyNine thirtyNine
     | EnumEightyThreeForty forty
-    | EnumEightyThreeFortyOne forty-one
-    | EnumEightyThreeFortyTwo forty-two
-    | EnumEightyThreeFortyThree forty-three
-    | EnumEightyThreeFortyFour forty-four
-    | EnumEightyThreeFortyFive forty-five
-    | EnumEightyThreeFortySix forty-six
-    | EnumEightyThreeFortySeven forty-seven
-    | EnumEightyThreeFortyEight forty-eight
-    | EnumEightyThreeFortyNine forty-nine
+    | EnumEightyThreeFortyOne fortyOne
+    | EnumEightyThreeFortyTwo fortyTwo
+    | EnumEightyThreeFortyThree fortyThree
+    | EnumEightyThreeFortyFour fortyFour
+    | EnumEightyThreeFortyFive fortyFive
+    | EnumEightyThreeFortySix fortySix
+    | EnumEightyThreeFortySeven fortySeven
+    | EnumEightyThreeFortyEight fortyEight
+    | EnumEightyThreeFortyNine fortyNine
     | EnumEightyThreeFifty fifty
-    | EnumEightyThreeFiftyOne fifty-one
-    | EnumEightyThreeFiftyTwo fifty-two
-    | EnumEightyThreeFiftyThree fifty-three
-    | EnumEightyThreeFiftyFour fifty-four
-    | EnumEightyThreeFiftyFive fifty-five
-    | EnumEightyThreeFiftySix fifty-six
-    | EnumEightyThreeFiftySeven fifty-seven
-    | EnumEightyThreeFiftyEight fifty-eight
-    | EnumEightyThreeFiftyNine fifty-nine
+    | EnumEightyThreeFiftyOne fiftyOne
+    | EnumEightyThreeFiftyTwo fiftyTwo
+    | EnumEightyThreeFiftyThree fiftyThree
+    | EnumEightyThreeFiftyFour fiftyFour
+    | EnumEightyThreeFiftyFive fiftyFive
+    | EnumEightyThreeFiftySix fiftySix
+    | EnumEightyThreeFiftySeven fiftySeven
+    | EnumEightyThreeFiftyEight fiftyEight
+    | EnumEightyThreeFiftyNine fiftyNine
     | EnumEightyThreeSixty sixty
-    | EnumEightyThreeSixtyOne sixty-one
-    | EnumEightyThreeSixtyTwo sixty-two
-    | EnumEightyThreeSixtyThree sixty-three
-    | EnumEightyThreeSixtyFour sixty-four
-    | EnumEightyThreeSixtyFive sixty-five
-    | EnumEightyThreeSixtySix sixty-six
-    | EnumEightyThreeSixtySeven sixty-seven
-    | EnumEightyThreeSixtyEight sixty-eight
-    | EnumEightyThreeSixtyNine sixty-nine
+    | EnumEightyThreeSixtyOne sixtyOne
+    | EnumEightyThreeSixtyTwo sixtyTwo
+    | EnumEightyThreeSixtyThree sixtyThree
+    | EnumEightyThreeSixtyFour sixtyFour
+    | EnumEightyThreeSixtyFive sixtyFive
+    | EnumEightyThreeSixtySix sixtySix
+    | EnumEightyThreeSixtySeven sixtySeven
+    | EnumEightyThreeSixtyEight sixtyEight
+    | EnumEightyThreeSixtyNine sixtyNine
     | EnumEightyThreeSeventy seventy
-    | EnumEightyThreeSeventyOne seventy-one
-    | EnumEightyThreeSeventyTwo seventy-two
-    | EnumEightyThreeSeventyThree seventy-three
-    | EnumEightyThreeSeventyFour seventy-four
-    | EnumEightyThreeSeventyFive seventy-five
-    | EnumEightyThreeSeventySix seventy-six
-    | EnumEightyThreeSeventySeven seventy-seven
-    | EnumEightyThreeSeventyEight seventy-eight
-    | EnumEightyThreeSeventyNine seventy-nine
+    | EnumEightyThreeSeventyOne seventyOne
+    | EnumEightyThreeSeventyTwo seventyTwo
+    | EnumEightyThreeSeventyThree seventyThree
+    | EnumEightyThreeSeventyFour seventyFour
+    | EnumEightyThreeSeventyFive seventyFive
+    | EnumEightyThreeSeventySix seventySix
+    | EnumEightyThreeSeventySeven seventySeven
+    | EnumEightyThreeSeventyEight seventyEight
+    | EnumEightyThreeSeventyNine seventyNine
     | EnumEightyThreeEighty eighty
-    | EnumEightyThreeEightyOne eighty-one
-    | EnumEightyThreeEightyTwo eighty-two
-    | EnumEightyThreeEightyThree eighty-three
+    | EnumEightyThreeEightyOne eightyOne
+    | EnumEightyThreeEightyTwo eightyTwo
+    | EnumEightyThreeEightyThree eightyThree
 
 
-type EnumEightyFour one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twenty-one twenty-two twenty-three twenty-four twenty-five twenty-six twenty-seven twenty-eight twenty-nine thirty thirty-one thirty-two thirty-three thirty-four thirty-five thirty-six thirty-seven thirty-eight thirty-nine forty forty-one forty-two forty-three forty-four forty-five forty-six forty-seven forty-eight forty-nine fifty fifty-one fifty-two fifty-three fifty-four fifty-five fifty-six fifty-seven fifty-eight fifty-nine sixty sixty-one sixty-two sixty-three sixty-four sixty-five sixty-six sixty-seven sixty-eight sixty-nine seventy seventy-one seventy-two seventy-three seventy-four seventy-five seventy-six seventy-seven seventy-eight seventy-nine eighty eighty-one eighty-two eighty-three eighty-four
+type EnumEightyFour one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twentyOne twentyTwo twentyThree twentyFour twentyFive twentySix twentySeven twentyEight twentyNine thirty thirtyOne thirtyTwo thirtyThree thirtyFour thirtyFive thirtySix thirtySeven thirtyEight thirtyNine forty fortyOne fortyTwo fortyThree fortyFour fortyFive fortySix fortySeven fortyEight fortyNine fifty fiftyOne fiftyTwo fiftyThree fiftyFour fiftyFive fiftySix fiftySeven fiftyEight fiftyNine sixty sixtyOne sixtyTwo sixtyThree sixtyFour sixtyFive sixtySix sixtySeven sixtyEight sixtyNine seventy seventyOne seventyTwo seventyThree seventyFour seventyFive seventySix seventySeven seventyEight seventyNine eighty eightyOne eightyTwo eightyThree eightyFour
     = EnumEightyFourOne one
     | EnumEightyFourTwo two
     | EnumEightyFourThree three
@@ -53981,73 +53981,73 @@ type EnumEightyFour one two three four five six seven eight nine ten eleven twel
     | EnumEightyFourEighteen eighteen
     | EnumEightyFourNineteen nineteen
     | EnumEightyFourTwenty twenty
-    | EnumEightyFourTwentyOne twenty-one
-    | EnumEightyFourTwentyTwo twenty-two
-    | EnumEightyFourTwentyThree twenty-three
-    | EnumEightyFourTwentyFour twenty-four
-    | EnumEightyFourTwentyFive twenty-five
-    | EnumEightyFourTwentySix twenty-six
-    | EnumEightyFourTwentySeven twenty-seven
-    | EnumEightyFourTwentyEight twenty-eight
-    | EnumEightyFourTwentyNine twenty-nine
+    | EnumEightyFourTwentyOne twentyOne
+    | EnumEightyFourTwentyTwo twentyTwo
+    | EnumEightyFourTwentyThree twentyThree
+    | EnumEightyFourTwentyFour twentyFour
+    | EnumEightyFourTwentyFive twentyFive
+    | EnumEightyFourTwentySix twentySix
+    | EnumEightyFourTwentySeven twentySeven
+    | EnumEightyFourTwentyEight twentyEight
+    | EnumEightyFourTwentyNine twentyNine
     | EnumEightyFourThirty thirty
-    | EnumEightyFourThirtyOne thirty-one
-    | EnumEightyFourThirtyTwo thirty-two
-    | EnumEightyFourThirtyThree thirty-three
-    | EnumEightyFourThirtyFour thirty-four
-    | EnumEightyFourThirtyFive thirty-five
-    | EnumEightyFourThirtySix thirty-six
-    | EnumEightyFourThirtySeven thirty-seven
-    | EnumEightyFourThirtyEight thirty-eight
-    | EnumEightyFourThirtyNine thirty-nine
+    | EnumEightyFourThirtyOne thirtyOne
+    | EnumEightyFourThirtyTwo thirtyTwo
+    | EnumEightyFourThirtyThree thirtyThree
+    | EnumEightyFourThirtyFour thirtyFour
+    | EnumEightyFourThirtyFive thirtyFive
+    | EnumEightyFourThirtySix thirtySix
+    | EnumEightyFourThirtySeven thirtySeven
+    | EnumEightyFourThirtyEight thirtyEight
+    | EnumEightyFourThirtyNine thirtyNine
     | EnumEightyFourForty forty
-    | EnumEightyFourFortyOne forty-one
-    | EnumEightyFourFortyTwo forty-two
-    | EnumEightyFourFortyThree forty-three
-    | EnumEightyFourFortyFour forty-four
-    | EnumEightyFourFortyFive forty-five
-    | EnumEightyFourFortySix forty-six
-    | EnumEightyFourFortySeven forty-seven
-    | EnumEightyFourFortyEight forty-eight
-    | EnumEightyFourFortyNine forty-nine
+    | EnumEightyFourFortyOne fortyOne
+    | EnumEightyFourFortyTwo fortyTwo
+    | EnumEightyFourFortyThree fortyThree
+    | EnumEightyFourFortyFour fortyFour
+    | EnumEightyFourFortyFive fortyFive
+    | EnumEightyFourFortySix fortySix
+    | EnumEightyFourFortySeven fortySeven
+    | EnumEightyFourFortyEight fortyEight
+    | EnumEightyFourFortyNine fortyNine
     | EnumEightyFourFifty fifty
-    | EnumEightyFourFiftyOne fifty-one
-    | EnumEightyFourFiftyTwo fifty-two
-    | EnumEightyFourFiftyThree fifty-three
-    | EnumEightyFourFiftyFour fifty-four
-    | EnumEightyFourFiftyFive fifty-five
-    | EnumEightyFourFiftySix fifty-six
-    | EnumEightyFourFiftySeven fifty-seven
-    | EnumEightyFourFiftyEight fifty-eight
-    | EnumEightyFourFiftyNine fifty-nine
+    | EnumEightyFourFiftyOne fiftyOne
+    | EnumEightyFourFiftyTwo fiftyTwo
+    | EnumEightyFourFiftyThree fiftyThree
+    | EnumEightyFourFiftyFour fiftyFour
+    | EnumEightyFourFiftyFive fiftyFive
+    | EnumEightyFourFiftySix fiftySix
+    | EnumEightyFourFiftySeven fiftySeven
+    | EnumEightyFourFiftyEight fiftyEight
+    | EnumEightyFourFiftyNine fiftyNine
     | EnumEightyFourSixty sixty
-    | EnumEightyFourSixtyOne sixty-one
-    | EnumEightyFourSixtyTwo sixty-two
-    | EnumEightyFourSixtyThree sixty-three
-    | EnumEightyFourSixtyFour sixty-four
-    | EnumEightyFourSixtyFive sixty-five
-    | EnumEightyFourSixtySix sixty-six
-    | EnumEightyFourSixtySeven sixty-seven
-    | EnumEightyFourSixtyEight sixty-eight
-    | EnumEightyFourSixtyNine sixty-nine
+    | EnumEightyFourSixtyOne sixtyOne
+    | EnumEightyFourSixtyTwo sixtyTwo
+    | EnumEightyFourSixtyThree sixtyThree
+    | EnumEightyFourSixtyFour sixtyFour
+    | EnumEightyFourSixtyFive sixtyFive
+    | EnumEightyFourSixtySix sixtySix
+    | EnumEightyFourSixtySeven sixtySeven
+    | EnumEightyFourSixtyEight sixtyEight
+    | EnumEightyFourSixtyNine sixtyNine
     | EnumEightyFourSeventy seventy
-    | EnumEightyFourSeventyOne seventy-one
-    | EnumEightyFourSeventyTwo seventy-two
-    | EnumEightyFourSeventyThree seventy-three
-    | EnumEightyFourSeventyFour seventy-four
-    | EnumEightyFourSeventyFive seventy-five
-    | EnumEightyFourSeventySix seventy-six
-    | EnumEightyFourSeventySeven seventy-seven
-    | EnumEightyFourSeventyEight seventy-eight
-    | EnumEightyFourSeventyNine seventy-nine
+    | EnumEightyFourSeventyOne seventyOne
+    | EnumEightyFourSeventyTwo seventyTwo
+    | EnumEightyFourSeventyThree seventyThree
+    | EnumEightyFourSeventyFour seventyFour
+    | EnumEightyFourSeventyFive seventyFive
+    | EnumEightyFourSeventySix seventySix
+    | EnumEightyFourSeventySeven seventySeven
+    | EnumEightyFourSeventyEight seventyEight
+    | EnumEightyFourSeventyNine seventyNine
     | EnumEightyFourEighty eighty
-    | EnumEightyFourEightyOne eighty-one
-    | EnumEightyFourEightyTwo eighty-two
-    | EnumEightyFourEightyThree eighty-three
-    | EnumEightyFourEightyFour eighty-four
+    | EnumEightyFourEightyOne eightyOne
+    | EnumEightyFourEightyTwo eightyTwo
+    | EnumEightyFourEightyThree eightyThree
+    | EnumEightyFourEightyFour eightyFour
 
 
-type EnumEightyFive one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twenty-one twenty-two twenty-three twenty-four twenty-five twenty-six twenty-seven twenty-eight twenty-nine thirty thirty-one thirty-two thirty-three thirty-four thirty-five thirty-six thirty-seven thirty-eight thirty-nine forty forty-one forty-two forty-three forty-four forty-five forty-six forty-seven forty-eight forty-nine fifty fifty-one fifty-two fifty-three fifty-four fifty-five fifty-six fifty-seven fifty-eight fifty-nine sixty sixty-one sixty-two sixty-three sixty-four sixty-five sixty-six sixty-seven sixty-eight sixty-nine seventy seventy-one seventy-two seventy-three seventy-four seventy-five seventy-six seventy-seven seventy-eight seventy-nine eighty eighty-one eighty-two eighty-three eighty-four eighty-five
+type EnumEightyFive one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twentyOne twentyTwo twentyThree twentyFour twentyFive twentySix twentySeven twentyEight twentyNine thirty thirtyOne thirtyTwo thirtyThree thirtyFour thirtyFive thirtySix thirtySeven thirtyEight thirtyNine forty fortyOne fortyTwo fortyThree fortyFour fortyFive fortySix fortySeven fortyEight fortyNine fifty fiftyOne fiftyTwo fiftyThree fiftyFour fiftyFive fiftySix fiftySeven fiftyEight fiftyNine sixty sixtyOne sixtyTwo sixtyThree sixtyFour sixtyFive sixtySix sixtySeven sixtyEight sixtyNine seventy seventyOne seventyTwo seventyThree seventyFour seventyFive seventySix seventySeven seventyEight seventyNine eighty eightyOne eightyTwo eightyThree eightyFour eightyFive
     = EnumEightyFiveOne one
     | EnumEightyFiveTwo two
     | EnumEightyFiveThree three
@@ -54068,74 +54068,74 @@ type EnumEightyFive one two three four five six seven eight nine ten eleven twel
     | EnumEightyFiveEighteen eighteen
     | EnumEightyFiveNineteen nineteen
     | EnumEightyFiveTwenty twenty
-    | EnumEightyFiveTwentyOne twenty-one
-    | EnumEightyFiveTwentyTwo twenty-two
-    | EnumEightyFiveTwentyThree twenty-three
-    | EnumEightyFiveTwentyFour twenty-four
-    | EnumEightyFiveTwentyFive twenty-five
-    | EnumEightyFiveTwentySix twenty-six
-    | EnumEightyFiveTwentySeven twenty-seven
-    | EnumEightyFiveTwentyEight twenty-eight
-    | EnumEightyFiveTwentyNine twenty-nine
+    | EnumEightyFiveTwentyOne twentyOne
+    | EnumEightyFiveTwentyTwo twentyTwo
+    | EnumEightyFiveTwentyThree twentyThree
+    | EnumEightyFiveTwentyFour twentyFour
+    | EnumEightyFiveTwentyFive twentyFive
+    | EnumEightyFiveTwentySix twentySix
+    | EnumEightyFiveTwentySeven twentySeven
+    | EnumEightyFiveTwentyEight twentyEight
+    | EnumEightyFiveTwentyNine twentyNine
     | EnumEightyFiveThirty thirty
-    | EnumEightyFiveThirtyOne thirty-one
-    | EnumEightyFiveThirtyTwo thirty-two
-    | EnumEightyFiveThirtyThree thirty-three
-    | EnumEightyFiveThirtyFour thirty-four
-    | EnumEightyFiveThirtyFive thirty-five
-    | EnumEightyFiveThirtySix thirty-six
-    | EnumEightyFiveThirtySeven thirty-seven
-    | EnumEightyFiveThirtyEight thirty-eight
-    | EnumEightyFiveThirtyNine thirty-nine
+    | EnumEightyFiveThirtyOne thirtyOne
+    | EnumEightyFiveThirtyTwo thirtyTwo
+    | EnumEightyFiveThirtyThree thirtyThree
+    | EnumEightyFiveThirtyFour thirtyFour
+    | EnumEightyFiveThirtyFive thirtyFive
+    | EnumEightyFiveThirtySix thirtySix
+    | EnumEightyFiveThirtySeven thirtySeven
+    | EnumEightyFiveThirtyEight thirtyEight
+    | EnumEightyFiveThirtyNine thirtyNine
     | EnumEightyFiveForty forty
-    | EnumEightyFiveFortyOne forty-one
-    | EnumEightyFiveFortyTwo forty-two
-    | EnumEightyFiveFortyThree forty-three
-    | EnumEightyFiveFortyFour forty-four
-    | EnumEightyFiveFortyFive forty-five
-    | EnumEightyFiveFortySix forty-six
-    | EnumEightyFiveFortySeven forty-seven
-    | EnumEightyFiveFortyEight forty-eight
-    | EnumEightyFiveFortyNine forty-nine
+    | EnumEightyFiveFortyOne fortyOne
+    | EnumEightyFiveFortyTwo fortyTwo
+    | EnumEightyFiveFortyThree fortyThree
+    | EnumEightyFiveFortyFour fortyFour
+    | EnumEightyFiveFortyFive fortyFive
+    | EnumEightyFiveFortySix fortySix
+    | EnumEightyFiveFortySeven fortySeven
+    | EnumEightyFiveFortyEight fortyEight
+    | EnumEightyFiveFortyNine fortyNine
     | EnumEightyFiveFifty fifty
-    | EnumEightyFiveFiftyOne fifty-one
-    | EnumEightyFiveFiftyTwo fifty-two
-    | EnumEightyFiveFiftyThree fifty-three
-    | EnumEightyFiveFiftyFour fifty-four
-    | EnumEightyFiveFiftyFive fifty-five
-    | EnumEightyFiveFiftySix fifty-six
-    | EnumEightyFiveFiftySeven fifty-seven
-    | EnumEightyFiveFiftyEight fifty-eight
-    | EnumEightyFiveFiftyNine fifty-nine
+    | EnumEightyFiveFiftyOne fiftyOne
+    | EnumEightyFiveFiftyTwo fiftyTwo
+    | EnumEightyFiveFiftyThree fiftyThree
+    | EnumEightyFiveFiftyFour fiftyFour
+    | EnumEightyFiveFiftyFive fiftyFive
+    | EnumEightyFiveFiftySix fiftySix
+    | EnumEightyFiveFiftySeven fiftySeven
+    | EnumEightyFiveFiftyEight fiftyEight
+    | EnumEightyFiveFiftyNine fiftyNine
     | EnumEightyFiveSixty sixty
-    | EnumEightyFiveSixtyOne sixty-one
-    | EnumEightyFiveSixtyTwo sixty-two
-    | EnumEightyFiveSixtyThree sixty-three
-    | EnumEightyFiveSixtyFour sixty-four
-    | EnumEightyFiveSixtyFive sixty-five
-    | EnumEightyFiveSixtySix sixty-six
-    | EnumEightyFiveSixtySeven sixty-seven
-    | EnumEightyFiveSixtyEight sixty-eight
-    | EnumEightyFiveSixtyNine sixty-nine
+    | EnumEightyFiveSixtyOne sixtyOne
+    | EnumEightyFiveSixtyTwo sixtyTwo
+    | EnumEightyFiveSixtyThree sixtyThree
+    | EnumEightyFiveSixtyFour sixtyFour
+    | EnumEightyFiveSixtyFive sixtyFive
+    | EnumEightyFiveSixtySix sixtySix
+    | EnumEightyFiveSixtySeven sixtySeven
+    | EnumEightyFiveSixtyEight sixtyEight
+    | EnumEightyFiveSixtyNine sixtyNine
     | EnumEightyFiveSeventy seventy
-    | EnumEightyFiveSeventyOne seventy-one
-    | EnumEightyFiveSeventyTwo seventy-two
-    | EnumEightyFiveSeventyThree seventy-three
-    | EnumEightyFiveSeventyFour seventy-four
-    | EnumEightyFiveSeventyFive seventy-five
-    | EnumEightyFiveSeventySix seventy-six
-    | EnumEightyFiveSeventySeven seventy-seven
-    | EnumEightyFiveSeventyEight seventy-eight
-    | EnumEightyFiveSeventyNine seventy-nine
+    | EnumEightyFiveSeventyOne seventyOne
+    | EnumEightyFiveSeventyTwo seventyTwo
+    | EnumEightyFiveSeventyThree seventyThree
+    | EnumEightyFiveSeventyFour seventyFour
+    | EnumEightyFiveSeventyFive seventyFive
+    | EnumEightyFiveSeventySix seventySix
+    | EnumEightyFiveSeventySeven seventySeven
+    | EnumEightyFiveSeventyEight seventyEight
+    | EnumEightyFiveSeventyNine seventyNine
     | EnumEightyFiveEighty eighty
-    | EnumEightyFiveEightyOne eighty-one
-    | EnumEightyFiveEightyTwo eighty-two
-    | EnumEightyFiveEightyThree eighty-three
-    | EnumEightyFiveEightyFour eighty-four
-    | EnumEightyFiveEightyFive eighty-five
+    | EnumEightyFiveEightyOne eightyOne
+    | EnumEightyFiveEightyTwo eightyTwo
+    | EnumEightyFiveEightyThree eightyThree
+    | EnumEightyFiveEightyFour eightyFour
+    | EnumEightyFiveEightyFive eightyFive
 
 
-type EnumEightySix one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twenty-one twenty-two twenty-three twenty-four twenty-five twenty-six twenty-seven twenty-eight twenty-nine thirty thirty-one thirty-two thirty-three thirty-four thirty-five thirty-six thirty-seven thirty-eight thirty-nine forty forty-one forty-two forty-three forty-four forty-five forty-six forty-seven forty-eight forty-nine fifty fifty-one fifty-two fifty-three fifty-four fifty-five fifty-six fifty-seven fifty-eight fifty-nine sixty sixty-one sixty-two sixty-three sixty-four sixty-five sixty-six sixty-seven sixty-eight sixty-nine seventy seventy-one seventy-two seventy-three seventy-four seventy-five seventy-six seventy-seven seventy-eight seventy-nine eighty eighty-one eighty-two eighty-three eighty-four eighty-five eighty-six
+type EnumEightySix one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twentyOne twentyTwo twentyThree twentyFour twentyFive twentySix twentySeven twentyEight twentyNine thirty thirtyOne thirtyTwo thirtyThree thirtyFour thirtyFive thirtySix thirtySeven thirtyEight thirtyNine forty fortyOne fortyTwo fortyThree fortyFour fortyFive fortySix fortySeven fortyEight fortyNine fifty fiftyOne fiftyTwo fiftyThree fiftyFour fiftyFive fiftySix fiftySeven fiftyEight fiftyNine sixty sixtyOne sixtyTwo sixtyThree sixtyFour sixtyFive sixtySix sixtySeven sixtyEight sixtyNine seventy seventyOne seventyTwo seventyThree seventyFour seventyFive seventySix seventySeven seventyEight seventyNine eighty eightyOne eightyTwo eightyThree eightyFour eightyFive eightySix
     = EnumEightySixOne one
     | EnumEightySixTwo two
     | EnumEightySixThree three
@@ -54156,75 +54156,75 @@ type EnumEightySix one two three four five six seven eight nine ten eleven twelv
     | EnumEightySixEighteen eighteen
     | EnumEightySixNineteen nineteen
     | EnumEightySixTwenty twenty
-    | EnumEightySixTwentyOne twenty-one
-    | EnumEightySixTwentyTwo twenty-two
-    | EnumEightySixTwentyThree twenty-three
-    | EnumEightySixTwentyFour twenty-four
-    | EnumEightySixTwentyFive twenty-five
-    | EnumEightySixTwentySix twenty-six
-    | EnumEightySixTwentySeven twenty-seven
-    | EnumEightySixTwentyEight twenty-eight
-    | EnumEightySixTwentyNine twenty-nine
+    | EnumEightySixTwentyOne twentyOne
+    | EnumEightySixTwentyTwo twentyTwo
+    | EnumEightySixTwentyThree twentyThree
+    | EnumEightySixTwentyFour twentyFour
+    | EnumEightySixTwentyFive twentyFive
+    | EnumEightySixTwentySix twentySix
+    | EnumEightySixTwentySeven twentySeven
+    | EnumEightySixTwentyEight twentyEight
+    | EnumEightySixTwentyNine twentyNine
     | EnumEightySixThirty thirty
-    | EnumEightySixThirtyOne thirty-one
-    | EnumEightySixThirtyTwo thirty-two
-    | EnumEightySixThirtyThree thirty-three
-    | EnumEightySixThirtyFour thirty-four
-    | EnumEightySixThirtyFive thirty-five
-    | EnumEightySixThirtySix thirty-six
-    | EnumEightySixThirtySeven thirty-seven
-    | EnumEightySixThirtyEight thirty-eight
-    | EnumEightySixThirtyNine thirty-nine
+    | EnumEightySixThirtyOne thirtyOne
+    | EnumEightySixThirtyTwo thirtyTwo
+    | EnumEightySixThirtyThree thirtyThree
+    | EnumEightySixThirtyFour thirtyFour
+    | EnumEightySixThirtyFive thirtyFive
+    | EnumEightySixThirtySix thirtySix
+    | EnumEightySixThirtySeven thirtySeven
+    | EnumEightySixThirtyEight thirtyEight
+    | EnumEightySixThirtyNine thirtyNine
     | EnumEightySixForty forty
-    | EnumEightySixFortyOne forty-one
-    | EnumEightySixFortyTwo forty-two
-    | EnumEightySixFortyThree forty-three
-    | EnumEightySixFortyFour forty-four
-    | EnumEightySixFortyFive forty-five
-    | EnumEightySixFortySix forty-six
-    | EnumEightySixFortySeven forty-seven
-    | EnumEightySixFortyEight forty-eight
-    | EnumEightySixFortyNine forty-nine
+    | EnumEightySixFortyOne fortyOne
+    | EnumEightySixFortyTwo fortyTwo
+    | EnumEightySixFortyThree fortyThree
+    | EnumEightySixFortyFour fortyFour
+    | EnumEightySixFortyFive fortyFive
+    | EnumEightySixFortySix fortySix
+    | EnumEightySixFortySeven fortySeven
+    | EnumEightySixFortyEight fortyEight
+    | EnumEightySixFortyNine fortyNine
     | EnumEightySixFifty fifty
-    | EnumEightySixFiftyOne fifty-one
-    | EnumEightySixFiftyTwo fifty-two
-    | EnumEightySixFiftyThree fifty-three
-    | EnumEightySixFiftyFour fifty-four
-    | EnumEightySixFiftyFive fifty-five
-    | EnumEightySixFiftySix fifty-six
-    | EnumEightySixFiftySeven fifty-seven
-    | EnumEightySixFiftyEight fifty-eight
-    | EnumEightySixFiftyNine fifty-nine
+    | EnumEightySixFiftyOne fiftyOne
+    | EnumEightySixFiftyTwo fiftyTwo
+    | EnumEightySixFiftyThree fiftyThree
+    | EnumEightySixFiftyFour fiftyFour
+    | EnumEightySixFiftyFive fiftyFive
+    | EnumEightySixFiftySix fiftySix
+    | EnumEightySixFiftySeven fiftySeven
+    | EnumEightySixFiftyEight fiftyEight
+    | EnumEightySixFiftyNine fiftyNine
     | EnumEightySixSixty sixty
-    | EnumEightySixSixtyOne sixty-one
-    | EnumEightySixSixtyTwo sixty-two
-    | EnumEightySixSixtyThree sixty-three
-    | EnumEightySixSixtyFour sixty-four
-    | EnumEightySixSixtyFive sixty-five
-    | EnumEightySixSixtySix sixty-six
-    | EnumEightySixSixtySeven sixty-seven
-    | EnumEightySixSixtyEight sixty-eight
-    | EnumEightySixSixtyNine sixty-nine
+    | EnumEightySixSixtyOne sixtyOne
+    | EnumEightySixSixtyTwo sixtyTwo
+    | EnumEightySixSixtyThree sixtyThree
+    | EnumEightySixSixtyFour sixtyFour
+    | EnumEightySixSixtyFive sixtyFive
+    | EnumEightySixSixtySix sixtySix
+    | EnumEightySixSixtySeven sixtySeven
+    | EnumEightySixSixtyEight sixtyEight
+    | EnumEightySixSixtyNine sixtyNine
     | EnumEightySixSeventy seventy
-    | EnumEightySixSeventyOne seventy-one
-    | EnumEightySixSeventyTwo seventy-two
-    | EnumEightySixSeventyThree seventy-three
-    | EnumEightySixSeventyFour seventy-four
-    | EnumEightySixSeventyFive seventy-five
-    | EnumEightySixSeventySix seventy-six
-    | EnumEightySixSeventySeven seventy-seven
-    | EnumEightySixSeventyEight seventy-eight
-    | EnumEightySixSeventyNine seventy-nine
+    | EnumEightySixSeventyOne seventyOne
+    | EnumEightySixSeventyTwo seventyTwo
+    | EnumEightySixSeventyThree seventyThree
+    | EnumEightySixSeventyFour seventyFour
+    | EnumEightySixSeventyFive seventyFive
+    | EnumEightySixSeventySix seventySix
+    | EnumEightySixSeventySeven seventySeven
+    | EnumEightySixSeventyEight seventyEight
+    | EnumEightySixSeventyNine seventyNine
     | EnumEightySixEighty eighty
-    | EnumEightySixEightyOne eighty-one
-    | EnumEightySixEightyTwo eighty-two
-    | EnumEightySixEightyThree eighty-three
-    | EnumEightySixEightyFour eighty-four
-    | EnumEightySixEightyFive eighty-five
-    | EnumEightySixEightySix eighty-six
+    | EnumEightySixEightyOne eightyOne
+    | EnumEightySixEightyTwo eightyTwo
+    | EnumEightySixEightyThree eightyThree
+    | EnumEightySixEightyFour eightyFour
+    | EnumEightySixEightyFive eightyFive
+    | EnumEightySixEightySix eightySix
 
 
-type EnumEightySeven one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twenty-one twenty-two twenty-three twenty-four twenty-five twenty-six twenty-seven twenty-eight twenty-nine thirty thirty-one thirty-two thirty-three thirty-four thirty-five thirty-six thirty-seven thirty-eight thirty-nine forty forty-one forty-two forty-three forty-four forty-five forty-six forty-seven forty-eight forty-nine fifty fifty-one fifty-two fifty-three fifty-four fifty-five fifty-six fifty-seven fifty-eight fifty-nine sixty sixty-one sixty-two sixty-three sixty-four sixty-five sixty-six sixty-seven sixty-eight sixty-nine seventy seventy-one seventy-two seventy-three seventy-four seventy-five seventy-six seventy-seven seventy-eight seventy-nine eighty eighty-one eighty-two eighty-three eighty-four eighty-five eighty-six eighty-seven
+type EnumEightySeven one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twentyOne twentyTwo twentyThree twentyFour twentyFive twentySix twentySeven twentyEight twentyNine thirty thirtyOne thirtyTwo thirtyThree thirtyFour thirtyFive thirtySix thirtySeven thirtyEight thirtyNine forty fortyOne fortyTwo fortyThree fortyFour fortyFive fortySix fortySeven fortyEight fortyNine fifty fiftyOne fiftyTwo fiftyThree fiftyFour fiftyFive fiftySix fiftySeven fiftyEight fiftyNine sixty sixtyOne sixtyTwo sixtyThree sixtyFour sixtyFive sixtySix sixtySeven sixtyEight sixtyNine seventy seventyOne seventyTwo seventyThree seventyFour seventyFive seventySix seventySeven seventyEight seventyNine eighty eightyOne eightyTwo eightyThree eightyFour eightyFive eightySix eightySeven
     = EnumEightySevenOne one
     | EnumEightySevenTwo two
     | EnumEightySevenThree three
@@ -54245,76 +54245,76 @@ type EnumEightySeven one two three four five six seven eight nine ten eleven twe
     | EnumEightySevenEighteen eighteen
     | EnumEightySevenNineteen nineteen
     | EnumEightySevenTwenty twenty
-    | EnumEightySevenTwentyOne twenty-one
-    | EnumEightySevenTwentyTwo twenty-two
-    | EnumEightySevenTwentyThree twenty-three
-    | EnumEightySevenTwentyFour twenty-four
-    | EnumEightySevenTwentyFive twenty-five
-    | EnumEightySevenTwentySix twenty-six
-    | EnumEightySevenTwentySeven twenty-seven
-    | EnumEightySevenTwentyEight twenty-eight
-    | EnumEightySevenTwentyNine twenty-nine
+    | EnumEightySevenTwentyOne twentyOne
+    | EnumEightySevenTwentyTwo twentyTwo
+    | EnumEightySevenTwentyThree twentyThree
+    | EnumEightySevenTwentyFour twentyFour
+    | EnumEightySevenTwentyFive twentyFive
+    | EnumEightySevenTwentySix twentySix
+    | EnumEightySevenTwentySeven twentySeven
+    | EnumEightySevenTwentyEight twentyEight
+    | EnumEightySevenTwentyNine twentyNine
     | EnumEightySevenThirty thirty
-    | EnumEightySevenThirtyOne thirty-one
-    | EnumEightySevenThirtyTwo thirty-two
-    | EnumEightySevenThirtyThree thirty-three
-    | EnumEightySevenThirtyFour thirty-four
-    | EnumEightySevenThirtyFive thirty-five
-    | EnumEightySevenThirtySix thirty-six
-    | EnumEightySevenThirtySeven thirty-seven
-    | EnumEightySevenThirtyEight thirty-eight
-    | EnumEightySevenThirtyNine thirty-nine
+    | EnumEightySevenThirtyOne thirtyOne
+    | EnumEightySevenThirtyTwo thirtyTwo
+    | EnumEightySevenThirtyThree thirtyThree
+    | EnumEightySevenThirtyFour thirtyFour
+    | EnumEightySevenThirtyFive thirtyFive
+    | EnumEightySevenThirtySix thirtySix
+    | EnumEightySevenThirtySeven thirtySeven
+    | EnumEightySevenThirtyEight thirtyEight
+    | EnumEightySevenThirtyNine thirtyNine
     | EnumEightySevenForty forty
-    | EnumEightySevenFortyOne forty-one
-    | EnumEightySevenFortyTwo forty-two
-    | EnumEightySevenFortyThree forty-three
-    | EnumEightySevenFortyFour forty-four
-    | EnumEightySevenFortyFive forty-five
-    | EnumEightySevenFortySix forty-six
-    | EnumEightySevenFortySeven forty-seven
-    | EnumEightySevenFortyEight forty-eight
-    | EnumEightySevenFortyNine forty-nine
+    | EnumEightySevenFortyOne fortyOne
+    | EnumEightySevenFortyTwo fortyTwo
+    | EnumEightySevenFortyThree fortyThree
+    | EnumEightySevenFortyFour fortyFour
+    | EnumEightySevenFortyFive fortyFive
+    | EnumEightySevenFortySix fortySix
+    | EnumEightySevenFortySeven fortySeven
+    | EnumEightySevenFortyEight fortyEight
+    | EnumEightySevenFortyNine fortyNine
     | EnumEightySevenFifty fifty
-    | EnumEightySevenFiftyOne fifty-one
-    | EnumEightySevenFiftyTwo fifty-two
-    | EnumEightySevenFiftyThree fifty-three
-    | EnumEightySevenFiftyFour fifty-four
-    | EnumEightySevenFiftyFive fifty-five
-    | EnumEightySevenFiftySix fifty-six
-    | EnumEightySevenFiftySeven fifty-seven
-    | EnumEightySevenFiftyEight fifty-eight
-    | EnumEightySevenFiftyNine fifty-nine
+    | EnumEightySevenFiftyOne fiftyOne
+    | EnumEightySevenFiftyTwo fiftyTwo
+    | EnumEightySevenFiftyThree fiftyThree
+    | EnumEightySevenFiftyFour fiftyFour
+    | EnumEightySevenFiftyFive fiftyFive
+    | EnumEightySevenFiftySix fiftySix
+    | EnumEightySevenFiftySeven fiftySeven
+    | EnumEightySevenFiftyEight fiftyEight
+    | EnumEightySevenFiftyNine fiftyNine
     | EnumEightySevenSixty sixty
-    | EnumEightySevenSixtyOne sixty-one
-    | EnumEightySevenSixtyTwo sixty-two
-    | EnumEightySevenSixtyThree sixty-three
-    | EnumEightySevenSixtyFour sixty-four
-    | EnumEightySevenSixtyFive sixty-five
-    | EnumEightySevenSixtySix sixty-six
-    | EnumEightySevenSixtySeven sixty-seven
-    | EnumEightySevenSixtyEight sixty-eight
-    | EnumEightySevenSixtyNine sixty-nine
+    | EnumEightySevenSixtyOne sixtyOne
+    | EnumEightySevenSixtyTwo sixtyTwo
+    | EnumEightySevenSixtyThree sixtyThree
+    | EnumEightySevenSixtyFour sixtyFour
+    | EnumEightySevenSixtyFive sixtyFive
+    | EnumEightySevenSixtySix sixtySix
+    | EnumEightySevenSixtySeven sixtySeven
+    | EnumEightySevenSixtyEight sixtyEight
+    | EnumEightySevenSixtyNine sixtyNine
     | EnumEightySevenSeventy seventy
-    | EnumEightySevenSeventyOne seventy-one
-    | EnumEightySevenSeventyTwo seventy-two
-    | EnumEightySevenSeventyThree seventy-three
-    | EnumEightySevenSeventyFour seventy-four
-    | EnumEightySevenSeventyFive seventy-five
-    | EnumEightySevenSeventySix seventy-six
-    | EnumEightySevenSeventySeven seventy-seven
-    | EnumEightySevenSeventyEight seventy-eight
-    | EnumEightySevenSeventyNine seventy-nine
+    | EnumEightySevenSeventyOne seventyOne
+    | EnumEightySevenSeventyTwo seventyTwo
+    | EnumEightySevenSeventyThree seventyThree
+    | EnumEightySevenSeventyFour seventyFour
+    | EnumEightySevenSeventyFive seventyFive
+    | EnumEightySevenSeventySix seventySix
+    | EnumEightySevenSeventySeven seventySeven
+    | EnumEightySevenSeventyEight seventyEight
+    | EnumEightySevenSeventyNine seventyNine
     | EnumEightySevenEighty eighty
-    | EnumEightySevenEightyOne eighty-one
-    | EnumEightySevenEightyTwo eighty-two
-    | EnumEightySevenEightyThree eighty-three
-    | EnumEightySevenEightyFour eighty-four
-    | EnumEightySevenEightyFive eighty-five
-    | EnumEightySevenEightySix eighty-six
-    | EnumEightySevenEightySeven eighty-seven
+    | EnumEightySevenEightyOne eightyOne
+    | EnumEightySevenEightyTwo eightyTwo
+    | EnumEightySevenEightyThree eightyThree
+    | EnumEightySevenEightyFour eightyFour
+    | EnumEightySevenEightyFive eightyFive
+    | EnumEightySevenEightySix eightySix
+    | EnumEightySevenEightySeven eightySeven
 
 
-type EnumEightyEight one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twenty-one twenty-two twenty-three twenty-four twenty-five twenty-six twenty-seven twenty-eight twenty-nine thirty thirty-one thirty-two thirty-three thirty-four thirty-five thirty-six thirty-seven thirty-eight thirty-nine forty forty-one forty-two forty-three forty-four forty-five forty-six forty-seven forty-eight forty-nine fifty fifty-one fifty-two fifty-three fifty-four fifty-five fifty-six fifty-seven fifty-eight fifty-nine sixty sixty-one sixty-two sixty-three sixty-four sixty-five sixty-six sixty-seven sixty-eight sixty-nine seventy seventy-one seventy-two seventy-three seventy-four seventy-five seventy-six seventy-seven seventy-eight seventy-nine eighty eighty-one eighty-two eighty-three eighty-four eighty-five eighty-six eighty-seven eighty-eight
+type EnumEightyEight one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twentyOne twentyTwo twentyThree twentyFour twentyFive twentySix twentySeven twentyEight twentyNine thirty thirtyOne thirtyTwo thirtyThree thirtyFour thirtyFive thirtySix thirtySeven thirtyEight thirtyNine forty fortyOne fortyTwo fortyThree fortyFour fortyFive fortySix fortySeven fortyEight fortyNine fifty fiftyOne fiftyTwo fiftyThree fiftyFour fiftyFive fiftySix fiftySeven fiftyEight fiftyNine sixty sixtyOne sixtyTwo sixtyThree sixtyFour sixtyFive sixtySix sixtySeven sixtyEight sixtyNine seventy seventyOne seventyTwo seventyThree seventyFour seventyFive seventySix seventySeven seventyEight seventyNine eighty eightyOne eightyTwo eightyThree eightyFour eightyFive eightySix eightySeven eightyEight
     = EnumEightyEightOne one
     | EnumEightyEightTwo two
     | EnumEightyEightThree three
@@ -54335,77 +54335,77 @@ type EnumEightyEight one two three four five six seven eight nine ten eleven twe
     | EnumEightyEightEighteen eighteen
     | EnumEightyEightNineteen nineteen
     | EnumEightyEightTwenty twenty
-    | EnumEightyEightTwentyOne twenty-one
-    | EnumEightyEightTwentyTwo twenty-two
-    | EnumEightyEightTwentyThree twenty-three
-    | EnumEightyEightTwentyFour twenty-four
-    | EnumEightyEightTwentyFive twenty-five
-    | EnumEightyEightTwentySix twenty-six
-    | EnumEightyEightTwentySeven twenty-seven
-    | EnumEightyEightTwentyEight twenty-eight
-    | EnumEightyEightTwentyNine twenty-nine
+    | EnumEightyEightTwentyOne twentyOne
+    | EnumEightyEightTwentyTwo twentyTwo
+    | EnumEightyEightTwentyThree twentyThree
+    | EnumEightyEightTwentyFour twentyFour
+    | EnumEightyEightTwentyFive twentyFive
+    | EnumEightyEightTwentySix twentySix
+    | EnumEightyEightTwentySeven twentySeven
+    | EnumEightyEightTwentyEight twentyEight
+    | EnumEightyEightTwentyNine twentyNine
     | EnumEightyEightThirty thirty
-    | EnumEightyEightThirtyOne thirty-one
-    | EnumEightyEightThirtyTwo thirty-two
-    | EnumEightyEightThirtyThree thirty-three
-    | EnumEightyEightThirtyFour thirty-four
-    | EnumEightyEightThirtyFive thirty-five
-    | EnumEightyEightThirtySix thirty-six
-    | EnumEightyEightThirtySeven thirty-seven
-    | EnumEightyEightThirtyEight thirty-eight
-    | EnumEightyEightThirtyNine thirty-nine
+    | EnumEightyEightThirtyOne thirtyOne
+    | EnumEightyEightThirtyTwo thirtyTwo
+    | EnumEightyEightThirtyThree thirtyThree
+    | EnumEightyEightThirtyFour thirtyFour
+    | EnumEightyEightThirtyFive thirtyFive
+    | EnumEightyEightThirtySix thirtySix
+    | EnumEightyEightThirtySeven thirtySeven
+    | EnumEightyEightThirtyEight thirtyEight
+    | EnumEightyEightThirtyNine thirtyNine
     | EnumEightyEightForty forty
-    | EnumEightyEightFortyOne forty-one
-    | EnumEightyEightFortyTwo forty-two
-    | EnumEightyEightFortyThree forty-three
-    | EnumEightyEightFortyFour forty-four
-    | EnumEightyEightFortyFive forty-five
-    | EnumEightyEightFortySix forty-six
-    | EnumEightyEightFortySeven forty-seven
-    | EnumEightyEightFortyEight forty-eight
-    | EnumEightyEightFortyNine forty-nine
+    | EnumEightyEightFortyOne fortyOne
+    | EnumEightyEightFortyTwo fortyTwo
+    | EnumEightyEightFortyThree fortyThree
+    | EnumEightyEightFortyFour fortyFour
+    | EnumEightyEightFortyFive fortyFive
+    | EnumEightyEightFortySix fortySix
+    | EnumEightyEightFortySeven fortySeven
+    | EnumEightyEightFortyEight fortyEight
+    | EnumEightyEightFortyNine fortyNine
     | EnumEightyEightFifty fifty
-    | EnumEightyEightFiftyOne fifty-one
-    | EnumEightyEightFiftyTwo fifty-two
-    | EnumEightyEightFiftyThree fifty-three
-    | EnumEightyEightFiftyFour fifty-four
-    | EnumEightyEightFiftyFive fifty-five
-    | EnumEightyEightFiftySix fifty-six
-    | EnumEightyEightFiftySeven fifty-seven
-    | EnumEightyEightFiftyEight fifty-eight
-    | EnumEightyEightFiftyNine fifty-nine
+    | EnumEightyEightFiftyOne fiftyOne
+    | EnumEightyEightFiftyTwo fiftyTwo
+    | EnumEightyEightFiftyThree fiftyThree
+    | EnumEightyEightFiftyFour fiftyFour
+    | EnumEightyEightFiftyFive fiftyFive
+    | EnumEightyEightFiftySix fiftySix
+    | EnumEightyEightFiftySeven fiftySeven
+    | EnumEightyEightFiftyEight fiftyEight
+    | EnumEightyEightFiftyNine fiftyNine
     | EnumEightyEightSixty sixty
-    | EnumEightyEightSixtyOne sixty-one
-    | EnumEightyEightSixtyTwo sixty-two
-    | EnumEightyEightSixtyThree sixty-three
-    | EnumEightyEightSixtyFour sixty-four
-    | EnumEightyEightSixtyFive sixty-five
-    | EnumEightyEightSixtySix sixty-six
-    | EnumEightyEightSixtySeven sixty-seven
-    | EnumEightyEightSixtyEight sixty-eight
-    | EnumEightyEightSixtyNine sixty-nine
+    | EnumEightyEightSixtyOne sixtyOne
+    | EnumEightyEightSixtyTwo sixtyTwo
+    | EnumEightyEightSixtyThree sixtyThree
+    | EnumEightyEightSixtyFour sixtyFour
+    | EnumEightyEightSixtyFive sixtyFive
+    | EnumEightyEightSixtySix sixtySix
+    | EnumEightyEightSixtySeven sixtySeven
+    | EnumEightyEightSixtyEight sixtyEight
+    | EnumEightyEightSixtyNine sixtyNine
     | EnumEightyEightSeventy seventy
-    | EnumEightyEightSeventyOne seventy-one
-    | EnumEightyEightSeventyTwo seventy-two
-    | EnumEightyEightSeventyThree seventy-three
-    | EnumEightyEightSeventyFour seventy-four
-    | EnumEightyEightSeventyFive seventy-five
-    | EnumEightyEightSeventySix seventy-six
-    | EnumEightyEightSeventySeven seventy-seven
-    | EnumEightyEightSeventyEight seventy-eight
-    | EnumEightyEightSeventyNine seventy-nine
+    | EnumEightyEightSeventyOne seventyOne
+    | EnumEightyEightSeventyTwo seventyTwo
+    | EnumEightyEightSeventyThree seventyThree
+    | EnumEightyEightSeventyFour seventyFour
+    | EnumEightyEightSeventyFive seventyFive
+    | EnumEightyEightSeventySix seventySix
+    | EnumEightyEightSeventySeven seventySeven
+    | EnumEightyEightSeventyEight seventyEight
+    | EnumEightyEightSeventyNine seventyNine
     | EnumEightyEightEighty eighty
-    | EnumEightyEightEightyOne eighty-one
-    | EnumEightyEightEightyTwo eighty-two
-    | EnumEightyEightEightyThree eighty-three
-    | EnumEightyEightEightyFour eighty-four
-    | EnumEightyEightEightyFive eighty-five
-    | EnumEightyEightEightySix eighty-six
-    | EnumEightyEightEightySeven eighty-seven
-    | EnumEightyEightEightyEight eighty-eight
+    | EnumEightyEightEightyOne eightyOne
+    | EnumEightyEightEightyTwo eightyTwo
+    | EnumEightyEightEightyThree eightyThree
+    | EnumEightyEightEightyFour eightyFour
+    | EnumEightyEightEightyFive eightyFive
+    | EnumEightyEightEightySix eightySix
+    | EnumEightyEightEightySeven eightySeven
+    | EnumEightyEightEightyEight eightyEight
 
 
-type EnumEightyNine one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twenty-one twenty-two twenty-three twenty-four twenty-five twenty-six twenty-seven twenty-eight twenty-nine thirty thirty-one thirty-two thirty-three thirty-four thirty-five thirty-six thirty-seven thirty-eight thirty-nine forty forty-one forty-two forty-three forty-four forty-five forty-six forty-seven forty-eight forty-nine fifty fifty-one fifty-two fifty-three fifty-four fifty-five fifty-six fifty-seven fifty-eight fifty-nine sixty sixty-one sixty-two sixty-three sixty-four sixty-five sixty-six sixty-seven sixty-eight sixty-nine seventy seventy-one seventy-two seventy-three seventy-four seventy-five seventy-six seventy-seven seventy-eight seventy-nine eighty eighty-one eighty-two eighty-three eighty-four eighty-five eighty-six eighty-seven eighty-eight eighty-nine
+type EnumEightyNine one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twentyOne twentyTwo twentyThree twentyFour twentyFive twentySix twentySeven twentyEight twentyNine thirty thirtyOne thirtyTwo thirtyThree thirtyFour thirtyFive thirtySix thirtySeven thirtyEight thirtyNine forty fortyOne fortyTwo fortyThree fortyFour fortyFive fortySix fortySeven fortyEight fortyNine fifty fiftyOne fiftyTwo fiftyThree fiftyFour fiftyFive fiftySix fiftySeven fiftyEight fiftyNine sixty sixtyOne sixtyTwo sixtyThree sixtyFour sixtyFive sixtySix sixtySeven sixtyEight sixtyNine seventy seventyOne seventyTwo seventyThree seventyFour seventyFive seventySix seventySeven seventyEight seventyNine eighty eightyOne eightyTwo eightyThree eightyFour eightyFive eightySix eightySeven eightyEight eightyNine
     = EnumEightyNineOne one
     | EnumEightyNineTwo two
     | EnumEightyNineThree three
@@ -54426,78 +54426,78 @@ type EnumEightyNine one two three four five six seven eight nine ten eleven twel
     | EnumEightyNineEighteen eighteen
     | EnumEightyNineNineteen nineteen
     | EnumEightyNineTwenty twenty
-    | EnumEightyNineTwentyOne twenty-one
-    | EnumEightyNineTwentyTwo twenty-two
-    | EnumEightyNineTwentyThree twenty-three
-    | EnumEightyNineTwentyFour twenty-four
-    | EnumEightyNineTwentyFive twenty-five
-    | EnumEightyNineTwentySix twenty-six
-    | EnumEightyNineTwentySeven twenty-seven
-    | EnumEightyNineTwentyEight twenty-eight
-    | EnumEightyNineTwentyNine twenty-nine
+    | EnumEightyNineTwentyOne twentyOne
+    | EnumEightyNineTwentyTwo twentyTwo
+    | EnumEightyNineTwentyThree twentyThree
+    | EnumEightyNineTwentyFour twentyFour
+    | EnumEightyNineTwentyFive twentyFive
+    | EnumEightyNineTwentySix twentySix
+    | EnumEightyNineTwentySeven twentySeven
+    | EnumEightyNineTwentyEight twentyEight
+    | EnumEightyNineTwentyNine twentyNine
     | EnumEightyNineThirty thirty
-    | EnumEightyNineThirtyOne thirty-one
-    | EnumEightyNineThirtyTwo thirty-two
-    | EnumEightyNineThirtyThree thirty-three
-    | EnumEightyNineThirtyFour thirty-four
-    | EnumEightyNineThirtyFive thirty-five
-    | EnumEightyNineThirtySix thirty-six
-    | EnumEightyNineThirtySeven thirty-seven
-    | EnumEightyNineThirtyEight thirty-eight
-    | EnumEightyNineThirtyNine thirty-nine
+    | EnumEightyNineThirtyOne thirtyOne
+    | EnumEightyNineThirtyTwo thirtyTwo
+    | EnumEightyNineThirtyThree thirtyThree
+    | EnumEightyNineThirtyFour thirtyFour
+    | EnumEightyNineThirtyFive thirtyFive
+    | EnumEightyNineThirtySix thirtySix
+    | EnumEightyNineThirtySeven thirtySeven
+    | EnumEightyNineThirtyEight thirtyEight
+    | EnumEightyNineThirtyNine thirtyNine
     | EnumEightyNineForty forty
-    | EnumEightyNineFortyOne forty-one
-    | EnumEightyNineFortyTwo forty-two
-    | EnumEightyNineFortyThree forty-three
-    | EnumEightyNineFortyFour forty-four
-    | EnumEightyNineFortyFive forty-five
-    | EnumEightyNineFortySix forty-six
-    | EnumEightyNineFortySeven forty-seven
-    | EnumEightyNineFortyEight forty-eight
-    | EnumEightyNineFortyNine forty-nine
+    | EnumEightyNineFortyOne fortyOne
+    | EnumEightyNineFortyTwo fortyTwo
+    | EnumEightyNineFortyThree fortyThree
+    | EnumEightyNineFortyFour fortyFour
+    | EnumEightyNineFortyFive fortyFive
+    | EnumEightyNineFortySix fortySix
+    | EnumEightyNineFortySeven fortySeven
+    | EnumEightyNineFortyEight fortyEight
+    | EnumEightyNineFortyNine fortyNine
     | EnumEightyNineFifty fifty
-    | EnumEightyNineFiftyOne fifty-one
-    | EnumEightyNineFiftyTwo fifty-two
-    | EnumEightyNineFiftyThree fifty-three
-    | EnumEightyNineFiftyFour fifty-four
-    | EnumEightyNineFiftyFive fifty-five
-    | EnumEightyNineFiftySix fifty-six
-    | EnumEightyNineFiftySeven fifty-seven
-    | EnumEightyNineFiftyEight fifty-eight
-    | EnumEightyNineFiftyNine fifty-nine
+    | EnumEightyNineFiftyOne fiftyOne
+    | EnumEightyNineFiftyTwo fiftyTwo
+    | EnumEightyNineFiftyThree fiftyThree
+    | EnumEightyNineFiftyFour fiftyFour
+    | EnumEightyNineFiftyFive fiftyFive
+    | EnumEightyNineFiftySix fiftySix
+    | EnumEightyNineFiftySeven fiftySeven
+    | EnumEightyNineFiftyEight fiftyEight
+    | EnumEightyNineFiftyNine fiftyNine
     | EnumEightyNineSixty sixty
-    | EnumEightyNineSixtyOne sixty-one
-    | EnumEightyNineSixtyTwo sixty-two
-    | EnumEightyNineSixtyThree sixty-three
-    | EnumEightyNineSixtyFour sixty-four
-    | EnumEightyNineSixtyFive sixty-five
-    | EnumEightyNineSixtySix sixty-six
-    | EnumEightyNineSixtySeven sixty-seven
-    | EnumEightyNineSixtyEight sixty-eight
-    | EnumEightyNineSixtyNine sixty-nine
+    | EnumEightyNineSixtyOne sixtyOne
+    | EnumEightyNineSixtyTwo sixtyTwo
+    | EnumEightyNineSixtyThree sixtyThree
+    | EnumEightyNineSixtyFour sixtyFour
+    | EnumEightyNineSixtyFive sixtyFive
+    | EnumEightyNineSixtySix sixtySix
+    | EnumEightyNineSixtySeven sixtySeven
+    | EnumEightyNineSixtyEight sixtyEight
+    | EnumEightyNineSixtyNine sixtyNine
     | EnumEightyNineSeventy seventy
-    | EnumEightyNineSeventyOne seventy-one
-    | EnumEightyNineSeventyTwo seventy-two
-    | EnumEightyNineSeventyThree seventy-three
-    | EnumEightyNineSeventyFour seventy-four
-    | EnumEightyNineSeventyFive seventy-five
-    | EnumEightyNineSeventySix seventy-six
-    | EnumEightyNineSeventySeven seventy-seven
-    | EnumEightyNineSeventyEight seventy-eight
-    | EnumEightyNineSeventyNine seventy-nine
+    | EnumEightyNineSeventyOne seventyOne
+    | EnumEightyNineSeventyTwo seventyTwo
+    | EnumEightyNineSeventyThree seventyThree
+    | EnumEightyNineSeventyFour seventyFour
+    | EnumEightyNineSeventyFive seventyFive
+    | EnumEightyNineSeventySix seventySix
+    | EnumEightyNineSeventySeven seventySeven
+    | EnumEightyNineSeventyEight seventyEight
+    | EnumEightyNineSeventyNine seventyNine
     | EnumEightyNineEighty eighty
-    | EnumEightyNineEightyOne eighty-one
-    | EnumEightyNineEightyTwo eighty-two
-    | EnumEightyNineEightyThree eighty-three
-    | EnumEightyNineEightyFour eighty-four
-    | EnumEightyNineEightyFive eighty-five
-    | EnumEightyNineEightySix eighty-six
-    | EnumEightyNineEightySeven eighty-seven
-    | EnumEightyNineEightyEight eighty-eight
-    | EnumEightyNineEightyNine eighty-nine
+    | EnumEightyNineEightyOne eightyOne
+    | EnumEightyNineEightyTwo eightyTwo
+    | EnumEightyNineEightyThree eightyThree
+    | EnumEightyNineEightyFour eightyFour
+    | EnumEightyNineEightyFive eightyFive
+    | EnumEightyNineEightySix eightySix
+    | EnumEightyNineEightySeven eightySeven
+    | EnumEightyNineEightyEight eightyEight
+    | EnumEightyNineEightyNine eightyNine
 
 
-type EnumNinety one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twenty-one twenty-two twenty-three twenty-four twenty-five twenty-six twenty-seven twenty-eight twenty-nine thirty thirty-one thirty-two thirty-three thirty-four thirty-five thirty-six thirty-seven thirty-eight thirty-nine forty forty-one forty-two forty-three forty-four forty-five forty-six forty-seven forty-eight forty-nine fifty fifty-one fifty-two fifty-three fifty-four fifty-five fifty-six fifty-seven fifty-eight fifty-nine sixty sixty-one sixty-two sixty-three sixty-four sixty-five sixty-six sixty-seven sixty-eight sixty-nine seventy seventy-one seventy-two seventy-three seventy-four seventy-five seventy-six seventy-seven seventy-eight seventy-nine eighty eighty-one eighty-two eighty-three eighty-four eighty-five eighty-six eighty-seven eighty-eight eighty-nine ninety
+type EnumNinety one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twentyOne twentyTwo twentyThree twentyFour twentyFive twentySix twentySeven twentyEight twentyNine thirty thirtyOne thirtyTwo thirtyThree thirtyFour thirtyFive thirtySix thirtySeven thirtyEight thirtyNine forty fortyOne fortyTwo fortyThree fortyFour fortyFive fortySix fortySeven fortyEight fortyNine fifty fiftyOne fiftyTwo fiftyThree fiftyFour fiftyFive fiftySix fiftySeven fiftyEight fiftyNine sixty sixtyOne sixtyTwo sixtyThree sixtyFour sixtyFive sixtySix sixtySeven sixtyEight sixtyNine seventy seventyOne seventyTwo seventyThree seventyFour seventyFive seventySix seventySeven seventyEight seventyNine eighty eightyOne eightyTwo eightyThree eightyFour eightyFive eightySix eightySeven eightyEight eightyNine ninety
     = EnumNinetyOne one
     | EnumNinetyTwo two
     | EnumNinetyThree three
@@ -54518,79 +54518,79 @@ type EnumNinety one two three four five six seven eight nine ten eleven twelve t
     | EnumNinetyEighteen eighteen
     | EnumNinetyNineteen nineteen
     | EnumNinetyTwenty twenty
-    | EnumNinetyTwentyOne twenty-one
-    | EnumNinetyTwentyTwo twenty-two
-    | EnumNinetyTwentyThree twenty-three
-    | EnumNinetyTwentyFour twenty-four
-    | EnumNinetyTwentyFive twenty-five
-    | EnumNinetyTwentySix twenty-six
-    | EnumNinetyTwentySeven twenty-seven
-    | EnumNinetyTwentyEight twenty-eight
-    | EnumNinetyTwentyNine twenty-nine
+    | EnumNinetyTwentyOne twentyOne
+    | EnumNinetyTwentyTwo twentyTwo
+    | EnumNinetyTwentyThree twentyThree
+    | EnumNinetyTwentyFour twentyFour
+    | EnumNinetyTwentyFive twentyFive
+    | EnumNinetyTwentySix twentySix
+    | EnumNinetyTwentySeven twentySeven
+    | EnumNinetyTwentyEight twentyEight
+    | EnumNinetyTwentyNine twentyNine
     | EnumNinetyThirty thirty
-    | EnumNinetyThirtyOne thirty-one
-    | EnumNinetyThirtyTwo thirty-two
-    | EnumNinetyThirtyThree thirty-three
-    | EnumNinetyThirtyFour thirty-four
-    | EnumNinetyThirtyFive thirty-five
-    | EnumNinetyThirtySix thirty-six
-    | EnumNinetyThirtySeven thirty-seven
-    | EnumNinetyThirtyEight thirty-eight
-    | EnumNinetyThirtyNine thirty-nine
+    | EnumNinetyThirtyOne thirtyOne
+    | EnumNinetyThirtyTwo thirtyTwo
+    | EnumNinetyThirtyThree thirtyThree
+    | EnumNinetyThirtyFour thirtyFour
+    | EnumNinetyThirtyFive thirtyFive
+    | EnumNinetyThirtySix thirtySix
+    | EnumNinetyThirtySeven thirtySeven
+    | EnumNinetyThirtyEight thirtyEight
+    | EnumNinetyThirtyNine thirtyNine
     | EnumNinetyForty forty
-    | EnumNinetyFortyOne forty-one
-    | EnumNinetyFortyTwo forty-two
-    | EnumNinetyFortyThree forty-three
-    | EnumNinetyFortyFour forty-four
-    | EnumNinetyFortyFive forty-five
-    | EnumNinetyFortySix forty-six
-    | EnumNinetyFortySeven forty-seven
-    | EnumNinetyFortyEight forty-eight
-    | EnumNinetyFortyNine forty-nine
+    | EnumNinetyFortyOne fortyOne
+    | EnumNinetyFortyTwo fortyTwo
+    | EnumNinetyFortyThree fortyThree
+    | EnumNinetyFortyFour fortyFour
+    | EnumNinetyFortyFive fortyFive
+    | EnumNinetyFortySix fortySix
+    | EnumNinetyFortySeven fortySeven
+    | EnumNinetyFortyEight fortyEight
+    | EnumNinetyFortyNine fortyNine
     | EnumNinetyFifty fifty
-    | EnumNinetyFiftyOne fifty-one
-    | EnumNinetyFiftyTwo fifty-two
-    | EnumNinetyFiftyThree fifty-three
-    | EnumNinetyFiftyFour fifty-four
-    | EnumNinetyFiftyFive fifty-five
-    | EnumNinetyFiftySix fifty-six
-    | EnumNinetyFiftySeven fifty-seven
-    | EnumNinetyFiftyEight fifty-eight
-    | EnumNinetyFiftyNine fifty-nine
+    | EnumNinetyFiftyOne fiftyOne
+    | EnumNinetyFiftyTwo fiftyTwo
+    | EnumNinetyFiftyThree fiftyThree
+    | EnumNinetyFiftyFour fiftyFour
+    | EnumNinetyFiftyFive fiftyFive
+    | EnumNinetyFiftySix fiftySix
+    | EnumNinetyFiftySeven fiftySeven
+    | EnumNinetyFiftyEight fiftyEight
+    | EnumNinetyFiftyNine fiftyNine
     | EnumNinetySixty sixty
-    | EnumNinetySixtyOne sixty-one
-    | EnumNinetySixtyTwo sixty-two
-    | EnumNinetySixtyThree sixty-three
-    | EnumNinetySixtyFour sixty-four
-    | EnumNinetySixtyFive sixty-five
-    | EnumNinetySixtySix sixty-six
-    | EnumNinetySixtySeven sixty-seven
-    | EnumNinetySixtyEight sixty-eight
-    | EnumNinetySixtyNine sixty-nine
+    | EnumNinetySixtyOne sixtyOne
+    | EnumNinetySixtyTwo sixtyTwo
+    | EnumNinetySixtyThree sixtyThree
+    | EnumNinetySixtyFour sixtyFour
+    | EnumNinetySixtyFive sixtyFive
+    | EnumNinetySixtySix sixtySix
+    | EnumNinetySixtySeven sixtySeven
+    | EnumNinetySixtyEight sixtyEight
+    | EnumNinetySixtyNine sixtyNine
     | EnumNinetySeventy seventy
-    | EnumNinetySeventyOne seventy-one
-    | EnumNinetySeventyTwo seventy-two
-    | EnumNinetySeventyThree seventy-three
-    | EnumNinetySeventyFour seventy-four
-    | EnumNinetySeventyFive seventy-five
-    | EnumNinetySeventySix seventy-six
-    | EnumNinetySeventySeven seventy-seven
-    | EnumNinetySeventyEight seventy-eight
-    | EnumNinetySeventyNine seventy-nine
+    | EnumNinetySeventyOne seventyOne
+    | EnumNinetySeventyTwo seventyTwo
+    | EnumNinetySeventyThree seventyThree
+    | EnumNinetySeventyFour seventyFour
+    | EnumNinetySeventyFive seventyFive
+    | EnumNinetySeventySix seventySix
+    | EnumNinetySeventySeven seventySeven
+    | EnumNinetySeventyEight seventyEight
+    | EnumNinetySeventyNine seventyNine
     | EnumNinetyEighty eighty
-    | EnumNinetyEightyOne eighty-one
-    | EnumNinetyEightyTwo eighty-two
-    | EnumNinetyEightyThree eighty-three
-    | EnumNinetyEightyFour eighty-four
-    | EnumNinetyEightyFive eighty-five
-    | EnumNinetyEightySix eighty-six
-    | EnumNinetyEightySeven eighty-seven
-    | EnumNinetyEightyEight eighty-eight
-    | EnumNinetyEightyNine eighty-nine
+    | EnumNinetyEightyOne eightyOne
+    | EnumNinetyEightyTwo eightyTwo
+    | EnumNinetyEightyThree eightyThree
+    | EnumNinetyEightyFour eightyFour
+    | EnumNinetyEightyFive eightyFive
+    | EnumNinetyEightySix eightySix
+    | EnumNinetyEightySeven eightySeven
+    | EnumNinetyEightyEight eightyEight
+    | EnumNinetyEightyNine eightyNine
     | EnumNinetyNinety ninety
 
 
-type EnumNinetyOne one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twenty-one twenty-two twenty-three twenty-four twenty-five twenty-six twenty-seven twenty-eight twenty-nine thirty thirty-one thirty-two thirty-three thirty-four thirty-five thirty-six thirty-seven thirty-eight thirty-nine forty forty-one forty-two forty-three forty-four forty-five forty-six forty-seven forty-eight forty-nine fifty fifty-one fifty-two fifty-three fifty-four fifty-five fifty-six fifty-seven fifty-eight fifty-nine sixty sixty-one sixty-two sixty-three sixty-four sixty-five sixty-six sixty-seven sixty-eight sixty-nine seventy seventy-one seventy-two seventy-three seventy-four seventy-five seventy-six seventy-seven seventy-eight seventy-nine eighty eighty-one eighty-two eighty-three eighty-four eighty-five eighty-six eighty-seven eighty-eight eighty-nine ninety ninety-one
+type EnumNinetyOne one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twentyOne twentyTwo twentyThree twentyFour twentyFive twentySix twentySeven twentyEight twentyNine thirty thirtyOne thirtyTwo thirtyThree thirtyFour thirtyFive thirtySix thirtySeven thirtyEight thirtyNine forty fortyOne fortyTwo fortyThree fortyFour fortyFive fortySix fortySeven fortyEight fortyNine fifty fiftyOne fiftyTwo fiftyThree fiftyFour fiftyFive fiftySix fiftySeven fiftyEight fiftyNine sixty sixtyOne sixtyTwo sixtyThree sixtyFour sixtyFive sixtySix sixtySeven sixtyEight sixtyNine seventy seventyOne seventyTwo seventyThree seventyFour seventyFive seventySix seventySeven seventyEight seventyNine eighty eightyOne eightyTwo eightyThree eightyFour eightyFive eightySix eightySeven eightyEight eightyNine ninety ninetyOne
     = EnumNinetyOneOne one
     | EnumNinetyOneTwo two
     | EnumNinetyOneThree three
@@ -54611,80 +54611,80 @@ type EnumNinetyOne one two three four five six seven eight nine ten eleven twelv
     | EnumNinetyOneEighteen eighteen
     | EnumNinetyOneNineteen nineteen
     | EnumNinetyOneTwenty twenty
-    | EnumNinetyOneTwentyOne twenty-one
-    | EnumNinetyOneTwentyTwo twenty-two
-    | EnumNinetyOneTwentyThree twenty-three
-    | EnumNinetyOneTwentyFour twenty-four
-    | EnumNinetyOneTwentyFive twenty-five
-    | EnumNinetyOneTwentySix twenty-six
-    | EnumNinetyOneTwentySeven twenty-seven
-    | EnumNinetyOneTwentyEight twenty-eight
-    | EnumNinetyOneTwentyNine twenty-nine
+    | EnumNinetyOneTwentyOne twentyOne
+    | EnumNinetyOneTwentyTwo twentyTwo
+    | EnumNinetyOneTwentyThree twentyThree
+    | EnumNinetyOneTwentyFour twentyFour
+    | EnumNinetyOneTwentyFive twentyFive
+    | EnumNinetyOneTwentySix twentySix
+    | EnumNinetyOneTwentySeven twentySeven
+    | EnumNinetyOneTwentyEight twentyEight
+    | EnumNinetyOneTwentyNine twentyNine
     | EnumNinetyOneThirty thirty
-    | EnumNinetyOneThirtyOne thirty-one
-    | EnumNinetyOneThirtyTwo thirty-two
-    | EnumNinetyOneThirtyThree thirty-three
-    | EnumNinetyOneThirtyFour thirty-four
-    | EnumNinetyOneThirtyFive thirty-five
-    | EnumNinetyOneThirtySix thirty-six
-    | EnumNinetyOneThirtySeven thirty-seven
-    | EnumNinetyOneThirtyEight thirty-eight
-    | EnumNinetyOneThirtyNine thirty-nine
+    | EnumNinetyOneThirtyOne thirtyOne
+    | EnumNinetyOneThirtyTwo thirtyTwo
+    | EnumNinetyOneThirtyThree thirtyThree
+    | EnumNinetyOneThirtyFour thirtyFour
+    | EnumNinetyOneThirtyFive thirtyFive
+    | EnumNinetyOneThirtySix thirtySix
+    | EnumNinetyOneThirtySeven thirtySeven
+    | EnumNinetyOneThirtyEight thirtyEight
+    | EnumNinetyOneThirtyNine thirtyNine
     | EnumNinetyOneForty forty
-    | EnumNinetyOneFortyOne forty-one
-    | EnumNinetyOneFortyTwo forty-two
-    | EnumNinetyOneFortyThree forty-three
-    | EnumNinetyOneFortyFour forty-four
-    | EnumNinetyOneFortyFive forty-five
-    | EnumNinetyOneFortySix forty-six
-    | EnumNinetyOneFortySeven forty-seven
-    | EnumNinetyOneFortyEight forty-eight
-    | EnumNinetyOneFortyNine forty-nine
+    | EnumNinetyOneFortyOne fortyOne
+    | EnumNinetyOneFortyTwo fortyTwo
+    | EnumNinetyOneFortyThree fortyThree
+    | EnumNinetyOneFortyFour fortyFour
+    | EnumNinetyOneFortyFive fortyFive
+    | EnumNinetyOneFortySix fortySix
+    | EnumNinetyOneFortySeven fortySeven
+    | EnumNinetyOneFortyEight fortyEight
+    | EnumNinetyOneFortyNine fortyNine
     | EnumNinetyOneFifty fifty
-    | EnumNinetyOneFiftyOne fifty-one
-    | EnumNinetyOneFiftyTwo fifty-two
-    | EnumNinetyOneFiftyThree fifty-three
-    | EnumNinetyOneFiftyFour fifty-four
-    | EnumNinetyOneFiftyFive fifty-five
-    | EnumNinetyOneFiftySix fifty-six
-    | EnumNinetyOneFiftySeven fifty-seven
-    | EnumNinetyOneFiftyEight fifty-eight
-    | EnumNinetyOneFiftyNine fifty-nine
+    | EnumNinetyOneFiftyOne fiftyOne
+    | EnumNinetyOneFiftyTwo fiftyTwo
+    | EnumNinetyOneFiftyThree fiftyThree
+    | EnumNinetyOneFiftyFour fiftyFour
+    | EnumNinetyOneFiftyFive fiftyFive
+    | EnumNinetyOneFiftySix fiftySix
+    | EnumNinetyOneFiftySeven fiftySeven
+    | EnumNinetyOneFiftyEight fiftyEight
+    | EnumNinetyOneFiftyNine fiftyNine
     | EnumNinetyOneSixty sixty
-    | EnumNinetyOneSixtyOne sixty-one
-    | EnumNinetyOneSixtyTwo sixty-two
-    | EnumNinetyOneSixtyThree sixty-three
-    | EnumNinetyOneSixtyFour sixty-four
-    | EnumNinetyOneSixtyFive sixty-five
-    | EnumNinetyOneSixtySix sixty-six
-    | EnumNinetyOneSixtySeven sixty-seven
-    | EnumNinetyOneSixtyEight sixty-eight
-    | EnumNinetyOneSixtyNine sixty-nine
+    | EnumNinetyOneSixtyOne sixtyOne
+    | EnumNinetyOneSixtyTwo sixtyTwo
+    | EnumNinetyOneSixtyThree sixtyThree
+    | EnumNinetyOneSixtyFour sixtyFour
+    | EnumNinetyOneSixtyFive sixtyFive
+    | EnumNinetyOneSixtySix sixtySix
+    | EnumNinetyOneSixtySeven sixtySeven
+    | EnumNinetyOneSixtyEight sixtyEight
+    | EnumNinetyOneSixtyNine sixtyNine
     | EnumNinetyOneSeventy seventy
-    | EnumNinetyOneSeventyOne seventy-one
-    | EnumNinetyOneSeventyTwo seventy-two
-    | EnumNinetyOneSeventyThree seventy-three
-    | EnumNinetyOneSeventyFour seventy-four
-    | EnumNinetyOneSeventyFive seventy-five
-    | EnumNinetyOneSeventySix seventy-six
-    | EnumNinetyOneSeventySeven seventy-seven
-    | EnumNinetyOneSeventyEight seventy-eight
-    | EnumNinetyOneSeventyNine seventy-nine
+    | EnumNinetyOneSeventyOne seventyOne
+    | EnumNinetyOneSeventyTwo seventyTwo
+    | EnumNinetyOneSeventyThree seventyThree
+    | EnumNinetyOneSeventyFour seventyFour
+    | EnumNinetyOneSeventyFive seventyFive
+    | EnumNinetyOneSeventySix seventySix
+    | EnumNinetyOneSeventySeven seventySeven
+    | EnumNinetyOneSeventyEight seventyEight
+    | EnumNinetyOneSeventyNine seventyNine
     | EnumNinetyOneEighty eighty
-    | EnumNinetyOneEightyOne eighty-one
-    | EnumNinetyOneEightyTwo eighty-two
-    | EnumNinetyOneEightyThree eighty-three
-    | EnumNinetyOneEightyFour eighty-four
-    | EnumNinetyOneEightyFive eighty-five
-    | EnumNinetyOneEightySix eighty-six
-    | EnumNinetyOneEightySeven eighty-seven
-    | EnumNinetyOneEightyEight eighty-eight
-    | EnumNinetyOneEightyNine eighty-nine
+    | EnumNinetyOneEightyOne eightyOne
+    | EnumNinetyOneEightyTwo eightyTwo
+    | EnumNinetyOneEightyThree eightyThree
+    | EnumNinetyOneEightyFour eightyFour
+    | EnumNinetyOneEightyFive eightyFive
+    | EnumNinetyOneEightySix eightySix
+    | EnumNinetyOneEightySeven eightySeven
+    | EnumNinetyOneEightyEight eightyEight
+    | EnumNinetyOneEightyNine eightyNine
     | EnumNinetyOneNinety ninety
-    | EnumNinetyOneNinetyOne ninety-one
+    | EnumNinetyOneNinetyOne ninetyOne
 
 
-type EnumNinetyTwo one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twenty-one twenty-two twenty-three twenty-four twenty-five twenty-six twenty-seven twenty-eight twenty-nine thirty thirty-one thirty-two thirty-three thirty-four thirty-five thirty-six thirty-seven thirty-eight thirty-nine forty forty-one forty-two forty-three forty-four forty-five forty-six forty-seven forty-eight forty-nine fifty fifty-one fifty-two fifty-three fifty-four fifty-five fifty-six fifty-seven fifty-eight fifty-nine sixty sixty-one sixty-two sixty-three sixty-four sixty-five sixty-six sixty-seven sixty-eight sixty-nine seventy seventy-one seventy-two seventy-three seventy-four seventy-five seventy-six seventy-seven seventy-eight seventy-nine eighty eighty-one eighty-two eighty-three eighty-four eighty-five eighty-six eighty-seven eighty-eight eighty-nine ninety ninety-one ninety-two
+type EnumNinetyTwo one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twentyOne twentyTwo twentyThree twentyFour twentyFive twentySix twentySeven twentyEight twentyNine thirty thirtyOne thirtyTwo thirtyThree thirtyFour thirtyFive thirtySix thirtySeven thirtyEight thirtyNine forty fortyOne fortyTwo fortyThree fortyFour fortyFive fortySix fortySeven fortyEight fortyNine fifty fiftyOne fiftyTwo fiftyThree fiftyFour fiftyFive fiftySix fiftySeven fiftyEight fiftyNine sixty sixtyOne sixtyTwo sixtyThree sixtyFour sixtyFive sixtySix sixtySeven sixtyEight sixtyNine seventy seventyOne seventyTwo seventyThree seventyFour seventyFive seventySix seventySeven seventyEight seventyNine eighty eightyOne eightyTwo eightyThree eightyFour eightyFive eightySix eightySeven eightyEight eightyNine ninety ninetyOne ninetyTwo
     = EnumNinetyTwoOne one
     | EnumNinetyTwoTwo two
     | EnumNinetyTwoThree three
@@ -54705,81 +54705,81 @@ type EnumNinetyTwo one two three four five six seven eight nine ten eleven twelv
     | EnumNinetyTwoEighteen eighteen
     | EnumNinetyTwoNineteen nineteen
     | EnumNinetyTwoTwenty twenty
-    | EnumNinetyTwoTwentyOne twenty-one
-    | EnumNinetyTwoTwentyTwo twenty-two
-    | EnumNinetyTwoTwentyThree twenty-three
-    | EnumNinetyTwoTwentyFour twenty-four
-    | EnumNinetyTwoTwentyFive twenty-five
-    | EnumNinetyTwoTwentySix twenty-six
-    | EnumNinetyTwoTwentySeven twenty-seven
-    | EnumNinetyTwoTwentyEight twenty-eight
-    | EnumNinetyTwoTwentyNine twenty-nine
+    | EnumNinetyTwoTwentyOne twentyOne
+    | EnumNinetyTwoTwentyTwo twentyTwo
+    | EnumNinetyTwoTwentyThree twentyThree
+    | EnumNinetyTwoTwentyFour twentyFour
+    | EnumNinetyTwoTwentyFive twentyFive
+    | EnumNinetyTwoTwentySix twentySix
+    | EnumNinetyTwoTwentySeven twentySeven
+    | EnumNinetyTwoTwentyEight twentyEight
+    | EnumNinetyTwoTwentyNine twentyNine
     | EnumNinetyTwoThirty thirty
-    | EnumNinetyTwoThirtyOne thirty-one
-    | EnumNinetyTwoThirtyTwo thirty-two
-    | EnumNinetyTwoThirtyThree thirty-three
-    | EnumNinetyTwoThirtyFour thirty-four
-    | EnumNinetyTwoThirtyFive thirty-five
-    | EnumNinetyTwoThirtySix thirty-six
-    | EnumNinetyTwoThirtySeven thirty-seven
-    | EnumNinetyTwoThirtyEight thirty-eight
-    | EnumNinetyTwoThirtyNine thirty-nine
+    | EnumNinetyTwoThirtyOne thirtyOne
+    | EnumNinetyTwoThirtyTwo thirtyTwo
+    | EnumNinetyTwoThirtyThree thirtyThree
+    | EnumNinetyTwoThirtyFour thirtyFour
+    | EnumNinetyTwoThirtyFive thirtyFive
+    | EnumNinetyTwoThirtySix thirtySix
+    | EnumNinetyTwoThirtySeven thirtySeven
+    | EnumNinetyTwoThirtyEight thirtyEight
+    | EnumNinetyTwoThirtyNine thirtyNine
     | EnumNinetyTwoForty forty
-    | EnumNinetyTwoFortyOne forty-one
-    | EnumNinetyTwoFortyTwo forty-two
-    | EnumNinetyTwoFortyThree forty-three
-    | EnumNinetyTwoFortyFour forty-four
-    | EnumNinetyTwoFortyFive forty-five
-    | EnumNinetyTwoFortySix forty-six
-    | EnumNinetyTwoFortySeven forty-seven
-    | EnumNinetyTwoFortyEight forty-eight
-    | EnumNinetyTwoFortyNine forty-nine
+    | EnumNinetyTwoFortyOne fortyOne
+    | EnumNinetyTwoFortyTwo fortyTwo
+    | EnumNinetyTwoFortyThree fortyThree
+    | EnumNinetyTwoFortyFour fortyFour
+    | EnumNinetyTwoFortyFive fortyFive
+    | EnumNinetyTwoFortySix fortySix
+    | EnumNinetyTwoFortySeven fortySeven
+    | EnumNinetyTwoFortyEight fortyEight
+    | EnumNinetyTwoFortyNine fortyNine
     | EnumNinetyTwoFifty fifty
-    | EnumNinetyTwoFiftyOne fifty-one
-    | EnumNinetyTwoFiftyTwo fifty-two
-    | EnumNinetyTwoFiftyThree fifty-three
-    | EnumNinetyTwoFiftyFour fifty-four
-    | EnumNinetyTwoFiftyFive fifty-five
-    | EnumNinetyTwoFiftySix fifty-six
-    | EnumNinetyTwoFiftySeven fifty-seven
-    | EnumNinetyTwoFiftyEight fifty-eight
-    | EnumNinetyTwoFiftyNine fifty-nine
+    | EnumNinetyTwoFiftyOne fiftyOne
+    | EnumNinetyTwoFiftyTwo fiftyTwo
+    | EnumNinetyTwoFiftyThree fiftyThree
+    | EnumNinetyTwoFiftyFour fiftyFour
+    | EnumNinetyTwoFiftyFive fiftyFive
+    | EnumNinetyTwoFiftySix fiftySix
+    | EnumNinetyTwoFiftySeven fiftySeven
+    | EnumNinetyTwoFiftyEight fiftyEight
+    | EnumNinetyTwoFiftyNine fiftyNine
     | EnumNinetyTwoSixty sixty
-    | EnumNinetyTwoSixtyOne sixty-one
-    | EnumNinetyTwoSixtyTwo sixty-two
-    | EnumNinetyTwoSixtyThree sixty-three
-    | EnumNinetyTwoSixtyFour sixty-four
-    | EnumNinetyTwoSixtyFive sixty-five
-    | EnumNinetyTwoSixtySix sixty-six
-    | EnumNinetyTwoSixtySeven sixty-seven
-    | EnumNinetyTwoSixtyEight sixty-eight
-    | EnumNinetyTwoSixtyNine sixty-nine
+    | EnumNinetyTwoSixtyOne sixtyOne
+    | EnumNinetyTwoSixtyTwo sixtyTwo
+    | EnumNinetyTwoSixtyThree sixtyThree
+    | EnumNinetyTwoSixtyFour sixtyFour
+    | EnumNinetyTwoSixtyFive sixtyFive
+    | EnumNinetyTwoSixtySix sixtySix
+    | EnumNinetyTwoSixtySeven sixtySeven
+    | EnumNinetyTwoSixtyEight sixtyEight
+    | EnumNinetyTwoSixtyNine sixtyNine
     | EnumNinetyTwoSeventy seventy
-    | EnumNinetyTwoSeventyOne seventy-one
-    | EnumNinetyTwoSeventyTwo seventy-two
-    | EnumNinetyTwoSeventyThree seventy-three
-    | EnumNinetyTwoSeventyFour seventy-four
-    | EnumNinetyTwoSeventyFive seventy-five
-    | EnumNinetyTwoSeventySix seventy-six
-    | EnumNinetyTwoSeventySeven seventy-seven
-    | EnumNinetyTwoSeventyEight seventy-eight
-    | EnumNinetyTwoSeventyNine seventy-nine
+    | EnumNinetyTwoSeventyOne seventyOne
+    | EnumNinetyTwoSeventyTwo seventyTwo
+    | EnumNinetyTwoSeventyThree seventyThree
+    | EnumNinetyTwoSeventyFour seventyFour
+    | EnumNinetyTwoSeventyFive seventyFive
+    | EnumNinetyTwoSeventySix seventySix
+    | EnumNinetyTwoSeventySeven seventySeven
+    | EnumNinetyTwoSeventyEight seventyEight
+    | EnumNinetyTwoSeventyNine seventyNine
     | EnumNinetyTwoEighty eighty
-    | EnumNinetyTwoEightyOne eighty-one
-    | EnumNinetyTwoEightyTwo eighty-two
-    | EnumNinetyTwoEightyThree eighty-three
-    | EnumNinetyTwoEightyFour eighty-four
-    | EnumNinetyTwoEightyFive eighty-five
-    | EnumNinetyTwoEightySix eighty-six
-    | EnumNinetyTwoEightySeven eighty-seven
-    | EnumNinetyTwoEightyEight eighty-eight
-    | EnumNinetyTwoEightyNine eighty-nine
+    | EnumNinetyTwoEightyOne eightyOne
+    | EnumNinetyTwoEightyTwo eightyTwo
+    | EnumNinetyTwoEightyThree eightyThree
+    | EnumNinetyTwoEightyFour eightyFour
+    | EnumNinetyTwoEightyFive eightyFive
+    | EnumNinetyTwoEightySix eightySix
+    | EnumNinetyTwoEightySeven eightySeven
+    | EnumNinetyTwoEightyEight eightyEight
+    | EnumNinetyTwoEightyNine eightyNine
     | EnumNinetyTwoNinety ninety
-    | EnumNinetyTwoNinetyOne ninety-one
-    | EnumNinetyTwoNinetyTwo ninety-two
+    | EnumNinetyTwoNinetyOne ninetyOne
+    | EnumNinetyTwoNinetyTwo ninetyTwo
 
 
-type EnumNinetyThree one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twenty-one twenty-two twenty-three twenty-four twenty-five twenty-six twenty-seven twenty-eight twenty-nine thirty thirty-one thirty-two thirty-three thirty-four thirty-five thirty-six thirty-seven thirty-eight thirty-nine forty forty-one forty-two forty-three forty-four forty-five forty-six forty-seven forty-eight forty-nine fifty fifty-one fifty-two fifty-three fifty-four fifty-five fifty-six fifty-seven fifty-eight fifty-nine sixty sixty-one sixty-two sixty-three sixty-four sixty-five sixty-six sixty-seven sixty-eight sixty-nine seventy seventy-one seventy-two seventy-three seventy-four seventy-five seventy-six seventy-seven seventy-eight seventy-nine eighty eighty-one eighty-two eighty-three eighty-four eighty-five eighty-six eighty-seven eighty-eight eighty-nine ninety ninety-one ninety-two ninety-three
+type EnumNinetyThree one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twentyOne twentyTwo twentyThree twentyFour twentyFive twentySix twentySeven twentyEight twentyNine thirty thirtyOne thirtyTwo thirtyThree thirtyFour thirtyFive thirtySix thirtySeven thirtyEight thirtyNine forty fortyOne fortyTwo fortyThree fortyFour fortyFive fortySix fortySeven fortyEight fortyNine fifty fiftyOne fiftyTwo fiftyThree fiftyFour fiftyFive fiftySix fiftySeven fiftyEight fiftyNine sixty sixtyOne sixtyTwo sixtyThree sixtyFour sixtyFive sixtySix sixtySeven sixtyEight sixtyNine seventy seventyOne seventyTwo seventyThree seventyFour seventyFive seventySix seventySeven seventyEight seventyNine eighty eightyOne eightyTwo eightyThree eightyFour eightyFive eightySix eightySeven eightyEight eightyNine ninety ninetyOne ninetyTwo ninetyThree
     = EnumNinetyThreeOne one
     | EnumNinetyThreeTwo two
     | EnumNinetyThreeThree three
@@ -54800,82 +54800,82 @@ type EnumNinetyThree one two three four five six seven eight nine ten eleven twe
     | EnumNinetyThreeEighteen eighteen
     | EnumNinetyThreeNineteen nineteen
     | EnumNinetyThreeTwenty twenty
-    | EnumNinetyThreeTwentyOne twenty-one
-    | EnumNinetyThreeTwentyTwo twenty-two
-    | EnumNinetyThreeTwentyThree twenty-three
-    | EnumNinetyThreeTwentyFour twenty-four
-    | EnumNinetyThreeTwentyFive twenty-five
-    | EnumNinetyThreeTwentySix twenty-six
-    | EnumNinetyThreeTwentySeven twenty-seven
-    | EnumNinetyThreeTwentyEight twenty-eight
-    | EnumNinetyThreeTwentyNine twenty-nine
+    | EnumNinetyThreeTwentyOne twentyOne
+    | EnumNinetyThreeTwentyTwo twentyTwo
+    | EnumNinetyThreeTwentyThree twentyThree
+    | EnumNinetyThreeTwentyFour twentyFour
+    | EnumNinetyThreeTwentyFive twentyFive
+    | EnumNinetyThreeTwentySix twentySix
+    | EnumNinetyThreeTwentySeven twentySeven
+    | EnumNinetyThreeTwentyEight twentyEight
+    | EnumNinetyThreeTwentyNine twentyNine
     | EnumNinetyThreeThirty thirty
-    | EnumNinetyThreeThirtyOne thirty-one
-    | EnumNinetyThreeThirtyTwo thirty-two
-    | EnumNinetyThreeThirtyThree thirty-three
-    | EnumNinetyThreeThirtyFour thirty-four
-    | EnumNinetyThreeThirtyFive thirty-five
-    | EnumNinetyThreeThirtySix thirty-six
-    | EnumNinetyThreeThirtySeven thirty-seven
-    | EnumNinetyThreeThirtyEight thirty-eight
-    | EnumNinetyThreeThirtyNine thirty-nine
+    | EnumNinetyThreeThirtyOne thirtyOne
+    | EnumNinetyThreeThirtyTwo thirtyTwo
+    | EnumNinetyThreeThirtyThree thirtyThree
+    | EnumNinetyThreeThirtyFour thirtyFour
+    | EnumNinetyThreeThirtyFive thirtyFive
+    | EnumNinetyThreeThirtySix thirtySix
+    | EnumNinetyThreeThirtySeven thirtySeven
+    | EnumNinetyThreeThirtyEight thirtyEight
+    | EnumNinetyThreeThirtyNine thirtyNine
     | EnumNinetyThreeForty forty
-    | EnumNinetyThreeFortyOne forty-one
-    | EnumNinetyThreeFortyTwo forty-two
-    | EnumNinetyThreeFortyThree forty-three
-    | EnumNinetyThreeFortyFour forty-four
-    | EnumNinetyThreeFortyFive forty-five
-    | EnumNinetyThreeFortySix forty-six
-    | EnumNinetyThreeFortySeven forty-seven
-    | EnumNinetyThreeFortyEight forty-eight
-    | EnumNinetyThreeFortyNine forty-nine
+    | EnumNinetyThreeFortyOne fortyOne
+    | EnumNinetyThreeFortyTwo fortyTwo
+    | EnumNinetyThreeFortyThree fortyThree
+    | EnumNinetyThreeFortyFour fortyFour
+    | EnumNinetyThreeFortyFive fortyFive
+    | EnumNinetyThreeFortySix fortySix
+    | EnumNinetyThreeFortySeven fortySeven
+    | EnumNinetyThreeFortyEight fortyEight
+    | EnumNinetyThreeFortyNine fortyNine
     | EnumNinetyThreeFifty fifty
-    | EnumNinetyThreeFiftyOne fifty-one
-    | EnumNinetyThreeFiftyTwo fifty-two
-    | EnumNinetyThreeFiftyThree fifty-three
-    | EnumNinetyThreeFiftyFour fifty-four
-    | EnumNinetyThreeFiftyFive fifty-five
-    | EnumNinetyThreeFiftySix fifty-six
-    | EnumNinetyThreeFiftySeven fifty-seven
-    | EnumNinetyThreeFiftyEight fifty-eight
-    | EnumNinetyThreeFiftyNine fifty-nine
+    | EnumNinetyThreeFiftyOne fiftyOne
+    | EnumNinetyThreeFiftyTwo fiftyTwo
+    | EnumNinetyThreeFiftyThree fiftyThree
+    | EnumNinetyThreeFiftyFour fiftyFour
+    | EnumNinetyThreeFiftyFive fiftyFive
+    | EnumNinetyThreeFiftySix fiftySix
+    | EnumNinetyThreeFiftySeven fiftySeven
+    | EnumNinetyThreeFiftyEight fiftyEight
+    | EnumNinetyThreeFiftyNine fiftyNine
     | EnumNinetyThreeSixty sixty
-    | EnumNinetyThreeSixtyOne sixty-one
-    | EnumNinetyThreeSixtyTwo sixty-two
-    | EnumNinetyThreeSixtyThree sixty-three
-    | EnumNinetyThreeSixtyFour sixty-four
-    | EnumNinetyThreeSixtyFive sixty-five
-    | EnumNinetyThreeSixtySix sixty-six
-    | EnumNinetyThreeSixtySeven sixty-seven
-    | EnumNinetyThreeSixtyEight sixty-eight
-    | EnumNinetyThreeSixtyNine sixty-nine
+    | EnumNinetyThreeSixtyOne sixtyOne
+    | EnumNinetyThreeSixtyTwo sixtyTwo
+    | EnumNinetyThreeSixtyThree sixtyThree
+    | EnumNinetyThreeSixtyFour sixtyFour
+    | EnumNinetyThreeSixtyFive sixtyFive
+    | EnumNinetyThreeSixtySix sixtySix
+    | EnumNinetyThreeSixtySeven sixtySeven
+    | EnumNinetyThreeSixtyEight sixtyEight
+    | EnumNinetyThreeSixtyNine sixtyNine
     | EnumNinetyThreeSeventy seventy
-    | EnumNinetyThreeSeventyOne seventy-one
-    | EnumNinetyThreeSeventyTwo seventy-two
-    | EnumNinetyThreeSeventyThree seventy-three
-    | EnumNinetyThreeSeventyFour seventy-four
-    | EnumNinetyThreeSeventyFive seventy-five
-    | EnumNinetyThreeSeventySix seventy-six
-    | EnumNinetyThreeSeventySeven seventy-seven
-    | EnumNinetyThreeSeventyEight seventy-eight
-    | EnumNinetyThreeSeventyNine seventy-nine
+    | EnumNinetyThreeSeventyOne seventyOne
+    | EnumNinetyThreeSeventyTwo seventyTwo
+    | EnumNinetyThreeSeventyThree seventyThree
+    | EnumNinetyThreeSeventyFour seventyFour
+    | EnumNinetyThreeSeventyFive seventyFive
+    | EnumNinetyThreeSeventySix seventySix
+    | EnumNinetyThreeSeventySeven seventySeven
+    | EnumNinetyThreeSeventyEight seventyEight
+    | EnumNinetyThreeSeventyNine seventyNine
     | EnumNinetyThreeEighty eighty
-    | EnumNinetyThreeEightyOne eighty-one
-    | EnumNinetyThreeEightyTwo eighty-two
-    | EnumNinetyThreeEightyThree eighty-three
-    | EnumNinetyThreeEightyFour eighty-four
-    | EnumNinetyThreeEightyFive eighty-five
-    | EnumNinetyThreeEightySix eighty-six
-    | EnumNinetyThreeEightySeven eighty-seven
-    | EnumNinetyThreeEightyEight eighty-eight
-    | EnumNinetyThreeEightyNine eighty-nine
+    | EnumNinetyThreeEightyOne eightyOne
+    | EnumNinetyThreeEightyTwo eightyTwo
+    | EnumNinetyThreeEightyThree eightyThree
+    | EnumNinetyThreeEightyFour eightyFour
+    | EnumNinetyThreeEightyFive eightyFive
+    | EnumNinetyThreeEightySix eightySix
+    | EnumNinetyThreeEightySeven eightySeven
+    | EnumNinetyThreeEightyEight eightyEight
+    | EnumNinetyThreeEightyNine eightyNine
     | EnumNinetyThreeNinety ninety
-    | EnumNinetyThreeNinetyOne ninety-one
-    | EnumNinetyThreeNinetyTwo ninety-two
-    | EnumNinetyThreeNinetyThree ninety-three
+    | EnumNinetyThreeNinetyOne ninetyOne
+    | EnumNinetyThreeNinetyTwo ninetyTwo
+    | EnumNinetyThreeNinetyThree ninetyThree
 
 
-type EnumNinetyFour one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twenty-one twenty-two twenty-three twenty-four twenty-five twenty-six twenty-seven twenty-eight twenty-nine thirty thirty-one thirty-two thirty-three thirty-four thirty-five thirty-six thirty-seven thirty-eight thirty-nine forty forty-one forty-two forty-three forty-four forty-five forty-six forty-seven forty-eight forty-nine fifty fifty-one fifty-two fifty-three fifty-four fifty-five fifty-six fifty-seven fifty-eight fifty-nine sixty sixty-one sixty-two sixty-three sixty-four sixty-five sixty-six sixty-seven sixty-eight sixty-nine seventy seventy-one seventy-two seventy-three seventy-four seventy-five seventy-six seventy-seven seventy-eight seventy-nine eighty eighty-one eighty-two eighty-three eighty-four eighty-five eighty-six eighty-seven eighty-eight eighty-nine ninety ninety-one ninety-two ninety-three ninety-four
+type EnumNinetyFour one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twentyOne twentyTwo twentyThree twentyFour twentyFive twentySix twentySeven twentyEight twentyNine thirty thirtyOne thirtyTwo thirtyThree thirtyFour thirtyFive thirtySix thirtySeven thirtyEight thirtyNine forty fortyOne fortyTwo fortyThree fortyFour fortyFive fortySix fortySeven fortyEight fortyNine fifty fiftyOne fiftyTwo fiftyThree fiftyFour fiftyFive fiftySix fiftySeven fiftyEight fiftyNine sixty sixtyOne sixtyTwo sixtyThree sixtyFour sixtyFive sixtySix sixtySeven sixtyEight sixtyNine seventy seventyOne seventyTwo seventyThree seventyFour seventyFive seventySix seventySeven seventyEight seventyNine eighty eightyOne eightyTwo eightyThree eightyFour eightyFive eightySix eightySeven eightyEight eightyNine ninety ninetyOne ninetyTwo ninetyThree ninetyFour
     = EnumNinetyFourOne one
     | EnumNinetyFourTwo two
     | EnumNinetyFourThree three
@@ -54896,83 +54896,83 @@ type EnumNinetyFour one two three four five six seven eight nine ten eleven twel
     | EnumNinetyFourEighteen eighteen
     | EnumNinetyFourNineteen nineteen
     | EnumNinetyFourTwenty twenty
-    | EnumNinetyFourTwentyOne twenty-one
-    | EnumNinetyFourTwentyTwo twenty-two
-    | EnumNinetyFourTwentyThree twenty-three
-    | EnumNinetyFourTwentyFour twenty-four
-    | EnumNinetyFourTwentyFive twenty-five
-    | EnumNinetyFourTwentySix twenty-six
-    | EnumNinetyFourTwentySeven twenty-seven
-    | EnumNinetyFourTwentyEight twenty-eight
-    | EnumNinetyFourTwentyNine twenty-nine
+    | EnumNinetyFourTwentyOne twentyOne
+    | EnumNinetyFourTwentyTwo twentyTwo
+    | EnumNinetyFourTwentyThree twentyThree
+    | EnumNinetyFourTwentyFour twentyFour
+    | EnumNinetyFourTwentyFive twentyFive
+    | EnumNinetyFourTwentySix twentySix
+    | EnumNinetyFourTwentySeven twentySeven
+    | EnumNinetyFourTwentyEight twentyEight
+    | EnumNinetyFourTwentyNine twentyNine
     | EnumNinetyFourThirty thirty
-    | EnumNinetyFourThirtyOne thirty-one
-    | EnumNinetyFourThirtyTwo thirty-two
-    | EnumNinetyFourThirtyThree thirty-three
-    | EnumNinetyFourThirtyFour thirty-four
-    | EnumNinetyFourThirtyFive thirty-five
-    | EnumNinetyFourThirtySix thirty-six
-    | EnumNinetyFourThirtySeven thirty-seven
-    | EnumNinetyFourThirtyEight thirty-eight
-    | EnumNinetyFourThirtyNine thirty-nine
+    | EnumNinetyFourThirtyOne thirtyOne
+    | EnumNinetyFourThirtyTwo thirtyTwo
+    | EnumNinetyFourThirtyThree thirtyThree
+    | EnumNinetyFourThirtyFour thirtyFour
+    | EnumNinetyFourThirtyFive thirtyFive
+    | EnumNinetyFourThirtySix thirtySix
+    | EnumNinetyFourThirtySeven thirtySeven
+    | EnumNinetyFourThirtyEight thirtyEight
+    | EnumNinetyFourThirtyNine thirtyNine
     | EnumNinetyFourForty forty
-    | EnumNinetyFourFortyOne forty-one
-    | EnumNinetyFourFortyTwo forty-two
-    | EnumNinetyFourFortyThree forty-three
-    | EnumNinetyFourFortyFour forty-four
-    | EnumNinetyFourFortyFive forty-five
-    | EnumNinetyFourFortySix forty-six
-    | EnumNinetyFourFortySeven forty-seven
-    | EnumNinetyFourFortyEight forty-eight
-    | EnumNinetyFourFortyNine forty-nine
+    | EnumNinetyFourFortyOne fortyOne
+    | EnumNinetyFourFortyTwo fortyTwo
+    | EnumNinetyFourFortyThree fortyThree
+    | EnumNinetyFourFortyFour fortyFour
+    | EnumNinetyFourFortyFive fortyFive
+    | EnumNinetyFourFortySix fortySix
+    | EnumNinetyFourFortySeven fortySeven
+    | EnumNinetyFourFortyEight fortyEight
+    | EnumNinetyFourFortyNine fortyNine
     | EnumNinetyFourFifty fifty
-    | EnumNinetyFourFiftyOne fifty-one
-    | EnumNinetyFourFiftyTwo fifty-two
-    | EnumNinetyFourFiftyThree fifty-three
-    | EnumNinetyFourFiftyFour fifty-four
-    | EnumNinetyFourFiftyFive fifty-five
-    | EnumNinetyFourFiftySix fifty-six
-    | EnumNinetyFourFiftySeven fifty-seven
-    | EnumNinetyFourFiftyEight fifty-eight
-    | EnumNinetyFourFiftyNine fifty-nine
+    | EnumNinetyFourFiftyOne fiftyOne
+    | EnumNinetyFourFiftyTwo fiftyTwo
+    | EnumNinetyFourFiftyThree fiftyThree
+    | EnumNinetyFourFiftyFour fiftyFour
+    | EnumNinetyFourFiftyFive fiftyFive
+    | EnumNinetyFourFiftySix fiftySix
+    | EnumNinetyFourFiftySeven fiftySeven
+    | EnumNinetyFourFiftyEight fiftyEight
+    | EnumNinetyFourFiftyNine fiftyNine
     | EnumNinetyFourSixty sixty
-    | EnumNinetyFourSixtyOne sixty-one
-    | EnumNinetyFourSixtyTwo sixty-two
-    | EnumNinetyFourSixtyThree sixty-three
-    | EnumNinetyFourSixtyFour sixty-four
-    | EnumNinetyFourSixtyFive sixty-five
-    | EnumNinetyFourSixtySix sixty-six
-    | EnumNinetyFourSixtySeven sixty-seven
-    | EnumNinetyFourSixtyEight sixty-eight
-    | EnumNinetyFourSixtyNine sixty-nine
+    | EnumNinetyFourSixtyOne sixtyOne
+    | EnumNinetyFourSixtyTwo sixtyTwo
+    | EnumNinetyFourSixtyThree sixtyThree
+    | EnumNinetyFourSixtyFour sixtyFour
+    | EnumNinetyFourSixtyFive sixtyFive
+    | EnumNinetyFourSixtySix sixtySix
+    | EnumNinetyFourSixtySeven sixtySeven
+    | EnumNinetyFourSixtyEight sixtyEight
+    | EnumNinetyFourSixtyNine sixtyNine
     | EnumNinetyFourSeventy seventy
-    | EnumNinetyFourSeventyOne seventy-one
-    | EnumNinetyFourSeventyTwo seventy-two
-    | EnumNinetyFourSeventyThree seventy-three
-    | EnumNinetyFourSeventyFour seventy-four
-    | EnumNinetyFourSeventyFive seventy-five
-    | EnumNinetyFourSeventySix seventy-six
-    | EnumNinetyFourSeventySeven seventy-seven
-    | EnumNinetyFourSeventyEight seventy-eight
-    | EnumNinetyFourSeventyNine seventy-nine
+    | EnumNinetyFourSeventyOne seventyOne
+    | EnumNinetyFourSeventyTwo seventyTwo
+    | EnumNinetyFourSeventyThree seventyThree
+    | EnumNinetyFourSeventyFour seventyFour
+    | EnumNinetyFourSeventyFive seventyFive
+    | EnumNinetyFourSeventySix seventySix
+    | EnumNinetyFourSeventySeven seventySeven
+    | EnumNinetyFourSeventyEight seventyEight
+    | EnumNinetyFourSeventyNine seventyNine
     | EnumNinetyFourEighty eighty
-    | EnumNinetyFourEightyOne eighty-one
-    | EnumNinetyFourEightyTwo eighty-two
-    | EnumNinetyFourEightyThree eighty-three
-    | EnumNinetyFourEightyFour eighty-four
-    | EnumNinetyFourEightyFive eighty-five
-    | EnumNinetyFourEightySix eighty-six
-    | EnumNinetyFourEightySeven eighty-seven
-    | EnumNinetyFourEightyEight eighty-eight
-    | EnumNinetyFourEightyNine eighty-nine
+    | EnumNinetyFourEightyOne eightyOne
+    | EnumNinetyFourEightyTwo eightyTwo
+    | EnumNinetyFourEightyThree eightyThree
+    | EnumNinetyFourEightyFour eightyFour
+    | EnumNinetyFourEightyFive eightyFive
+    | EnumNinetyFourEightySix eightySix
+    | EnumNinetyFourEightySeven eightySeven
+    | EnumNinetyFourEightyEight eightyEight
+    | EnumNinetyFourEightyNine eightyNine
     | EnumNinetyFourNinety ninety
-    | EnumNinetyFourNinetyOne ninety-one
-    | EnumNinetyFourNinetyTwo ninety-two
-    | EnumNinetyFourNinetyThree ninety-three
-    | EnumNinetyFourNinetyFour ninety-four
+    | EnumNinetyFourNinetyOne ninetyOne
+    | EnumNinetyFourNinetyTwo ninetyTwo
+    | EnumNinetyFourNinetyThree ninetyThree
+    | EnumNinetyFourNinetyFour ninetyFour
 
 
-type EnumNinetyFive one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twenty-one twenty-two twenty-three twenty-four twenty-five twenty-six twenty-seven twenty-eight twenty-nine thirty thirty-one thirty-two thirty-three thirty-four thirty-five thirty-six thirty-seven thirty-eight thirty-nine forty forty-one forty-two forty-three forty-four forty-five forty-six forty-seven forty-eight forty-nine fifty fifty-one fifty-two fifty-three fifty-four fifty-five fifty-six fifty-seven fifty-eight fifty-nine sixty sixty-one sixty-two sixty-three sixty-four sixty-five sixty-six sixty-seven sixty-eight sixty-nine seventy seventy-one seventy-two seventy-three seventy-four seventy-five seventy-six seventy-seven seventy-eight seventy-nine eighty eighty-one eighty-two eighty-three eighty-four eighty-five eighty-six eighty-seven eighty-eight eighty-nine ninety ninety-one ninety-two ninety-three ninety-four ninety-five
+type EnumNinetyFive one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twentyOne twentyTwo twentyThree twentyFour twentyFive twentySix twentySeven twentyEight twentyNine thirty thirtyOne thirtyTwo thirtyThree thirtyFour thirtyFive thirtySix thirtySeven thirtyEight thirtyNine forty fortyOne fortyTwo fortyThree fortyFour fortyFive fortySix fortySeven fortyEight fortyNine fifty fiftyOne fiftyTwo fiftyThree fiftyFour fiftyFive fiftySix fiftySeven fiftyEight fiftyNine sixty sixtyOne sixtyTwo sixtyThree sixtyFour sixtyFive sixtySix sixtySeven sixtyEight sixtyNine seventy seventyOne seventyTwo seventyThree seventyFour seventyFive seventySix seventySeven seventyEight seventyNine eighty eightyOne eightyTwo eightyThree eightyFour eightyFive eightySix eightySeven eightyEight eightyNine ninety ninetyOne ninetyTwo ninetyThree ninetyFour ninetyFive
     = EnumNinetyFiveOne one
     | EnumNinetyFiveTwo two
     | EnumNinetyFiveThree three
@@ -54993,84 +54993,84 @@ type EnumNinetyFive one two three four five six seven eight nine ten eleven twel
     | EnumNinetyFiveEighteen eighteen
     | EnumNinetyFiveNineteen nineteen
     | EnumNinetyFiveTwenty twenty
-    | EnumNinetyFiveTwentyOne twenty-one
-    | EnumNinetyFiveTwentyTwo twenty-two
-    | EnumNinetyFiveTwentyThree twenty-three
-    | EnumNinetyFiveTwentyFour twenty-four
-    | EnumNinetyFiveTwentyFive twenty-five
-    | EnumNinetyFiveTwentySix twenty-six
-    | EnumNinetyFiveTwentySeven twenty-seven
-    | EnumNinetyFiveTwentyEight twenty-eight
-    | EnumNinetyFiveTwentyNine twenty-nine
+    | EnumNinetyFiveTwentyOne twentyOne
+    | EnumNinetyFiveTwentyTwo twentyTwo
+    | EnumNinetyFiveTwentyThree twentyThree
+    | EnumNinetyFiveTwentyFour twentyFour
+    | EnumNinetyFiveTwentyFive twentyFive
+    | EnumNinetyFiveTwentySix twentySix
+    | EnumNinetyFiveTwentySeven twentySeven
+    | EnumNinetyFiveTwentyEight twentyEight
+    | EnumNinetyFiveTwentyNine twentyNine
     | EnumNinetyFiveThirty thirty
-    | EnumNinetyFiveThirtyOne thirty-one
-    | EnumNinetyFiveThirtyTwo thirty-two
-    | EnumNinetyFiveThirtyThree thirty-three
-    | EnumNinetyFiveThirtyFour thirty-four
-    | EnumNinetyFiveThirtyFive thirty-five
-    | EnumNinetyFiveThirtySix thirty-six
-    | EnumNinetyFiveThirtySeven thirty-seven
-    | EnumNinetyFiveThirtyEight thirty-eight
-    | EnumNinetyFiveThirtyNine thirty-nine
+    | EnumNinetyFiveThirtyOne thirtyOne
+    | EnumNinetyFiveThirtyTwo thirtyTwo
+    | EnumNinetyFiveThirtyThree thirtyThree
+    | EnumNinetyFiveThirtyFour thirtyFour
+    | EnumNinetyFiveThirtyFive thirtyFive
+    | EnumNinetyFiveThirtySix thirtySix
+    | EnumNinetyFiveThirtySeven thirtySeven
+    | EnumNinetyFiveThirtyEight thirtyEight
+    | EnumNinetyFiveThirtyNine thirtyNine
     | EnumNinetyFiveForty forty
-    | EnumNinetyFiveFortyOne forty-one
-    | EnumNinetyFiveFortyTwo forty-two
-    | EnumNinetyFiveFortyThree forty-three
-    | EnumNinetyFiveFortyFour forty-four
-    | EnumNinetyFiveFortyFive forty-five
-    | EnumNinetyFiveFortySix forty-six
-    | EnumNinetyFiveFortySeven forty-seven
-    | EnumNinetyFiveFortyEight forty-eight
-    | EnumNinetyFiveFortyNine forty-nine
+    | EnumNinetyFiveFortyOne fortyOne
+    | EnumNinetyFiveFortyTwo fortyTwo
+    | EnumNinetyFiveFortyThree fortyThree
+    | EnumNinetyFiveFortyFour fortyFour
+    | EnumNinetyFiveFortyFive fortyFive
+    | EnumNinetyFiveFortySix fortySix
+    | EnumNinetyFiveFortySeven fortySeven
+    | EnumNinetyFiveFortyEight fortyEight
+    | EnumNinetyFiveFortyNine fortyNine
     | EnumNinetyFiveFifty fifty
-    | EnumNinetyFiveFiftyOne fifty-one
-    | EnumNinetyFiveFiftyTwo fifty-two
-    | EnumNinetyFiveFiftyThree fifty-three
-    | EnumNinetyFiveFiftyFour fifty-four
-    | EnumNinetyFiveFiftyFive fifty-five
-    | EnumNinetyFiveFiftySix fifty-six
-    | EnumNinetyFiveFiftySeven fifty-seven
-    | EnumNinetyFiveFiftyEight fifty-eight
-    | EnumNinetyFiveFiftyNine fifty-nine
+    | EnumNinetyFiveFiftyOne fiftyOne
+    | EnumNinetyFiveFiftyTwo fiftyTwo
+    | EnumNinetyFiveFiftyThree fiftyThree
+    | EnumNinetyFiveFiftyFour fiftyFour
+    | EnumNinetyFiveFiftyFive fiftyFive
+    | EnumNinetyFiveFiftySix fiftySix
+    | EnumNinetyFiveFiftySeven fiftySeven
+    | EnumNinetyFiveFiftyEight fiftyEight
+    | EnumNinetyFiveFiftyNine fiftyNine
     | EnumNinetyFiveSixty sixty
-    | EnumNinetyFiveSixtyOne sixty-one
-    | EnumNinetyFiveSixtyTwo sixty-two
-    | EnumNinetyFiveSixtyThree sixty-three
-    | EnumNinetyFiveSixtyFour sixty-four
-    | EnumNinetyFiveSixtyFive sixty-five
-    | EnumNinetyFiveSixtySix sixty-six
-    | EnumNinetyFiveSixtySeven sixty-seven
-    | EnumNinetyFiveSixtyEight sixty-eight
-    | EnumNinetyFiveSixtyNine sixty-nine
+    | EnumNinetyFiveSixtyOne sixtyOne
+    | EnumNinetyFiveSixtyTwo sixtyTwo
+    | EnumNinetyFiveSixtyThree sixtyThree
+    | EnumNinetyFiveSixtyFour sixtyFour
+    | EnumNinetyFiveSixtyFive sixtyFive
+    | EnumNinetyFiveSixtySix sixtySix
+    | EnumNinetyFiveSixtySeven sixtySeven
+    | EnumNinetyFiveSixtyEight sixtyEight
+    | EnumNinetyFiveSixtyNine sixtyNine
     | EnumNinetyFiveSeventy seventy
-    | EnumNinetyFiveSeventyOne seventy-one
-    | EnumNinetyFiveSeventyTwo seventy-two
-    | EnumNinetyFiveSeventyThree seventy-three
-    | EnumNinetyFiveSeventyFour seventy-four
-    | EnumNinetyFiveSeventyFive seventy-five
-    | EnumNinetyFiveSeventySix seventy-six
-    | EnumNinetyFiveSeventySeven seventy-seven
-    | EnumNinetyFiveSeventyEight seventy-eight
-    | EnumNinetyFiveSeventyNine seventy-nine
+    | EnumNinetyFiveSeventyOne seventyOne
+    | EnumNinetyFiveSeventyTwo seventyTwo
+    | EnumNinetyFiveSeventyThree seventyThree
+    | EnumNinetyFiveSeventyFour seventyFour
+    | EnumNinetyFiveSeventyFive seventyFive
+    | EnumNinetyFiveSeventySix seventySix
+    | EnumNinetyFiveSeventySeven seventySeven
+    | EnumNinetyFiveSeventyEight seventyEight
+    | EnumNinetyFiveSeventyNine seventyNine
     | EnumNinetyFiveEighty eighty
-    | EnumNinetyFiveEightyOne eighty-one
-    | EnumNinetyFiveEightyTwo eighty-two
-    | EnumNinetyFiveEightyThree eighty-three
-    | EnumNinetyFiveEightyFour eighty-four
-    | EnumNinetyFiveEightyFive eighty-five
-    | EnumNinetyFiveEightySix eighty-six
-    | EnumNinetyFiveEightySeven eighty-seven
-    | EnumNinetyFiveEightyEight eighty-eight
-    | EnumNinetyFiveEightyNine eighty-nine
+    | EnumNinetyFiveEightyOne eightyOne
+    | EnumNinetyFiveEightyTwo eightyTwo
+    | EnumNinetyFiveEightyThree eightyThree
+    | EnumNinetyFiveEightyFour eightyFour
+    | EnumNinetyFiveEightyFive eightyFive
+    | EnumNinetyFiveEightySix eightySix
+    | EnumNinetyFiveEightySeven eightySeven
+    | EnumNinetyFiveEightyEight eightyEight
+    | EnumNinetyFiveEightyNine eightyNine
     | EnumNinetyFiveNinety ninety
-    | EnumNinetyFiveNinetyOne ninety-one
-    | EnumNinetyFiveNinetyTwo ninety-two
-    | EnumNinetyFiveNinetyThree ninety-three
-    | EnumNinetyFiveNinetyFour ninety-four
-    | EnumNinetyFiveNinetyFive ninety-five
+    | EnumNinetyFiveNinetyOne ninetyOne
+    | EnumNinetyFiveNinetyTwo ninetyTwo
+    | EnumNinetyFiveNinetyThree ninetyThree
+    | EnumNinetyFiveNinetyFour ninetyFour
+    | EnumNinetyFiveNinetyFive ninetyFive
 
 
-type EnumNinetySix one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twenty-one twenty-two twenty-three twenty-four twenty-five twenty-six twenty-seven twenty-eight twenty-nine thirty thirty-one thirty-two thirty-three thirty-four thirty-five thirty-six thirty-seven thirty-eight thirty-nine forty forty-one forty-two forty-three forty-four forty-five forty-six forty-seven forty-eight forty-nine fifty fifty-one fifty-two fifty-three fifty-four fifty-five fifty-six fifty-seven fifty-eight fifty-nine sixty sixty-one sixty-two sixty-three sixty-four sixty-five sixty-six sixty-seven sixty-eight sixty-nine seventy seventy-one seventy-two seventy-three seventy-four seventy-five seventy-six seventy-seven seventy-eight seventy-nine eighty eighty-one eighty-two eighty-three eighty-four eighty-five eighty-six eighty-seven eighty-eight eighty-nine ninety ninety-one ninety-two ninety-three ninety-four ninety-five ninety-six
+type EnumNinetySix one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twentyOne twentyTwo twentyThree twentyFour twentyFive twentySix twentySeven twentyEight twentyNine thirty thirtyOne thirtyTwo thirtyThree thirtyFour thirtyFive thirtySix thirtySeven thirtyEight thirtyNine forty fortyOne fortyTwo fortyThree fortyFour fortyFive fortySix fortySeven fortyEight fortyNine fifty fiftyOne fiftyTwo fiftyThree fiftyFour fiftyFive fiftySix fiftySeven fiftyEight fiftyNine sixty sixtyOne sixtyTwo sixtyThree sixtyFour sixtyFive sixtySix sixtySeven sixtyEight sixtyNine seventy seventyOne seventyTwo seventyThree seventyFour seventyFive seventySix seventySeven seventyEight seventyNine eighty eightyOne eightyTwo eightyThree eightyFour eightyFive eightySix eightySeven eightyEight eightyNine ninety ninetyOne ninetyTwo ninetyThree ninetyFour ninetyFive ninetySix
     = EnumNinetySixOne one
     | EnumNinetySixTwo two
     | EnumNinetySixThree three
@@ -55091,85 +55091,85 @@ type EnumNinetySix one two three four five six seven eight nine ten eleven twelv
     | EnumNinetySixEighteen eighteen
     | EnumNinetySixNineteen nineteen
     | EnumNinetySixTwenty twenty
-    | EnumNinetySixTwentyOne twenty-one
-    | EnumNinetySixTwentyTwo twenty-two
-    | EnumNinetySixTwentyThree twenty-three
-    | EnumNinetySixTwentyFour twenty-four
-    | EnumNinetySixTwentyFive twenty-five
-    | EnumNinetySixTwentySix twenty-six
-    | EnumNinetySixTwentySeven twenty-seven
-    | EnumNinetySixTwentyEight twenty-eight
-    | EnumNinetySixTwentyNine twenty-nine
+    | EnumNinetySixTwentyOne twentyOne
+    | EnumNinetySixTwentyTwo twentyTwo
+    | EnumNinetySixTwentyThree twentyThree
+    | EnumNinetySixTwentyFour twentyFour
+    | EnumNinetySixTwentyFive twentyFive
+    | EnumNinetySixTwentySix twentySix
+    | EnumNinetySixTwentySeven twentySeven
+    | EnumNinetySixTwentyEight twentyEight
+    | EnumNinetySixTwentyNine twentyNine
     | EnumNinetySixThirty thirty
-    | EnumNinetySixThirtyOne thirty-one
-    | EnumNinetySixThirtyTwo thirty-two
-    | EnumNinetySixThirtyThree thirty-three
-    | EnumNinetySixThirtyFour thirty-four
-    | EnumNinetySixThirtyFive thirty-five
-    | EnumNinetySixThirtySix thirty-six
-    | EnumNinetySixThirtySeven thirty-seven
-    | EnumNinetySixThirtyEight thirty-eight
-    | EnumNinetySixThirtyNine thirty-nine
+    | EnumNinetySixThirtyOne thirtyOne
+    | EnumNinetySixThirtyTwo thirtyTwo
+    | EnumNinetySixThirtyThree thirtyThree
+    | EnumNinetySixThirtyFour thirtyFour
+    | EnumNinetySixThirtyFive thirtyFive
+    | EnumNinetySixThirtySix thirtySix
+    | EnumNinetySixThirtySeven thirtySeven
+    | EnumNinetySixThirtyEight thirtyEight
+    | EnumNinetySixThirtyNine thirtyNine
     | EnumNinetySixForty forty
-    | EnumNinetySixFortyOne forty-one
-    | EnumNinetySixFortyTwo forty-two
-    | EnumNinetySixFortyThree forty-three
-    | EnumNinetySixFortyFour forty-four
-    | EnumNinetySixFortyFive forty-five
-    | EnumNinetySixFortySix forty-six
-    | EnumNinetySixFortySeven forty-seven
-    | EnumNinetySixFortyEight forty-eight
-    | EnumNinetySixFortyNine forty-nine
+    | EnumNinetySixFortyOne fortyOne
+    | EnumNinetySixFortyTwo fortyTwo
+    | EnumNinetySixFortyThree fortyThree
+    | EnumNinetySixFortyFour fortyFour
+    | EnumNinetySixFortyFive fortyFive
+    | EnumNinetySixFortySix fortySix
+    | EnumNinetySixFortySeven fortySeven
+    | EnumNinetySixFortyEight fortyEight
+    | EnumNinetySixFortyNine fortyNine
     | EnumNinetySixFifty fifty
-    | EnumNinetySixFiftyOne fifty-one
-    | EnumNinetySixFiftyTwo fifty-two
-    | EnumNinetySixFiftyThree fifty-three
-    | EnumNinetySixFiftyFour fifty-four
-    | EnumNinetySixFiftyFive fifty-five
-    | EnumNinetySixFiftySix fifty-six
-    | EnumNinetySixFiftySeven fifty-seven
-    | EnumNinetySixFiftyEight fifty-eight
-    | EnumNinetySixFiftyNine fifty-nine
+    | EnumNinetySixFiftyOne fiftyOne
+    | EnumNinetySixFiftyTwo fiftyTwo
+    | EnumNinetySixFiftyThree fiftyThree
+    | EnumNinetySixFiftyFour fiftyFour
+    | EnumNinetySixFiftyFive fiftyFive
+    | EnumNinetySixFiftySix fiftySix
+    | EnumNinetySixFiftySeven fiftySeven
+    | EnumNinetySixFiftyEight fiftyEight
+    | EnumNinetySixFiftyNine fiftyNine
     | EnumNinetySixSixty sixty
-    | EnumNinetySixSixtyOne sixty-one
-    | EnumNinetySixSixtyTwo sixty-two
-    | EnumNinetySixSixtyThree sixty-three
-    | EnumNinetySixSixtyFour sixty-four
-    | EnumNinetySixSixtyFive sixty-five
-    | EnumNinetySixSixtySix sixty-six
-    | EnumNinetySixSixtySeven sixty-seven
-    | EnumNinetySixSixtyEight sixty-eight
-    | EnumNinetySixSixtyNine sixty-nine
+    | EnumNinetySixSixtyOne sixtyOne
+    | EnumNinetySixSixtyTwo sixtyTwo
+    | EnumNinetySixSixtyThree sixtyThree
+    | EnumNinetySixSixtyFour sixtyFour
+    | EnumNinetySixSixtyFive sixtyFive
+    | EnumNinetySixSixtySix sixtySix
+    | EnumNinetySixSixtySeven sixtySeven
+    | EnumNinetySixSixtyEight sixtyEight
+    | EnumNinetySixSixtyNine sixtyNine
     | EnumNinetySixSeventy seventy
-    | EnumNinetySixSeventyOne seventy-one
-    | EnumNinetySixSeventyTwo seventy-two
-    | EnumNinetySixSeventyThree seventy-three
-    | EnumNinetySixSeventyFour seventy-four
-    | EnumNinetySixSeventyFive seventy-five
-    | EnumNinetySixSeventySix seventy-six
-    | EnumNinetySixSeventySeven seventy-seven
-    | EnumNinetySixSeventyEight seventy-eight
-    | EnumNinetySixSeventyNine seventy-nine
+    | EnumNinetySixSeventyOne seventyOne
+    | EnumNinetySixSeventyTwo seventyTwo
+    | EnumNinetySixSeventyThree seventyThree
+    | EnumNinetySixSeventyFour seventyFour
+    | EnumNinetySixSeventyFive seventyFive
+    | EnumNinetySixSeventySix seventySix
+    | EnumNinetySixSeventySeven seventySeven
+    | EnumNinetySixSeventyEight seventyEight
+    | EnumNinetySixSeventyNine seventyNine
     | EnumNinetySixEighty eighty
-    | EnumNinetySixEightyOne eighty-one
-    | EnumNinetySixEightyTwo eighty-two
-    | EnumNinetySixEightyThree eighty-three
-    | EnumNinetySixEightyFour eighty-four
-    | EnumNinetySixEightyFive eighty-five
-    | EnumNinetySixEightySix eighty-six
-    | EnumNinetySixEightySeven eighty-seven
-    | EnumNinetySixEightyEight eighty-eight
-    | EnumNinetySixEightyNine eighty-nine
+    | EnumNinetySixEightyOne eightyOne
+    | EnumNinetySixEightyTwo eightyTwo
+    | EnumNinetySixEightyThree eightyThree
+    | EnumNinetySixEightyFour eightyFour
+    | EnumNinetySixEightyFive eightyFive
+    | EnumNinetySixEightySix eightySix
+    | EnumNinetySixEightySeven eightySeven
+    | EnumNinetySixEightyEight eightyEight
+    | EnumNinetySixEightyNine eightyNine
     | EnumNinetySixNinety ninety
-    | EnumNinetySixNinetyOne ninety-one
-    | EnumNinetySixNinetyTwo ninety-two
-    | EnumNinetySixNinetyThree ninety-three
-    | EnumNinetySixNinetyFour ninety-four
-    | EnumNinetySixNinetyFive ninety-five
-    | EnumNinetySixNinetySix ninety-six
+    | EnumNinetySixNinetyOne ninetyOne
+    | EnumNinetySixNinetyTwo ninetyTwo
+    | EnumNinetySixNinetyThree ninetyThree
+    | EnumNinetySixNinetyFour ninetyFour
+    | EnumNinetySixNinetyFive ninetyFive
+    | EnumNinetySixNinetySix ninetySix
 
 
-type EnumNinetySeven one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twenty-one twenty-two twenty-three twenty-four twenty-five twenty-six twenty-seven twenty-eight twenty-nine thirty thirty-one thirty-two thirty-three thirty-four thirty-five thirty-six thirty-seven thirty-eight thirty-nine forty forty-one forty-two forty-three forty-four forty-five forty-six forty-seven forty-eight forty-nine fifty fifty-one fifty-two fifty-three fifty-four fifty-five fifty-six fifty-seven fifty-eight fifty-nine sixty sixty-one sixty-two sixty-three sixty-four sixty-five sixty-six sixty-seven sixty-eight sixty-nine seventy seventy-one seventy-two seventy-three seventy-four seventy-five seventy-six seventy-seven seventy-eight seventy-nine eighty eighty-one eighty-two eighty-three eighty-four eighty-five eighty-six eighty-seven eighty-eight eighty-nine ninety ninety-one ninety-two ninety-three ninety-four ninety-five ninety-six ninety-seven
+type EnumNinetySeven one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twentyOne twentyTwo twentyThree twentyFour twentyFive twentySix twentySeven twentyEight twentyNine thirty thirtyOne thirtyTwo thirtyThree thirtyFour thirtyFive thirtySix thirtySeven thirtyEight thirtyNine forty fortyOne fortyTwo fortyThree fortyFour fortyFive fortySix fortySeven fortyEight fortyNine fifty fiftyOne fiftyTwo fiftyThree fiftyFour fiftyFive fiftySix fiftySeven fiftyEight fiftyNine sixty sixtyOne sixtyTwo sixtyThree sixtyFour sixtyFive sixtySix sixtySeven sixtyEight sixtyNine seventy seventyOne seventyTwo seventyThree seventyFour seventyFive seventySix seventySeven seventyEight seventyNine eighty eightyOne eightyTwo eightyThree eightyFour eightyFive eightySix eightySeven eightyEight eightyNine ninety ninetyOne ninetyTwo ninetyThree ninetyFour ninetyFive ninetySix ninetySeven
     = EnumNinetySevenOne one
     | EnumNinetySevenTwo two
     | EnumNinetySevenThree three
@@ -55190,86 +55190,86 @@ type EnumNinetySeven one two three four five six seven eight nine ten eleven twe
     | EnumNinetySevenEighteen eighteen
     | EnumNinetySevenNineteen nineteen
     | EnumNinetySevenTwenty twenty
-    | EnumNinetySevenTwentyOne twenty-one
-    | EnumNinetySevenTwentyTwo twenty-two
-    | EnumNinetySevenTwentyThree twenty-three
-    | EnumNinetySevenTwentyFour twenty-four
-    | EnumNinetySevenTwentyFive twenty-five
-    | EnumNinetySevenTwentySix twenty-six
-    | EnumNinetySevenTwentySeven twenty-seven
-    | EnumNinetySevenTwentyEight twenty-eight
-    | EnumNinetySevenTwentyNine twenty-nine
+    | EnumNinetySevenTwentyOne twentyOne
+    | EnumNinetySevenTwentyTwo twentyTwo
+    | EnumNinetySevenTwentyThree twentyThree
+    | EnumNinetySevenTwentyFour twentyFour
+    | EnumNinetySevenTwentyFive twentyFive
+    | EnumNinetySevenTwentySix twentySix
+    | EnumNinetySevenTwentySeven twentySeven
+    | EnumNinetySevenTwentyEight twentyEight
+    | EnumNinetySevenTwentyNine twentyNine
     | EnumNinetySevenThirty thirty
-    | EnumNinetySevenThirtyOne thirty-one
-    | EnumNinetySevenThirtyTwo thirty-two
-    | EnumNinetySevenThirtyThree thirty-three
-    | EnumNinetySevenThirtyFour thirty-four
-    | EnumNinetySevenThirtyFive thirty-five
-    | EnumNinetySevenThirtySix thirty-six
-    | EnumNinetySevenThirtySeven thirty-seven
-    | EnumNinetySevenThirtyEight thirty-eight
-    | EnumNinetySevenThirtyNine thirty-nine
+    | EnumNinetySevenThirtyOne thirtyOne
+    | EnumNinetySevenThirtyTwo thirtyTwo
+    | EnumNinetySevenThirtyThree thirtyThree
+    | EnumNinetySevenThirtyFour thirtyFour
+    | EnumNinetySevenThirtyFive thirtyFive
+    | EnumNinetySevenThirtySix thirtySix
+    | EnumNinetySevenThirtySeven thirtySeven
+    | EnumNinetySevenThirtyEight thirtyEight
+    | EnumNinetySevenThirtyNine thirtyNine
     | EnumNinetySevenForty forty
-    | EnumNinetySevenFortyOne forty-one
-    | EnumNinetySevenFortyTwo forty-two
-    | EnumNinetySevenFortyThree forty-three
-    | EnumNinetySevenFortyFour forty-four
-    | EnumNinetySevenFortyFive forty-five
-    | EnumNinetySevenFortySix forty-six
-    | EnumNinetySevenFortySeven forty-seven
-    | EnumNinetySevenFortyEight forty-eight
-    | EnumNinetySevenFortyNine forty-nine
+    | EnumNinetySevenFortyOne fortyOne
+    | EnumNinetySevenFortyTwo fortyTwo
+    | EnumNinetySevenFortyThree fortyThree
+    | EnumNinetySevenFortyFour fortyFour
+    | EnumNinetySevenFortyFive fortyFive
+    | EnumNinetySevenFortySix fortySix
+    | EnumNinetySevenFortySeven fortySeven
+    | EnumNinetySevenFortyEight fortyEight
+    | EnumNinetySevenFortyNine fortyNine
     | EnumNinetySevenFifty fifty
-    | EnumNinetySevenFiftyOne fifty-one
-    | EnumNinetySevenFiftyTwo fifty-two
-    | EnumNinetySevenFiftyThree fifty-three
-    | EnumNinetySevenFiftyFour fifty-four
-    | EnumNinetySevenFiftyFive fifty-five
-    | EnumNinetySevenFiftySix fifty-six
-    | EnumNinetySevenFiftySeven fifty-seven
-    | EnumNinetySevenFiftyEight fifty-eight
-    | EnumNinetySevenFiftyNine fifty-nine
+    | EnumNinetySevenFiftyOne fiftyOne
+    | EnumNinetySevenFiftyTwo fiftyTwo
+    | EnumNinetySevenFiftyThree fiftyThree
+    | EnumNinetySevenFiftyFour fiftyFour
+    | EnumNinetySevenFiftyFive fiftyFive
+    | EnumNinetySevenFiftySix fiftySix
+    | EnumNinetySevenFiftySeven fiftySeven
+    | EnumNinetySevenFiftyEight fiftyEight
+    | EnumNinetySevenFiftyNine fiftyNine
     | EnumNinetySevenSixty sixty
-    | EnumNinetySevenSixtyOne sixty-one
-    | EnumNinetySevenSixtyTwo sixty-two
-    | EnumNinetySevenSixtyThree sixty-three
-    | EnumNinetySevenSixtyFour sixty-four
-    | EnumNinetySevenSixtyFive sixty-five
-    | EnumNinetySevenSixtySix sixty-six
-    | EnumNinetySevenSixtySeven sixty-seven
-    | EnumNinetySevenSixtyEight sixty-eight
-    | EnumNinetySevenSixtyNine sixty-nine
+    | EnumNinetySevenSixtyOne sixtyOne
+    | EnumNinetySevenSixtyTwo sixtyTwo
+    | EnumNinetySevenSixtyThree sixtyThree
+    | EnumNinetySevenSixtyFour sixtyFour
+    | EnumNinetySevenSixtyFive sixtyFive
+    | EnumNinetySevenSixtySix sixtySix
+    | EnumNinetySevenSixtySeven sixtySeven
+    | EnumNinetySevenSixtyEight sixtyEight
+    | EnumNinetySevenSixtyNine sixtyNine
     | EnumNinetySevenSeventy seventy
-    | EnumNinetySevenSeventyOne seventy-one
-    | EnumNinetySevenSeventyTwo seventy-two
-    | EnumNinetySevenSeventyThree seventy-three
-    | EnumNinetySevenSeventyFour seventy-four
-    | EnumNinetySevenSeventyFive seventy-five
-    | EnumNinetySevenSeventySix seventy-six
-    | EnumNinetySevenSeventySeven seventy-seven
-    | EnumNinetySevenSeventyEight seventy-eight
-    | EnumNinetySevenSeventyNine seventy-nine
+    | EnumNinetySevenSeventyOne seventyOne
+    | EnumNinetySevenSeventyTwo seventyTwo
+    | EnumNinetySevenSeventyThree seventyThree
+    | EnumNinetySevenSeventyFour seventyFour
+    | EnumNinetySevenSeventyFive seventyFive
+    | EnumNinetySevenSeventySix seventySix
+    | EnumNinetySevenSeventySeven seventySeven
+    | EnumNinetySevenSeventyEight seventyEight
+    | EnumNinetySevenSeventyNine seventyNine
     | EnumNinetySevenEighty eighty
-    | EnumNinetySevenEightyOne eighty-one
-    | EnumNinetySevenEightyTwo eighty-two
-    | EnumNinetySevenEightyThree eighty-three
-    | EnumNinetySevenEightyFour eighty-four
-    | EnumNinetySevenEightyFive eighty-five
-    | EnumNinetySevenEightySix eighty-six
-    | EnumNinetySevenEightySeven eighty-seven
-    | EnumNinetySevenEightyEight eighty-eight
-    | EnumNinetySevenEightyNine eighty-nine
+    | EnumNinetySevenEightyOne eightyOne
+    | EnumNinetySevenEightyTwo eightyTwo
+    | EnumNinetySevenEightyThree eightyThree
+    | EnumNinetySevenEightyFour eightyFour
+    | EnumNinetySevenEightyFive eightyFive
+    | EnumNinetySevenEightySix eightySix
+    | EnumNinetySevenEightySeven eightySeven
+    | EnumNinetySevenEightyEight eightyEight
+    | EnumNinetySevenEightyNine eightyNine
     | EnumNinetySevenNinety ninety
-    | EnumNinetySevenNinetyOne ninety-one
-    | EnumNinetySevenNinetyTwo ninety-two
-    | EnumNinetySevenNinetyThree ninety-three
-    | EnumNinetySevenNinetyFour ninety-four
-    | EnumNinetySevenNinetyFive ninety-five
-    | EnumNinetySevenNinetySix ninety-six
-    | EnumNinetySevenNinetySeven ninety-seven
+    | EnumNinetySevenNinetyOne ninetyOne
+    | EnumNinetySevenNinetyTwo ninetyTwo
+    | EnumNinetySevenNinetyThree ninetyThree
+    | EnumNinetySevenNinetyFour ninetyFour
+    | EnumNinetySevenNinetyFive ninetyFive
+    | EnumNinetySevenNinetySix ninetySix
+    | EnumNinetySevenNinetySeven ninetySeven
 
 
-type EnumNinetyEight one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twenty-one twenty-two twenty-three twenty-four twenty-five twenty-six twenty-seven twenty-eight twenty-nine thirty thirty-one thirty-two thirty-three thirty-four thirty-five thirty-six thirty-seven thirty-eight thirty-nine forty forty-one forty-two forty-three forty-four forty-five forty-six forty-seven forty-eight forty-nine fifty fifty-one fifty-two fifty-three fifty-four fifty-five fifty-six fifty-seven fifty-eight fifty-nine sixty sixty-one sixty-two sixty-three sixty-four sixty-five sixty-six sixty-seven sixty-eight sixty-nine seventy seventy-one seventy-two seventy-three seventy-four seventy-five seventy-six seventy-seven seventy-eight seventy-nine eighty eighty-one eighty-two eighty-three eighty-four eighty-five eighty-six eighty-seven eighty-eight eighty-nine ninety ninety-one ninety-two ninety-three ninety-four ninety-five ninety-six ninety-seven ninety-eight
+type EnumNinetyEight one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twentyOne twentyTwo twentyThree twentyFour twentyFive twentySix twentySeven twentyEight twentyNine thirty thirtyOne thirtyTwo thirtyThree thirtyFour thirtyFive thirtySix thirtySeven thirtyEight thirtyNine forty fortyOne fortyTwo fortyThree fortyFour fortyFive fortySix fortySeven fortyEight fortyNine fifty fiftyOne fiftyTwo fiftyThree fiftyFour fiftyFive fiftySix fiftySeven fiftyEight fiftyNine sixty sixtyOne sixtyTwo sixtyThree sixtyFour sixtyFive sixtySix sixtySeven sixtyEight sixtyNine seventy seventyOne seventyTwo seventyThree seventyFour seventyFive seventySix seventySeven seventyEight seventyNine eighty eightyOne eightyTwo eightyThree eightyFour eightyFive eightySix eightySeven eightyEight eightyNine ninety ninetyOne ninetyTwo ninetyThree ninetyFour ninetyFive ninetySix ninetySeven ninetyEight
     = EnumNinetyEightOne one
     | EnumNinetyEightTwo two
     | EnumNinetyEightThree three
@@ -55290,87 +55290,87 @@ type EnumNinetyEight one two three four five six seven eight nine ten eleven twe
     | EnumNinetyEightEighteen eighteen
     | EnumNinetyEightNineteen nineteen
     | EnumNinetyEightTwenty twenty
-    | EnumNinetyEightTwentyOne twenty-one
-    | EnumNinetyEightTwentyTwo twenty-two
-    | EnumNinetyEightTwentyThree twenty-three
-    | EnumNinetyEightTwentyFour twenty-four
-    | EnumNinetyEightTwentyFive twenty-five
-    | EnumNinetyEightTwentySix twenty-six
-    | EnumNinetyEightTwentySeven twenty-seven
-    | EnumNinetyEightTwentyEight twenty-eight
-    | EnumNinetyEightTwentyNine twenty-nine
+    | EnumNinetyEightTwentyOne twentyOne
+    | EnumNinetyEightTwentyTwo twentyTwo
+    | EnumNinetyEightTwentyThree twentyThree
+    | EnumNinetyEightTwentyFour twentyFour
+    | EnumNinetyEightTwentyFive twentyFive
+    | EnumNinetyEightTwentySix twentySix
+    | EnumNinetyEightTwentySeven twentySeven
+    | EnumNinetyEightTwentyEight twentyEight
+    | EnumNinetyEightTwentyNine twentyNine
     | EnumNinetyEightThirty thirty
-    | EnumNinetyEightThirtyOne thirty-one
-    | EnumNinetyEightThirtyTwo thirty-two
-    | EnumNinetyEightThirtyThree thirty-three
-    | EnumNinetyEightThirtyFour thirty-four
-    | EnumNinetyEightThirtyFive thirty-five
-    | EnumNinetyEightThirtySix thirty-six
-    | EnumNinetyEightThirtySeven thirty-seven
-    | EnumNinetyEightThirtyEight thirty-eight
-    | EnumNinetyEightThirtyNine thirty-nine
+    | EnumNinetyEightThirtyOne thirtyOne
+    | EnumNinetyEightThirtyTwo thirtyTwo
+    | EnumNinetyEightThirtyThree thirtyThree
+    | EnumNinetyEightThirtyFour thirtyFour
+    | EnumNinetyEightThirtyFive thirtyFive
+    | EnumNinetyEightThirtySix thirtySix
+    | EnumNinetyEightThirtySeven thirtySeven
+    | EnumNinetyEightThirtyEight thirtyEight
+    | EnumNinetyEightThirtyNine thirtyNine
     | EnumNinetyEightForty forty
-    | EnumNinetyEightFortyOne forty-one
-    | EnumNinetyEightFortyTwo forty-two
-    | EnumNinetyEightFortyThree forty-three
-    | EnumNinetyEightFortyFour forty-four
-    | EnumNinetyEightFortyFive forty-five
-    | EnumNinetyEightFortySix forty-six
-    | EnumNinetyEightFortySeven forty-seven
-    | EnumNinetyEightFortyEight forty-eight
-    | EnumNinetyEightFortyNine forty-nine
+    | EnumNinetyEightFortyOne fortyOne
+    | EnumNinetyEightFortyTwo fortyTwo
+    | EnumNinetyEightFortyThree fortyThree
+    | EnumNinetyEightFortyFour fortyFour
+    | EnumNinetyEightFortyFive fortyFive
+    | EnumNinetyEightFortySix fortySix
+    | EnumNinetyEightFortySeven fortySeven
+    | EnumNinetyEightFortyEight fortyEight
+    | EnumNinetyEightFortyNine fortyNine
     | EnumNinetyEightFifty fifty
-    | EnumNinetyEightFiftyOne fifty-one
-    | EnumNinetyEightFiftyTwo fifty-two
-    | EnumNinetyEightFiftyThree fifty-three
-    | EnumNinetyEightFiftyFour fifty-four
-    | EnumNinetyEightFiftyFive fifty-five
-    | EnumNinetyEightFiftySix fifty-six
-    | EnumNinetyEightFiftySeven fifty-seven
-    | EnumNinetyEightFiftyEight fifty-eight
-    | EnumNinetyEightFiftyNine fifty-nine
+    | EnumNinetyEightFiftyOne fiftyOne
+    | EnumNinetyEightFiftyTwo fiftyTwo
+    | EnumNinetyEightFiftyThree fiftyThree
+    | EnumNinetyEightFiftyFour fiftyFour
+    | EnumNinetyEightFiftyFive fiftyFive
+    | EnumNinetyEightFiftySix fiftySix
+    | EnumNinetyEightFiftySeven fiftySeven
+    | EnumNinetyEightFiftyEight fiftyEight
+    | EnumNinetyEightFiftyNine fiftyNine
     | EnumNinetyEightSixty sixty
-    | EnumNinetyEightSixtyOne sixty-one
-    | EnumNinetyEightSixtyTwo sixty-two
-    | EnumNinetyEightSixtyThree sixty-three
-    | EnumNinetyEightSixtyFour sixty-four
-    | EnumNinetyEightSixtyFive sixty-five
-    | EnumNinetyEightSixtySix sixty-six
-    | EnumNinetyEightSixtySeven sixty-seven
-    | EnumNinetyEightSixtyEight sixty-eight
-    | EnumNinetyEightSixtyNine sixty-nine
+    | EnumNinetyEightSixtyOne sixtyOne
+    | EnumNinetyEightSixtyTwo sixtyTwo
+    | EnumNinetyEightSixtyThree sixtyThree
+    | EnumNinetyEightSixtyFour sixtyFour
+    | EnumNinetyEightSixtyFive sixtyFive
+    | EnumNinetyEightSixtySix sixtySix
+    | EnumNinetyEightSixtySeven sixtySeven
+    | EnumNinetyEightSixtyEight sixtyEight
+    | EnumNinetyEightSixtyNine sixtyNine
     | EnumNinetyEightSeventy seventy
-    | EnumNinetyEightSeventyOne seventy-one
-    | EnumNinetyEightSeventyTwo seventy-two
-    | EnumNinetyEightSeventyThree seventy-three
-    | EnumNinetyEightSeventyFour seventy-four
-    | EnumNinetyEightSeventyFive seventy-five
-    | EnumNinetyEightSeventySix seventy-six
-    | EnumNinetyEightSeventySeven seventy-seven
-    | EnumNinetyEightSeventyEight seventy-eight
-    | EnumNinetyEightSeventyNine seventy-nine
+    | EnumNinetyEightSeventyOne seventyOne
+    | EnumNinetyEightSeventyTwo seventyTwo
+    | EnumNinetyEightSeventyThree seventyThree
+    | EnumNinetyEightSeventyFour seventyFour
+    | EnumNinetyEightSeventyFive seventyFive
+    | EnumNinetyEightSeventySix seventySix
+    | EnumNinetyEightSeventySeven seventySeven
+    | EnumNinetyEightSeventyEight seventyEight
+    | EnumNinetyEightSeventyNine seventyNine
     | EnumNinetyEightEighty eighty
-    | EnumNinetyEightEightyOne eighty-one
-    | EnumNinetyEightEightyTwo eighty-two
-    | EnumNinetyEightEightyThree eighty-three
-    | EnumNinetyEightEightyFour eighty-four
-    | EnumNinetyEightEightyFive eighty-five
-    | EnumNinetyEightEightySix eighty-six
-    | EnumNinetyEightEightySeven eighty-seven
-    | EnumNinetyEightEightyEight eighty-eight
-    | EnumNinetyEightEightyNine eighty-nine
+    | EnumNinetyEightEightyOne eightyOne
+    | EnumNinetyEightEightyTwo eightyTwo
+    | EnumNinetyEightEightyThree eightyThree
+    | EnumNinetyEightEightyFour eightyFour
+    | EnumNinetyEightEightyFive eightyFive
+    | EnumNinetyEightEightySix eightySix
+    | EnumNinetyEightEightySeven eightySeven
+    | EnumNinetyEightEightyEight eightyEight
+    | EnumNinetyEightEightyNine eightyNine
     | EnumNinetyEightNinety ninety
-    | EnumNinetyEightNinetyOne ninety-one
-    | EnumNinetyEightNinetyTwo ninety-two
-    | EnumNinetyEightNinetyThree ninety-three
-    | EnumNinetyEightNinetyFour ninety-four
-    | EnumNinetyEightNinetyFive ninety-five
-    | EnumNinetyEightNinetySix ninety-six
-    | EnumNinetyEightNinetySeven ninety-seven
-    | EnumNinetyEightNinetyEight ninety-eight
+    | EnumNinetyEightNinetyOne ninetyOne
+    | EnumNinetyEightNinetyTwo ninetyTwo
+    | EnumNinetyEightNinetyThree ninetyThree
+    | EnumNinetyEightNinetyFour ninetyFour
+    | EnumNinetyEightNinetyFive ninetyFive
+    | EnumNinetyEightNinetySix ninetySix
+    | EnumNinetyEightNinetySeven ninetySeven
+    | EnumNinetyEightNinetyEight ninetyEight
 
 
-type EnumNinetyNine one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twenty-one twenty-two twenty-three twenty-four twenty-five twenty-six twenty-seven twenty-eight twenty-nine thirty thirty-one thirty-two thirty-three thirty-four thirty-five thirty-six thirty-seven thirty-eight thirty-nine forty forty-one forty-two forty-three forty-four forty-five forty-six forty-seven forty-eight forty-nine fifty fifty-one fifty-two fifty-three fifty-four fifty-five fifty-six fifty-seven fifty-eight fifty-nine sixty sixty-one sixty-two sixty-three sixty-four sixty-five sixty-six sixty-seven sixty-eight sixty-nine seventy seventy-one seventy-two seventy-three seventy-four seventy-five seventy-six seventy-seven seventy-eight seventy-nine eighty eighty-one eighty-two eighty-three eighty-four eighty-five eighty-six eighty-seven eighty-eight eighty-nine ninety ninety-one ninety-two ninety-three ninety-four ninety-five ninety-six ninety-seven ninety-eight ninety-nine
+type EnumNinetyNine one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twentyOne twentyTwo twentyThree twentyFour twentyFive twentySix twentySeven twentyEight twentyNine thirty thirtyOne thirtyTwo thirtyThree thirtyFour thirtyFive thirtySix thirtySeven thirtyEight thirtyNine forty fortyOne fortyTwo fortyThree fortyFour fortyFive fortySix fortySeven fortyEight fortyNine fifty fiftyOne fiftyTwo fiftyThree fiftyFour fiftyFive fiftySix fiftySeven fiftyEight fiftyNine sixty sixtyOne sixtyTwo sixtyThree sixtyFour sixtyFive sixtySix sixtySeven sixtyEight sixtyNine seventy seventyOne seventyTwo seventyThree seventyFour seventyFive seventySix seventySeven seventyEight seventyNine eighty eightyOne eightyTwo eightyThree eightyFour eightyFive eightySix eightySeven eightyEight eightyNine ninety ninetyOne ninetyTwo ninetyThree ninetyFour ninetyFive ninetySix ninetySeven ninetyEight ninetyNine
     = EnumNinetyNineOne one
     | EnumNinetyNineTwo two
     | EnumNinetyNineThree three
@@ -55391,84 +55391,84 @@ type EnumNinetyNine one two three four five six seven eight nine ten eleven twel
     | EnumNinetyNineEighteen eighteen
     | EnumNinetyNineNineteen nineteen
     | EnumNinetyNineTwenty twenty
-    | EnumNinetyNineTwentyOne twenty-one
-    | EnumNinetyNineTwentyTwo twenty-two
-    | EnumNinetyNineTwentyThree twenty-three
-    | EnumNinetyNineTwentyFour twenty-four
-    | EnumNinetyNineTwentyFive twenty-five
-    | EnumNinetyNineTwentySix twenty-six
-    | EnumNinetyNineTwentySeven twenty-seven
-    | EnumNinetyNineTwentyEight twenty-eight
-    | EnumNinetyNineTwentyNine twenty-nine
+    | EnumNinetyNineTwentyOne twentyOne
+    | EnumNinetyNineTwentyTwo twentyTwo
+    | EnumNinetyNineTwentyThree twentyThree
+    | EnumNinetyNineTwentyFour twentyFour
+    | EnumNinetyNineTwentyFive twentyFive
+    | EnumNinetyNineTwentySix twentySix
+    | EnumNinetyNineTwentySeven twentySeven
+    | EnumNinetyNineTwentyEight twentyEight
+    | EnumNinetyNineTwentyNine twentyNine
     | EnumNinetyNineThirty thirty
-    | EnumNinetyNineThirtyOne thirty-one
-    | EnumNinetyNineThirtyTwo thirty-two
-    | EnumNinetyNineThirtyThree thirty-three
-    | EnumNinetyNineThirtyFour thirty-four
-    | EnumNinetyNineThirtyFive thirty-five
-    | EnumNinetyNineThirtySix thirty-six
-    | EnumNinetyNineThirtySeven thirty-seven
-    | EnumNinetyNineThirtyEight thirty-eight
-    | EnumNinetyNineThirtyNine thirty-nine
+    | EnumNinetyNineThirtyOne thirtyOne
+    | EnumNinetyNineThirtyTwo thirtyTwo
+    | EnumNinetyNineThirtyThree thirtyThree
+    | EnumNinetyNineThirtyFour thirtyFour
+    | EnumNinetyNineThirtyFive thirtyFive
+    | EnumNinetyNineThirtySix thirtySix
+    | EnumNinetyNineThirtySeven thirtySeven
+    | EnumNinetyNineThirtyEight thirtyEight
+    | EnumNinetyNineThirtyNine thirtyNine
     | EnumNinetyNineForty forty
-    | EnumNinetyNineFortyOne forty-one
-    | EnumNinetyNineFortyTwo forty-two
-    | EnumNinetyNineFortyThree forty-three
-    | EnumNinetyNineFortyFour forty-four
-    | EnumNinetyNineFortyFive forty-five
-    | EnumNinetyNineFortySix forty-six
-    | EnumNinetyNineFortySeven forty-seven
-    | EnumNinetyNineFortyEight forty-eight
-    | EnumNinetyNineFortyNine forty-nine
+    | EnumNinetyNineFortyOne fortyOne
+    | EnumNinetyNineFortyTwo fortyTwo
+    | EnumNinetyNineFortyThree fortyThree
+    | EnumNinetyNineFortyFour fortyFour
+    | EnumNinetyNineFortyFive fortyFive
+    | EnumNinetyNineFortySix fortySix
+    | EnumNinetyNineFortySeven fortySeven
+    | EnumNinetyNineFortyEight fortyEight
+    | EnumNinetyNineFortyNine fortyNine
     | EnumNinetyNineFifty fifty
-    | EnumNinetyNineFiftyOne fifty-one
-    | EnumNinetyNineFiftyTwo fifty-two
-    | EnumNinetyNineFiftyThree fifty-three
-    | EnumNinetyNineFiftyFour fifty-four
-    | EnumNinetyNineFiftyFive fifty-five
-    | EnumNinetyNineFiftySix fifty-six
-    | EnumNinetyNineFiftySeven fifty-seven
-    | EnumNinetyNineFiftyEight fifty-eight
-    | EnumNinetyNineFiftyNine fifty-nine
+    | EnumNinetyNineFiftyOne fiftyOne
+    | EnumNinetyNineFiftyTwo fiftyTwo
+    | EnumNinetyNineFiftyThree fiftyThree
+    | EnumNinetyNineFiftyFour fiftyFour
+    | EnumNinetyNineFiftyFive fiftyFive
+    | EnumNinetyNineFiftySix fiftySix
+    | EnumNinetyNineFiftySeven fiftySeven
+    | EnumNinetyNineFiftyEight fiftyEight
+    | EnumNinetyNineFiftyNine fiftyNine
     | EnumNinetyNineSixty sixty
-    | EnumNinetyNineSixtyOne sixty-one
-    | EnumNinetyNineSixtyTwo sixty-two
-    | EnumNinetyNineSixtyThree sixty-three
-    | EnumNinetyNineSixtyFour sixty-four
-    | EnumNinetyNineSixtyFive sixty-five
-    | EnumNinetyNineSixtySix sixty-six
-    | EnumNinetyNineSixtySeven sixty-seven
-    | EnumNinetyNineSixtyEight sixty-eight
-    | EnumNinetyNineSixtyNine sixty-nine
+    | EnumNinetyNineSixtyOne sixtyOne
+    | EnumNinetyNineSixtyTwo sixtyTwo
+    | EnumNinetyNineSixtyThree sixtyThree
+    | EnumNinetyNineSixtyFour sixtyFour
+    | EnumNinetyNineSixtyFive sixtyFive
+    | EnumNinetyNineSixtySix sixtySix
+    | EnumNinetyNineSixtySeven sixtySeven
+    | EnumNinetyNineSixtyEight sixtyEight
+    | EnumNinetyNineSixtyNine sixtyNine
     | EnumNinetyNineSeventy seventy
-    | EnumNinetyNineSeventyOne seventy-one
-    | EnumNinetyNineSeventyTwo seventy-two
-    | EnumNinetyNineSeventyThree seventy-three
-    | EnumNinetyNineSeventyFour seventy-four
-    | EnumNinetyNineSeventyFive seventy-five
-    | EnumNinetyNineSeventySix seventy-six
-    | EnumNinetyNineSeventySeven seventy-seven
-    | EnumNinetyNineSeventyEight seventy-eight
-    | EnumNinetyNineSeventyNine seventy-nine
+    | EnumNinetyNineSeventyOne seventyOne
+    | EnumNinetyNineSeventyTwo seventyTwo
+    | EnumNinetyNineSeventyThree seventyThree
+    | EnumNinetyNineSeventyFour seventyFour
+    | EnumNinetyNineSeventyFive seventyFive
+    | EnumNinetyNineSeventySix seventySix
+    | EnumNinetyNineSeventySeven seventySeven
+    | EnumNinetyNineSeventyEight seventyEight
+    | EnumNinetyNineSeventyNine seventyNine
     | EnumNinetyNineEighty eighty
-    | EnumNinetyNineEightyOne eighty-one
-    | EnumNinetyNineEightyTwo eighty-two
-    | EnumNinetyNineEightyThree eighty-three
-    | EnumNinetyNineEightyFour eighty-four
-    | EnumNinetyNineEightyFive eighty-five
-    | EnumNinetyNineEightySix eighty-six
-    | EnumNinetyNineEightySeven eighty-seven
-    | EnumNinetyNineEightyEight eighty-eight
-    | EnumNinetyNineEightyNine eighty-nine
+    | EnumNinetyNineEightyOne eightyOne
+    | EnumNinetyNineEightyTwo eightyTwo
+    | EnumNinetyNineEightyThree eightyThree
+    | EnumNinetyNineEightyFour eightyFour
+    | EnumNinetyNineEightyFive eightyFive
+    | EnumNinetyNineEightySix eightySix
+    | EnumNinetyNineEightySeven eightySeven
+    | EnumNinetyNineEightyEight eightyEight
+    | EnumNinetyNineEightyNine eightyNine
     | EnumNinetyNineNinety ninety
-    | EnumNinetyNineNinetyOne ninety-one
-    | EnumNinetyNineNinetyTwo ninety-two
-    | EnumNinetyNineNinetyThree ninety-three
-    | EnumNinetyNineNinetyFour ninety-four
-    | EnumNinetyNineNinetyFive ninety-five
-    | EnumNinetyNineNinetySix ninety-six
-    | EnumNinetyNineNinetySeven ninety-seven
-    | EnumNinetyNineNinetyEight ninety-eight
-    | EnumNinetyNineNinetyNine ninety-nine
+    | EnumNinetyNineNinetyOne ninetyOne
+    | EnumNinetyNineNinetyTwo ninetyTwo
+    | EnumNinetyNineNinetyThree ninetyThree
+    | EnumNinetyNineNinetyFour ninetyFour
+    | EnumNinetyNineNinetyFive ninetyFive
+    | EnumNinetyNineNinetySix ninetySix
+    | EnumNinetyNineNinetySeven ninetySeven
+    | EnumNinetyNineNinetyEight ninetyEight
+    | EnumNinetyNineNinetyNine ninetyNine
 
 

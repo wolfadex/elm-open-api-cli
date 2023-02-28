@@ -488,7 +488,7 @@ toRequestFunction method apiSpec url operation =
         function =
             case body of
                 Ok EmptyBody ->
-                    Elm.Declare.fn functionName
+                    Elm.fn
                         toMsgParam
                         (\toMsg ->
                             Gen.Http.request
@@ -509,10 +509,9 @@ toRequestFunction method apiSpec url operation =
                                 , body = Gen.Http.emptyBody
                                 }
                         )
-                        |> .declaration
 
                 Ok (JsonBody bodyType bodyEncoder) ->
-                    Elm.Declare.fn2 functionName
+                    Elm.fn2
                         toMsgParam
                         ( "body", Just bodyType )
                         (\toMsg bodyValue ->
@@ -534,10 +533,9 @@ toRequestFunction method apiSpec url operation =
                                 , body = Gen.Http.jsonBody <| Elm.apply bodyEncoder [ bodyValue ]
                                 }
                         )
-                        |> .declaration
 
                 Ok (BytesBody mime) ->
-                    Elm.Declare.fn2 functionName
+                    Elm.fn2
                         toMsgParam
                         ( "body", Just Gen.Bytes.annotation_.bytes )
                         (\toMsg bodyValue ->
@@ -559,23 +557,18 @@ toRequestFunction method apiSpec url operation =
                                 , body = Gen.Http.bytesBody mime bodyValue
                                 }
                         )
-                        |> .declaration
 
                 Err e ->
-                    Elm.Declare.function functionName
-                        []
-                        (\_ ->
-                            Gen.Debug.todo <|
-                                "["
-                                    ++ method
-                                    ++ " "
-                                    ++ url
-                                    ++ "]Could not deal with body type: "
-                                    ++ e
-                        )
-                        |> .declaration
+                    Gen.Debug.todo <|
+                        "["
+                            ++ method
+                            ++ " "
+                            ++ url
+                            ++ "]Could not deal with body type: "
+                            ++ e
     in
     function
+        |> Elm.declaration functionName
         |> Elm.withDocumentation (OpenApi.Operation.description operation |> Maybe.withDefault "")
 
 

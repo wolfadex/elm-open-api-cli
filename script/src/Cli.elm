@@ -30,6 +30,7 @@ import OpenApi.MediaType
 import OpenApi.Operation
 import OpenApi.Path
 import OpenApi.Reference
+import OpenApi.RequestBody
 import OpenApi.Response
 import OpenApi.Schema
 import OpenApi.Server
@@ -385,13 +386,55 @@ stepOrFail msg f =
 toRequestFunction : String -> OpenApi -> String -> OpenApi.Operation.Operation -> Elm.Declaration
 toRequestFunction method apiSpec url operation =
     let
+        body : Result String (Maybe ( Elm.Annotation.Annotation, Elm.Expression ))
         body =
             case OpenApi.Operation.requestBody operation of
                 Nothing ->
-                    Gen.Http.emptyBody
+                    Ok Nothing
 
-                Just rb ->
-                    Gen.Debug.todo ("Nonempty request body: " ++ Debug.toString rb)
+                Just requestOrRef ->
+                    case OpenApi.Reference.toConcrete requestOrRef of
+                        Just request ->
+                            Ok request
+                                |> stepOrFail "The request doesn't have an application/json content option"
+                                    (OpenApi.RequestBody.content
+                                        >> Dict.get "application/json"
+                                    )
+                                |> stepOrFail "The request's application/json content option doesn't have a schema"
+                                    (OpenApi.MediaType.schema >> Maybe.map OpenApi.Schema.get)
+                                |> Result.andThen
+                                    (\schema ->
+                                        Result.map
+                                            (\ann ->
+                                                Just
+                                                    ( ann
+                                                    , schemaToEncoder schema
+                                                    )
+                                            )
+                                            (schemaToAnnotation schema)
+                                            |> Result.mapError Tuple.second
+                                    )
+
+                        Nothing ->
+                            Ok requestOrRef
+                                |> stepOrFail "I found a successfull response, but I couldn't convert it to a concrete one"
+                                    OpenApi.Reference.toReference
+                                |> (\mr ->
+                                        mr
+                                            |> stepOrFail
+                                                ("Couldn't get the type ref for the response [ref = "
+                                                    ++ Result.withDefault "?" (Result.map OpenApi.Reference.ref mr)
+                                                    ++ "]"
+                                                )
+                                                (OpenApi.Reference.ref >> schemaTypeRef apiSpec)
+                                   )
+                                |> Result.map
+                                    (\st ->
+                                        Just
+                                            ( Elm.Annotation.named [] st
+                                            , Elm.val ("decode" ++ st)
+                                            )
+                                    )
 
         fullUrl : String
         fullUrl =
@@ -406,44 +449,93 @@ toRequestFunction method apiSpec url operation =
                     else
                         OpenApi.Server.url firstServer ++ "/" ++ url
 
+        functionName : String
+        functionName =
+            (OpenApi.Operation.operationId operation
+                |> Maybe.withDefault url
+            )
+                |> makeNamespaceValid
+                |> removeInvalidChars
+                |> String.Extra.camelize
+
+        toMsgParam =
+            ( "toMsg"
+            , Just
+                (Elm.Annotation.function
+                    [ Gen.Result.annotation_.result Gen.Http.annotation_.error successType ]
+                    (Elm.Annotation.var "msg")
+                )
+            )
+
         ( successType, maybeSuccessDecoder ) =
             operationToSuccessTypeAndDecoder apiSpec operation
-    in
-    Elm.Declare.fn
-        ((OpenApi.Operation.operationId operation
-            |> Maybe.withDefault url
-         )
-            |> makeNamespaceValid
-            |> removeInvalidChars
-            |> String.Extra.camelize
-        )
-        ( "toMsg"
-        , Just
-            (Elm.Annotation.function
-                [ Gen.Result.annotation_.result Gen.Http.annotation_.error successType ]
-                (Elm.Annotation.var "msg")
-            )
-        )
-        (\toMsg ->
-            Gen.Http.request
-                { method = method
-                , headers = []
-                , timeout = Gen.Maybe.make_.nothing
-                , tracker = Gen.Maybe.make_.nothing
-                , url = fullUrl
-                , expect =
-                    case maybeSuccessDecoder of
-                        Just successDecoder ->
-                            Gen.Http.expectJson
-                                (\result -> Elm.apply toMsg [ result ])
-                                successDecoder
 
-                        Nothing ->
-                            Gen.Http.expectWhatever (\result -> Elm.apply toMsg [ result ])
-                , body = body
-                }
-        )
-        |> .declaration
+        function =
+            case body of
+                Ok Nothing ->
+                    Elm.Declare.fn functionName
+                        toMsgParam
+                        (\toMsg ->
+                            Gen.Http.request
+                                { method = method
+                                , headers = []
+                                , timeout = Gen.Maybe.make_.nothing
+                                , tracker = Gen.Maybe.make_.nothing
+                                , url = fullUrl
+                                , expect =
+                                    case maybeSuccessDecoder of
+                                        Just successDecoder ->
+                                            Gen.Http.expectJson
+                                                (\result -> Elm.apply toMsg [ result ])
+                                                successDecoder
+
+                                        Nothing ->
+                                            Gen.Http.expectWhatever (\result -> Elm.apply toMsg [ result ])
+                                , body = Gen.Http.emptyBody
+                                }
+                        )
+                        |> .declaration
+
+                Ok (Just ( bodyType, bodyEncoder )) ->
+                    Elm.Declare.fn2 functionName
+                        toMsgParam
+                        ( "body", Just bodyType )
+                        (\toMsg bodyValue ->
+                            Gen.Http.request
+                                { method = method
+                                , headers = []
+                                , timeout = Gen.Maybe.make_.nothing
+                                , tracker = Gen.Maybe.make_.nothing
+                                , url = fullUrl
+                                , expect =
+                                    case maybeSuccessDecoder of
+                                        Just successDecoder ->
+                                            Gen.Http.expectJson
+                                                (\result -> Elm.apply toMsg [ result ])
+                                                successDecoder
+
+                                        Nothing ->
+                                            Gen.Http.expectWhatever (\result -> Elm.apply toMsg [ result ])
+                                , body = Gen.Http.jsonBody <| Elm.apply bodyEncoder [ bodyValue ]
+                                }
+                        )
+                        |> .declaration
+
+                Err e ->
+                    Elm.Declare.function functionName
+                        []
+                        (\_ ->
+                            Gen.Debug.todo <|
+                                "["
+                                    ++ method
+                                    ++ " "
+                                    ++ url
+                                    ++ "]Could not deal with body type: "
+                                    ++ e
+                        )
+                        |> .declaration
+    in
+    function
         |> Elm.withDocumentation (OpenApi.Operation.description operation |> Maybe.withDefault "")
 
 

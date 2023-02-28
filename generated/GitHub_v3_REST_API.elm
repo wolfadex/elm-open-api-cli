@@ -64,16 +64,13 @@ appsGetWebhookConfigForApp toMsg =
 
 You must use a [JWT](https://docs.github.com/apps/building-github-apps/authenticating-with-github-apps/#authenticating-as-a-github-app) to access this endpoint.
 -}
-appsListWebhookDeliveries : (Result Http.Error todo -> msg) -> Cmd msg
+appsListWebhookDeliveries :
+    (Result Http.Error (List HookDeliveryItem) -> msg) -> Cmd msg
 appsListWebhookDeliveries toMsg =
     Http.get
         { url = "https://api.github.com/app/hook/deliveries"
         , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+            Http.expectJson toMsg (Json.Decode.list decodeHookDeliveryItem)
         }
 
 
@@ -93,16 +90,12 @@ appsGetWebhookDelivery toMsg =
 
 The permissions the installation has are included under the `permissions` key.
 -}
-appsListInstallations : (Result Http.Error todo -> msg) -> Cmd msg
+appsListInstallations :
+    (Result Http.Error (List Installation) -> msg) -> Cmd msg
 appsListInstallations toMsg =
     Http.get
         { url = "https://api.github.com/app/installations"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodeInstallation)
         }
 
 
@@ -130,16 +123,12 @@ appsGetBySlug toMsg =
         }
 
 
-codesOfConductGetAllCodesOfConduct : (Result Http.Error todo -> msg) -> Cmd msg
+codesOfConductGetAllCodesOfConduct :
+    (Result Http.Error (List CodeOfConduct) -> msg) -> Cmd msg
 codesOfConductGetAllCodesOfConduct toMsg =
     Http.get
         { url = "https://api.github.com/codes_of_conduct"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodeCodeOfConduct)
         }
 
 
@@ -153,16 +142,11 @@ codesOfConductGetConductCode toMsg =
 
 
 {-| Lists all the emojis available to use on GitHub. -}
-emojisGet : (Result Http.Error todo -> msg) -> Cmd msg
+emojisGet : (Result Http.Error {} -> msg) -> Cmd msg
 emojisGet toMsg =
     Http.get
         { url = "https://api.github.com/emojis"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.succeed {})
         }
 
 
@@ -218,8 +202,6 @@ enterpriseAdminGetGithubActionsPermissionsEnterprise toMsg =
 
 You must authenticate using an access token with the `admin:enterprise` scope to use this endpoint.
 -}
-enterpriseAdminListSelectedOrganizationsEnabledGithubActionsEnterprise :
-    (Result Http.Error todo -> msg) -> Cmd msg
 enterpriseAdminListSelectedOrganizationsEnabledGithubActionsEnterprise toMsg =
     Http.get
         { url =
@@ -227,8 +209,17 @@ enterpriseAdminListSelectedOrganizationsEnabledGithubActionsEnterprise toMsg =
         , expect =
             Http.expectJson
                 toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
+                (Json.Decode.succeed
+                  (\totalCount organizations ->
+                      { totalCount = totalCount, organizations = organizations }
+                  )
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field "total_count" Json.Decode.float)
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field
+                            "organizations"
+                            (Json.Decode.list decodeOrganizationSimple)
+                        )
                 )
         }
 
@@ -269,8 +260,6 @@ actionsGetGithubActionsDefaultWorkflowPermissionsEnterprise toMsg =
 
 You must authenticate using an access token with the `manage_runners:enterprise` scope to use this endpoint.
 -}
-enterpriseAdminListSelfHostedRunnerGroupsForEnterprise :
-    (Result Http.Error todo -> msg) -> Cmd msg
 enterpriseAdminListSelfHostedRunnerGroupsForEnterprise toMsg =
     Http.get
         { url =
@@ -278,8 +267,17 @@ enterpriseAdminListSelfHostedRunnerGroupsForEnterprise toMsg =
         , expect =
             Http.expectJson
                 toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
+                (Json.Decode.succeed
+                  (\totalCount runnerGroups ->
+                      { totalCount = totalCount, runnerGroups = runnerGroups }
+                  )
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field "total_count" Json.Decode.float)
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field
+                            "runner_groups"
+                            (Json.Decode.list decodeRunnerGroupsEnterprise)
+                        )
                 )
         }
 
@@ -302,8 +300,6 @@ enterpriseAdminGetSelfHostedRunnerGroupForEnterprise toMsg =
 
 You must authenticate using an access token with the `manage_runners:enterprise` scope to use this endpoint.
 -}
-enterpriseAdminListOrgAccessToSelfHostedRunnerGroupInEnterprise :
-    (Result Http.Error todo -> msg) -> Cmd msg
 enterpriseAdminListOrgAccessToSelfHostedRunnerGroupInEnterprise toMsg =
     Http.get
         { url =
@@ -311,8 +307,17 @@ enterpriseAdminListOrgAccessToSelfHostedRunnerGroupInEnterprise toMsg =
         , expect =
             Http.expectJson
                 toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
+                (Json.Decode.succeed
+                  (\totalCount organizations ->
+                      { totalCount = totalCount, organizations = organizations }
+                  )
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field "total_count" Json.Decode.float)
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field
+                            "organizations"
+                            (Json.Decode.list decodeOrganizationSimple)
+                        )
                 )
         }
 
@@ -321,8 +326,6 @@ enterpriseAdminListOrgAccessToSelfHostedRunnerGroupInEnterprise toMsg =
 
 You must authenticate using an access token with the `manage_runners:enterprise` scope to use this endpoint.
 -}
-enterpriseAdminListSelfHostedRunnersInGroupForEnterprise :
-    (Result Http.Error todo -> msg) -> Cmd msg
 enterpriseAdminListSelfHostedRunnersInGroupForEnterprise toMsg =
     Http.get
         { url =
@@ -330,8 +333,17 @@ enterpriseAdminListSelfHostedRunnersInGroupForEnterprise toMsg =
         , expect =
             Http.expectJson
                 toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
+                (Json.Decode.succeed
+                  (\totalCount runners ->
+                      { totalCount = totalCount, runners = runners }
+                  )
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field "total_count" Json.Decode.float)
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field
+                            "runners"
+                            (Json.Decode.list decodeRunner)
+                        )
                 )
         }
 
@@ -340,8 +352,6 @@ enterpriseAdminListSelfHostedRunnersInGroupForEnterprise toMsg =
 
 You must authenticate using an access token with the `manage_runners:enterprise` scope to use this endpoint.
 -}
-enterpriseAdminListSelfHostedRunnersForEnterprise :
-    (Result Http.Error todo -> msg) -> Cmd msg
 enterpriseAdminListSelfHostedRunnersForEnterprise toMsg =
     Http.get
         { url =
@@ -349,8 +359,17 @@ enterpriseAdminListSelfHostedRunnersForEnterprise toMsg =
         , expect =
             Http.expectJson
                 toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
+                (Json.Decode.succeed
+                  (\totalCount runners ->
+                      { totalCount = totalCount, runners = runners }
+                  )
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field "total_count" Json.Decode.float)
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field
+                            "runners"
+                            (Json.Decode.list decodeRunner)
+                        )
                 )
         }
 
@@ -360,17 +379,13 @@ enterpriseAdminListSelfHostedRunnersForEnterprise toMsg =
 You must authenticate using an access token with the `manage_runners:enterprise` scope to use this endpoint.
 -}
 enterpriseAdminListRunnerApplicationsForEnterprise :
-    (Result Http.Error todo -> msg) -> Cmd msg
+    (Result Http.Error (List RunnerApplication) -> msg) -> Cmd msg
 enterpriseAdminListRunnerApplicationsForEnterprise toMsg =
     Http.get
         { url =
             "https://api.github.com/enterprises/{enterprise}/actions/runners/downloads"
         , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+            Http.expectJson toMsg (Json.Decode.list decodeRunnerApplication)
         }
 
 
@@ -407,7 +422,9 @@ enterpriseAdminListLabelsForSelfHostedRunnerForEnterprise toMsg =
 To use this endpoint, you must be a member of the enterprise,
 and you must use an access token with the `repo` scope or `security_events` scope.
 -}
-codeScanningListAlertsForEnterprise : (Result Http.Error todo -> msg) -> Cmd msg
+codeScanningListAlertsForEnterprise :
+    (Result Http.Error (List CodeScanningOrganizationAlertItems) -> msg)
+    -> Cmd msg
 codeScanningListAlertsForEnterprise toMsg =
     Http.get
         { url =
@@ -415,9 +432,7 @@ codeScanningListAlertsForEnterprise toMsg =
         , expect =
             Http.expectJson
                 toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+                (Json.Decode.list decodeCodeScanningOrganizationAlertItems)
         }
 
 
@@ -425,7 +440,7 @@ codeScanningListAlertsForEnterprise toMsg =
 To use this endpoint, you must be a member of the enterprise, and you must use an access token with the `repo` scope or `security_events` scope. Alerts are only returned for organizations in the enterprise for which you are an organization owner or a [security manager](https://docs.github.com/organizations/managing-peoples-access-to-your-organization-with-roles/managing-security-managers-in-your-organization).
 -}
 secretScanningListAlertsForEnterprise :
-    (Result Http.Error todo -> msg) -> Cmd msg
+    (Result Http.Error (List OrganizationSecretScanningAlert) -> msg) -> Cmd msg
 secretScanningListAlertsForEnterprise toMsg =
     Http.get
         { url =
@@ -433,9 +448,7 @@ secretScanningListAlertsForEnterprise toMsg =
         , expect =
             Http.expectJson
                 toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+                (Json.Decode.list decodeOrganizationSecretScanningAlert)
         }
 
 
@@ -456,16 +469,11 @@ billingGetGithubAdvancedSecurityBillingGhe toMsg =
 
 
 {-| We delay the public events feed by five minutes, which means the most recent event returned by the public events API actually occurred at least five minutes ago. -}
-activityListPublicEvents : (Result Http.Error todo -> msg) -> Cmd msg
+activityListPublicEvents : (Result Http.Error (List Event) -> msg) -> Cmd msg
 activityListPublicEvents toMsg =
     Http.get
         { url = "https://api.github.com/events"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodeEvent)
         }
 
 
@@ -490,16 +498,11 @@ activityGetFeeds toMsg =
 
 
 {-| Lists the authenticated user's gists or if called anonymously, this endpoint returns all public gists: -}
-gistsList : (Result Http.Error todo -> msg) -> Cmd msg
+gistsList : (Result Http.Error (List BaseGist) -> msg) -> Cmd msg
 gistsList toMsg =
     Http.get
         { url = "https://api.github.com/gists"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodeBaseGist)
         }
 
 
@@ -507,30 +510,20 @@ gistsList toMsg =
 
 Note: With [pagination](https://docs.github.com/rest/overview/resources-in-the-rest-api#pagination), you can fetch up to 3000 gists. For example, you can fetch 100 pages with 30 gists per page or 30 pages with 100 gists per page.
 -}
-gistsListPublic : (Result Http.Error todo -> msg) -> Cmd msg
+gistsListPublic : (Result Http.Error (List BaseGist) -> msg) -> Cmd msg
 gistsListPublic toMsg =
     Http.get
         { url = "https://api.github.com/gists/public"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodeBaseGist)
         }
 
 
 {-| List the authenticated user's starred gists: -}
-gistsListStarred : (Result Http.Error todo -> msg) -> Cmd msg
+gistsListStarred : (Result Http.Error (List BaseGist) -> msg) -> Cmd msg
 gistsListStarred toMsg =
     Http.get
         { url = "https://api.github.com/gists/starred"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodeBaseGist)
         }
 
 
@@ -542,16 +535,11 @@ gistsGet toMsg =
         }
 
 
-gistsListComments : (Result Http.Error todo -> msg) -> Cmd msg
+gistsListComments : (Result Http.Error (List GistComment) -> msg) -> Cmd msg
 gistsListComments toMsg =
     Http.get
         { url = "https://api.github.com/gists/{gist_id}/comments"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodeGistComment)
         }
 
 
@@ -563,29 +551,19 @@ gistsGetComment toMsg =
         }
 
 
-gistsListCommits : (Result Http.Error todo -> msg) -> Cmd msg
+gistsListCommits : (Result Http.Error (List GistCommit) -> msg) -> Cmd msg
 gistsListCommits toMsg =
     Http.get
         { url = "https://api.github.com/gists/{gist_id}/commits"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodeGistCommit)
         }
 
 
-gistsListForks : (Result Http.Error todo -> msg) -> Cmd msg
+gistsListForks : (Result Http.Error (List GistSimple) -> msg) -> Cmd msg
 gistsListForks toMsg =
     Http.get
         { url = "https://api.github.com/gists/{gist_id}/forks"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodeGistSimple)
         }
 
 
@@ -611,16 +589,11 @@ gistsGetRevision toMsg =
 
 
 {-| List all templates available to pass as an option when [creating a repository](https://docs.github.com/rest/reference/repos#create-a-repository-for-the-authenticated-user). -}
-gitignoreGetAllTemplates : (Result Http.Error todo -> msg) -> Cmd msg
+gitignoreGetAllTemplates : (Result Http.Error (List String) -> msg) -> Cmd msg
 gitignoreGetAllTemplates toMsg =
     Http.get
         { url = "https://api.github.com/gitignore/templates"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list Json.Decode.string)
         }
 
 
@@ -639,16 +612,31 @@ gitignoreGetTemplate toMsg =
 
 You must use an [installation access token](https://docs.github.com/apps/building-github-apps/authenticating-with-github-apps/#authenticating-as-an-installation) to access this endpoint.
 -}
-appsListReposAccessibleToInstallation :
-    (Result Http.Error todo -> msg) -> Cmd msg
 appsListReposAccessibleToInstallation toMsg =
     Http.get
         { url = "https://api.github.com/installation/repositories"
         , expect =
             Http.expectJson
                 toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
+                (Json.Decode.succeed
+                  (\totalCount repositories repositorySelection ->
+                      { totalCount = totalCount
+                      , repositories = repositories
+                      , repositorySelection = repositorySelection
+                      }
+                  )
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field "total_count" Json.Decode.int)
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field
+                            "repositories"
+                            (Json.Decode.list decodeRepository)
+                        )
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field
+                            "repository_selection"
+                            Json.Decode.string
+                        )
                 )
         }
 
@@ -663,29 +651,20 @@ reason, "Issues" endpoints may return both issues and pull requests in the respo
 the `pull_request` key. Be aware that the `id` of a pull request returned from "Issues" endpoints will be an _issue id_. To find out the pull
 request id, use the "[List pull requests](https://docs.github.com/rest/reference/pulls#list-pull-requests)" endpoint.
 -}
-issuesList : (Result Http.Error todo -> msg) -> Cmd msg
+issuesList : (Result Http.Error (List Issue) -> msg) -> Cmd msg
 issuesList toMsg =
     Http.get
         { url = "https://api.github.com/issues"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodeIssue)
         }
 
 
-licensesGetAllCommonlyUsed : (Result Http.Error todo -> msg) -> Cmd msg
+licensesGetAllCommonlyUsed :
+    (Result Http.Error (List LicenseSimple) -> msg) -> Cmd msg
 licensesGetAllCommonlyUsed toMsg =
     Http.get
         { url = "https://api.github.com/licenses"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodeLicenseSimple)
         }
 
 
@@ -715,16 +694,15 @@ appsGetSubscriptionPlanForAccount toMsg =
 
 GitHub Apps must use a [JWT](https://docs.github.com/apps/building-github-apps/authenticating-with-github-apps/#authenticating-as-a-github-app) to access this endpoint. OAuth Apps must use [basic authentication](https://docs.github.com/rest/overview/other-authentication-methods#basic-authentication) with their client ID and client secret to access this endpoint.
 -}
-appsListPlans : (Result Http.Error todo -> msg) -> Cmd msg
+appsListPlans :
+    (Result Http.Error (List MarketplaceListingPlan) -> msg) -> Cmd msg
 appsListPlans toMsg =
     Http.get
         { url = "https://api.github.com/marketplace_listing/plans"
         , expect =
             Http.expectJson
                 toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+                (Json.Decode.list decodeMarketplaceListingPlan)
         }
 
 
@@ -732,17 +710,14 @@ appsListPlans toMsg =
 
 GitHub Apps must use a [JWT](https://docs.github.com/apps/building-github-apps/authenticating-with-github-apps/#authenticating-as-a-github-app) to access this endpoint. OAuth Apps must use [basic authentication](https://docs.github.com/rest/overview/other-authentication-methods#basic-authentication) with their client ID and client secret to access this endpoint.
 -}
-appsListAccountsForPlan : (Result Http.Error todo -> msg) -> Cmd msg
+appsListAccountsForPlan :
+    (Result Http.Error (List MarketplacePurchase) -> msg) -> Cmd msg
 appsListAccountsForPlan toMsg =
     Http.get
         { url =
             "https://api.github.com/marketplace_listing/plans/{plan_id}/accounts"
         , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+            Http.expectJson toMsg (Json.Decode.list decodeMarketplacePurchase)
         }
 
 
@@ -764,16 +739,15 @@ appsGetSubscriptionPlanForAccountStubbed toMsg =
 
 GitHub Apps must use a [JWT](https://docs.github.com/apps/building-github-apps/authenticating-with-github-apps/#authenticating-as-a-github-app) to access this endpoint. OAuth Apps must use [basic authentication](https://docs.github.com/rest/overview/other-authentication-methods#basic-authentication) with their client ID and client secret to access this endpoint.
 -}
-appsListPlansStubbed : (Result Http.Error todo -> msg) -> Cmd msg
+appsListPlansStubbed :
+    (Result Http.Error (List MarketplaceListingPlan) -> msg) -> Cmd msg
 appsListPlansStubbed toMsg =
     Http.get
         { url = "https://api.github.com/marketplace_listing/stubbed/plans"
         , expect =
             Http.expectJson
                 toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+                (Json.Decode.list decodeMarketplaceListingPlan)
         }
 
 
@@ -781,17 +755,14 @@ appsListPlansStubbed toMsg =
 
 GitHub Apps must use a [JWT](https://docs.github.com/apps/building-github-apps/authenticating-with-github-apps/#authenticating-as-a-github-app) to access this endpoint. OAuth Apps must use [basic authentication](https://docs.github.com/rest/overview/other-authentication-methods#basic-authentication) with their client ID and client secret to access this endpoint.
 -}
-appsListAccountsForPlanStubbed : (Result Http.Error todo -> msg) -> Cmd msg
+appsListAccountsForPlanStubbed :
+    (Result Http.Error (List MarketplacePurchase) -> msg) -> Cmd msg
 appsListAccountsForPlanStubbed toMsg =
     Http.get
         { url =
             "https://api.github.com/marketplace_listing/stubbed/plans/{plan_id}/accounts"
         , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+            Http.expectJson toMsg (Json.Decode.list decodeMarketplacePurchase)
         }
 
 
@@ -808,31 +779,21 @@ metaGet toMsg =
 
 
 activityListPublicEventsForRepoNetwork :
-    (Result Http.Error todo -> msg) -> Cmd msg
+    (Result Http.Error (List Event) -> msg) -> Cmd msg
 activityListPublicEventsForRepoNetwork toMsg =
     Http.get
         { url = "https://api.github.com/networks/{owner}/{repo}/events"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodeEvent)
         }
 
 
 {-| List all notifications for the current user, sorted by most recently updated. -}
 activityListNotificationsForAuthenticatedUser :
-    (Result Http.Error todo -> msg) -> Cmd msg
+    (Result Http.Error (List Thread) -> msg) -> Cmd msg
 activityListNotificationsForAuthenticatedUser toMsg =
     Http.get
         { url = "https://api.github.com/notifications"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodeThread)
         }
 
 
@@ -877,16 +838,12 @@ metaGetOctocat toMsg =
 
 **Note:** Pagination is powered exclusively by the `since` parameter. Use the [Link header](https://docs.github.com/rest/overview/resources-in-the-rest-api#link-header) to get the URL for the next page of organizations.
 -}
-orgsList : (Result Http.Error todo -> msg) -> Cmd msg
+orgsList : (Result Http.Error (List OrganizationSimple) -> msg) -> Cmd msg
 orgsList toMsg =
     Http.get
         { url = "https://api.github.com/organizations"
         , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+            Http.expectJson toMsg (Json.Decode.list decodeOrganizationSimple)
         }
 
 
@@ -898,7 +855,6 @@ GitHub Apps must have the `organization_custom_roles:read` organization permissi
 
 For more information on custom repository roles, see "[Managing custom repository roles for an organization](https://docs.github.com/organizations/managing-peoples-access-to-your-organization-with-roles/managing-custom-repository-roles-for-an-organization)".
 -}
-orgsListCustomRoles : (Result Http.Error todo -> msg) -> Cmd msg
 orgsListCustomRoles toMsg =
     Http.get
         { url =
@@ -906,8 +862,19 @@ orgsListCustomRoles toMsg =
         , expect =
             Http.expectJson
                 toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
+                (Json.Decode.succeed
+                  (\totalCount customRoles ->
+                      { totalCount = totalCount, customRoles = customRoles }
+                  )
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field "total_count" Json.Decode.int)
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field
+                            "custom_roles"
+                            (Json.Decode.list
+                                decodeOrganizationCustomRepositoryRole
+                            )
+                        )
                 )
         }
 
@@ -941,8 +908,6 @@ actionsGetActionsCacheUsageForOrg toMsg =
 The data fetched using this API is refreshed approximately every 5 minutes, so values returned from this endpoint may take at least 5 minutes to get updated.
 You must authenticate using an access token with the `read:org` scope to use this endpoint. GitHub Apps must have the `organization_admistration:read` permission to use this endpoint.
 -}
-actionsGetActionsCacheUsageByRepoForOrg :
-    (Result Http.Error todo -> msg) -> Cmd msg
 actionsGetActionsCacheUsageByRepoForOrg toMsg =
     Http.get
         { url =
@@ -950,8 +915,21 @@ actionsGetActionsCacheUsageByRepoForOrg toMsg =
         , expect =
             Http.expectJson
                 toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
+                (Json.Decode.succeed
+                  (\totalCount repositoryCacheUsages ->
+                      { totalCount = totalCount
+                      , repositoryCacheUsages = repositoryCacheUsages
+                      }
+                  )
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field "total_count" Json.Decode.int)
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field
+                            "repository_cache_usages"
+                            (Json.Decode.list
+                                decodeActionsCacheUsageByRepository
+                            )
+                        )
                 )
         }
 
@@ -973,8 +951,6 @@ actionsGetGithubActionsPermissionsOrganization toMsg =
 
 You must authenticate using an access token with the `admin:org` scope to use this endpoint. GitHub Apps must have the `administration` organization permission to use this API.
 -}
-actionsListSelectedRepositoriesEnabledGithubActionsOrganization :
-    (Result Http.Error todo -> msg) -> Cmd msg
 actionsListSelectedRepositoriesEnabledGithubActionsOrganization toMsg =
     Http.get
         { url =
@@ -982,8 +958,17 @@ actionsListSelectedRepositoriesEnabledGithubActionsOrganization toMsg =
         , expect =
             Http.expectJson
                 toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
+                (Json.Decode.succeed
+                  (\totalCount repositories ->
+                      { totalCount = totalCount, repositories = repositories }
+                  )
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field "total_count" Json.Decode.float)
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field
+                            "repositories"
+                            (Json.Decode.list decodeRepository)
+                        )
                 )
         }
 
@@ -1024,16 +1009,23 @@ Lists all self-hosted runner groups configured in an organization and inherited 
 
 You must authenticate using an access token with the `admin:org` scope to use this endpoint.
 -}
-actionsListSelfHostedRunnerGroupsForOrg :
-    (Result Http.Error todo -> msg) -> Cmd msg
 actionsListSelfHostedRunnerGroupsForOrg toMsg =
     Http.get
         { url = "https://api.github.com/orgs/{org}/actions/runner-groups"
         , expect =
             Http.expectJson
                 toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
+                (Json.Decode.succeed
+                  (\totalCount runnerGroups ->
+                      { totalCount = totalCount, runnerGroups = runnerGroups }
+                  )
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field "total_count" Json.Decode.float)
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field
+                            "runner_groups"
+                            (Json.Decode.list decodeRunnerGroupsOrg)
+                        )
                 )
         }
 
@@ -1060,8 +1052,6 @@ Lists the repositories with access to a self-hosted runner group configured in a
 
 You must authenticate using an access token with the `admin:org` scope to use this endpoint.
 -}
-actionsListRepoAccessToSelfHostedRunnerGroupInOrg :
-    (Result Http.Error todo -> msg) -> Cmd msg
 actionsListRepoAccessToSelfHostedRunnerGroupInOrg toMsg =
     Http.get
         { url =
@@ -1069,8 +1059,17 @@ actionsListRepoAccessToSelfHostedRunnerGroupInOrg toMsg =
         , expect =
             Http.expectJson
                 toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
+                (Json.Decode.succeed
+                  (\totalCount repositories ->
+                      { totalCount = totalCount, repositories = repositories }
+                  )
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field "total_count" Json.Decode.float)
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field
+                            "repositories"
+                            (Json.Decode.list decodeMinimalRepository)
+                        )
                 )
         }
 
@@ -1081,8 +1080,6 @@ Lists self-hosted runners that are in a specific organization group.
 
 You must authenticate using an access token with the `admin:org` scope to use this endpoint.
 -}
-actionsListSelfHostedRunnersInGroupForOrg :
-    (Result Http.Error todo -> msg) -> Cmd msg
 actionsListSelfHostedRunnersInGroupForOrg toMsg =
     Http.get
         { url =
@@ -1090,8 +1087,17 @@ actionsListSelfHostedRunnersInGroupForOrg toMsg =
         , expect =
             Http.expectJson
                 toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
+                (Json.Decode.succeed
+                  (\totalCount runners ->
+                      { totalCount = totalCount, runners = runners }
+                  )
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field "total_count" Json.Decode.float)
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field
+                            "runners"
+                            (Json.Decode.list decodeRunner)
+                        )
                 )
         }
 
@@ -1100,15 +1106,23 @@ actionsListSelfHostedRunnersInGroupForOrg toMsg =
 
 You must authenticate using an access token with the `admin:org` scope to use this endpoint.
 -}
-actionsListSelfHostedRunnersForOrg : (Result Http.Error todo -> msg) -> Cmd msg
 actionsListSelfHostedRunnersForOrg toMsg =
     Http.get
         { url = "https://api.github.com/orgs/{org}/actions/runners"
         , expect =
             Http.expectJson
                 toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
+                (Json.Decode.succeed
+                  (\totalCount runners ->
+                      { totalCount = totalCount, runners = runners }
+                  )
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field "total_count" Json.Decode.int)
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field
+                            "runners"
+                            (Json.Decode.list decodeRunner)
+                        )
                 )
         }
 
@@ -1117,16 +1131,13 @@ actionsListSelfHostedRunnersForOrg toMsg =
 
 You must authenticate using an access token with the `admin:org` scope to use this endpoint.
 -}
-actionsListRunnerApplicationsForOrg : (Result Http.Error todo -> msg) -> Cmd msg
+actionsListRunnerApplicationsForOrg :
+    (Result Http.Error (List RunnerApplication) -> msg) -> Cmd msg
 actionsListRunnerApplicationsForOrg toMsg =
     Http.get
         { url = "https://api.github.com/orgs/{org}/actions/runners/downloads"
         , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+            Http.expectJson toMsg (Json.Decode.list decodeRunnerApplication)
         }
 
 
@@ -1157,15 +1168,23 @@ actionsListLabelsForSelfHostedRunnerForOrg toMsg =
 
 
 {-| Lists all secrets available in an organization without revealing their encrypted values. You must authenticate using an access token with the `admin:org` scope to use this endpoint. GitHub Apps must have the `secrets` organization permission to use this endpoint. -}
-actionsListOrgSecrets : (Result Http.Error todo -> msg) -> Cmd msg
 actionsListOrgSecrets toMsg =
     Http.get
         { url = "https://api.github.com/orgs/{org}/actions/secrets"
         , expect =
             Http.expectJson
                 toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
+                (Json.Decode.succeed
+                  (\totalCount secrets ->
+                      { totalCount = totalCount, secrets = secrets }
+                  )
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field "total_count" Json.Decode.int)
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field
+                            "secrets"
+                            (Json.Decode.list decodeOrganizationActionsSecret)
+                        )
                 )
         }
 
@@ -1191,8 +1210,6 @@ actionsGetOrgSecret toMsg =
 
 
 {-| Lists all repositories that have been selected when the `visibility` for repository access to a secret is set to `selected`. You must authenticate using an access token with the `admin:org` scope to use this endpoint. GitHub Apps must have the `secrets` organization permission to use this endpoint. -}
-actionsListSelectedReposForOrgSecret :
-    (Result Http.Error todo -> msg) -> Cmd msg
 actionsListSelectedReposForOrgSecret toMsg =
     Http.get
         { url =
@@ -1200,23 +1217,27 @@ actionsListSelectedReposForOrgSecret toMsg =
         , expect =
             Http.expectJson
                 toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
+                (Json.Decode.succeed
+                  (\totalCount repositories ->
+                      { totalCount = totalCount, repositories = repositories }
+                  )
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field "total_count" Json.Decode.int)
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field
+                            "repositories"
+                            (Json.Decode.list decodeMinimalRepository)
+                        )
                 )
         }
 
 
 {-| List the users blocked by an organization. -}
-orgsListBlockedUsers : (Result Http.Error todo -> msg) -> Cmd msg
+orgsListBlockedUsers : (Result Http.Error (List SimpleUser) -> msg) -> Cmd msg
 orgsListBlockedUsers toMsg =
     Http.get
         { url = "https://api.github.com/orgs/{org}/blocks"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodeSimpleUser)
         }
 
 
@@ -1241,16 +1262,16 @@ For public repositories, you may instead use the `public_repo` scope.
 
 GitHub Apps must have the `security_events` read permission to use this endpoint.
 -}
-codeScanningListAlertsForOrg : (Result Http.Error todo -> msg) -> Cmd msg
+codeScanningListAlertsForOrg :
+    (Result Http.Error (List CodeScanningOrganizationAlertItems) -> msg)
+    -> Cmd msg
 codeScanningListAlertsForOrg toMsg =
     Http.get
         { url = "https://api.github.com/orgs/{org}/code-scanning/alerts"
         , expect =
             Http.expectJson
                 toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+                (Json.Decode.list decodeCodeScanningOrganizationAlertItems)
         }
 
 
@@ -1258,15 +1279,23 @@ codeScanningListAlertsForOrg toMsg =
 
 You must authenticate using an access token with the `admin:org` scope to use this endpoint.
 -}
-codespacesListInOrganization : (Result Http.Error todo -> msg) -> Cmd msg
 codespacesListInOrganization toMsg =
     Http.get
         { url = "https://api.github.com/orgs/{org}/codespaces"
         , expect =
             Http.expectJson
                 toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
+                (Json.Decode.succeed
+                  (\totalCount codespaces ->
+                      { totalCount = totalCount, codespaces = codespaces }
+                  )
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field "total_count" Json.Decode.int)
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field
+                            "codespaces"
+                            (Json.Decode.list decodeCodespace)
+                        )
                 )
         }
 
@@ -1274,15 +1303,23 @@ codespacesListInOrganization toMsg =
 {-| Lists all Codespaces secrets available at the organization-level without revealing their encrypted values.
 You must authenticate using an access token with the `admin:org` scope to use this endpoint.
 -}
-codespacesListOrgSecrets : (Result Http.Error todo -> msg) -> Cmd msg
 codespacesListOrgSecrets toMsg =
     Http.get
         { url = "https://api.github.com/orgs/{org}/codespaces/secrets"
         , expect =
             Http.expectJson
                 toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
+                (Json.Decode.succeed
+                  (\totalCount secrets ->
+                      { totalCount = totalCount, secrets = secrets }
+                  )
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field "total_count" Json.Decode.int)
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field
+                            "secrets"
+                            (Json.Decode.list decodeCodespacesOrgSecret)
+                        )
                 )
         }
 
@@ -1312,8 +1349,6 @@ codespacesGetOrgSecret toMsg =
 
 
 {-| Lists all repositories that have been selected when the `visibility` for repository access to a secret is set to `selected`. You must authenticate using an access token with the `admin:org` scope to use this endpoint. -}
-codespacesListSelectedReposForOrgSecret :
-    (Result Http.Error todo -> msg) -> Cmd msg
 codespacesListSelectedReposForOrgSecret toMsg =
     Http.get
         { url =
@@ -1321,22 +1356,40 @@ codespacesListSelectedReposForOrgSecret toMsg =
         , expect =
             Http.expectJson
                 toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
+                (Json.Decode.succeed
+                  (\totalCount repositories ->
+                      { totalCount = totalCount, repositories = repositories }
+                  )
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field "total_count" Json.Decode.int)
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field
+                            "repositories"
+                            (Json.Decode.list decodeMinimalRepository)
+                        )
                 )
         }
 
 
 {-| Lists all secrets available in an organization without revealing their encrypted values. You must authenticate using an access token with the `admin:org` scope to use this endpoint. GitHub Apps must have the `dependabot_secrets` organization permission to use this endpoint. -}
-dependabotListOrgSecrets : (Result Http.Error todo -> msg) -> Cmd msg
 dependabotListOrgSecrets toMsg =
     Http.get
         { url = "https://api.github.com/orgs/{org}/dependabot/secrets"
         , expect =
             Http.expectJson
                 toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
+                (Json.Decode.succeed
+                  (\totalCount secrets ->
+                      { totalCount = totalCount, secrets = secrets }
+                  )
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field "total_count" Json.Decode.int)
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field
+                            "secrets"
+                            (Json.Decode.list decodeOrganizationDependabotSecret
+                            )
+                        )
                 )
         }
 
@@ -1364,8 +1417,6 @@ dependabotGetOrgSecret toMsg =
 
 
 {-| Lists all repositories that have been selected when the `visibility` for repository access to a secret is set to `selected`. You must authenticate using an access token with the `admin:org` scope to use this endpoint. GitHub Apps must have the `dependabot_secrets` organization permission to use this endpoint. -}
-dependabotListSelectedReposForOrgSecret :
-    (Result Http.Error todo -> msg) -> Cmd msg
 dependabotListSelectedReposForOrgSecret toMsg =
     Http.get
         { url =
@@ -1373,36 +1424,39 @@ dependabotListSelectedReposForOrgSecret toMsg =
         , expect =
             Http.expectJson
                 toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
+                (Json.Decode.succeed
+                  (\totalCount repositories ->
+                      { totalCount = totalCount, repositories = repositories }
+                  )
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field "total_count" Json.Decode.int)
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field
+                            "repositories"
+                            (Json.Decode.list decodeMinimalRepository)
+                        )
                 )
         }
 
 
-activityListPublicOrgEvents : (Result Http.Error todo -> msg) -> Cmd msg
+activityListPublicOrgEvents : (Result Http.Error (List Event) -> msg) -> Cmd msg
 activityListPublicOrgEvents toMsg =
     Http.get
         { url = "https://api.github.com/orgs/{org}/events"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodeEvent)
         }
 
 
 {-| The return hash contains `failed_at` and `failed_reason` fields which represent the time at which the invitation failed and the reason for the failure. -}
-orgsListFailedInvitations : (Result Http.Error todo -> msg) -> Cmd msg
+orgsListFailedInvitations :
+    (Result Http.Error (List OrganizationInvitation) -> msg) -> Cmd msg
 orgsListFailedInvitations toMsg =
     Http.get
         { url = "https://api.github.com/orgs/{org}/failed_invitations"
         , expect =
             Http.expectJson
                 toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+                (Json.Decode.list decodeOrganizationInvitation)
         }
 
 
@@ -1413,29 +1467,24 @@ Lists the fine-grained permissions available for an organization.
 To use this endpoint the authenticated user must be an administrator for the organization or of an repository of the organizaiton and must use an access token with `admin:org repo` scope.
 GitHub Apps must have the `organization_custom_roles:read` organization permission to use this endpoint.
 -}
-orgsListFineGrainedPermissions : (Result Http.Error todo -> msg) -> Cmd msg
+orgsListFineGrainedPermissions :
+    (Result Http.Error (List OrganizationFineGrainedPermission) -> msg)
+    -> Cmd msg
 orgsListFineGrainedPermissions toMsg =
     Http.get
         { url = "https://api.github.com/orgs/{org}/fine_grained_permissions"
         , expect =
             Http.expectJson
                 toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+                (Json.Decode.list decodeOrganizationFineGrainedPermission)
         }
 
 
-orgsListWebhooks : (Result Http.Error todo -> msg) -> Cmd msg
+orgsListWebhooks : (Result Http.Error (List OrgHook) -> msg) -> Cmd msg
 orgsListWebhooks toMsg =
     Http.get
         { url = "https://api.github.com/orgs/{org}/hooks"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodeOrgHook)
         }
 
 
@@ -1461,16 +1510,13 @@ orgsGetWebhookConfigForOrg toMsg =
 
 
 {-| Returns a list of webhook deliveries for a webhook configured in an organization. -}
-orgsListWebhookDeliveries : (Result Http.Error todo -> msg) -> Cmd msg
+orgsListWebhookDeliveries :
+    (Result Http.Error (List HookDeliveryItem) -> msg) -> Cmd msg
 orgsListWebhookDeliveries toMsg =
     Http.get
         { url = "https://api.github.com/orgs/{org}/hooks/{hook_id}/deliveries"
         , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+            Http.expectJson toMsg (Json.Decode.list decodeHookDeliveryItem)
         }
 
 
@@ -1497,21 +1543,30 @@ appsGetOrgInstallation toMsg =
 
 
 {-| Lists all GitHub Apps in an organization. The installation count includes all GitHub Apps installed on repositories in the organization. You must be an organization owner with `admin:read` scope to use this endpoint. -}
-orgsListAppInstallations : (Result Http.Error todo -> msg) -> Cmd msg
 orgsListAppInstallations toMsg =
     Http.get
         { url = "https://api.github.com/orgs/{org}/installations"
         , expect =
             Http.expectJson
                 toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
+                (Json.Decode.succeed
+                  (\totalCount installations ->
+                      { totalCount = totalCount, installations = installations }
+                  )
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field "total_count" Json.Decode.int)
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field
+                            "installations"
+                            (Json.Decode.list decodeInstallation)
+                        )
                 )
         }
 
 
 {-| Shows which type of GitHub user can interact with this organization and when the restriction expires. If there is no restrictions, you will see an empty response. -}
-interactionsGetRestrictionsForOrg : (Result Http.Error todo -> msg) -> Cmd msg
+interactionsGetRestrictionsForOrg :
+    (Result Http.Error (EnumTwo InteractionLimitResponse {}) -> msg) -> Cmd msg
 interactionsGetRestrictionsForOrg toMsg =
     Http.get
         { url = "https://api.github.com/orgs/{org}/interaction-limits"
@@ -1519,37 +1574,31 @@ interactionsGetRestrictionsForOrg toMsg =
             Http.expectJson
                 toMsg
                 (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
+                    "decode anyOf 2: not nullable:: { additionalItems = Nothing, additionalProperties = Nothing, allOf = Nothing, anyOf = Nothing, const = Nothing, contains = Nothing, default = Nothing, definitions = Nothing, dependencies = [], description = Nothing, enum = Nothing, examples = Nothing, exclusiveMaximum = Nothing, exclusiveMinimum = Nothing, format = Nothing, id = Nothing, items = NoItems, maxItems = Nothing, maxLength = Nothing, maxProperties = Nothing, maximum = Nothing, minItems = Nothing, minLength = Nothing, minProperties = Nothing, minimum = Nothing, multipleOf = Nothing, not = Nothing, oneOf = Nothing, pattern = Nothing, patternProperties = Nothing, properties = Nothing, propertyNames = Nothing, ref = Just \"#/components/schemas/interaction-limit-response\", required = Nothing, source = <internals>, title = Nothing, type_ = AnyType, uniqueItems = Nothing } ,,, { additionalItems = Nothing, additionalProperties = Just (BooleanSchema False), allOf = Nothing, anyOf = Nothing, const = Nothing, contains = Nothing, default = Nothing, definitions = Nothing, dependencies = [], description = Nothing, enum = Nothing, examples = Nothing, exclusiveMaximum = Nothing, exclusiveMinimum = Nothing, format = Nothing, id = Nothing, items = NoItems, maxItems = Nothing, maxLength = Nothing, maxProperties = Nothing, maximum = Nothing, minItems = Nothing, minLength = Nothing, minProperties = Nothing, minimum = Nothing, multipleOf = Nothing, not = Nothing, oneOf = Nothing, pattern = Nothing, patternProperties = Nothing, properties = Just (Schemata []), propertyNames = Nothing, ref = Nothing, required = Nothing, source = <internals>, title = Nothing, type_ = SingleType ObjectType, uniqueItems = Nothing }"
                 )
         }
 
 
 {-| The return hash contains a `role` field which refers to the Organization Invitation role and will be one of the following values: `direct_member`, `admin`, `billing_manager`, `hiring_manager`, or `reinstate`. If the invitee is not a GitHub member, the `login` field in the return hash will be `null`. -}
-orgsListPendingInvitations : (Result Http.Error todo -> msg) -> Cmd msg
+orgsListPendingInvitations :
+    (Result Http.Error (List OrganizationInvitation) -> msg) -> Cmd msg
 orgsListPendingInvitations toMsg =
     Http.get
         { url = "https://api.github.com/orgs/{org}/invitations"
         , expect =
             Http.expectJson
                 toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+                (Json.Decode.list decodeOrganizationInvitation)
         }
 
 
 {-| List all teams associated with an invitation. In order to see invitations in an organization, the authenticated user must be an organization owner. -}
-orgsListInvitationTeams : (Result Http.Error todo -> msg) -> Cmd msg
+orgsListInvitationTeams : (Result Http.Error (List Team) -> msg) -> Cmd msg
 orgsListInvitationTeams toMsg =
     Http.get
         { url =
             "https://api.github.com/orgs/{org}/invitations/{invitation_id}/teams"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodeTeam)
         }
 
 
@@ -1560,30 +1609,20 @@ reason, "Issues" endpoints may return both issues and pull requests in the respo
 the `pull_request` key. Be aware that the `id` of a pull request returned from "Issues" endpoints will be an _issue id_. To find out the pull
 request id, use the "[List pull requests](https://docs.github.com/rest/reference/pulls#list-pull-requests)" endpoint.
 -}
-issuesListForOrg : (Result Http.Error todo -> msg) -> Cmd msg
+issuesListForOrg : (Result Http.Error (List Issue) -> msg) -> Cmd msg
 issuesListForOrg toMsg =
     Http.get
         { url = "https://api.github.com/orgs/{org}/issues"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodeIssue)
         }
 
 
 {-| List all users who are members of an organization. If the authenticated user is also a member of this organization then both concealed and public members will be returned. -}
-orgsListMembers : (Result Http.Error todo -> msg) -> Cmd msg
+orgsListMembers : (Result Http.Error (List SimpleUser) -> msg) -> Cmd msg
 orgsListMembers toMsg =
     Http.get
         { url = "https://api.github.com/orgs/{org}/members"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodeSimpleUser)
         }
 
 
@@ -1605,7 +1644,6 @@ orgsCheckMembershipForUser toMsg =
 
 You must authenticate using an access token with the `admin:org` scope to use this endpoint.
 -}
-codespacesGetCodespacesForUserInOrg : (Result Http.Error todo -> msg) -> Cmd msg
 codespacesGetCodespacesForUserInOrg toMsg =
     Http.get
         { url =
@@ -1613,8 +1651,17 @@ codespacesGetCodespacesForUserInOrg toMsg =
         , expect =
             Http.expectJson
                 toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
+                (Json.Decode.succeed
+                  (\totalCount codespaces ->
+                      { totalCount = totalCount, codespaces = codespaces }
+                  )
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field "total_count" Json.Decode.int)
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field
+                            "codespaces"
+                            (Json.Decode.list decodeCodespace)
+                        )
                 )
         }
 
@@ -1629,16 +1676,11 @@ orgsGetMembershipForUser toMsg =
 
 
 {-| Lists the most recent migrations. -}
-migrationsListForOrg : (Result Http.Error todo -> msg) -> Cmd msg
+migrationsListForOrg : (Result Http.Error (List Migration) -> msg) -> Cmd msg
 migrationsListForOrg toMsg =
     Http.get
         { url = "https://api.github.com/orgs/{org}/migrations"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodeMigration)
         }
 
 
@@ -1675,31 +1717,24 @@ migrationsDownloadArchiveForOrg toMsg =
 
 
 {-| List all the repositories for this organization migration. -}
-migrationsListReposForOrg : (Result Http.Error todo -> msg) -> Cmd msg
+migrationsListReposForOrg :
+    (Result Http.Error (List MinimalRepository) -> msg) -> Cmd msg
 migrationsListReposForOrg toMsg =
     Http.get
         { url =
             "https://api.github.com/orgs/{org}/migrations/{migration_id}/repositories"
         , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+            Http.expectJson toMsg (Json.Decode.list decodeMinimalRepository)
         }
 
 
 {-| List all users who are outside collaborators of an organization. -}
-orgsListOutsideCollaborators : (Result Http.Error todo -> msg) -> Cmd msg
+orgsListOutsideCollaborators :
+    (Result Http.Error (List SimpleUser) -> msg) -> Cmd msg
 orgsListOutsideCollaborators toMsg =
     Http.get
         { url = "https://api.github.com/orgs/{org}/outside_collaborators"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodeSimpleUser)
         }
 
 
@@ -1708,16 +1743,12 @@ orgsListOutsideCollaborators toMsg =
 To use this endpoint, you must authenticate using an access token with the `packages:read` scope.
 If `package_type` is not `container`, your token must also include the `repo` scope.
 -}
-packagesListPackagesForOrganization : (Result Http.Error todo -> msg) -> Cmd msg
+packagesListPackagesForOrganization :
+    (Result Http.Error (List Package) -> msg) -> Cmd msg
 packagesListPackagesForOrganization toMsg =
     Http.get
         { url = "https://api.github.com/orgs/{org}/packages"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodePackage)
         }
 
 
@@ -1742,17 +1773,12 @@ To use this endpoint, you must authenticate using an access token with the `pack
 If `package_type` is not `container`, your token must also include the `repo` scope.
 -}
 packagesGetAllPackageVersionsForPackageOwnedByOrg :
-    (Result Http.Error todo -> msg) -> Cmd msg
+    (Result Http.Error (List PackageVersion) -> msg) -> Cmd msg
 packagesGetAllPackageVersionsForPackageOwnedByOrg toMsg =
     Http.get
         { url =
             "https://api.github.com/orgs/{org}/packages/{package_type}/{package_name}/versions"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodePackageVersion)
         }
 
 
@@ -1772,30 +1798,20 @@ packagesGetPackageVersionForOrganization toMsg =
 
 
 {-| Lists the projects in an organization. Returns a `404 Not Found` status if projects are disabled in the organization. If you do not have sufficient privileges to perform this action, a `401 Unauthorized` or `410 Gone` status is returned. -}
-projectsListForOrg : (Result Http.Error todo -> msg) -> Cmd msg
+projectsListForOrg : (Result Http.Error (List Project) -> msg) -> Cmd msg
 projectsListForOrg toMsg =
     Http.get
         { url = "https://api.github.com/orgs/{org}/projects"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodeProject)
         }
 
 
 {-| Members of an organization can choose to have their membership publicized or not. -}
-orgsListPublicMembers : (Result Http.Error todo -> msg) -> Cmd msg
+orgsListPublicMembers : (Result Http.Error (List SimpleUser) -> msg) -> Cmd msg
 orgsListPublicMembers toMsg =
     Http.get
         { url = "https://api.github.com/orgs/{org}/public_members"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodeSimpleUser)
         }
 
 
@@ -1813,16 +1829,12 @@ orgsCheckPublicMembershipForUser toMsg =
 
 
 {-| Lists repositories for the specified organization. -}
-reposListForOrg : (Result Http.Error todo -> msg) -> Cmd msg
+reposListForOrg : (Result Http.Error (List MinimalRepository) -> msg) -> Cmd msg
 reposListForOrg toMsg =
     Http.get
         { url = "https://api.github.com/orgs/{org}/repos"
         , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+            Http.expectJson toMsg (Json.Decode.list decodeMinimalRepository)
         }
 
 
@@ -1832,16 +1844,15 @@ For public repositories, you may instead use the `public_repo` scope.
 
 GitHub Apps must have the `secret_scanning_alerts` read permission to use this endpoint.
 -}
-secretScanningListAlertsForOrg : (Result Http.Error todo -> msg) -> Cmd msg
+secretScanningListAlertsForOrg :
+    (Result Http.Error (List OrganizationSecretScanningAlert) -> msg) -> Cmd msg
 secretScanningListAlertsForOrg toMsg =
     Http.get
         { url = "https://api.github.com/orgs/{org}/secret-scanning/alerts"
         , expect =
             Http.expectJson
                 toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+                (Json.Decode.list decodeOrganizationSecretScanningAlert)
         }
 
 
@@ -1851,16 +1862,12 @@ To use this endpoint, you must be an administrator or security manager for the o
 
 GitHub Apps must have the `administration` organization read permission to use this endpoint.
 -}
-orgsListSecurityManagerTeams : (Result Http.Error todo -> msg) -> Cmd msg
+orgsListSecurityManagerTeams :
+    (Result Http.Error (List TeamSimple) -> msg) -> Cmd msg
 orgsListSecurityManagerTeams toMsg =
     Http.get
         { url = "https://api.github.com/orgs/{org}/security-managers"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodeTeamSimple)
         }
 
 
@@ -1929,16 +1936,11 @@ billingGetSharedStorageBillingOrg toMsg =
 
 
 {-| Lists all teams in an organization that are visible to the authenticated user. -}
-teamsList : (Result Http.Error todo -> msg) -> Cmd msg
+teamsList : (Result Http.Error (List Team) -> msg) -> Cmd msg
 teamsList toMsg =
     Http.get
         { url = "https://api.github.com/orgs/{org}/teams"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodeTeam)
         }
 
 
@@ -1958,17 +1960,13 @@ teamsGetByName toMsg =
 
 **Note:** You can also specify a team by `org_id` and `team_id` using the route `GET /organizations/{org_id}/team/{team_id}/discussions`.
 -}
-teamsListDiscussionsInOrg : (Result Http.Error todo -> msg) -> Cmd msg
+teamsListDiscussionsInOrg :
+    (Result Http.Error (List TeamDiscussion) -> msg) -> Cmd msg
 teamsListDiscussionsInOrg toMsg =
     Http.get
         { url =
             "https://api.github.com/orgs/{org}/teams/{team_slug}/discussions"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodeTeamDiscussion)
         }
 
 
@@ -1989,17 +1987,14 @@ teamsGetDiscussionInOrg toMsg =
 
 **Note:** You can also specify a team by `org_id` and `team_id` using the route `GET /organizations/{org_id}/team/{team_id}/discussions/{discussion_number}/comments`.
 -}
-teamsListDiscussionCommentsInOrg : (Result Http.Error todo -> msg) -> Cmd msg
+teamsListDiscussionCommentsInOrg :
+    (Result Http.Error (List TeamDiscussionComment) -> msg) -> Cmd msg
 teamsListDiscussionCommentsInOrg toMsg =
     Http.get
         { url =
             "https://api.github.com/orgs/{org}/teams/{team_slug}/discussions/{discussion_number}/comments"
         , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+            Http.expectJson toMsg (Json.Decode.list decodeTeamDiscussionComment)
         }
 
 
@@ -2022,17 +2017,12 @@ teamsGetDiscussionCommentInOrg toMsg =
 **Note:** You can also specify a team by `org_id` and `team_id` using the route `GET /organizations/:org_id/team/:team_id/discussions/:discussion_number/comments/:comment_number/reactions`.
 -}
 reactionsListForTeamDiscussionCommentInOrg :
-    (Result Http.Error todo -> msg) -> Cmd msg
+    (Result Http.Error (List Reaction) -> msg) -> Cmd msg
 reactionsListForTeamDiscussionCommentInOrg toMsg =
     Http.get
         { url =
             "https://api.github.com/orgs/{org}/teams/{team_slug}/discussions/{discussion_number}/comments/{comment_number}/reactions"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodeReaction)
         }
 
 
@@ -2040,17 +2030,13 @@ reactionsListForTeamDiscussionCommentInOrg toMsg =
 
 **Note:** You can also specify a team by `org_id` and `team_id` using the route `GET /organizations/:org_id/team/:team_id/discussions/:discussion_number/reactions`.
 -}
-reactionsListForTeamDiscussionInOrg : (Result Http.Error todo -> msg) -> Cmd msg
+reactionsListForTeamDiscussionInOrg :
+    (Result Http.Error (List Reaction) -> msg) -> Cmd msg
 reactionsListForTeamDiscussionInOrg toMsg =
     Http.get
         { url =
             "https://api.github.com/orgs/{org}/teams/{team_slug}/discussions/{discussion_number}/reactions"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodeReaction)
         }
 
 
@@ -2058,7 +2044,8 @@ reactionsListForTeamDiscussionInOrg toMsg =
 
 **Note:** You can also specify a team by `org_id` and `team_id` using the route `GET /organizations/{org_id}/team/{team_id}/invitations`.
 -}
-teamsListPendingInvitationsInOrg : (Result Http.Error todo -> msg) -> Cmd msg
+teamsListPendingInvitationsInOrg :
+    (Result Http.Error (List OrganizationInvitation) -> msg) -> Cmd msg
 teamsListPendingInvitationsInOrg toMsg =
     Http.get
         { url =
@@ -2066,9 +2053,7 @@ teamsListPendingInvitationsInOrg toMsg =
         , expect =
             Http.expectJson
                 toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+                (Json.Decode.list decodeOrganizationInvitation)
         }
 
 
@@ -2076,16 +2061,11 @@ teamsListPendingInvitationsInOrg toMsg =
 
 To list members in a team, the team must be visible to the authenticated user.
 -}
-teamsListMembersInOrg : (Result Http.Error todo -> msg) -> Cmd msg
+teamsListMembersInOrg : (Result Http.Error (List SimpleUser) -> msg) -> Cmd msg
 teamsListMembersInOrg toMsg =
     Http.get
         { url = "https://api.github.com/orgs/{org}/teams/{team_slug}/members"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodeSimpleUser)
         }
 
 
@@ -2114,16 +2094,12 @@ teamsGetMembershipForUserInOrg toMsg =
 
 **Note:** You can also specify a team by `org_id` and `team_id` using the route `GET /organizations/{org_id}/team/{team_id}/projects`.
 -}
-teamsListProjectsInOrg : (Result Http.Error todo -> msg) -> Cmd msg
+teamsListProjectsInOrg :
+    (Result Http.Error (List TeamProject) -> msg) -> Cmd msg
 teamsListProjectsInOrg toMsg =
     Http.get
         { url = "https://api.github.com/orgs/{org}/teams/{team_slug}/projects"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodeTeamProject)
         }
 
 
@@ -2145,16 +2121,13 @@ teamsCheckPermissionsForProjectInOrg toMsg =
 
 **Note:** You can also specify a team by `org_id` and `team_id` using the route `GET /organizations/{org_id}/team/{team_id}/repos`.
 -}
-teamsListReposInOrg : (Result Http.Error todo -> msg) -> Cmd msg
+teamsListReposInOrg :
+    (Result Http.Error (List MinimalRepository) -> msg) -> Cmd msg
 teamsListReposInOrg toMsg =
     Http.get
         { url = "https://api.github.com/orgs/{org}/teams/{team_slug}/repos"
         , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+            Http.expectJson toMsg (Json.Decode.list decodeMinimalRepository)
         }
 
 
@@ -2180,16 +2153,11 @@ teamsCheckPermissionsForRepoInOrg toMsg =
 
 **Note:** You can also specify a team by `org_id` and `team_id` using the route `GET /organizations/{org_id}/team/{team_id}/teams`.
 -}
-teamsListChildInOrg : (Result Http.Error todo -> msg) -> Cmd msg
+teamsListChildInOrg : (Result Http.Error (List Team) -> msg) -> Cmd msg
 teamsListChildInOrg toMsg =
     Http.get
         { url = "https://api.github.com/orgs/{org}/teams/{team_slug}/teams"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodeTeam)
         }
 
 
@@ -2209,16 +2177,11 @@ projectsGetColumn toMsg =
         }
 
 
-projectsListCards : (Result Http.Error todo -> msg) -> Cmd msg
+projectsListCards : (Result Http.Error (List ProjectCard) -> msg) -> Cmd msg
 projectsListCards toMsg =
     Http.get
         { url = "https://api.github.com/projects/columns/{column_id}/cards"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodeProjectCard)
         }
 
 
@@ -2232,16 +2195,12 @@ projectsGet toMsg =
 
 
 {-| Lists the collaborators for an organization project. For a project, the list of collaborators includes outside collaborators, organization members that are direct collaborators, organization members with access through team memberships, organization members with access through default organization permissions, and organization owners. You must be an organization owner or a project `admin` to list collaborators. -}
-projectsListCollaborators : (Result Http.Error todo -> msg) -> Cmd msg
+projectsListCollaborators :
+    (Result Http.Error (List SimpleUser) -> msg) -> Cmd msg
 projectsListCollaborators toMsg =
     Http.get
         { url = "https://api.github.com/projects/{project_id}/collaborators"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodeSimpleUser)
         }
 
 
@@ -2256,16 +2215,11 @@ projectsGetPermissionForUser toMsg =
         }
 
 
-projectsListColumns : (Result Http.Error todo -> msg) -> Cmd msg
+projectsListColumns : (Result Http.Error (List ProjectColumn) -> msg) -> Cmd msg
 projectsListColumns toMsg =
     Http.get
         { url = "https://api.github.com/projects/{project_id}/columns"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodeProjectColumn)
         }
 
 
@@ -2291,15 +2245,23 @@ reposGet toMsg =
 
 
 {-| Lists all artifacts for a repository. Anyone with read access to the repository can use this endpoint. If the repository is private you must use an access token with the `repo` scope. GitHub Apps must have the `actions:read` permission to use this endpoint. -}
-actionsListArtifactsForRepo : (Result Http.Error todo -> msg) -> Cmd msg
 actionsListArtifactsForRepo toMsg =
     Http.get
         { url = "https://api.github.com/repos/{owner}/{repo}/actions/artifacts"
         , expect =
             Http.expectJson
                 toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
+                (Json.Decode.succeed
+                  (\totalCount artifacts ->
+                      { totalCount = totalCount, artifacts = artifacts }
+                  )
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field "total_count" Json.Decode.int)
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field
+                            "artifacts"
+                            (Json.Decode.list decodeArtifact)
+                        )
                 )
         }
 
@@ -2452,15 +2414,23 @@ actionsGetGithubActionsDefaultWorkflowPermissionsRepository toMsg =
 
 
 {-| Lists all self-hosted runners configured in a repository. You must authenticate using an access token with the `repo` scope to use this endpoint. -}
-actionsListSelfHostedRunnersForRepo : (Result Http.Error todo -> msg) -> Cmd msg
 actionsListSelfHostedRunnersForRepo toMsg =
     Http.get
         { url = "https://api.github.com/repos/{owner}/{repo}/actions/runners"
         , expect =
             Http.expectJson
                 toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
+                (Json.Decode.succeed
+                  (\totalCount runners ->
+                      { totalCount = totalCount, runners = runners }
+                  )
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field "total_count" Json.Decode.int)
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field
+                            "runners"
+                            (Json.Decode.list decodeRunner)
+                        )
                 )
         }
 
@@ -2470,17 +2440,13 @@ actionsListSelfHostedRunnersForRepo toMsg =
 You must authenticate using an access token with the `repo` scope to use this endpoint.
 -}
 actionsListRunnerApplicationsForRepo :
-    (Result Http.Error todo -> msg) -> Cmd msg
+    (Result Http.Error (List RunnerApplication) -> msg) -> Cmd msg
 actionsListRunnerApplicationsForRepo toMsg =
     Http.get
         { url =
             "https://api.github.com/repos/{owner}/{repo}/actions/runners/downloads"
         , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+            Http.expectJson toMsg (Json.Decode.list decodeRunnerApplication)
         }
 
 
@@ -2517,15 +2483,23 @@ actionsListLabelsForSelfHostedRunnerForRepo toMsg =
 
 Anyone with read access to the repository can use this endpoint. If the repository is private you must use an access token with the `repo` scope. GitHub Apps must have the `actions:read` permission to use this endpoint.
 -}
-actionsListWorkflowRunsForRepo : (Result Http.Error todo -> msg) -> Cmd msg
 actionsListWorkflowRunsForRepo toMsg =
     Http.get
         { url = "https://api.github.com/repos/{owner}/{repo}/actions/runs"
         , expect =
             Http.expectJson
                 toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
+                (Json.Decode.succeed
+                  (\totalCount workflowRuns ->
+                      { totalCount = totalCount, workflowRuns = workflowRuns }
+                  )
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field "total_count" Json.Decode.int)
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field
+                            "workflow_runs"
+                            (Json.Decode.list decodeWorkflowRun)
+                        )
                 )
         }
 
@@ -2541,22 +2515,18 @@ actionsGetWorkflowRun toMsg =
 
 
 {-| Anyone with read access to the repository can use this endpoint. If the repository is private, you must use an access token with the `repo` scope. GitHub Apps must have the `actions:read` permission to use this endpoint. -}
-actionsGetReviewsForRun : (Result Http.Error todo -> msg) -> Cmd msg
+actionsGetReviewsForRun :
+    (Result Http.Error (List EnvironmentApprovals) -> msg) -> Cmd msg
 actionsGetReviewsForRun toMsg =
     Http.get
         { url =
             "https://api.github.com/repos/{owner}/{repo}/actions/runs/{run_id}/approvals"
         , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+            Http.expectJson toMsg (Json.Decode.list decodeEnvironmentApprovals)
         }
 
 
 {-| Lists artifacts for a workflow run. Anyone with read access to the repository can use this endpoint. If the repository is private you must use an access token with the `repo` scope. GitHub Apps must have the `actions:read` permission to use this endpoint. -}
-actionsListWorkflowRunArtifacts : (Result Http.Error todo -> msg) -> Cmd msg
 actionsListWorkflowRunArtifacts toMsg =
     Http.get
         { url =
@@ -2564,8 +2534,17 @@ actionsListWorkflowRunArtifacts toMsg =
         , expect =
             Http.expectJson
                 toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
+                (Json.Decode.succeed
+                  (\totalCount artifacts ->
+                      { totalCount = totalCount, artifacts = artifacts }
+                  )
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field "total_count" Json.Decode.int)
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field
+                            "artifacts"
+                            (Json.Decode.list decodeArtifact)
+                        )
                 )
         }
 
@@ -2585,8 +2564,6 @@ actionsGetWorkflowRunAttempt toMsg =
 
 
 {-| Lists jobs for a specific workflow run attempt. Anyone with read access to the repository can use this endpoint. If the repository is private you must use an access token with the `repo` scope. GitHub Apps must have the `actions:read` permission to use this endpoint. You can use parameters to narrow the list of results. For more information about using parameters, see [Parameters](https://docs.github.com/rest/overview/resources-in-the-rest-api#parameters). -}
-actionsListJobsForWorkflowRunAttempt :
-    (Result Http.Error todo -> msg) -> Cmd msg
 actionsListJobsForWorkflowRunAttempt toMsg =
     Http.get
         { url =
@@ -2594,8 +2571,12 @@ actionsListJobsForWorkflowRunAttempt toMsg =
         , expect =
             Http.expectJson
                 toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
+                (Json.Decode.succeed
+                  (\totalCount jobs -> { totalCount = totalCount, jobs = jobs })
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field "total_count" Json.Decode.int)
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field "jobs" (Json.Decode.list decodeJob))
                 )
         }
 
@@ -2621,7 +2602,6 @@ actionsDownloadWorkflowRunAttemptLogs toMsg =
 
 
 {-| Lists jobs for a workflow run. Anyone with read access to the repository can use this endpoint. If the repository is private you must use an access token with the `repo` scope. GitHub Apps must have the `actions:read` permission to use this endpoint. You can use parameters to narrow the list of results. For more information about using parameters, see [Parameters](https://docs.github.com/rest/overview/resources-in-the-rest-api#parameters). -}
-actionsListJobsForWorkflowRun : (Result Http.Error todo -> msg) -> Cmd msg
 actionsListJobsForWorkflowRun toMsg =
     Http.get
         { url =
@@ -2629,8 +2609,12 @@ actionsListJobsForWorkflowRun toMsg =
         , expect =
             Http.expectJson
                 toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
+                (Json.Decode.succeed
+                  (\totalCount jobs -> { totalCount = totalCount, jobs = jobs })
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field "total_count" Json.Decode.int)
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field "jobs" (Json.Decode.list decodeJob))
                 )
         }
 
@@ -2658,17 +2642,14 @@ actionsDownloadWorkflowRunLogs toMsg =
 
 Anyone with read access to the repository can use this endpoint. If the repository is private, you must use an access token with the `repo` scope. GitHub Apps must have the `actions:read` permission to use this endpoint.
 -}
-actionsGetPendingDeploymentsForRun : (Result Http.Error todo -> msg) -> Cmd msg
+actionsGetPendingDeploymentsForRun :
+    (Result Http.Error (List PendingDeployment) -> msg) -> Cmd msg
 actionsGetPendingDeploymentsForRun toMsg =
     Http.get
         { url =
             "https://api.github.com/repos/{owner}/{repo}/actions/runs/{run_id}/pending_deployments"
         , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+            Http.expectJson toMsg (Json.Decode.list decodePendingDeployment)
         }
 
 
@@ -2687,15 +2668,23 @@ actionsGetWorkflowRunUsage toMsg =
 
 
 {-| Lists all secrets available in a repository without revealing their encrypted values. You must authenticate using an access token with the `repo` scope to use this endpoint. GitHub Apps must have the `secrets` repository permission to use this endpoint. -}
-actionsListRepoSecrets : (Result Http.Error todo -> msg) -> Cmd msg
 actionsListRepoSecrets toMsg =
     Http.get
         { url = "https://api.github.com/repos/{owner}/{repo}/actions/secrets"
         , expect =
             Http.expectJson
                 toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
+                (Json.Decode.succeed
+                  (\totalCount secrets ->
+                      { totalCount = totalCount, secrets = secrets }
+                  )
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field "total_count" Json.Decode.int)
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field
+                            "secrets"
+                            (Json.Decode.list decodeActionsSecret)
+                        )
                 )
         }
 
@@ -2721,15 +2710,23 @@ actionsGetRepoSecret toMsg =
 
 
 {-| Lists the workflows in a repository. Anyone with read access to the repository can use this endpoint. If the repository is private you must use an access token with the `repo` scope. GitHub Apps must have the `actions:read` permission to use this endpoint. -}
-actionsListRepoWorkflows : (Result Http.Error todo -> msg) -> Cmd msg
 actionsListRepoWorkflows toMsg =
     Http.get
         { url = "https://api.github.com/repos/{owner}/{repo}/actions/workflows"
         , expect =
             Http.expectJson
                 toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
+                (Json.Decode.succeed
+                  (\totalCount workflows ->
+                      { totalCount = totalCount, workflows = workflows }
+                  )
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field "total_count" Json.Decode.int)
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field
+                            "workflows"
+                            (Json.Decode.list decodeWorkflow)
+                        )
                 )
         }
 
@@ -2748,7 +2745,6 @@ actionsGetWorkflow toMsg =
 
 Anyone with read access to the repository can use this endpoint. If the repository is private you must use an access token with the `repo` scope.
 -}
-actionsListWorkflowRuns : (Result Http.Error todo -> msg) -> Cmd msg
 actionsListWorkflowRuns toMsg =
     Http.get
         { url =
@@ -2756,8 +2752,17 @@ actionsListWorkflowRuns toMsg =
         , expect =
             Http.expectJson
                 toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
+                (Json.Decode.succeed
+                  (\totalCount workflowRuns ->
+                      { totalCount = totalCount, workflowRuns = workflowRuns }
+                  )
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field "total_count" Json.Decode.int)
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field
+                            "workflow_runs"
+                            (Json.Decode.list decodeWorkflowRun)
+                        )
                 )
         }
 
@@ -2776,16 +2781,11 @@ actionsGetWorkflowUsage toMsg =
 
 
 {-| Lists the [available assignees](https://docs.github.com/articles/assigning-issues-and-pull-requests-to-other-github-users/) for issues in a repository. -}
-issuesListAssignees : (Result Http.Error todo -> msg) -> Cmd msg
+issuesListAssignees : (Result Http.Error (List SimpleUser) -> msg) -> Cmd msg
 issuesListAssignees toMsg =
     Http.get
         { url = "https://api.github.com/repos/{owner}/{repo}/assignees"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodeSimpleUser)
         }
 
 
@@ -2813,16 +2813,11 @@ issuesCheckUserCanBeAssigned toMsg =
 
 Information about autolinks are only available to repository administrators.
 -}
-reposListAutolinks : (Result Http.Error todo -> msg) -> Cmd msg
+reposListAutolinks : (Result Http.Error (List Autolink) -> msg) -> Cmd msg
 reposListAutolinks toMsg =
     Http.get
         { url = "https://api.github.com/repos/{owner}/{repo}/autolinks"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodeAutolink)
         }
 
 
@@ -2839,16 +2834,11 @@ reposGetAutolink toMsg =
         }
 
 
-reposListBranches : (Result Http.Error todo -> msg) -> Cmd msg
+reposListBranches : (Result Http.Error (List ShortBranch) -> msg) -> Cmd msg
 reposListBranches toMsg =
     Http.get
         { url = "https://api.github.com/repos/{owner}/{repo}/branches"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodeShortBranch)
         }
 
 
@@ -2921,17 +2911,13 @@ reposGetStatusChecksProtection toMsg =
 
 
 {-| Protected branches are available in public repositories with GitHub Free and GitHub Free for organizations, and in public and private repositories with GitHub Pro, GitHub Team, GitHub Enterprise Cloud, and GitHub Enterprise Server. For more information, see [GitHub's products](https://docs.github.com/github/getting-started-with-github/githubs-products) in the GitHub Help documentation. -}
-reposGetAllStatusCheckContexts : (Result Http.Error todo -> msg) -> Cmd msg
+reposGetAllStatusCheckContexts :
+    (Result Http.Error (List String) -> msg) -> Cmd msg
 reposGetAllStatusCheckContexts toMsg =
     Http.get
         { url =
             "https://api.github.com/repos/{owner}/{repo}/branches/{branch}/protection/required_status_checks/contexts"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list Json.Decode.string)
         }
 
 
@@ -2956,17 +2942,12 @@ reposGetAccessRestrictions toMsg =
 Lists the GitHub Apps that have push access to this branch. Only installed GitHub Apps with `write` access to the `contents` permission can be added as authorized actors on a protected branch.
 -}
 reposGetAppsWithAccessToProtectedBranch :
-    (Result Http.Error todo -> msg) -> Cmd msg
+    (Result Http.Error (List Integration) -> msg) -> Cmd msg
 reposGetAppsWithAccessToProtectedBranch toMsg =
     Http.get
         { url =
             "https://api.github.com/repos/{owner}/{repo}/branches/{branch}/protection/restrictions/apps"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodeIntegration)
         }
 
 
@@ -2975,17 +2956,12 @@ reposGetAppsWithAccessToProtectedBranch toMsg =
 Lists the teams who have push access to this branch. The list includes child teams.
 -}
 reposGetTeamsWithAccessToProtectedBranch :
-    (Result Http.Error todo -> msg) -> Cmd msg
+    (Result Http.Error (List Team) -> msg) -> Cmd msg
 reposGetTeamsWithAccessToProtectedBranch toMsg =
     Http.get
         { url =
             "https://api.github.com/repos/{owner}/{repo}/branches/{branch}/protection/restrictions/teams"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodeTeam)
         }
 
 
@@ -2994,17 +2970,12 @@ reposGetTeamsWithAccessToProtectedBranch toMsg =
 Lists the people who have push access to this branch.
 -}
 reposGetUsersWithAccessToProtectedBranch :
-    (Result Http.Error todo -> msg) -> Cmd msg
+    (Result Http.Error (List SimpleUser) -> msg) -> Cmd msg
 reposGetUsersWithAccessToProtectedBranch toMsg =
     Http.get
         { url =
             "https://api.github.com/repos/{owner}/{repo}/branches/{branch}/protection/restrictions/users"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodeSimpleUser)
         }
 
 
@@ -3022,17 +2993,14 @@ checksGet toMsg =
 
 
 {-| Lists annotations for a check run using the annotation `id`. GitHub Apps must have the `checks:read` permission on a private repository or pull access to a public repository to get annotations for a check run. OAuth Apps and authenticated users must have the `repo` scope to get annotations for a check run in a private repository. -}
-checksListAnnotations : (Result Http.Error todo -> msg) -> Cmd msg
+checksListAnnotations :
+    (Result Http.Error (List CheckAnnotation) -> msg) -> Cmd msg
 checksListAnnotations toMsg =
     Http.get
         { url =
             "https://api.github.com/repos/{owner}/{repo}/check-runs/{check_run_id}/annotations"
         , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+            Http.expectJson toMsg (Json.Decode.list decodeCheckAnnotation)
         }
 
 
@@ -3053,7 +3021,6 @@ checksGetSuite toMsg =
 
 Lists check runs for a check suite using its `id`. GitHub Apps must have the `checks:read` permission on a private repository or pull access to a public repository to get check runs. OAuth Apps and authenticated users must have the `repo` scope to get check runs in a private repository.
 -}
-checksListForSuite : (Result Http.Error todo -> msg) -> Cmd msg
 checksListForSuite toMsg =
     Http.get
         { url =
@@ -3061,8 +3028,17 @@ checksListForSuite toMsg =
         , expect =
             Http.expectJson
                 toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
+                (Json.Decode.succeed
+                  (\totalCount checkRuns ->
+                      { totalCount = totalCount, checkRuns = checkRuns }
+                  )
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field "total_count" Json.Decode.int)
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field
+                            "check_runs"
+                            (Json.Decode.list decodeCheckRun)
+                        )
                 )
         }
 
@@ -3078,7 +3054,8 @@ The response includes a `most_recent_instance` object.
 This provides details of the most recent instance of this alert
 for the default branch (or for the specified Git reference if you used `ref` in the request).
 -}
-codeScanningListAlertsForRepo : (Result Http.Error todo -> msg) -> Cmd msg
+codeScanningListAlertsForRepo :
+    (Result Http.Error (List CodeScanningAlertItems) -> msg) -> Cmd msg
 codeScanningListAlertsForRepo toMsg =
     Http.get
         { url =
@@ -3086,9 +3063,7 @@ codeScanningListAlertsForRepo toMsg =
         , expect =
             Http.expectJson
                 toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+                (Json.Decode.list decodeCodeScanningAlertItems)
         }
 
 
@@ -3111,7 +3086,8 @@ You must use an access token with the `security_events` scope to use this endpoi
 the `public_repo` scope also grants permission to read security events on public repos only.
 GitHub Apps must have the `security_events` read permission to use this endpoint.
 -}
-codeScanningListAlertInstances : (Result Http.Error todo -> msg) -> Cmd msg
+codeScanningListAlertInstances :
+    (Result Http.Error (List CodeScanningAlertInstance) -> msg) -> Cmd msg
 codeScanningListAlertInstances toMsg =
     Http.get
         { url =
@@ -3119,9 +3095,7 @@ codeScanningListAlertInstances toMsg =
         , expect =
             Http.expectJson
                 toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+                (Json.Decode.list decodeCodeScanningAlertInstance)
         }
 
 
@@ -3143,17 +3117,14 @@ GitHub Apps must have the `security_events` read permission to use this endpoint
 **Deprecation notice**:
 The `tool_name` field is deprecated and will, in future, not be included in the response for this endpoint. The example response reflects this change. The tool name can now be found inside the `tool` field.
 -}
-codeScanningListRecentAnalyses : (Result Http.Error todo -> msg) -> Cmd msg
+codeScanningListRecentAnalyses :
+    (Result Http.Error (List CodeScanningAnalysis) -> msg) -> Cmd msg
 codeScanningListRecentAnalyses toMsg =
     Http.get
         { url =
             "https://api.github.com/repos/{owner}/{repo}/code-scanning/analyses"
         , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+            Http.expectJson toMsg (Json.Decode.list decodeCodeScanningAnalysis)
         }
 
 
@@ -3193,7 +3164,8 @@ For private repositories, you must use an access token with the `security_events
 For public repositories, you can use tokens with the `security_events` or `public_repo` scope.
 GitHub Apps must have the `contents` read permission to use this endpoint.
 -}
-codeScanningListCodeqlDatabases : (Result Http.Error todo -> msg) -> Cmd msg
+codeScanningListCodeqlDatabases :
+    (Result Http.Error (List CodeScanningCodeqlDatabase) -> msg) -> Cmd msg
 codeScanningListCodeqlDatabases toMsg =
     Http.get
         { url =
@@ -3201,9 +3173,7 @@ codeScanningListCodeqlDatabases toMsg =
         , expect =
             Http.expectJson
                 toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+                (Json.Decode.list decodeCodeScanningCodeqlDatabase)
         }
 
 
@@ -3260,16 +3230,23 @@ You must authenticate using an access token with the `codespace` scope to use th
 
 GitHub Apps must have read access to the `codespaces` repository permission to use this endpoint.
 -}
-codespacesListInRepositoryForAuthenticatedUser :
-    (Result Http.Error todo -> msg) -> Cmd msg
 codespacesListInRepositoryForAuthenticatedUser toMsg =
     Http.get
         { url = "https://api.github.com/repos/{owner}/{repo}/codespaces"
         , expect =
             Http.expectJson
                 toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
+                (Json.Decode.succeed
+                  (\totalCount codespaces ->
+                      { totalCount = totalCount, codespaces = codespaces }
+                  )
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field "total_count" Json.Decode.int)
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field
+                            "codespaces"
+                            (Json.Decode.list decodeCodespace)
+                        )
                 )
         }
 
@@ -3281,8 +3258,6 @@ You must authenticate using an access token with the `codespace` scope to use th
 
 GitHub Apps must have read access to the `codespaces_metadata` repository permission to use this endpoint.
 -}
-codespacesListDevcontainersInRepositoryForAuthenticatedUser :
-    (Result Http.Error todo -> msg) -> Cmd msg
 codespacesListDevcontainersInRepositoryForAuthenticatedUser toMsg =
     Http.get
         { url =
@@ -3290,8 +3265,31 @@ codespacesListDevcontainersInRepositoryForAuthenticatedUser toMsg =
         , expect =
             Http.expectJson
                 toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
+                (Json.Decode.succeed
+                  (\totalCount devcontainers ->
+                      { totalCount = totalCount, devcontainers = devcontainers }
+                  )
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field "total_count" Json.Decode.int)
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field
+                            "devcontainers"
+                            (Json.Decode.list
+                                (Json.Decode.succeed
+                                  (\path name -> { path = path, name = name })
+                                    |> Json.Decode.Extra.andMap
+                                        (Json.Decode.field
+                                            "path"
+                                            Json.Decode.string
+                                        )
+                                    |> Json.Decode.Extra.andMap
+                                        (Json.Decode.field
+                                            "name"
+                                            Json.Decode.string
+                                        )
+                                )
+                            )
+                        )
                 )
         }
 
@@ -3302,8 +3300,6 @@ You must authenticate using an access token with the `codespace` scope to use th
 
 GitHub Apps must have write access to the `codespaces_metadata` repository permission to use this endpoint.
 -}
-codespacesRepoMachinesForAuthenticatedUser :
-    (Result Http.Error todo -> msg) -> Cmd msg
 codespacesRepoMachinesForAuthenticatedUser toMsg =
     Http.get
         { url =
@@ -3311,8 +3307,17 @@ codespacesRepoMachinesForAuthenticatedUser toMsg =
         , expect =
             Http.expectJson
                 toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
+                (Json.Decode.succeed
+                  (\totalCount machines ->
+                      { totalCount = totalCount, machines = machines }
+                  )
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field "total_count" Json.Decode.int)
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field
+                            "machines"
+                            (Json.Decode.list decodeCodespaceMachine)
+                        )
                 )
         }
 
@@ -3323,30 +3328,67 @@ You must authenticate using an access token with the `codespace` scope to use th
 
 GitHub Apps must have write access to the `codespaces` repository permission to use this endpoint.
 -}
-codespacesPreFlightWithRepoForAuthenticatedUser :
-    (Result Http.Error todo -> msg) -> Cmd msg
 codespacesPreFlightWithRepoForAuthenticatedUser toMsg =
     Http.get
         { url = "https://api.github.com/repos/{owner}/{repo}/codespaces/new"
         , expect =
             Http.expectJson
                 toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
+                (Json.Decode.succeed
+                  (\billableOwner defaults ->
+                      { billableOwner = billableOwner, defaults = defaults }
+                  )
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field "billable_owner" decodeSimpleUser)
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field
+                            "defaults"
+                            (Json.Decode.succeed
+                              (\location devcontainerPath ->
+                                  { location = location
+                                  , devcontainerPath = devcontainerPath
+                                  }
+                              )
+                                |> Json.Decode.Extra.andMap
+                                    (Json.Decode.field
+                                        "location"
+                                        Json.Decode.string
+                                    )
+                                |> Json.Decode.Extra.andMap
+                                    (Json.Decode.field
+                                        "devcontainer_path"
+                                        (Json.Decode.oneOf
+                                            [ Json.Decode.map
+                                                Present
+                                                Json.Decode.string
+                                            , Json.Decode.null Null
+                                            ]
+                                        )
+                                    )
+                            )
+                        )
                 )
         }
 
 
 {-| Lists all secrets available in a repository without revealing their encrypted values. You must authenticate using an access token with the `repo` scope to use this endpoint. GitHub Apps must have the `codespaces_secrets` repository permission to use this endpoint. -}
-codespacesListRepoSecrets : (Result Http.Error todo -> msg) -> Cmd msg
 codespacesListRepoSecrets toMsg =
     Http.get
         { url = "https://api.github.com/repos/{owner}/{repo}/codespaces/secrets"
         , expect =
             Http.expectJson
                 toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
+                (Json.Decode.succeed
+                  (\totalCount secrets ->
+                      { totalCount = totalCount, secrets = secrets }
+                  )
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field "total_count" Json.Decode.int)
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field
+                            "secrets"
+                            (Json.Decode.list decodeRepoCodespacesSecret)
+                        )
                 )
         }
 
@@ -3382,16 +3424,12 @@ You must authenticate using an access token with the `read:org` and `repo` scope
 endpoint. GitHub Apps must have the `members` organization permission and `metadata` repository permission to use this
 endpoint.
 -}
-reposListCollaborators : (Result Http.Error todo -> msg) -> Cmd msg
+reposListCollaborators :
+    (Result Http.Error (List Collaborator) -> msg) -> Cmd msg
 reposListCollaborators toMsg =
     Http.get
         { url = "https://api.github.com/repos/{owner}/{repo}/collaborators"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodeCollaborator)
         }
 
 
@@ -3432,16 +3470,12 @@ reposGetCollaboratorPermissionLevel toMsg =
 
 Comments are ordered by ascending ID.
 -}
-reposListCommitCommentsForRepo : (Result Http.Error todo -> msg) -> Cmd msg
+reposListCommitCommentsForRepo :
+    (Result Http.Error (List CommitComment) -> msg) -> Cmd msg
 reposListCommitCommentsForRepo toMsg =
     Http.get
         { url = "https://api.github.com/repos/{owner}/{repo}/comments"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodeCommitComment)
         }
 
 
@@ -3455,17 +3489,13 @@ reposGetCommitComment toMsg =
 
 
 {-| List the reactions to a [commit comment](https://docs.github.com/rest/reference/repos#comments). -}
-reactionsListForCommitComment : (Result Http.Error todo -> msg) -> Cmd msg
+reactionsListForCommitComment :
+    (Result Http.Error (List Reaction) -> msg) -> Cmd msg
 reactionsListForCommitComment toMsg =
     Http.get
         { url =
             "https://api.github.com/repos/{owner}/{repo}/comments/{comment_id}/reactions"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodeReaction)
         }
 
 
@@ -3498,16 +3528,11 @@ These are the possible values for `reason` in the `verification` object:
 | `invalid` | The signature could not be cryptographically verified using the key whose key-id was found in the signature. |
 | `valid` | None of the above errors applied, so the signature is considered to be verified. |
 -}
-reposListCommits : (Result Http.Error todo -> msg) -> Cmd msg
+reposListCommits : (Result Http.Error (List Commit) -> msg) -> Cmd msg
 reposListCommits toMsg =
     Http.get
         { url = "https://api.github.com/repos/{owner}/{repo}/commits"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodeCommit)
         }
 
 
@@ -3515,48 +3540,36 @@ reposListCommits toMsg =
 
 Returns all branches where the given commit SHA is the HEAD, or latest commit for the branch.
 -}
-reposListBranchesForHeadCommit : (Result Http.Error todo -> msg) -> Cmd msg
+reposListBranchesForHeadCommit :
+    (Result Http.Error (List BranchShort) -> msg) -> Cmd msg
 reposListBranchesForHeadCommit toMsg =
     Http.get
         { url =
             "https://api.github.com/repos/{owner}/{repo}/commits/{commit_sha}/branches-where-head"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodeBranchShort)
         }
 
 
 {-| Use the `:commit_sha` to specify the commit that will have its comments listed. -}
-reposListCommentsForCommit : (Result Http.Error todo -> msg) -> Cmd msg
+reposListCommentsForCommit :
+    (Result Http.Error (List CommitComment) -> msg) -> Cmd msg
 reposListCommentsForCommit toMsg =
     Http.get
         { url =
             "https://api.github.com/repos/{owner}/{repo}/commits/{commit_sha}/comments"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodeCommitComment)
         }
 
 
 {-| Lists the merged pull request that introduced the commit to the repository. If the commit is not present in the default branch, additionally returns open pull requests associated with the commit. The results may include open and closed pull requests. -}
 reposListPullRequestsAssociatedWithCommit :
-    (Result Http.Error todo -> msg) -> Cmd msg
+    (Result Http.Error (List PullRequestSimple) -> msg) -> Cmd msg
 reposListPullRequestsAssociatedWithCommit toMsg =
     Http.get
         { url =
             "https://api.github.com/repos/{owner}/{repo}/commits/{commit_sha}/pulls"
         , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+            Http.expectJson toMsg (Json.Decode.list decodePullRequestSimple)
         }
 
 
@@ -3609,7 +3622,6 @@ reposGetCommit toMsg =
 
 Lists check runs for a commit ref. The `ref` can be a SHA, branch name, or a tag name. GitHub Apps must have the `checks:read` permission on a private repository or pull access to a public repository to get check runs. OAuth Apps and authenticated users must have the `repo` scope to get check runs in a private repository.
 -}
-checksListForRef : (Result Http.Error todo -> msg) -> Cmd msg
 checksListForRef toMsg =
     Http.get
         { url =
@@ -3617,8 +3629,17 @@ checksListForRef toMsg =
         , expect =
             Http.expectJson
                 toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
+                (Json.Decode.succeed
+                  (\totalCount checkRuns ->
+                      { totalCount = totalCount, checkRuns = checkRuns }
+                  )
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field "total_count" Json.Decode.int)
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field
+                            "check_runs"
+                            (Json.Decode.list decodeCheckRun)
+                        )
                 )
         }
 
@@ -3627,7 +3648,6 @@ checksListForRef toMsg =
 
 Lists check suites for a commit `ref`. The `ref` can be a SHA, branch name, or a tag name. GitHub Apps must have the `checks:read` permission on a private repository or pull access to a public repository to list check suites. OAuth Apps and authenticated users must have the `repo` scope to get check suites in a private repository.
 -}
-checksListSuitesForRef : (Result Http.Error todo -> msg) -> Cmd msg
 checksListSuitesForRef toMsg =
     Http.get
         { url =
@@ -3635,8 +3655,17 @@ checksListSuitesForRef toMsg =
         , expect =
             Http.expectJson
                 toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
+                (Json.Decode.succeed
+                  (\totalCount checkSuites ->
+                      { totalCount = totalCount, checkSuites = checkSuites }
+                  )
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field "total_count" Json.Decode.int)
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field
+                            "check_suites"
+                            (Json.Decode.list decodeCheckSuite)
+                        )
                 )
         }
 
@@ -3664,17 +3693,13 @@ reposGetCombinedStatusForRef toMsg =
 
 This resource is also available via a legacy route: `GET /repos/:owner/:repo/statuses/:ref`.
 -}
-reposListCommitStatusesForRef : (Result Http.Error todo -> msg) -> Cmd msg
+reposListCommitStatusesForRef :
+    (Result Http.Error (List Status) -> msg) -> Cmd msg
 reposListCommitStatusesForRef toMsg =
     Http.get
         { url =
             "https://api.github.com/repos/{owner}/{repo}/commits/{ref}/statuses"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodeStatus)
         }
 
 
@@ -3788,16 +3813,11 @@ the submodule at that specific commit.
 If the submodule repository is not hosted on github.com, the Git URLs (`git_url` and `_links["git"]`) and the
 github.com URLs (`html_url` and `_links["html"]`) will have null values.
 -}
-reposGetContent : (Result Http.Error todo -> msg) -> Cmd msg
+reposGetContent : (Result Http.Error Json.Encode.Value -> msg) -> Cmd msg
 reposGetContent toMsg =
     Http.get
         { url = "https://api.github.com/repos/{owner}/{repo}/contents/{path}"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg Json.Decode.value
         }
 
 
@@ -3805,16 +3825,11 @@ reposGetContent toMsg =
 
 GitHub identifies contributors by author email address. This endpoint groups contribution counts by GitHub user, which includes all associated email addresses. To improve performance, only the first 500 author email addresses in the repository link to GitHub users. The rest will appear as anonymous contributors without associated GitHub user information.
 -}
-reposListContributors : (Result Http.Error todo -> msg) -> Cmd msg
+reposListContributors : (Result Http.Error (List Contributor) -> msg) -> Cmd msg
 reposListContributors toMsg =
     Http.get
         { url = "https://api.github.com/repos/{owner}/{repo}/contributors"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodeContributor)
         }
 
 
@@ -3822,16 +3837,13 @@ reposListContributors toMsg =
 You can also use tokens with the `public_repo` scope for public repositories only.
 GitHub Apps must have **Dependabot alerts** read permission to use this endpoint.
 -}
-dependabotListAlertsForRepo : (Result Http.Error todo -> msg) -> Cmd msg
+dependabotListAlertsForRepo :
+    (Result Http.Error (List DependabotAlert) -> msg) -> Cmd msg
 dependabotListAlertsForRepo toMsg =
     Http.get
         { url = "https://api.github.com/repos/{owner}/{repo}/dependabot/alerts"
         , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+            Http.expectJson toMsg (Json.Decode.list decodeDependabotAlert)
         }
 
 
@@ -3849,15 +3861,23 @@ dependabotGetAlert toMsg =
 
 
 {-| Lists all secrets available in a repository without revealing their encrypted values. You must authenticate using an access token with the `repo` scope to use this endpoint. GitHub Apps must have the `dependabot_secrets` repository permission to use this endpoint. -}
-dependabotListRepoSecrets : (Result Http.Error todo -> msg) -> Cmd msg
 dependabotListRepoSecrets toMsg =
     Http.get
         { url = "https://api.github.com/repos/{owner}/{repo}/dependabot/secrets"
         , expect =
             Http.expectJson
                 toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
+                (Json.Decode.succeed
+                  (\totalCount secrets ->
+                      { totalCount = totalCount, secrets = secrets }
+                  )
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field "total_count" Json.Decode.int)
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field
+                            "secrets"
+                            (Json.Decode.list decodeDependabotSecret)
+                        )
                 )
         }
 
@@ -3895,16 +3915,11 @@ dependencyGraphDiffRange toMsg =
 
 
 {-| Simple filtering of deployments is available via query parameters: -}
-reposListDeployments : (Result Http.Error todo -> msg) -> Cmd msg
+reposListDeployments : (Result Http.Error (List Deployment) -> msg) -> Cmd msg
 reposListDeployments toMsg =
     Http.get
         { url = "https://api.github.com/repos/{owner}/{repo}/deployments"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodeDeployment)
         }
 
 
@@ -3918,17 +3933,14 @@ reposGetDeployment toMsg =
 
 
 {-| Users with pull access can view deployment statuses for a deployment: -}
-reposListDeploymentStatuses : (Result Http.Error todo -> msg) -> Cmd msg
+reposListDeploymentStatuses :
+    (Result Http.Error (List DeploymentStatus) -> msg) -> Cmd msg
 reposListDeploymentStatuses toMsg =
     Http.get
         { url =
             "https://api.github.com/repos/{owner}/{repo}/deployments/{deployment_id}/statuses"
         , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+            Http.expectJson toMsg (Json.Decode.list decodeDeploymentStatus)
         }
 
 
@@ -3947,15 +3959,23 @@ reposGetDeploymentStatus toMsg =
 
 Anyone with read access to the repository can use this endpoint. If the repository is private, you must use an access token with the `repo` scope. GitHub Apps must have the `actions:read` permission to use this endpoint.
 -}
-reposGetAllEnvironments : (Result Http.Error todo -> msg) -> Cmd msg
 reposGetAllEnvironments toMsg =
     Http.get
         { url = "https://api.github.com/repos/{owner}/{repo}/environments"
         , expect =
             Http.expectJson
                 toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
+                (Json.Decode.succeed
+                  (\totalCount environments ->
+                      { totalCount = totalCount, environments = environments }
+                  )
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field "total_count" Json.Decode.int)
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field
+                            "environments"
+                            (Json.Decode.list decodeEnvironment)
+                        )
                 )
         }
 
@@ -3979,7 +3999,6 @@ reposGetEnvironment toMsg =
 
 Anyone with read access to the repository can use this endpoint. If the repository is private, you must use an access token with the `repo` scope. GitHub Apps must have the `actions:read` permission to use this endpoint.
 -}
-reposListDeploymentBranchPolicies : (Result Http.Error todo -> msg) -> Cmd msg
 reposListDeploymentBranchPolicies toMsg =
     Http.get
         { url =
@@ -3987,8 +4006,19 @@ reposListDeploymentBranchPolicies toMsg =
         , expect =
             Http.expectJson
                 toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
+                (Json.Decode.succeed
+                  (\totalCount branchPolicies ->
+                      { totalCount = totalCount
+                      , branchPolicies = branchPolicies
+                      }
+                  )
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field "total_count" Json.Decode.int)
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field
+                            "branch_policies"
+                            (Json.Decode.list decodeDeploymentBranchPolicy)
+                        )
                 )
         }
 
@@ -4007,29 +4037,20 @@ reposGetDeploymentBranchPolicy toMsg =
         }
 
 
-activityListRepoEvents : (Result Http.Error todo -> msg) -> Cmd msg
+activityListRepoEvents : (Result Http.Error (List Event) -> msg) -> Cmd msg
 activityListRepoEvents toMsg =
     Http.get
         { url = "https://api.github.com/repos/{owner}/{repo}/events"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodeEvent)
         }
 
 
-reposListForks : (Result Http.Error todo -> msg) -> Cmd msg
+reposListForks : (Result Http.Error (List MinimalRepository) -> msg) -> Cmd msg
 reposListForks toMsg =
     Http.get
         { url = "https://api.github.com/repos/{owner}/{repo}/forks"
         , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+            Http.expectJson toMsg (Json.Decode.list decodeMinimalRepository)
         }
 
 
@@ -4094,17 +4115,12 @@ When you use this endpoint without providing a `:ref`, it will return an array o
 
 If you request matching references for a branch named `feature` but the branch `feature` doesn't exist, the response can still include other matching head refs that start with the word `feature`, such as `featureA` and `featureB`.
 -}
-gitListMatchingRefs : (Result Http.Error todo -> msg) -> Cmd msg
+gitListMatchingRefs : (Result Http.Error (List GitRef) -> msg) -> Cmd msg
 gitListMatchingRefs toMsg =
     Http.get
         { url =
             "https://api.github.com/repos/{owner}/{repo}/git/matching-refs/{ref}"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodeGitRef)
         }
 
 
@@ -4174,16 +4190,11 @@ gitGetTree toMsg =
 
 
 {-| Lists webhooks for a repository. `last response` may return null if there have not been any deliveries within 30 days. -}
-reposListWebhooks : (Result Http.Error todo -> msg) -> Cmd msg
+reposListWebhooks : (Result Http.Error (List Hook) -> msg) -> Cmd msg
 reposListWebhooks toMsg =
     Http.get
         { url = "https://api.github.com/repos/{owner}/{repo}/hooks"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodeHook)
         }
 
 
@@ -4211,17 +4222,14 @@ reposGetWebhookConfigForRepo toMsg =
 
 
 {-| Returns a list of webhook deliveries for a webhook configured in a repository. -}
-reposListWebhookDeliveries : (Result Http.Error todo -> msg) -> Cmd msg
+reposListWebhookDeliveries :
+    (Result Http.Error (List HookDeliveryItem) -> msg) -> Cmd msg
 reposListWebhookDeliveries toMsg =
     Http.get
         { url =
             "https://api.github.com/repos/{owner}/{repo}/hooks/{hook_id}/deliveries"
         , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+            Http.expectJson toMsg (Json.Decode.list decodeHookDeliveryItem)
         }
 
 
@@ -4282,30 +4290,23 @@ migrationsGetImportStatus toMsg =
 
 This endpoint and the [Map a commit author](https://docs.github.com/rest/reference/migrations#map-a-commit-author) endpoint allow you to provide correct Git author information.
 -}
-migrationsGetCommitAuthors : (Result Http.Error todo -> msg) -> Cmd msg
+migrationsGetCommitAuthors :
+    (Result Http.Error (List PorterAuthor) -> msg) -> Cmd msg
 migrationsGetCommitAuthors toMsg =
     Http.get
         { url = "https://api.github.com/repos/{owner}/{repo}/import/authors"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodePorterAuthor)
         }
 
 
 {-| List files larger than 100MB found during the import -}
-migrationsGetLargeFiles : (Result Http.Error todo -> msg) -> Cmd msg
+migrationsGetLargeFiles :
+    (Result Http.Error (List PorterLargeFile) -> msg) -> Cmd msg
 migrationsGetLargeFiles toMsg =
     Http.get
         { url = "https://api.github.com/repos/{owner}/{repo}/import/large_files"
         , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+            Http.expectJson toMsg (Json.Decode.list decodePorterLargeFile)
         }
 
 
@@ -4322,7 +4323,8 @@ appsGetRepoInstallation toMsg =
 
 
 {-| Shows which type of GitHub user can interact with this repository and when the restriction expires. If there are no restrictions, you will see an empty response. -}
-interactionsGetRestrictionsForRepo : (Result Http.Error todo -> msg) -> Cmd msg
+interactionsGetRestrictionsForRepo :
+    (Result Http.Error (EnumTwo InteractionLimitResponse {}) -> msg) -> Cmd msg
 interactionsGetRestrictionsForRepo toMsg =
     Http.get
         { url = "https://api.github.com/repos/{owner}/{repo}/interaction-limits"
@@ -4330,22 +4332,19 @@ interactionsGetRestrictionsForRepo toMsg =
             Http.expectJson
                 toMsg
                 (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
+                    "decode anyOf 2: not nullable:: { additionalItems = Nothing, additionalProperties = Nothing, allOf = Nothing, anyOf = Nothing, const = Nothing, contains = Nothing, default = Nothing, definitions = Nothing, dependencies = [], description = Nothing, enum = Nothing, examples = Nothing, exclusiveMaximum = Nothing, exclusiveMinimum = Nothing, format = Nothing, id = Nothing, items = NoItems, maxItems = Nothing, maxLength = Nothing, maxProperties = Nothing, maximum = Nothing, minItems = Nothing, minLength = Nothing, minProperties = Nothing, minimum = Nothing, multipleOf = Nothing, not = Nothing, oneOf = Nothing, pattern = Nothing, patternProperties = Nothing, properties = Nothing, propertyNames = Nothing, ref = Just \"#/components/schemas/interaction-limit-response\", required = Nothing, source = <internals>, title = Nothing, type_ = AnyType, uniqueItems = Nothing } ,,, { additionalItems = Nothing, additionalProperties = Just (BooleanSchema False), allOf = Nothing, anyOf = Nothing, const = Nothing, contains = Nothing, default = Nothing, definitions = Nothing, dependencies = [], description = Nothing, enum = Nothing, examples = Nothing, exclusiveMaximum = Nothing, exclusiveMinimum = Nothing, format = Nothing, id = Nothing, items = NoItems, maxItems = Nothing, maxLength = Nothing, maxProperties = Nothing, maximum = Nothing, minItems = Nothing, minLength = Nothing, minProperties = Nothing, minimum = Nothing, multipleOf = Nothing, not = Nothing, oneOf = Nothing, pattern = Nothing, patternProperties = Nothing, properties = Just (Schemata []), propertyNames = Nothing, ref = Nothing, required = Nothing, source = <internals>, title = Nothing, type_ = SingleType ObjectType, uniqueItems = Nothing }"
                 )
         }
 
 
 {-| When authenticating as a user with admin rights to a repository, this endpoint will list all currently open repository invitations. -}
-reposListInvitations : (Result Http.Error todo -> msg) -> Cmd msg
+reposListInvitations :
+    (Result Http.Error (List RepositoryInvitation) -> msg) -> Cmd msg
 reposListInvitations toMsg =
     Http.get
         { url = "https://api.github.com/repos/{owner}/{repo}/invitations"
         , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+            Http.expectJson toMsg (Json.Decode.list decodeRepositoryInvitation)
         }
 
 
@@ -4356,30 +4355,21 @@ reason, "Issues" endpoints may return both issues and pull requests in the respo
 the `pull_request` key. Be aware that the `id` of a pull request returned from "Issues" endpoints will be an _issue id_. To find out the pull
 request id, use the "[List pull requests](https://docs.github.com/rest/reference/pulls#list-pull-requests)" endpoint.
 -}
-issuesListForRepo : (Result Http.Error todo -> msg) -> Cmd msg
+issuesListForRepo : (Result Http.Error (List Issue) -> msg) -> Cmd msg
 issuesListForRepo toMsg =
     Http.get
         { url = "https://api.github.com/repos/{owner}/{repo}/issues"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodeIssue)
         }
 
 
 {-| By default, Issue Comments are ordered by ascending ID. -}
-issuesListCommentsForRepo : (Result Http.Error todo -> msg) -> Cmd msg
+issuesListCommentsForRepo :
+    (Result Http.Error (List IssueComment) -> msg) -> Cmd msg
 issuesListCommentsForRepo toMsg =
     Http.get
         { url = "https://api.github.com/repos/{owner}/{repo}/issues/comments"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodeIssueComment)
         }
 
 
@@ -4393,30 +4383,22 @@ issuesGetComment toMsg =
 
 
 {-| List the reactions to an [issue comment](https://docs.github.com/rest/reference/issues#comments). -}
-reactionsListForIssueComment : (Result Http.Error todo -> msg) -> Cmd msg
+reactionsListForIssueComment :
+    (Result Http.Error (List Reaction) -> msg) -> Cmd msg
 reactionsListForIssueComment toMsg =
     Http.get
         { url =
             "https://api.github.com/repos/{owner}/{repo}/issues/comments/{comment_id}/reactions"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodeReaction)
         }
 
 
-issuesListEventsForRepo : (Result Http.Error todo -> msg) -> Cmd msg
+issuesListEventsForRepo :
+    (Result Http.Error (List IssueEvent) -> msg) -> Cmd msg
 issuesListEventsForRepo toMsg =
     Http.get
         { url = "https://api.github.com/repos/{owner}/{repo}/issues/events"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodeIssueEvent)
         }
 
 
@@ -4451,87 +4433,61 @@ issuesGet toMsg =
 
 
 {-| Issue Comments are ordered by ascending ID. -}
-issuesListComments : (Result Http.Error todo -> msg) -> Cmd msg
+issuesListComments : (Result Http.Error (List IssueComment) -> msg) -> Cmd msg
 issuesListComments toMsg =
     Http.get
         { url =
             "https://api.github.com/repos/{owner}/{repo}/issues/{issue_number}/comments"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodeIssueComment)
         }
 
 
-issuesListEvents : (Result Http.Error todo -> msg) -> Cmd msg
+issuesListEvents :
+    (Result Http.Error (List IssueEventForIssue) -> msg) -> Cmd msg
 issuesListEvents toMsg =
     Http.get
         { url =
             "https://api.github.com/repos/{owner}/{repo}/issues/{issue_number}/events"
         , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+            Http.expectJson toMsg (Json.Decode.list decodeIssueEventForIssue)
         }
 
 
-issuesListLabelsOnIssue : (Result Http.Error todo -> msg) -> Cmd msg
+issuesListLabelsOnIssue : (Result Http.Error (List Label) -> msg) -> Cmd msg
 issuesListLabelsOnIssue toMsg =
     Http.get
         { url =
             "https://api.github.com/repos/{owner}/{repo}/issues/{issue_number}/labels"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodeLabel)
         }
 
 
 {-| List the reactions to an [issue](https://docs.github.com/rest/reference/issues). -}
-reactionsListForIssue : (Result Http.Error todo -> msg) -> Cmd msg
+reactionsListForIssue : (Result Http.Error (List Reaction) -> msg) -> Cmd msg
 reactionsListForIssue toMsg =
     Http.get
         { url =
             "https://api.github.com/repos/{owner}/{repo}/issues/{issue_number}/reactions"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodeReaction)
         }
 
 
-issuesListEventsForTimeline : (Result Http.Error todo -> msg) -> Cmd msg
+issuesListEventsForTimeline :
+    (Result Http.Error (List TimelineIssueEvents) -> msg) -> Cmd msg
 issuesListEventsForTimeline toMsg =
     Http.get
         { url =
             "https://api.github.com/repos/{owner}/{repo}/issues/{issue_number}/timeline"
         , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+            Http.expectJson toMsg (Json.Decode.list decodeTimelineIssueEvents)
         }
 
 
-reposListDeployKeys : (Result Http.Error todo -> msg) -> Cmd msg
+reposListDeployKeys : (Result Http.Error (List DeployKey) -> msg) -> Cmd msg
 reposListDeployKeys toMsg =
     Http.get
         { url = "https://api.github.com/repos/{owner}/{repo}/keys"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodeDeployKey)
         }
 
 
@@ -4543,16 +4499,11 @@ reposGetDeployKey toMsg =
         }
 
 
-issuesListLabelsForRepo : (Result Http.Error todo -> msg) -> Cmd msg
+issuesListLabelsForRepo : (Result Http.Error (List Label) -> msg) -> Cmd msg
 issuesListLabelsForRepo toMsg =
     Http.get
         { url = "https://api.github.com/repos/{owner}/{repo}/labels"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodeLabel)
         }
 
 
@@ -4585,16 +4536,11 @@ licensesGetForRepo toMsg =
         }
 
 
-issuesListMilestones : (Result Http.Error todo -> msg) -> Cmd msg
+issuesListMilestones : (Result Http.Error (List Milestone) -> msg) -> Cmd msg
 issuesListMilestones toMsg =
     Http.get
         { url = "https://api.github.com/repos/{owner}/{repo}/milestones"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodeMilestone)
         }
 
 
@@ -4607,32 +4553,23 @@ issuesGetMilestone toMsg =
         }
 
 
-issuesListLabelsForMilestone : (Result Http.Error todo -> msg) -> Cmd msg
+issuesListLabelsForMilestone :
+    (Result Http.Error (List Label) -> msg) -> Cmd msg
 issuesListLabelsForMilestone toMsg =
     Http.get
         { url =
             "https://api.github.com/repos/{owner}/{repo}/milestones/{milestone_number}/labels"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodeLabel)
         }
 
 
 {-| Lists all notifications for the current user in the specified repository. -}
 activityListRepoNotificationsForAuthenticatedUser :
-    (Result Http.Error todo -> msg) -> Cmd msg
+    (Result Http.Error (List Thread) -> msg) -> Cmd msg
 activityListRepoNotificationsForAuthenticatedUser toMsg =
     Http.get
         { url = "https://api.github.com/repos/{owner}/{repo}/notifications"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodeThread)
         }
 
 
@@ -4644,16 +4581,11 @@ reposGetPages toMsg =
         }
 
 
-reposListPagesBuilds : (Result Http.Error todo -> msg) -> Cmd msg
+reposListPagesBuilds : (Result Http.Error (List PageBuild) -> msg) -> Cmd msg
 reposListPagesBuilds toMsg =
     Http.get
         { url = "https://api.github.com/repos/{owner}/{repo}/pages/builds"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodePageBuild)
         }
 
 
@@ -4691,44 +4623,34 @@ reposGetPagesHealthCheck toMsg =
 
 
 {-| Lists the projects in a repository. Returns a `404 Not Found` status if projects are disabled in the repository. If you do not have sufficient privileges to perform this action, a `401 Unauthorized` or `410 Gone` status is returned. -}
-projectsListForRepo : (Result Http.Error todo -> msg) -> Cmd msg
+projectsListForRepo : (Result Http.Error (List Project) -> msg) -> Cmd msg
 projectsListForRepo toMsg =
     Http.get
         { url = "https://api.github.com/repos/{owner}/{repo}/projects"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodeProject)
         }
 
 
 {-| Draft pull requests are available in public repositories with GitHub Free and GitHub Free for organizations, GitHub Pro, and legacy per-repository billing plans, and in public and private repositories with GitHub Team and GitHub Enterprise Cloud. For more information, see [GitHub's products](https://docs.github.com/github/getting-started-with-github/githubs-products) in the GitHub Help documentation. -}
-pullsList : (Result Http.Error todo -> msg) -> Cmd msg
+pullsList : (Result Http.Error (List PullRequestSimple) -> msg) -> Cmd msg
 pullsList toMsg =
     Http.get
         { url = "https://api.github.com/repos/{owner}/{repo}/pulls"
         , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+            Http.expectJson toMsg (Json.Decode.list decodePullRequestSimple)
         }
 
 
 {-| Lists review comments for all pull requests in a repository. By default, review comments are in ascending order by ID. -}
-pullsListReviewCommentsForRepo : (Result Http.Error todo -> msg) -> Cmd msg
+pullsListReviewCommentsForRepo :
+    (Result Http.Error (List PullRequestReviewComment) -> msg) -> Cmd msg
 pullsListReviewCommentsForRepo toMsg =
     Http.get
         { url = "https://api.github.com/repos/{owner}/{repo}/pulls/comments"
         , expect =
             Http.expectJson
                 toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+                (Json.Decode.list decodePullRequestReviewComment)
         }
 
 
@@ -4745,17 +4667,12 @@ pullsGetReviewComment toMsg =
 
 {-| List the reactions to a [pull request review comment](https://docs.github.com/rest/reference/pulls#review-comments). -}
 reactionsListForPullRequestReviewComment :
-    (Result Http.Error todo -> msg) -> Cmd msg
+    (Result Http.Error (List Reaction) -> msg) -> Cmd msg
 reactionsListForPullRequestReviewComment toMsg =
     Http.get
         { url =
             "https://api.github.com/repos/{owner}/{repo}/pulls/comments/{comment_id}/reactions"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodeReaction)
         }
 
 
@@ -4785,7 +4702,8 @@ pullsGet toMsg =
 
 
 {-| Lists all review comments for a pull request. By default, review comments are in ascending order by ID. -}
-pullsListReviewComments : (Result Http.Error todo -> msg) -> Cmd msg
+pullsListReviewComments :
+    (Result Http.Error (List PullRequestReviewComment) -> msg) -> Cmd msg
 pullsListReviewComments toMsg =
     Http.get
         { url =
@@ -4793,39 +4711,27 @@ pullsListReviewComments toMsg =
         , expect =
             Http.expectJson
                 toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+                (Json.Decode.list decodePullRequestReviewComment)
         }
 
 
 {-| Lists a maximum of 250 commits for a pull request. To receive a complete commit list for pull requests with more than 250 commits, use the [List commits](https://docs.github.com/rest/reference/repos#list-commits) endpoint. -}
-pullsListCommits : (Result Http.Error todo -> msg) -> Cmd msg
+pullsListCommits : (Result Http.Error (List Commit) -> msg) -> Cmd msg
 pullsListCommits toMsg =
     Http.get
         { url =
             "https://api.github.com/repos/{owner}/{repo}/pulls/{pull_number}/commits"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodeCommit)
         }
 
 
 {-| **Note:** Responses include a maximum of 3000 files. The paginated response returns 30 files per page by default. -}
-pullsListFiles : (Result Http.Error todo -> msg) -> Cmd msg
+pullsListFiles : (Result Http.Error (List DiffEntry) -> msg) -> Cmd msg
 pullsListFiles toMsg =
     Http.get
         { url =
             "https://api.github.com/repos/{owner}/{repo}/pulls/{pull_number}/files"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodeDiffEntry)
         }
 
 
@@ -4855,17 +4761,14 @@ pullsListRequestedReviewers toMsg =
 
 
 {-| The list of reviews returns in chronological order. -}
-pullsListReviews : (Result Http.Error todo -> msg) -> Cmd msg
+pullsListReviews :
+    (Result Http.Error (List PullRequestReview) -> msg) -> Cmd msg
 pullsListReviews toMsg =
     Http.get
         { url =
             "https://api.github.com/repos/{owner}/{repo}/pulls/{pull_number}/reviews"
         , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+            Http.expectJson toMsg (Json.Decode.list decodePullRequestReview)
         }
 
 
@@ -4879,17 +4782,13 @@ pullsGetReview toMsg =
 
 
 {-| List comments for a specific pull request review. -}
-pullsListCommentsForReview : (Result Http.Error todo -> msg) -> Cmd msg
+pullsListCommentsForReview :
+    (Result Http.Error (List ReviewComment) -> msg) -> Cmd msg
 pullsListCommentsForReview toMsg =
     Http.get
         { url =
             "https://api.github.com/repos/{owner}/{repo}/pulls/{pull_number}/reviews/{review_id}/comments"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodeReviewComment)
         }
 
 
@@ -4921,16 +4820,11 @@ reposGetReadmeInDirectory toMsg =
 
 Information about published releases are available to everyone. Only users with push access will receive listings for draft releases.
 -}
-reposListReleases : (Result Http.Error todo -> msg) -> Cmd msg
+reposListReleases : (Result Http.Error (List Release) -> msg) -> Cmd msg
 reposListReleases toMsg =
     Http.get
         { url = "https://api.github.com/repos/{owner}/{repo}/releases"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodeRelease)
         }
 
 
@@ -4976,32 +4870,23 @@ reposGetRelease toMsg =
         }
 
 
-reposListReleaseAssets : (Result Http.Error todo -> msg) -> Cmd msg
+reposListReleaseAssets :
+    (Result Http.Error (List ReleaseAsset) -> msg) -> Cmd msg
 reposListReleaseAssets toMsg =
     Http.get
         { url =
             "https://api.github.com/repos/{owner}/{repo}/releases/{release_id}/assets"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodeReleaseAsset)
         }
 
 
 {-| List the reactions to a [release](https://docs.github.com/rest/reference/repos#releases). -}
-reactionsListForRelease : (Result Http.Error todo -> msg) -> Cmd msg
+reactionsListForRelease : (Result Http.Error (List Reaction) -> msg) -> Cmd msg
 reactionsListForRelease toMsg =
     Http.get
         { url =
             "https://api.github.com/repos/{owner}/{repo}/releases/{release_id}/reactions"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodeReaction)
         }
 
 
@@ -5011,17 +4896,14 @@ For public repositories, you may instead use the `public_repo` scope.
 
 GitHub Apps must have the `secret_scanning_alerts` read permission to use this endpoint.
 -}
-secretScanningListAlertsForRepo : (Result Http.Error todo -> msg) -> Cmd msg
+secretScanningListAlertsForRepo :
+    (Result Http.Error (List SecretScanningAlert) -> msg) -> Cmd msg
 secretScanningListAlertsForRepo toMsg =
     Http.get
         { url =
             "https://api.github.com/repos/{owner}/{repo}/secret-scanning/alerts"
         , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+            Http.expectJson toMsg (Json.Decode.list decodeSecretScanningAlert)
         }
 
 
@@ -5047,7 +4929,8 @@ For public repositories, you may instead use the `public_repo` scope.
 
 GitHub Apps must have the `secret_scanning_alerts` read permission to use this endpoint.
 -}
-secretScanningListLocationsForAlert : (Result Http.Error todo -> msg) -> Cmd msg
+secretScanningListLocationsForAlert :
+    (Result Http.Error (List SecretScanningLocation) -> msg) -> Cmd msg
 secretScanningListLocationsForAlert toMsg =
     Http.get
         { url =
@@ -5055,9 +4938,7 @@ secretScanningListLocationsForAlert toMsg =
         , expect =
             Http.expectJson
                 toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+                (Json.Decode.list decodeSecretScanningLocation)
         }
 
 
@@ -5065,7 +4946,9 @@ secretScanningListLocationsForAlert toMsg =
 
 You can also find out _when_ stars were created by passing the following custom [media type](https://docs.github.com/rest/overview/media-types/) via the `Accept` header: `application/vnd.github.star+json`.
 -}
-activityListStargazersForRepo : (Result Http.Error todo -> msg) -> Cmd msg
+activityListStargazersForRepo :
+    (Result Http.Error (EnumTwo (List SimpleUser) (List Stargazer)) -> msg)
+    -> Cmd msg
 activityListStargazersForRepo toMsg =
     Http.get
         { url = "https://api.github.com/repos/{owner}/{repo}/stargazers"
@@ -5073,38 +4956,31 @@ activityListStargazersForRepo toMsg =
             Http.expectJson
                 toMsg
                 (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
+                    "decode anyOf 2: not nullable:: { additionalItems = Nothing, additionalProperties = Nothing, allOf = Nothing, anyOf = Nothing, const = Nothing, contains = Nothing, default = Nothing, definitions = Nothing, dependencies = [], description = Nothing, enum = Nothing, examples = Nothing, exclusiveMaximum = Nothing, exclusiveMinimum = Nothing, format = Nothing, id = Nothing, items = ItemDefinition (ObjectSchema { additionalItems = Nothing, additionalProperties = Nothing, allOf = Nothing, anyOf = Nothing, const = Nothing, contains = Nothing, default = Nothing, definitions = Nothing, dependencies = [], description = Nothing, enum = Nothing, examples = Nothing, exclusiveMaximum = Nothing, exclusiveMinimum = Nothing, format = Nothing, id = Nothing, items = NoItems, maxItems = Nothing, maxLength = Nothing, maxProperties = Nothing, maximum = Nothing, minItems = Nothing, minLength = Nothing, minProperties = Nothing, minimum = Nothing, multipleOf = Nothing, not = Nothing, oneOf = Nothing, pattern = Nothing, patternProperties = Nothing, properties = Nothing, propertyNames = Nothing, ref = Just \"#/components/schemas/simple-user\", required = Nothing, source = <internals>, title = Nothing, type_ = AnyType, uniqueItems = Nothing }), maxItems = Nothing, maxLength = Nothing, maxProperties = Nothing, maximum = Nothing, minItems = Nothing, minLength = Nothing, minProperties = Nothing, minimum = Nothing, multipleOf = Nothing, not = Nothing, oneOf = Nothing, pattern = Nothing, patternProperties = Nothing, properties = Nothing, propertyNames = Nothing, ref = Nothing, required = Nothing, source = <internals>, title = Nothing, type_ = SingleType ArrayType, uniqueItems = Nothing } ,,, { additionalItems = Nothing, additionalProperties = Nothing, allOf = Nothing, anyOf = Nothing, const = Nothing, contains = Nothing, default = Nothing, definitions = Nothing, dependencies = [], description = Nothing, enum = Nothing, examples = Nothing, exclusiveMaximum = Nothing, exclusiveMinimum = Nothing, format = Nothing, id = Nothing, items = ItemDefinition (ObjectSchema { additionalItems = Nothing, additionalProperties = Nothing, allOf = Nothing, anyOf = Nothing, const = Nothing, contains = Nothing, default = Nothing, definitions = Nothing, dependencies = [], description = Nothing, enum = Nothing, examples = Nothing, exclusiveMaximum = Nothing, exclusiveMinimum = Nothing, format = Nothing, id = Nothing, items = NoItems, maxItems = Nothing, maxLength = Nothing, maxProperties = Nothing, maximum = Nothing, minItems = Nothing, minLength = Nothing, minProperties = Nothing, minimum = Nothing, multipleOf = Nothing, not = Nothing, oneOf = Nothing, pattern = Nothing, patternProperties = Nothing, properties = Nothing, propertyNames = Nothing, ref = Just \"#/components/schemas/stargazer\", required = Nothing, source = <internals>, title = Nothing, type_ = AnyType, uniqueItems = Nothing }), maxItems = Nothing, maxLength = Nothing, maxProperties = Nothing, maximum = Nothing, minItems = Nothing, minLength = Nothing, minProperties = Nothing, minimum = Nothing, multipleOf = Nothing, not = Nothing, oneOf = Nothing, pattern = Nothing, patternProperties = Nothing, properties = Nothing, propertyNames = Nothing, ref = Nothing, required = Nothing, source = <internals>, title = Nothing, type_ = SingleType ArrayType, uniqueItems = Nothing }"
                 )
         }
 
 
 {-| Returns a weekly aggregate of the number of additions and deletions pushed to a repository. -}
-reposGetCodeFrequencyStats : (Result Http.Error todo -> msg) -> Cmd msg
+reposGetCodeFrequencyStats :
+    (Result Http.Error (List CodeFrequencyStat) -> msg) -> Cmd msg
 reposGetCodeFrequencyStats toMsg =
     Http.get
         { url =
             "https://api.github.com/repos/{owner}/{repo}/stats/code_frequency"
         , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+            Http.expectJson toMsg (Json.Decode.list decodeCodeFrequencyStat)
         }
 
 
 {-| Returns the last year of commit activity grouped by week. The `days` array is a group of commits per day, starting on `Sunday`. -}
-reposGetCommitActivityStats : (Result Http.Error todo -> msg) -> Cmd msg
+reposGetCommitActivityStats :
+    (Result Http.Error (List CommitActivity) -> msg) -> Cmd msg
 reposGetCommitActivityStats toMsg =
     Http.get
         { url =
             "https://api.github.com/repos/{owner}/{repo}/stats/commit_activity"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodeCommitActivity)
         }
 
 
@@ -5115,16 +4991,13 @@ reposGetCommitActivityStats toMsg =
 *   `d` - Number of deletions
 *   `c` - Number of commits
 -}
-reposGetContributorsStats : (Result Http.Error todo -> msg) -> Cmd msg
+reposGetContributorsStats :
+    (Result Http.Error (List ContributorActivity) -> msg) -> Cmd msg
 reposGetContributorsStats toMsg =
     Http.get
         { url = "https://api.github.com/repos/{owner}/{repo}/stats/contributors"
         , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+            Http.expectJson toMsg (Json.Decode.list decodeContributorActivity)
         }
 
 
@@ -5150,30 +5023,23 @@ reposGetParticipationStats toMsg =
 
 For example, `[2, 14, 25]` indicates that there were 25 total commits, during the 2:00pm hour on Tuesdays. All times are based on the time zone of individual commits.
 -}
-reposGetPunchCardStats : (Result Http.Error todo -> msg) -> Cmd msg
+reposGetPunchCardStats :
+    (Result Http.Error (List CodeFrequencyStat) -> msg) -> Cmd msg
 reposGetPunchCardStats toMsg =
     Http.get
         { url = "https://api.github.com/repos/{owner}/{repo}/stats/punch_card"
         , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+            Http.expectJson toMsg (Json.Decode.list decodeCodeFrequencyStat)
         }
 
 
 {-| Lists the people watching the specified repository. -}
-activityListWatchersForRepo : (Result Http.Error todo -> msg) -> Cmd msg
+activityListWatchersForRepo :
+    (Result Http.Error (List SimpleUser) -> msg) -> Cmd msg
 activityListWatchersForRepo toMsg =
     Http.get
         { url = "https://api.github.com/repos/{owner}/{repo}/subscribers"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodeSimpleUser)
         }
 
 
@@ -5186,16 +5052,11 @@ activityGetRepoSubscription toMsg =
         }
 
 
-reposListTags : (Result Http.Error todo -> msg) -> Cmd msg
+reposListTags : (Result Http.Error (List Tag) -> msg) -> Cmd msg
 reposListTags toMsg =
     Http.get
         { url = "https://api.github.com/repos/{owner}/{repo}/tags"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodeTag)
         }
 
 
@@ -5203,16 +5064,12 @@ reposListTags toMsg =
 
 This information is only available to repository administrators.
 -}
-reposListTagProtection : (Result Http.Error todo -> msg) -> Cmd msg
+reposListTagProtection :
+    (Result Http.Error (List TagProtection) -> msg) -> Cmd msg
 reposListTagProtection toMsg =
     Http.get
         { url = "https://api.github.com/repos/{owner}/{repo}/tags/protection"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodeTagProtection)
         }
 
 
@@ -5234,16 +5091,11 @@ reposDownloadTarballArchive toMsg =
         }
 
 
-reposListTeams : (Result Http.Error todo -> msg) -> Cmd msg
+reposListTeams : (Result Http.Error (List Team) -> msg) -> Cmd msg
 reposListTeams toMsg =
     Http.get
         { url = "https://api.github.com/repos/{owner}/{repo}/teams"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodeTeam)
         }
 
 
@@ -5265,32 +5117,24 @@ reposGetClones toMsg =
 
 
 {-| Get the top 10 popular contents over the last 14 days. -}
-reposGetTopPaths : (Result Http.Error todo -> msg) -> Cmd msg
+reposGetTopPaths : (Result Http.Error (List ContentTraffic) -> msg) -> Cmd msg
 reposGetTopPaths toMsg =
     Http.get
         { url =
             "https://api.github.com/repos/{owner}/{repo}/traffic/popular/paths"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodeContentTraffic)
         }
 
 
 {-| Get the top 10 referrers over the last 14 days. -}
-reposGetTopReferrers : (Result Http.Error todo -> msg) -> Cmd msg
+reposGetTopReferrers :
+    (Result Http.Error (List ReferrerTraffic) -> msg) -> Cmd msg
 reposGetTopReferrers toMsg =
     Http.get
         { url =
             "https://api.github.com/repos/{owner}/{repo}/traffic/popular/referrers"
         , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+            Http.expectJson toMsg (Json.Decode.list decodeReferrerTraffic)
         }
 
 
@@ -5343,21 +5187,16 @@ Note:
 - For GitHub Enterprise Server, this endpoint will only list repositories available to all users on the enterprise.
 - Pagination is powered exclusively by the `since` parameter. Use the [Link header](https://docs.github.com/rest/overview/resources-in-the-rest-api#link-header) to get the URL for the next page of repositories.
 -}
-reposListPublic : (Result Http.Error todo -> msg) -> Cmd msg
+reposListPublic : (Result Http.Error (List MinimalRepository) -> msg) -> Cmd msg
 reposListPublic toMsg =
     Http.get
         { url = "https://api.github.com/repositories"
         , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+            Http.expectJson toMsg (Json.Decode.list decodeMinimalRepository)
         }
 
 
 {-| Lists all secrets available in an environment without revealing their encrypted values. You must authenticate using an access token with the `repo` scope to use this endpoint. GitHub Apps must have the `secrets` repository permission to use this endpoint. -}
-actionsListEnvironmentSecrets : (Result Http.Error todo -> msg) -> Cmd msg
 actionsListEnvironmentSecrets toMsg =
     Http.get
         { url =
@@ -5365,8 +5204,17 @@ actionsListEnvironmentSecrets toMsg =
         , expect =
             Http.expectJson
                 toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
+                (Json.Decode.succeed
+                  (\totalCount secrets ->
+                      { totalCount = totalCount, secrets = secrets }
+                  )
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field "total_count" Json.Decode.int)
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field
+                            "secrets"
+                            (Json.Decode.list decodeActionsSecret)
+                        )
                 )
         }
 
@@ -5412,15 +5260,29 @@ Due to the complexity of searching code, there are a few restrictions on how sea
 *   You must always include at least one search term when searching source code. For example, searching for [`language:go`](https://github.com/search?utf8=%E2%9C%93&q=language%3Ago&type=Code) is not valid, while [`amazing
 language:go`](https://github.com/search?utf8=%E2%9C%93&q=amazing+language%3Ago&type=Code) is.
 -}
-searchCode : (Result Http.Error todo -> msg) -> Cmd msg
 searchCode toMsg =
     Http.get
         { url = "https://api.github.com/search/code"
         , expect =
             Http.expectJson
                 toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
+                (Json.Decode.succeed
+                  (\totalCount incompleteResults items ->
+                      { totalCount = totalCount
+                      , incompleteResults = incompleteResults
+                      , items = items
+                      }
+                  )
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field "total_count" Json.Decode.int)
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field "incomplete_results" Json.Decode.bool
+                        )
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field
+                            "items"
+                            (Json.Decode.list decodeCodeSearchResultItem)
+                        )
                 )
         }
 
@@ -5434,15 +5296,29 @@ For example, if you want to find commits related to CSS in the [octocat/Spoon-Kn
 
 `q=repo:octocat/Spoon-Knife+css`
 -}
-searchCommits : (Result Http.Error todo -> msg) -> Cmd msg
 searchCommits toMsg =
     Http.get
         { url = "https://api.github.com/search/commits"
         , expect =
             Http.expectJson
                 toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
+                (Json.Decode.succeed
+                  (\totalCount incompleteResults items ->
+                      { totalCount = totalCount
+                      , incompleteResults = incompleteResults
+                      , items = items
+                      }
+                  )
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field "total_count" Json.Decode.int)
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field "incomplete_results" Json.Decode.bool
+                        )
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field
+                            "items"
+                            (Json.Decode.list decodeCommitSearchResultItem)
+                        )
                 )
         }
 
@@ -5460,15 +5336,29 @@ This query searches for the keyword `windows`, within any open issue that is lab
 
 **Note:** For [user-to-server](https://docs.github.com/developers/apps/identifying-and-authorizing-users-for-github-apps#user-to-server-requests) GitHub App requests, you can't retrieve a combination of issues and pull requests in a single query. Requests that don't include the `is:issue` or `is:pull-request` qualifier will receive an HTTP `422 Unprocessable Entity` response. To get results for both issues and pull requests, you must send separate queries for issues and pull requests. For more information about the `is` qualifier, see "[Searching only issues or pull requests](https://docs.github.com/github/searching-for-information-on-github/searching-issues-and-pull-requests#search-only-issues-or-pull-requests)."
 -}
-searchIssuesAndPullRequests : (Result Http.Error todo -> msg) -> Cmd msg
 searchIssuesAndPullRequests toMsg =
     Http.get
         { url = "https://api.github.com/search/issues"
         , expect =
             Http.expectJson
                 toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
+                (Json.Decode.succeed
+                  (\totalCount incompleteResults items ->
+                      { totalCount = totalCount
+                      , incompleteResults = incompleteResults
+                      , items = items
+                      }
+                  )
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field "total_count" Json.Decode.int)
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field "incomplete_results" Json.Decode.bool
+                        )
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field
+                            "items"
+                            (Json.Decode.list decodeIssueSearchResultItem)
+                        )
                 )
         }
 
@@ -5483,15 +5373,29 @@ For example, if you want to find labels in the `linguist` repository that match 
 
 The labels that best match the query appear first in the search results.
 -}
-searchLabels : (Result Http.Error todo -> msg) -> Cmd msg
 searchLabels toMsg =
     Http.get
         { url = "https://api.github.com/search/labels"
         , expect =
             Http.expectJson
                 toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
+                (Json.Decode.succeed
+                  (\totalCount incompleteResults items ->
+                      { totalCount = totalCount
+                      , incompleteResults = incompleteResults
+                      , items = items
+                      }
+                  )
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field "total_count" Json.Decode.int)
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field "incomplete_results" Json.Decode.bool
+                        )
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field
+                            "items"
+                            (Json.Decode.list decodeLabelSearchResultItem)
+                        )
                 )
         }
 
@@ -5506,15 +5410,29 @@ For example, if you want to search for popular Tetris repositories written in as
 
 This query searches for repositories with the word `tetris` in the name, the description, or the README. The results are limited to repositories where the primary language is assembly. The results are sorted by stars in descending order, so that the most popular repositories appear first in the search results.
 -}
-searchRepos : (Result Http.Error todo -> msg) -> Cmd msg
 searchRepos toMsg =
     Http.get
         { url = "https://api.github.com/search/repositories"
         , expect =
             Http.expectJson
                 toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
+                (Json.Decode.succeed
+                  (\totalCount incompleteResults items ->
+                      { totalCount = totalCount
+                      , incompleteResults = incompleteResults
+                      , items = items
+                      }
+                  )
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field "total_count" Json.Decode.int)
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field "incomplete_results" Json.Decode.bool
+                        )
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field
+                            "items"
+                            (Json.Decode.list decodeRepoSearchResultItem)
+                        )
                 )
         }
 
@@ -5529,15 +5447,29 @@ For example, if you want to search for topics related to Ruby that are featured 
 
 This query searches for topics with the keyword `ruby` and limits the results to find only topics that are featured. The topics that are the best match for the query appear first in the search results.
 -}
-searchTopics : (Result Http.Error todo -> msg) -> Cmd msg
 searchTopics toMsg =
     Http.get
         { url = "https://api.github.com/search/topics"
         , expect =
             Http.expectJson
                 toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
+                (Json.Decode.succeed
+                  (\totalCount incompleteResults items ->
+                      { totalCount = totalCount
+                      , incompleteResults = incompleteResults
+                      , items = items
+                      }
+                  )
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field "total_count" Json.Decode.int)
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field "incomplete_results" Json.Decode.bool
+                        )
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field
+                            "items"
+                            (Json.Decode.list decodeTopicSearchResultItem)
+                        )
                 )
         }
 
@@ -5552,15 +5484,29 @@ For example, if you're looking for a list of popular users, you might try this q
 
 This query searches for users with the name `tom`. The results are restricted to users with more than 42 repositories and over 1,000 followers.
 -}
-searchUsers : (Result Http.Error todo -> msg) -> Cmd msg
 searchUsers toMsg =
     Http.get
         { url = "https://api.github.com/search/users"
         , expect =
             Http.expectJson
                 toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
+                (Json.Decode.succeed
+                  (\totalCount incompleteResults items ->
+                      { totalCount = totalCount
+                      , incompleteResults = incompleteResults
+                      , items = items
+                      }
+                  )
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field "total_count" Json.Decode.int)
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field "incomplete_results" Json.Decode.bool
+                        )
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field
+                            "items"
+                            (Json.Decode.list decodeUserSearchResultItem)
+                        )
                 )
         }
 
@@ -5578,16 +5524,12 @@ teamsGetLegacy toMsg =
 
 List all discussions on a team's page. OAuth access tokens require the `read:discussion` [scope](https://docs.github.com/apps/building-oauth-apps/understanding-scopes-for-oauth-apps/).
 -}
-teamsListDiscussionsLegacy : (Result Http.Error todo -> msg) -> Cmd msg
+teamsListDiscussionsLegacy :
+    (Result Http.Error (List TeamDiscussion) -> msg) -> Cmd msg
 teamsListDiscussionsLegacy toMsg =
     Http.get
         { url = "https://api.github.com/teams/{team_id}/discussions"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodeTeamDiscussion)
         }
 
 
@@ -5608,17 +5550,14 @@ teamsGetDiscussionLegacy toMsg =
 
 List all comments on a team discussion. OAuth access tokens require the `read:discussion` [scope](https://docs.github.com/apps/building-oauth-apps/understanding-scopes-for-oauth-apps/).
 -}
-teamsListDiscussionCommentsLegacy : (Result Http.Error todo -> msg) -> Cmd msg
+teamsListDiscussionCommentsLegacy :
+    (Result Http.Error (List TeamDiscussionComment) -> msg) -> Cmd msg
 teamsListDiscussionCommentsLegacy toMsg =
     Http.get
         { url =
             "https://api.github.com/teams/{team_id}/discussions/{discussion_number}/comments"
         , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+            Http.expectJson toMsg (Json.Decode.list decodeTeamDiscussionComment)
         }
 
 
@@ -5641,17 +5580,12 @@ teamsGetDiscussionCommentLegacy toMsg =
 List the reactions to a [team discussion comment](https://docs.github.com/rest/reference/teams#discussion-comments). OAuth access tokens require the `read:discussion` [scope](https://docs.github.com/apps/building-oauth-apps/understanding-scopes-for-oauth-apps/).
 -}
 reactionsListForTeamDiscussionCommentLegacy :
-    (Result Http.Error todo -> msg) -> Cmd msg
+    (Result Http.Error (List Reaction) -> msg) -> Cmd msg
 reactionsListForTeamDiscussionCommentLegacy toMsg =
     Http.get
         { url =
             "https://api.github.com/teams/{team_id}/discussions/{discussion_number}/comments/{comment_number}/reactions"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodeReaction)
         }
 
 
@@ -5660,17 +5594,12 @@ reactionsListForTeamDiscussionCommentLegacy toMsg =
 List the reactions to a [team discussion](https://docs.github.com/rest/reference/teams#discussions). OAuth access tokens require the `read:discussion` [scope](https://docs.github.com/apps/building-oauth-apps/understanding-scopes-for-oauth-apps/).
 -}
 reactionsListForTeamDiscussionLegacy :
-    (Result Http.Error todo -> msg) -> Cmd msg
+    (Result Http.Error (List Reaction) -> msg) -> Cmd msg
 reactionsListForTeamDiscussionLegacy toMsg =
     Http.get
         { url =
             "https://api.github.com/teams/{team_id}/discussions/{discussion_number}/reactions"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodeReaction)
         }
 
 
@@ -5678,16 +5607,15 @@ reactionsListForTeamDiscussionLegacy toMsg =
 
 The return hash contains a `role` field which refers to the Organization Invitation role and will be one of the following values: `direct_member`, `admin`, `billing_manager`, `hiring_manager`, or `reinstate`. If the invitee is not a GitHub member, the `login` field in the return hash will be `null`.
 -}
-teamsListPendingInvitationsLegacy : (Result Http.Error todo -> msg) -> Cmd msg
+teamsListPendingInvitationsLegacy :
+    (Result Http.Error (List OrganizationInvitation) -> msg) -> Cmd msg
 teamsListPendingInvitationsLegacy toMsg =
     Http.get
         { url = "https://api.github.com/teams/{team_id}/invitations"
         , expect =
             Http.expectJson
                 toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+                (Json.Decode.list decodeOrganizationInvitation)
         }
 
 
@@ -5695,16 +5623,11 @@ teamsListPendingInvitationsLegacy toMsg =
 
 Team members will include the members of child teams.
 -}
-teamsListMembersLegacy : (Result Http.Error todo -> msg) -> Cmd msg
+teamsListMembersLegacy : (Result Http.Error (List SimpleUser) -> msg) -> Cmd msg
 teamsListMembersLegacy toMsg =
     Http.get
         { url = "https://api.github.com/teams/{team_id}/members"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodeSimpleUser)
         }
 
 
@@ -5751,16 +5674,12 @@ teamsGetMembershipForUserLegacy toMsg =
 
 Lists the organization projects for a team.
 -}
-teamsListProjectsLegacy : (Result Http.Error todo -> msg) -> Cmd msg
+teamsListProjectsLegacy :
+    (Result Http.Error (List TeamProject) -> msg) -> Cmd msg
 teamsListProjectsLegacy toMsg =
     Http.get
         { url = "https://api.github.com/teams/{team_id}/projects"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodeTeamProject)
         }
 
 
@@ -5778,16 +5697,13 @@ teamsCheckPermissionsForProjectLegacy toMsg =
 
 
 {-| **Deprecation Notice:** This endpoint route is deprecated and will be removed from the Teams API. We recommend migrating your existing code to use the new [List team repositories](https://docs.github.com/rest/reference/teams#list-team-repositories) endpoint. -}
-teamsListReposLegacy : (Result Http.Error todo -> msg) -> Cmd msg
+teamsListReposLegacy :
+    (Result Http.Error (List MinimalRepository) -> msg) -> Cmd msg
 teamsListReposLegacy toMsg =
     Http.get
         { url = "https://api.github.com/teams/{team_id}/repos"
         , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+            Http.expectJson toMsg (Json.Decode.list decodeMinimalRepository)
         }
 
 
@@ -5807,16 +5723,11 @@ teamsCheckPermissionsForRepoLegacy toMsg =
 
 
 {-| **Deprecation Notice:** This endpoint route is deprecated and will be removed from the Teams API. We recommend migrating your existing code to use the new [`List child teams`](https://docs.github.com/rest/reference/teams#list-child-teams) endpoint. -}
-teamsListChildLegacy : (Result Http.Error todo -> msg) -> Cmd msg
+teamsListChildLegacy : (Result Http.Error (List Team) -> msg) -> Cmd msg
 teamsListChildLegacy toMsg =
     Http.get
         { url = "https://api.github.com/teams/{team_id}/teams"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodeTeam)
         }
 
 
@@ -5824,30 +5735,21 @@ teamsListChildLegacy toMsg =
 
 If the authenticated user is authenticated through OAuth without the `user` scope, then the response lists only public profile information.
 -}
-usersGetAuthenticated : (Result Http.Error todo -> msg) -> Cmd msg
+usersGetAuthenticated : (Result Http.Error Json.Encode.Value -> msg) -> Cmd msg
 usersGetAuthenticated toMsg =
     Http.get
         { url = "https://api.github.com/user"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg Json.Decode.value
         }
 
 
 {-| List the users you've blocked on your personal account. -}
-usersListBlockedByAuthenticatedUser : (Result Http.Error todo -> msg) -> Cmd msg
+usersListBlockedByAuthenticatedUser :
+    (Result Http.Error (List SimpleUser) -> msg) -> Cmd msg
 usersListBlockedByAuthenticatedUser toMsg =
     Http.get
         { url = "https://api.github.com/user/blocks"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodeSimpleUser)
         }
 
 
@@ -5870,15 +5772,23 @@ You must authenticate using an access token with the `codespace` scope to use th
 
 GitHub Apps must have read access to the `codespaces` repository permission to use this endpoint.
 -}
-codespacesListForAuthenticatedUser : (Result Http.Error todo -> msg) -> Cmd msg
 codespacesListForAuthenticatedUser toMsg =
     Http.get
         { url = "https://api.github.com/user/codespaces"
         , expect =
             Http.expectJson
                 toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
+                (Json.Decode.succeed
+                  (\totalCount codespaces ->
+                      { totalCount = totalCount, codespaces = codespaces }
+                  )
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field "total_count" Json.Decode.int)
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field
+                            "codespaces"
+                            (Json.Decode.list decodeCodespace)
+                        )
                 )
         }
 
@@ -5890,16 +5800,23 @@ You must authenticate using an access token with the `codespace` or `codespace:s
 
 GitHub Apps must have read access to the `codespaces_user_secrets` user permission to use this endpoint.
 -}
-codespacesListSecretsForAuthenticatedUser :
-    (Result Http.Error todo -> msg) -> Cmd msg
 codespacesListSecretsForAuthenticatedUser toMsg =
     Http.get
         { url = "https://api.github.com/user/codespaces/secrets"
         , expect =
             Http.expectJson
                 toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
+                (Json.Decode.succeed
+                  (\totalCount secrets ->
+                      { totalCount = totalCount, secrets = secrets }
+                  )
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field "total_count" Json.Decode.int)
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field
+                            "secrets"
+                            (Json.Decode.list decodeCodespacesSecret)
+                        )
                 )
         }
 
@@ -5940,8 +5857,6 @@ You must authenticate using an access token with the `codespace` or `codespace:s
 
 GitHub Apps must have read access to the `codespaces_user_secrets` user permission and write access to the `codespaces_secrets` repository permission on all referenced repositories to use this endpoint.
 -}
-codespacesListRepositoriesForSecretForAuthenticatedUser :
-    (Result Http.Error todo -> msg) -> Cmd msg
 codespacesListRepositoriesForSecretForAuthenticatedUser toMsg =
     Http.get
         { url =
@@ -5949,8 +5864,17 @@ codespacesListRepositoriesForSecretForAuthenticatedUser toMsg =
         , expect =
             Http.expectJson
                 toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
+                (Json.Decode.succeed
+                  (\totalCount repositories ->
+                      { totalCount = totalCount, repositories = repositories }
+                  )
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field "total_count" Json.Decode.int)
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field
+                            "repositories"
+                            (Json.Decode.list decodeMinimalRepository)
+                        )
                 )
         }
 
@@ -5992,8 +5916,6 @@ You must authenticate using an access token with the `codespace` scope to use th
 
 GitHub Apps must have read access to the `codespaces_metadata` repository permission to use this endpoint.
 -}
-codespacesCodespaceMachinesForAuthenticatedUser :
-    (Result Http.Error todo -> msg) -> Cmd msg
 codespacesCodespaceMachinesForAuthenticatedUser toMsg =
     Http.get
         { url =
@@ -6001,53 +5923,48 @@ codespacesCodespaceMachinesForAuthenticatedUser toMsg =
         , expect =
             Http.expectJson
                 toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
+                (Json.Decode.succeed
+                  (\totalCount machines ->
+                      { totalCount = totalCount, machines = machines }
+                  )
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field "total_count" Json.Decode.int)
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field
+                            "machines"
+                            (Json.Decode.list decodeCodespaceMachine)
+                        )
                 )
         }
 
 
 {-| Lists all of your email addresses, and specifies which one is visible to the public. This endpoint is accessible with the `user:email` scope. -}
-usersListEmailsForAuthenticatedUser : (Result Http.Error todo -> msg) -> Cmd msg
+usersListEmailsForAuthenticatedUser :
+    (Result Http.Error (List Email) -> msg) -> Cmd msg
 usersListEmailsForAuthenticatedUser toMsg =
     Http.get
         { url = "https://api.github.com/user/emails"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodeEmail)
         }
 
 
 {-| Lists the people following the authenticated user. -}
 usersListFollowersForAuthenticatedUser :
-    (Result Http.Error todo -> msg) -> Cmd msg
+    (Result Http.Error (List SimpleUser) -> msg) -> Cmd msg
 usersListFollowersForAuthenticatedUser toMsg =
     Http.get
         { url = "https://api.github.com/user/followers"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodeSimpleUser)
         }
 
 
 {-| Lists the people who the authenticated user follows. -}
 usersListFollowedByAuthenticatedUser :
-    (Result Http.Error todo -> msg) -> Cmd msg
+    (Result Http.Error (List SimpleUser) -> msg) -> Cmd msg
 usersListFollowedByAuthenticatedUser toMsg =
     Http.get
         { url = "https://api.github.com/user/following"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodeSimpleUser)
         }
 
 
@@ -6067,16 +5984,11 @@ usersCheckPersonIsFollowedByAuthenticated toMsg =
 
 {-| Lists the current user's GPG keys. Requires that you are authenticated via Basic Auth or via OAuth with at least `read:gpg_key` [scope](https://docs.github.com/apps/building-oauth-apps/understanding-scopes-for-oauth-apps/). -}
 usersListGpgKeysForAuthenticatedUser :
-    (Result Http.Error todo -> msg) -> Cmd msg
+    (Result Http.Error (List GpgKey) -> msg) -> Cmd msg
 usersListGpgKeysForAuthenticatedUser toMsg =
     Http.get
         { url = "https://api.github.com/user/gpg_keys"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodeGpgKey)
         }
 
 
@@ -6098,16 +6010,23 @@ The authenticated user has explicit permission to access repositories they own, 
 
 You can find the permissions for the installation under the `permissions` key.
 -}
-appsListInstallationsForAuthenticatedUser :
-    (Result Http.Error todo -> msg) -> Cmd msg
 appsListInstallationsForAuthenticatedUser toMsg =
     Http.get
         { url = "https://api.github.com/user/installations"
         , expect =
             Http.expectJson
                 toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
+                (Json.Decode.succeed
+                  (\totalCount installations ->
+                      { totalCount = totalCount, installations = installations }
+                  )
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field "total_count" Json.Decode.int)
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field
+                            "installations"
+                            (Json.Decode.list decodeInstallation)
+                        )
                 )
         }
 
@@ -6120,8 +6039,6 @@ You must use a [user-to-server OAuth access token](https://docs.github.com/apps/
 
 The access the user has to each repository is included in the hash under the `permissions` key.
 -}
-appsListInstallationReposForAuthenticatedUser :
-    (Result Http.Error todo -> msg) -> Cmd msg
 appsListInstallationReposForAuthenticatedUser toMsg =
     Http.get
         { url =
@@ -6129,15 +6046,32 @@ appsListInstallationReposForAuthenticatedUser toMsg =
         , expect =
             Http.expectJson
                 toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
+                (Json.Decode.succeed
+                  (\totalCount repositorySelection repositories ->
+                      { totalCount = totalCount
+                      , repositorySelection = repositorySelection
+                      , repositories = repositories
+                      }
+                  )
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field "total_count" Json.Decode.int)
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field
+                            "repository_selection"
+                            Json.Decode.string
+                        )
+                    |> Json.Decode.Extra.andMap
+                        (Json.Decode.field
+                            "repositories"
+                            (Json.Decode.list decodeRepository)
+                        )
                 )
         }
 
 
 {-| Shows which type of GitHub user can interact with your public repositories and when the restriction expires. -}
 interactionsGetRestrictionsForAuthenticatedUser :
-    (Result Http.Error todo -> msg) -> Cmd msg
+    (Result Http.Error (EnumTwo InteractionLimitResponse {}) -> msg) -> Cmd msg
 interactionsGetRestrictionsForAuthenticatedUser toMsg =
     Http.get
         { url = "https://api.github.com/user/interaction-limits"
@@ -6145,7 +6079,7 @@ interactionsGetRestrictionsForAuthenticatedUser toMsg =
             Http.expectJson
                 toMsg
                 (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
+                    "decode anyOf 2: not nullable:: { additionalItems = Nothing, additionalProperties = Nothing, allOf = Nothing, anyOf = Nothing, const = Nothing, contains = Nothing, default = Nothing, definitions = Nothing, dependencies = [], description = Nothing, enum = Nothing, examples = Nothing, exclusiveMaximum = Nothing, exclusiveMinimum = Nothing, format = Nothing, id = Nothing, items = NoItems, maxItems = Nothing, maxLength = Nothing, maxProperties = Nothing, maximum = Nothing, minItems = Nothing, minLength = Nothing, minProperties = Nothing, minimum = Nothing, multipleOf = Nothing, not = Nothing, oneOf = Nothing, pattern = Nothing, patternProperties = Nothing, properties = Nothing, propertyNames = Nothing, ref = Just \"#/components/schemas/interaction-limit-response\", required = Nothing, source = <internals>, title = Nothing, type_ = AnyType, uniqueItems = Nothing } ,,, { additionalItems = Nothing, additionalProperties = Just (BooleanSchema False), allOf = Nothing, anyOf = Nothing, const = Nothing, contains = Nothing, default = Nothing, definitions = Nothing, dependencies = [], description = Nothing, enum = Nothing, examples = Nothing, exclusiveMaximum = Nothing, exclusiveMinimum = Nothing, format = Nothing, id = Nothing, items = NoItems, maxItems = Nothing, maxLength = Nothing, maxProperties = Nothing, maximum = Nothing, minItems = Nothing, minLength = Nothing, minProperties = Nothing, minimum = Nothing, multipleOf = Nothing, not = Nothing, oneOf = Nothing, pattern = Nothing, patternProperties = Nothing, properties = Just (Schemata []), propertyNames = Nothing, ref = Nothing, required = Nothing, source = <internals>, title = Nothing, type_ = SingleType ObjectType, uniqueItems = Nothing }"
                 )
         }
 
@@ -6157,31 +6091,22 @@ reason, "Issues" endpoints may return both issues and pull requests in the respo
 the `pull_request` key. Be aware that the `id` of a pull request returned from "Issues" endpoints will be an _issue id_. To find out the pull
 request id, use the "[List pull requests](https://docs.github.com/rest/reference/pulls#list-pull-requests)" endpoint.
 -}
-issuesListForAuthenticatedUser : (Result Http.Error todo -> msg) -> Cmd msg
+issuesListForAuthenticatedUser :
+    (Result Http.Error (List Issue) -> msg) -> Cmd msg
 issuesListForAuthenticatedUser toMsg =
     Http.get
         { url = "https://api.github.com/user/issues"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodeIssue)
         }
 
 
 {-| Lists the public SSH keys for the authenticated user's GitHub account. Requires that you are authenticated via Basic Auth or via OAuth with at least `read:public_key` [scope](https://docs.github.com/apps/building-oauth-apps/understanding-scopes-for-oauth-apps/). -}
 usersListPublicSshKeysForAuthenticatedUser :
-    (Result Http.Error todo -> msg) -> Cmd msg
+    (Result Http.Error (List Key) -> msg) -> Cmd msg
 usersListPublicSshKeysForAuthenticatedUser toMsg =
     Http.get
         { url = "https://api.github.com/user/keys"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodeKey)
         }
 
 
@@ -6197,45 +6122,36 @@ usersGetPublicSshKeyForAuthenticatedUser toMsg =
 
 {-| Lists the active subscriptions for the authenticated user. You must use a [user-to-server OAuth access token](https://docs.github.com/apps/building-github-apps/identifying-and-authorizing-users-for-github-apps/#identifying-users-on-your-site), created for a user who has authorized your GitHub App, to access this endpoint. . OAuth Apps must authenticate using an [OAuth token](https://docs.github.com/apps/building-github-apps/authenticating-with-github-apps/). -}
 appsListSubscriptionsForAuthenticatedUser :
-    (Result Http.Error todo -> msg) -> Cmd msg
+    (Result Http.Error (List UserMarketplacePurchase) -> msg) -> Cmd msg
 appsListSubscriptionsForAuthenticatedUser toMsg =
     Http.get
         { url = "https://api.github.com/user/marketplace_purchases"
         , expect =
             Http.expectJson
                 toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+                (Json.Decode.list decodeUserMarketplacePurchase)
         }
 
 
 {-| Lists the active subscriptions for the authenticated user. You must use a [user-to-server OAuth access token](https://docs.github.com/apps/building-github-apps/identifying-and-authorizing-users-for-github-apps/#identifying-users-on-your-site), created for a user who has authorized your GitHub App, to access this endpoint. . OAuth Apps must authenticate using an [OAuth token](https://docs.github.com/apps/building-github-apps/authenticating-with-github-apps/). -}
 appsListSubscriptionsForAuthenticatedUserStubbed :
-    (Result Http.Error todo -> msg) -> Cmd msg
+    (Result Http.Error (List UserMarketplacePurchase) -> msg) -> Cmd msg
 appsListSubscriptionsForAuthenticatedUserStubbed toMsg =
     Http.get
         { url = "https://api.github.com/user/marketplace_purchases/stubbed"
         , expect =
             Http.expectJson
                 toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+                (Json.Decode.list decodeUserMarketplacePurchase)
         }
 
 
 orgsListMembershipsForAuthenticatedUser :
-    (Result Http.Error todo -> msg) -> Cmd msg
+    (Result Http.Error (List OrgMembership) -> msg) -> Cmd msg
 orgsListMembershipsForAuthenticatedUser toMsg =
     Http.get
         { url = "https://api.github.com/user/memberships/orgs"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodeOrgMembership)
         }
 
 
@@ -6249,16 +6165,12 @@ orgsGetMembershipForAuthenticatedUser toMsg =
 
 
 {-| Lists all migrations a user has started. -}
-migrationsListForAuthenticatedUser : (Result Http.Error todo -> msg) -> Cmd msg
+migrationsListForAuthenticatedUser :
+    (Result Http.Error (List Migration) -> msg) -> Cmd msg
 migrationsListForAuthenticatedUser toMsg =
     Http.get
         { url = "https://api.github.com/user/migrations"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodeMigration)
         }
 
 
@@ -6318,17 +6230,13 @@ migrationsGetArchiveForAuthenticatedUser toMsg =
 
 {-| Lists all the repositories for this user migration. -}
 migrationsListReposForAuthenticatedUser :
-    (Result Http.Error todo -> msg) -> Cmd msg
+    (Result Http.Error (List MinimalRepository) -> msg) -> Cmd msg
 migrationsListReposForAuthenticatedUser toMsg =
     Http.get
         { url =
             "https://api.github.com/user/migrations/{migration_id}/repositories"
         , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+            Http.expectJson toMsg (Json.Decode.list decodeMinimalRepository)
         }
 
 
@@ -6338,16 +6246,13 @@ migrationsListReposForAuthenticatedUser toMsg =
 
 This only lists organizations that your authorization allows you to operate on in some way (e.g., you can list teams with `read:org` scope, you can publicize your organization membership with `user` scope, etc.). Therefore, this API requires at least `user` or `read:org` scope. OAuth requests with insufficient scope receive a `403 Forbidden` response.
 -}
-orgsListForAuthenticatedUser : (Result Http.Error todo -> msg) -> Cmd msg
+orgsListForAuthenticatedUser :
+    (Result Http.Error (List OrganizationSimple) -> msg) -> Cmd msg
 orgsListForAuthenticatedUser toMsg =
     Http.get
         { url = "https://api.github.com/user/orgs"
         , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+            Http.expectJson toMsg (Json.Decode.list decodeOrganizationSimple)
         }
 
 
@@ -6357,16 +6262,11 @@ To use this endpoint, you must authenticate using an access token with the `pack
 If `package_type` is not `container`, your token must also include the `repo` scope.
 -}
 packagesListPackagesForAuthenticatedUser :
-    (Result Http.Error todo -> msg) -> Cmd msg
+    (Result Http.Error (List Package) -> msg) -> Cmd msg
 packagesListPackagesForAuthenticatedUser toMsg =
     Http.get
         { url = "https://api.github.com/user/packages"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodePackage)
         }
 
 
@@ -6391,17 +6291,12 @@ To use this endpoint, you must authenticate using an access token with the `pack
 If `package_type` is not `container`, your token must also include the `repo` scope.
 -}
 packagesGetAllPackageVersionsForPackageOwnedByAuthenticatedUser :
-    (Result Http.Error todo -> msg) -> Cmd msg
+    (Result Http.Error (List PackageVersion) -> msg) -> Cmd msg
 packagesGetAllPackageVersionsForPackageOwnedByAuthenticatedUser toMsg =
     Http.get
         { url =
             "https://api.github.com/user/packages/{package_type}/{package_name}/versions"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodePackageVersion)
         }
 
 
@@ -6422,16 +6317,11 @@ packagesGetPackageVersionForAuthenticatedUser toMsg =
 
 {-| Lists your publicly visible email address, which you can set with the [Set primary email visibility for the authenticated user](https://docs.github.com/rest/reference/users#set-primary-email-visibility-for-the-authenticated-user) endpoint. This endpoint is accessible with the `user:email` scope. -}
 usersListPublicEmailsForAuthenticatedUser :
-    (Result Http.Error todo -> msg) -> Cmd msg
+    (Result Http.Error (List Email) -> msg) -> Cmd msg
 usersListPublicEmailsForAuthenticatedUser toMsg =
     Http.get
         { url = "https://api.github.com/user/public_emails"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodeEmail)
         }
 
 
@@ -6439,46 +6329,33 @@ usersListPublicEmailsForAuthenticatedUser toMsg =
 
 The authenticated user has explicit permission to access repositories they own, repositories where they are a collaborator, and repositories that they can access through an organization membership.
 -}
-reposListForAuthenticatedUser : (Result Http.Error todo -> msg) -> Cmd msg
+reposListForAuthenticatedUser :
+    (Result Http.Error (List Repository) -> msg) -> Cmd msg
 reposListForAuthenticatedUser toMsg =
     Http.get
         { url = "https://api.github.com/user/repos"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodeRepository)
         }
 
 
 {-| When authenticating as a user, this endpoint will list all currently open repository invitations for that user. -}
 reposListInvitationsForAuthenticatedUser :
-    (Result Http.Error todo -> msg) -> Cmd msg
+    (Result Http.Error (List RepositoryInvitation) -> msg) -> Cmd msg
 reposListInvitationsForAuthenticatedUser toMsg =
     Http.get
         { url = "https://api.github.com/user/repository_invitations"
         , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+            Http.expectJson toMsg (Json.Decode.list decodeRepositoryInvitation)
         }
 
 
 {-| Lists the SSH signing keys for the authenticated user's GitHub account. You must authenticate with Basic Authentication, or you must authenticate with OAuth with at least `read:ssh_signing_key` scope. For more information, see "[Understanding scopes for OAuth apps](https://docs.github.com/apps/building-oauth-apps/understanding-scopes-for-oauth-apps/)." -}
 usersListSshSigningKeysForAuthenticatedUser :
-    (Result Http.Error todo -> msg) -> Cmd msg
+    (Result Http.Error (List SshSigningKey) -> msg) -> Cmd msg
 usersListSshSigningKeysForAuthenticatedUser toMsg =
     Http.get
         { url = "https://api.github.com/user/ssh_signing_keys"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodeSshSigningKey)
         }
 
 
@@ -6498,16 +6375,11 @@ usersGetSshSigningKeyForAuthenticatedUser toMsg =
 You can also find out _when_ stars were created by passing the following custom [media type](https://docs.github.com/rest/overview/media-types/) via the `Accept` header: `application/vnd.github.star+json`.
 -}
 activityListReposStarredByAuthenticatedUser :
-    (Result Http.Error todo -> msg) -> Cmd msg
+    (Result Http.Error (List Repository) -> msg) -> Cmd msg
 activityListReposStarredByAuthenticatedUser toMsg =
     Http.get
         { url = "https://api.github.com/user/starred"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodeRepository)
         }
 
 
@@ -6527,30 +6399,22 @@ activityCheckRepoIsStarredByAuthenticatedUser toMsg =
 
 {-| Lists repositories the authenticated user is watching. -}
 activityListWatchedReposForAuthenticatedUser :
-    (Result Http.Error todo -> msg) -> Cmd msg
+    (Result Http.Error (List MinimalRepository) -> msg) -> Cmd msg
 activityListWatchedReposForAuthenticatedUser toMsg =
     Http.get
         { url = "https://api.github.com/user/subscriptions"
         , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+            Http.expectJson toMsg (Json.Decode.list decodeMinimalRepository)
         }
 
 
 {-| List all of the teams across all of the organizations to which the authenticated user belongs. This method requires `user`, `repo`, or `read:org` [scope](https://docs.github.com/apps/building-oauth-apps/understanding-scopes-for-oauth-apps/) when authenticating via [OAuth](https://docs.github.com/apps/building-oauth-apps/). -}
-teamsListForAuthenticatedUser : (Result Http.Error todo -> msg) -> Cmd msg
+teamsListForAuthenticatedUser :
+    (Result Http.Error (List TeamFull) -> msg) -> Cmd msg
 teamsListForAuthenticatedUser toMsg =
     Http.get
         { url = "https://api.github.com/user/teams"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodeTeamFull)
         }
 
 
@@ -6558,16 +6422,11 @@ teamsListForAuthenticatedUser toMsg =
 
 Note: Pagination is powered exclusively by the `since` parameter. Use the [Link header](https://docs.github.com/rest/overview/resources-in-the-rest-api#link-header) to get the URL for the next page of users.
 -}
-usersList : (Result Http.Error todo -> msg) -> Cmd msg
+usersList : (Result Http.Error (List SimpleUser) -> msg) -> Cmd msg
 usersList toMsg =
     Http.get
         { url = "https://api.github.com/users"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodeSimpleUser)
         }
 
 
@@ -6579,87 +6438,60 @@ The `email` key in the following response is the publicly visible email address 
 
 The Emails API enables you to list all of your email addresses, and toggle a primary email to be visible publicly. For more information, see "[Emails API](https://docs.github.com/rest/reference/users#emails)".
 -}
-usersGetByUsername : (Result Http.Error todo -> msg) -> Cmd msg
+usersGetByUsername : (Result Http.Error Json.Encode.Value -> msg) -> Cmd msg
 usersGetByUsername toMsg =
     Http.get
         { url = "https://api.github.com/users/{username}"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg Json.Decode.value
         }
 
 
 {-| If you are authenticated as the given user, you will see your private events. Otherwise, you'll only see public events. -}
 activityListEventsForAuthenticatedUser :
-    (Result Http.Error todo -> msg) -> Cmd msg
+    (Result Http.Error (List Event) -> msg) -> Cmd msg
 activityListEventsForAuthenticatedUser toMsg =
     Http.get
         { url = "https://api.github.com/users/{username}/events"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodeEvent)
         }
 
 
 {-| This is the user's organization dashboard. You must be authenticated as the user to view this. -}
 activityListOrgEventsForAuthenticatedUser :
-    (Result Http.Error todo -> msg) -> Cmd msg
+    (Result Http.Error (List Event) -> msg) -> Cmd msg
 activityListOrgEventsForAuthenticatedUser toMsg =
     Http.get
         { url = "https://api.github.com/users/{username}/events/orgs/{org}"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodeEvent)
         }
 
 
-activityListPublicEventsForUser : (Result Http.Error todo -> msg) -> Cmd msg
+activityListPublicEventsForUser :
+    (Result Http.Error (List Event) -> msg) -> Cmd msg
 activityListPublicEventsForUser toMsg =
     Http.get
         { url = "https://api.github.com/users/{username}/events/public"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodeEvent)
         }
 
 
 {-| Lists the people following the specified user. -}
-usersListFollowersForUser : (Result Http.Error todo -> msg) -> Cmd msg
+usersListFollowersForUser :
+    (Result Http.Error (List SimpleUser) -> msg) -> Cmd msg
 usersListFollowersForUser toMsg =
     Http.get
         { url = "https://api.github.com/users/{username}/followers"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodeSimpleUser)
         }
 
 
 {-| Lists the people who the specified user follows. -}
-usersListFollowingForUser : (Result Http.Error todo -> msg) -> Cmd msg
+usersListFollowingForUser :
+    (Result Http.Error (List SimpleUser) -> msg) -> Cmd msg
 usersListFollowingForUser toMsg =
     Http.get
         { url = "https://api.github.com/users/{username}/following"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodeSimpleUser)
         }
 
 
@@ -6678,30 +6510,20 @@ usersCheckFollowingForUser toMsg =
 
 
 {-| Lists public gists for the specified user: -}
-gistsListForUser : (Result Http.Error todo -> msg) -> Cmd msg
+gistsListForUser : (Result Http.Error (List BaseGist) -> msg) -> Cmd msg
 gistsListForUser toMsg =
     Http.get
         { url = "https://api.github.com/users/{username}/gists"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodeBaseGist)
         }
 
 
 {-| Lists the GPG keys for a user. This information is accessible by anyone. -}
-usersListGpgKeysForUser : (Result Http.Error todo -> msg) -> Cmd msg
+usersListGpgKeysForUser : (Result Http.Error (List GpgKey) -> msg) -> Cmd msg
 usersListGpgKeysForUser toMsg =
     Http.get
         { url = "https://api.github.com/users/{username}/gpg_keys"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodeGpgKey)
         }
 
 
@@ -6735,16 +6557,12 @@ appsGetUserInstallation toMsg =
 
 
 {-| Lists the _verified_ public SSH keys for a user. This is accessible by anyone. -}
-usersListPublicKeysForUser : (Result Http.Error todo -> msg) -> Cmd msg
+usersListPublicKeysForUser :
+    (Result Http.Error (List KeySimple) -> msg) -> Cmd msg
 usersListPublicKeysForUser toMsg =
     Http.get
         { url = "https://api.github.com/users/{username}/keys"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodeKeySimple)
         }
 
 
@@ -6752,16 +6570,13 @@ usersListPublicKeysForUser toMsg =
 
 This method only lists _public_ memberships, regardless of authentication. If you need to fetch all of the organization memberships (public and private) for the authenticated user, use the [List organizations for the authenticated user](https://docs.github.com/rest/reference/orgs#list-organizations-for-the-authenticated-user) API instead.
 -}
-orgsListForUser : (Result Http.Error todo -> msg) -> Cmd msg
+orgsListForUser :
+    (Result Http.Error (List OrganizationSimple) -> msg) -> Cmd msg
 orgsListForUser toMsg =
     Http.get
         { url = "https://api.github.com/users/{username}/orgs"
         , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+            Http.expectJson toMsg (Json.Decode.list decodeOrganizationSimple)
         }
 
 
@@ -6770,16 +6585,12 @@ orgsListForUser toMsg =
 To use this endpoint, you must authenticate using an access token with the `packages:read` scope.
 If `package_type` is not `container`, your token must also include the `repo` scope.
 -}
-packagesListPackagesForUser : (Result Http.Error todo -> msg) -> Cmd msg
+packagesListPackagesForUser :
+    (Result Http.Error (List Package) -> msg) -> Cmd msg
 packagesListPackagesForUser toMsg =
     Http.get
         { url = "https://api.github.com/users/{username}/packages"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodePackage)
         }
 
 
@@ -6803,17 +6614,12 @@ To use this endpoint, you must authenticate using an access token with the `pack
 If `package_type` is not `container`, your token must also include the `repo` scope.
 -}
 packagesGetAllPackageVersionsForPackageOwnedByUser :
-    (Result Http.Error todo -> msg) -> Cmd msg
+    (Result Http.Error (List PackageVersion) -> msg) -> Cmd msg
 packagesGetAllPackageVersionsForPackageOwnedByUser toMsg =
     Http.get
         { url =
             "https://api.github.com/users/{username}/packages/{package_type}/{package_name}/versions"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodePackageVersion)
         }
 
 
@@ -6832,58 +6638,41 @@ packagesGetPackageVersionForUser toMsg =
         }
 
 
-projectsListForUser : (Result Http.Error todo -> msg) -> Cmd msg
+projectsListForUser : (Result Http.Error (List Project) -> msg) -> Cmd msg
 projectsListForUser toMsg =
     Http.get
         { url = "https://api.github.com/users/{username}/projects"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodeProject)
         }
 
 
 {-| These are events that you've received by watching repos and following users. If you are authenticated as the given user, you will see private events. Otherwise, you'll only see public events. -}
-activityListReceivedEventsForUser : (Result Http.Error todo -> msg) -> Cmd msg
+activityListReceivedEventsForUser :
+    (Result Http.Error (List Event) -> msg) -> Cmd msg
 activityListReceivedEventsForUser toMsg =
     Http.get
         { url = "https://api.github.com/users/{username}/received_events"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodeEvent)
         }
 
 
 activityListReceivedPublicEventsForUser :
-    (Result Http.Error todo -> msg) -> Cmd msg
+    (Result Http.Error (List Event) -> msg) -> Cmd msg
 activityListReceivedPublicEventsForUser toMsg =
     Http.get
         { url = "https://api.github.com/users/{username}/received_events/public"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodeEvent)
         }
 
 
 {-| Lists public repositories for the specified user. Note: For GitHub AE, this endpoint will list internal repositories for the specified user. -}
-reposListForUser : (Result Http.Error todo -> msg) -> Cmd msg
+reposListForUser :
+    (Result Http.Error (List MinimalRepository) -> msg) -> Cmd msg
 reposListForUser toMsg =
     Http.get
         { url = "https://api.github.com/users/{username}/repos"
         , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+            Http.expectJson toMsg (Json.Decode.list decodeMinimalRepository)
         }
 
 
@@ -6936,16 +6725,12 @@ billingGetSharedStorageBillingUser toMsg =
 
 
 {-| Lists the SSH signing keys for a user. This operation is accessible by anyone. -}
-usersListSshSigningKeysForUser : (Result Http.Error todo -> msg) -> Cmd msg
+usersListSshSigningKeysForUser :
+    (Result Http.Error (List SshSigningKey) -> msg) -> Cmd msg
 usersListSshSigningKeysForUser toMsg =
     Http.get
         { url = "https://api.github.com/users/{username}/ssh_signing_keys"
-        , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+        , expect = Http.expectJson toMsg (Json.Decode.list decodeSshSigningKey)
         }
 
 
@@ -6953,7 +6738,10 @@ usersListSshSigningKeysForUser toMsg =
 
 You can also find out _when_ stars were created by passing the following custom [media type](https://docs.github.com/rest/overview/media-types/) via the `Accept` header: `application/vnd.github.star+json`.
 -}
-activityListReposStarredByUser : (Result Http.Error todo -> msg) -> Cmd msg
+activityListReposStarredByUser :
+    (Result Http.Error (EnumTwo (List StarredRepository) (List Repository))
+    -> msg)
+    -> Cmd msg
 activityListReposStarredByUser toMsg =
     Http.get
         { url = "https://api.github.com/users/{username}/starred"
@@ -6961,22 +6749,19 @@ activityListReposStarredByUser toMsg =
             Http.expectJson
                 toMsg
                 (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
+                    "decode anyOf 2: not nullable:: { additionalItems = Nothing, additionalProperties = Nothing, allOf = Nothing, anyOf = Nothing, const = Nothing, contains = Nothing, default = Nothing, definitions = Nothing, dependencies = [], description = Nothing, enum = Nothing, examples = Nothing, exclusiveMaximum = Nothing, exclusiveMinimum = Nothing, format = Nothing, id = Nothing, items = ItemDefinition (ObjectSchema { additionalItems = Nothing, additionalProperties = Nothing, allOf = Nothing, anyOf = Nothing, const = Nothing, contains = Nothing, default = Nothing, definitions = Nothing, dependencies = [], description = Nothing, enum = Nothing, examples = Nothing, exclusiveMaximum = Nothing, exclusiveMinimum = Nothing, format = Nothing, id = Nothing, items = NoItems, maxItems = Nothing, maxLength = Nothing, maxProperties = Nothing, maximum = Nothing, minItems = Nothing, minLength = Nothing, minProperties = Nothing, minimum = Nothing, multipleOf = Nothing, not = Nothing, oneOf = Nothing, pattern = Nothing, patternProperties = Nothing, properties = Nothing, propertyNames = Nothing, ref = Just \"#/components/schemas/starred-repository\", required = Nothing, source = <internals>, title = Nothing, type_ = AnyType, uniqueItems = Nothing }), maxItems = Nothing, maxLength = Nothing, maxProperties = Nothing, maximum = Nothing, minItems = Nothing, minLength = Nothing, minProperties = Nothing, minimum = Nothing, multipleOf = Nothing, not = Nothing, oneOf = Nothing, pattern = Nothing, patternProperties = Nothing, properties = Nothing, propertyNames = Nothing, ref = Nothing, required = Nothing, source = <internals>, title = Nothing, type_ = SingleType ArrayType, uniqueItems = Nothing } ,,, { additionalItems = Nothing, additionalProperties = Nothing, allOf = Nothing, anyOf = Nothing, const = Nothing, contains = Nothing, default = Nothing, definitions = Nothing, dependencies = [], description = Nothing, enum = Nothing, examples = Nothing, exclusiveMaximum = Nothing, exclusiveMinimum = Nothing, format = Nothing, id = Nothing, items = ItemDefinition (ObjectSchema { additionalItems = Nothing, additionalProperties = Nothing, allOf = Nothing, anyOf = Nothing, const = Nothing, contains = Nothing, default = Nothing, definitions = Nothing, dependencies = [], description = Nothing, enum = Nothing, examples = Nothing, exclusiveMaximum = Nothing, exclusiveMinimum = Nothing, format = Nothing, id = Nothing, items = NoItems, maxItems = Nothing, maxLength = Nothing, maxProperties = Nothing, maximum = Nothing, minItems = Nothing, minLength = Nothing, minProperties = Nothing, minimum = Nothing, multipleOf = Nothing, not = Nothing, oneOf = Nothing, pattern = Nothing, patternProperties = Nothing, properties = Nothing, propertyNames = Nothing, ref = Just \"#/components/schemas/repository\", required = Nothing, source = <internals>, title = Nothing, type_ = AnyType, uniqueItems = Nothing }), maxItems = Nothing, maxLength = Nothing, maxProperties = Nothing, maximum = Nothing, minItems = Nothing, minLength = Nothing, minProperties = Nothing, minimum = Nothing, multipleOf = Nothing, not = Nothing, oneOf = Nothing, pattern = Nothing, patternProperties = Nothing, properties = Nothing, propertyNames = Nothing, ref = Nothing, required = Nothing, source = <internals>, title = Nothing, type_ = SingleType ArrayType, uniqueItems = Nothing }"
                 )
         }
 
 
 {-| Lists repositories a user is watching. -}
-activityListReposWatchedByUser : (Result Http.Error todo -> msg) -> Cmd msg
+activityListReposWatchedByUser :
+    (Result Http.Error (List MinimalRepository) -> msg) -> Cmd msg
 activityListReposWatchedByUser toMsg =
     Http.get
         { url = "https://api.github.com/users/{username}/subscriptions"
         , expect =
-            Http.expectJson
-                toMsg
-                (Debug.todo
-                    "Couldn't find a response decoder. Couldn't get the type ref for the response [concrete]"
-                )
+            Http.expectJson toMsg (Json.Decode.list decodeMinimalRepository)
         }
 
 
@@ -36190,6 +35975,8 @@ type alias HookDeliveryItem =
     , installationId : Nullable Int
     , repositoryId : Nullable Int
     }
+
+
 
 
 decodeHookDeliveryItem : Json.Decode.Decoder HookDeliveryItem

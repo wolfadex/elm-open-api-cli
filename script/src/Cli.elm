@@ -34,6 +34,7 @@ import OpenApi.Reference
 import OpenApi.RequestBody
 import OpenApi.Response
 import OpenApi.Schema
+import OpenApi.SecurityRequirement
 import OpenApi.Server
 import Pages.Script
 import Path
@@ -485,7 +486,7 @@ toRequestFunction method apiSpec url operation =
         ( successType, maybeSuccessDecoder ) =
             operationToSuccessTypeAndDecoder apiSpec operation
 
-        function =
+        function headers =
             case body of
                 Ok EmptyBody ->
                     Elm.fn
@@ -493,7 +494,7 @@ toRequestFunction method apiSpec url operation =
                         (\toMsg ->
                             Gen.Http.request
                                 { method = method
-                                , headers = []
+                                , headers = headers
                                 , timeout = Gen.Maybe.make_.nothing
                                 , tracker = Gen.Maybe.make_.nothing
                                 , url = fullUrl
@@ -517,7 +518,7 @@ toRequestFunction method apiSpec url operation =
                         (\toMsg bodyValue ->
                             Gen.Http.request
                                 { method = method
-                                , headers = []
+                                , headers = headers
                                 , timeout = Gen.Maybe.make_.nothing
                                 , tracker = Gen.Maybe.make_.nothing
                                 , url = fullUrl
@@ -541,7 +542,7 @@ toRequestFunction method apiSpec url operation =
                         (\toMsg bodyValue ->
                             Gen.Http.request
                                 { method = method
-                                , headers = []
+                                , headers = headers
                                 , timeout = Gen.Maybe.make_.nothing
                                 , tracker = Gen.Maybe.make_.nothing
                                 , url = fullUrl
@@ -566,10 +567,73 @@ toRequestFunction method apiSpec url operation =
                             ++ url
                             ++ "]Could not deal with body type: "
                             ++ e
+
+        ( functionWithSecurity, scopes ) =
+            case
+                List.map
+                    (Dict.toList << OpenApi.SecurityRequirement.requirements)
+                    (OpenApi.Operation.security operation)
+            of
+                [] ->
+                    ( function [], [] )
+
+                [ [ ( "oauth_2_0", ss ) ] ] ->
+                    ( Elm.fn
+                        ( "token"
+                        , Just
+                            (Elm.Annotation.record
+                                [ ( "authorization"
+                                  , Elm.Annotation.record
+                                        [ ( "bearer"
+                                          , Elm.Annotation.string
+                                          )
+                                        ]
+                                  )
+                                ]
+                            )
+                        )
+                        (\token ->
+                            function
+                                [ Gen.Http.call_.header (Elm.string "Authorization")
+                                    (Elm.Op.append
+                                        (Elm.string "Bearer ")
+                                        (token
+                                            |> Elm.get "authorization"
+                                            |> Elm.get "bearer"
+                                        )
+                                    )
+                                ]
+                        )
+                    , ss
+                    )
+
+                _ ->
+                    ( Gen.Debug.todo "Don't know how to handle branches with multiple security requirements", [] )
+
+        documentation =
+            OpenApi.Operation.description operation
+                |> Maybe.withDefault ""
+                |> (\d ->
+                        if List.isEmpty scopes then
+                            d
+
+                        else
+                            ([ d
+                             , ""
+                             , "This operations requires the following scopes:"
+                             ]
+                                ++ List.map
+                                    (\scope ->
+                                        " - `" ++ scope ++ "`"
+                                    )
+                                    scopes
+                            )
+                                |> String.join "\n"
+                   )
     in
-    function
+    functionWithSecurity
         |> Elm.declaration functionName
-        |> Elm.withDocumentation (OpenApi.Operation.description operation |> Maybe.withDefault "")
+        |> Elm.withDocumentation documentation
 
 
 operationToSuccessTypeAndDecoder : OpenApi -> OpenApi.Operation.Operation -> ( Elm.Annotation.Annotation, Maybe Elm.Expression )

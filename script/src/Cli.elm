@@ -18,6 +18,7 @@ import Gen.Http
 import Gen.Json.Decode
 import Gen.Json.Decode.Extra
 import Gen.Json.Encode
+import Gen.Maybe
 import Gen.Result
 import Json.Decode
 import Json.Schema.Definitions
@@ -144,23 +145,29 @@ generateFileFromOpenApiSpec { outputFile, namespace } apiSpec =
                 |> Dict.foldr
                     (\url path res ->
                         let
-                            decl =
-                                path
-                                    |> OpenApi.Path.get
-                                    |> Maybe.map
-                                        (toRequestFunction apiSpec url
-                                            >> Elm.exposeWith
-                                                { exposeConstructor = False
-                                                , group = Just "Request functions"
-                                                }
+                            ops =
+                                [ ( "GET", OpenApi.Path.get )
+                                , ( "POST", OpenApi.Path.post )
+                                , ( "PUT", OpenApi.Path.put )
+                                , ( "PATCH", OpenApi.Path.patch )
+                                , ( "DELETE", OpenApi.Path.delete )
+                                , ( "HEAD", OpenApi.Path.head )
+                                , ( "TRACE", OpenApi.Path.trace )
+                                ]
+                                    |> List.filterMap
+                                        (\( method, getter ) ->
+                                            path
+                                                |> getter
+                                                |> Maybe.map
+                                                    (toRequestFunction method apiSpec url
+                                                        >> Elm.exposeWith
+                                                            { exposeConstructor = False
+                                                            , group = Just "Request functions"
+                                                            }
+                                                    )
                                         )
                         in
-                        case decl of
-                            Nothing ->
-                                res
-
-                            Just d ->
-                                d :: res
+                        ops ++ res
                     )
                     []
 
@@ -375,12 +382,16 @@ stepOrFail msg f =
         )
 
 
-toRequestFunction : OpenApi -> String -> OpenApi.Operation.Operation -> Elm.Declaration
-toRequestFunction apiSpec url operation =
+toRequestFunction : String -> OpenApi -> String -> OpenApi.Operation.Operation -> Elm.Declaration
+toRequestFunction method apiSpec url operation =
     let
-        responses : Dict.Dict String (OpenApi.Reference.ReferenceOr OpenApi.Response.Response)
-        responses =
-            OpenApi.Operation.responses operation
+        body =
+            case OpenApi.Operation.requestBody operation of
+                Nothing ->
+                    Gen.Http.emptyBody
+
+                Just rb ->
+                    Gen.Debug.todo ("Nonempty request body: " ++ Debug.toString rb)
 
         fullUrl : String
         fullUrl =
@@ -395,66 +406,8 @@ toRequestFunction apiSpec url operation =
                     else
                         OpenApi.Server.url firstServer ++ "/" ++ url
 
-        debugFromResult : Result String ( Elm.Annotation.Annotation, Elm.Expression ) -> ( Elm.Annotation.Annotation, Elm.Expression )
-        debugFromResult r =
-            case r of
-                Ok t ->
-                    t
-
-                Err msg ->
-                    ( Elm.Annotation.var "todo"
-                    , Gen.Debug.todo msg
-                    )
-
-        ( successType, successDecoder ) =
-            Ok responses
-                |> stepOrFail
-                    ("Among the "
-                        ++ String.fromInt (Dict.size responses)
-                        ++ " possible responses, there was no successfull one."
-                    )
-                    getFirstSuccessResponse
-                |> Result.andThen
-                    (\responseOrRef ->
-                        case OpenApi.Reference.toConcrete responseOrRef of
-                            Just response ->
-                                Ok response
-                                    |> stepOrFail "The response doesn't have an application/json content option"
-                                        -- TODO: This is expected to fail when the repsonse status code is 204, how to handle?
-                                        (OpenApi.Response.content
-                                            >> Dict.get "application/json"
-                                        )
-                                    |> stepOrFail "The response's application/json content option doesn't have a schema"
-                                        (OpenApi.MediaType.schema >> Maybe.map OpenApi.Schema.get)
-                                    |> Result.andThen
-                                        (\schema ->
-                                            Result.map2 Tuple.pair
-                                                (schemaToAnnotation schema)
-                                                (schemaToDecoder schema)
-                                                |> Result.mapError Tuple.second
-                                        )
-
-                            Nothing ->
-                                Ok responseOrRef
-                                    |> stepOrFail "I found a successfull response, but I couldn't convert it to a concrete one"
-                                        OpenApi.Reference.toReference
-                                    |> (\mr ->
-                                            mr
-                                                |> stepOrFail
-                                                    ("Couldn't get the type ref for the response [ref = "
-                                                        ++ Result.withDefault "?" (Result.map OpenApi.Reference.ref mr)
-                                                        ++ "]"
-                                                    )
-                                                    (OpenApi.Reference.ref >> schemaTypeRef apiSpec)
-                                       )
-                                    |> Result.map
-                                        (\st ->
-                                            ( Elm.Annotation.named [] st
-                                            , Elm.val ("decode" ++ st)
-                                            )
-                                        )
-                    )
-                |> debugFromResult
+        ( successType, maybeSuccessDecoder ) =
+            operationToSuccessTypeAndDecoder apiSpec operation
     in
     Elm.Declare.fn
         ((OpenApi.Operation.operationId operation
@@ -472,16 +425,97 @@ toRequestFunction apiSpec url operation =
             )
         )
         (\toMsg ->
-            Gen.Http.get
-                { url = fullUrl
+            Gen.Http.request
+                { method = method
+                , headers = []
+                , timeout = Gen.Maybe.make_.nothing
+                , tracker = Gen.Maybe.make_.nothing
+                , url = fullUrl
                 , expect =
-                    Gen.Http.expectJson
-                        (\result -> Elm.apply toMsg [ result ])
-                        successDecoder
+                    case maybeSuccessDecoder of
+                        Just successDecoder ->
+                            Gen.Http.expectJson
+                                (\result -> Elm.apply toMsg [ result ])
+                                successDecoder
+
+                        Nothing ->
+                            Gen.Http.expectWhatever (\result -> Elm.apply toMsg [ result ])
+                , body = body
                 }
         )
         |> .declaration
         |> Elm.withDocumentation (OpenApi.Operation.description operation |> Maybe.withDefault "")
+
+
+operationToSuccessTypeAndDecoder : OpenApi -> OpenApi.Operation.Operation -> ( Elm.Annotation.Annotation, Maybe Elm.Expression )
+operationToSuccessTypeAndDecoder apiSpec operation =
+    let
+        responses : Dict.Dict String (OpenApi.Reference.ReferenceOr OpenApi.Response.Response)
+        responses =
+            OpenApi.Operation.responses operation
+
+        debugFromResult : Result String ( Elm.Annotation.Annotation, Maybe Elm.Expression ) -> ( Elm.Annotation.Annotation, Maybe Elm.Expression )
+        debugFromResult r =
+            case r of
+                Ok t ->
+                    t
+
+                Err msg ->
+                    ( Elm.Annotation.var "todo"
+                    , Just <| Gen.Debug.todo msg
+                    )
+    in
+    Ok responses
+        |> stepOrFail
+            ("Among the "
+                ++ String.fromInt (Dict.size responses)
+                ++ " possible responses, there was no successfull one."
+            )
+            getFirstSuccessResponse
+        |> Result.andThen
+            (\( code, responseOrRef ) ->
+                case OpenApi.Reference.toConcrete responseOrRef of
+                    Just response ->
+                        if code == "204" && Dict.get "application/json" (OpenApi.Response.content response) == Nothing then
+                            Ok ( Elm.Annotation.unit, Nothing )
+
+                        else
+                            Ok response
+                                |> stepOrFail "The response doesn't have an application/json content option"
+                                    (OpenApi.Response.content
+                                        >> Dict.get "application/json"
+                                    )
+                                |> stepOrFail "The response's application/json content option doesn't have a schema"
+                                    (OpenApi.MediaType.schema >> Maybe.map OpenApi.Schema.get)
+                                |> Result.andThen
+                                    (\schema ->
+                                        Result.map2 Tuple.pair
+                                            (schemaToAnnotation schema)
+                                            (Result.map Just <| schemaToDecoder schema)
+                                            |> Result.mapError Tuple.second
+                                    )
+
+                    Nothing ->
+                        Ok responseOrRef
+                            |> stepOrFail "I found a successfull response, but I couldn't convert it to a concrete one"
+                                OpenApi.Reference.toReference
+                            |> (\mr ->
+                                    mr
+                                        |> stepOrFail
+                                            ("Couldn't get the type ref for the response [ref = "
+                                                ++ Result.withDefault "?" (Result.map OpenApi.Reference.ref mr)
+                                                ++ "]"
+                                            )
+                                            (OpenApi.Reference.ref >> schemaTypeRef apiSpec)
+                               )
+                            |> Result.map
+                                (\st ->
+                                    ( Elm.Annotation.named [] st
+                                    , Just <| Elm.val ("decode" ++ st)
+                                    )
+                                )
+            )
+        |> debugFromResult
 
 
 schemaTypeRef : OpenApi -> String -> Maybe String
@@ -507,13 +541,12 @@ toObjectSchema schema =
             Just subSchema
 
 
-getFirstSuccessResponse : Dict.Dict String (OpenApi.Reference.ReferenceOr OpenApi.Response.Response) -> Maybe (OpenApi.Reference.ReferenceOr OpenApi.Response.Response)
+getFirstSuccessResponse : Dict.Dict String (OpenApi.Reference.ReferenceOr OpenApi.Response.Response) -> Maybe ( String, OpenApi.Reference.ReferenceOr OpenApi.Response.Response )
 getFirstSuccessResponse responses =
     responses
         |> Dict.toList
         |> List.filter (\( statusCode, _ ) -> String.startsWith "2" statusCode)
         |> List.head
-        |> Maybe.map Tuple.second
 
 
 nullableType : Elm.Declaration

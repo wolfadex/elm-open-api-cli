@@ -204,6 +204,44 @@ generateFileFromOpenApiSpec { outputFile, namespace } apiSpec =
                                 Debug.todo <| "Error " ++ e ++ " at path " ++ String.join "." path
                    )
 
+        helperDeclarations =
+            -- The max value here should match with the max value supported by `intToWord`
+            List.range 1 99
+                |> List.map
+                    (\i ->
+                        intToWord i
+                            |> Result.andThen
+                                (\intWord ->
+                                    let
+                                        typeName =
+                                            typifyName ("enum_" ++ intWord)
+                                    in
+                                    List.range 1 i
+                                        |> List.foldr
+                                            (\j res ->
+                                                Result.map2
+                                                    (\jWord r ->
+                                                        Elm.variantWith (typifyName (typeName ++ "_" ++ jWord)) [ Elm.Annotation.var jWord ]
+                                                            :: r
+                                                    )
+                                                    (intToWord j)
+                                                    res
+                                            )
+                                            (Ok [])
+                                        |> Result.map (Elm.customType typeName)
+                                )
+                    )
+                |> Result.Extra.combine
+                -- |> Result.withDefault []
+                |> (\r ->
+                        case r of
+                            Ok lst ->
+                                lst
+
+                            Err e ->
+                                Debug.todo <| "Error " ++ e
+                   )
+
         file =
             Elm.fileWith [ fileNamespace ]
                 { docs =
@@ -229,7 +267,7 @@ generateFileFromOpenApiSpec { outputFile, namespace } apiSpec =
                 , aliases = []
                 }
                 (pathDeclarations
-                    ++ (nullableType :: componentDeclarations ++ responsesDeclarations)
+                    ++ (nullableType :: componentDeclarations ++ responsesDeclarations ++ helperDeclarations)
                 )
 
         outputPath =
@@ -775,22 +813,21 @@ type alias Path =
 
 schemaToAnnotation : Json.Schema.Definitions.Schema -> Result ( Path, String ) Elm.Annotation.Annotation
 schemaToAnnotation schema =
-    let
-        nullable : Result ( Path, String ) Elm.Annotation.Annotation -> Result ( Path, String ) Elm.Annotation.Annotation
-        nullable =
-            Result.map
-                (\ann ->
-                    Elm.Annotation.namedWith []
-                        "Nullable"
-                        [ ann ]
-                )
-    in
     case schema of
         Json.Schema.Definitions.BooleanSchema bool ->
             Err ( [], "Todo: boolean schema" )
 
         Json.Schema.Definitions.ObjectSchema subSchema ->
             let
+                nullable : Result ( Path, String ) Elm.Annotation.Annotation -> Result ( Path, String ) Elm.Annotation.Annotation
+                nullable =
+                    Result.map
+                        (\ann ->
+                            Elm.Annotation.namedWith []
+                                "Nullable"
+                                [ ann ]
+                        )
+
                 singleTypeToAnnotation singleType =
                     case singleType of
                         Json.Schema.Definitions.ObjectType ->
@@ -833,6 +870,24 @@ schemaToAnnotation schema =
 
                                 Json.Schema.Definitions.ItemDefinition itemSchema ->
                                     Result.map Elm.Annotation.list (schemaToAnnotation itemSchema)
+
+                enumAnnotation : List Json.Schema.Definitions.Schema -> Result ( Path, String ) Elm.Annotation.Annotation
+                enumAnnotation anyOf =
+                    intToWord (List.length anyOf)
+                        |> Result.mapError (Tuple.pair [])
+                        |> Result.andThen
+                            (\intWord ->
+                                anyOf
+                                    |> List.foldr
+                                        (\next res ->
+                                            Result.map2 (::)
+                                                (schemaToAnnotation next)
+                                                res
+                                        )
+                                        (Ok [])
+                                    |> Result.map
+                                        (Elm.Annotation.namedWith [] (typifyName ("enum_" ++ intWord)))
+                            )
             in
             case subSchema.type_ of
                 Json.Schema.Definitions.SingleType singleType ->
@@ -850,6 +905,9 @@ schemaToAnnotation schema =
                                         [ firstSchema, secondSchema ] ->
                                             case ( firstSchema, secondSchema ) of
                                                 ( Json.Schema.Definitions.ObjectSchema firstSubSchema, Json.Schema.Definitions.ObjectSchema secondSubSchema ) ->
+                                                    -- The first 2 cases here are for pseudo-nullable schemas where the higher level schema type is AnyOf
+                                                    -- but it's actually made up of only 2 types and 1 of them is nullable. This acts as a hack of sorts to
+                                                    -- mark a value as nullable in the schema.
                                                     case ( firstSubSchema.type_, secondSubSchema.type_ ) of
                                                         ( Json.Schema.Definitions.SingleType Json.Schema.Definitions.NullType, _ ) ->
                                                             nullable (schemaToAnnotation secondSchema)
@@ -858,13 +916,13 @@ schemaToAnnotation schema =
                                                             nullable (schemaToAnnotation firstSchema)
 
                                                         _ ->
-                                                            Err ( [], "Todo: AnyOf (except if one is nullable)" )
+                                                            enumAnnotation anyOf
 
                                                 _ ->
-                                                    Err ( [], "Todo: AnyOf (when not both ObjectSchemas)" )
+                                                    enumAnnotation anyOf
 
                                         _ ->
-                                            Err ( [], "Todo: AnyOf (when not exactly 2 items)" )
+                                            enumAnnotation anyOf
 
                         Just ref ->
                             case String.split "/" ref of
@@ -908,3 +966,130 @@ invalidModuleNameChars =
     , '}'
     , '-'
     ]
+
+
+intToWord : Int -> Result String String
+intToWord i =
+    case i of
+        1 ->
+            Ok "one"
+
+        2 ->
+            Ok "two"
+
+        3 ->
+            Ok "three"
+
+        4 ->
+            Ok "four"
+
+        5 ->
+            Ok "five"
+
+        6 ->
+            Ok "six"
+
+        7 ->
+            Ok "seven"
+
+        8 ->
+            Ok "eight"
+
+        9 ->
+            Ok "nine"
+
+        10 ->
+            Ok "ten"
+
+        11 ->
+            Ok "eleven"
+
+        12 ->
+            Ok "twelve"
+
+        13 ->
+            Ok "thirteen"
+
+        14 ->
+            Ok "fourteen"
+
+        15 ->
+            Ok "fifteen"
+
+        16 ->
+            Ok "sixteen"
+
+        17 ->
+            Ok "seventeen"
+
+        18 ->
+            Ok "eighteen"
+
+        19 ->
+            Ok "nineteen"
+
+        _ ->
+            if i < 0 then
+                Err "Negative numbers aren't supported"
+
+            else if i == 0 then
+                Err "Zero isn't supported"
+
+            else if i == 20 then
+                Ok "twenty"
+
+            else if i < 30 then
+                intToWord (i - 20)
+                    |> Result.map (\ones -> "twenty-" ++ ones)
+
+            else if i == 30 then
+                Ok "thirty"
+
+            else if i < 40 then
+                intToWord (i - 30)
+                    |> Result.map (\ones -> "thirty-" ++ ones)
+
+            else if i == 40 then
+                Ok "forty"
+
+            else if i < 50 then
+                intToWord (i - 40)
+                    |> Result.map (\ones -> "forty-" ++ ones)
+
+            else if i == 50 then
+                Ok "fifty"
+
+            else if i < 60 then
+                intToWord (i - 50)
+                    |> Result.map (\ones -> "fifty-" ++ ones)
+
+            else if i == 60 then
+                Ok "sixty"
+
+            else if i < 70 then
+                intToWord (i - 60)
+                    |> Result.map (\ones -> "sixty-" ++ ones)
+
+            else if i == 70 then
+                Ok "seventy"
+
+            else if i < 80 then
+                intToWord (i - 70)
+                    |> Result.map (\ones -> "seventy-" ++ ones)
+
+            else if i == 80 then
+                Ok "eighty"
+
+            else if i < 90 then
+                intToWord (i - 80)
+                    |> Result.map (\ones -> "eighty-" ++ ones)
+
+            else if i == 90 then
+                Ok "ninety"
+
+            else if i < 100 then
+                intToWord (i - 90)
+                    |> Result.map (\ones -> "ninety-" ++ ones)
+
+            else
+                Err ("Numbers larger than 99 aren't currently supported and I got an " ++ String.fromInt i)

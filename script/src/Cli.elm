@@ -470,6 +470,7 @@ toRequestFunction apiSpec url operation =
                 }
         )
         |> .declaration
+        |> Elm.withDocumentation (OpenApi.Operation.description operation |> Maybe.withDefault "")
 
 
 schemaTypeRef : OpenApi -> String -> Maybe String

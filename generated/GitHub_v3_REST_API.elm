@@ -27,6 +27,7 @@ import Json.Encode
 import Result
 
 
+{-| Get Hypermedia links to resources accessible in GitHub's REST API -}
 metaRoot : (Result Http.Error Root -> msg) -> Cmd msg
 metaRoot toMsg =
     Http.get
@@ -35,6 +36,10 @@ metaRoot toMsg =
         }
 
 
+{-| Returns the GitHub App associated with the authentication credentials used. To see how many app installations are associated with this GitHub App, see the `installations_count` in the response. For more details about your app's installations, see the "[List installations for the authenticated app](https://docs.github.com/rest/reference/apps#list-installations-for-the-authenticated-app)" endpoint.
+
+You must use a [JWT](https://docs.github.com/apps/building-github-apps/authenticating-with-github-apps/#authenticating-as-a-github-app) to access this endpoint.
+-}
 appsGetAuthenticated : (Result Http.Error Integration -> msg) -> Cmd msg
 appsGetAuthenticated toMsg =
     Http.get
@@ -43,6 +48,10 @@ appsGetAuthenticated toMsg =
         }
 
 
+{-| Returns the webhook configuration for a GitHub App. For more information about configuring a webhook for your app, see "[Creating a GitHub App](/developers/apps/creating-a-github-app)."
+
+You must use a [JWT](https://docs.github.com/apps/building-github-apps/authenticating-with-github-apps/#authenticating-as-a-github-app) to access this endpoint.
+-}
 appsGetWebhookConfigForApp : (Result Http.Error WebhookConfig -> msg) -> Cmd msg
 appsGetWebhookConfigForApp toMsg =
     Http.get
@@ -51,6 +60,10 @@ appsGetWebhookConfigForApp toMsg =
         }
 
 
+{-| Returns a list of webhook deliveries for the webhook configured for a GitHub App.
+
+You must use a [JWT](https://docs.github.com/apps/building-github-apps/authenticating-with-github-apps/#authenticating-as-a-github-app) to access this endpoint.
+-}
 appsListWebhookDeliveries : (Result Http.Error todo -> msg) -> Cmd msg
 appsListWebhookDeliveries toMsg =
     Http.get
@@ -64,6 +77,10 @@ appsListWebhookDeliveries toMsg =
         }
 
 
+{-| Returns a delivery for the webhook configured for a GitHub App.
+
+You must use a [JWT](https://docs.github.com/apps/building-github-apps/authenticating-with-github-apps/#authenticating-as-a-github-app) to access this endpoint.
+-}
 appsGetWebhookDelivery : (Result Http.Error HookDelivery -> msg) -> Cmd msg
 appsGetWebhookDelivery toMsg =
     Http.get
@@ -72,6 +89,10 @@ appsGetWebhookDelivery toMsg =
         }
 
 
+{-| You must use a [JWT](https://docs.github.com/apps/building-github-apps/authenticating-with-github-apps/#authenticating-as-a-github-app) to access this endpoint.
+
+The permissions the installation has are included under the `permissions` key.
+-}
 appsListInstallations : (Result Http.Error todo -> msg) -> Cmd msg
 appsListInstallations toMsg =
     Http.get
@@ -85,6 +106,10 @@ appsListInstallations toMsg =
         }
 
 
+{-| Enables an authenticated GitHub App to find an installation's information using the installation id.
+
+You must use a [JWT](https://docs.github.com/apps/building-github-apps/authenticating-with-github-apps/#authenticating-as-a-github-app) to access this endpoint.
+-}
 appsGetInstallation : (Result Http.Error Installation -> msg) -> Cmd msg
 appsGetInstallation toMsg =
     Http.get
@@ -93,6 +118,10 @@ appsGetInstallation toMsg =
         }
 
 
+{-| **Note**: The `:app_slug` is just the URL-friendly name of your GitHub App. You can find this on the settings page for your GitHub App (e.g., `https://github.com/settings/apps/:app_slug`).
+
+If the GitHub App you specify is public, you can access this endpoint without authenticating. If the GitHub App you specify is private, you must authenticate with a [personal access token](https://docs.github.com/articles/creating-a-personal-access-token-for-the-command-line/) or an [installation access token](https://docs.github.com/apps/building-github-apps/authenticating-with-github-apps/#authenticating-as-an-installation) to access this endpoint.
+-}
 appsGetBySlug : (Result Http.Error Integration -> msg) -> Cmd msg
 appsGetBySlug toMsg =
     Http.get
@@ -123,6 +152,7 @@ codesOfConductGetConductCode toMsg =
         }
 
 
+{-| Lists all the emojis available to use on GitHub. -}
 emojisGet : (Result Http.Error todo -> msg) -> Cmd msg
 emojisGet toMsg =
     Http.get
@@ -136,6 +166,16 @@ emojisGet toMsg =
         }
 
 
+{-| Returns aggregate usage metrics for your GitHub Enterprise Server 3.5+ instance for a specified time period up to 365 days.
+
+To use this endpoint, your GitHub Enterprise Server instance must be connected to GitHub Enterprise Cloud using GitHub Connect. You must enable Server Statistics, and for the API request provide your enterprise account name or organization name connected to the GitHub Enterprise Server. For more information, see "[Enabling Server Statistics for your enterprise](/admin/configuration/configuring-github-connect/enabling-server-statistics-for-your-enterprise)" in the GitHub Enterprise Server documentation.
+
+You'll need to use a personal access token:
+  - If you connected your GitHub Enterprise Server to an enterprise account and enabled Server Statistics, you'll need a personal access token with the `read:enterprise` permission.
+  - If you connected your GitHub Enterprise Server to an organization account and enabled Server Statistics, you'll need a personal access token with the `read:org` permission.
+
+For more information on creating a personal access token, see "[Creating a personal access token](/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token)."
+-}
 enterpriseAdminGetServerStatistics :
     (Result Http.Error ServerStatistics -> msg) -> Cmd msg
 enterpriseAdminGetServerStatistics toMsg =
@@ -146,6 +186,10 @@ enterpriseAdminGetServerStatistics toMsg =
         }
 
 
+{-| Gets the total GitHub Actions cache usage for an enterprise.
+The data fetched using this API is refreshed approximately every 5 minutes, so values returned from this endpoint may take at least 5 minutes to get updated.
+You must authenticate using an access token with the `admin:enterprise` scope to use this endpoint.
+-}
 actionsGetActionsCacheUsageForEnterprise :
     (Result Http.Error ActionsCacheUsageOrgEnterprise -> msg) -> Cmd msg
 actionsGetActionsCacheUsageForEnterprise toMsg =
@@ -156,6 +200,10 @@ actionsGetActionsCacheUsageForEnterprise toMsg =
         }
 
 
+{-| Gets the GitHub Actions permissions policy for organizations and allowed actions and reusable workflows in an enterprise.
+
+You must authenticate using an access token with the `admin:enterprise` scope to use this endpoint.
+-}
 enterpriseAdminGetGithubActionsPermissionsEnterprise :
     (Result Http.Error ActionsEnterprisePermissions -> msg) -> Cmd msg
 enterpriseAdminGetGithubActionsPermissionsEnterprise toMsg =
@@ -166,6 +214,10 @@ enterpriseAdminGetGithubActionsPermissionsEnterprise toMsg =
         }
 
 
+{-| Lists the organizations that are selected to have GitHub Actions enabled in an enterprise. To use this endpoint, the enterprise permission policy for `enabled_organizations` must be configured to `selected`. For more information, see "[Set GitHub Actions permissions for an enterprise](#set-github-actions-permissions-for-an-enterprise)."
+
+You must authenticate using an access token with the `admin:enterprise` scope to use this endpoint.
+-}
 enterpriseAdminListSelectedOrganizationsEnabledGithubActionsEnterprise :
     (Result Http.Error todo -> msg) -> Cmd msg
 enterpriseAdminListSelectedOrganizationsEnabledGithubActionsEnterprise toMsg =
@@ -181,6 +233,10 @@ enterpriseAdminListSelectedOrganizationsEnabledGithubActionsEnterprise toMsg =
         }
 
 
+{-| Gets the selected actions and reusable workflows that are allowed in an enterprise. To use this endpoint, the enterprise permission policy for `allowed_actions` must be configured to `selected`. For more information, see "[Set GitHub Actions permissions for an enterprise](#set-github-actions-permissions-for-an-enterprise)."
+
+You must authenticate using an access token with the `admin:enterprise` scope to use this endpoint.
+-}
 enterpriseAdminGetAllowedActionsEnterprise :
     (Result Http.Error SelectedActions -> msg) -> Cmd msg
 enterpriseAdminGetAllowedActionsEnterprise toMsg =
@@ -191,6 +247,13 @@ enterpriseAdminGetAllowedActionsEnterprise toMsg =
         }
 
 
+{-| Gets the default workflow permissions granted to the `GITHUB_TOKEN` when running workflows in an enterprise,
+as well as whether GitHub Actions can submit approving pull request reviews. For more information, see
+"[Enforcing a policy for workflow permissions in your enterprise](https://docs.github.com/enterprise-cloud@latest/admin/policies/enforcing-policies-for-your-enterprise/enforcing-policies-for-github-actions-in-your-enterprise#enforcing-a-policy-for-workflow-permissions-in-your-enterprise)."
+
+You must authenticate using an access token with the `admin:enterprise` scope to use this endpoint.
+GitHub Apps must have the `enterprise_administration:write` permission to use this endpoint.
+-}
 actionsGetGithubActionsDefaultWorkflowPermissionsEnterprise :
     (Result Http.Error ActionsGetDefaultWorkflowPermissions -> msg) -> Cmd msg
 actionsGetGithubActionsDefaultWorkflowPermissionsEnterprise toMsg =
@@ -202,6 +265,10 @@ actionsGetGithubActionsDefaultWorkflowPermissionsEnterprise toMsg =
         }
 
 
+{-| Lists all self-hosted runner groups for an enterprise.
+
+You must authenticate using an access token with the `manage_runners:enterprise` scope to use this endpoint.
+-}
 enterpriseAdminListSelfHostedRunnerGroupsForEnterprise :
     (Result Http.Error todo -> msg) -> Cmd msg
 enterpriseAdminListSelfHostedRunnerGroupsForEnterprise toMsg =
@@ -217,6 +284,10 @@ enterpriseAdminListSelfHostedRunnerGroupsForEnterprise toMsg =
         }
 
 
+{-| Gets a specific self-hosted runner group for an enterprise.
+
+You must authenticate using an access token with the `manage_runners:enterprise` scope to use this endpoint.
+-}
 enterpriseAdminGetSelfHostedRunnerGroupForEnterprise :
     (Result Http.Error RunnerGroupsEnterprise -> msg) -> Cmd msg
 enterpriseAdminGetSelfHostedRunnerGroupForEnterprise toMsg =
@@ -227,6 +298,10 @@ enterpriseAdminGetSelfHostedRunnerGroupForEnterprise toMsg =
         }
 
 
+{-| Lists the organizations with access to a self-hosted runner group.
+
+You must authenticate using an access token with the `manage_runners:enterprise` scope to use this endpoint.
+-}
 enterpriseAdminListOrgAccessToSelfHostedRunnerGroupInEnterprise :
     (Result Http.Error todo -> msg) -> Cmd msg
 enterpriseAdminListOrgAccessToSelfHostedRunnerGroupInEnterprise toMsg =
@@ -242,6 +317,10 @@ enterpriseAdminListOrgAccessToSelfHostedRunnerGroupInEnterprise toMsg =
         }
 
 
+{-| Lists the self-hosted runners that are in a specific enterprise group.
+
+You must authenticate using an access token with the `manage_runners:enterprise` scope to use this endpoint.
+-}
 enterpriseAdminListSelfHostedRunnersInGroupForEnterprise :
     (Result Http.Error todo -> msg) -> Cmd msg
 enterpriseAdminListSelfHostedRunnersInGroupForEnterprise toMsg =
@@ -257,6 +336,10 @@ enterpriseAdminListSelfHostedRunnersInGroupForEnterprise toMsg =
         }
 
 
+{-| Lists all self-hosted runners configured for an enterprise.
+
+You must authenticate using an access token with the `manage_runners:enterprise` scope to use this endpoint.
+-}
 enterpriseAdminListSelfHostedRunnersForEnterprise :
     (Result Http.Error todo -> msg) -> Cmd msg
 enterpriseAdminListSelfHostedRunnersForEnterprise toMsg =
@@ -272,6 +355,10 @@ enterpriseAdminListSelfHostedRunnersForEnterprise toMsg =
         }
 
 
+{-| Lists binaries for the runner application that you can download and run.
+
+You must authenticate using an access token with the `manage_runners:enterprise` scope to use this endpoint.
+-}
 enterpriseAdminListRunnerApplicationsForEnterprise :
     (Result Http.Error todo -> msg) -> Cmd msg
 enterpriseAdminListRunnerApplicationsForEnterprise toMsg =
@@ -287,6 +374,10 @@ enterpriseAdminListRunnerApplicationsForEnterprise toMsg =
         }
 
 
+{-| Gets a specific self-hosted runner configured in an enterprise.
+
+You must authenticate using an access token with the `manage_runners:enterprise` scope to use this endpoint.
+-}
 enterpriseAdminGetSelfHostedRunnerForEnterprise :
     (Result Http.Error Runner -> msg) -> Cmd msg
 enterpriseAdminGetSelfHostedRunnerForEnterprise toMsg =
@@ -297,6 +388,10 @@ enterpriseAdminGetSelfHostedRunnerForEnterprise toMsg =
         }
 
 
+{-| Lists all labels for a self-hosted runner configured in an enterprise.
+
+You must authenticate using an access token with the `manage_runners:enterprise` scope to use this endpoint.
+-}
 enterpriseAdminListLabelsForSelfHostedRunnerForEnterprise :
     (Result Http.Error ActionsRunnerLabels -> msg) -> Cmd msg
 enterpriseAdminListLabelsForSelfHostedRunnerForEnterprise toMsg =
@@ -307,6 +402,11 @@ enterpriseAdminListLabelsForSelfHostedRunnerForEnterprise toMsg =
         }
 
 
+{-| Lists code scanning alerts for the default branch for all eligible repositories in an enterprise. Eligible repositories are repositories that are owned by organizations that you own or for which you are a security manager. For more information, see "[Managing security managers in your organization](https://docs.github.com/organizations/managing-peoples-access-to-your-organization-with-roles/managing-security-managers-in-your-organization)."
+
+To use this endpoint, you must be a member of the enterprise,
+and you must use an access token with the `repo` scope or `security_events` scope.
+-}
 codeScanningListAlertsForEnterprise : (Result Http.Error todo -> msg) -> Cmd msg
 codeScanningListAlertsForEnterprise toMsg =
     Http.get
@@ -321,6 +421,9 @@ codeScanningListAlertsForEnterprise toMsg =
         }
 
 
+{-| Lists secret scanning alerts for eligible repositories in an enterprise, from newest to oldest.
+To use this endpoint, you must be a member of the enterprise, and you must use an access token with the `repo` scope or `security_events` scope. Alerts are only returned for organizations in the enterprise for which you are an organization owner or a [security manager](https://docs.github.com/organizations/managing-peoples-access-to-your-organization-with-roles/managing-security-managers-in-your-organization).
+-}
 secretScanningListAlertsForEnterprise :
     (Result Http.Error todo -> msg) -> Cmd msg
 secretScanningListAlertsForEnterprise toMsg =
@@ -336,6 +439,12 @@ secretScanningListAlertsForEnterprise toMsg =
         }
 
 
+{-| Gets the GitHub Advanced Security active committers for an enterprise per repository.
+
+Each distinct user login across all repositories is counted as a single Advanced Security seat, so the `total_advanced_security_committers` is not the sum of active_users for each repository.
+
+The total number of repositories with committer information is tracked by the `total_count` field.
+-}
 billingGetGithubAdvancedSecurityBillingGhe :
     (Result Http.Error AdvancedSecurityActiveCommitters -> msg) -> Cmd msg
 billingGetGithubAdvancedSecurityBillingGhe toMsg =
@@ -346,6 +455,7 @@ billingGetGithubAdvancedSecurityBillingGhe toMsg =
         }
 
 
+{-| We delay the public events feed by five minutes, which means the most recent event returned by the public events API actually occurred at least five minutes ago. -}
 activityListPublicEvents : (Result Http.Error todo -> msg) -> Cmd msg
 activityListPublicEvents toMsg =
     Http.get
@@ -359,6 +469,18 @@ activityListPublicEvents toMsg =
         }
 
 
+{-| GitHub provides several timeline resources in [Atom](http://en.wikipedia.org/wiki/Atom_(standard)) format. The Feeds API lists all the feeds available to the authenticated user:
+
+*   **Timeline**: The GitHub global public timeline
+*   **User**: The public timeline for any user, using [URI template](https://docs.github.com/rest/overview/resources-in-the-rest-api#hypermedia)
+*   **Current user public**: The public timeline for the authenticated user
+*   **Current user**: The private timeline for the authenticated user
+*   **Current user actor**: The private timeline for activity created by the authenticated user
+*   **Current user organizations**: The private timeline for the organizations the authenticated user is a member of.
+*   **Security advisories**: A collection of public announcements that provide information about security-related vulnerabilities in software on GitHub.
+
+**Note**: Private feeds are only returned when [authenticating via Basic Auth](https://docs.github.com/rest/overview/other-authentication-methods#basic-authentication) since current feed URIs use the older, non revocable auth tokens.
+-}
 activityGetFeeds : (Result Http.Error Feed -> msg) -> Cmd msg
 activityGetFeeds toMsg =
     Http.get
@@ -367,6 +489,7 @@ activityGetFeeds toMsg =
         }
 
 
+{-| Lists the authenticated user's gists or if called anonymously, this endpoint returns all public gists: -}
 gistsList : (Result Http.Error todo -> msg) -> Cmd msg
 gistsList toMsg =
     Http.get
@@ -380,6 +503,10 @@ gistsList toMsg =
         }
 
 
+{-| List public gists sorted by most recently updated to least recently updated.
+
+Note: With [pagination](https://docs.github.com/rest/overview/resources-in-the-rest-api#pagination), you can fetch up to 3000 gists. For example, you can fetch 100 pages with 30 gists per page or 30 pages with 100 gists per page.
+-}
 gistsListPublic : (Result Http.Error todo -> msg) -> Cmd msg
 gistsListPublic toMsg =
     Http.get
@@ -393,6 +520,7 @@ gistsListPublic toMsg =
         }
 
 
+{-| List the authenticated user's starred gists: -}
 gistsListStarred : (Result Http.Error todo -> msg) -> Cmd msg
 gistsListStarred toMsg =
     Http.get
@@ -482,6 +610,7 @@ gistsGetRevision toMsg =
         }
 
 
+{-| List all templates available to pass as an option when [creating a repository](https://docs.github.com/rest/reference/repos#create-a-repository-for-the-authenticated-user). -}
 gitignoreGetAllTemplates : (Result Http.Error todo -> msg) -> Cmd msg
 gitignoreGetAllTemplates toMsg =
     Http.get
@@ -495,6 +624,9 @@ gitignoreGetAllTemplates toMsg =
         }
 
 
+{-| The API also allows fetching the source of a single template.
+Use the raw [media type](https://docs.github.com/rest/overview/media-types/) to get the raw contents.
+-}
 gitignoreGetTemplate : (Result Http.Error GitignoreTemplate -> msg) -> Cmd msg
 gitignoreGetTemplate toMsg =
     Http.get
@@ -503,6 +635,10 @@ gitignoreGetTemplate toMsg =
         }
 
 
+{-| List repositories that an app installation can access.
+
+You must use an [installation access token](https://docs.github.com/apps/building-github-apps/authenticating-with-github-apps/#authenticating-as-an-installation) to access this endpoint.
+-}
 appsListReposAccessibleToInstallation :
     (Result Http.Error todo -> msg) -> Cmd msg
 appsListReposAccessibleToInstallation toMsg =
@@ -517,6 +653,16 @@ appsListReposAccessibleToInstallation toMsg =
         }
 
 
+{-| List issues assigned to the authenticated user across all visible repositories including owned repositories, member
+repositories, and organization repositories. You can use the `filter` query parameter to fetch issues that are not
+necessarily assigned to you.
+
+
+**Note**: GitHub's REST API v3 considers every pull request an issue, but not every issue is a pull request. For this
+reason, "Issues" endpoints may return both issues and pull requests in the response. You can identify pull requests by
+the `pull_request` key. Be aware that the `id` of a pull request returned from "Issues" endpoints will be an _issue id_. To find out the pull
+request id, use the "[List pull requests](https://docs.github.com/rest/reference/pulls#list-pull-requests)" endpoint.
+-}
 issuesList : (Result Http.Error todo -> msg) -> Cmd msg
 issuesList toMsg =
     Http.get
@@ -551,6 +697,10 @@ licensesGet toMsg =
         }
 
 
+{-| Shows whether the user or organization account actively subscribes to a plan listed by the authenticated GitHub App. When someone submits a plan change that won't be processed until the end of their billing cycle, you will also see the upcoming pending change.
+
+GitHub Apps must use a [JWT](https://docs.github.com/apps/building-github-apps/authenticating-with-github-apps/#authenticating-as-a-github-app) to access this endpoint. OAuth Apps must use [basic authentication](https://docs.github.com/rest/overview/other-authentication-methods#basic-authentication) with their client ID and client secret to access this endpoint.
+-}
 appsGetSubscriptionPlanForAccount :
     (Result Http.Error MarketplacePurchase -> msg) -> Cmd msg
 appsGetSubscriptionPlanForAccount toMsg =
@@ -561,6 +711,10 @@ appsGetSubscriptionPlanForAccount toMsg =
         }
 
 
+{-| Lists all plans that are part of your GitHub Marketplace listing.
+
+GitHub Apps must use a [JWT](https://docs.github.com/apps/building-github-apps/authenticating-with-github-apps/#authenticating-as-a-github-app) to access this endpoint. OAuth Apps must use [basic authentication](https://docs.github.com/rest/overview/other-authentication-methods#basic-authentication) with their client ID and client secret to access this endpoint.
+-}
 appsListPlans : (Result Http.Error todo -> msg) -> Cmd msg
 appsListPlans toMsg =
     Http.get
@@ -574,6 +728,10 @@ appsListPlans toMsg =
         }
 
 
+{-| Returns user and organization accounts associated with the specified plan, including free plans. For per-seat pricing, you see the list of accounts that have purchased the plan, including the number of seats purchased. When someone submits a plan change that won't be processed until the end of their billing cycle, you will also see the upcoming pending change.
+
+GitHub Apps must use a [JWT](https://docs.github.com/apps/building-github-apps/authenticating-with-github-apps/#authenticating-as-a-github-app) to access this endpoint. OAuth Apps must use [basic authentication](https://docs.github.com/rest/overview/other-authentication-methods#basic-authentication) with their client ID and client secret to access this endpoint.
+-}
 appsListAccountsForPlan : (Result Http.Error todo -> msg) -> Cmd msg
 appsListAccountsForPlan toMsg =
     Http.get
@@ -588,6 +746,10 @@ appsListAccountsForPlan toMsg =
         }
 
 
+{-| Shows whether the user or organization account actively subscribes to a plan listed by the authenticated GitHub App. When someone submits a plan change that won't be processed until the end of their billing cycle, you will also see the upcoming pending change.
+
+GitHub Apps must use a [JWT](https://docs.github.com/apps/building-github-apps/authenticating-with-github-apps/#authenticating-as-a-github-app) to access this endpoint. OAuth Apps must use [basic authentication](https://docs.github.com/rest/overview/other-authentication-methods#basic-authentication) with their client ID and client secret to access this endpoint.
+-}
 appsGetSubscriptionPlanForAccountStubbed :
     (Result Http.Error MarketplacePurchase -> msg) -> Cmd msg
 appsGetSubscriptionPlanForAccountStubbed toMsg =
@@ -598,6 +760,10 @@ appsGetSubscriptionPlanForAccountStubbed toMsg =
         }
 
 
+{-| Lists all plans that are part of your GitHub Marketplace listing.
+
+GitHub Apps must use a [JWT](https://docs.github.com/apps/building-github-apps/authenticating-with-github-apps/#authenticating-as-a-github-app) to access this endpoint. OAuth Apps must use [basic authentication](https://docs.github.com/rest/overview/other-authentication-methods#basic-authentication) with their client ID and client secret to access this endpoint.
+-}
 appsListPlansStubbed : (Result Http.Error todo -> msg) -> Cmd msg
 appsListPlansStubbed toMsg =
     Http.get
@@ -611,6 +777,10 @@ appsListPlansStubbed toMsg =
         }
 
 
+{-| Returns repository and organization accounts associated with the specified plan, including free plans. For per-seat pricing, you see the list of accounts that have purchased the plan, including the number of seats purchased. When someone submits a plan change that won't be processed until the end of their billing cycle, you will also see the upcoming pending change.
+
+GitHub Apps must use a [JWT](https://docs.github.com/apps/building-github-apps/authenticating-with-github-apps/#authenticating-as-a-github-app) to access this endpoint. OAuth Apps must use [basic authentication](https://docs.github.com/rest/overview/other-authentication-methods#basic-authentication) with their client ID and client secret to access this endpoint.
+-}
 appsListAccountsForPlanStubbed : (Result Http.Error todo -> msg) -> Cmd msg
 appsListAccountsForPlanStubbed toMsg =
     Http.get
@@ -625,6 +795,10 @@ appsListAccountsForPlanStubbed toMsg =
         }
 
 
+{-| Returns meta information about GitHub, including a list of GitHub's IP addresses. For more information, see "[About GitHub's IP addresses](https://docs.github.com/articles/about-github-s-ip-addresses/)."
+
+**Note:** The IP addresses shown in the documentation's response are only example values. You must always query the API directly to get the latest list of IP addresses.
+-}
 metaGet : (Result Http.Error ApiOverview -> msg) -> Cmd msg
 metaGet toMsg =
     Http.get
@@ -647,6 +821,7 @@ activityListPublicEventsForRepoNetwork toMsg =
         }
 
 
+{-| List all notifications for the current user, sorted by most recently updated. -}
 activityListNotificationsForAuthenticatedUser :
     (Result Http.Error todo -> msg) -> Cmd msg
 activityListNotificationsForAuthenticatedUser toMsg =
@@ -661,6 +836,7 @@ activityListNotificationsForAuthenticatedUser toMsg =
         }
 
 
+{-| Gets information about a notification thread. -}
 activityGetThread : (Result Http.Error Thread -> msg) -> Cmd msg
 activityGetThread toMsg =
     Http.get
@@ -669,6 +845,10 @@ activityGetThread toMsg =
         }
 
 
+{-| This checks to see if the current user is subscribed to a thread. You can also [get a repository subscription](https://docs.github.com/rest/reference/activity#get-a-repository-subscription).
+
+Note that subscriptions are only generated if a user is participating in a conversation--for example, they've replied to the thread, were **@mentioned**, or manually subscribe to a thread.
+-}
 activityGetThreadSubscriptionForAuthenticatedUser :
     (Result Http.Error ThreadSubscription -> msg) -> Cmd msg
 activityGetThreadSubscriptionForAuthenticatedUser toMsg =
@@ -679,6 +859,7 @@ activityGetThreadSubscriptionForAuthenticatedUser toMsg =
         }
 
 
+{-| Get the octocat as ASCII art -}
 metaGetOctocat : (Result Http.Error todo -> msg) -> Cmd msg
 metaGetOctocat toMsg =
     Http.get
@@ -692,6 +873,10 @@ metaGetOctocat toMsg =
         }
 
 
+{-| Lists all organizations, in the order that they were created on GitHub.
+
+**Note:** Pagination is powered exclusively by the `since` parameter. Use the [Link header](https://docs.github.com/rest/overview/resources-in-the-rest-api#link-header) to get the URL for the next page of organizations.
+-}
 orgsList : (Result Http.Error todo -> msg) -> Cmd msg
 orgsList toMsg =
     Http.get
@@ -705,6 +890,14 @@ orgsList toMsg =
         }
 
 
+{-| List the custom repository roles available in this organization. In order to see custom
+repository roles in an organization, the authenticated user must be an organization owner.
+
+To use this endpoint the authenticated user must be an administrator for the organization or of an repository of the organizaiton and must use an access token with `admin:org repo` scope.
+GitHub Apps must have the `organization_custom_roles:read` organization permission to use this endpoint.
+
+For more information on custom repository roles, see "[Managing custom repository roles for an organization](https://docs.github.com/organizations/managing-peoples-access-to-your-organization-with-roles/managing-custom-repository-roles-for-an-organization)".
+-}
 orgsListCustomRoles : (Result Http.Error todo -> msg) -> Cmd msg
 orgsListCustomRoles toMsg =
     Http.get
@@ -719,6 +912,10 @@ orgsListCustomRoles toMsg =
         }
 
 
+{-| To see many of the organization response values, you need to be an authenticated organization owner with the `admin:org` scope. When the value of `two_factor_requirement_enabled` is `true`, the organization requires all members, billing managers, and outside collaborators to enable [two-factor authentication](https://docs.github.com/articles/securing-your-account-with-two-factor-authentication-2fa/).
+
+GitHub Apps with the `Organization plan` permission can use this endpoint to retrieve information about an organization's GitHub plan. See "[Authenticating with GitHub Apps](https://docs.github.com/apps/building-github-apps/authenticating-with-github-apps/)" for details. For an example response, see 'Response with GitHub plan information' below."
+-}
 orgsGet : (Result Http.Error OrganizationFull -> msg) -> Cmd msg
 orgsGet toMsg =
     Http.get
@@ -727,6 +924,10 @@ orgsGet toMsg =
         }
 
 
+{-| Gets the total GitHub Actions cache usage for an organization.
+The data fetched using this API is refreshed approximately every 5 minutes, so values returned from this endpoint may take at least 5 minutes to get updated.
+You must authenticate using an access token with the `read:org` scope to use this endpoint. GitHub Apps must have the `organization_admistration:read` permission to use this endpoint.
+-}
 actionsGetActionsCacheUsageForOrg :
     (Result Http.Error ActionsCacheUsageOrgEnterprise -> msg) -> Cmd msg
 actionsGetActionsCacheUsageForOrg toMsg =
@@ -736,6 +937,10 @@ actionsGetActionsCacheUsageForOrg toMsg =
         }
 
 
+{-| Lists repositories and their GitHub Actions cache usage for an organization.
+The data fetched using this API is refreshed approximately every 5 minutes, so values returned from this endpoint may take at least 5 minutes to get updated.
+You must authenticate using an access token with the `read:org` scope to use this endpoint. GitHub Apps must have the `organization_admistration:read` permission to use this endpoint.
+-}
 actionsGetActionsCacheUsageByRepoForOrg :
     (Result Http.Error todo -> msg) -> Cmd msg
 actionsGetActionsCacheUsageByRepoForOrg toMsg =
@@ -751,6 +956,10 @@ actionsGetActionsCacheUsageByRepoForOrg toMsg =
         }
 
 
+{-| Gets the GitHub Actions permissions policy for repositories and allowed actions and reusable workflows in an organization.
+
+You must authenticate using an access token with the `admin:org` scope to use this endpoint. GitHub Apps must have the `administration` organization permission to use this API.
+-}
 actionsGetGithubActionsPermissionsOrganization :
     (Result Http.Error ActionsOrganizationPermissions -> msg) -> Cmd msg
 actionsGetGithubActionsPermissionsOrganization toMsg =
@@ -760,6 +969,10 @@ actionsGetGithubActionsPermissionsOrganization toMsg =
         }
 
 
+{-| Lists the selected repositories that are enabled for GitHub Actions in an organization. To use this endpoint, the organization permission policy for `enabled_repositories` must be configured to `selected`. For more information, see "[Set GitHub Actions permissions for an organization](#set-github-actions-permissions-for-an-organization)."
+
+You must authenticate using an access token with the `admin:org` scope to use this endpoint. GitHub Apps must have the `administration` organization permission to use this API.
+-}
 actionsListSelectedRepositoriesEnabledGithubActionsOrganization :
     (Result Http.Error todo -> msg) -> Cmd msg
 actionsListSelectedRepositoriesEnabledGithubActionsOrganization toMsg =
@@ -775,6 +988,10 @@ actionsListSelectedRepositoriesEnabledGithubActionsOrganization toMsg =
         }
 
 
+{-| Gets the selected actions and reusable workflows that are allowed in an organization. To use this endpoint, the organization permission policy for `allowed_actions` must be configured to `selected`. For more information, see "[Set GitHub Actions permissions for an organization](#set-github-actions-permissions-for-an-organization).""
+
+You must authenticate using an access token with the `admin:org` scope to use this endpoint. GitHub Apps must have the `administration` organization permission to use this API.
+-}
 actionsGetAllowedActionsOrganization :
     (Result Http.Error SelectedActions -> msg) -> Cmd msg
 actionsGetAllowedActionsOrganization toMsg =
@@ -785,6 +1002,12 @@ actionsGetAllowedActionsOrganization toMsg =
         }
 
 
+{-| Gets the default workflow permissions granted to the `GITHUB_TOKEN` when running workflows in an organization,
+as well as whether GitHub Actions can submit approving pull request reviews. For more information, see
+"[Setting the permissions of the GITHUB_TOKEN for your organization](https://docs.github.com/organizations/managing-organization-settings/disabling-or-limiting-github-actions-for-your-organization#setting-the-permissions-of-the-github_token-for-your-organization)."
+
+You must authenticate using an access token with the `admin:org` scope to use this endpoint. GitHub Apps must have the `administration` organization permission to use this API.
+-}
 actionsGetGithubActionsDefaultWorkflowPermissionsOrganization :
     (Result Http.Error ActionsGetDefaultWorkflowPermissions -> msg) -> Cmd msg
 actionsGetGithubActionsDefaultWorkflowPermissionsOrganization toMsg =
@@ -795,6 +1018,12 @@ actionsGetGithubActionsDefaultWorkflowPermissionsOrganization toMsg =
         }
 
 
+{-| The self-hosted runner groups REST API is available with GitHub Enterprise Cloud. For more information, see "[GitHub's products](https://docs.github.com/github/getting-started-with-github/githubs-products)."
+
+Lists all self-hosted runner groups configured in an organization and inherited from an enterprise.
+
+You must authenticate using an access token with the `admin:org` scope to use this endpoint.
+-}
 actionsListSelfHostedRunnerGroupsForOrg :
     (Result Http.Error todo -> msg) -> Cmd msg
 actionsListSelfHostedRunnerGroupsForOrg toMsg =
@@ -809,6 +1038,12 @@ actionsListSelfHostedRunnerGroupsForOrg toMsg =
         }
 
 
+{-| The self-hosted runner groups REST API is available with GitHub Enterprise Cloud. For more information, see "[GitHub's products](https://docs.github.com/github/getting-started-with-github/githubs-products)."
+
+Gets a specific self-hosted runner group for an organization.
+
+You must authenticate using an access token with the `admin:org` scope to use this endpoint.
+-}
 actionsGetSelfHostedRunnerGroupForOrg :
     (Result Http.Error RunnerGroupsOrg -> msg) -> Cmd msg
 actionsGetSelfHostedRunnerGroupForOrg toMsg =
@@ -819,6 +1054,12 @@ actionsGetSelfHostedRunnerGroupForOrg toMsg =
         }
 
 
+{-| The self-hosted runner groups REST API is available with GitHub Enterprise Cloud and GitHub Enterprise Server. For more information, see "[GitHub's products](https://docs.github.com/github/getting-started-with-github/githubs-products)."
+
+Lists the repositories with access to a self-hosted runner group configured in an organization.
+
+You must authenticate using an access token with the `admin:org` scope to use this endpoint.
+-}
 actionsListRepoAccessToSelfHostedRunnerGroupInOrg :
     (Result Http.Error todo -> msg) -> Cmd msg
 actionsListRepoAccessToSelfHostedRunnerGroupInOrg toMsg =
@@ -834,6 +1075,12 @@ actionsListRepoAccessToSelfHostedRunnerGroupInOrg toMsg =
         }
 
 
+{-| The self-hosted runner groups REST API is available with GitHub Enterprise Cloud. For more information, see "[GitHub's products](https://docs.github.com/github/getting-started-with-github/githubs-products)."
+
+Lists self-hosted runners that are in a specific organization group.
+
+You must authenticate using an access token with the `admin:org` scope to use this endpoint.
+-}
 actionsListSelfHostedRunnersInGroupForOrg :
     (Result Http.Error todo -> msg) -> Cmd msg
 actionsListSelfHostedRunnersInGroupForOrg toMsg =
@@ -849,6 +1096,10 @@ actionsListSelfHostedRunnersInGroupForOrg toMsg =
         }
 
 
+{-| Lists all self-hosted runners configured in an organization.
+
+You must authenticate using an access token with the `admin:org` scope to use this endpoint.
+-}
 actionsListSelfHostedRunnersForOrg : (Result Http.Error todo -> msg) -> Cmd msg
 actionsListSelfHostedRunnersForOrg toMsg =
     Http.get
@@ -862,6 +1113,10 @@ actionsListSelfHostedRunnersForOrg toMsg =
         }
 
 
+{-| Lists binaries for the runner application that you can download and run.
+
+You must authenticate using an access token with the `admin:org` scope to use this endpoint.
+-}
 actionsListRunnerApplicationsForOrg : (Result Http.Error todo -> msg) -> Cmd msg
 actionsListRunnerApplicationsForOrg toMsg =
     Http.get
@@ -875,6 +1130,10 @@ actionsListRunnerApplicationsForOrg toMsg =
         }
 
 
+{-| Gets a specific self-hosted runner configured in an organization.
+
+You must authenticate using an access token with the `admin:org` scope to use this endpoint.
+-}
 actionsGetSelfHostedRunnerForOrg : (Result Http.Error Runner -> msg) -> Cmd msg
 actionsGetSelfHostedRunnerForOrg toMsg =
     Http.get
@@ -883,6 +1142,10 @@ actionsGetSelfHostedRunnerForOrg toMsg =
         }
 
 
+{-| Lists all labels for a self-hosted runner configured in an organization.
+
+You must authenticate using an access token with the `admin:org` scope to use this endpoint.
+-}
 actionsListLabelsForSelfHostedRunnerForOrg :
     (Result Http.Error ActionsRunnerLabels -> msg) -> Cmd msg
 actionsListLabelsForSelfHostedRunnerForOrg toMsg =
@@ -893,6 +1156,7 @@ actionsListLabelsForSelfHostedRunnerForOrg toMsg =
         }
 
 
+{-| Lists all secrets available in an organization without revealing their encrypted values. You must authenticate using an access token with the `admin:org` scope to use this endpoint. GitHub Apps must have the `secrets` organization permission to use this endpoint. -}
 actionsListOrgSecrets : (Result Http.Error todo -> msg) -> Cmd msg
 actionsListOrgSecrets toMsg =
     Http.get
@@ -906,6 +1170,7 @@ actionsListOrgSecrets toMsg =
         }
 
 
+{-| Gets your public key, which you need to encrypt secrets. You need to encrypt a secret before you can create or update secrets. You must authenticate using an access token with the `admin:org` scope to use this endpoint. GitHub Apps must have the `secrets` organization permission to use this endpoint. -}
 actionsGetOrgPublicKey : (Result Http.Error ActionsPublicKey -> msg) -> Cmd msg
 actionsGetOrgPublicKey toMsg =
     Http.get
@@ -914,6 +1179,7 @@ actionsGetOrgPublicKey toMsg =
         }
 
 
+{-| Gets a single organization secret without revealing its encrypted value. You must authenticate using an access token with the `admin:org` scope to use this endpoint. GitHub Apps must have the `secrets` organization permission to use this endpoint. -}
 actionsGetOrgSecret :
     (Result Http.Error OrganizationActionsSecret -> msg) -> Cmd msg
 actionsGetOrgSecret toMsg =
@@ -924,6 +1190,7 @@ actionsGetOrgSecret toMsg =
         }
 
 
+{-| Lists all repositories that have been selected when the `visibility` for repository access to a secret is set to `selected`. You must authenticate using an access token with the `admin:org` scope to use this endpoint. GitHub Apps must have the `secrets` organization permission to use this endpoint. -}
 actionsListSelectedReposForOrgSecret :
     (Result Http.Error todo -> msg) -> Cmd msg
 actionsListSelectedReposForOrgSecret toMsg =
@@ -939,6 +1206,7 @@ actionsListSelectedReposForOrgSecret toMsg =
         }
 
 
+{-| List the users blocked by an organization. -}
 orgsListBlockedUsers : (Result Http.Error todo -> msg) -> Cmd msg
 orgsListBlockedUsers toMsg =
     Http.get
@@ -965,6 +1233,14 @@ orgsCheckBlockedUser toMsg =
         }
 
 
+{-| Lists code scanning alerts for the default branch for all eligible repositories in an organization. Eligible repositories are repositories that are owned by organizations that you own or for which you are a security manager. For more information, see "[Managing security managers in your organization](https://docs.github.com/organizations/managing-peoples-access-to-your-organization-with-roles/managing-security-managers-in-your-organization)."
+
+To use this endpoint, you must be an owner or security manager for the organization, and you must use an access token with the `repo` scope or `security_events` scope.
+
+For public repositories, you may instead use the `public_repo` scope.
+
+GitHub Apps must have the `security_events` read permission to use this endpoint.
+-}
 codeScanningListAlertsForOrg : (Result Http.Error todo -> msg) -> Cmd msg
 codeScanningListAlertsForOrg toMsg =
     Http.get
@@ -978,6 +1254,10 @@ codeScanningListAlertsForOrg toMsg =
         }
 
 
+{-| Lists the codespaces associated to a specified organization.
+
+You must authenticate using an access token with the `admin:org` scope to use this endpoint.
+-}
 codespacesListInOrganization : (Result Http.Error todo -> msg) -> Cmd msg
 codespacesListInOrganization toMsg =
     Http.get
@@ -991,6 +1271,9 @@ codespacesListInOrganization toMsg =
         }
 
 
+{-| Lists all Codespaces secrets available at the organization-level without revealing their encrypted values.
+You must authenticate using an access token with the `admin:org` scope to use this endpoint.
+-}
 codespacesListOrgSecrets : (Result Http.Error todo -> msg) -> Cmd msg
 codespacesListOrgSecrets toMsg =
     Http.get
@@ -1004,6 +1287,7 @@ codespacesListOrgSecrets toMsg =
         }
 
 
+{-| Gets a public key for an organization, which is required in order to encrypt secrets. You need to encrypt the value of a secret before you can create or update secrets. You must authenticate using an access token with the `admin:org` scope to use this endpoint. -}
 codespacesGetOrgPublicKey :
     (Result Http.Error CodespacesPublicKey -> msg) -> Cmd msg
 codespacesGetOrgPublicKey toMsg =
@@ -1014,6 +1298,9 @@ codespacesGetOrgPublicKey toMsg =
         }
 
 
+{-| Gets an organization secret without revealing its encrypted value.
+You must authenticate using an access token with the `admin:org` scope to use this endpoint.
+-}
 codespacesGetOrgSecret :
     (Result Http.Error CodespacesOrgSecret -> msg) -> Cmd msg
 codespacesGetOrgSecret toMsg =
@@ -1024,6 +1311,7 @@ codespacesGetOrgSecret toMsg =
         }
 
 
+{-| Lists all repositories that have been selected when the `visibility` for repository access to a secret is set to `selected`. You must authenticate using an access token with the `admin:org` scope to use this endpoint. -}
 codespacesListSelectedReposForOrgSecret :
     (Result Http.Error todo -> msg) -> Cmd msg
 codespacesListSelectedReposForOrgSecret toMsg =
@@ -1039,6 +1327,7 @@ codespacesListSelectedReposForOrgSecret toMsg =
         }
 
 
+{-| Lists all secrets available in an organization without revealing their encrypted values. You must authenticate using an access token with the `admin:org` scope to use this endpoint. GitHub Apps must have the `dependabot_secrets` organization permission to use this endpoint. -}
 dependabotListOrgSecrets : (Result Http.Error todo -> msg) -> Cmd msg
 dependabotListOrgSecrets toMsg =
     Http.get
@@ -1052,6 +1341,7 @@ dependabotListOrgSecrets toMsg =
         }
 
 
+{-| Gets your public key, which you need to encrypt secrets. You need to encrypt a secret before you can create or update secrets. You must authenticate using an access token with the `admin:org` scope to use this endpoint. GitHub Apps must have the `dependabot_secrets` organization permission to use this endpoint. -}
 dependabotGetOrgPublicKey :
     (Result Http.Error DependabotPublicKey -> msg) -> Cmd msg
 dependabotGetOrgPublicKey toMsg =
@@ -1062,6 +1352,7 @@ dependabotGetOrgPublicKey toMsg =
         }
 
 
+{-| Gets a single organization secret without revealing its encrypted value. You must authenticate using an access token with the `admin:org` scope to use this endpoint. GitHub Apps must have the `dependabot_secrets` organization permission to use this endpoint. -}
 dependabotGetOrgSecret :
     (Result Http.Error OrganizationDependabotSecret -> msg) -> Cmd msg
 dependabotGetOrgSecret toMsg =
@@ -1072,6 +1363,7 @@ dependabotGetOrgSecret toMsg =
         }
 
 
+{-| Lists all repositories that have been selected when the `visibility` for repository access to a secret is set to `selected`. You must authenticate using an access token with the `admin:org` scope to use this endpoint. GitHub Apps must have the `dependabot_secrets` organization permission to use this endpoint. -}
 dependabotListSelectedReposForOrgSecret :
     (Result Http.Error todo -> msg) -> Cmd msg
 dependabotListSelectedReposForOrgSecret toMsg =
@@ -1100,6 +1392,7 @@ activityListPublicOrgEvents toMsg =
         }
 
 
+{-| The return hash contains `failed_at` and `failed_reason` fields which represent the time at which the invitation failed and the reason for the failure. -}
 orgsListFailedInvitations : (Result Http.Error todo -> msg) -> Cmd msg
 orgsListFailedInvitations toMsg =
     Http.get
@@ -1113,6 +1406,13 @@ orgsListFailedInvitations toMsg =
         }
 
 
+{-| **Note**: This operation is in beta and subject to change.
+
+Lists the fine-grained permissions available for an organization.
+
+To use this endpoint the authenticated user must be an administrator for the organization or of an repository of the organizaiton and must use an access token with `admin:org repo` scope.
+GitHub Apps must have the `organization_custom_roles:read` organization permission to use this endpoint.
+-}
 orgsListFineGrainedPermissions : (Result Http.Error todo -> msg) -> Cmd msg
 orgsListFineGrainedPermissions toMsg =
     Http.get
@@ -1139,6 +1439,7 @@ orgsListWebhooks toMsg =
         }
 
 
+{-| Returns a webhook configured in an organization. To get only the webhook `config` properties, see "[Get a webhook configuration for an organization](/rest/reference/orgs#get-a-webhook-configuration-for-an-organization)." -}
 orgsGetWebhook : (Result Http.Error OrgHook -> msg) -> Cmd msg
 orgsGetWebhook toMsg =
     Http.get
@@ -1147,6 +1448,10 @@ orgsGetWebhook toMsg =
         }
 
 
+{-| Returns the webhook configuration for an organization. To get more information about the webhook, including the `active` state and `events`, use "[Get an organization webhook ](/rest/reference/orgs#get-an-organization-webhook)."
+
+Access tokens must have the `admin:org_hook` scope, and GitHub Apps must have the `organization_hooks:read` permission.
+-}
 orgsGetWebhookConfigForOrg : (Result Http.Error WebhookConfig -> msg) -> Cmd msg
 orgsGetWebhookConfigForOrg toMsg =
     Http.get
@@ -1155,6 +1460,7 @@ orgsGetWebhookConfigForOrg toMsg =
         }
 
 
+{-| Returns a list of webhook deliveries for a webhook configured in an organization. -}
 orgsListWebhookDeliveries : (Result Http.Error todo -> msg) -> Cmd msg
 orgsListWebhookDeliveries toMsg =
     Http.get
@@ -1168,6 +1474,7 @@ orgsListWebhookDeliveries toMsg =
         }
 
 
+{-| Returns a delivery for a webhook configured in an organization. -}
 orgsGetWebhookDelivery : (Result Http.Error HookDelivery -> msg) -> Cmd msg
 orgsGetWebhookDelivery toMsg =
     Http.get
@@ -1177,6 +1484,10 @@ orgsGetWebhookDelivery toMsg =
         }
 
 
+{-| Enables an authenticated GitHub App to find the organization's installation information.
+
+You must use a [JWT](https://docs.github.com/apps/building-github-apps/authenticating-with-github-apps/#authenticating-as-a-github-app) to access this endpoint.
+-}
 appsGetOrgInstallation : (Result Http.Error Installation -> msg) -> Cmd msg
 appsGetOrgInstallation toMsg =
     Http.get
@@ -1185,6 +1496,7 @@ appsGetOrgInstallation toMsg =
         }
 
 
+{-| Lists all GitHub Apps in an organization. The installation count includes all GitHub Apps installed on repositories in the organization. You must be an organization owner with `admin:read` scope to use this endpoint. -}
 orgsListAppInstallations : (Result Http.Error todo -> msg) -> Cmd msg
 orgsListAppInstallations toMsg =
     Http.get
@@ -1198,6 +1510,7 @@ orgsListAppInstallations toMsg =
         }
 
 
+{-| Shows which type of GitHub user can interact with this organization and when the restriction expires. If there is no restrictions, you will see an empty response. -}
 interactionsGetRestrictionsForOrg : (Result Http.Error todo -> msg) -> Cmd msg
 interactionsGetRestrictionsForOrg toMsg =
     Http.get
@@ -1211,6 +1524,7 @@ interactionsGetRestrictionsForOrg toMsg =
         }
 
 
+{-| The return hash contains a `role` field which refers to the Organization Invitation role and will be one of the following values: `direct_member`, `admin`, `billing_manager`, `hiring_manager`, or `reinstate`. If the invitee is not a GitHub member, the `login` field in the return hash will be `null`. -}
 orgsListPendingInvitations : (Result Http.Error todo -> msg) -> Cmd msg
 orgsListPendingInvitations toMsg =
     Http.get
@@ -1224,6 +1538,7 @@ orgsListPendingInvitations toMsg =
         }
 
 
+{-| List all teams associated with an invitation. In order to see invitations in an organization, the authenticated user must be an organization owner. -}
 orgsListInvitationTeams : (Result Http.Error todo -> msg) -> Cmd msg
 orgsListInvitationTeams toMsg =
     Http.get
@@ -1238,6 +1553,13 @@ orgsListInvitationTeams toMsg =
         }
 
 
+{-| List issues in an organization assigned to the authenticated user.
+
+**Note**: GitHub's REST API v3 considers every pull request an issue, but not every issue is a pull request. For this
+reason, "Issues" endpoints may return both issues and pull requests in the response. You can identify pull requests by
+the `pull_request` key. Be aware that the `id` of a pull request returned from "Issues" endpoints will be an _issue id_. To find out the pull
+request id, use the "[List pull requests](https://docs.github.com/rest/reference/pulls#list-pull-requests)" endpoint.
+-}
 issuesListForOrg : (Result Http.Error todo -> msg) -> Cmd msg
 issuesListForOrg toMsg =
     Http.get
@@ -1251,6 +1573,7 @@ issuesListForOrg toMsg =
         }
 
 
+{-| List all users who are members of an organization. If the authenticated user is also a member of this organization then both concealed and public members will be returned. -}
 orgsListMembers : (Result Http.Error todo -> msg) -> Cmd msg
 orgsListMembers toMsg =
     Http.get
@@ -1264,6 +1587,7 @@ orgsListMembers toMsg =
         }
 
 
+{-| Check if a user is, publicly or privately, a member of the organization. -}
 orgsCheckMembershipForUser : (Result Http.Error todo -> msg) -> Cmd msg
 orgsCheckMembershipForUser toMsg =
     Http.get
@@ -1277,6 +1601,10 @@ orgsCheckMembershipForUser toMsg =
         }
 
 
+{-| Lists the codespaces that a member of an organization has for repositories in that organization.
+
+You must authenticate using an access token with the `admin:org` scope to use this endpoint.
+-}
 codespacesGetCodespacesForUserInOrg : (Result Http.Error todo -> msg) -> Cmd msg
 codespacesGetCodespacesForUserInOrg toMsg =
     Http.get
@@ -1291,6 +1619,7 @@ codespacesGetCodespacesForUserInOrg toMsg =
         }
 
 
+{-| In order to get a user's membership with an organization, the authenticated user must be an organization member. The `state` parameter in the response can be used to identify the user's membership status. -}
 orgsGetMembershipForUser : (Result Http.Error OrgMembership -> msg) -> Cmd msg
 orgsGetMembershipForUser toMsg =
     Http.get
@@ -1299,6 +1628,7 @@ orgsGetMembershipForUser toMsg =
         }
 
 
+{-| Lists the most recent migrations. -}
 migrationsListForOrg : (Result Http.Error todo -> msg) -> Cmd msg
 migrationsListForOrg toMsg =
     Http.get
@@ -1312,6 +1642,15 @@ migrationsListForOrg toMsg =
         }
 
 
+{-| Fetches the status of a migration.
+
+The `state` of a migration can be one of the following values:
+
+*   `pending`, which means the migration hasn't started yet.
+*   `exporting`, which means the migration is in progress.
+*   `exported`, which means the migration finished successfully.
+*   `failed`, which means the migration failed.
+-}
 migrationsGetStatusForOrg : (Result Http.Error Migration -> msg) -> Cmd msg
 migrationsGetStatusForOrg toMsg =
     Http.get
@@ -1320,6 +1659,7 @@ migrationsGetStatusForOrg toMsg =
         }
 
 
+{-| Fetches the URL to a migration archive. -}
 migrationsDownloadArchiveForOrg : (Result Http.Error todo -> msg) -> Cmd msg
 migrationsDownloadArchiveForOrg toMsg =
     Http.get
@@ -1334,6 +1674,7 @@ migrationsDownloadArchiveForOrg toMsg =
         }
 
 
+{-| List all the repositories for this organization migration. -}
 migrationsListReposForOrg : (Result Http.Error todo -> msg) -> Cmd msg
 migrationsListReposForOrg toMsg =
     Http.get
@@ -1348,6 +1689,7 @@ migrationsListReposForOrg toMsg =
         }
 
 
+{-| List all users who are outside collaborators of an organization. -}
 orgsListOutsideCollaborators : (Result Http.Error todo -> msg) -> Cmd msg
 orgsListOutsideCollaborators toMsg =
     Http.get
@@ -1361,6 +1703,11 @@ orgsListOutsideCollaborators toMsg =
         }
 
 
+{-| Lists all packages in an organization readable by the user.
+
+To use this endpoint, you must authenticate using an access token with the `packages:read` scope.
+If `package_type` is not `container`, your token must also include the `repo` scope.
+-}
 packagesListPackagesForOrganization : (Result Http.Error todo -> msg) -> Cmd msg
 packagesListPackagesForOrganization toMsg =
     Http.get
@@ -1374,6 +1721,11 @@ packagesListPackagesForOrganization toMsg =
         }
 
 
+{-| Gets a specific package in an organization.
+
+To use this endpoint, you must authenticate using an access token with the `packages:read` scope.
+If `package_type` is not `container`, your token must also include the `repo` scope.
+-}
 packagesGetPackageForOrganization :
     (Result Http.Error Package -> msg) -> Cmd msg
 packagesGetPackageForOrganization toMsg =
@@ -1384,6 +1736,11 @@ packagesGetPackageForOrganization toMsg =
         }
 
 
+{-| Lists package versions for a package owned by an organization.
+
+To use this endpoint, you must authenticate using an access token with the `packages:read` scope.
+If `package_type` is not `container`, your token must also include the `repo` scope.
+-}
 packagesGetAllPackageVersionsForPackageOwnedByOrg :
     (Result Http.Error todo -> msg) -> Cmd msg
 packagesGetAllPackageVersionsForPackageOwnedByOrg toMsg =
@@ -1399,6 +1756,11 @@ packagesGetAllPackageVersionsForPackageOwnedByOrg toMsg =
         }
 
 
+{-| Gets a specific package version in an organization.
+
+You must authenticate using an access token with the `packages:read` scope.
+If `package_type` is not `container`, your token must also include the `repo` scope.
+-}
 packagesGetPackageVersionForOrganization :
     (Result Http.Error PackageVersion -> msg) -> Cmd msg
 packagesGetPackageVersionForOrganization toMsg =
@@ -1409,6 +1771,7 @@ packagesGetPackageVersionForOrganization toMsg =
         }
 
 
+{-| Lists the projects in an organization. Returns a `404 Not Found` status if projects are disabled in the organization. If you do not have sufficient privileges to perform this action, a `401 Unauthorized` or `410 Gone` status is returned. -}
 projectsListForOrg : (Result Http.Error todo -> msg) -> Cmd msg
 projectsListForOrg toMsg =
     Http.get
@@ -1422,6 +1785,7 @@ projectsListForOrg toMsg =
         }
 
 
+{-| Members of an organization can choose to have their membership publicized or not. -}
 orgsListPublicMembers : (Result Http.Error todo -> msg) -> Cmd msg
 orgsListPublicMembers toMsg =
     Http.get
@@ -1448,6 +1812,7 @@ orgsCheckPublicMembershipForUser toMsg =
         }
 
 
+{-| Lists repositories for the specified organization. -}
 reposListForOrg : (Result Http.Error todo -> msg) -> Cmd msg
 reposListForOrg toMsg =
     Http.get
@@ -1461,6 +1826,12 @@ reposListForOrg toMsg =
         }
 
 
+{-| Lists secret scanning alerts for eligible repositories in an organization, from newest to oldest.
+To use this endpoint, you must be an administrator or security manager for the organization, and you must use an access token with the `repo` scope or `security_events` scope.
+For public repositories, you may instead use the `public_repo` scope.
+
+GitHub Apps must have the `secret_scanning_alerts` read permission to use this endpoint.
+-}
 secretScanningListAlertsForOrg : (Result Http.Error todo -> msg) -> Cmd msg
 secretScanningListAlertsForOrg toMsg =
     Http.get
@@ -1474,6 +1845,12 @@ secretScanningListAlertsForOrg toMsg =
         }
 
 
+{-| Lists teams that are security managers for an organization. For more information, see "[Managing security managers in your organization](https://docs.github.com/organizations/managing-peoples-access-to-your-organization-with-roles/managing-security-managers-in-your-organization)."
+
+To use this endpoint, you must be an administrator or security manager for the organization, and you must use an access token with the `read:org` scope.
+
+GitHub Apps must have the `administration` organization read permission to use this endpoint.
+-}
 orgsListSecurityManagerTeams : (Result Http.Error todo -> msg) -> Cmd msg
 orgsListSecurityManagerTeams toMsg =
     Http.get
@@ -1487,6 +1864,12 @@ orgsListSecurityManagerTeams toMsg =
         }
 
 
+{-| Gets the summary of the free and paid GitHub Actions minutes used.
+
+Paid minutes only apply to workflows in private repositories that use GitHub-hosted runners. Minutes used is listed for each GitHub-hosted runner operating system. Any job re-runs are also included in the usage. The usage returned includes any minute multipliers for macOS and Windows runners, and is rounded up to the nearest whole minute. For more information, see "[Managing billing for GitHub Actions](https://docs.github.com/github/setting-up-and-managing-billing-and-payments-on-github/managing-billing-for-github-actions)".
+
+Access tokens must have the `repo` or `admin:org` scope.
+-}
 billingGetGithubActionsBillingOrg :
     (Result Http.Error ActionsBillingUsage -> msg) -> Cmd msg
 billingGetGithubActionsBillingOrg toMsg =
@@ -1496,6 +1879,14 @@ billingGetGithubActionsBillingOrg toMsg =
         }
 
 
+{-| Gets the GitHub Advanced Security active committers for an organization per repository.
+
+Each distinct user login across all repositories is counted as a single Advanced Security seat, so the `total_advanced_security_committers` is not the sum of advanced_security_committers for each repository.
+
+If this organization defers to an enterprise for billing, the `total_advanced_security_committers` returned from the organization API may include some users that are in more than one organization, so they will only consume a single Advanced Security seat at the enterprise level.
+
+The total number of repositories with committer information is tracked by the `total_count` field.
+-}
 billingGetGithubAdvancedSecurityBillingOrg :
     (Result Http.Error AdvancedSecurityActiveCommitters -> msg) -> Cmd msg
 billingGetGithubAdvancedSecurityBillingOrg toMsg =
@@ -1506,6 +1897,12 @@ billingGetGithubAdvancedSecurityBillingOrg toMsg =
         }
 
 
+{-| Gets the free and paid storage used for GitHub Packages in gigabytes.
+
+Paid minutes only apply to packages stored for private repositories. For more information, see "[Managing billing for GitHub Packages](https://docs.github.com/github/setting-up-and-managing-billing-and-payments-on-github/managing-billing-for-github-packages)."
+
+Access tokens must have the `repo` or `admin:org` scope.
+-}
 billingGetGithubPackagesBillingOrg :
     (Result Http.Error PackagesBillingUsage -> msg) -> Cmd msg
 billingGetGithubPackagesBillingOrg toMsg =
@@ -1515,6 +1912,12 @@ billingGetGithubPackagesBillingOrg toMsg =
         }
 
 
+{-| Gets the estimated paid and estimated total storage used for GitHub Actions and GitHub Packages.
+
+Paid minutes only apply to packages stored for private repositories. For more information, see "[Managing billing for GitHub Packages](https://docs.github.com/github/setting-up-and-managing-billing-and-payments-on-github/managing-billing-for-github-packages)."
+
+Access tokens must have the `repo` or `admin:org` scope.
+-}
 billingGetSharedStorageBillingOrg :
     (Result Http.Error CombinedBillingUsage -> msg) -> Cmd msg
 billingGetSharedStorageBillingOrg toMsg =
@@ -1525,6 +1928,7 @@ billingGetSharedStorageBillingOrg toMsg =
         }
 
 
+{-| Lists all teams in an organization that are visible to the authenticated user. -}
 teamsList : (Result Http.Error todo -> msg) -> Cmd msg
 teamsList toMsg =
     Http.get
@@ -1538,6 +1942,10 @@ teamsList toMsg =
         }
 
 
+{-| Gets a team using the team's `slug`. GitHub generates the `slug` from the team `name`.
+
+**Note:** You can also specify a team by `org_id` and `team_id` using the route `GET /organizations/{org_id}/team/{team_id}`.
+-}
 teamsGetByName : (Result Http.Error TeamFull -> msg) -> Cmd msg
 teamsGetByName toMsg =
     Http.get
@@ -1546,6 +1954,10 @@ teamsGetByName toMsg =
         }
 
 
+{-| List all discussions on a team's page. OAuth access tokens require the `read:discussion` [scope](https://docs.github.com/apps/building-oauth-apps/understanding-scopes-for-oauth-apps/).
+
+**Note:** You can also specify a team by `org_id` and `team_id` using the route `GET /organizations/{org_id}/team/{team_id}/discussions`.
+-}
 teamsListDiscussionsInOrg : (Result Http.Error todo -> msg) -> Cmd msg
 teamsListDiscussionsInOrg toMsg =
     Http.get
@@ -1560,6 +1972,10 @@ teamsListDiscussionsInOrg toMsg =
         }
 
 
+{-| Get a specific discussion on a team's page. OAuth access tokens require the `read:discussion` [scope](https://docs.github.com/apps/building-oauth-apps/understanding-scopes-for-oauth-apps/).
+
+**Note:** You can also specify a team by `org_id` and `team_id` using the route `GET /organizations/{org_id}/team/{team_id}/discussions/{discussion_number}`.
+-}
 teamsGetDiscussionInOrg : (Result Http.Error TeamDiscussion -> msg) -> Cmd msg
 teamsGetDiscussionInOrg toMsg =
     Http.get
@@ -1569,6 +1985,10 @@ teamsGetDiscussionInOrg toMsg =
         }
 
 
+{-| List all comments on a team discussion. OAuth access tokens require the `read:discussion` [scope](https://docs.github.com/apps/building-oauth-apps/understanding-scopes-for-oauth-apps/).
+
+**Note:** You can also specify a team by `org_id` and `team_id` using the route `GET /organizations/{org_id}/team/{team_id}/discussions/{discussion_number}/comments`.
+-}
 teamsListDiscussionCommentsInOrg : (Result Http.Error todo -> msg) -> Cmd msg
 teamsListDiscussionCommentsInOrg toMsg =
     Http.get
@@ -1583,6 +2003,10 @@ teamsListDiscussionCommentsInOrg toMsg =
         }
 
 
+{-| Get a specific comment on a team discussion. OAuth access tokens require the `read:discussion` [scope](https://docs.github.com/apps/building-oauth-apps/understanding-scopes-for-oauth-apps/).
+
+**Note:** You can also specify a team by `org_id` and `team_id` using the route `GET /organizations/{org_id}/team/{team_id}/discussions/{discussion_number}/comments/{comment_number}`.
+-}
 teamsGetDiscussionCommentInOrg :
     (Result Http.Error TeamDiscussionComment -> msg) -> Cmd msg
 teamsGetDiscussionCommentInOrg toMsg =
@@ -1593,6 +2017,10 @@ teamsGetDiscussionCommentInOrg toMsg =
         }
 
 
+{-| List the reactions to a [team discussion comment](https://docs.github.com/rest/reference/teams#discussion-comments/). OAuth access tokens require the `read:discussion` [scope](https://docs.github.com/apps/building-oauth-apps/understanding-scopes-for-oauth-apps/).
+
+**Note:** You can also specify a team by `org_id` and `team_id` using the route `GET /organizations/:org_id/team/:team_id/discussions/:discussion_number/comments/:comment_number/reactions`.
+-}
 reactionsListForTeamDiscussionCommentInOrg :
     (Result Http.Error todo -> msg) -> Cmd msg
 reactionsListForTeamDiscussionCommentInOrg toMsg =
@@ -1608,6 +2036,10 @@ reactionsListForTeamDiscussionCommentInOrg toMsg =
         }
 
 
+{-| List the reactions to a [team discussion](https://docs.github.com/rest/reference/teams#discussions). OAuth access tokens require the `read:discussion` [scope](https://docs.github.com/apps/building-oauth-apps/understanding-scopes-for-oauth-apps/).
+
+**Note:** You can also specify a team by `org_id` and `team_id` using the route `GET /organizations/:org_id/team/:team_id/discussions/:discussion_number/reactions`.
+-}
 reactionsListForTeamDiscussionInOrg : (Result Http.Error todo -> msg) -> Cmd msg
 reactionsListForTeamDiscussionInOrg toMsg =
     Http.get
@@ -1622,6 +2054,10 @@ reactionsListForTeamDiscussionInOrg toMsg =
         }
 
 
+{-| The return hash contains a `role` field which refers to the Organization Invitation role and will be one of the following values: `direct_member`, `admin`, `billing_manager`, `hiring_manager`, or `reinstate`. If the invitee is not a GitHub member, the `login` field in the return hash will be `null`.
+
+**Note:** You can also specify a team by `org_id` and `team_id` using the route `GET /organizations/{org_id}/team/{team_id}/invitations`.
+-}
 teamsListPendingInvitationsInOrg : (Result Http.Error todo -> msg) -> Cmd msg
 teamsListPendingInvitationsInOrg toMsg =
     Http.get
@@ -1636,6 +2072,10 @@ teamsListPendingInvitationsInOrg toMsg =
         }
 
 
+{-| Team members will include the members of child teams.
+
+To list members in a team, the team must be visible to the authenticated user.
+-}
 teamsListMembersInOrg : (Result Http.Error todo -> msg) -> Cmd msg
 teamsListMembersInOrg toMsg =
     Http.get
@@ -1649,6 +2089,17 @@ teamsListMembersInOrg toMsg =
         }
 
 
+{-| Team members will include the members of child teams.
+
+To get a user's membership with a team, the team must be visible to the authenticated user.
+
+**Note:** You can also specify a team by `org_id` and `team_id` using the route `GET /organizations/{org_id}/team/{team_id}/memberships/{username}`.
+
+**Note:**
+The response contains the `state` of the membership and the member's `role`.
+
+The `role` for organization owners is set to `maintainer`. For more information about `maintainer` roles, see see [Create a team](https://docs.github.com/rest/reference/teams#create-a-team).
+-}
 teamsGetMembershipForUserInOrg :
     (Result Http.Error TeamMembership -> msg) -> Cmd msg
 teamsGetMembershipForUserInOrg toMsg =
@@ -1659,6 +2110,10 @@ teamsGetMembershipForUserInOrg toMsg =
         }
 
 
+{-| Lists the organization projects for a team.
+
+**Note:** You can also specify a team by `org_id` and `team_id` using the route `GET /organizations/{org_id}/team/{team_id}/projects`.
+-}
 teamsListProjectsInOrg : (Result Http.Error todo -> msg) -> Cmd msg
 teamsListProjectsInOrg toMsg =
     Http.get
@@ -1672,6 +2127,10 @@ teamsListProjectsInOrg toMsg =
         }
 
 
+{-| Checks whether a team has `read`, `write`, or `admin` permissions for an organization project. The response includes projects inherited from a parent team.
+
+**Note:** You can also specify a team by `org_id` and `team_id` using the route `GET /organizations/{org_id}/team/{team_id}/projects/{project_id}`.
+-}
 teamsCheckPermissionsForProjectInOrg :
     (Result Http.Error TeamProject -> msg) -> Cmd msg
 teamsCheckPermissionsForProjectInOrg toMsg =
@@ -1682,6 +2141,10 @@ teamsCheckPermissionsForProjectInOrg toMsg =
         }
 
 
+{-| Lists a team's repositories visible to the authenticated user.
+
+**Note:** You can also specify a team by `org_id` and `team_id` using the route `GET /organizations/{org_id}/team/{team_id}/repos`.
+-}
 teamsListReposInOrg : (Result Http.Error todo -> msg) -> Cmd msg
 teamsListReposInOrg toMsg =
     Http.get
@@ -1695,6 +2158,14 @@ teamsListReposInOrg toMsg =
         }
 
 
+{-| Checks whether a team has `admin`, `push`, `maintain`, `triage`, or `pull` permission for a repository. Repositories inherited through a parent team will also be checked.
+
+You can also get information about the specified repository, including what permissions the team grants on it, by passing the following custom [media type](https://docs.github.com/rest/overview/media-types/) via the `application/vnd.github.v3.repository+json` accept header.
+
+If a team doesn't have permission for the repository, you will receive a `404 Not Found` response status.
+
+**Note:** You can also specify a team by `org_id` and `team_id` using the route `GET /organizations/{org_id}/team/{team_id}/repos/{owner}/{repo}`.
+-}
 teamsCheckPermissionsForRepoInOrg :
     (Result Http.Error TeamRepository -> msg) -> Cmd msg
 teamsCheckPermissionsForRepoInOrg toMsg =
@@ -1705,6 +2176,10 @@ teamsCheckPermissionsForRepoInOrg toMsg =
         }
 
 
+{-| Lists the child teams of the team specified by `{team_slug}`.
+
+**Note:** You can also specify a team by `org_id` and `team_id` using the route `GET /organizations/{org_id}/team/{team_id}/teams`.
+-}
 teamsListChildInOrg : (Result Http.Error todo -> msg) -> Cmd msg
 teamsListChildInOrg toMsg =
     Http.get
@@ -1747,6 +2222,7 @@ projectsListCards toMsg =
         }
 
 
+{-| Gets a project by its `id`. Returns a `404 Not Found` status if projects are disabled. If you do not have sufficient privileges to perform this action, a `401 Unauthorized` or `410 Gone` status is returned. -}
 projectsGet : (Result Http.Error Project -> msg) -> Cmd msg
 projectsGet toMsg =
     Http.get
@@ -1755,6 +2231,7 @@ projectsGet toMsg =
         }
 
 
+{-| Lists the collaborators for an organization project. For a project, the list of collaborators includes outside collaborators, organization members that are direct collaborators, organization members with access through team memberships, organization members with access through default organization permissions, and organization owners. You must be an organization owner or a project `admin` to list collaborators. -}
 projectsListCollaborators : (Result Http.Error todo -> msg) -> Cmd msg
 projectsListCollaborators toMsg =
     Http.get
@@ -1768,6 +2245,7 @@ projectsListCollaborators toMsg =
         }
 
 
+{-| Returns the collaborator's permission level for an organization project. Possible values for the `permission` key: `admin`, `write`, `read`, `none`. You must be an organization owner or a project `admin` to review a user's permission level. -}
 projectsGetPermissionForUser :
     (Result Http.Error ProjectCollaboratorPermission -> msg) -> Cmd msg
 projectsGetPermissionForUser toMsg =
@@ -1791,6 +2269,10 @@ projectsListColumns toMsg =
         }
 
 
+{-| **Note:** Accessing this endpoint does not count against your REST API rate limit.
+
+**Note:** The `rate` object is deprecated. If you're writing new API client code or updating existing code, you should use the `core` object instead of the `rate` object. The `core` object contains the same information that is present in the `rate` object.
+-}
 rateLimitGet : (Result Http.Error RateLimitOverview -> msg) -> Cmd msg
 rateLimitGet toMsg =
     Http.get
@@ -1799,6 +2281,7 @@ rateLimitGet toMsg =
         }
 
 
+{-| The `parent` and `source` objects are present when the repository is a fork. `parent` is the repository this repository was forked from, `source` is the ultimate source for the network. -}
 reposGet : (Result Http.Error FullRepository -> msg) -> Cmd msg
 reposGet toMsg =
     Http.get
@@ -1807,6 +2290,7 @@ reposGet toMsg =
         }
 
 
+{-| Lists all artifacts for a repository. Anyone with read access to the repository can use this endpoint. If the repository is private you must use an access token with the `repo` scope. GitHub Apps must have the `actions:read` permission to use this endpoint. -}
 actionsListArtifactsForRepo : (Result Http.Error todo -> msg) -> Cmd msg
 actionsListArtifactsForRepo toMsg =
     Http.get
@@ -1820,6 +2304,7 @@ actionsListArtifactsForRepo toMsg =
         }
 
 
+{-| Gets a specific artifact for a workflow run. Anyone with read access to the repository can use this endpoint. If the repository is private you must use an access token with the `repo` scope. GitHub Apps must have the `actions:read` permission to use this endpoint. -}
 actionsGetArtifact : (Result Http.Error Artifact -> msg) -> Cmd msg
 actionsGetArtifact toMsg =
     Http.get
@@ -1829,6 +2314,11 @@ actionsGetArtifact toMsg =
         }
 
 
+{-| Gets a redirect URL to download an archive for a repository. This URL expires after 1 minute. Look for `Location:` in
+the response header to find the URL for the download. The `:archive_format` must be `zip`. Anyone with read access to
+the repository can use this endpoint. If the repository is private you must use an access token with the `repo` scope.
+GitHub Apps must have the `actions:read` permission to use this endpoint.
+-}
 actionsDownloadArtifact : (Result Http.Error todo -> msg) -> Cmd msg
 actionsDownloadArtifact toMsg =
     Http.get
@@ -1843,6 +2333,10 @@ actionsDownloadArtifact toMsg =
         }
 
 
+{-| Gets GitHub Actions cache usage for a repository.
+The data fetched using this API is refreshed approximately every 5 minutes, so values returned from this endpoint may take at least 5 minutes to get updated.
+Anyone with read access to the repository can use this endpoint. If the repository is private, you must use an access token with the `repo` scope. GitHub Apps must have the `actions:read` permission to use this endpoint.
+-}
 actionsGetActionsCacheUsage :
     (Result Http.Error ActionsCacheUsageByRepository -> msg) -> Cmd msg
 actionsGetActionsCacheUsage toMsg =
@@ -1853,6 +2347,10 @@ actionsGetActionsCacheUsage toMsg =
         }
 
 
+{-| Lists the GitHub Actions caches for a repository.
+You must authenticate using an access token with the `repo` scope to use this endpoint.
+GitHub Apps must have the `actions:read` permission to use this endpoint.
+-}
 actionsGetActionsCacheList :
     (Result Http.Error ActionsCacheList -> msg) -> Cmd msg
 actionsGetActionsCacheList toMsg =
@@ -1862,6 +2360,7 @@ actionsGetActionsCacheList toMsg =
         }
 
 
+{-| Gets a specific job in a workflow run. Anyone with read access to the repository can use this endpoint. If the repository is private you must use an access token with the `repo` scope. GitHub Apps must have the `actions:read` permission to use this endpoint. -}
 actionsGetJobForWorkflowRun : (Result Http.Error Job -> msg) -> Cmd msg
 actionsGetJobForWorkflowRun toMsg =
     Http.get
@@ -1871,6 +2370,11 @@ actionsGetJobForWorkflowRun toMsg =
         }
 
 
+{-| Gets a redirect URL to download a plain text file of logs for a workflow job. This link expires after 1 minute. Look
+for `Location:` in the response header to find the URL for the download. Anyone with read access to the repository can
+use this endpoint. If the repository is private you must use an access token with the `repo` scope. GitHub Apps must
+have the `actions:read` permission to use this endpoint.
+-}
 actionsDownloadJobLogsForWorkflowRun :
     (Result Http.Error todo -> msg) -> Cmd msg
 actionsDownloadJobLogsForWorkflowRun toMsg =
@@ -1886,6 +2390,10 @@ actionsDownloadJobLogsForWorkflowRun toMsg =
         }
 
 
+{-| Gets the GitHub Actions permissions policy for a repository, including whether GitHub Actions is enabled and the actions and reusable workflows allowed to run in the repository.
+
+You must authenticate using an access token with the `repo` scope to use this endpoint. GitHub Apps must have the `administration` repository permission to use this API.
+-}
 actionsGetGithubActionsPermissionsRepository :
     (Result Http.Error ActionsRepositoryPermissions -> msg) -> Cmd msg
 actionsGetGithubActionsPermissionsRepository toMsg =
@@ -1896,6 +2404,12 @@ actionsGetGithubActionsPermissionsRepository toMsg =
         }
 
 
+{-| Gets the level of access that workflows outside of the repository have to actions and reusable workflows in the repository.
+This endpoint only applies to internal repositories. For more information, see "[Managing GitHub Actions settings for a repository](https://docs.github.com/repositories/managing-your-repositorys-settings-and-features/enabling-features-for-your-repository/managing-github-actions-settings-for-a-repository#allowing-access-to-components-in-an-internal-repository)."
+
+You must authenticate using an access token with the `repo` scope to use this endpoint. GitHub Apps must have the
+repository `administration` permission to use this endpoint.
+-}
 actionsGetWorkflowAccessToRepository :
     (Result Http.Error ActionsWorkflowAccessToRepository -> msg) -> Cmd msg
 actionsGetWorkflowAccessToRepository toMsg =
@@ -1906,6 +2420,10 @@ actionsGetWorkflowAccessToRepository toMsg =
         }
 
 
+{-| Gets the settings for selected actions and reusable workflows that are allowed in a repository. To use this endpoint, the repository policy for `allowed_actions` must be configured to `selected`. For more information, see "[Set GitHub Actions permissions for a repository](#set-github-actions-permissions-for-a-repository)."
+
+You must authenticate using an access token with the `repo` scope to use this endpoint. GitHub Apps must have the `administration` repository permission to use this API.
+-}
 actionsGetAllowedActionsRepository :
     (Result Http.Error SelectedActions -> msg) -> Cmd msg
 actionsGetAllowedActionsRepository toMsg =
@@ -1916,6 +2434,12 @@ actionsGetAllowedActionsRepository toMsg =
         }
 
 
+{-| Gets the default workflow permissions granted to the `GITHUB_TOKEN` when running workflows in a repository,
+as well as if GitHub Actions can submit approving pull request reviews.
+For more information, see "[Setting the permissions of the GITHUB_TOKEN for your repository](https://docs.github.com/repositories/managing-your-repositorys-settings-and-features/enabling-features-for-your-repository/managing-github-actions-settings-for-a-repository#setting-the-permissions-of-the-github_token-for-your-repository)."
+
+You must authenticate using an access token with the `repo` scope to use this endpoint. GitHub Apps must have the repository `administration` permission to use this API.
+-}
 actionsGetGithubActionsDefaultWorkflowPermissionsRepository :
     (Result Http.Error ActionsGetDefaultWorkflowPermissions -> msg) -> Cmd msg
 actionsGetGithubActionsDefaultWorkflowPermissionsRepository toMsg =
@@ -1927,6 +2451,7 @@ actionsGetGithubActionsDefaultWorkflowPermissionsRepository toMsg =
         }
 
 
+{-| Lists all self-hosted runners configured in a repository. You must authenticate using an access token with the `repo` scope to use this endpoint. -}
 actionsListSelfHostedRunnersForRepo : (Result Http.Error todo -> msg) -> Cmd msg
 actionsListSelfHostedRunnersForRepo toMsg =
     Http.get
@@ -1940,6 +2465,10 @@ actionsListSelfHostedRunnersForRepo toMsg =
         }
 
 
+{-| Lists binaries for the runner application that you can download and run.
+
+You must authenticate using an access token with the `repo` scope to use this endpoint.
+-}
 actionsListRunnerApplicationsForRepo :
     (Result Http.Error todo -> msg) -> Cmd msg
 actionsListRunnerApplicationsForRepo toMsg =
@@ -1955,6 +2484,11 @@ actionsListRunnerApplicationsForRepo toMsg =
         }
 
 
+{-| Gets a specific self-hosted runner configured in a repository.
+
+You must authenticate using an access token with the `repo` scope to use this
+endpoint.
+-}
 actionsGetSelfHostedRunnerForRepo : (Result Http.Error Runner -> msg) -> Cmd msg
 actionsGetSelfHostedRunnerForRepo toMsg =
     Http.get
@@ -1964,6 +2498,11 @@ actionsGetSelfHostedRunnerForRepo toMsg =
         }
 
 
+{-| Lists all labels for a self-hosted runner configured in a repository.
+
+You must authenticate using an access token with the `repo` scope to use this
+endpoint.
+-}
 actionsListLabelsForSelfHostedRunnerForRepo :
     (Result Http.Error ActionsRunnerLabels -> msg) -> Cmd msg
 actionsListLabelsForSelfHostedRunnerForRepo toMsg =
@@ -1974,6 +2513,10 @@ actionsListLabelsForSelfHostedRunnerForRepo toMsg =
         }
 
 
+{-| Lists all workflow runs for a repository. You can use parameters to narrow the list of results. For more information about using parameters, see [Parameters](https://docs.github.com/rest/overview/resources-in-the-rest-api#parameters).
+
+Anyone with read access to the repository can use this endpoint. If the repository is private you must use an access token with the `repo` scope. GitHub Apps must have the `actions:read` permission to use this endpoint.
+-}
 actionsListWorkflowRunsForRepo : (Result Http.Error todo -> msg) -> Cmd msg
 actionsListWorkflowRunsForRepo toMsg =
     Http.get
@@ -1987,6 +2530,7 @@ actionsListWorkflowRunsForRepo toMsg =
         }
 
 
+{-| Gets a specific workflow run. Anyone with read access to the repository can use this endpoint. If the repository is private you must use an access token with the `repo` scope. GitHub Apps must have the `actions:read` permission to use this endpoint. -}
 actionsGetWorkflowRun : (Result Http.Error WorkflowRun -> msg) -> Cmd msg
 actionsGetWorkflowRun toMsg =
     Http.get
@@ -1996,6 +2540,7 @@ actionsGetWorkflowRun toMsg =
         }
 
 
+{-| Anyone with read access to the repository can use this endpoint. If the repository is private, you must use an access token with the `repo` scope. GitHub Apps must have the `actions:read` permission to use this endpoint. -}
 actionsGetReviewsForRun : (Result Http.Error todo -> msg) -> Cmd msg
 actionsGetReviewsForRun toMsg =
     Http.get
@@ -2010,6 +2555,7 @@ actionsGetReviewsForRun toMsg =
         }
 
 
+{-| Lists artifacts for a workflow run. Anyone with read access to the repository can use this endpoint. If the repository is private you must use an access token with the `repo` scope. GitHub Apps must have the `actions:read` permission to use this endpoint. -}
 actionsListWorkflowRunArtifacts : (Result Http.Error todo -> msg) -> Cmd msg
 actionsListWorkflowRunArtifacts toMsg =
     Http.get
@@ -2024,6 +2570,11 @@ actionsListWorkflowRunArtifacts toMsg =
         }
 
 
+{-| Gets a specific workflow run attempt. Anyone with read access to the repository
+can use this endpoint. If the repository is private you must use an access token
+with the `repo` scope. GitHub Apps must have the `actions:read` permission to
+use this endpoint.
+-}
 actionsGetWorkflowRunAttempt : (Result Http.Error WorkflowRun -> msg) -> Cmd msg
 actionsGetWorkflowRunAttempt toMsg =
     Http.get
@@ -2033,6 +2584,7 @@ actionsGetWorkflowRunAttempt toMsg =
         }
 
 
+{-| Lists jobs for a specific workflow run attempt. Anyone with read access to the repository can use this endpoint. If the repository is private you must use an access token with the `repo` scope. GitHub Apps must have the `actions:read` permission to use this endpoint. You can use parameters to narrow the list of results. For more information about using parameters, see [Parameters](https://docs.github.com/rest/overview/resources-in-the-rest-api#parameters). -}
 actionsListJobsForWorkflowRunAttempt :
     (Result Http.Error todo -> msg) -> Cmd msg
 actionsListJobsForWorkflowRunAttempt toMsg =
@@ -2048,6 +2600,11 @@ actionsListJobsForWorkflowRunAttempt toMsg =
         }
 
 
+{-| Gets a redirect URL to download an archive of log files for a specific workflow run attempt. This link expires after
+1 minute. Look for `Location:` in the response header to find the URL for the download. Anyone with read access to
+the repository can use this endpoint. If the repository is private you must use an access token with the `repo` scope.
+GitHub Apps must have the `actions:read` permission to use this endpoint.
+-}
 actionsDownloadWorkflowRunAttemptLogs :
     (Result Http.Error todo -> msg) -> Cmd msg
 actionsDownloadWorkflowRunAttemptLogs toMsg =
@@ -2063,6 +2620,7 @@ actionsDownloadWorkflowRunAttemptLogs toMsg =
         }
 
 
+{-| Lists jobs for a workflow run. Anyone with read access to the repository can use this endpoint. If the repository is private you must use an access token with the `repo` scope. GitHub Apps must have the `actions:read` permission to use this endpoint. You can use parameters to narrow the list of results. For more information about using parameters, see [Parameters](https://docs.github.com/rest/overview/resources-in-the-rest-api#parameters). -}
 actionsListJobsForWorkflowRun : (Result Http.Error todo -> msg) -> Cmd msg
 actionsListJobsForWorkflowRun toMsg =
     Http.get
@@ -2077,6 +2635,11 @@ actionsListJobsForWorkflowRun toMsg =
         }
 
 
+{-| Gets a redirect URL to download an archive of log files for a workflow run. This link expires after 1 minute. Look for
+`Location:` in the response header to find the URL for the download. Anyone with read access to the repository can use
+this endpoint. If the repository is private you must use an access token with the `repo` scope. GitHub Apps must have
+the `actions:read` permission to use this endpoint.
+-}
 actionsDownloadWorkflowRunLogs : (Result Http.Error todo -> msg) -> Cmd msg
 actionsDownloadWorkflowRunLogs toMsg =
     Http.get
@@ -2091,6 +2654,10 @@ actionsDownloadWorkflowRunLogs toMsg =
         }
 
 
+{-| Get all deployment environments for a workflow run that are waiting for protection rules to pass.
+
+Anyone with read access to the repository can use this endpoint. If the repository is private, you must use an access token with the `repo` scope. GitHub Apps must have the `actions:read` permission to use this endpoint.
+-}
 actionsGetPendingDeploymentsForRun : (Result Http.Error todo -> msg) -> Cmd msg
 actionsGetPendingDeploymentsForRun toMsg =
     Http.get
@@ -2105,6 +2672,10 @@ actionsGetPendingDeploymentsForRun toMsg =
         }
 
 
+{-| Gets the number of billable minutes and total run time for a specific workflow run. Billable minutes only apply to workflows in private repositories that use GitHub-hosted runners. Usage is listed for each GitHub-hosted runner operating system in milliseconds. Any job re-runs are also included in the usage. The usage does not include the multiplier for macOS and Windows runners and is not rounded up to the nearest whole minute. For more information, see "[Managing billing for GitHub Actions](https://docs.github.com/github/setting-up-and-managing-billing-and-payments-on-github/managing-billing-for-github-actions)".
+
+Anyone with read access to the repository can use this endpoint. If the repository is private you must use an access token with the `repo` scope. GitHub Apps must have the `actions:read` permission to use this endpoint.
+-}
 actionsGetWorkflowRunUsage :
     (Result Http.Error WorkflowRunUsage -> msg) -> Cmd msg
 actionsGetWorkflowRunUsage toMsg =
@@ -2115,6 +2686,7 @@ actionsGetWorkflowRunUsage toMsg =
         }
 
 
+{-| Lists all secrets available in a repository without revealing their encrypted values. You must authenticate using an access token with the `repo` scope to use this endpoint. GitHub Apps must have the `secrets` repository permission to use this endpoint. -}
 actionsListRepoSecrets : (Result Http.Error todo -> msg) -> Cmd msg
 actionsListRepoSecrets toMsg =
     Http.get
@@ -2128,6 +2700,7 @@ actionsListRepoSecrets toMsg =
         }
 
 
+{-| Gets your public key, which you need to encrypt secrets. You need to encrypt a secret before you can create or update secrets. Anyone with read access to the repository can use this endpoint. If the repository is private you must use an access token with the `repo` scope. GitHub Apps must have the `secrets` repository permission to use this endpoint. -}
 actionsGetRepoPublicKey : (Result Http.Error ActionsPublicKey -> msg) -> Cmd msg
 actionsGetRepoPublicKey toMsg =
     Http.get
@@ -2137,6 +2710,7 @@ actionsGetRepoPublicKey toMsg =
         }
 
 
+{-| Gets a single repository secret without revealing its encrypted value. You must authenticate using an access token with the `repo` scope to use this endpoint. GitHub Apps must have the `secrets` repository permission to use this endpoint. -}
 actionsGetRepoSecret : (Result Http.Error ActionsSecret -> msg) -> Cmd msg
 actionsGetRepoSecret toMsg =
     Http.get
@@ -2146,6 +2720,7 @@ actionsGetRepoSecret toMsg =
         }
 
 
+{-| Lists the workflows in a repository. Anyone with read access to the repository can use this endpoint. If the repository is private you must use an access token with the `repo` scope. GitHub Apps must have the `actions:read` permission to use this endpoint. -}
 actionsListRepoWorkflows : (Result Http.Error todo -> msg) -> Cmd msg
 actionsListRepoWorkflows toMsg =
     Http.get
@@ -2159,6 +2734,7 @@ actionsListRepoWorkflows toMsg =
         }
 
 
+{-| Gets a specific workflow. You can replace `workflow_id` with the workflow file name. For example, you could use `main.yaml`. Anyone with read access to the repository can use this endpoint. If the repository is private you must use an access token with the `repo` scope. GitHub Apps must have the `actions:read` permission to use this endpoint. -}
 actionsGetWorkflow : (Result Http.Error Workflow -> msg) -> Cmd msg
 actionsGetWorkflow toMsg =
     Http.get
@@ -2168,6 +2744,10 @@ actionsGetWorkflow toMsg =
         }
 
 
+{-| List all workflow runs for a workflow. You can replace `workflow_id` with the workflow file name. For example, you could use `main.yaml`. You can use parameters to narrow the list of results. For more information about using parameters, see [Parameters](https://docs.github.com/rest/overview/resources-in-the-rest-api#parameters).
+
+Anyone with read access to the repository can use this endpoint. If the repository is private you must use an access token with the `repo` scope.
+-}
 actionsListWorkflowRuns : (Result Http.Error todo -> msg) -> Cmd msg
 actionsListWorkflowRuns toMsg =
     Http.get
@@ -2182,6 +2762,10 @@ actionsListWorkflowRuns toMsg =
         }
 
 
+{-| Gets the number of billable minutes used by a specific workflow during the current billing cycle. Billable minutes only apply to workflows in private repositories that use GitHub-hosted runners. Usage is listed for each GitHub-hosted runner operating system in milliseconds. Any job re-runs are also included in the usage. The usage does not include the multiplier for macOS and Windows runners and is not rounded up to the nearest whole minute. For more information, see "[Managing billing for GitHub Actions](https://docs.github.com/github/setting-up-and-managing-billing-and-payments-on-github/managing-billing-for-github-actions)".
+
+You can replace `workflow_id` with the workflow file name. For example, you could use `main.yaml`. Anyone with read access to the repository can use this endpoint. If the repository is private you must use an access token with the `repo` scope. GitHub Apps must have the `actions:read` permission to use this endpoint.
+-}
 actionsGetWorkflowUsage : (Result Http.Error WorkflowUsage -> msg) -> Cmd msg
 actionsGetWorkflowUsage toMsg =
     Http.get
@@ -2191,6 +2775,7 @@ actionsGetWorkflowUsage toMsg =
         }
 
 
+{-| Lists the [available assignees](https://docs.github.com/articles/assigning-issues-and-pull-requests-to-other-github-users/) for issues in a repository. -}
 issuesListAssignees : (Result Http.Error todo -> msg) -> Cmd msg
 issuesListAssignees toMsg =
     Http.get
@@ -2204,6 +2789,12 @@ issuesListAssignees toMsg =
         }
 
 
+{-| Checks if a user has permission to be assigned to an issue in this repository.
+
+If the `assignee` can be assigned to issues in the repository, a `204` header with no content is returned.
+
+Otherwise a `404` status code is returned.
+-}
 issuesCheckUserCanBeAssigned : (Result Http.Error todo -> msg) -> Cmd msg
 issuesCheckUserCanBeAssigned toMsg =
     Http.get
@@ -2218,6 +2809,10 @@ issuesCheckUserCanBeAssigned toMsg =
         }
 
 
+{-| This returns a list of autolinks configured for the given repository.
+
+Information about autolinks are only available to repository administrators.
+-}
 reposListAutolinks : (Result Http.Error todo -> msg) -> Cmd msg
 reposListAutolinks toMsg =
     Http.get
@@ -2231,6 +2826,10 @@ reposListAutolinks toMsg =
         }
 
 
+{-| This returns a single autolink reference by ID that was configured for the given repository.
+
+Information about autolinks are only available to repository administrators.
+-}
 reposGetAutolink : (Result Http.Error Autolink -> msg) -> Cmd msg
 reposGetAutolink toMsg =
     Http.get
@@ -2261,6 +2860,7 @@ reposGetBranch toMsg =
         }
 
 
+{-| Protected branches are available in public repositories with GitHub Free and GitHub Free for organizations, and in public and private repositories with GitHub Pro, GitHub Team, GitHub Enterprise Cloud, and GitHub Enterprise Server. For more information, see [GitHub's products](https://docs.github.com/github/getting-started-with-github/githubs-products) in the GitHub Help documentation. -}
 reposGetBranchProtection :
     (Result Http.Error BranchProtection -> msg) -> Cmd msg
 reposGetBranchProtection toMsg =
@@ -2271,6 +2871,7 @@ reposGetBranchProtection toMsg =
         }
 
 
+{-| Protected branches are available in public repositories with GitHub Free and GitHub Free for organizations, and in public and private repositories with GitHub Pro, GitHub Team, GitHub Enterprise Cloud, and GitHub Enterprise Server. For more information, see [GitHub's products](https://docs.github.com/github/getting-started-with-github/githubs-products) in the GitHub Help documentation. -}
 reposGetAdminBranchProtection :
     (Result Http.Error ProtectedBranchAdminEnforced -> msg) -> Cmd msg
 reposGetAdminBranchProtection toMsg =
@@ -2281,6 +2882,7 @@ reposGetAdminBranchProtection toMsg =
         }
 
 
+{-| Protected branches are available in public repositories with GitHub Free and GitHub Free for organizations, and in public and private repositories with GitHub Pro, GitHub Team, GitHub Enterprise Cloud, and GitHub Enterprise Server. For more information, see [GitHub's products](https://docs.github.com/github/getting-started-with-github/githubs-products) in the GitHub Help documentation. -}
 reposGetPullRequestReviewProtection :
     (Result Http.Error ProtectedBranchPullRequestReview -> msg) -> Cmd msg
 reposGetPullRequestReviewProtection toMsg =
@@ -2291,6 +2893,12 @@ reposGetPullRequestReviewProtection toMsg =
         }
 
 
+{-| Protected branches are available in public repositories with GitHub Free and GitHub Free for organizations, and in public and private repositories with GitHub Pro, GitHub Team, GitHub Enterprise Cloud, and GitHub Enterprise Server. For more information, see [GitHub's products](https://docs.github.com/github/getting-started-with-github/githubs-products) in the GitHub Help documentation.
+
+When authenticated with admin or owner permissions to the repository, you can use this endpoint to check whether a branch requires signed commits. An enabled status of `true` indicates you must sign commits on this branch. For more information, see [Signing commits with GPG](https://docs.github.com/articles/signing-commits-with-gpg) in GitHub Help.
+
+**Note**: You must enable branch protection to require signed commits.
+-}
 reposGetCommitSignatureProtection :
     (Result Http.Error ProtectedBranchAdminEnforced -> msg) -> Cmd msg
 reposGetCommitSignatureProtection toMsg =
@@ -2301,6 +2909,7 @@ reposGetCommitSignatureProtection toMsg =
         }
 
 
+{-| Protected branches are available in public repositories with GitHub Free and GitHub Free for organizations, and in public and private repositories with GitHub Pro, GitHub Team, GitHub Enterprise Cloud, and GitHub Enterprise Server. For more information, see [GitHub's products](https://docs.github.com/github/getting-started-with-github/githubs-products) in the GitHub Help documentation. -}
 reposGetStatusChecksProtection :
     (Result Http.Error StatusCheckPolicy -> msg) -> Cmd msg
 reposGetStatusChecksProtection toMsg =
@@ -2311,6 +2920,7 @@ reposGetStatusChecksProtection toMsg =
         }
 
 
+{-| Protected branches are available in public repositories with GitHub Free and GitHub Free for organizations, and in public and private repositories with GitHub Pro, GitHub Team, GitHub Enterprise Cloud, and GitHub Enterprise Server. For more information, see [GitHub's products](https://docs.github.com/github/getting-started-with-github/githubs-products) in the GitHub Help documentation. -}
 reposGetAllStatusCheckContexts : (Result Http.Error todo -> msg) -> Cmd msg
 reposGetAllStatusCheckContexts toMsg =
     Http.get
@@ -2325,6 +2935,12 @@ reposGetAllStatusCheckContexts toMsg =
         }
 
 
+{-| Protected branches are available in public repositories with GitHub Free and GitHub Free for organizations, and in public and private repositories with GitHub Pro, GitHub Team, GitHub Enterprise Cloud, and GitHub Enterprise Server. For more information, see [GitHub's products](https://docs.github.com/github/getting-started-with-github/githubs-products) in the GitHub Help documentation.
+
+Lists who has access to this protected branch.
+
+**Note**: Users, apps, and teams `restrictions` are only available for organization-owned repositories.
+-}
 reposGetAccessRestrictions :
     (Result Http.Error BranchRestrictionPolicy -> msg) -> Cmd msg
 reposGetAccessRestrictions toMsg =
@@ -2335,6 +2951,10 @@ reposGetAccessRestrictions toMsg =
         }
 
 
+{-| Protected branches are available in public repositories with GitHub Free and GitHub Free for organizations, and in public and private repositories with GitHub Pro, GitHub Team, GitHub Enterprise Cloud, and GitHub Enterprise Server. For more information, see [GitHub's products](https://docs.github.com/github/getting-started-with-github/githubs-products) in the GitHub Help documentation.
+
+Lists the GitHub Apps that have push access to this branch. Only installed GitHub Apps with `write` access to the `contents` permission can be added as authorized actors on a protected branch.
+-}
 reposGetAppsWithAccessToProtectedBranch :
     (Result Http.Error todo -> msg) -> Cmd msg
 reposGetAppsWithAccessToProtectedBranch toMsg =
@@ -2350,6 +2970,10 @@ reposGetAppsWithAccessToProtectedBranch toMsg =
         }
 
 
+{-| Protected branches are available in public repositories with GitHub Free and GitHub Free for organizations, and in public and private repositories with GitHub Pro, GitHub Team, GitHub Enterprise Cloud, and GitHub Enterprise Server. For more information, see [GitHub's products](https://docs.github.com/github/getting-started-with-github/githubs-products) in the GitHub Help documentation.
+
+Lists the teams who have push access to this branch. The list includes child teams.
+-}
 reposGetTeamsWithAccessToProtectedBranch :
     (Result Http.Error todo -> msg) -> Cmd msg
 reposGetTeamsWithAccessToProtectedBranch toMsg =
@@ -2365,6 +2989,10 @@ reposGetTeamsWithAccessToProtectedBranch toMsg =
         }
 
 
+{-| Protected branches are available in public repositories with GitHub Free and GitHub Free for organizations, and in public and private repositories with GitHub Pro, GitHub Team, GitHub Enterprise Cloud, and GitHub Enterprise Server. For more information, see [GitHub's products](https://docs.github.com/github/getting-started-with-github/githubs-products) in the GitHub Help documentation.
+
+Lists the people who have push access to this branch.
+-}
 reposGetUsersWithAccessToProtectedBranch :
     (Result Http.Error todo -> msg) -> Cmd msg
 reposGetUsersWithAccessToProtectedBranch toMsg =
@@ -2380,6 +3008,10 @@ reposGetUsersWithAccessToProtectedBranch toMsg =
         }
 
 
+{-| **Note:** The Checks API only looks for pushes in the repository where the check suite or check run were created. Pushes to a branch in a forked repository are not detected and return an empty `pull_requests` array.
+
+Gets a single check run using its `id`. GitHub Apps must have the `checks:read` permission on a private repository or pull access to a public repository to get check runs. OAuth Apps and authenticated users must have the `repo` scope to get check runs in a private repository.
+-}
 checksGet : (Result Http.Error CheckRun -> msg) -> Cmd msg
 checksGet toMsg =
     Http.get
@@ -2389,6 +3021,7 @@ checksGet toMsg =
         }
 
 
+{-| Lists annotations for a check run using the annotation `id`. GitHub Apps must have the `checks:read` permission on a private repository or pull access to a public repository to get annotations for a check run. OAuth Apps and authenticated users must have the `repo` scope to get annotations for a check run in a private repository. -}
 checksListAnnotations : (Result Http.Error todo -> msg) -> Cmd msg
 checksListAnnotations toMsg =
     Http.get
@@ -2403,6 +3036,10 @@ checksListAnnotations toMsg =
         }
 
 
+{-| **Note:** The Checks API only looks for pushes in the repository where the check suite or check run were created. Pushes to a branch in a forked repository are not detected and return an empty `pull_requests` array and a `null` value for `head_branch`.
+
+Gets a single check suite using its `id`. GitHub Apps must have the `checks:read` permission on a private repository or pull access to a public repository to get check suites. OAuth Apps and authenticated users must have the `repo` scope to get check suites in a private repository.
+-}
 checksGetSuite : (Result Http.Error CheckSuite -> msg) -> Cmd msg
 checksGetSuite toMsg =
     Http.get
@@ -2412,6 +3049,10 @@ checksGetSuite toMsg =
         }
 
 
+{-| **Note:** The Checks API only looks for pushes in the repository where the check suite or check run were created. Pushes to a branch in a forked repository are not detected and return an empty `pull_requests` array.
+
+Lists check runs for a check suite using its `id`. GitHub Apps must have the `checks:read` permission on a private repository or pull access to a public repository to get check runs. OAuth Apps and authenticated users must have the `repo` scope to get check runs in a private repository.
+-}
 checksListForSuite : (Result Http.Error todo -> msg) -> Cmd msg
 checksListForSuite toMsg =
     Http.get
@@ -2426,6 +3067,17 @@ checksListForSuite toMsg =
         }
 
 
+{-| Lists code scanning alerts.
+
+To use this endpoint, you must use an access token with the `security_events` scope or, for alerts from public repositories only, an access token with the `public_repo` scope.
+
+GitHub Apps must have the `security_events` read
+permission to use this endpoint.
+
+The response includes a `most_recent_instance` object.
+This provides details of the most recent instance of this alert
+for the default branch (or for the specified Git reference if you used `ref` in the request).
+-}
 codeScanningListAlertsForRepo : (Result Http.Error todo -> msg) -> Cmd msg
 codeScanningListAlertsForRepo toMsg =
     Http.get
@@ -2440,6 +3092,11 @@ codeScanningListAlertsForRepo toMsg =
         }
 
 
+{-| Gets a single code scanning alert. You must use an access token with the `security_events` scope to use this endpoint with private repos, the `public_repo` scope also grants permission to read security events on public repos only. GitHub Apps must have the `security_events` read permission to use this endpoint.
+
+**Deprecation notice**:
+The instances field is deprecated and will, in future, not be included in the response for this endpoint. The example response reflects this change. The same information can now be retrieved via a GET request to the URL specified by `instances_url`.
+-}
 codeScanningGetAlert : (Result Http.Error CodeScanningAlert -> msg) -> Cmd msg
 codeScanningGetAlert toMsg =
     Http.get
@@ -2449,6 +3106,11 @@ codeScanningGetAlert toMsg =
         }
 
 
+{-| Lists all instances of the specified code scanning alert.
+You must use an access token with the `security_events` scope to use this endpoint with private repos,
+the `public_repo` scope also grants permission to read security events on public repos only.
+GitHub Apps must have the `security_events` read permission to use this endpoint.
+-}
 codeScanningListAlertInstances : (Result Http.Error todo -> msg) -> Cmd msg
 codeScanningListAlertInstances toMsg =
     Http.get
@@ -2463,6 +3125,24 @@ codeScanningListAlertInstances toMsg =
         }
 
 
+{-| Lists the details of all code scanning analyses for a repository,
+starting with the most recent.
+The response is paginated and you can use the `page` and `per_page` parameters
+to list the analyses you're interested in.
+By default 30 analyses are listed per page.
+
+The `rules_count` field in the response give the number of rules
+that were run in the analysis.
+For very old analyses this data is not available,
+and `0` is returned in this field.
+
+You must use an access token with the `security_events` scope to use this endpoint with private repos,
+the `public_repo` scope also grants permission to read security events on public repos only.
+GitHub Apps must have the `security_events` read permission to use this endpoint.
+
+**Deprecation notice**:
+The `tool_name` field is deprecated and will, in future, not be included in the response for this endpoint. The example response reflects this change. The tool name can now be found inside the `tool` field.
+-}
 codeScanningListRecentAnalyses : (Result Http.Error todo -> msg) -> Cmd msg
 codeScanningListRecentAnalyses toMsg =
     Http.get
@@ -2477,6 +3157,26 @@ codeScanningListRecentAnalyses toMsg =
         }
 
 
+{-| Gets a specified code scanning analysis for a repository.
+You must use an access token with the `security_events` scope to use this endpoint with private repos,
+the `public_repo` scope also grants permission to read security events on public repos only.
+GitHub Apps must have the `security_events` read permission to use this endpoint.
+
+The default JSON response contains fields that describe the analysis.
+This includes the Git reference and commit SHA to which the analysis relates,
+the datetime of the analysis, the name of the code scanning tool,
+and the number of alerts.
+
+The `rules_count` field in the default response give the number of rules
+that were run in the analysis.
+For very old analyses this data is not available,
+and `0` is returned in this field.
+
+If you use the Accept header `application/sarif+json`,
+the response contains the analysis data that was uploaded.
+This is formatted as
+[SARIF version 2.1.0](https://docs.oasis-open.org/sarif/sarif/v2.1.0/cs01/sarif-v2.1.0-cs01.html).
+-}
 codeScanningGetAnalysis :
     (Result Http.Error CodeScanningAnalysis -> msg) -> Cmd msg
 codeScanningGetAnalysis toMsg =
@@ -2487,6 +3187,12 @@ codeScanningGetAnalysis toMsg =
         }
 
 
+{-| Lists the CodeQL databases that are available in a repository.
+
+For private repositories, you must use an access token with the `security_events` scope.
+For public repositories, you can use tokens with the `security_events` or `public_repo` scope.
+GitHub Apps must have the `contents` read permission to use this endpoint.
+-}
 codeScanningListCodeqlDatabases : (Result Http.Error todo -> msg) -> Cmd msg
 codeScanningListCodeqlDatabases toMsg =
     Http.get
@@ -2501,6 +3207,18 @@ codeScanningListCodeqlDatabases toMsg =
         }
 
 
+{-| Gets a CodeQL database for a language in a repository.
+
+By default this endpoint returns JSON metadata about the CodeQL database. To
+download the CodeQL database binary content, set the `Accept` header of the request
+to [`application/zip`](https://docs.github.com/rest/overview/media-types), and make sure
+your HTTP client is configured to follow redirects or use the `Location` header
+to make a second request to get the redirect URL.
+
+For private repositories, you must use an access token with the `security_events` scope.
+For public repositories, you can use tokens with the `security_events` or `public_repo` scope.
+GitHub Apps must have the `contents` read permission to use this endpoint.
+-}
 codeScanningGetCodeqlDatabase :
     (Result Http.Error CodeScanningCodeqlDatabase -> msg) -> Cmd msg
 codeScanningGetCodeqlDatabase toMsg =
@@ -2511,6 +3229,7 @@ codeScanningGetCodeqlDatabase toMsg =
         }
 
 
+{-| Gets information about a SARIF upload, including the status and the URL of the analysis that was uploaded so that you can retrieve details of the analysis. For more information, see "[Get a code scanning analysis for a repository](/rest/reference/code-scanning#get-a-code-scanning-analysis-for-a-repository)." You must use an access token with the `security_events` scope to use this endpoint with private repos, the `public_repo` scope also grants permission to read security events on public repos only. GitHub Apps must have the `security_events` read permission to use this endpoint. -}
 codeScanningGetSarif :
     (Result Http.Error CodeScanningSarifsStatus -> msg) -> Cmd msg
 codeScanningGetSarif toMsg =
@@ -2521,6 +3240,12 @@ codeScanningGetSarif toMsg =
         }
 
 
+{-| List any syntax errors that are detected in the CODEOWNERS
+file.
+
+For more information about the correct CODEOWNERS syntax,
+see "[About code owners](https://docs.github.com/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners)."
+-}
 reposCodeownersErrors : (Result Http.Error CodeownersErrors -> msg) -> Cmd msg
 reposCodeownersErrors toMsg =
     Http.get
@@ -2529,6 +3254,12 @@ reposCodeownersErrors toMsg =
         }
 
 
+{-| Lists the codespaces associated to a specified repository and the authenticated user.
+
+You must authenticate using an access token with the `codespace` scope to use this endpoint.
+
+GitHub Apps must have read access to the `codespaces` repository permission to use this endpoint.
+-}
 codespacesListInRepositoryForAuthenticatedUser :
     (Result Http.Error todo -> msg) -> Cmd msg
 codespacesListInRepositoryForAuthenticatedUser toMsg =
@@ -2543,6 +3274,13 @@ codespacesListInRepositoryForAuthenticatedUser toMsg =
         }
 
 
+{-| Lists the devcontainer.json files associated with a specified repository and the authenticated user. These files
+specify launchpoint configurations for codespaces created within the repository.
+
+You must authenticate using an access token with the `codespace` scope to use this endpoint.
+
+GitHub Apps must have read access to the `codespaces_metadata` repository permission to use this endpoint.
+-}
 codespacesListDevcontainersInRepositoryForAuthenticatedUser :
     (Result Http.Error todo -> msg) -> Cmd msg
 codespacesListDevcontainersInRepositoryForAuthenticatedUser toMsg =
@@ -2558,6 +3296,12 @@ codespacesListDevcontainersInRepositoryForAuthenticatedUser toMsg =
         }
 
 
+{-| List the machine types available for a given repository based on its configuration.
+
+You must authenticate using an access token with the `codespace` scope to use this endpoint.
+
+GitHub Apps must have write access to the `codespaces_metadata` repository permission to use this endpoint.
+-}
 codespacesRepoMachinesForAuthenticatedUser :
     (Result Http.Error todo -> msg) -> Cmd msg
 codespacesRepoMachinesForAuthenticatedUser toMsg =
@@ -2573,6 +3317,12 @@ codespacesRepoMachinesForAuthenticatedUser toMsg =
         }
 
 
+{-| Gets the default attributes for codespaces created by the user with the repository.
+
+You must authenticate using an access token with the `codespace` scope to use this endpoint.
+
+GitHub Apps must have write access to the `codespaces` repository permission to use this endpoint.
+-}
 codespacesPreFlightWithRepoForAuthenticatedUser :
     (Result Http.Error todo -> msg) -> Cmd msg
 codespacesPreFlightWithRepoForAuthenticatedUser toMsg =
@@ -2587,6 +3337,7 @@ codespacesPreFlightWithRepoForAuthenticatedUser toMsg =
         }
 
 
+{-| Lists all secrets available in a repository without revealing their encrypted values. You must authenticate using an access token with the `repo` scope to use this endpoint. GitHub Apps must have the `codespaces_secrets` repository permission to use this endpoint. -}
 codespacesListRepoSecrets : (Result Http.Error todo -> msg) -> Cmd msg
 codespacesListRepoSecrets toMsg =
     Http.get
@@ -2600,6 +3351,7 @@ codespacesListRepoSecrets toMsg =
         }
 
 
+{-| Gets your public key, which you need to encrypt secrets. You need to encrypt a secret before you can create or update secrets. Anyone with read access to the repository can use this endpoint. If the repository is private you must use an access token with the `repo` scope. GitHub Apps must have the `codespaces_secrets` repository permission to use this endpoint. -}
 codespacesGetRepoPublicKey :
     (Result Http.Error CodespacesPublicKey -> msg) -> Cmd msg
 codespacesGetRepoPublicKey toMsg =
@@ -2610,6 +3362,7 @@ codespacesGetRepoPublicKey toMsg =
         }
 
 
+{-| Gets a single repository secret without revealing its encrypted value. You must authenticate using an access token with the `repo` scope to use this endpoint. GitHub Apps must have the `codespaces_secrets` repository permission to use this endpoint. -}
 codespacesGetRepoSecret :
     (Result Http.Error RepoCodespacesSecret -> msg) -> Cmd msg
 codespacesGetRepoSecret toMsg =
@@ -2620,6 +3373,15 @@ codespacesGetRepoSecret toMsg =
         }
 
 
+{-| For organization-owned repositories, the list of collaborators includes outside collaborators, organization members that are direct collaborators, organization members with access through team memberships, organization members with access through default organization permissions, and organization owners.
+Organization members with write, maintain, or admin privileges on the organization-owned repository can use this endpoint.
+
+Team members will include the members of child teams.
+
+You must authenticate using an access token with the `read:org` and `repo` scopes with push access to use this
+endpoint. GitHub Apps must have the `members` organization permission and `metadata` repository permission to use this
+endpoint.
+-}
 reposListCollaborators : (Result Http.Error todo -> msg) -> Cmd msg
 reposListCollaborators toMsg =
     Http.get
@@ -2633,6 +3395,14 @@ reposListCollaborators toMsg =
         }
 
 
+{-| For organization-owned repositories, the list of collaborators includes outside collaborators, organization members that are direct collaborators, organization members with access through team memberships, organization members with access through default organization permissions, and organization owners.
+
+Team members will include the members of child teams.
+
+You must authenticate using an access token with the `read:org` and `repo` scopes with push access to use this
+endpoint. GitHub Apps must have the `members` organization permission and `metadata` repository permission to use this
+endpoint.
+-}
 reposCheckCollaborator : (Result Http.Error todo -> msg) -> Cmd msg
 reposCheckCollaborator toMsg =
     Http.get
@@ -2647,6 +3417,7 @@ reposCheckCollaborator toMsg =
         }
 
 
+{-| Checks the repository permission of a collaborator. The possible repository permissions are `admin`, `write`, `read`, and `none`. -}
 reposGetCollaboratorPermissionLevel :
     (Result Http.Error RepositoryCollaboratorPermission -> msg) -> Cmd msg
 reposGetCollaboratorPermissionLevel toMsg =
@@ -2657,6 +3428,10 @@ reposGetCollaboratorPermissionLevel toMsg =
         }
 
 
+{-| Commit Comments use [these custom media types](https://docs.github.com/rest/reference/repos#custom-media-types). You can read more about the use of media types in the API [here](https://docs.github.com/rest/overview/media-types/).
+
+Comments are ordered by ascending ID.
+-}
 reposListCommitCommentsForRepo : (Result Http.Error todo -> msg) -> Cmd msg
 reposListCommitCommentsForRepo toMsg =
     Http.get
@@ -2679,6 +3454,7 @@ reposGetCommitComment toMsg =
         }
 
 
+{-| List the reactions to a [commit comment](https://docs.github.com/rest/reference/repos#comments). -}
 reactionsListForCommitComment : (Result Http.Error todo -> msg) -> Cmd msg
 reactionsListForCommitComment toMsg =
     Http.get
@@ -2693,6 +3469,35 @@ reactionsListForCommitComment toMsg =
         }
 
 
+{-| **Signature verification object**
+
+The response will include a `verification` object that describes the result of verifying the commit's signature. The following fields are included in the `verification` object:
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| `verified` | `boolean` | Indicates whether GitHub considers the signature in this commit to be verified. |
+| `reason` | `string` | The reason for verified value. Possible values and their meanings are enumerated in table below. |
+| `signature` | `string` | The signature that was extracted from the commit. |
+| `payload` | `string` | The value that was signed. |
+
+These are the possible values for `reason` in the `verification` object:
+
+| Value | Description |
+| ----- | ----------- |
+| `expired_key` | The key that made the signature is expired. |
+| `not_signing_key` | The "signing" flag is not among the usage flags in the GPG key that made the signature. |
+| `gpgverify_error` | There was an error communicating with the signature verification service. |
+| `gpgverify_unavailable` | The signature verification service is currently unavailable. |
+| `unsigned` | The object does not include a signature. |
+| `unknown_signature_type` | A non-PGP signature was found in the commit. |
+| `no_user` | No user was associated with the `committer` email address in the commit. |
+| `unverified_email` | The `committer` email address in the commit was associated with a user, but the email address is not verified on her/his account. |
+| `bad_email` | The `committer` email address in the commit is not included in the identities of the PGP key that made the signature. |
+| `unknown_key` | The key that made the signature has not been registered with any user's account. |
+| `malformed_signature` | There was an error parsing the signature. |
+| `invalid` | The signature could not be cryptographically verified using the key whose key-id was found in the signature. |
+| `valid` | None of the above errors applied, so the signature is considered to be verified. |
+-}
 reposListCommits : (Result Http.Error todo -> msg) -> Cmd msg
 reposListCommits toMsg =
     Http.get
@@ -2706,6 +3511,10 @@ reposListCommits toMsg =
         }
 
 
+{-| Protected branches are available in public repositories with GitHub Free and GitHub Free for organizations, and in public and private repositories with GitHub Pro, GitHub Team, GitHub Enterprise Cloud, and GitHub Enterprise Server. For more information, see [GitHub's products](https://docs.github.com/github/getting-started-with-github/githubs-products) in the GitHub Help documentation.
+
+Returns all branches where the given commit SHA is the HEAD, or latest commit for the branch.
+-}
 reposListBranchesForHeadCommit : (Result Http.Error todo -> msg) -> Cmd msg
 reposListBranchesForHeadCommit toMsg =
     Http.get
@@ -2720,6 +3529,7 @@ reposListBranchesForHeadCommit toMsg =
         }
 
 
+{-| Use the `:commit_sha` to specify the commit that will have its comments listed. -}
 reposListCommentsForCommit : (Result Http.Error todo -> msg) -> Cmd msg
 reposListCommentsForCommit toMsg =
     Http.get
@@ -2734,6 +3544,7 @@ reposListCommentsForCommit toMsg =
         }
 
 
+{-| Lists the merged pull request that introduced the commit to the repository. If the commit is not present in the default branch, additionally returns open pull requests associated with the commit. The results may include open and closed pull requests. -}
 reposListPullRequestsAssociatedWithCommit :
     (Result Http.Error todo -> msg) -> Cmd msg
 reposListPullRequestsAssociatedWithCommit toMsg =
@@ -2749,6 +3560,43 @@ reposListPullRequestsAssociatedWithCommit toMsg =
         }
 
 
+{-| Returns the contents of a single commit reference. You must have `read` access for the repository to use this endpoint.
+
+**Note:** If there are more than 300 files in the commit diff, the response will include pagination link headers for the remaining files, up to a limit of 3000 files. Each page contains the static commit information, and the only changes are to the file listing.
+
+You can pass the appropriate [media type](https://docs.github.com/rest/overview/media-types/#commits-commit-comparison-and-pull-requests) to  fetch `diff` and `patch` formats. Diffs with binary data will have no `patch` property.
+
+To return only the SHA-1 hash of the commit reference, you can provide the `sha` custom [media type](https://docs.github.com/rest/overview/media-types/#commits-commit-comparison-and-pull-requests) in the `Accept` header. You can use this endpoint to check if a remote reference's SHA-1 hash is the same as your local reference's SHA-1 hash by providing the local SHA-1 reference as the ETag.
+
+**Signature verification object**
+
+The response will include a `verification` object that describes the result of verifying the commit's signature. The following fields are included in the `verification` object:
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| `verified` | `boolean` | Indicates whether GitHub considers the signature in this commit to be verified. |
+| `reason` | `string` | The reason for verified value. Possible values and their meanings are enumerated in table below. |
+| `signature` | `string` | The signature that was extracted from the commit. |
+| `payload` | `string` | The value that was signed. |
+
+These are the possible values for `reason` in the `verification` object:
+
+| Value | Description |
+| ----- | ----------- |
+| `expired_key` | The key that made the signature is expired. |
+| `not_signing_key` | The "signing" flag is not among the usage flags in the GPG key that made the signature. |
+| `gpgverify_error` | There was an error communicating with the signature verification service. |
+| `gpgverify_unavailable` | The signature verification service is currently unavailable. |
+| `unsigned` | The object does not include a signature. |
+| `unknown_signature_type` | A non-PGP signature was found in the commit. |
+| `no_user` | No user was associated with the `committer` email address in the commit. |
+| `unverified_email` | The `committer` email address in the commit was associated with a user, but the email address is not verified on her/his account. |
+| `bad_email` | The `committer` email address in the commit is not included in the identities of the PGP key that made the signature. |
+| `unknown_key` | The key that made the signature has not been registered with any user's account. |
+| `malformed_signature` | There was an error parsing the signature. |
+| `invalid` | The signature could not be cryptographically verified using the key whose key-id was found in the signature. |
+| `valid` | None of the above errors applied, so the signature is considered to be verified. |
+-}
 reposGetCommit : (Result Http.Error Commit -> msg) -> Cmd msg
 reposGetCommit toMsg =
     Http.get
@@ -2757,6 +3605,10 @@ reposGetCommit toMsg =
         }
 
 
+{-| **Note:** The Checks API only looks for pushes in the repository where the check suite or check run were created. Pushes to a branch in a forked repository are not detected and return an empty `pull_requests` array.
+
+Lists check runs for a commit ref. The `ref` can be a SHA, branch name, or a tag name. GitHub Apps must have the `checks:read` permission on a private repository or pull access to a public repository to get check runs. OAuth Apps and authenticated users must have the `repo` scope to get check runs in a private repository.
+-}
 checksListForRef : (Result Http.Error todo -> msg) -> Cmd msg
 checksListForRef toMsg =
     Http.get
@@ -2771,6 +3623,10 @@ checksListForRef toMsg =
         }
 
 
+{-| **Note:** The Checks API only looks for pushes in the repository where the check suite or check run were created. Pushes to a branch in a forked repository are not detected and return an empty `pull_requests` array and a `null` value for `head_branch`.
+
+Lists check suites for a commit `ref`. The `ref` can be a SHA, branch name, or a tag name. GitHub Apps must have the `checks:read` permission on a private repository or pull access to a public repository to list check suites. OAuth Apps and authenticated users must have the `repo` scope to get check suites in a private repository.
+-}
 checksListSuitesForRef : (Result Http.Error todo -> msg) -> Cmd msg
 checksListSuitesForRef toMsg =
     Http.get
@@ -2785,6 +3641,15 @@ checksListSuitesForRef toMsg =
         }
 
 
+{-| Users with pull access in a repository can access a combined view of commit statuses for a given ref. The ref can be a SHA, a branch name, or a tag name.
+
+
+Additionally, a combined `state` is returned. The `state` is one of:
+
+*   **failure** if any of the contexts report as `error` or `failure`
+*   **pending** if there are no statuses or a context is `pending`
+*   **success** if the latest status for all contexts is `success`
+-}
 reposGetCombinedStatusForRef :
     (Result Http.Error CombinedCommitStatus -> msg) -> Cmd msg
 reposGetCombinedStatusForRef toMsg =
@@ -2795,6 +3660,10 @@ reposGetCombinedStatusForRef toMsg =
         }
 
 
+{-| Users with pull access in a repository can view commit statuses for a given ref. The ref can be a SHA, a branch name, or a tag name. Statuses are returned in reverse chronological order. The first status in the list will be the latest one.
+
+This resource is also available via a legacy route: `GET /repos/:owner/:repo/statuses/:ref`.
+-}
 reposListCommitStatusesForRef : (Result Http.Error todo -> msg) -> Cmd msg
 reposListCommitStatusesForRef toMsg =
     Http.get
@@ -2809,6 +3678,20 @@ reposListCommitStatusesForRef toMsg =
         }
 
 
+{-| Returns all community profile metrics for a repository. The repository must be public, and cannot be a fork.
+
+The returned metrics include an overall health score, the repository description, the presence of documentation, the
+detected code of conduct, the detected license, and the presence of ISSUE\_TEMPLATE, PULL\_REQUEST\_TEMPLATE,
+README, and CONTRIBUTING files.
+
+The `health_percentage` score is defined as a percentage of how many of
+these four documents are present: README, CONTRIBUTING, LICENSE, and
+CODE_OF_CONDUCT. For example, if all four documents are present, then
+the `health_percentage` is `100`. If only one is present, then the
+`health_percentage` is `25`.
+
+`content_reports_enabled` is only returned for organization-owned repositories.
+-}
 reposGetCommunityProfileMetrics :
     (Result Http.Error CommunityProfile -> msg) -> Cmd msg
 reposGetCommunityProfileMetrics toMsg =
@@ -2818,6 +3701,47 @@ reposGetCommunityProfileMetrics toMsg =
         }
 
 
+{-| The `basehead` param is comprised of two parts separated by triple dots: `{base}...{head}`. Both must be branch names in `repo`. To compare branches across other repositories in the same network as `repo`, use the format `<USERNAME>:branch`.
+
+The response from the API is equivalent to running the `git log base..head` command; however, commits are returned in chronological order. Pass the appropriate [media type](https://docs.github.com/rest/overview/media-types/#commits-commit-comparison-and-pull-requests) to fetch diff and patch formats.
+
+The response also includes details on the files that were changed between the two commits. This includes the status of the change (for example, if a file was added, removed, modified, or renamed), and details of the change itself. For example, files with a `renamed` status have a `previous_filename` field showing the previous filename of the file, and files with a `modified` status have a `patch` field showing the changes made to the file.
+
+**Working with large comparisons**
+
+To process a response with a large number of commits, you can use (`per_page` or `page`) to paginate the results. When using paging, the list of changed files is only returned with page 1, but includes all changed files for the entire comparison. For more information on working with pagination, see "[Traversing with pagination](/rest/guides/traversing-with-pagination)."
+
+When calling this API without any paging parameters (`per_page` or `page`), the returned list is limited to 250 commits and the last commit in the list is the most recent of the entire comparison. When a paging parameter is specified, the first commit in the returned list of each page is the earliest.
+
+**Signature verification object**
+
+The response will include a `verification` object that describes the result of verifying the commit's signature. The following fields are included in the `verification` object:
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| `verified` | `boolean` | Indicates whether GitHub considers the signature in this commit to be verified. |
+| `reason` | `string` | The reason for verified value. Possible values and their meanings are enumerated in table below. |
+| `signature` | `string` | The signature that was extracted from the commit. |
+| `payload` | `string` | The value that was signed. |
+
+These are the possible values for `reason` in the `verification` object:
+
+| Value | Description |
+| ----- | ----------- |
+| `expired_key` | The key that made the signature is expired. |
+| `not_signing_key` | The "signing" flag is not among the usage flags in the GPG key that made the signature. |
+| `gpgverify_error` | There was an error communicating with the signature verification service. |
+| `gpgverify_unavailable` | The signature verification service is currently unavailable. |
+| `unsigned` | The object does not include a signature. |
+| `unknown_signature_type` | A non-PGP signature was found in the commit. |
+| `no_user` | No user was associated with the `committer` email address in the commit. |
+| `unverified_email` | The `committer` email address in the commit was associated with a user, but the email address is not verified on her/his account. |
+| `bad_email` | The `committer` email address in the commit is not included in the identities of the PGP key that made the signature. |
+| `unknown_key` | The key that made the signature has not been registered with any user's account. |
+| `malformed_signature` | There was an error parsing the signature. |
+| `invalid` | The signature could not be cryptographically verified using the key whose key-id was found in the signature. |
+| `valid` | None of the above errors applied, so the signature is considered to be verified. |
+-}
 reposCompareCommits : (Result Http.Error CommitComparison -> msg) -> Cmd msg
 reposCompareCommits toMsg =
     Http.get
@@ -2826,6 +3750,44 @@ reposCompareCommits toMsg =
         }
 
 
+{-| Gets the contents of a file or directory in a repository. Specify the file path or directory in `:path`. If you omit
+`:path`, you will receive the contents of the repository's root directory. See the description below regarding what the API response includes for directories. 
+
+Files and symlinks support [a custom media type](https://docs.github.com/rest/reference/repos#custom-media-types) for
+retrieving the raw content or rendered HTML (when supported). All content types support [a custom media
+type](https://docs.github.com/rest/reference/repos#custom-media-types) to ensure the content is returned in a consistent
+object format.
+
+**Notes**:
+*   To get a repository's contents recursively, you can [recursively get the tree](https://docs.github.com/rest/reference/git#trees).
+*   This API has an upper limit of 1,000 files for a directory. If you need to retrieve more files, use the [Git Trees
+API](https://docs.github.com/rest/reference/git#get-a-tree).
+ *  Download URLs expire and are meant to be used just once. To ensure the download URL does not expire, please use the contents API to obtain a fresh download URL for each download.
+#### Size limits
+If the requested file's size is:
+* 1 MB or smaller: All features of this endpoint are supported.
+* Between 1-100 MB: Only the `raw` or `object` [custom media types](https://docs.github.com/rest/repos/contents#custom-media-types-for-repository-contents) are supported. Both will work as normal, except that when using the `object` media type, the `content` field will be an empty string and the `encoding` field will be `"none"`. To get the contents of these larger files, use the `raw` media type.
+ * Greater than 100 MB: This endpoint is not supported.
+
+#### If the content is a directory
+The response will be an array of objects, one object for each item in the directory.
+When listing the contents of a directory, submodules have their "type" specified as "file". Logically, the value
+_should_ be "submodule". This behavior exists in API v3 [for backwards compatibility purposes](https://git.io/v1YCW).
+In the next major version of the API, the type will be returned as "submodule".
+
+#### If the content is a symlink 
+If the requested `:path` points to a symlink, and the symlink's target is a normal file in the repository, then the
+API responds with the content of the file (in the format shown in the example. Otherwise, the API responds with an object 
+describing the symlink itself.
+
+#### If the content is a submodule
+The `submodule_git_url` identifies the location of the submodule repository, and the `sha` identifies a specific
+commit within the submodule repository. Git uses the given URL when cloning the submodule repository, and checks out
+the submodule at that specific commit.
+
+If the submodule repository is not hosted on github.com, the Git URLs (`git_url` and `_links["git"]`) and the
+github.com URLs (`html_url` and `_links["html"]`) will have null values.
+-}
 reposGetContent : (Result Http.Error todo -> msg) -> Cmd msg
 reposGetContent toMsg =
     Http.get
@@ -2839,6 +3801,10 @@ reposGetContent toMsg =
         }
 
 
+{-| Lists contributors to the specified repository and sorts them by the number of commits per contributor in descending order. This endpoint may return information that is a few hours old because the GitHub REST API v3 caches contributor data to improve performance.
+
+GitHub identifies contributors by author email address. This endpoint groups contribution counts by GitHub user, which includes all associated email addresses. To improve performance, only the first 500 author email addresses in the repository link to GitHub users. The rest will appear as anonymous contributors without associated GitHub user information.
+-}
 reposListContributors : (Result Http.Error todo -> msg) -> Cmd msg
 reposListContributors toMsg =
     Http.get
@@ -2852,6 +3818,10 @@ reposListContributors toMsg =
         }
 
 
+{-| You must use an access token with the `security_events` scope to use this endpoint with private repositories.
+You can also use tokens with the `public_repo` scope for public repositories only.
+GitHub Apps must have **Dependabot alerts** read permission to use this endpoint.
+-}
 dependabotListAlertsForRepo : (Result Http.Error todo -> msg) -> Cmd msg
 dependabotListAlertsForRepo toMsg =
     Http.get
@@ -2865,6 +3835,10 @@ dependabotListAlertsForRepo toMsg =
         }
 
 
+{-| You must use an access token with the `security_events` scope to use this endpoint with private repositories.
+You can also use tokens with the `public_repo` scope for public repositories only.
+GitHub Apps must have **Dependabot alerts** read permission to use this endpoint.
+-}
 dependabotGetAlert : (Result Http.Error DependabotAlert -> msg) -> Cmd msg
 dependabotGetAlert toMsg =
     Http.get
@@ -2874,6 +3848,7 @@ dependabotGetAlert toMsg =
         }
 
 
+{-| Lists all secrets available in a repository without revealing their encrypted values. You must authenticate using an access token with the `repo` scope to use this endpoint. GitHub Apps must have the `dependabot_secrets` repository permission to use this endpoint. -}
 dependabotListRepoSecrets : (Result Http.Error todo -> msg) -> Cmd msg
 dependabotListRepoSecrets toMsg =
     Http.get
@@ -2887,6 +3862,7 @@ dependabotListRepoSecrets toMsg =
         }
 
 
+{-| Gets your public key, which you need to encrypt secrets. You need to encrypt a secret before you can create or update secrets. Anyone with read access to the repository can use this endpoint. If the repository is private you must use an access token with the `repo` scope. GitHub Apps must have the `dependabot_secrets` repository permission to use this endpoint. -}
 dependabotGetRepoPublicKey :
     (Result Http.Error DependabotPublicKey -> msg) -> Cmd msg
 dependabotGetRepoPublicKey toMsg =
@@ -2897,6 +3873,7 @@ dependabotGetRepoPublicKey toMsg =
         }
 
 
+{-| Gets a single repository secret without revealing its encrypted value. You must authenticate using an access token with the `repo` scope to use this endpoint. GitHub Apps must have the `dependabot_secrets` repository permission to use this endpoint. -}
 dependabotGetRepoSecret : (Result Http.Error DependabotSecret -> msg) -> Cmd msg
 dependabotGetRepoSecret toMsg =
     Http.get
@@ -2906,6 +3883,7 @@ dependabotGetRepoSecret toMsg =
         }
 
 
+{-| Gets the diff of the dependency changes between two commits of a repository, based on the changes to the dependency manifests made in those commits. -}
 dependencyGraphDiffRange :
     (Result Http.Error DependencyGraphDiff -> msg) -> Cmd msg
 dependencyGraphDiffRange toMsg =
@@ -2916,6 +3894,7 @@ dependencyGraphDiffRange toMsg =
         }
 
 
+{-| Simple filtering of deployments is available via query parameters: -}
 reposListDeployments : (Result Http.Error todo -> msg) -> Cmd msg
 reposListDeployments toMsg =
     Http.get
@@ -2938,6 +3917,7 @@ reposGetDeployment toMsg =
         }
 
 
+{-| Users with pull access can view deployment statuses for a deployment: -}
 reposListDeploymentStatuses : (Result Http.Error todo -> msg) -> Cmd msg
 reposListDeploymentStatuses toMsg =
     Http.get
@@ -2952,6 +3932,7 @@ reposListDeploymentStatuses toMsg =
         }
 
 
+{-| Users with pull access can view a deployment status for a deployment: -}
 reposGetDeploymentStatus :
     (Result Http.Error DeploymentStatus -> msg) -> Cmd msg
 reposGetDeploymentStatus toMsg =
@@ -2962,6 +3943,10 @@ reposGetDeploymentStatus toMsg =
         }
 
 
+{-| Lists the environments for a repository.
+
+Anyone with read access to the repository can use this endpoint. If the repository is private, you must use an access token with the `repo` scope. GitHub Apps must have the `actions:read` permission to use this endpoint.
+-}
 reposGetAllEnvironments : (Result Http.Error todo -> msg) -> Cmd msg
 reposGetAllEnvironments toMsg =
     Http.get
@@ -2975,6 +3960,12 @@ reposGetAllEnvironments toMsg =
         }
 
 
+{-| **Note:** To get information about name patterns that branches must match in order to deploy to this environment, see "[Get a deployment branch policy](/rest/deployments/branch-policies#get-a-deployment-branch-policy)."
+
+Anyone with read access to the repository can use this endpoint. If the
+repository is private, you must use an access token with the `repo` scope. GitHub
+Apps must have the `actions:read` permission to use this endpoint.
+-}
 reposGetEnvironment : (Result Http.Error Environment -> msg) -> Cmd msg
 reposGetEnvironment toMsg =
     Http.get
@@ -2984,6 +3975,10 @@ reposGetEnvironment toMsg =
         }
 
 
+{-| Lists the deployment branch policies for an environment.
+
+Anyone with read access to the repository can use this endpoint. If the repository is private, you must use an access token with the `repo` scope. GitHub Apps must have the `actions:read` permission to use this endpoint.
+-}
 reposListDeploymentBranchPolicies : (Result Http.Error todo -> msg) -> Cmd msg
 reposListDeploymentBranchPolicies toMsg =
     Http.get
@@ -2998,6 +3993,10 @@ reposListDeploymentBranchPolicies toMsg =
         }
 
 
+{-| Gets a deployment branch policy for an environment.
+
+Anyone with read access to the repository can use this endpoint. If the repository is private, you must use an access token with the `repo` scope. GitHub Apps must have the `actions:read` permission to use this endpoint.
+-}
 reposGetDeploymentBranchPolicy :
     (Result Http.Error DeploymentBranchPolicy -> msg) -> Cmd msg
 reposGetDeploymentBranchPolicy toMsg =
@@ -3034,6 +4033,10 @@ reposListForks toMsg =
         }
 
 
+{-| The `content` in the response will always be Base64 encoded.
+
+_Note_: This API supports blobs up to 100 megabytes in size.
+-}
 gitGetBlob : (Result Http.Error Blob -> msg) -> Cmd msg
 gitGetBlob toMsg =
     Http.get
@@ -3043,6 +4046,37 @@ gitGetBlob toMsg =
         }
 
 
+{-| Gets a Git [commit object](https://git-scm.com/book/en/v1/Git-Internals-Git-Objects#Commit-Objects).
+
+**Signature verification object**
+
+The response will include a `verification` object that describes the result of verifying the commit's signature. The following fields are included in the `verification` object:
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| `verified` | `boolean` | Indicates whether GitHub considers the signature in this commit to be verified. |
+| `reason` | `string` | The reason for verified value. Possible values and their meanings are enumerated in the table below. |
+| `signature` | `string` | The signature that was extracted from the commit. |
+| `payload` | `string` | The value that was signed. |
+
+These are the possible values for `reason` in the `verification` object:
+
+| Value | Description |
+| ----- | ----------- |
+| `expired_key` | The key that made the signature is expired. |
+| `not_signing_key` | The "signing" flag is not among the usage flags in the GPG key that made the signature. |
+| `gpgverify_error` | There was an error communicating with the signature verification service. |
+| `gpgverify_unavailable` | The signature verification service is currently unavailable. |
+| `unsigned` | The object does not include a signature. |
+| `unknown_signature_type` | A non-PGP signature was found in the commit. |
+| `no_user` | No user was associated with the `committer` email address in the commit. |
+| `unverified_email` | The `committer` email address in the commit was associated with a user, but the email address is not verified on her/his account. |
+| `bad_email` | The `committer` email address in the commit is not included in the identities of the PGP key that made the signature. |
+| `unknown_key` | The key that made the signature has not been registered with any user's account. |
+| `malformed_signature` | There was an error parsing the signature. |
+| `invalid` | The signature could not be cryptographically verified using the key whose key-id was found in the signature. |
+| `valid` | None of the above errors applied, so the signature is considered to be verified. |
+-}
 gitGetCommit : (Result Http.Error GitCommit -> msg) -> Cmd msg
 gitGetCommit toMsg =
     Http.get
@@ -3052,6 +4086,14 @@ gitGetCommit toMsg =
         }
 
 
+{-| Returns an array of references from your Git database that match the supplied name. The `:ref` in the URL must be formatted as `heads/<branch name>` for branches and `tags/<tag name>` for tags. If the `:ref` doesn't exist in the repository, but existing refs start with `:ref`, they will be returned as an array.
+
+When you use this endpoint without providing a `:ref`, it will return an array of all the references from your Git database, including notes and stashes if they exist on the server. Anything in the namespace is returned, not just `heads` and `tags`.
+
+**Note:** You need to explicitly [request a pull request](https://docs.github.com/rest/reference/pulls#get-a-pull-request) to trigger a test merge commit, which checks the mergeability of pull requests. For more information, see "[Checking mergeability of pull requests](https://docs.github.com/rest/guides/getting-started-with-the-git-database-api#checking-mergeability-of-pull-requests)".
+
+If you request matching references for a branch named `feature` but the branch `feature` doesn't exist, the response can still include other matching head refs that start with the word `feature`, such as `featureA` and `featureB`.
+-}
 gitListMatchingRefs : (Result Http.Error todo -> msg) -> Cmd msg
 gitListMatchingRefs toMsg =
     Http.get
@@ -3066,6 +4108,10 @@ gitListMatchingRefs toMsg =
         }
 
 
+{-| Returns a single reference from your Git database. The `:ref` in the URL must be formatted as `heads/<branch name>` for branches and `tags/<tag name>` for tags. If the `:ref` doesn't match an existing ref, a `404` is returned.
+
+**Note:** You need to explicitly [request a pull request](https://docs.github.com/rest/reference/pulls#get-a-pull-request) to trigger a test merge commit, which checks the mergeability of pull requests. For more information, see "[Checking mergeability of pull requests](https://docs.github.com/rest/guides/getting-started-with-the-git-database-api#checking-mergeability-of-pull-requests)".
+-}
 gitGetRef : (Result Http.Error GitRef -> msg) -> Cmd msg
 gitGetRef toMsg =
     Http.get
@@ -3074,6 +4120,35 @@ gitGetRef toMsg =
         }
 
 
+{-| **Signature verification object**
+
+The response will include a `verification` object that describes the result of verifying the commit's signature. The following fields are included in the `verification` object:
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| `verified` | `boolean` | Indicates whether GitHub considers the signature in this commit to be verified. |
+| `reason` | `string` | The reason for verified value. Possible values and their meanings are enumerated in table below. |
+| `signature` | `string` | The signature that was extracted from the commit. |
+| `payload` | `string` | The value that was signed. |
+
+These are the possible values for `reason` in the `verification` object:
+
+| Value | Description |
+| ----- | ----------- |
+| `expired_key` | The key that made the signature is expired. |
+| `not_signing_key` | The "signing" flag is not among the usage flags in the GPG key that made the signature. |
+| `gpgverify_error` | There was an error communicating with the signature verification service. |
+| `gpgverify_unavailable` | The signature verification service is currently unavailable. |
+| `unsigned` | The object does not include a signature. |
+| `unknown_signature_type` | A non-PGP signature was found in the commit. |
+| `no_user` | No user was associated with the `committer` email address in the commit. |
+| `unverified_email` | The `committer` email address in the commit was associated with a user, but the email address is not verified on her/his account. |
+| `bad_email` | The `committer` email address in the commit is not included in the identities of the PGP key that made the signature. |
+| `unknown_key` | The key that made the signature has not been registered with any user's account. |
+| `malformed_signature` | There was an error parsing the signature. |
+| `invalid` | The signature could not be cryptographically verified using the key whose key-id was found in the signature. |
+| `valid` | None of the above errors applied, so the signature is considered to be verified. |
+-}
 gitGetTag : (Result Http.Error GitTag -> msg) -> Cmd msg
 gitGetTag toMsg =
     Http.get
@@ -3082,6 +4157,13 @@ gitGetTag toMsg =
         }
 
 
+{-| Returns a single tree using the SHA1 value for that tree.
+
+If `truncated` is `true` in the response then the number of items in the `tree` array exceeded our maximum limit. If you need to fetch more items, use the non-recursive method of fetching trees, and fetch one sub-tree at a time.
+
+
+**Note**: The limit for the `tree` array is 100,000 entries with a maximum size of 7 MB when using the `recursive` parameter.
+-}
 gitGetTree : (Result Http.Error GitTree -> msg) -> Cmd msg
 gitGetTree toMsg =
     Http.get
@@ -3091,6 +4173,7 @@ gitGetTree toMsg =
         }
 
 
+{-| Lists webhooks for a repository. `last response` may return null if there have not been any deliveries within 30 days. -}
 reposListWebhooks : (Result Http.Error todo -> msg) -> Cmd msg
 reposListWebhooks toMsg =
     Http.get
@@ -3104,6 +4187,7 @@ reposListWebhooks toMsg =
         }
 
 
+{-| Returns a webhook configured in a repository. To get only the webhook `config` properties, see "[Get a webhook configuration for a repository](/rest/reference/repos#get-a-webhook-configuration-for-a-repository)." -}
 reposGetWebhook : (Result Http.Error Hook -> msg) -> Cmd msg
 reposGetWebhook toMsg =
     Http.get
@@ -3112,6 +4196,10 @@ reposGetWebhook toMsg =
         }
 
 
+{-| Returns the webhook configuration for a repository. To get more information about the webhook, including the `active` state and `events`, use "[Get a repository webhook](/rest/reference/orgs#get-a-repository-webhook)."
+
+Access tokens must have the `read:repo_hook` or `repo` scope, and GitHub Apps must have the `repository_hooks:read` permission.
+-}
 reposGetWebhookConfigForRepo :
     (Result Http.Error WebhookConfig -> msg) -> Cmd msg
 reposGetWebhookConfigForRepo toMsg =
@@ -3122,6 +4210,7 @@ reposGetWebhookConfigForRepo toMsg =
         }
 
 
+{-| Returns a list of webhook deliveries for a webhook configured in a repository. -}
 reposListWebhookDeliveries : (Result Http.Error todo -> msg) -> Cmd msg
 reposListWebhookDeliveries toMsg =
     Http.get
@@ -3136,6 +4225,7 @@ reposListWebhookDeliveries toMsg =
         }
 
 
+{-| Returns a delivery for a webhook configured in a repository. -}
 reposGetWebhookDelivery : (Result Http.Error HookDelivery -> msg) -> Cmd msg
 reposGetWebhookDelivery toMsg =
     Http.get
@@ -3145,6 +4235,41 @@ reposGetWebhookDelivery toMsg =
         }
 
 
+{-| View the progress of an import.
+
+**Import status**
+
+This section includes details about the possible values of the `status` field of the Import Progress response.
+
+An import that does not have errors will progress through these steps:
+
+*   `detecting` - the "detection" step of the import is in progress because the request did not include a `vcs` parameter. The import is identifying the type of source control present at the URL.
+*   `importing` - the "raw" step of the import is in progress. This is where commit data is fetched from the original repository. The import progress response will include `commit_count` (the total number of raw commits that will be imported) and `percent` (0 - 100, the current progress through the import).
+*   `mapping` - the "rewrite" step of the import is in progress. This is where SVN branches are converted to Git branches, and where author updates are applied. The import progress response does not include progress information.
+*   `pushing` - the "push" step of the import is in progress. This is where the importer updates the repository on GitHub. The import progress response will include `push_percent`, which is the percent value reported by `git push` when it is "Writing objects".
+*   `complete` - the import is complete, and the repository is ready on GitHub.
+
+If there are problems, you will see one of these in the `status` field:
+
+*   `auth_failed` - the import requires authentication in order to connect to the original repository. To update authentication for the import, please see the [Update an import](https://docs.github.com/rest/reference/migrations#update-an-import) section.
+*   `error` - the import encountered an error. The import progress response will include the `failed_step` and an error message. Contact [GitHub Support](https://support.github.com/contact?tags=dotcom-rest-api) for more information.
+*   `detection_needs_auth` - the importer requires authentication for the originating repository to continue detection. To update authentication for the import, please see the [Update an import](https://docs.github.com/rest/reference/migrations#update-an-import) section.
+*   `detection_found_nothing` - the importer didn't recognize any source control at the URL. To resolve, [Cancel the import](https://docs.github.com/rest/reference/migrations#cancel-an-import) and [retry](https://docs.github.com/rest/reference/migrations#start-an-import) with the correct URL.
+*   `detection_found_multiple` - the importer found several projects or repositories at the provided URL. When this is the case, the Import Progress response will also include a `project_choices` field with the possible project choices as values. To update project choice, please see the [Update an import](https://docs.github.com/rest/reference/migrations#update-an-import) section.
+
+**The project_choices field**
+
+When multiple projects are found at the provided URL, the response hash will include a `project_choices` field, the value of which is an array of hashes each representing a project choice. The exact key/value pairs of the project hashes will differ depending on the version control type.
+
+**Git LFS related fields**
+
+This section includes details about Git LFS related fields that may be present in the Import Progress response.
+
+*   `use_lfs` - describes whether the import has been opted in or out of using Git LFS. The value can be `opt_in`, `opt_out`, or `undecided` if no action has been taken.
+*   `has_large_files` - the boolean value describing whether files larger than 100MB were found during the `importing` step.
+*   `large_files_size` - the total size in gigabytes of files larger than 100MB found in the originating repository.
+*   `large_files_count` - the total number of files larger than 100MB found in the originating repository. To see a list of these files, make a "Get Large Files" request.
+-}
 migrationsGetImportStatus : (Result Http.Error Import -> msg) -> Cmd msg
 migrationsGetImportStatus toMsg =
     Http.get
@@ -3153,6 +4278,10 @@ migrationsGetImportStatus toMsg =
         }
 
 
+{-| Each type of source control system represents authors in a different way. For example, a Git commit author has a display name and an email address, but a Subversion commit author just has a username. The GitHub Importer will make the author information valid, but the author might not be correct. For example, it will change the bare Subversion username `hubot` into something like `hubot <hubot@12341234-abab-fefe-8787-fedcba987654>`.
+
+This endpoint and the [Map a commit author](https://docs.github.com/rest/reference/migrations#map-a-commit-author) endpoint allow you to provide correct Git author information.
+-}
 migrationsGetCommitAuthors : (Result Http.Error todo -> msg) -> Cmd msg
 migrationsGetCommitAuthors toMsg =
     Http.get
@@ -3166,6 +4295,7 @@ migrationsGetCommitAuthors toMsg =
         }
 
 
+{-| List files larger than 100MB found during the import -}
 migrationsGetLargeFiles : (Result Http.Error todo -> msg) -> Cmd msg
 migrationsGetLargeFiles toMsg =
     Http.get
@@ -3179,6 +4309,10 @@ migrationsGetLargeFiles toMsg =
         }
 
 
+{-| Enables an authenticated GitHub App to find the repository's installation information. The installation's account type will be either an organization or a user account, depending which account the repository belongs to.
+
+You must use a [JWT](https://docs.github.com/apps/building-github-apps/authenticating-with-github-apps/#authenticating-as-a-github-app) to access this endpoint.
+-}
 appsGetRepoInstallation : (Result Http.Error Installation -> msg) -> Cmd msg
 appsGetRepoInstallation toMsg =
     Http.get
@@ -3187,6 +4321,7 @@ appsGetRepoInstallation toMsg =
         }
 
 
+{-| Shows which type of GitHub user can interact with this repository and when the restriction expires. If there are no restrictions, you will see an empty response. -}
 interactionsGetRestrictionsForRepo : (Result Http.Error todo -> msg) -> Cmd msg
 interactionsGetRestrictionsForRepo toMsg =
     Http.get
@@ -3200,6 +4335,7 @@ interactionsGetRestrictionsForRepo toMsg =
         }
 
 
+{-| When authenticating as a user with admin rights to a repository, this endpoint will list all currently open repository invitations. -}
 reposListInvitations : (Result Http.Error todo -> msg) -> Cmd msg
 reposListInvitations toMsg =
     Http.get
@@ -3213,6 +4349,13 @@ reposListInvitations toMsg =
         }
 
 
+{-| List issues in a repository.
+
+**Note**: GitHub's REST API v3 considers every pull request an issue, but not every issue is a pull request. For this
+reason, "Issues" endpoints may return both issues and pull requests in the response. You can identify pull requests by
+the `pull_request` key. Be aware that the `id` of a pull request returned from "Issues" endpoints will be an _issue id_. To find out the pull
+request id, use the "[List pull requests](https://docs.github.com/rest/reference/pulls#list-pull-requests)" endpoint.
+-}
 issuesListForRepo : (Result Http.Error todo -> msg) -> Cmd msg
 issuesListForRepo toMsg =
     Http.get
@@ -3226,6 +4369,7 @@ issuesListForRepo toMsg =
         }
 
 
+{-| By default, Issue Comments are ordered by ascending ID. -}
 issuesListCommentsForRepo : (Result Http.Error todo -> msg) -> Cmd msg
 issuesListCommentsForRepo toMsg =
     Http.get
@@ -3248,6 +4392,7 @@ issuesGetComment toMsg =
         }
 
 
+{-| List the reactions to an [issue comment](https://docs.github.com/rest/reference/issues#comments). -}
 reactionsListForIssueComment : (Result Http.Error todo -> msg) -> Cmd msg
 reactionsListForIssueComment toMsg =
     Http.get
@@ -3284,6 +4429,18 @@ issuesGetEvent toMsg =
         }
 
 
+{-| The API returns a [`301 Moved Permanently` status](https://docs.github.com/rest/overview/resources-in-the-rest-api#http-redirects-redirects) if the issue was
+[transferred](https://docs.github.com/articles/transferring-an-issue-to-another-repository/) to another repository. If
+the issue was transferred to or deleted from a repository where the authenticated user lacks read access, the API
+returns a `404 Not Found` status. If the issue was deleted from a repository where the authenticated user has read
+access, the API returns a `410 Gone` status. To receive webhook events for transferred and deleted issues, subscribe
+to the [`issues`](https://docs.github.com/webhooks/event-payloads/#issues) webhook.
+
+**Note**: GitHub's REST API v3 considers every pull request an issue, but not every issue is a pull request. For this
+reason, "Issues" endpoints may return both issues and pull requests in the response. You can identify pull requests by
+the `pull_request` key. Be aware that the `id` of a pull request returned from "Issues" endpoints will be an _issue id_. To find out the pull
+request id, use the "[List pull requests](https://docs.github.com/rest/reference/pulls#list-pull-requests)" endpoint.
+-}
 issuesGet : (Result Http.Error Issue -> msg) -> Cmd msg
 issuesGet toMsg =
     Http.get
@@ -3293,6 +4450,7 @@ issuesGet toMsg =
         }
 
 
+{-| Issue Comments are ordered by ascending ID. -}
 issuesListComments : (Result Http.Error todo -> msg) -> Cmd msg
 issuesListComments toMsg =
     Http.get
@@ -3335,6 +4493,7 @@ issuesListLabelsOnIssue toMsg =
         }
 
 
+{-| List the reactions to an [issue](https://docs.github.com/rest/reference/issues). -}
 reactionsListForIssue : (Result Http.Error todo -> msg) -> Cmd msg
 reactionsListForIssue toMsg =
     Http.get
@@ -3405,6 +4564,7 @@ issuesGetLabel toMsg =
         }
 
 
+{-| Lists languages for the specified repository. The value shown for each language is the number of bytes of code written in that language. -}
 reposListLanguages : (Result Http.Error Language -> msg) -> Cmd msg
 reposListLanguages toMsg =
     Http.get
@@ -3413,6 +4573,10 @@ reposListLanguages toMsg =
         }
 
 
+{-| This method returns the contents of the repository's license file, if one is detected.
+
+Similar to [Get repository content](https://docs.github.com/rest/reference/repos#get-repository-content), this method also supports [custom media types](https://docs.github.com/rest/overview/media-types) for retrieving the raw license content or rendered license HTML.
+-}
 licensesGetForRepo : (Result Http.Error LicenseContent -> msg) -> Cmd msg
 licensesGetForRepo toMsg =
     Http.get
@@ -3457,6 +4621,7 @@ issuesListLabelsForMilestone toMsg =
         }
 
 
+{-| Lists all notifications for the current user in the specified repository. -}
 activityListRepoNotificationsForAuthenticatedUser :
     (Result Http.Error todo -> msg) -> Cmd msg
 activityListRepoNotificationsForAuthenticatedUser toMsg =
@@ -3510,6 +4675,12 @@ reposGetPagesBuild toMsg =
         }
 
 
+{-| Gets a health check of the DNS settings for the `CNAME` record configured for a repository's GitHub Pages.
+
+The first request to this endpoint returns a `202 Accepted` status and starts an asynchronous background task to get the results for the domain. After the background task completes, subsequent requests to this endpoint return a `200 OK` status with the health check results in the response.
+
+Users must have admin or owner permissions. GitHub Apps must have the `pages:write` and `administration:write` permission to use this endpoint.
+-}
 reposGetPagesHealthCheck :
     (Result Http.Error PagesHealthCheck -> msg) -> Cmd msg
 reposGetPagesHealthCheck toMsg =
@@ -3519,6 +4690,7 @@ reposGetPagesHealthCheck toMsg =
         }
 
 
+{-| Lists the projects in a repository. Returns a `404 Not Found` status if projects are disabled in the repository. If you do not have sufficient privileges to perform this action, a `401 Unauthorized` or `410 Gone` status is returned. -}
 projectsListForRepo : (Result Http.Error todo -> msg) -> Cmd msg
 projectsListForRepo toMsg =
     Http.get
@@ -3532,6 +4704,7 @@ projectsListForRepo toMsg =
         }
 
 
+{-| Draft pull requests are available in public repositories with GitHub Free and GitHub Free for organizations, GitHub Pro, and legacy per-repository billing plans, and in public and private repositories with GitHub Team and GitHub Enterprise Cloud. For more information, see [GitHub's products](https://docs.github.com/github/getting-started-with-github/githubs-products) in the GitHub Help documentation. -}
 pullsList : (Result Http.Error todo -> msg) -> Cmd msg
 pullsList toMsg =
     Http.get
@@ -3545,6 +4718,7 @@ pullsList toMsg =
         }
 
 
+{-| Lists review comments for all pull requests in a repository. By default, review comments are in ascending order by ID. -}
 pullsListReviewCommentsForRepo : (Result Http.Error todo -> msg) -> Cmd msg
 pullsListReviewCommentsForRepo toMsg =
     Http.get
@@ -3558,6 +4732,7 @@ pullsListReviewCommentsForRepo toMsg =
         }
 
 
+{-| Provides details for a review comment. -}
 pullsGetReviewComment :
     (Result Http.Error PullRequestReviewComment -> msg) -> Cmd msg
 pullsGetReviewComment toMsg =
@@ -3568,6 +4743,7 @@ pullsGetReviewComment toMsg =
         }
 
 
+{-| List the reactions to a [pull request review comment](https://docs.github.com/rest/reference/pulls#review-comments). -}
 reactionsListForPullRequestReviewComment :
     (Result Http.Error todo -> msg) -> Cmd msg
 reactionsListForPullRequestReviewComment toMsg =
@@ -3583,6 +4759,22 @@ reactionsListForPullRequestReviewComment toMsg =
         }
 
 
+{-| Draft pull requests are available in public repositories with GitHub Free and GitHub Free for organizations, GitHub Pro, and legacy per-repository billing plans, and in public and private repositories with GitHub Team and GitHub Enterprise Cloud. For more information, see [GitHub's products](https://docs.github.com/github/getting-started-with-github/githubs-products) in the GitHub Help documentation.
+
+Lists details of a pull request by providing its number.
+
+When you get, [create](https://docs.github.com/rest/reference/pulls/#create-a-pull-request), or [edit](https://docs.github.com/rest/reference/pulls#update-a-pull-request) a pull request, GitHub creates a merge commit to test whether the pull request can be automatically merged into the base branch. This test commit is not added to the base branch or the head branch. You can review the status of the test commit using the `mergeable` key. For more information, see "[Checking mergeability of pull requests](https://docs.github.com/rest/guides/getting-started-with-the-git-database-api#checking-mergeability-of-pull-requests)".
+
+The value of the `mergeable` attribute can be `true`, `false`, or `null`. If the value is `null`, then GitHub has started a background job to compute the mergeability. After giving the job time to complete, resubmit the request. When the job finishes, you will see a non-`null` value for the `mergeable` attribute in the response. If `mergeable` is `true`, then `merge_commit_sha` will be the SHA of the _test_ merge commit.
+
+The value of the `merge_commit_sha` attribute changes depending on the state of the pull request. Before merging a pull request, the `merge_commit_sha` attribute holds the SHA of the _test_ merge commit. After merging a pull request, the `merge_commit_sha` attribute changes depending on how you merged the pull request:
+
+*   If merged as a [merge commit](https://docs.github.com/articles/about-merge-methods-on-github/), `merge_commit_sha` represents the SHA of the merge commit.
+*   If merged via a [squash](https://docs.github.com/articles/about-merge-methods-on-github/#squashing-your-merge-commits), `merge_commit_sha` represents the SHA of the squashed commit on the base branch.
+*   If [rebased](https://docs.github.com/articles/about-merge-methods-on-github/#rebasing-and-merging-your-commits), `merge_commit_sha` represents the commit that the base branch was updated to.
+
+Pass the appropriate [media type](https://docs.github.com/rest/overview/media-types/#commits-commit-comparison-and-pull-requests) to fetch diff and patch formats.
+-}
 pullsGet : (Result Http.Error PullRequest -> msg) -> Cmd msg
 pullsGet toMsg =
     Http.get
@@ -3592,6 +4784,7 @@ pullsGet toMsg =
         }
 
 
+{-| Lists all review comments for a pull request. By default, review comments are in ascending order by ID. -}
 pullsListReviewComments : (Result Http.Error todo -> msg) -> Cmd msg
 pullsListReviewComments toMsg =
     Http.get
@@ -3606,6 +4799,7 @@ pullsListReviewComments toMsg =
         }
 
 
+{-| Lists a maximum of 250 commits for a pull request. To receive a complete commit list for pull requests with more than 250 commits, use the [List commits](https://docs.github.com/rest/reference/repos#list-commits) endpoint. -}
 pullsListCommits : (Result Http.Error todo -> msg) -> Cmd msg
 pullsListCommits toMsg =
     Http.get
@@ -3620,6 +4814,7 @@ pullsListCommits toMsg =
         }
 
 
+{-| **Note:** Responses include a maximum of 3000 files. The paginated response returns 30 files per page by default. -}
 pullsListFiles : (Result Http.Error todo -> msg) -> Cmd msg
 pullsListFiles toMsg =
     Http.get
@@ -3648,6 +4843,7 @@ pullsCheckIfMerged toMsg =
         }
 
 
+{-| Gets the users or teams whose review is requested for a pull request. Once a requested reviewer submits a review, they are no longer considered a requested reviewer. Their review will instead be returned by the [List reviews for a pull request](https://docs.github.com/rest/pulls/reviews#list-reviews-for-a-pull-request) operation. -}
 pullsListRequestedReviewers :
     (Result Http.Error PullRequestReviewRequest -> msg) -> Cmd msg
 pullsListRequestedReviewers toMsg =
@@ -3658,6 +4854,7 @@ pullsListRequestedReviewers toMsg =
         }
 
 
+{-| The list of reviews returns in chronological order. -}
 pullsListReviews : (Result Http.Error todo -> msg) -> Cmd msg
 pullsListReviews toMsg =
     Http.get
@@ -3681,6 +4878,7 @@ pullsGetReview toMsg =
         }
 
 
+{-| List comments for a specific pull request review. -}
 pullsListCommentsForReview : (Result Http.Error todo -> msg) -> Cmd msg
 pullsListCommentsForReview toMsg =
     Http.get
@@ -3695,6 +4893,10 @@ pullsListCommentsForReview toMsg =
         }
 
 
+{-| Gets the preferred README for a repository.
+
+READMEs support [custom media types](https://docs.github.com/rest/reference/repos#custom-media-types) for retrieving the raw content or rendered HTML.
+-}
 reposGetReadme : (Result Http.Error ContentFile -> msg) -> Cmd msg
 reposGetReadme toMsg =
     Http.get
@@ -3703,6 +4905,10 @@ reposGetReadme toMsg =
         }
 
 
+{-| Gets the README from a repository directory.
+
+READMEs support [custom media types](https://docs.github.com/rest/reference/repos#custom-media-types) for retrieving the raw content or rendered HTML.
+-}
 reposGetReadmeInDirectory : (Result Http.Error ContentFile -> msg) -> Cmd msg
 reposGetReadmeInDirectory toMsg =
     Http.get
@@ -3711,6 +4917,10 @@ reposGetReadmeInDirectory toMsg =
         }
 
 
+{-| This returns a list of releases, which does not include regular Git tags that have not been associated with a release. To get a list of Git tags, use the [Repository Tags API](https://docs.github.com/rest/reference/repos#list-repository-tags).
+
+Information about published releases are available to everyone. Only users with push access will receive listings for draft releases.
+-}
 reposListReleases : (Result Http.Error todo -> msg) -> Cmd msg
 reposListReleases toMsg =
     Http.get
@@ -3724,6 +4934,7 @@ reposListReleases toMsg =
         }
 
 
+{-| To download the asset's binary content, set the `Accept` header of the request to [`application/octet-stream`](https://docs.github.com/rest/overview/media-types). The API will either redirect the client to the location, or stream it directly if possible. API clients should handle both a `200` or `302` response. -}
 reposGetReleaseAsset : (Result Http.Error ReleaseAsset -> msg) -> Cmd msg
 reposGetReleaseAsset toMsg =
     Http.get
@@ -3733,6 +4944,10 @@ reposGetReleaseAsset toMsg =
         }
 
 
+{-| View the latest published full release for the repository.
+
+The latest release is the most recent non-prerelease, non-draft release, sorted by the `created_at` attribute. The `created_at` attribute is the date of the commit used for the release, and not the date when the release was drafted or published.
+-}
 reposGetLatestRelease : (Result Http.Error Release -> msg) -> Cmd msg
 reposGetLatestRelease toMsg =
     Http.get
@@ -3741,6 +4956,7 @@ reposGetLatestRelease toMsg =
         }
 
 
+{-| Get a published release with the specified tag. -}
 reposGetReleaseByTag : (Result Http.Error Release -> msg) -> Cmd msg
 reposGetReleaseByTag toMsg =
     Http.get
@@ -3750,6 +4966,7 @@ reposGetReleaseByTag toMsg =
         }
 
 
+{-| **Note:** This returns an `upload_url` key corresponding to the endpoint for uploading release assets. This key is a [hypermedia resource](https://docs.github.com/rest/overview/resources-in-the-rest-api#hypermedia). -}
 reposGetRelease : (Result Http.Error Release -> msg) -> Cmd msg
 reposGetRelease toMsg =
     Http.get
@@ -3773,6 +4990,7 @@ reposListReleaseAssets toMsg =
         }
 
 
+{-| List the reactions to a [release](https://docs.github.com/rest/reference/repos#releases). -}
 reactionsListForRelease : (Result Http.Error todo -> msg) -> Cmd msg
 reactionsListForRelease toMsg =
     Http.get
@@ -3787,6 +5005,12 @@ reactionsListForRelease toMsg =
         }
 
 
+{-| Lists secret scanning alerts for an eligible repository, from newest to oldest.
+To use this endpoint, you must be an administrator for the repository or for the organization that owns the repository, and you must use a personal access token with the `repo` scope or `security_events` scope.
+For public repositories, you may instead use the `public_repo` scope.
+
+GitHub Apps must have the `secret_scanning_alerts` read permission to use this endpoint.
+-}
 secretScanningListAlertsForRepo : (Result Http.Error todo -> msg) -> Cmd msg
 secretScanningListAlertsForRepo toMsg =
     Http.get
@@ -3801,6 +5025,12 @@ secretScanningListAlertsForRepo toMsg =
         }
 
 
+{-| Gets a single secret scanning alert detected in an eligible repository.
+To use this endpoint, you must be an administrator for the repository or for the organization that owns the repository, and you must use a personal access token with the `repo` scope or `security_events` scope.
+For public repositories, you may instead use the `public_repo` scope.
+
+GitHub Apps must have the `secret_scanning_alerts` read permission to use this endpoint.
+-}
 secretScanningGetAlert :
     (Result Http.Error SecretScanningAlert -> msg) -> Cmd msg
 secretScanningGetAlert toMsg =
@@ -3811,6 +5041,12 @@ secretScanningGetAlert toMsg =
         }
 
 
+{-| Lists all locations for a given secret scanning alert for an eligible repository.
+To use this endpoint, you must be an administrator for the repository or for the organization that owns the repository, and you must use a personal access token with the `repo` scope or `security_events` scope.
+For public repositories, you may instead use the `public_repo` scope.
+
+GitHub Apps must have the `secret_scanning_alerts` read permission to use this endpoint.
+-}
 secretScanningListLocationsForAlert : (Result Http.Error todo -> msg) -> Cmd msg
 secretScanningListLocationsForAlert toMsg =
     Http.get
@@ -3825,6 +5061,10 @@ secretScanningListLocationsForAlert toMsg =
         }
 
 
+{-| Lists the people that have starred the repository.
+
+You can also find out _when_ stars were created by passing the following custom [media type](https://docs.github.com/rest/overview/media-types/) via the `Accept` header: `application/vnd.github.star+json`.
+-}
 activityListStargazersForRepo : (Result Http.Error todo -> msg) -> Cmd msg
 activityListStargazersForRepo toMsg =
     Http.get
@@ -3838,6 +5078,7 @@ activityListStargazersForRepo toMsg =
         }
 
 
+{-| Returns a weekly aggregate of the number of additions and deletions pushed to a repository. -}
 reposGetCodeFrequencyStats : (Result Http.Error todo -> msg) -> Cmd msg
 reposGetCodeFrequencyStats toMsg =
     Http.get
@@ -3852,6 +5093,7 @@ reposGetCodeFrequencyStats toMsg =
         }
 
 
+{-| Returns the last year of commit activity grouped by week. The `days` array is a group of commits per day, starting on `Sunday`. -}
 reposGetCommitActivityStats : (Result Http.Error todo -> msg) -> Cmd msg
 reposGetCommitActivityStats toMsg =
     Http.get
@@ -3866,6 +5108,13 @@ reposGetCommitActivityStats toMsg =
         }
 
 
+{-| Returns the `total` number of commits authored by the contributor. In addition, the response includes a Weekly Hash (`weeks` array) with the following information:
+
+*   `w` - Start of the week, given as a [Unix timestamp](http://en.wikipedia.org/wiki/Unix_time).
+*   `a` - Number of additions
+*   `d` - Number of deletions
+*   `c` - Number of commits
+-}
 reposGetContributorsStats : (Result Http.Error todo -> msg) -> Cmd msg
 reposGetContributorsStats toMsg =
     Http.get
@@ -3879,6 +5128,10 @@ reposGetContributorsStats toMsg =
         }
 
 
+{-| Returns the total commit counts for the `owner` and total commit counts in `all`. `all` is everyone combined, including the `owner` in the last 52 weeks. If you'd like to get the commit counts for non-owners, you can subtract `owner` from `all`.
+
+The array order is oldest week (index 0) to most recent week.
+-}
 reposGetParticipationStats :
     (Result Http.Error ParticipationStats -> msg) -> Cmd msg
 reposGetParticipationStats toMsg =
@@ -3889,6 +5142,14 @@ reposGetParticipationStats toMsg =
         }
 
 
+{-| Each array contains the day number, hour number, and number of commits:
+
+*   `0-6`: Sunday - Saturday
+*   `0-23`: Hour of day
+*   Number of commits
+
+For example, `[2, 14, 25]` indicates that there were 25 total commits, during the 2:00pm hour on Tuesdays. All times are based on the time zone of individual commits.
+-}
 reposGetPunchCardStats : (Result Http.Error todo -> msg) -> Cmd msg
 reposGetPunchCardStats toMsg =
     Http.get
@@ -3902,6 +5163,7 @@ reposGetPunchCardStats toMsg =
         }
 
 
+{-| Lists the people watching the specified repository. -}
 activityListWatchersForRepo : (Result Http.Error todo -> msg) -> Cmd msg
 activityListWatchersForRepo toMsg =
     Http.get
@@ -3937,6 +5199,10 @@ reposListTags toMsg =
         }
 
 
+{-| This returns the tag protection states of a repository.
+
+This information is only available to repository administrators.
+-}
 reposListTagProtection : (Result Http.Error todo -> msg) -> Cmd msg
 reposListTagProtection toMsg =
     Http.get
@@ -3950,6 +5216,11 @@ reposListTagProtection toMsg =
         }
 
 
+{-| Gets a redirect URL to download a tar archive for a repository. If you omit `:ref`, the repository’s default branch (usually
+`master`) will be used. Please make sure your HTTP framework is configured to follow redirects or you will need to use
+the `Location` header to make a second `GET` request.
+**Note**: For private repositories, these links are temporary and expire after five minutes.
+-}
 reposDownloadTarballArchive : (Result Http.Error todo -> msg) -> Cmd msg
 reposDownloadTarballArchive toMsg =
     Http.get
@@ -3984,6 +5255,7 @@ reposGetAllTopics toMsg =
         }
 
 
+{-| Get the total number of clones and breakdown per day or week for the last 14 days. Timestamps are aligned to UTC midnight of the beginning of the day or week. Week begins on Monday. -}
 reposGetClones : (Result Http.Error CloneTraffic -> msg) -> Cmd msg
 reposGetClones toMsg =
     Http.get
@@ -3992,6 +5264,7 @@ reposGetClones toMsg =
         }
 
 
+{-| Get the top 10 popular contents over the last 14 days. -}
 reposGetTopPaths : (Result Http.Error todo -> msg) -> Cmd msg
 reposGetTopPaths toMsg =
     Http.get
@@ -4006,6 +5279,7 @@ reposGetTopPaths toMsg =
         }
 
 
+{-| Get the top 10 referrers over the last 14 days. -}
 reposGetTopReferrers : (Result Http.Error todo -> msg) -> Cmd msg
 reposGetTopReferrers toMsg =
     Http.get
@@ -4020,6 +5294,7 @@ reposGetTopReferrers toMsg =
         }
 
 
+{-| Get the total number of views and breakdown per day or week for the last 14 days. Timestamps are aligned to UTC midnight of the beginning of the day or week. Week begins on Monday. -}
 reposGetViews : (Result Http.Error ViewTraffic -> msg) -> Cmd msg
 reposGetViews toMsg =
     Http.get
@@ -4028,6 +5303,7 @@ reposGetViews toMsg =
         }
 
 
+{-| Shows whether dependency alerts are enabled or disabled for a repository. The authenticated user must have admin read access to the repository. For more information, see "[About security alerts for vulnerable dependencies](https://docs.github.com/en/articles/about-security-alerts-for-vulnerable-dependencies)". -}
 reposCheckVulnerabilityAlerts : (Result Http.Error todo -> msg) -> Cmd msg
 reposCheckVulnerabilityAlerts toMsg =
     Http.get
@@ -4042,6 +5318,12 @@ reposCheckVulnerabilityAlerts toMsg =
         }
 
 
+{-| Gets a redirect URL to download a zip archive for a repository. If you omit `:ref`, the repository’s default branch (usually
+`master`) will be used. Please make sure your HTTP framework is configured to follow redirects or you will need to use
+the `Location` header to make a second `GET` request.
+
+**Note**: For private repositories, these links are temporary and expire after five minutes. If the repository is empty, you will receive a 404 when you follow the redirect.
+-}
 reposDownloadZipballArchive : (Result Http.Error todo -> msg) -> Cmd msg
 reposDownloadZipballArchive toMsg =
     Http.get
@@ -4055,6 +5337,12 @@ reposDownloadZipballArchive toMsg =
         }
 
 
+{-| Lists all public repositories in the order that they were created.
+
+Note:
+- For GitHub Enterprise Server, this endpoint will only list repositories available to all users on the enterprise.
+- Pagination is powered exclusively by the `since` parameter. Use the [Link header](https://docs.github.com/rest/overview/resources-in-the-rest-api#link-header) to get the URL for the next page of repositories.
+-}
 reposListPublic : (Result Http.Error todo -> msg) -> Cmd msg
 reposListPublic toMsg =
     Http.get
@@ -4068,6 +5356,7 @@ reposListPublic toMsg =
         }
 
 
+{-| Lists all secrets available in an environment without revealing their encrypted values. You must authenticate using an access token with the `repo` scope to use this endpoint. GitHub Apps must have the `secrets` repository permission to use this endpoint. -}
 actionsListEnvironmentSecrets : (Result Http.Error todo -> msg) -> Cmd msg
 actionsListEnvironmentSecrets toMsg =
     Http.get
@@ -4082,6 +5371,7 @@ actionsListEnvironmentSecrets toMsg =
         }
 
 
+{-| Get the public key for an environment, which you need to encrypt environment secrets. You need to encrypt a secret before you can create or update secrets. Anyone with read access to the repository can use this endpoint. If the repository is private you must use an access token with the `repo` scope. GitHub Apps must have the `secrets` repository permission to use this endpoint. -}
 actionsGetEnvironmentPublicKey :
     (Result Http.Error ActionsPublicKey -> msg) -> Cmd msg
 actionsGetEnvironmentPublicKey toMsg =
@@ -4092,6 +5382,7 @@ actionsGetEnvironmentPublicKey toMsg =
         }
 
 
+{-| Gets a single environment secret without revealing its encrypted value. You must authenticate using an access token with the `repo` scope to use this endpoint. GitHub Apps must have the `secrets` repository permission to use this endpoint. -}
 actionsGetEnvironmentSecret :
     (Result Http.Error ActionsSecret -> msg) -> Cmd msg
 actionsGetEnvironmentSecret toMsg =
@@ -4102,6 +5393,25 @@ actionsGetEnvironmentSecret toMsg =
         }
 
 
+{-| Searches for query terms inside of a file. This method returns up to 100 results [per page](https://docs.github.com/rest/overview/resources-in-the-rest-api#pagination).
+
+When searching for code, you can get text match metadata for the file **content** and file **path** fields when you pass the `text-match` media type. For more details about how to receive highlighted search results, see [Text match metadata](https://docs.github.com/rest/reference/search#text-match-metadata).
+
+For example, if you want to find the definition of the `addClass` function inside [jQuery](https://github.com/jquery/jquery) repository, your query would look something like this:
+
+`q=addClass+in:file+language:js+repo:jquery/jquery`
+
+This query searches for the keyword `addClass` within a file's contents. The query limits the search to files where the language is JavaScript in the `jquery/jquery` repository.
+
+#### Considerations for code search
+
+Due to the complexity of searching code, there are a few restrictions on how searches are performed:
+
+*   Only the _default branch_ is considered. In most cases, this will be the `master` branch.
+*   Only files smaller than 384 KB are searchable.
+*   You must always include at least one search term when searching source code. For example, searching for [`language:go`](https://github.com/search?utf8=%E2%9C%93&q=language%3Ago&type=Code) is not valid, while [`amazing
+language:go`](https://github.com/search?utf8=%E2%9C%93&q=amazing+language%3Ago&type=Code) is.
+-}
 searchCode : (Result Http.Error todo -> msg) -> Cmd msg
 searchCode toMsg =
     Http.get
@@ -4115,6 +5425,15 @@ searchCode toMsg =
         }
 
 
+{-| Find commits via various criteria on the default branch (usually `master`). This method returns up to 100 results [per page](https://docs.github.com/rest/overview/resources-in-the-rest-api#pagination).
+
+When searching for commits, you can get text match metadata for the **message** field when you provide the `text-match` media type. For more details about how to receive highlighted search results, see [Text match
+metadata](https://docs.github.com/rest/reference/search#text-match-metadata).
+
+For example, if you want to find commits related to CSS in the [octocat/Spoon-Knife](https://github.com/octocat/Spoon-Knife) repository. Your query would look something like this:
+
+`q=repo:octocat/Spoon-Knife+css`
+-}
 searchCommits : (Result Http.Error todo -> msg) -> Cmd msg
 searchCommits toMsg =
     Http.get
@@ -4128,6 +5447,19 @@ searchCommits toMsg =
         }
 
 
+{-| Find issues by state and keyword. This method returns up to 100 results [per page](https://docs.github.com/rest/overview/resources-in-the-rest-api#pagination).
+
+When searching for issues, you can get text match metadata for the issue **title**, issue **body**, and issue **comment body** fields when you pass the `text-match` media type. For more details about how to receive highlighted
+search results, see [Text match metadata](https://docs.github.com/rest/reference/search#text-match-metadata).
+
+For example, if you want to find the oldest unresolved Python bugs on Windows. Your query might look something like this.
+
+`q=windows+label:bug+language:python+state:open&sort=created&order=asc`
+
+This query searches for the keyword `windows`, within any open issue that is labeled as `bug`. The search runs across repositories whose primary language is Python. The results are sorted by creation date in ascending order, which means the oldest issues appear first in the search results.
+
+**Note:** For [user-to-server](https://docs.github.com/developers/apps/identifying-and-authorizing-users-for-github-apps#user-to-server-requests) GitHub App requests, you can't retrieve a combination of issues and pull requests in a single query. Requests that don't include the `is:issue` or `is:pull-request` qualifier will receive an HTTP `422 Unprocessable Entity` response. To get results for both issues and pull requests, you must send separate queries for issues and pull requests. For more information about the `is` qualifier, see "[Searching only issues or pull requests](https://docs.github.com/github/searching-for-information-on-github/searching-issues-and-pull-requests#search-only-issues-or-pull-requests)."
+-}
 searchIssuesAndPullRequests : (Result Http.Error todo -> msg) -> Cmd msg
 searchIssuesAndPullRequests toMsg =
     Http.get
@@ -4141,6 +5473,16 @@ searchIssuesAndPullRequests toMsg =
         }
 
 
+{-| Find labels in a repository with names or descriptions that match search keywords. Returns up to 100 results [per page](https://docs.github.com/rest/overview/resources-in-the-rest-api#pagination).
+
+When searching for labels, you can get text match metadata for the label **name** and **description** fields when you pass the `text-match` media type. For more details about how to receive highlighted search results, see [Text match metadata](https://docs.github.com/rest/reference/search#text-match-metadata).
+
+For example, if you want to find labels in the `linguist` repository that match `bug`, `defect`, or `enhancement`. Your query might look like this:
+
+`q=bug+defect+enhancement&repository_id=64778136`
+
+The labels that best match the query appear first in the search results.
+-}
 searchLabels : (Result Http.Error todo -> msg) -> Cmd msg
 searchLabels toMsg =
     Http.get
@@ -4154,6 +5496,16 @@ searchLabels toMsg =
         }
 
 
+{-| Find repositories via various criteria. This method returns up to 100 results [per page](https://docs.github.com/rest/overview/resources-in-the-rest-api#pagination).
+
+When searching for repositories, you can get text match metadata for the **name** and **description** fields when you pass the `text-match` media type. For more details about how to receive highlighted search results, see [Text match metadata](https://docs.github.com/rest/reference/search#text-match-metadata).
+
+For example, if you want to search for popular Tetris repositories written in assembly code, your query might look like this:
+
+`q=tetris+language:assembly&sort=stars&order=desc`
+
+This query searches for repositories with the word `tetris` in the name, the description, or the README. The results are limited to repositories where the primary language is assembly. The results are sorted by stars in descending order, so that the most popular repositories appear first in the search results.
+-}
 searchRepos : (Result Http.Error todo -> msg) -> Cmd msg
 searchRepos toMsg =
     Http.get
@@ -4167,6 +5519,16 @@ searchRepos toMsg =
         }
 
 
+{-| Find topics via various criteria. Results are sorted by best match. This method returns up to 100 results [per page](https://docs.github.com/rest/overview/resources-in-the-rest-api#pagination). See "[Searching topics](https://docs.github.com/articles/searching-topics/)" for a detailed list of qualifiers.
+
+When searching for topics, you can get text match metadata for the topic's **short\_description**, **description**, **name**, or **display\_name** field when you pass the `text-match` media type. For more details about how to receive highlighted search results, see [Text match metadata](https://docs.github.com/rest/reference/search#text-match-metadata).
+
+For example, if you want to search for topics related to Ruby that are featured on https://github.com/topics. Your query might look like this:
+
+`q=ruby+is:featured`
+
+This query searches for topics with the keyword `ruby` and limits the results to find only topics that are featured. The topics that are the best match for the query appear first in the search results.
+-}
 searchTopics : (Result Http.Error todo -> msg) -> Cmd msg
 searchTopics toMsg =
     Http.get
@@ -4180,6 +5542,16 @@ searchTopics toMsg =
         }
 
 
+{-| Find users via various criteria. This method returns up to 100 results [per page](https://docs.github.com/rest/overview/resources-in-the-rest-api#pagination).
+
+When searching for users, you can get text match metadata for the issue **login**, public **email**, and **name** fields when you pass the `text-match` media type. For more details about highlighting search results, see [Text match metadata](https://docs.github.com/rest/reference/search#text-match-metadata). For more details about how to receive highlighted search results, see [Text match metadata](https://docs.github.com/rest/reference/search#text-match-metadata).
+
+For example, if you're looking for a list of popular users, you might try this query:
+
+`q=tom+repos:%3E42+followers:%3E1000`
+
+This query searches for users with the name `tom`. The results are restricted to users with more than 42 repositories and over 1,000 followers.
+-}
 searchUsers : (Result Http.Error todo -> msg) -> Cmd msg
 searchUsers toMsg =
     Http.get
@@ -4193,6 +5565,7 @@ searchUsers toMsg =
         }
 
 
+{-| **Deprecation Notice:** This endpoint route is deprecated and will be removed from the Teams API. We recommend migrating your existing code to use the [Get a team by name](https://docs.github.com/rest/reference/teams#get-a-team-by-name) endpoint. -}
 teamsGetLegacy : (Result Http.Error TeamFull -> msg) -> Cmd msg
 teamsGetLegacy toMsg =
     Http.get
@@ -4201,6 +5574,10 @@ teamsGetLegacy toMsg =
         }
 
 
+{-| **Deprecation Notice:** This endpoint route is deprecated and will be removed from the Teams API. We recommend migrating your existing code to use the new [`List discussions`](https://docs.github.com/rest/reference/teams#list-discussions) endpoint.
+
+List all discussions on a team's page. OAuth access tokens require the `read:discussion` [scope](https://docs.github.com/apps/building-oauth-apps/understanding-scopes-for-oauth-apps/).
+-}
 teamsListDiscussionsLegacy : (Result Http.Error todo -> msg) -> Cmd msg
 teamsListDiscussionsLegacy toMsg =
     Http.get
@@ -4214,6 +5591,10 @@ teamsListDiscussionsLegacy toMsg =
         }
 
 
+{-| **Deprecation Notice:** This endpoint route is deprecated and will be removed from the Teams API. We recommend migrating your existing code to use the new [Get a discussion](https://docs.github.com/rest/reference/teams#get-a-discussion) endpoint.
+
+Get a specific discussion on a team's page. OAuth access tokens require the `read:discussion` [scope](https://docs.github.com/apps/building-oauth-apps/understanding-scopes-for-oauth-apps/).
+-}
 teamsGetDiscussionLegacy : (Result Http.Error TeamDiscussion -> msg) -> Cmd msg
 teamsGetDiscussionLegacy toMsg =
     Http.get
@@ -4223,6 +5604,10 @@ teamsGetDiscussionLegacy toMsg =
         }
 
 
+{-| **Deprecation Notice:** This endpoint route is deprecated and will be removed from the Teams API. We recommend migrating your existing code to use the new [List discussion comments](https://docs.github.com/rest/reference/teams#list-discussion-comments) endpoint.
+
+List all comments on a team discussion. OAuth access tokens require the `read:discussion` [scope](https://docs.github.com/apps/building-oauth-apps/understanding-scopes-for-oauth-apps/).
+-}
 teamsListDiscussionCommentsLegacy : (Result Http.Error todo -> msg) -> Cmd msg
 teamsListDiscussionCommentsLegacy toMsg =
     Http.get
@@ -4237,6 +5622,10 @@ teamsListDiscussionCommentsLegacy toMsg =
         }
 
 
+{-| **Deprecation Notice:** This endpoint route is deprecated and will be removed from the Teams API. We recommend migrating your existing code to use the new [Get a discussion comment](https://docs.github.com/rest/reference/teams#get-a-discussion-comment) endpoint.
+
+Get a specific comment on a team discussion. OAuth access tokens require the `read:discussion` [scope](https://docs.github.com/apps/building-oauth-apps/understanding-scopes-for-oauth-apps/).
+-}
 teamsGetDiscussionCommentLegacy :
     (Result Http.Error TeamDiscussionComment -> msg) -> Cmd msg
 teamsGetDiscussionCommentLegacy toMsg =
@@ -4247,6 +5636,10 @@ teamsGetDiscussionCommentLegacy toMsg =
         }
 
 
+{-| **Deprecation Notice:** This endpoint route is deprecated and will be removed from the Teams API. We recommend migrating your existing code to use the new [`List reactions for a team discussion comment`](https://docs.github.com/rest/reference/reactions#list-reactions-for-a-team-discussion-comment) endpoint.
+
+List the reactions to a [team discussion comment](https://docs.github.com/rest/reference/teams#discussion-comments). OAuth access tokens require the `read:discussion` [scope](https://docs.github.com/apps/building-oauth-apps/understanding-scopes-for-oauth-apps/).
+-}
 reactionsListForTeamDiscussionCommentLegacy :
     (Result Http.Error todo -> msg) -> Cmd msg
 reactionsListForTeamDiscussionCommentLegacy toMsg =
@@ -4262,6 +5655,10 @@ reactionsListForTeamDiscussionCommentLegacy toMsg =
         }
 
 
+{-| **Deprecation Notice:** This endpoint route is deprecated and will be removed from the Teams API. We recommend migrating your existing code to use the new [`List reactions for a team discussion`](https://docs.github.com/rest/reference/reactions#list-reactions-for-a-team-discussion) endpoint.
+
+List the reactions to a [team discussion](https://docs.github.com/rest/reference/teams#discussions). OAuth access tokens require the `read:discussion` [scope](https://docs.github.com/apps/building-oauth-apps/understanding-scopes-for-oauth-apps/).
+-}
 reactionsListForTeamDiscussionLegacy :
     (Result Http.Error todo -> msg) -> Cmd msg
 reactionsListForTeamDiscussionLegacy toMsg =
@@ -4277,6 +5674,10 @@ reactionsListForTeamDiscussionLegacy toMsg =
         }
 
 
+{-| **Deprecation Notice:** This endpoint route is deprecated and will be removed from the Teams API. We recommend migrating your existing code to use the new [`List pending team invitations`](https://docs.github.com/rest/reference/teams#list-pending-team-invitations) endpoint.
+
+The return hash contains a `role` field which refers to the Organization Invitation role and will be one of the following values: `direct_member`, `admin`, `billing_manager`, `hiring_manager`, or `reinstate`. If the invitee is not a GitHub member, the `login` field in the return hash will be `null`.
+-}
 teamsListPendingInvitationsLegacy : (Result Http.Error todo -> msg) -> Cmd msg
 teamsListPendingInvitationsLegacy toMsg =
     Http.get
@@ -4290,6 +5691,10 @@ teamsListPendingInvitationsLegacy toMsg =
         }
 
 
+{-| **Deprecation Notice:** This endpoint route is deprecated and will be removed from the Teams API. We recommend migrating your existing code to use the new [`List team members`](https://docs.github.com/rest/reference/teams#list-team-members) endpoint.
+
+Team members will include the members of child teams.
+-}
 teamsListMembersLegacy : (Result Http.Error todo -> msg) -> Cmd msg
 teamsListMembersLegacy toMsg =
     Http.get
@@ -4303,6 +5708,12 @@ teamsListMembersLegacy toMsg =
         }
 
 
+{-| The "Get team member" endpoint (described below) is deprecated.
+
+We recommend using the [Get team membership for a user](https://docs.github.com/rest/reference/teams#get-team-membership-for-a-user) endpoint instead. It allows you to get both active and pending memberships.
+
+To list members in a team, the team must be visible to the authenticated user.
+-}
 teamsGetMemberLegacy : (Result Http.Error todo -> msg) -> Cmd msg
 teamsGetMemberLegacy toMsg =
     Http.get
@@ -4316,6 +5727,17 @@ teamsGetMemberLegacy toMsg =
         }
 
 
+{-| **Deprecation Notice:** This endpoint route is deprecated and will be removed from the Teams API. We recommend migrating your existing code to use the new [Get team membership for a user](https://docs.github.com/rest/reference/teams#get-team-membership-for-a-user) endpoint.
+
+Team members will include the members of child teams.
+
+To get a user's membership with a team, the team must be visible to the authenticated user.
+
+**Note:**
+The response contains the `state` of the membership and the member's `role`.
+
+The `role` for organization owners is set to `maintainer`. For more information about `maintainer` roles, see [Create a team](https://docs.github.com/rest/reference/teams#create-a-team).
+-}
 teamsGetMembershipForUserLegacy :
     (Result Http.Error TeamMembership -> msg) -> Cmd msg
 teamsGetMembershipForUserLegacy toMsg =
@@ -4325,6 +5747,10 @@ teamsGetMembershipForUserLegacy toMsg =
         }
 
 
+{-| **Deprecation Notice:** This endpoint route is deprecated and will be removed from the Teams API. We recommend migrating your existing code to use the new [`List team projects`](https://docs.github.com/rest/reference/teams#list-team-projects) endpoint.
+
+Lists the organization projects for a team.
+-}
 teamsListProjectsLegacy : (Result Http.Error todo -> msg) -> Cmd msg
 teamsListProjectsLegacy toMsg =
     Http.get
@@ -4338,6 +5764,10 @@ teamsListProjectsLegacy toMsg =
         }
 
 
+{-| **Deprecation Notice:** This endpoint route is deprecated and will be removed from the Teams API. We recommend migrating your existing code to use the new [Check team permissions for a project](https://docs.github.com/rest/reference/teams#check-team-permissions-for-a-project) endpoint.
+
+Checks whether a team has `read`, `write`, or `admin` permissions for an organization project. The response includes projects inherited from a parent team.
+-}
 teamsCheckPermissionsForProjectLegacy :
     (Result Http.Error TeamProject -> msg) -> Cmd msg
 teamsCheckPermissionsForProjectLegacy toMsg =
@@ -4347,6 +5777,7 @@ teamsCheckPermissionsForProjectLegacy toMsg =
         }
 
 
+{-| **Deprecation Notice:** This endpoint route is deprecated and will be removed from the Teams API. We recommend migrating your existing code to use the new [List team repositories](https://docs.github.com/rest/reference/teams#list-team-repositories) endpoint. -}
 teamsListReposLegacy : (Result Http.Error todo -> msg) -> Cmd msg
 teamsListReposLegacy toMsg =
     Http.get
@@ -4360,6 +5791,12 @@ teamsListReposLegacy toMsg =
         }
 
 
+{-| **Note**: Repositories inherited through a parent team will also be checked.
+
+**Deprecation Notice:** This endpoint route is deprecated and will be removed from the Teams API. We recommend migrating your existing code to use the new [Check team permissions for a repository](https://docs.github.com/rest/reference/teams#check-team-permissions-for-a-repository) endpoint.
+
+You can also get information about the specified repository, including what permissions the team grants on it, by passing the following custom [media type](https://docs.github.com/rest/overview/media-types/) via the `Accept` header:
+-}
 teamsCheckPermissionsForRepoLegacy :
     (Result Http.Error TeamRepository -> msg) -> Cmd msg
 teamsCheckPermissionsForRepoLegacy toMsg =
@@ -4369,6 +5806,7 @@ teamsCheckPermissionsForRepoLegacy toMsg =
         }
 
 
+{-| **Deprecation Notice:** This endpoint route is deprecated and will be removed from the Teams API. We recommend migrating your existing code to use the new [`List child teams`](https://docs.github.com/rest/reference/teams#list-child-teams) endpoint. -}
 teamsListChildLegacy : (Result Http.Error todo -> msg) -> Cmd msg
 teamsListChildLegacy toMsg =
     Http.get
@@ -4382,6 +5820,10 @@ teamsListChildLegacy toMsg =
         }
 
 
+{-| If the authenticated user is authenticated through basic authentication or OAuth with the `user` scope, then the response lists public and private profile information.
+
+If the authenticated user is authenticated through OAuth without the `user` scope, then the response lists only public profile information.
+-}
 usersGetAuthenticated : (Result Http.Error todo -> msg) -> Cmd msg
 usersGetAuthenticated toMsg =
     Http.get
@@ -4395,6 +5837,7 @@ usersGetAuthenticated toMsg =
         }
 
 
+{-| List the users you've blocked on your personal account. -}
 usersListBlockedByAuthenticatedUser : (Result Http.Error todo -> msg) -> Cmd msg
 usersListBlockedByAuthenticatedUser toMsg =
     Http.get
@@ -4421,6 +5864,12 @@ usersCheckBlocked toMsg =
         }
 
 
+{-| Lists the authenticated user's codespaces.
+
+You must authenticate using an access token with the `codespace` scope to use this endpoint.
+
+GitHub Apps must have read access to the `codespaces` repository permission to use this endpoint.
+-}
 codespacesListForAuthenticatedUser : (Result Http.Error todo -> msg) -> Cmd msg
 codespacesListForAuthenticatedUser toMsg =
     Http.get
@@ -4434,6 +5883,13 @@ codespacesListForAuthenticatedUser toMsg =
         }
 
 
+{-| Lists all secrets available for a user's Codespaces without revealing their
+encrypted values.
+
+You must authenticate using an access token with the `codespace` or `codespace:secrets` scope to use this endpoint. User must have Codespaces access to use this endpoint.
+
+GitHub Apps must have read access to the `codespaces_user_secrets` user permission to use this endpoint.
+-}
 codespacesListSecretsForAuthenticatedUser :
     (Result Http.Error todo -> msg) -> Cmd msg
 codespacesListSecretsForAuthenticatedUser toMsg =
@@ -4448,6 +5904,12 @@ codespacesListSecretsForAuthenticatedUser toMsg =
         }
 
 
+{-| Gets your public key, which you need to encrypt secrets. You need to encrypt a secret before you can create or update secrets.
+
+You must authenticate using an access token with the `codespace` or `codespace:secrets` scope to use this endpoint. User must have Codespaces access to use this endpoint.
+
+GitHub Apps must have read access to the `codespaces_user_secrets` user permission to use this endpoint.
+-}
 codespacesGetPublicKeyForAuthenticatedUser :
     (Result Http.Error CodespacesUserPublicKey -> msg) -> Cmd msg
 codespacesGetPublicKeyForAuthenticatedUser toMsg =
@@ -4457,6 +5919,12 @@ codespacesGetPublicKeyForAuthenticatedUser toMsg =
         }
 
 
+{-| Gets a secret available to a user's codespaces without revealing its encrypted value.
+
+You must authenticate using an access token with the `codespace` or `codespace:secrets` scope to use this endpoint. User must have Codespaces access to use this endpoint.
+
+GitHub Apps must have read access to the `codespaces_user_secrets` user permission to use this endpoint.
+-}
 codespacesGetSecretForAuthenticatedUser :
     (Result Http.Error CodespacesSecret -> msg) -> Cmd msg
 codespacesGetSecretForAuthenticatedUser toMsg =
@@ -4466,6 +5934,12 @@ codespacesGetSecretForAuthenticatedUser toMsg =
         }
 
 
+{-| List the repositories that have been granted the ability to use a user's codespace secret.
+
+You must authenticate using an access token with the `codespace` or `codespace:secrets` scope to use this endpoint. User must have Codespaces access to use this endpoint.
+
+GitHub Apps must have read access to the `codespaces_user_secrets` user permission and write access to the `codespaces_secrets` repository permission on all referenced repositories to use this endpoint.
+-}
 codespacesListRepositoriesForSecretForAuthenticatedUser :
     (Result Http.Error todo -> msg) -> Cmd msg
 codespacesListRepositoriesForSecretForAuthenticatedUser toMsg =
@@ -4481,6 +5955,12 @@ codespacesListRepositoriesForSecretForAuthenticatedUser toMsg =
         }
 
 
+{-| Gets information about a user's codespace.
+
+You must authenticate using an access token with the `codespace` scope to use this endpoint.
+
+GitHub Apps must have read access to the `codespaces` repository permission to use this endpoint.
+-}
 codespacesGetForAuthenticatedUser :
     (Result Http.Error Codespace -> msg) -> Cmd msg
 codespacesGetForAuthenticatedUser toMsg =
@@ -4490,6 +5970,12 @@ codespacesGetForAuthenticatedUser toMsg =
         }
 
 
+{-| Gets information about an export of a codespace.
+
+You must authenticate using a personal access token with the `codespace` scope to use this endpoint.
+
+GitHub Apps must have read access to the `codespaces_lifecycle_admin` repository permission to use this endpoint.
+-}
 codespacesGetExportDetailsForAuthenticatedUser :
     (Result Http.Error CodespaceExportDetails -> msg) -> Cmd msg
 codespacesGetExportDetailsForAuthenticatedUser toMsg =
@@ -4500,6 +5986,12 @@ codespacesGetExportDetailsForAuthenticatedUser toMsg =
         }
 
 
+{-| List the machine types a codespace can transition to use.
+
+You must authenticate using an access token with the `codespace` scope to use this endpoint.
+
+GitHub Apps must have read access to the `codespaces_metadata` repository permission to use this endpoint.
+-}
 codespacesCodespaceMachinesForAuthenticatedUser :
     (Result Http.Error todo -> msg) -> Cmd msg
 codespacesCodespaceMachinesForAuthenticatedUser toMsg =
@@ -4515,6 +6007,7 @@ codespacesCodespaceMachinesForAuthenticatedUser toMsg =
         }
 
 
+{-| Lists all of your email addresses, and specifies which one is visible to the public. This endpoint is accessible with the `user:email` scope. -}
 usersListEmailsForAuthenticatedUser : (Result Http.Error todo -> msg) -> Cmd msg
 usersListEmailsForAuthenticatedUser toMsg =
     Http.get
@@ -4528,6 +6021,7 @@ usersListEmailsForAuthenticatedUser toMsg =
         }
 
 
+{-| Lists the people following the authenticated user. -}
 usersListFollowersForAuthenticatedUser :
     (Result Http.Error todo -> msg) -> Cmd msg
 usersListFollowersForAuthenticatedUser toMsg =
@@ -4542,6 +6036,7 @@ usersListFollowersForAuthenticatedUser toMsg =
         }
 
 
+{-| Lists the people who the authenticated user follows. -}
 usersListFollowedByAuthenticatedUser :
     (Result Http.Error todo -> msg) -> Cmd msg
 usersListFollowedByAuthenticatedUser toMsg =
@@ -4570,6 +6065,7 @@ usersCheckPersonIsFollowedByAuthenticated toMsg =
         }
 
 
+{-| Lists the current user's GPG keys. Requires that you are authenticated via Basic Auth or via OAuth with at least `read:gpg_key` [scope](https://docs.github.com/apps/building-oauth-apps/understanding-scopes-for-oauth-apps/). -}
 usersListGpgKeysForAuthenticatedUser :
     (Result Http.Error todo -> msg) -> Cmd msg
 usersListGpgKeysForAuthenticatedUser toMsg =
@@ -4584,6 +6080,7 @@ usersListGpgKeysForAuthenticatedUser toMsg =
         }
 
 
+{-| View extended details for a single GPG key. Requires that you are authenticated via Basic Auth or via OAuth with at least `read:gpg_key` [scope](https://docs.github.com/apps/building-oauth-apps/understanding-scopes-for-oauth-apps/). -}
 usersGetGpgKeyForAuthenticatedUser :
     (Result Http.Error GpgKey -> msg) -> Cmd msg
 usersGetGpgKeyForAuthenticatedUser toMsg =
@@ -4593,6 +6090,14 @@ usersGetGpgKeyForAuthenticatedUser toMsg =
         }
 
 
+{-| Lists installations of your GitHub App that the authenticated user has explicit permission (`:read`, `:write`, or `:admin`) to access.
+
+You must use a [user-to-server OAuth access token](https://docs.github.com/apps/building-github-apps/identifying-and-authorizing-users-for-github-apps/#identifying-users-on-your-site), created for a user who has authorized your GitHub App, to access this endpoint.
+
+The authenticated user has explicit permission to access repositories they own, repositories where they are a collaborator, and repositories that they can access through an organization membership.
+
+You can find the permissions for the installation under the `permissions` key.
+-}
 appsListInstallationsForAuthenticatedUser :
     (Result Http.Error todo -> msg) -> Cmd msg
 appsListInstallationsForAuthenticatedUser toMsg =
@@ -4607,6 +6112,14 @@ appsListInstallationsForAuthenticatedUser toMsg =
         }
 
 
+{-| List repositories that the authenticated user has explicit permission (`:read`, `:write`, or `:admin`) to access for an installation.
+
+The authenticated user has explicit permission to access repositories they own, repositories where they are a collaborator, and repositories that they can access through an organization membership.
+
+You must use a [user-to-server OAuth access token](https://docs.github.com/apps/building-github-apps/identifying-and-authorizing-users-for-github-apps/#identifying-users-on-your-site), created for a user who has authorized your GitHub App, to access this endpoint.
+
+The access the user has to each repository is included in the hash under the `permissions` key.
+-}
 appsListInstallationReposForAuthenticatedUser :
     (Result Http.Error todo -> msg) -> Cmd msg
 appsListInstallationReposForAuthenticatedUser toMsg =
@@ -4622,6 +6135,7 @@ appsListInstallationReposForAuthenticatedUser toMsg =
         }
 
 
+{-| Shows which type of GitHub user can interact with your public repositories and when the restriction expires. -}
 interactionsGetRestrictionsForAuthenticatedUser :
     (Result Http.Error todo -> msg) -> Cmd msg
 interactionsGetRestrictionsForAuthenticatedUser toMsg =
@@ -4636,6 +6150,13 @@ interactionsGetRestrictionsForAuthenticatedUser toMsg =
         }
 
 
+{-| List issues across owned and member repositories assigned to the authenticated user.
+
+**Note**: GitHub's REST API v3 considers every pull request an issue, but not every issue is a pull request. For this
+reason, "Issues" endpoints may return both issues and pull requests in the response. You can identify pull requests by
+the `pull_request` key. Be aware that the `id` of a pull request returned from "Issues" endpoints will be an _issue id_. To find out the pull
+request id, use the "[List pull requests](https://docs.github.com/rest/reference/pulls#list-pull-requests)" endpoint.
+-}
 issuesListForAuthenticatedUser : (Result Http.Error todo -> msg) -> Cmd msg
 issuesListForAuthenticatedUser toMsg =
     Http.get
@@ -4649,6 +6170,7 @@ issuesListForAuthenticatedUser toMsg =
         }
 
 
+{-| Lists the public SSH keys for the authenticated user's GitHub account. Requires that you are authenticated via Basic Auth or via OAuth with at least `read:public_key` [scope](https://docs.github.com/apps/building-oauth-apps/understanding-scopes-for-oauth-apps/). -}
 usersListPublicSshKeysForAuthenticatedUser :
     (Result Http.Error todo -> msg) -> Cmd msg
 usersListPublicSshKeysForAuthenticatedUser toMsg =
@@ -4663,6 +6185,7 @@ usersListPublicSshKeysForAuthenticatedUser toMsg =
         }
 
 
+{-| View extended details for a single public SSH key. Requires that you are authenticated via Basic Auth or via OAuth with at least `read:public_key` [scope](https://docs.github.com/apps/building-oauth-apps/understanding-scopes-for-oauth-apps/). -}
 usersGetPublicSshKeyForAuthenticatedUser :
     (Result Http.Error Key -> msg) -> Cmd msg
 usersGetPublicSshKeyForAuthenticatedUser toMsg =
@@ -4672,6 +6195,7 @@ usersGetPublicSshKeyForAuthenticatedUser toMsg =
         }
 
 
+{-| Lists the active subscriptions for the authenticated user. You must use a [user-to-server OAuth access token](https://docs.github.com/apps/building-github-apps/identifying-and-authorizing-users-for-github-apps/#identifying-users-on-your-site), created for a user who has authorized your GitHub App, to access this endpoint. . OAuth Apps must authenticate using an [OAuth token](https://docs.github.com/apps/building-github-apps/authenticating-with-github-apps/). -}
 appsListSubscriptionsForAuthenticatedUser :
     (Result Http.Error todo -> msg) -> Cmd msg
 appsListSubscriptionsForAuthenticatedUser toMsg =
@@ -4686,6 +6210,7 @@ appsListSubscriptionsForAuthenticatedUser toMsg =
         }
 
 
+{-| Lists the active subscriptions for the authenticated user. You must use a [user-to-server OAuth access token](https://docs.github.com/apps/building-github-apps/identifying-and-authorizing-users-for-github-apps/#identifying-users-on-your-site), created for a user who has authorized your GitHub App, to access this endpoint. . OAuth Apps must authenticate using an [OAuth token](https://docs.github.com/apps/building-github-apps/authenticating-with-github-apps/). -}
 appsListSubscriptionsForAuthenticatedUserStubbed :
     (Result Http.Error todo -> msg) -> Cmd msg
 appsListSubscriptionsForAuthenticatedUserStubbed toMsg =
@@ -4723,6 +6248,7 @@ orgsGetMembershipForAuthenticatedUser toMsg =
         }
 
 
+{-| Lists all migrations a user has started. -}
 migrationsListForAuthenticatedUser : (Result Http.Error todo -> msg) -> Cmd msg
 migrationsListForAuthenticatedUser toMsg =
     Http.get
@@ -4736,6 +6262,15 @@ migrationsListForAuthenticatedUser toMsg =
         }
 
 
+{-| Fetches a single user migration. The response includes the `state` of the migration, which can be one of the following values:
+
+*   `pending` - the migration hasn't started yet.
+*   `exporting` - the migration is in progress.
+*   `exported` - the migration finished successfully.
+*   `failed` - the migration failed.
+
+Once the migration has been `exported` you can [download the migration archive](https://docs.github.com/rest/reference/migrations#download-a-user-migration-archive).
+-}
 migrationsGetStatusForAuthenticatedUser :
     (Result Http.Error Migration -> msg) -> Cmd msg
 migrationsGetStatusForAuthenticatedUser toMsg =
@@ -4745,6 +6280,28 @@ migrationsGetStatusForAuthenticatedUser toMsg =
         }
 
 
+{-| Fetches the URL to download the migration archive as a `tar.gz` file. Depending on the resources your repository uses, the migration archive can contain JSON files with data for these objects:
+
+*   attachments
+*   bases
+*   commit\_comments
+*   issue\_comments
+*   issue\_events
+*   issues
+*   milestones
+*   organizations
+*   projects
+*   protected\_branches
+*   pull\_request\_reviews
+*   pull\_requests
+*   releases
+*   repositories
+*   review\_comments
+*   schema
+*   users
+
+The archive will also contain an `attachments` directory that includes all attachment files uploaded to GitHub.com and a `repositories` directory that contains the repository's Git data.
+-}
 migrationsGetArchiveForAuthenticatedUser :
     (Result Http.Error todo -> msg) -> Cmd msg
 migrationsGetArchiveForAuthenticatedUser toMsg =
@@ -4759,6 +6316,7 @@ migrationsGetArchiveForAuthenticatedUser toMsg =
         }
 
 
+{-| Lists all the repositories for this user migration. -}
 migrationsListReposForAuthenticatedUser :
     (Result Http.Error todo -> msg) -> Cmd msg
 migrationsListReposForAuthenticatedUser toMsg =
@@ -4774,6 +6332,12 @@ migrationsListReposForAuthenticatedUser toMsg =
         }
 
 
+{-| List organizations for the authenticated user.
+
+**OAuth scope requirements**
+
+This only lists organizations that your authorization allows you to operate on in some way (e.g., you can list teams with `read:org` scope, you can publicize your organization membership with `user` scope, etc.). Therefore, this API requires at least `user` or `read:org` scope. OAuth requests with insufficient scope receive a `403 Forbidden` response.
+-}
 orgsListForAuthenticatedUser : (Result Http.Error todo -> msg) -> Cmd msg
 orgsListForAuthenticatedUser toMsg =
     Http.get
@@ -4787,6 +6351,11 @@ orgsListForAuthenticatedUser toMsg =
         }
 
 
+{-| Lists packages owned by the authenticated user within the user's namespace.
+
+To use this endpoint, you must authenticate using an access token with the `packages:read` scope.
+If `package_type` is not `container`, your token must also include the `repo` scope.
+-}
 packagesListPackagesForAuthenticatedUser :
     (Result Http.Error todo -> msg) -> Cmd msg
 packagesListPackagesForAuthenticatedUser toMsg =
@@ -4801,6 +6370,11 @@ packagesListPackagesForAuthenticatedUser toMsg =
         }
 
 
+{-| Gets a specific package for a package owned by the authenticated user.
+
+To use this endpoint, you must authenticate using an access token with the `packages:read` scope.
+If `package_type` is not `container`, your token must also include the `repo` scope.
+-}
 packagesGetPackageForAuthenticatedUser :
     (Result Http.Error Package -> msg) -> Cmd msg
 packagesGetPackageForAuthenticatedUser toMsg =
@@ -4811,6 +6385,11 @@ packagesGetPackageForAuthenticatedUser toMsg =
         }
 
 
+{-| Lists package versions for a package owned by the authenticated user.
+
+To use this endpoint, you must authenticate using an access token with the `packages:read` scope.
+If `package_type` is not `container`, your token must also include the `repo` scope.
+-}
 packagesGetAllPackageVersionsForPackageOwnedByAuthenticatedUser :
     (Result Http.Error todo -> msg) -> Cmd msg
 packagesGetAllPackageVersionsForPackageOwnedByAuthenticatedUser toMsg =
@@ -4826,6 +6405,11 @@ packagesGetAllPackageVersionsForPackageOwnedByAuthenticatedUser toMsg =
         }
 
 
+{-| Gets a specific package version for a package owned by the authenticated user.
+
+To use this endpoint, you must authenticate using an access token with the `packages:read` scope.
+If `package_type` is not `container`, your token must also include the `repo` scope.
+-}
 packagesGetPackageVersionForAuthenticatedUser :
     (Result Http.Error PackageVersion -> msg) -> Cmd msg
 packagesGetPackageVersionForAuthenticatedUser toMsg =
@@ -4836,6 +6420,7 @@ packagesGetPackageVersionForAuthenticatedUser toMsg =
         }
 
 
+{-| Lists your publicly visible email address, which you can set with the [Set primary email visibility for the authenticated user](https://docs.github.com/rest/reference/users#set-primary-email-visibility-for-the-authenticated-user) endpoint. This endpoint is accessible with the `user:email` scope. -}
 usersListPublicEmailsForAuthenticatedUser :
     (Result Http.Error todo -> msg) -> Cmd msg
 usersListPublicEmailsForAuthenticatedUser toMsg =
@@ -4850,6 +6435,10 @@ usersListPublicEmailsForAuthenticatedUser toMsg =
         }
 
 
+{-| Lists repositories that the authenticated user has explicit permission (`:read`, `:write`, or `:admin`) to access.
+
+The authenticated user has explicit permission to access repositories they own, repositories where they are a collaborator, and repositories that they can access through an organization membership.
+-}
 reposListForAuthenticatedUser : (Result Http.Error todo -> msg) -> Cmd msg
 reposListForAuthenticatedUser toMsg =
     Http.get
@@ -4863,6 +6452,7 @@ reposListForAuthenticatedUser toMsg =
         }
 
 
+{-| When authenticating as a user, this endpoint will list all currently open repository invitations for that user. -}
 reposListInvitationsForAuthenticatedUser :
     (Result Http.Error todo -> msg) -> Cmd msg
 reposListInvitationsForAuthenticatedUser toMsg =
@@ -4877,6 +6467,7 @@ reposListInvitationsForAuthenticatedUser toMsg =
         }
 
 
+{-| Lists the SSH signing keys for the authenticated user's GitHub account. You must authenticate with Basic Authentication, or you must authenticate with OAuth with at least `read:ssh_signing_key` scope. For more information, see "[Understanding scopes for OAuth apps](https://docs.github.com/apps/building-oauth-apps/understanding-scopes-for-oauth-apps/)." -}
 usersListSshSigningKeysForAuthenticatedUser :
     (Result Http.Error todo -> msg) -> Cmd msg
 usersListSshSigningKeysForAuthenticatedUser toMsg =
@@ -4891,6 +6482,7 @@ usersListSshSigningKeysForAuthenticatedUser toMsg =
         }
 
 
+{-| Gets extended details for an SSH signing key. You must authenticate with Basic Authentication, or you must authenticate with OAuth with at least `read:ssh_signing_key` scope. For more information, see "[Understanding scopes for OAuth apps](https://docs.github.com/apps/building-oauth-apps/understanding-scopes-for-oauth-apps/)." -}
 usersGetSshSigningKeyForAuthenticatedUser :
     (Result Http.Error SshSigningKey -> msg) -> Cmd msg
 usersGetSshSigningKeyForAuthenticatedUser toMsg =
@@ -4901,6 +6493,10 @@ usersGetSshSigningKeyForAuthenticatedUser toMsg =
         }
 
 
+{-| Lists repositories the authenticated user has starred.
+
+You can also find out _when_ stars were created by passing the following custom [media type](https://docs.github.com/rest/overview/media-types/) via the `Accept` header: `application/vnd.github.star+json`.
+-}
 activityListReposStarredByAuthenticatedUser :
     (Result Http.Error todo -> msg) -> Cmd msg
 activityListReposStarredByAuthenticatedUser toMsg =
@@ -4929,6 +6525,7 @@ activityCheckRepoIsStarredByAuthenticatedUser toMsg =
         }
 
 
+{-| Lists repositories the authenticated user is watching. -}
 activityListWatchedReposForAuthenticatedUser :
     (Result Http.Error todo -> msg) -> Cmd msg
 activityListWatchedReposForAuthenticatedUser toMsg =
@@ -4943,6 +6540,7 @@ activityListWatchedReposForAuthenticatedUser toMsg =
         }
 
 
+{-| List all of the teams across all of the organizations to which the authenticated user belongs. This method requires `user`, `repo`, or `read:org` [scope](https://docs.github.com/apps/building-oauth-apps/understanding-scopes-for-oauth-apps/) when authenticating via [OAuth](https://docs.github.com/apps/building-oauth-apps/). -}
 teamsListForAuthenticatedUser : (Result Http.Error todo -> msg) -> Cmd msg
 teamsListForAuthenticatedUser toMsg =
     Http.get
@@ -4956,6 +6554,10 @@ teamsListForAuthenticatedUser toMsg =
         }
 
 
+{-| Lists all users, in the order that they signed up on GitHub. This list includes personal user accounts and organization accounts.
+
+Note: Pagination is powered exclusively by the `since` parameter. Use the [Link header](https://docs.github.com/rest/overview/resources-in-the-rest-api#link-header) to get the URL for the next page of users.
+-}
 usersList : (Result Http.Error todo -> msg) -> Cmd msg
 usersList toMsg =
     Http.get
@@ -4969,6 +6571,14 @@ usersList toMsg =
         }
 
 
+{-| Provides publicly available information about someone with a GitHub account.
+
+GitHub Apps with the `Plan` user permission can use this endpoint to retrieve information about a user's GitHub plan. The GitHub App must be authenticated as a user. See "[Identifying and authorizing users for GitHub Apps](https://docs.github.com/apps/building-github-apps/identifying-and-authorizing-users-for-github-apps/)" for details about authentication. For an example response, see 'Response with GitHub plan information' below"
+
+The `email` key in the following response is the publicly visible email address from your GitHub [profile page](https://github.com/settings/profile). When setting up your profile, you can select a primary email address to be “public” which provides an email entry for this endpoint. If you do not set a public email address for `email`, then it will have a value of `null`. You only see publicly visible email addresses when authenticated with GitHub. For more information, see [Authentication](https://docs.github.com/rest/overview/resources-in-the-rest-api#authentication).
+
+The Emails API enables you to list all of your email addresses, and toggle a primary email to be visible publicly. For more information, see "[Emails API](https://docs.github.com/rest/reference/users#emails)".
+-}
 usersGetByUsername : (Result Http.Error todo -> msg) -> Cmd msg
 usersGetByUsername toMsg =
     Http.get
@@ -4982,6 +6592,7 @@ usersGetByUsername toMsg =
         }
 
 
+{-| If you are authenticated as the given user, you will see your private events. Otherwise, you'll only see public events. -}
 activityListEventsForAuthenticatedUser :
     (Result Http.Error todo -> msg) -> Cmd msg
 activityListEventsForAuthenticatedUser toMsg =
@@ -4996,6 +6607,7 @@ activityListEventsForAuthenticatedUser toMsg =
         }
 
 
+{-| This is the user's organization dashboard. You must be authenticated as the user to view this. -}
 activityListOrgEventsForAuthenticatedUser :
     (Result Http.Error todo -> msg) -> Cmd msg
 activityListOrgEventsForAuthenticatedUser toMsg =
@@ -5023,6 +6635,7 @@ activityListPublicEventsForUser toMsg =
         }
 
 
+{-| Lists the people following the specified user. -}
 usersListFollowersForUser : (Result Http.Error todo -> msg) -> Cmd msg
 usersListFollowersForUser toMsg =
     Http.get
@@ -5036,6 +6649,7 @@ usersListFollowersForUser toMsg =
         }
 
 
+{-| Lists the people who the specified user follows. -}
 usersListFollowingForUser : (Result Http.Error todo -> msg) -> Cmd msg
 usersListFollowingForUser toMsg =
     Http.get
@@ -5063,6 +6677,7 @@ usersCheckFollowingForUser toMsg =
         }
 
 
+{-| Lists public gists for the specified user: -}
 gistsListForUser : (Result Http.Error todo -> msg) -> Cmd msg
 gistsListForUser toMsg =
     Http.get
@@ -5076,6 +6691,7 @@ gistsListForUser toMsg =
         }
 
 
+{-| Lists the GPG keys for a user. This information is accessible by anyone. -}
 usersListGpgKeysForUser : (Result Http.Error todo -> msg) -> Cmd msg
 usersListGpgKeysForUser toMsg =
     Http.get
@@ -5089,6 +6705,15 @@ usersListGpgKeysForUser toMsg =
         }
 
 
+{-| Provides hovercard information when authenticated through basic auth or OAuth with the `repo` scope. You can find out more about someone in relation to their pull requests, issues, repositories, and organizations.
+
+The `subject_type` and `subject_id` parameters provide context for the person's hovercard, which returns more information than without the parameters. For example, if you wanted to find out more about `octocat` who owns the `Spoon-Knife` repository via cURL, it would look like this:
+
+```shell
+ curl -u username:token
+  https://api.github.com/users/octocat/hovercard?subject_type=repository&subject_id=1300192
+```
+-}
 usersGetContextForUser : (Result Http.Error Hovercard -> msg) -> Cmd msg
 usersGetContextForUser toMsg =
     Http.get
@@ -5097,6 +6722,10 @@ usersGetContextForUser toMsg =
         }
 
 
+{-| Enables an authenticated GitHub App to find the user’s installation information.
+
+You must use a [JWT](https://docs.github.com/apps/building-github-apps/authenticating-with-github-apps/#authenticating-as-a-github-app) to access this endpoint.
+-}
 appsGetUserInstallation : (Result Http.Error Installation -> msg) -> Cmd msg
 appsGetUserInstallation toMsg =
     Http.get
@@ -5105,6 +6734,7 @@ appsGetUserInstallation toMsg =
         }
 
 
+{-| Lists the _verified_ public SSH keys for a user. This is accessible by anyone. -}
 usersListPublicKeysForUser : (Result Http.Error todo -> msg) -> Cmd msg
 usersListPublicKeysForUser toMsg =
     Http.get
@@ -5118,6 +6748,10 @@ usersListPublicKeysForUser toMsg =
         }
 
 
+{-| List [public organization memberships](https://docs.github.com/articles/publicizing-or-concealing-organization-membership) for the specified user.
+
+This method only lists _public_ memberships, regardless of authentication. If you need to fetch all of the organization memberships (public and private) for the authenticated user, use the [List organizations for the authenticated user](https://docs.github.com/rest/reference/orgs#list-organizations-for-the-authenticated-user) API instead.
+-}
 orgsListForUser : (Result Http.Error todo -> msg) -> Cmd msg
 orgsListForUser toMsg =
     Http.get
@@ -5131,6 +6765,11 @@ orgsListForUser toMsg =
         }
 
 
+{-| Lists all packages in a user's namespace for which the requesting user has access.
+
+To use this endpoint, you must authenticate using an access token with the `packages:read` scope.
+If `package_type` is not `container`, your token must also include the `repo` scope.
+-}
 packagesListPackagesForUser : (Result Http.Error todo -> msg) -> Cmd msg
 packagesListPackagesForUser toMsg =
     Http.get
@@ -5144,6 +6783,11 @@ packagesListPackagesForUser toMsg =
         }
 
 
+{-| Gets a specific package metadata for a public package owned by a user.
+
+To use this endpoint, you must authenticate using an access token with the `packages:read` scope.
+If `package_type` is not `container`, your token must also include the `repo` scope.
+-}
 packagesGetPackageForUser : (Result Http.Error Package -> msg) -> Cmd msg
 packagesGetPackageForUser toMsg =
     Http.get
@@ -5153,6 +6797,11 @@ packagesGetPackageForUser toMsg =
         }
 
 
+{-| Lists package versions for a public package owned by a specified user.
+
+To use this endpoint, you must authenticate using an access token with the `packages:read` scope.
+If `package_type` is not `container`, your token must also include the `repo` scope.
+-}
 packagesGetAllPackageVersionsForPackageOwnedByUser :
     (Result Http.Error todo -> msg) -> Cmd msg
 packagesGetAllPackageVersionsForPackageOwnedByUser toMsg =
@@ -5168,6 +6817,11 @@ packagesGetAllPackageVersionsForPackageOwnedByUser toMsg =
         }
 
 
+{-| Gets a specific package version for a public package owned by a specified user.
+
+At this time, to use this endpoint, you must authenticate using an access token with the `packages:read` scope.
+If `package_type` is not `container`, your token must also include the `repo` scope.
+-}
 packagesGetPackageVersionForUser :
     (Result Http.Error PackageVersion -> msg) -> Cmd msg
 packagesGetPackageVersionForUser toMsg =
@@ -5191,6 +6845,7 @@ projectsListForUser toMsg =
         }
 
 
+{-| These are events that you've received by watching repos and following users. If you are authenticated as the given user, you will see private events. Otherwise, you'll only see public events. -}
 activityListReceivedEventsForUser : (Result Http.Error todo -> msg) -> Cmd msg
 activityListReceivedEventsForUser toMsg =
     Http.get
@@ -5218,6 +6873,7 @@ activityListReceivedPublicEventsForUser toMsg =
         }
 
 
+{-| Lists public repositories for the specified user. Note: For GitHub AE, this endpoint will list internal repositories for the specified user. -}
 reposListForUser : (Result Http.Error todo -> msg) -> Cmd msg
 reposListForUser toMsg =
     Http.get
@@ -5231,6 +6887,12 @@ reposListForUser toMsg =
         }
 
 
+{-| Gets the summary of the free and paid GitHub Actions minutes used.
+
+Paid minutes only apply to workflows in private repositories that use GitHub-hosted runners. Minutes used is listed for each GitHub-hosted runner operating system. Any job re-runs are also included in the usage. The usage returned includes any minute multipliers for macOS and Windows runners, and is rounded up to the nearest whole minute. For more information, see "[Managing billing for GitHub Actions](https://docs.github.com/github/setting-up-and-managing-billing-and-payments-on-github/managing-billing-for-github-actions)".
+
+Access tokens must have the `user` scope.
+-}
 billingGetGithubActionsBillingUser :
     (Result Http.Error ActionsBillingUsage -> msg) -> Cmd msg
 billingGetGithubActionsBillingUser toMsg =
@@ -5241,6 +6903,12 @@ billingGetGithubActionsBillingUser toMsg =
         }
 
 
+{-| Gets the free and paid storage used for GitHub Packages in gigabytes.
+
+Paid minutes only apply to packages stored for private repositories. For more information, see "[Managing billing for GitHub Packages](https://docs.github.com/github/setting-up-and-managing-billing-and-payments-on-github/managing-billing-for-github-packages)."
+
+Access tokens must have the `user` scope.
+-}
 billingGetGithubPackagesBillingUser :
     (Result Http.Error PackagesBillingUsage -> msg) -> Cmd msg
 billingGetGithubPackagesBillingUser toMsg =
@@ -5251,6 +6919,12 @@ billingGetGithubPackagesBillingUser toMsg =
         }
 
 
+{-| Gets the estimated paid and estimated total storage used for GitHub Actions and GitHub Packages.
+
+Paid minutes only apply to packages stored for private repositories. For more information, see "[Managing billing for GitHub Packages](https://docs.github.com/github/setting-up-and-managing-billing-and-payments-on-github/managing-billing-for-github-packages)."
+
+Access tokens must have the `user` scope.
+-}
 billingGetSharedStorageBillingUser :
     (Result Http.Error CombinedBillingUsage -> msg) -> Cmd msg
 billingGetSharedStorageBillingUser toMsg =
@@ -5261,6 +6935,7 @@ billingGetSharedStorageBillingUser toMsg =
         }
 
 
+{-| Lists the SSH signing keys for a user. This operation is accessible by anyone. -}
 usersListSshSigningKeysForUser : (Result Http.Error todo -> msg) -> Cmd msg
 usersListSshSigningKeysForUser toMsg =
     Http.get
@@ -5274,6 +6949,10 @@ usersListSshSigningKeysForUser toMsg =
         }
 
 
+{-| Lists repositories a user has starred.
+
+You can also find out _when_ stars were created by passing the following custom [media type](https://docs.github.com/rest/overview/media-types/) via the `Accept` header: `application/vnd.github.star+json`.
+-}
 activityListReposStarredByUser : (Result Http.Error todo -> msg) -> Cmd msg
 activityListReposStarredByUser toMsg =
     Http.get
@@ -5287,6 +6966,7 @@ activityListReposStarredByUser toMsg =
         }
 
 
+{-| Lists repositories a user is watching. -}
 activityListReposWatchedByUser : (Result Http.Error todo -> msg) -> Cmd msg
 activityListReposWatchedByUser toMsg =
     Http.get
@@ -5300,6 +6980,7 @@ activityListReposWatchedByUser toMsg =
         }
 
 
+{-| Get a random sentence from the Zen of GitHub -}
 metaGetZen : (Result Http.Error todo -> msg) -> Cmd msg
 metaGetZen toMsg =
     Http.get

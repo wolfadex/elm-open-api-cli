@@ -31,6 +31,7 @@ import OpenApi.Path
 import OpenApi.Reference
 import OpenApi.Response
 import OpenApi.Schema
+import OpenApi.Server
 import Pages.Script
 import Path
 import Result.Extra
@@ -336,6 +337,19 @@ toRequestFunction apiSpec url operation =
         responses =
             OpenApi.Operation.responses operation
 
+        fullUrl : String
+        fullUrl =
+            case OpenApi.servers apiSpec of
+                [] ->
+                    url
+
+                firstServer :: _ ->
+                    if String.startsWith "/" url then
+                        OpenApi.Server.url firstServer ++ url
+
+                    else
+                        OpenApi.Server.url firstServer ++ "/" ++ url
+
         fromResult r =
             case r of
                 Ok t ->
@@ -409,7 +423,7 @@ toRequestFunction apiSpec url operation =
         )
         (\toMsg ->
             Gen.Http.get
-                { url = url
+                { url = fullUrl
                 , expect =
                     Gen.Http.expectJson
                         (\result -> Elm.apply toMsg [ result ])

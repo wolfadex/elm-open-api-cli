@@ -303,17 +303,22 @@ schemaToDeclarations name schema =
                     { exposeConstructor = False
                     , group = Just "Types"
                     }
-            , Elm.Declare.function ("decode" ++ typifyName name)
-                []
-                (\_ ->
-                    schemaToDecoder schema
-                        |> Elm.withType (Gen.Json.Decode.annotation_.decoder (Elm.Annotation.named [] (typifyName name)))
+                |> Ok
+            , Result.map
+                (\schemaDecoder ->
+                    Elm.Declare.function ("decode" ++ typifyName name)
+                        []
+                        (\_ ->
+                            schemaDecoder
+                                |> Elm.withType (Gen.Json.Decode.annotation_.decoder (Elm.Annotation.named [] (typifyName name)))
+                        )
+                        |> .declaration
+                        |> Elm.exposeWith
+                            { exposeConstructor = False
+                            , group = Just "Decoders"
+                            }
                 )
-                |> .declaration
-                |> Elm.exposeWith
-                    { exposeConstructor = False
-                    , group = Just "Decoders"
-                    }
+                (schemaToDecoder schema)
             , Elm.Declare.function ("encode" ++ typifyName name)
                 []
                 (\_ ->
@@ -325,8 +330,9 @@ schemaToDeclarations name schema =
                     { exposeConstructor = False
                     , group = Just "Encoders"
                     }
-            ]
                 |> Ok
+            ]
+                |> Result.Extra.combine
 
         Err ( path, msg ) ->
             Err ( name :: path, msg )
@@ -389,7 +395,8 @@ toRequestFunction apiSpec url operation =
                     else
                         OpenApi.Server.url firstServer ++ "/" ++ url
 
-        fromResult r =
+        debugFromResult : Result String ( Elm.Annotation.Annotation, Elm.Expression ) -> ( Elm.Annotation.Annotation, Elm.Expression )
+        debugFromResult r =
             case r of
                 Ok t ->
                     t
@@ -417,11 +424,14 @@ toRequestFunction apiSpec url operation =
                                             >> Dict.get "application/json"
                                         )
                                     |> stepOrFail "The response's application/json content option doesn't have a schema"
-                                        OpenApi.MediaType.schema
-                                    |> stepOrFail "Couldn't get the object schema for the response"
-                                        (OpenApi.Schema.get >> toObjectSchema)
-                                    |> stepOrFail "Couldn't get the type ref for the response [concrete]"
-                                        (.ref >> Maybe.andThen (schemaTypeRef apiSpec))
+                                        (OpenApi.MediaType.schema >> Maybe.map OpenApi.Schema.get)
+                                    |> Result.andThen
+                                        (\schema ->
+                                            Result.map2 Tuple.pair
+                                                (schemaToAnnotation schema)
+                                                (schemaToDecoder schema)
+                                                |> Result.mapError Tuple.second
+                                        )
 
                             Nothing ->
                                 Ok responseOrRef
@@ -436,14 +446,14 @@ toRequestFunction apiSpec url operation =
                                                     )
                                                     (OpenApi.Reference.ref >> schemaTypeRef apiSpec)
                                        )
+                                    |> Result.map
+                                        (\st ->
+                                            ( Elm.Annotation.named [] st
+                                            , Elm.val ("decode" ++ st)
+                                            )
+                                        )
                     )
-                |> Result.map
-                    (\st ->
-                        ( Elm.Annotation.named [] st
-                        , Elm.val ("decode" ++ st)
-                        )
-                    )
-                |> fromResult
+                |> debugFromResult
     in
     Elm.Declare.fn
         ((OpenApi.Operation.operationId operation
@@ -470,6 +480,7 @@ toRequestFunction apiSpec url operation =
                 }
         )
         |> .declaration
+        |> Elm.withDocumentation (OpenApi.Operation.description operation |> Maybe.withDefault "")
 
 
 schemaTypeRef : OpenApi -> String -> Maybe String
@@ -680,14 +691,15 @@ schemaToEncoder schema =
                     Gen.Debug.todo "union type"
 
 
-schemaToDecoder : Json.Schema.Definitions.Schema -> Elm.Expression
+schemaToDecoder : Json.Schema.Definitions.Schema -> Result ( Path, String ) Elm.Expression
 schemaToDecoder schema =
     case schema of
         Json.Schema.Definitions.BooleanSchema bool ->
-            Gen.Debug.todo ""
+            Ok (Gen.Debug.todo "")
 
         Json.Schema.Definitions.ObjectSchema subSchema ->
             let
+                singleTypeToDecoder : Json.Schema.Definitions.SingleType -> Result ( Path, String ) Elm.Expression
                 singleTypeToDecoder singleType =
                     case singleType of
                         Json.Schema.Definitions.ObjectType ->
@@ -698,54 +710,62 @@ schemaToDecoder schema =
                                         |> Maybe.withDefault []
                             in
                             List.foldl
-                                (\( key, valueSchema ) prevExpr ->
-                                    Elm.Op.pipe
-                                        (Elm.apply
-                                            Gen.Json.Decode.Extra.values_.andMap
-                                            [ Gen.Json.Decode.field key (schemaToDecoder valueSchema) ]
-                                        )
-                                        prevExpr
-                                )
-                                (Gen.Json.Decode.succeed
-                                    (Elm.function
-                                        (List.map (\( key, _ ) -> ( elmifyName key, Nothing )) properties)
-                                        (\args ->
-                                            Elm.record
-                                                (List.map2
-                                                    (\( key, _ ) arg -> ( elmifyName key, arg ))
-                                                    properties
-                                                    args
+                                (\( key, valueSchema ) prevExprRes ->
+                                    Result.map2
+                                        (\internalDecoder prevExpr ->
+                                            Elm.Op.pipe
+                                                (Elm.apply
+                                                    Gen.Json.Decode.Extra.values_.andMap
+                                                    [ Gen.Json.Decode.field key internalDecoder ]
                                                 )
+                                                prevExpr
+                                        )
+                                        (schemaToDecoder valueSchema)
+                                        prevExprRes
+                                )
+                                (Ok
+                                    (Gen.Json.Decode.succeed
+                                        (Elm.function
+                                            (List.map (\( key, _ ) -> ( elmifyName key, Nothing )) properties)
+                                            (\args ->
+                                                Elm.record
+                                                    (List.map2
+                                                        (\( key, _ ) arg -> ( elmifyName key, arg ))
+                                                        properties
+                                                        args
+                                                    )
+                                            )
                                         )
                                     )
                                 )
                                 properties
 
                         Json.Schema.Definitions.StringType ->
-                            Gen.Json.Decode.string
+                            Ok Gen.Json.Decode.string
 
                         Json.Schema.Definitions.IntegerType ->
-                            Gen.Json.Decode.int
+                            Ok Gen.Json.Decode.int
 
                         Json.Schema.Definitions.NumberType ->
-                            Gen.Json.Decode.float
+                            Ok Gen.Json.Decode.float
 
                         Json.Schema.Definitions.BooleanType ->
-                            Gen.Json.Decode.bool
+                            Ok Gen.Json.Decode.bool
 
                         Json.Schema.Definitions.NullType ->
-                            Gen.Debug.todo ""
+                            Ok (Gen.Debug.todo "null type decoder")
 
                         Json.Schema.Definitions.ArrayType ->
                             case subSchema.items of
                                 Json.Schema.Definitions.NoItems ->
-                                    Gen.Debug.todo "err"
+                                    Ok (Gen.Debug.todo "array of nothing?")
 
                                 Json.Schema.Definitions.ArrayOfItems _ ->
-                                    Gen.Debug.todo ""
+                                    Ok (Gen.Debug.todo "array of items")
 
                                 Json.Schema.Definitions.ItemDefinition itemSchema ->
-                                    Gen.Json.Decode.list (schemaToDecoder itemSchema)
+                                    Result.map Gen.Json.Decode.list
+                                        (schemaToDecoder itemSchema)
             in
             case subSchema.type_ of
                 Json.Schema.Definitions.SingleType singleType ->
@@ -756,7 +776,7 @@ schemaToDecoder schema =
                         Nothing ->
                             case subSchema.anyOf of
                                 Nothing ->
-                                    Gen.Json.Decode.value
+                                    Ok Gen.Json.Decode.value
 
                                 Just anyOf ->
                                     case anyOf of
@@ -765,48 +785,60 @@ schemaToDecoder schema =
                                                 ( Json.Schema.Definitions.ObjectSchema firstSubSchema, Json.Schema.Definitions.ObjectSchema secondSubSchema ) ->
                                                     case ( firstSubSchema.type_, secondSubSchema.type_ ) of
                                                         ( Json.Schema.Definitions.SingleType Json.Schema.Definitions.NullType, _ ) ->
-                                                            Gen.Json.Decode.oneOf
-                                                                [ Elm.apply
-                                                                    Gen.Json.Decode.values_.map
-                                                                    [ Elm.val "Present", schemaToDecoder secondSchema ]
-                                                                , Gen.Json.Decode.null (Elm.val "Null")
-                                                                ]
+                                                            Result.map
+                                                                (\schemaDecoderExpr ->
+                                                                    Gen.Json.Decode.oneOf
+                                                                        [ Elm.apply
+                                                                            Gen.Json.Decode.values_.map
+                                                                            [ Elm.val "Present", schemaDecoderExpr ]
+                                                                        , Gen.Json.Decode.null (Elm.val "Null")
+                                                                        ]
+                                                                )
+                                                                (schemaToDecoder secondSchema)
 
                                                         ( _, Json.Schema.Definitions.SingleType Json.Schema.Definitions.NullType ) ->
-                                                            Gen.Json.Decode.oneOf
-                                                                [ Elm.apply
-                                                                    Gen.Json.Decode.values_.map
-                                                                    [ Elm.val "Present", schemaToDecoder firstSchema ]
-                                                                , Gen.Json.Decode.null (Elm.val "Null")
-                                                                ]
+                                                            Result.map
+                                                                (\schemaDecoderExpr ->
+                                                                    Gen.Json.Decode.oneOf
+                                                                        [ Elm.apply
+                                                                            Gen.Json.Decode.values_.map
+                                                                            [ Elm.val "Present", schemaDecoderExpr ]
+                                                                        , Gen.Json.Decode.null (Elm.val "Null")
+                                                                        ]
+                                                                )
+                                                                (schemaToDecoder firstSchema)
 
                                                         _ ->
-                                                            Gen.Debug.todo ("decode anyOf 2: not nullable:: " ++ Debug.toString firstSubSchema ++ " ,,, " ++ Debug.toString secondSubSchema)
+                                                            Ok (Gen.Debug.todo ("decode anyOf 2: not nullable:: " ++ Debug.toString firstSubSchema ++ " ,,, " ++ Debug.toString secondSubSchema))
 
                                                 _ ->
-                                                    Gen.Debug.todo "decode anyOf 2: not both object schemas"
+                                                    Ok (Gen.Debug.todo "decode anyOf 2: not both object schemas")
 
                                         _ ->
-                                            Gen.Debug.todo "decode anyOf: not exactly 2 items"
+                                            Ok (Gen.Debug.todo "decode anyOf: not exactly 2 items")
 
                         Just ref ->
                             case String.split "/" ref of
                                 [ "#", "components", "schemas", schemaName ] ->
-                                    Elm.val ("decode" ++ typifyName schemaName)
+                                    Ok (Elm.val ("decode" ++ typifyName schemaName))
 
                                 _ ->
-                                    Gen.Debug.todo ("other ref: " ++ ref)
+                                    Ok (Gen.Debug.todo ("other ref: " ++ ref))
 
                 Json.Schema.Definitions.NullableType singleType ->
-                    Gen.Json.Decode.oneOf
-                        [ Elm.apply
-                            Gen.Json.Decode.values_.map
-                            [ Elm.val "Present", singleTypeToDecoder singleType ]
-                        , Gen.Json.Decode.null (Elm.val "Null")
-                        ]
+                    Result.map
+                        (\nullType ->
+                            Gen.Json.Decode.oneOf
+                                [ Elm.apply
+                                    Gen.Json.Decode.values_.map
+                                    [ Elm.val "Present", nullType ]
+                                , Gen.Json.Decode.null (Elm.val "Null")
+                                ]
+                        )
+                        (singleTypeToDecoder singleType)
 
                 Json.Schema.Definitions.UnionType singleTypes ->
-                    Gen.Debug.todo "union type"
+                    Ok (Gen.Debug.todo "union type")
 
 
 responseToSchema : OpenApi.Response.Response -> Result String Json.Schema.Definitions.Schema

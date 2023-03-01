@@ -511,14 +511,14 @@ toRequestFunction method apiSpec url operation =
                         toConcreteParam apiSpec param
                             |> Result.andThen
                                 (\concreteParam ->
-                                    let
-                                        pname : String
-                                        pname =
-                                            OpenApi.Parameter.name concreteParam
-                                    in
                                     case OpenApi.Parameter.in_ concreteParam of
                                         "path" ->
                                             if OpenApi.Parameter.required concreteParam then
+                                                let
+                                                    pname : String
+                                                    pname =
+                                                        OpenApi.Parameter.name concreteParam
+                                                in
                                                 ( Just
                                                     (Gen.String.call_.replace
                                                         (Elm.string <| "{" ++ pname ++ "}")

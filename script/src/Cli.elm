@@ -1055,6 +1055,19 @@ schemaToEncoder schema =
                                     Elm.apply
                                         Gen.Json.Encode.values_.list
                                         [ schemaToEncoder itemSchema ]
+
+                nullable encoder =
+                    Elm.fn ( "nullableValue", Nothing )
+                        (\nullableValue ->
+                            Elm.Case.custom
+                                nullableValue
+                                (Elm.Annotation.namedWith [] "Nullable" [ Elm.Annotation.var "value" ])
+                                [ Elm.Case.branch0 "Null" Gen.Json.Encode.null
+                                , Elm.Case.branch1 "Present"
+                                    ( "value", Elm.Annotation.var "value" )
+                                    (\value -> Elm.apply encoder [ value ])
+                                ]
+                        )
             in
             case subSchema.type_ of
                 Json.Schema.Definitions.SingleType singleType ->
@@ -1070,37 +1083,17 @@ schemaToEncoder schema =
                                 Just anyOf ->
                                     case anyOf of
                                         [ onlySchema ] ->
-                                            Gen.Debug.todo "decode anyOf: exactly 1 item"
+                                            schemaToEncoder onlySchema
 
                                         [ firstSchema, secondSchema ] ->
                                             case ( firstSchema, secondSchema ) of
                                                 ( Json.Schema.Definitions.ObjectSchema firstSubSchema, Json.Schema.Definitions.ObjectSchema secondSubSchema ) ->
                                                     case ( firstSubSchema.type_, secondSubSchema.type_ ) of
                                                         ( Json.Schema.Definitions.SingleType Json.Schema.Definitions.NullType, _ ) ->
-                                                            Elm.fn ( "nullableValue", Nothing )
-                                                                (\nullableValue ->
-                                                                    Elm.Case.custom
-                                                                        nullableValue
-                                                                        (Elm.Annotation.namedWith [] "Nullable" [ Elm.Annotation.var "value" ])
-                                                                        [ Elm.Case.branch0 "Null" Gen.Json.Encode.null
-                                                                        , Elm.Case.branch1 "Present"
-                                                                            ( "value", Elm.Annotation.var "value" )
-                                                                            (\value -> Elm.apply (schemaToEncoder secondSchema) [ value ])
-                                                                        ]
-                                                                )
+                                                            nullable (schemaToEncoder secondSchema)
 
                                                         ( _, Json.Schema.Definitions.SingleType Json.Schema.Definitions.NullType ) ->
-                                                            Elm.fn ( "nullableValue", Nothing )
-                                                                (\nullableValue ->
-                                                                    Elm.Case.custom
-                                                                        nullableValue
-                                                                        (Elm.Annotation.namedWith [] "Nullable" [ Elm.Annotation.var "value" ])
-                                                                        [ Elm.Case.branch0 "Null" Gen.Json.Encode.null
-                                                                        , Elm.Case.branch1 "Present"
-                                                                            ( "value", Elm.Annotation.var "value" )
-                                                                            (\value -> Elm.apply (schemaToEncoder firstSchema) [ value ])
-                                                                        ]
-                                                                )
+                                                            nullable (schemaToEncoder firstSchema)
 
                                                         _ ->
                                                             Gen.Debug.todo ("decode anyOf 2: not nullable:: " ++ Debug.toString firstSubSchema ++ " ,,, " ++ Debug.toString secondSubSchema)
@@ -1120,17 +1113,7 @@ schemaToEncoder schema =
                                     Gen.Debug.todo ("other ref: " ++ ref)
 
                 Json.Schema.Definitions.NullableType singleType ->
-                    Elm.fn ( "nullableValue", Nothing )
-                        (\nullableValue ->
-                            Elm.Case.custom
-                                nullableValue
-                                (Elm.Annotation.namedWith [] "Nullable" [ Elm.Annotation.var "value" ])
-                                [ Elm.Case.branch0 "Null" Gen.Json.Encode.null
-                                , Elm.Case.branch1 "Present"
-                                    ( "value", Elm.Annotation.var "value" )
-                                    (\value -> Elm.apply (singleTypeToDecoder singleType) [ value ])
-                                ]
-                        )
+                    nullable (singleTypeToDecoder singleType)
 
                 Json.Schema.Definitions.UnionType singleTypes ->
                     Gen.Debug.todo "union type"
@@ -1225,6 +1208,9 @@ schemaToDecoder schema =
 
                                 Just anyOf ->
                                     case anyOf of
+                                        [ onlySchema ] ->
+                                            schemaToDecoder onlySchema
+
                                         [ firstSchema, secondSchema ] ->
                                             case ( firstSchema, secondSchema ) of
                                                 ( Json.Schema.Definitions.ObjectSchema firstSubSchema, Json.Schema.Definitions.ObjectSchema secondSubSchema ) ->
@@ -1393,6 +1379,9 @@ schemaToAnnotation schema =
 
                                 Just anyOf ->
                                     case anyOf of
+                                        [ onlySchema ] ->
+                                            schemaToAnnotation onlySchema
+
                                         [ firstSchema, secondSchema ] ->
                                             case ( firstSchema, secondSchema ) of
                                                 ( Json.Schema.Definitions.ObjectSchema firstSubSchema, Json.Schema.Definitions.ObjectSchema secondSubSchema ) ->

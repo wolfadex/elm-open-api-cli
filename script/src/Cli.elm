@@ -532,11 +532,7 @@ toRequestFunction method apiSpec url operation =
                                                 Err "Optional parameters in path are not supported"
 
                                         "query" ->
-                                            paramToAnnotation concreteParam
-                                                |> Result.map
-                                                    (\annotatedParam ->
-                                                        ( Nothing, [ annotatedParam ] )
-                                                    )
+                                            Ok ( Nothing, [ concreteParam ] )
 
                                         paramIn ->
                                             Err <| "Parameters not supported in \"" ++ paramIn ++ "\" (original URL was " ++ fullUrl ++ ")"
@@ -557,56 +553,8 @@ toRequestFunction method apiSpec url operation =
                                 else
                                     queryParams
                                         |> Result.Extra.combineMap
-                                            (\( queryParam, annotation ) ->
-                                                let
-                                                    name =
-                                                        Elm.string queryParam
-
-                                                    value =
-                                                        Elm.get queryParam (Elm.get "params" config)
-                                                in
-                                                case (Elm.ToString.annotation annotation).signature of
-                                                    "String" ->
-                                                        Ok <| Gen.Maybe.make_.just <| Gen.Url.Builder.call_.string name value
-
-                                                    "Maybe String" ->
-                                                        Ok <| Gen.Maybe.map (Gen.Url.Builder.call_.string name) value
-
-                                                    "Int" ->
-                                                        Ok <| Gen.Maybe.make_.just <| Gen.Url.Builder.call_.int name value
-
-                                                    "Maybe Int" ->
-                                                        Ok <| Gen.Maybe.map (Gen.Url.Builder.call_.int name) value
-
-                                                    "Float" ->
-                                                        Ok <| Gen.Maybe.make_.just <| Gen.Url.Builder.call_.string name (Gen.String.call_.fromFloat value)
-
-                                                    "Maybe Float" ->
-                                                        Ok <| Gen.Maybe.map (Gen.Url.Builder.call_.string name << Gen.String.call_.fromFloat) value
-
-                                                    "Bool" ->
-                                                        Ok <|
-                                                            Gen.Maybe.map
-                                                                (\v ->
-                                                                    Gen.Url.Builder.call_.string name
-                                                                        (Elm.ifThen v
-                                                                            (Elm.string "true")
-                                                                            (Elm.string "false")
-                                                                        )
-                                                                )
-                                                                value
-
-                                                    "List String" ->
-                                                        Ok <|
-                                                            Gen.Maybe.map
-                                                                (\v ->
-                                                                    Gen.Url.Builder.call_.string name
-                                                                        (Gen.String.call_.join (Elm.string ",") v)
-                                                                )
-                                                                value
-
-                                                    t ->
-                                                        Err ("Params of type \"" ++ t ++ "\" not supported yet")
+                                            (\queryParam ->
+                                                queryParameterToUrlBuilderArgument config queryParam
                                             )
                                         |> Result.map
                                             (Gen.List.filterMap Gen.Basics.identity
@@ -782,6 +730,63 @@ toRequestFunction method apiSpec url operation =
     function
         |> Elm.declaration functionName
         |> Elm.withDocumentation documentation
+
+
+queryParameterToUrlBuilderArgument : Elm.Expression -> OpenApi.Parameter.Parameter -> Result String Elm.Expression
+queryParameterToUrlBuilderArgument config param =
+    paramToAnnotation param
+        |> Result.andThen
+            (\( paramName, annotation ) ->
+                let
+                    name =
+                        Elm.string paramName
+
+                    value =
+                        Elm.get paramName (Elm.get "params" config)
+                in
+                case (Elm.ToString.annotation annotation).signature of
+                    "String" ->
+                        Ok <| Gen.Maybe.make_.just <| Gen.Url.Builder.call_.string name value
+
+                    "Maybe String" ->
+                        Ok <| Gen.Maybe.map (Gen.Url.Builder.call_.string name) value
+
+                    "Int" ->
+                        Ok <| Gen.Maybe.make_.just <| Gen.Url.Builder.call_.int name value
+
+                    "Maybe Int" ->
+                        Ok <| Gen.Maybe.map (Gen.Url.Builder.call_.int name) value
+
+                    "Float" ->
+                        Ok <| Gen.Maybe.make_.just <| Gen.Url.Builder.call_.string name (Gen.String.call_.fromFloat value)
+
+                    "Maybe Float" ->
+                        Ok <| Gen.Maybe.map (Gen.Url.Builder.call_.string name << Gen.String.call_.fromFloat) value
+
+                    "Bool" ->
+                        Ok <|
+                            Gen.Maybe.map
+                                (\v ->
+                                    Gen.Url.Builder.call_.string name
+                                        (Elm.ifThen v
+                                            (Elm.string "true")
+                                            (Elm.string "false")
+                                        )
+                                )
+                                value
+
+                    "List String" ->
+                        Ok <|
+                            Gen.Maybe.map
+                                (\v ->
+                                    Gen.Url.Builder.call_.string name
+                                        (Gen.String.call_.join (Elm.string ",") v)
+                                )
+                                value
+
+                    t ->
+                        Err ("Params of type \"" ++ t ++ "\" not supported yet")
+            )
 
 
 paramToAnnotation : OpenApi.Parameter.Parameter -> Result String ( String, Elm.Annotation.Annotation )

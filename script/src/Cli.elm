@@ -314,41 +314,45 @@ schemaToDeclarations : String -> Json.Schema.Definitions.Schema -> Result ( Path
 schemaToDeclarations name schema =
     case schemaToAnnotation schema of
         Ok ann ->
-            [ Elm.alias (typifyName name) ann
-                |> Elm.exposeWith
-                    { exposeConstructor = False
-                    , group = Just "Types"
-                    }
-                |> Ok
-            , Result.map
-                (\schemaDecoder ->
-                    Elm.Declare.function ("decode" ++ typifyName name)
-                        []
-                        (\_ ->
-                            schemaDecoder
-                                |> Elm.withType (Gen.Json.Decode.annotation_.decoder (Elm.Annotation.named [] (typifyName name)))
-                        )
-                        |> .declaration
-                        |> Elm.exposeWith
-                            { exposeConstructor = False
-                            , group = Just "Decoders"
-                            }
-                )
-                (schemaToDecoder schema)
-            , Elm.Declare.function ("encode" ++ typifyName name)
-                []
-                (\_ ->
-                    schemaToEncoder schema
-                        |> Elm.withType (Elm.Annotation.function [ Elm.Annotation.named [] (typifyName name) ] Gen.Json.Encode.annotation_.value)
-                )
-                |> .declaration
-                |> Elm.exposeWith
-                    { exposeConstructor = False
-                    , group = Just "Encoders"
-                    }
-                |> Ok
-            ]
-                |> Result.Extra.combine
+            if (Elm.ToString.annotation ann).signature == typifyName name then
+                Ok []
+
+            else
+                [ Elm.alias (typifyName name) ann
+                    |> Elm.exposeWith
+                        { exposeConstructor = False
+                        , group = Just "Types"
+                        }
+                    |> Ok
+                , Result.map
+                    (\schemaDecoder ->
+                        Elm.Declare.function ("decode" ++ typifyName name)
+                            []
+                            (\_ ->
+                                schemaDecoder
+                                    |> Elm.withType (Gen.Json.Decode.annotation_.decoder (Elm.Annotation.named [] (typifyName name)))
+                            )
+                            |> .declaration
+                            |> Elm.exposeWith
+                                { exposeConstructor = False
+                                , group = Just "Decoders"
+                                }
+                    )
+                    (schemaToDecoder schema)
+                , Elm.Declare.function ("encode" ++ typifyName name)
+                    []
+                    (\_ ->
+                        schemaToEncoder schema
+                            |> Elm.withType (Elm.Annotation.function [ Elm.Annotation.named [] (typifyName name) ] Gen.Json.Encode.annotation_.value)
+                    )
+                    |> .declaration
+                    |> Elm.exposeWith
+                        { exposeConstructor = False
+                        , group = Just "Encoders"
+                        }
+                    |> Ok
+                ]
+                    |> Result.Extra.combine
 
         Err ( path, msg ) ->
             Err ( name :: path, msg )

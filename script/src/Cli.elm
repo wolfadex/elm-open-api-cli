@@ -12,15 +12,20 @@ import Elm.Annotation
 import Elm.Case
 import Elm.Declare
 import Elm.Op
+import Elm.ToString
 import FatalError
+import Gen.Basics
 import Gen.Bytes
 import Gen.Debug
 import Gen.Http
 import Gen.Json.Decode
 import Gen.Json.Decode.Extra
 import Gen.Json.Encode
+import Gen.List
 import Gen.Maybe
 import Gen.Result
+import Gen.String
+import Gen.Url.Builder
 import Json.Decode
 import Json.Schema.Definitions
 import List.Extra
@@ -29,6 +34,7 @@ import OpenApi.Components
 import OpenApi.Info
 import OpenApi.MediaType
 import OpenApi.Operation
+import OpenApi.Parameter
 import OpenApi.Path
 import OpenApi.Reference
 import OpenApi.RequestBody
@@ -394,8 +400,8 @@ type BodyType
 toRequestFunction : String -> OpenApi -> String -> OpenApi.Operation.Operation -> Elm.Declaration
 toRequestFunction method apiSpec url operation =
     let
-        body : Result String BodyType
-        body =
+        bodyType : Result String BodyType
+        bodyType =
             case OpenApi.Operation.requestBody operation of
                 Nothing ->
                     Ok EmptyBody
@@ -474,140 +480,283 @@ toRequestFunction method apiSpec url operation =
                 |> removeInvalidChars
                 |> String.Extra.camelize
 
-        configParam : List ( String, Elm.Annotation.Annotation ) -> ( String, Maybe Elm.Annotation.Annotation )
-        configParam additionalParams =
-            ( "config"
-            , Just
-                (Elm.Annotation.record
-                    (( "toMsg"
-                     , Elm.Annotation.function
-                        [ Gen.Result.annotation_.result Gen.Http.annotation_.error successType ]
-                        (Elm.Annotation.var "msg")
-                     )
-                        :: additionalParams
+        urlParams : Result String (List ( String, Elm.Annotation.Annotation ))
+        urlParams =
+            let
+                params =
+                    OpenApi.Operation.parameters operation
+            in
+            if List.isEmpty params then
+                Ok []
+
+            else
+                params
+                    |> Result.Extra.combineMap
+                        (\param ->
+                            toConcreteParam apiSpec param
+                                |> Result.andThen paramToAnnotation
+                        )
+                    |> Result.map
+                        (\types -> [ ( "params", Elm.Annotation.record types ) ])
+
+        replacedUrl : Elm.Expression -> Result String Elm.Expression
+        replacedUrl config =
+            let
+                params =
+                    OpenApi.Operation.parameters operation
+            in
+            params
+                |> Result.Extra.combineMap
+                    (\param ->
+                        toConcreteParam apiSpec param
+                            |> Result.andThen
+                                (\concreteParam ->
+                                    let
+                                        pname : String
+                                        pname =
+                                            OpenApi.Parameter.name concreteParam
+                                    in
+                                    case OpenApi.Parameter.in_ concreteParam of
+                                        "path" ->
+                                            if OpenApi.Parameter.required concreteParam then
+                                                ( Just
+                                                    (Gen.String.call_.replace
+                                                        (Elm.string <| "{" ++ pname ++ "}")
+                                                        (Elm.get pname (Elm.get "params" config))
+                                                    )
+                                                , []
+                                                )
+                                                    |> Ok
+
+                                            else
+                                                Err "Optional parameters in path are not supported"
+
+                                        "query" ->
+                                            paramToAnnotation concreteParam
+                                                |> Result.map
+                                                    (\annotatedParam ->
+                                                        ( Nothing, [ annotatedParam ] )
+                                                    )
+
+                                        paramIn ->
+                                            Err <| "Parameters not supported in \"" ++ paramIn ++ "\" (original URL was " ++ fullUrl ++ ")"
+                                )
                     )
-                )
-            )
+                |> Result.andThen
+                    (List.unzip
+                        >> Tuple.mapBoth (List.filterMap identity) List.concat
+                        >> (\( replacements, queryParams ) ->
+                                let
+                                    replaced : Elm.Expression
+                                    replaced =
+                                        List.foldl identity (Elm.string fullUrl) replacements
+                                in
+                                if List.isEmpty queryParams then
+                                    Ok replaced
+
+                                else
+                                    queryParams
+                                        |> Result.Extra.combineMap
+                                            (\( queryParam, annotation ) ->
+                                                let
+                                                    name =
+                                                        Elm.string queryParam
+
+                                                    value =
+                                                        Elm.get queryParam (Elm.get "params" config)
+                                                in
+                                                case (Elm.ToString.annotation annotation).signature of
+                                                    "String" ->
+                                                        Ok <| Gen.Maybe.make_.just <| Gen.Url.Builder.call_.string name value
+
+                                                    "Maybe String" ->
+                                                        Ok <| Gen.Maybe.map (Gen.Url.Builder.call_.string name) value
+
+                                                    "Int" ->
+                                                        Ok <| Gen.Maybe.make_.just <| Gen.Url.Builder.call_.int name value
+
+                                                    "Maybe Int" ->
+                                                        Ok <| Gen.Maybe.map (Gen.Url.Builder.call_.int name) value
+
+                                                    "Float" ->
+                                                        Ok <| Gen.Maybe.make_.just <| Gen.Url.Builder.call_.string name (Gen.String.call_.fromFloat value)
+
+                                                    "Maybe Float" ->
+                                                        Ok <| Gen.Maybe.map (Gen.Url.Builder.call_.string name << Gen.String.call_.fromFloat) value
+
+                                                    "Bool" ->
+                                                        Ok <|
+                                                            Gen.Maybe.map
+                                                                (\v ->
+                                                                    Gen.Url.Builder.call_.string name
+                                                                        (Elm.ifThen v
+                                                                            (Elm.string "true")
+                                                                            (Elm.string "false")
+                                                                        )
+                                                                )
+                                                                value
+
+                                                    "List String" ->
+                                                        Ok <|
+                                                            Gen.Maybe.map
+                                                                (\v ->
+                                                                    Gen.Url.Builder.call_.string name
+                                                                        (Gen.String.call_.join (Elm.string ",") v)
+                                                                )
+                                                                value
+
+                                                    t ->
+                                                        Err ("Params of type \"" ++ t ++ "\" not supported yet")
+                                            )
+                                        |> Result.map
+                                            (Gen.List.filterMap Gen.Basics.identity
+                                                >> Gen.Url.Builder.call_.crossOrigin
+                                                    replaced
+                                                    (Elm.list [])
+                                            )
+                           )
+                    )
+
+        configParam : Result String ( String, Maybe Elm.Annotation.Annotation )
+        configParam =
+            urlParams
+                |> Result.map
+                    (\up ->
+                        ( "config"
+                        , Just
+                            (Elm.Annotation.record
+                                (authorizationParams
+                                    ++ ( "toMsg"
+                                       , Elm.Annotation.function
+                                            [ Gen.Result.annotation_.result Gen.Http.annotation_.error successType ]
+                                            (Elm.Annotation.var "msg")
+                                       )
+                                    :: bodyParams
+                                    ++ up
+                                )
+                            )
+                        )
+                    )
 
         ( successType, maybeSuccessDecoder ) =
             operationToSuccessTypeAndDecoder apiSpec operation
 
-        function : (Elm.Expression -> List Elm.Expression) -> List ( String, Elm.Annotation.Annotation ) -> Elm.Expression
-        function headers additionalParams =
-            case body of
+        body config =
+            case bodyType of
                 Ok EmptyBody ->
-                    Elm.fn
-                        (configParam additionalParams)
-                        (\config ->
-                            Gen.Http.request
-                                { method = method
-                                , headers = headers config
-                                , timeout = Gen.Maybe.make_.nothing
-                                , tracker = Gen.Maybe.make_.nothing
-                                , url = fullUrl
-                                , expect =
-                                    case maybeSuccessDecoder of
-                                        Just successDecoder ->
-                                            Gen.Http.expectJson
-                                                (\result -> Elm.apply (Elm.get "toMsg" config) [ result ])
-                                                successDecoder
+                    Gen.Http.emptyBody
+                        |> Ok
 
-                                        Nothing ->
-                                            Gen.Http.expectWhatever (\result -> Elm.apply (Elm.get "toMsg" config) [ result ])
-                                , body = Gen.Http.emptyBody
-                                }
-                        )
-
-                Ok (JsonBody bodyType bodyEncoder) ->
-                    Elm.fn
-                        (configParam (( "body", bodyType ) :: additionalParams))
-                        (\config ->
-                            Gen.Http.request
-                                { method = method
-                                , headers = headers config
-                                , timeout = Gen.Maybe.make_.nothing
-                                , tracker = Gen.Maybe.make_.nothing
-                                , url = fullUrl
-                                , expect =
-                                    case maybeSuccessDecoder of
-                                        Just successDecoder ->
-                                            Gen.Http.expectJson
-                                                (\result -> Elm.apply (Elm.get "toMsg" config) [ result ])
-                                                successDecoder
-
-                                        Nothing ->
-                                            Gen.Http.expectWhatever (\result -> Elm.apply (Elm.get "toMsg" config) [ result ])
-                                , body = Gen.Http.jsonBody <| Elm.apply bodyEncoder [ Elm.get "body" config ]
-                                }
-                        )
+                Ok (JsonBody _ bodyEncoder) ->
+                    Gen.Http.jsonBody
+                        (Elm.apply bodyEncoder [ Elm.get "body" config ])
+                        |> Ok
 
                 Ok (BytesBody mime) ->
-                    Elm.fn
-                        (configParam (( "body", Gen.Bytes.annotation_.bytes ) :: additionalParams))
-                        (\config ->
-                            Gen.Http.request
-                                { method = method
-                                , headers = headers config
-                                , timeout = Gen.Maybe.make_.nothing
-                                , tracker = Gen.Maybe.make_.nothing
-                                , url = fullUrl
-                                , expect =
-                                    case maybeSuccessDecoder of
-                                        Just successDecoder ->
-                                            Gen.Http.expectJson
-                                                (\result -> Elm.apply (Elm.get "toMsg" config) [ result ])
-                                                successDecoder
+                    Gen.Http.bytesBody mime (Elm.get "body" config)
+                        |> Ok
 
-                                        Nothing ->
-                                            Gen.Http.expectWhatever (\result -> Elm.apply (Elm.get "toMsg" config) [ result ])
-                                , body = Gen.Http.bytesBody mime (Elm.get "body" config)
-                                }
+                Err e ->
+                    Err <| "Could not deal with body type: " ++ e
+
+        expect config =
+            case maybeSuccessDecoder of
+                Just successDecoder ->
+                    Gen.Http.expectJson
+                        (\result -> Elm.apply (Elm.get "toMsg" config) [ result ])
+                        successDecoder
+
+                Nothing ->
+                    Gen.Http.expectWhatever (\result -> Elm.apply (Elm.get "toMsg" config) [ result ])
+
+        bodyParams : List ( String, Elm.Annotation.Annotation )
+        bodyParams =
+            case bodyType of
+                Ok EmptyBody ->
+                    []
+
+                Ok (JsonBody annotation _) ->
+                    [ ( "body", annotation ) ]
+
+                Ok (BytesBody _) ->
+                    [ ( "body", Gen.Bytes.annotation_.bytes ) ]
+
+                Err _ ->
+                    []
+
+        function : Elm.Expression
+        function =
+            case configParam of
+                Ok param ->
+                    Elm.fn
+                        param
+                        (\config ->
+                            Gen.Http.call_.request
+                                (Elm.record
+                                    [ ( "method", Elm.string method )
+                                    , ( "headers", Elm.list <| authorizationHeaders config )
+                                    , ( "expect", expect config )
+                                    , ( "body"
+                                      , case body config of
+                                            Ok b ->
+                                                b
+
+                                            Err e ->
+                                                Gen.Debug.todo e
+                                      )
+                                    , ( "timeout", Gen.Maybe.make_.nothing )
+                                    , ( "tracker", Gen.Maybe.make_.nothing )
+                                    , ( "url"
+                                      , case replacedUrl config of
+                                            Ok replaced ->
+                                                replaced
+
+                                            Err e ->
+                                                Gen.Debug.todo e
+                                      )
+                                    ]
+                                )
                         )
 
                 Err e ->
-                    Gen.Debug.todo <|
-                        "["
-                            ++ method
-                            ++ " "
-                            ++ url
-                            ++ "]Could not deal with body type: "
-                            ++ e
+                    Gen.Debug.todo e
 
-        ( functionWithSecurity, scopes ) =
+        ( authorizationHeaders, authorizationParams, scopes ) =
             case
                 List.map
                     (Dict.toList << OpenApi.SecurityRequirement.requirements)
                     (OpenApi.Operation.security operation)
             of
                 [] ->
-                    ( function (\_ -> []) [], [] )
+                    ( \_ -> [], [], [] )
 
                 [ [ ( "oauth_2_0", ss ) ] ] ->
-                    ( function
-                        (\config ->
-                            [ Gen.Http.call_.header (Elm.string "Authorization")
-                                (Elm.Op.append
-                                    (Elm.string "Bearer ")
-                                    (config
-                                        |> Elm.get "authorization"
-                                        |> Elm.get "bearer"
-                                    )
+                    ( \config ->
+                        [ Gen.Http.call_.header (Elm.string "Authorization")
+                            (Elm.Op.append
+                                (Elm.string "Bearer ")
+                                (config
+                                    |> Elm.get "authorization"
+                                    |> Elm.get "bearer"
                                 )
+                            )
+                        ]
+                    , [ ( "authorization"
+                        , Elm.Annotation.record
+                            [ ( "bearer"
+                              , Elm.Annotation.string
+                              )
                             ]
                         )
-                        [ ( "authorization"
-                          , Elm.Annotation.record
-                                [ ( "bearer"
-                                  , Elm.Annotation.string
-                                  )
-                                ]
-                          )
-                        ]
+                      ]
                     , ss
                     )
 
                 _ ->
-                    ( Gen.Debug.todo "Don't know how to handle branches with multiple security requirements", [] )
+                    ( \_ -> [ Gen.Debug.todo "Don't know how to handle branches with multiple security requirements" ]
+                    , []
+                    , []
+                    )
 
         documentation =
             OpenApi.Operation.description operation
@@ -630,9 +779,58 @@ toRequestFunction method apiSpec url operation =
                                 |> String.join "\n"
                    )
     in
-    functionWithSecurity
+    function
         |> Elm.declaration functionName
         |> Elm.withDocumentation documentation
+
+
+paramToAnnotation : OpenApi.Parameter.Parameter -> Result String ( String, Elm.Annotation.Annotation )
+paramToAnnotation concreteParam =
+    let
+        pname : String
+        pname =
+            OpenApi.Parameter.name concreteParam
+    in
+    Ok concreteParam
+        |> stepOrFail ("Could not get schema for parameter " ++ pname)
+            (OpenApi.Parameter.schema >> Maybe.map OpenApi.Schema.get)
+        |> Result.andThen (schemaToAnnotation >> Result.mapError Tuple.second)
+        |> Result.map
+            (\annotation ->
+                ( pname
+                , if OpenApi.Parameter.required concreteParam then
+                    annotation
+
+                  else
+                    Elm.Annotation.maybe annotation
+                )
+            )
+
+
+toConcreteParam : OpenApi -> OpenApi.Reference.ReferenceOr OpenApi.Parameter.Parameter -> Result String OpenApi.Parameter.Parameter
+toConcreteParam apiSpec param =
+    case OpenApi.Reference.toConcrete param of
+        Just concreteParam ->
+            Ok concreteParam
+
+        Nothing ->
+            Ok param
+                |> stepOrFail "I found a params, but I couldn't convert it to a concrete one" OpenApi.Reference.toReference
+                |> Result.map OpenApi.Reference.ref
+                |> Result.andThen
+                    (\ref ->
+                        case String.split "/" ref of
+                            [ "#", "components", "parameters", parameterType ] ->
+                                apiSpec
+                                    |> OpenApi.components
+                                    |> Maybe.map OpenApi.Components.parameters
+                                    |> Maybe.andThen (Dict.get parameterType)
+                                    |> Maybe.map (toConcreteParam apiSpec)
+                                    |> Maybe.withDefault (Err <| "Param ref " ++ parameterType ++ " not found")
+
+                            _ ->
+                                Err <| "Unsupported param reference: " ++ ref
+                    )
 
 
 operationToSuccessTypeAndDecoder : OpenApi -> OpenApi.Operation.Operation -> ( Elm.Annotation.Annotation, Maybe Elm.Expression )

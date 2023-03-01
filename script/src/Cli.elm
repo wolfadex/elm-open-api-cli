@@ -1070,7 +1070,7 @@ schemaToEncoder schema =
                                 Just anyOf ->
                                     case anyOf of
                                         [ onlySchema ] ->
-                                            Gen.Debug.todo "decode anyOf: exactly 1 item"
+                                            schemaToEncoder onlySchema
 
                                         [ firstSchema, secondSchema ] ->
                                             case ( firstSchema, secondSchema ) of
@@ -1225,6 +1225,9 @@ schemaToDecoder schema =
 
                                 Just anyOf ->
                                     case anyOf of
+                                        [ onlySchema ] ->
+                                            schemaToDecoder onlySchema
+
                                         [ firstSchema, secondSchema ] ->
                                             case ( firstSchema, secondSchema ) of
                                                 ( Json.Schema.Definitions.ObjectSchema firstSubSchema, Json.Schema.Definitions.ObjectSchema secondSubSchema ) ->
@@ -1393,6 +1396,9 @@ schemaToAnnotation schema =
 
                                 Just anyOf ->
                                     case anyOf of
+                                        [ onlySchema ] ->
+                                            schemaToAnnotation onlySchema
+
                                         [ firstSchema, secondSchema ] ->
                                             case ( firstSchema, secondSchema ) of
                                                 ( Json.Schema.Definitions.ObjectSchema firstSubSchema, Json.Schema.Definitions.ObjectSchema secondSubSchema ) ->

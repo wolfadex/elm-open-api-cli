@@ -747,49 +747,62 @@ queryParameterToUrlBuilderArgument config param =
 
                     value =
                         Elm.get paramName (Elm.get "params" config)
+
+                    paramBuilderHelper : List String -> Result String (Elm.Expression -> Elm.Expression)
+                    paramBuilderHelper parts =
+                        case parts of
+                            "String" :: [] ->
+                                identity
+                                    |> Ok
+
+                            "Int" :: [] ->
+                                Gen.String.call_.fromInt
+                                    |> Ok
+
+                            "Float" :: [] ->
+                                Gen.String.call_.fromFloat
+                                    |> Ok
+
+                            "Bool" :: [] ->
+                                (\val ->
+                                    Elm.ifThen val
+                                        (Elm.string "true")
+                                        (Elm.string "false")
+                                )
+                                    |> Ok
+
+                            t ->
+                                Err ("Params of type \"" ++ String.join " " t ++ "\" not supported yet")
                 in
-                case (Elm.ToString.annotation annotation).signature of
-                    "String" ->
-                        Ok <| Gen.Maybe.make_.just <| Gen.Url.Builder.call_.string name value
+                case (Elm.ToString.annotation annotation).signature |> String.split " " of
+                    [ a ] ->
+                        paramBuilderHelper [ a ]
+                            |> Result.map
+                                (\f ->
+                                    f value
+                                        |> Gen.Url.Builder.call_.string name
+                                        |> Gen.Maybe.make_.just
+                                )
 
-                    "Maybe String" ->
-                        Ok <| Gen.Maybe.map (Gen.Url.Builder.call_.string name) value
+                    "Maybe" :: rest ->
+                        paramBuilderHelper rest
+                            |> Result.map (\f -> Gen.Maybe.map (f >> Gen.Url.Builder.call_.string name) value)
 
-                    "Int" ->
-                        Ok <| Gen.Maybe.make_.just <| Gen.Url.Builder.call_.int name value
-
-                    "Maybe Int" ->
-                        Ok <| Gen.Maybe.map (Gen.Url.Builder.call_.int name) value
-
-                    "Float" ->
-                        Ok <| Gen.Maybe.make_.just <| Gen.Url.Builder.call_.string name (Gen.String.call_.fromFloat value)
-
-                    "Maybe Float" ->
-                        Ok <| Gen.Maybe.map (Gen.Url.Builder.call_.string name << Gen.String.call_.fromFloat) value
-
-                    "Bool" ->
-                        Ok <|
-                            Gen.Maybe.map
-                                (\v ->
-                                    Gen.Url.Builder.call_.string name
-                                        (Elm.ifThen v
-                                            (Elm.string "true")
-                                            (Elm.string "false")
+                    "List" :: rest ->
+                        paramBuilderHelper rest
+                            |> Result.map
+                                (\f ->
+                                    Gen.Maybe.map
+                                        (f
+                                            >> Gen.String.call_.join (Elm.string ",")
+                                            >> Gen.Url.Builder.call_.string name
                                         )
+                                        value
                                 )
-                                value
-
-                    "List String" ->
-                        Ok <|
-                            Gen.Maybe.map
-                                (\v ->
-                                    Gen.Url.Builder.call_.string name
-                                        (Gen.String.call_.join (Elm.string ",") v)
-                                )
-                                value
 
                     t ->
-                        Err ("Params of type \"" ++ t ++ "\" not supported yet")
+                        -- TODO: This seems to be mostle aliases, at least in the GitHub OAS
+                        Err ("Params of type \"" ++ String.join " " t ++ "\" not supported yet")
             )
 
 
@@ -1414,7 +1427,8 @@ schemaToAnnotation schema =
                     nullable (singleTypeToAnnotation singleType)
 
                 Json.Schema.Definitions.UnionType singleTypes ->
-                    Debug.todo "union type"
+                    -- Debug.todo "union type"
+                    Err ( [], "Todo: union type" )
 
 
 makeNamespaceValid : String -> String

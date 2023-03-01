@@ -22,7 +22,7 @@ type alias Model =
 init : () -> ( Model, Cmd Msg )
 init () =
     ( {}
-    , GitHub_v3_REST_API.metaRoot RootResponsed
+    , GitHub_v3_REST_API.metaRoot { toMsg = RootResponsed }
     )
 
 

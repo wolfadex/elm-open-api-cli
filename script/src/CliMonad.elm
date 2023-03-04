@@ -1,4 +1,4 @@
-module CliMonad exposing (CliMonad, andThen, combine, combineMap, fail, fromApiSpec, fromResult, map, map2, run, succeed, todo, todoWithDefault, withPath)
+module CliMonad exposing (CliMonad, andThen, combine, combineMap, fail, fromApiSpec, fromResult, map, map2, map3, run, succeed, todo, todoWithDefault, withPath)
 
 import Elm
 import Gen.Debug
@@ -58,6 +58,11 @@ map f (CliMonad x) =
 map2 : (a -> b -> c) -> CliMonad a -> CliMonad b -> CliMonad c
 map2 f (CliMonad x) (CliMonad y) =
     CliMonad (\input -> Result.map2 f (x input) (y input))
+
+
+map3 : (a -> b -> c -> d) -> CliMonad a -> CliMonad b -> CliMonad c -> CliMonad d
+map3 f (CliMonad x) (CliMonad y) (CliMonad z) =
+    CliMonad (\input -> Result.map3 f (x input) (y input) (z input))
 
 
 andThen : (a -> CliMonad b) -> CliMonad a -> CliMonad b

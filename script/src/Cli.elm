@@ -212,8 +212,9 @@ generateFileFromOpenApiSpec { outputFile, namespace, generateTodos } apiSpec =
                     }
                     combined
             of
-                Ok decls ->
-                    BackendTask.succeed (List.concat decls)
+                Ok ( decls, warnings ) ->
+                    BackendTask.combine (List.map (\warning -> Pages.Script.log <| Ansi.Color.fontColor Ansi.Color.brightYellow "Warning: " ++ Ansi.Color.end Ansi.Color.Font ++ warning) warnings)
+                        |> BackendTask.map (\_ -> List.concat decls)
 
                 Err e ->
                     BackendTask.fail (FatalError.fromString e)
@@ -771,8 +772,8 @@ operationToContentSchema operation =
 contentToContentSchema : Dict String OpenApi.MediaType.MediaType -> CliMonad ContentSchema
 contentToContentSchema content =
     let
-        default : () -> CliMonad ContentSchema
-        default _ =
+        default : Maybe (CliMonad ContentSchema) -> CliMonad ContentSchema
+        default fallback =
             case Dict.get "application/json" content of
                 Just jsonSchema ->
                     CliMonad.succeed jsonSchema
@@ -792,7 +793,12 @@ contentToContentSchema content =
                                     stringContent "text/plain" htmlSchema
 
                                 Nothing ->
-                                    CliMonad.fail <| "The content doesn't have an application/json, text/html or text/plain option, it has " ++ String.join ", " (Dict.keys content)
+                                    let
+                                        msg =
+                                            "The content doesn't have an application/json, text/html or text/plain option, it has " ++ String.join ", " (Dict.keys content)
+                                    in
+                                    fallback
+                                        |> Maybe.withDefault (CliMonad.fail msg)
 
         stringContent mime htmlSchema =
             CliMonad.succeed htmlSchema
@@ -808,19 +814,31 @@ contentToContentSchema content =
                             CliMonad.fail ("The only supported type for " ++ mime ++ " content is string")
                     )
     in
-    case Dict.keys content of
+    case Dict.toList content of
         [] ->
             CliMonad.succeed EmptyContent
 
-        [ single ] ->
-            if String.startsWith "image/" single || single == "application/octet-stream" then
-                CliMonad.succeed (BytesContent single)
+        [ ( singleKey, singleValue ) ] ->
+            if singleKey == "application/octet-stream" then
+                CliMonad.succeed (BytesContent singleKey)
 
             else
-                default ()
+                let
+                    fallback : CliMonad ContentSchema
+                    fallback =
+                        CliMonad.succeed
+                            (BytesContent singleKey)
+                            |> CliMonad.withWarning ("Unrecognized mime type: " ++ singleKey ++ ", treating it as bytes")
+                in
+                if String.startsWith "image/" singleKey then
+                    -- TODO: handle base64
+                    default (Just fallback)
+
+                else
+                    default (Just fallback)
 
         _ ->
-            default ()
+            default Nothing
 
 
 toConfigParam : OpenApi.Operation.Operation -> Elm.Annotation.Annotation -> AuthorizationInfo -> List ( String, Elm.Annotation.Annotation ) -> CliMonad ( String, Maybe Elm.Annotation.Annotation )

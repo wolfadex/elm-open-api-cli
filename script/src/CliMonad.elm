@@ -1,74 +1,128 @@
-module CliMonad exposing (CliMonad, andThen, combine, combineMap, fail, fromApiSpec, fromResult, map, map2, run, succeed, todo, withPath)
+module CliMonad exposing (CliMonad, Warning, andThen, combine, combineMap, errorToWarning, fail, fromApiSpec, fromResult, map, map2, map3, run, succeed, todo, todoWithDefault, withPath, withWarning)
 
+import Elm
+import Gen.Debug
 import OpenApi exposing (OpenApi)
+
+
+type alias Message =
+    { message : String
+    , path : Path
+    }
 
 
 type alias Path =
     List String
 
 
+type alias Warning =
+    String
+
+
 type CliMonad a
-    = CliMonad (OpenApi -> Result ( Path, String ) a)
+    = CliMonad ({ openApi : OpenApi, generateTodos : Bool } -> Result Message ( a, List Message ))
 
 
 withPath : String -> CliMonad a -> CliMonad a
 withPath segment (CliMonad f) =
     CliMonad
-        (\openApi ->
-            Result.mapError
-                (\( path, msg ) -> ( segment :: path, msg ))
-                (f openApi)
+        (\inputs ->
+            case f inputs of
+                Err message ->
+                    Err (addPath segment message)
+
+                Ok ( res, warns ) ->
+                    Ok ( res, List.map (addPath segment) warns )
         )
 
 
-todo : String -> CliMonad a
-todo msg =
-    fail ("Todo: " ++ msg)
+addPath : String -> Message -> Message
+addPath segment { path, message } =
+    { path = segment :: path
+    , message = message
+    }
+
+
+withWarning : String -> CliMonad a -> CliMonad a
+withWarning message (CliMonad f) =
+    CliMonad
+        (\inputs ->
+            Result.map
+                (\( res, warnings ) -> ( res, { path = [], message = message } :: warnings ))
+                (f inputs)
+        )
+
+
+todo : String -> CliMonad Elm.Expression
+todo message =
+    todoWithDefault (Gen.Debug.todo message) message
+
+
+todoWithDefault : a -> String -> CliMonad a
+todoWithDefault default message =
+    CliMonad
+        (\{ generateTodos } ->
+            if generateTodos then
+                Ok ( default, [ { path = [], message = message } ] )
+
+            else
+                Err
+                    { path = []
+                    , message = "Todo: " ++ message
+                    }
+        )
 
 
 fail : String -> CliMonad a
-fail msg =
-    CliMonad (\_ -> Err ( [], msg ))
+fail message =
+    CliMonad (\_ -> Err { path = [], message = message })
 
 
 succeed : a -> CliMonad a
 succeed x =
-    CliMonad (\_ -> Ok x)
+    CliMonad (\_ -> Ok ( x, [] ))
 
 
 map : (a -> b) -> CliMonad a -> CliMonad b
 map f (CliMonad x) =
-    CliMonad (\openApi -> Result.map f (x openApi))
+    CliMonad (\input -> Result.map (\( xr, xw ) -> ( f xr, xw )) (x input))
 
 
 map2 : (a -> b -> c) -> CliMonad a -> CliMonad b -> CliMonad c
 map2 f (CliMonad x) (CliMonad y) =
-    CliMonad (\openApi -> Result.map2 f (x openApi) (y openApi))
+    CliMonad (\input -> Result.map2 (\( xr, xw ) ( yr, yw ) -> ( f xr yr, xw ++ yw )) (x input) (y input))
+
+
+map3 : (a -> b -> c -> d) -> CliMonad a -> CliMonad b -> CliMonad c -> CliMonad d
+map3 f (CliMonad x) (CliMonad y) (CliMonad z) =
+    CliMonad (\input -> Result.map3 (\( xr, xw ) ( yr, yw ) ( zr, zw ) -> ( f xr yr zr, xw ++ yw ++ zw )) (x input) (y input) (z input))
 
 
 andThen : (a -> CliMonad b) -> CliMonad a -> CliMonad b
 andThen f (CliMonad x) =
     CliMonad
-        (\openApi ->
+        (\input ->
             Result.andThen
-                (\y ->
+                (\( y, yw ) ->
                     let
                         (CliMonad z) =
                             f y
                     in
-                    z openApi
+                    z input
+                        |> Result.map (\( w, ww ) -> ( w, yw ++ ww ))
                 )
-                (x openApi)
+                (x input)
         )
 
 
-run : OpenApi -> CliMonad a -> Result String a
-run openApi (CliMonad x) =
-    x openApi
-        |> Result.mapError
-            (\( path, msg ) ->
-                "Error\n  Message - " ++ msg ++ "\n  Path " ++ String.join "." path
-            )
+run : { openApi : OpenApi, generateTodos : Bool } -> CliMonad a -> Result String ( a, List Warning )
+run input (CliMonad x) =
+    case x input of
+        Err message ->
+            Err <| messageToString message
+
+        Ok ( res, warnings ) ->
+            Ok ( res, List.reverse warnings |> List.map messageToString )
 
 
 combineMap : (a -> CliMonad b) -> List a -> CliMonad (List b)
@@ -83,9 +137,39 @@ combine =
 
 fromApiSpec : (OpenApi -> a) -> CliMonad a
 fromApiSpec f =
-    CliMonad (\openApi -> Ok <| f openApi)
+    CliMonad (\input -> Ok ( f input.openApi, [] ))
 
 
 fromResult : Result String a -> CliMonad a
 fromResult res =
-    CliMonad (\_ -> Result.mapError (\msg -> ( [], msg )) res)
+    CliMonad
+        (\_ ->
+            case res of
+                Err message ->
+                    Err { path = [], message = message }
+
+                Ok r ->
+                    Ok ( r, [] )
+        )
+
+
+errorToWarning : CliMonad a -> CliMonad (Maybe a)
+errorToWarning (CliMonad f) =
+    CliMonad
+        (\input ->
+            case f input of
+                Ok ( res, warns ) ->
+                    Ok ( Just res, warns )
+
+                Err { path, message } ->
+                    Ok ( Nothing, [ { path = path, message = message } ] )
+        )
+
+
+messageToString : Message -> String
+messageToString { path, message } =
+    if List.isEmpty path then
+        "Error! " ++ message
+
+    else
+        "Error! " ++ message ++ "\n  Path: " ++ String.join " -> " path

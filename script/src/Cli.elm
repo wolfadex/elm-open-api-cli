@@ -421,15 +421,16 @@ stepOrFail msg f =
 
 type BodyType
     = EmptyBody
-    | JsonBody Elm.Annotation.Annotation Elm.Expression
+    | JsonBody { annotation : Elm.Annotation.Annotation, encoder : Elm.Expression }
+    | StringBody
     | BytesBody String
 
 
 toRequestFunction : String -> String -> OpenApi.Operation.Operation -> CliMonad Elm.Declaration
 toRequestFunction method url operation =
-    operationToSuccessTypeAndDecoder operation
+    operationToSuccessTypeAndExpect operation
         |> CliMonad.andThen
-            (\( successType, maybeSuccessDecoder ) ->
+            (\( successType, toExpect ) ->
                 let
                     functionName : String
                     functionName =
@@ -547,22 +548,19 @@ toRequestFunction method url operation =
                             EmptyBody ->
                                 Gen.Http.emptyBody
 
-                            JsonBody _ bodyEncoder ->
+                            JsonBody { encoder } ->
                                 Gen.Http.jsonBody
-                                    (Elm.apply bodyEncoder [ Elm.get "body" config ])
+                                    (Elm.apply encoder [ Elm.get "body" config ])
+
+                            StringBody ->
+                                Gen.Http.call_.stringBody (Elm.string "text/html") (Elm.get "body" config)
 
                             BytesBody mime ->
                                 Gen.Http.bytesBody mime (Elm.get "body" config)
 
+                    expect : Elm.Expression -> Elm.Expression
                     expect config =
-                        case maybeSuccessDecoder of
-                            Just successDecoder ->
-                                Gen.Http.expectJson
-                                    (\result -> Elm.apply (Elm.get "toMsg" config) [ result ])
-                                    successDecoder
-
-                            Nothing ->
-                                Gen.Http.expectWhatever (\result -> Elm.apply (Elm.get "toMsg" config) [ result ])
+                        toExpect (\toMsgArg -> Elm.apply (Elm.get "toMsg" config) [ toMsgArg ])
 
                     bodyParams : BodyType -> List ( String, Elm.Annotation.Annotation )
                     bodyParams bodyType =
@@ -570,8 +568,11 @@ toRequestFunction method url operation =
                             EmptyBody ->
                                 []
 
-                            JsonBody annotation _ ->
+                            JsonBody { annotation } ->
                                 [ ( "body", annotation ) ]
+
+                            StringBody ->
+                                [ ( "body", Elm.Annotation.string ) ]
 
                             BytesBody _ ->
                                 [ ( "body", Gen.Bytes.annotation_.bytes ) ]
@@ -700,6 +701,13 @@ operationToAuthorizationInfo operation =
             CliMonad.todoWithDefault empty "Multiple security requirements"
 
 
+type ContentSchema
+    = JsonContent Type
+    | HtmlContent
+    | ImageContent String
+    | EmptyContent
+
+
 operationToBodyType : OpenApi.Operation.Operation -> CliMonad BodyType
 operationToBodyType operation =
     case OpenApi.Operation.requestBody operation of
@@ -709,34 +717,26 @@ operationToBodyType operation =
         Just requestOrRef ->
             case OpenApi.Reference.toConcrete requestOrRef of
                 Just request ->
-                    let
-                        content =
-                            OpenApi.RequestBody.content request
-
-                        default _ =
-                            CliMonad.succeed content
-                                |> stepOrFail ("The request doesn't have an application/json content option, it has " ++ String.join " " (Dict.keys content))
-                                    (Dict.get "application/json")
-                                |> stepOrFail "The request's application/json content option doesn't have a schema"
-                                    (OpenApi.MediaType.schema >> Maybe.map OpenApi.Schema.get)
-                                |> CliMonad.andThen
-                                    (\schema ->
+                    OpenApi.RequestBody.content request
+                        |> contentToContentSchema
+                        |> CliMonad.andThen
+                            (\contentSchema ->
+                                case contentSchema of
+                                    JsonContent type_ ->
                                         CliMonad.map2
-                                            (\ann encoder -> JsonBody ann encoder)
-                                            (schemaToAnnotation schema)
-                                            (schemaToEncoder schema)
-                                    )
-                    in
-                    case Dict.keys content of
-                        [ single ] ->
-                            if String.startsWith "image/" single || single == "application/octet-stream" then
-                                CliMonad.succeed (BytesBody single)
+                                            (\ann encoder -> JsonBody { annotation = ann, encoder = encoder })
+                                            (typeToAnnotation type_)
+                                            (typeToEncoder type_)
 
-                            else
-                                default ()
+                                    HtmlContent ->
+                                        CliMonad.succeed StringBody
 
-                        _ ->
-                            default ()
+                                    ImageContent mime ->
+                                        CliMonad.succeed <| BytesBody mime
+
+                                    EmptyContent ->
+                                        CliMonad.succeed EmptyBody
+                            )
 
                 Nothing ->
                     CliMonad.succeed requestOrRef
@@ -747,9 +747,57 @@ operationToBodyType operation =
                         |> CliMonad.map
                             (\st ->
                                 JsonBody
-                                    (Elm.Annotation.named [] st)
-                                    (Elm.val ("decode" ++ st))
+                                    { annotation = Elm.Annotation.named [] st
+                                    , encoder = Elm.val ("encode" ++ st)
+                                    }
                             )
+
+
+contentToContentSchema : Dict String OpenApi.MediaType.MediaType -> CliMonad ContentSchema
+contentToContentSchema content =
+    let
+        default : () -> CliMonad ContentSchema
+        default _ =
+            case Dict.get "application/json" content of
+                Just jsonSchema ->
+                    CliMonad.succeed jsonSchema
+                        |> stepOrFail "The request's application/json content option doesn't have a schema"
+                            (OpenApi.MediaType.schema >> Maybe.map OpenApi.Schema.get)
+                        |> CliMonad.andThen schemaToType
+                        |> CliMonad.map JsonContent
+
+                Nothing ->
+                    case Dict.get "text/html" content of
+                        Just htmlSchema ->
+                            CliMonad.succeed htmlSchema
+                                |> stepOrFail "The request's text/html content option doesn't have a schema"
+                                    (OpenApi.MediaType.schema >> Maybe.map OpenApi.Schema.get)
+                                |> CliMonad.andThen schemaToType
+                                |> CliMonad.andThen
+                                    (\type_ ->
+                                        if type_ == String then
+                                            CliMonad.succeed HtmlContent
+
+                                        else
+                                            CliMonad.fail "The only supported type for text/html content is string"
+                                    )
+
+                        Nothing ->
+                            CliMonad.fail <| "The request doesn't have an application/json or text/html content option, it has " ++ String.join ", " (Dict.keys content)
+    in
+    case Dict.keys content of
+        [] ->
+            CliMonad.succeed EmptyContent
+
+        [ single ] ->
+            if String.startsWith "image/" single || single == "application/octet-stream" then
+                CliMonad.succeed (ImageContent single)
+
+            else
+                default ()
+
+        _ ->
+            default ()
 
 
 toConfigParam : OpenApi.Operation.Operation -> Elm.Annotation.Annotation -> AuthorizationInfo -> List ( String, Elm.Annotation.Annotation ) -> CliMonad ( String, Maybe Elm.Annotation.Annotation )
@@ -921,12 +969,16 @@ toConcreteParam param =
                     )
 
 
-operationToSuccessTypeAndDecoder : OpenApi.Operation.Operation -> CliMonad ( Elm.Annotation.Annotation, Maybe Elm.Expression )
-operationToSuccessTypeAndDecoder operation =
+operationToSuccessTypeAndExpect : OpenApi.Operation.Operation -> CliMonad ( Elm.Annotation.Annotation, (Elm.Expression -> Elm.Expression) -> Elm.Expression )
+operationToSuccessTypeAndExpect operation =
     let
         responses : Dict.Dict String (OpenApi.Reference.ReferenceOr OpenApi.Response.Response)
         responses =
             OpenApi.Operation.responses operation
+
+        expectJson : Elm.Expression -> ((Elm.Expression -> Elm.Expression) -> Elm.Expression)
+        expectJson decoder toMsg =
+            Gen.Http.expectJson toMsg decoder
     in
     CliMonad.succeed responses
         |> stepOrFail
@@ -939,26 +991,34 @@ operationToSuccessTypeAndDecoder operation =
             (\( _, responseOrRef ) ->
                 case OpenApi.Reference.toConcrete responseOrRef of
                     Just response ->
-                        let
-                            content =
-                                OpenApi.Response.content response
-                        in
-                        case Dict.keys content of
-                            [] ->
-                                CliMonad.succeed ( Elm.Annotation.unit, Nothing )
-
-                            _ ->
-                                CliMonad.succeed content
-                                    |> stepOrFail ("The response doesn't have an application/json content option, it has " ++ String.join ", " (Dict.keys content))
-                                        (Dict.get "application/json")
-                                    |> stepOrFail "The response's application/json content option doesn't have a schema"
-                                        (OpenApi.MediaType.schema >> Maybe.map OpenApi.Schema.get)
-                                    |> CliMonad.andThen
-                                        (\schema ->
+                        OpenApi.Response.content response
+                            |> contentToContentSchema
+                            |> CliMonad.andThen
+                                (\contentSchema ->
+                                    case contentSchema of
+                                        JsonContent type_ ->
                                             CliMonad.map2 Tuple.pair
-                                                (schemaToAnnotation schema)
-                                                (CliMonad.map Just <| schemaToDecoder schema)
-                                        )
+                                                (typeToAnnotation type_)
+                                                (CliMonad.map expectJson <| typeToDecoder type_)
+
+                                        HtmlContent ->
+                                            CliMonad.succeed
+                                                ( Elm.Annotation.string
+                                                , Gen.Http.expectString
+                                                )
+
+                                        ImageContent _ ->
+                                            CliMonad.succeed
+                                                ( Gen.Bytes.annotation_.bytes
+                                                , \toMsg -> Gen.Http.expectBytes toMsg Gen.Basics.values_.identity
+                                                )
+
+                                        EmptyContent ->
+                                            CliMonad.succeed
+                                                ( Elm.Annotation.unit
+                                                , Gen.Http.expectWhatever
+                                                )
+                                )
 
                     Nothing ->
                         CliMonad.succeed responseOrRef
@@ -969,7 +1029,7 @@ operationToSuccessTypeAndDecoder operation =
                             |> CliMonad.map
                                 (\st ->
                                     ( Elm.Annotation.named [] st
-                                    , Just <| Elm.val ("decode" ++ st)
+                                    , expectJson <| Elm.val ("decode" ++ st)
                                     )
                                 )
             )

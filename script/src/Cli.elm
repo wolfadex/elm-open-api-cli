@@ -1437,13 +1437,7 @@ schemaToType schema =
                 enumAnnotation : List Json.Schema.Definitions.Schema -> CliMonad Type
                 enumAnnotation anyOf =
                     anyOf
-                        |> List.foldr
-                            (\next res ->
-                                CliMonad.map2 (::)
-                                    (schemaToType next)
-                                    res
-                            )
-                            (CliMonad.succeed [])
+                        |> CliMonad.combineMap schemaToType
                         |> CliMonad.map Enum
             in
             case subSchema.type_ of

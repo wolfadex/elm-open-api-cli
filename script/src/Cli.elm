@@ -11,13 +11,11 @@ import Dict exposing (Dict)
 import Elm
 import Elm.Annotation
 import Elm.Case
-import Elm.Declare
 import Elm.Op
 import Elm.ToString
 import FatalError
 import Gen.Basics
 import Gen.Bytes
-import Gen.Debug
 import Gen.Http
 import Gen.Json.Decode
 import Gen.Json.Decode.Extra
@@ -30,7 +28,7 @@ import Gen.Url.Builder
 import Json.Decode
 import Json.Schema.Definitions
 import List.Extra
-import OpenApi exposing (OpenApi)
+import OpenApi
 import OpenApi.Components
 import OpenApi.Info
 import OpenApi.MediaType
@@ -149,91 +147,6 @@ generateFileFromOpenApiSpec { outputFile, namespace } apiSpec =
                         Nothing ->
                             defaultNamespace
 
-        pathDeclarations =
-            apiSpec
-                |> OpenApi.paths
-                |> Dict.toList
-                |> CliMonad.combineMap
-                    (\( url, path ) ->
-                        [ ( "GET", OpenApi.Path.get )
-                        , ( "POST", OpenApi.Path.post )
-                        , ( "PUT", OpenApi.Path.put )
-                        , ( "PATCH", OpenApi.Path.patch )
-                        , ( "DELETE", OpenApi.Path.delete )
-                        , ( "HEAD", OpenApi.Path.head )
-                        , ( "TRACE", OpenApi.Path.trace )
-                        ]
-                            |> List.filterMap (\( method, getter ) -> Maybe.map (Tuple.pair method) (getter path))
-                            |> CliMonad.combineMap (\( method, operation ) -> toRequestFunction method url operation)
-                    )
-                |> CliMonad.map
-                    (List.concat
-                        >> List.map
-                            (Elm.exposeWith
-                                { exposeConstructor = False
-                                , group = Just "Request functions"
-                                }
-                            )
-                    )
-
-        responsesDeclarations =
-            apiSpec
-                |> OpenApi.components
-                |> Maybe.map OpenApi.Components.responses
-                |> Maybe.withDefault Dict.empty
-                |> Dict.foldl
-                    (\name schema ->
-                        CliMonad.map2 (::)
-                            (responseToDeclarations name schema)
-                    )
-                    (CliMonad.succeed [])
-                |> CliMonad.map List.concat
-
-        componentDeclarations =
-            apiSpec
-                |> OpenApi.components
-                |> Maybe.map OpenApi.Components.schemas
-                |> Maybe.withDefault Dict.empty
-                |> Dict.foldl
-                    (\name schema ->
-                        CliMonad.map2 (::)
-                            (schemaToDeclarations name (OpenApi.Schema.get schema))
-                    )
-                    (CliMonad.succeed [])
-                |> CliMonad.map List.concat
-
-        helperDeclarations : CliMonad (List Elm.Declaration)
-        helperDeclarations =
-            -- The max value here should match with the max value supported by `intToWord`
-            List.range 1 99
-                |> List.map
-                    (\i ->
-                        intToWord i
-                            |> Result.andThen
-                                (\intWord ->
-                                    let
-                                        typeName : String
-                                        typeName =
-                                            typifyName ("enum_" ++ intWord)
-                                    in
-                                    List.range 1 i
-                                        |> List.foldr
-                                            (\j res ->
-                                                Result.map2
-                                                    (\jWord r ->
-                                                        Elm.variantWith (typifyName (typeName ++ "_" ++ jWord)) [ Elm.Annotation.var (elmifyName jWord) ]
-                                                            :: r
-                                                    )
-                                                    (intToWord j)
-                                                    res
-                                            )
-                                            (Ok [])
-                                        |> Result.map (Elm.customType typeName)
-                                )
-                    )
-                |> Result.Extra.combine
-                |> CliMonad.fromResult
-
         declarations =
             let
                 combined =
@@ -299,6 +212,107 @@ generateFileFromOpenApiSpec { outputFile, namespace } apiSpec =
                                 "Uh oh! Failed to write file"
             )
         |> BackendTask.andThen (\() -> Pages.Script.log ("SDK generated at " ++ outputPath))
+
+
+pathDeclarations : CliMonad (List Elm.Declaration)
+pathDeclarations =
+    CliMonad.fromApiSpec OpenApi.paths
+        |> CliMonad.andThen
+            (\paths ->
+                paths
+                    |> Dict.toList
+                    |> CliMonad.combineMap
+                        (\( url, path ) ->
+                            [ ( "GET", OpenApi.Path.get )
+                            , ( "POST", OpenApi.Path.post )
+                            , ( "PUT", OpenApi.Path.put )
+                            , ( "PATCH", OpenApi.Path.patch )
+                            , ( "DELETE", OpenApi.Path.delete )
+                            , ( "HEAD", OpenApi.Path.head )
+                            , ( "TRACE", OpenApi.Path.trace )
+                            ]
+                                |> List.filterMap (\( method, getter ) -> Maybe.map (Tuple.pair method) (getter path))
+                                |> CliMonad.combineMap (\( method, operation ) -> toRequestFunction method url operation)
+                        )
+                    |> CliMonad.map
+                        (List.concat
+                            >> List.map
+                                (Elm.exposeWith
+                                    { exposeConstructor = False
+                                    , group = Just "Request functions"
+                                    }
+                                )
+                        )
+            )
+
+
+responsesDeclarations : CliMonad (List Elm.Declaration)
+responsesDeclarations =
+    CliMonad.fromApiSpec
+        (OpenApi.components
+            >> Maybe.map OpenApi.Components.responses
+            >> Maybe.withDefault Dict.empty
+        )
+        |> CliMonad.andThen
+            (Dict.foldl
+                (\name schema ->
+                    CliMonad.map2 (::)
+                        (responseToDeclarations name schema)
+                )
+                (CliMonad.succeed [])
+            )
+        |> CliMonad.map List.concat
+
+
+componentDeclarations : CliMonad (List Elm.Declaration)
+componentDeclarations =
+    CliMonad.fromApiSpec
+        (OpenApi.components
+            >> Maybe.map OpenApi.Components.schemas
+            >> Maybe.withDefault Dict.empty
+        )
+        |> CliMonad.andThen
+            (Dict.foldl
+                (\name schema ->
+                    CliMonad.map2 (::)
+                        (schemaToDeclarations name (OpenApi.Schema.get schema))
+                )
+                (CliMonad.succeed [])
+            )
+        |> CliMonad.map List.concat
+
+
+helperDeclarations : CliMonad (List Elm.Declaration)
+helperDeclarations =
+    -- The max value here should match with the max value supported by `intToWord`
+    List.range 1 99
+        |> List.map
+            (\i ->
+                intToWord i
+                    |> Result.andThen
+                        (\intWord ->
+                            let
+                                typeName : String
+                                typeName =
+                                    typifyName ("enum_" ++ intWord)
+                            in
+                            List.range 1 i
+                                |> List.foldr
+                                    (\j res ->
+                                        Result.map2
+                                            (\jWord r ->
+                                                Elm.variantWith (typifyName (typeName ++ "_" ++ jWord)) [ Elm.Annotation.var (elmifyName jWord) ]
+                                                    :: r
+                                            )
+                                            (intToWord j)
+                                            res
+                                    )
+                                    (Ok [])
+                                |> Result.map (Elm.customType typeName)
+                        )
+            )
+        |> Result.Extra.combine
+        |> CliMonad.fromResult
 
 
 schemaToDeclarations : String -> Json.Schema.Definitions.Schema -> CliMonad (List Elm.Declaration)
@@ -393,23 +407,6 @@ toRequestFunction method url operation =
         |> CliMonad.andThen
             (\( successType, maybeSuccessDecoder ) ->
                 let
-                    fullUrl : CliMonad String
-                    fullUrl =
-                        CliMonad.fromApiSpec OpenApi.servers
-                            |> CliMonad.map
-                                (\servers ->
-                                    case servers of
-                                        [] ->
-                                            url
-
-                                        firstServer :: _ ->
-                                            if String.startsWith "/" url then
-                                                OpenApi.Server.url firstServer ++ url
-
-                                            else
-                                                OpenApi.Server.url firstServer ++ "/" ++ url
-                                )
-
                     functionName : String
                     functionName =
                         (OpenApi.Operation.operationId operation
@@ -462,6 +459,23 @@ toRequestFunction method url operation =
                             |> CliMonad.andThen
                                 (\pairs ->
                                     let
+                                        fullUrl : CliMonad String
+                                        fullUrl =
+                                            CliMonad.fromApiSpec OpenApi.servers
+                                                |> CliMonad.map
+                                                    (\servers ->
+                                                        case servers of
+                                                            [] ->
+                                                                url
+
+                                                            firstServer :: _ ->
+                                                                if String.startsWith "/" url then
+                                                                    OpenApi.Server.url firstServer ++ url
+
+                                                                else
+                                                                    OpenApi.Server.url firstServer ++ "/" ++ url
+                                                    )
+
                                         ( replacements, queryParams ) =
                                             List.unzip pairs
                                                 |> Tuple.mapBoth (List.filterMap identity) List.concat
@@ -939,16 +953,6 @@ schemaTypeRef refUri =
             CliMonad.fail <| "Couldn't get the type ref (" ++ refUri ++ ")for the response"
 
 
-toObjectSchema : Json.Schema.Definitions.Schema -> Maybe Json.Schema.Definitions.SubSchema
-toObjectSchema schema =
-    case schema of
-        Json.Schema.Definitions.BooleanSchema _ ->
-            Nothing
-
-        Json.Schema.Definitions.ObjectSchema subSchema ->
-            Just subSchema
-
-
 getFirstSuccessResponse : Dict.Dict String (OpenApi.Reference.ReferenceOr OpenApi.Response.Response) -> Maybe ( String, OpenApi.Reference.ReferenceOr OpenApi.Response.Response )
 getFirstSuccessResponse responses =
     responses
@@ -1355,7 +1359,6 @@ schemaToType schema =
                     nullable (singleTypeToType singleType)
 
                 Json.Schema.Definitions.UnionType singleTypes ->
-                    -- Debug.todo "union type"
                     CliMonad.todo "union type"
 
 

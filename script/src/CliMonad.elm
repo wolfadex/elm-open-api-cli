@@ -1,4 +1,4 @@
-module CliMonad exposing (CliMonad, andThen, combine, combineMap, fail, fromApiSpec, fromResult, getApiSpec, map, map2, run, succeed, todo, withPath)
+module CliMonad exposing (CliMonad, andThen, combine, combineMap, fail, fromApiSpec, fromResult, map, map2, run, succeed, todo, withPath)
 
 import OpenApi exposing (OpenApi)
 
@@ -79,11 +79,6 @@ combineMap f ls =
 combine : List (CliMonad a) -> CliMonad (List a)
 combine =
     List.foldr (map2 (::)) (succeed [])
-
-
-getApiSpec : CliMonad OpenApi
-getApiSpec =
-    CliMonad Ok
 
 
 fromApiSpec : (OpenApi -> a) -> CliMonad a

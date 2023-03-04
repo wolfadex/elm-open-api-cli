@@ -149,4 +149,8 @@ errorToWarning (CliMonad f) =
 
 errorToString : Path -> String -> String
 errorToString path msg =
-    "Error! " ++ msg ++ "\n  Path: " ++ String.join " -> " path
+    if List.isEmpty path then
+        "Error! " ++ msg
+
+    else
+        "Error! " ++ msg ++ "\n  Path: " ++ String.join " -> " path

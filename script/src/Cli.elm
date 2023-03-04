@@ -294,7 +294,12 @@ pathDeclarations =
                             , ( "TRACE", OpenApi.Path.trace )
                             ]
                                 |> List.filterMap (\( method, getter ) -> Maybe.map (Tuple.pair method) (getter path))
-                                |> CliMonad.combineMap (\( method, operation ) -> toRequestFunction method url operation)
+                                |> CliMonad.combineMap
+                                    (\( method, operation ) ->
+                                        toRequestFunction method url operation
+                                            |> CliMonad.errorToWarning
+                                    )
+                                |> CliMonad.map (List.filterMap identity)
                         )
                     |> CliMonad.map
                         (List.concat
@@ -503,7 +508,7 @@ toRequestFunction method url operation =
                                                                 (\config ->
                                                                     Gen.String.call_.replace
                                                                         (Elm.string <| "{" ++ pname ++ "}")
-                                                                        (Elm.get pname (Elm.get "params" config))
+                                                                        (Elm.get (toValueName pname) (Elm.get "params" config))
                                                                 )
                                                             , []
                                                             )
@@ -560,25 +565,17 @@ toRequestFunction method url operation =
 
                                     else
                                         queryParams
-                                            |> CliMonad.combineMap
-                                                (\queryParam ->
-                                                    queryParameterToUrlBuilderArgument
-                                                        -- TODO: use the proper variable
-                                                        (Elm.val "config")
-                                                        queryParam
-                                                )
+                                            |> CliMonad.combineMap queryParameterToUrlBuilderArgument
                                             |> CliMonad.map2
-                                                (\repl args ->
-                                                    args
+                                                (\repl queryArgs config ->
+                                                    queryArgs
+                                                        |> List.map (\arg -> arg config)
                                                         |> Gen.List.filterMap Gen.Basics.identity
                                                         |> Gen.Url.Builder.call_.crossOrigin
-                                                            -- TODO: use the proper variable
-                                                            (repl (Elm.val "config"))
+                                                            (repl config)
                                                             (Elm.list [])
                                                 )
                                                 replaced
-                                            -- TODO: remove when removing the `Elm.val "config"` above
-                                            |> CliMonad.map always
                                 )
 
                     body : ContentSchema -> CliMonad (Elm.Expression -> Elm.Expression)
@@ -846,18 +843,17 @@ toConfigParam operation successType authorizationInfo bodyParams =
     CliMonad.map
         (\urlParams ->
             ( "config"
-            , Just
-                (Elm.Annotation.record
-                    (authorizationInfo.params
-                        ++ ( "toMsg"
-                           , Elm.Annotation.function
-                                [ Gen.Result.annotation_.result Gen.Http.annotation_.error successType ]
-                                (Elm.Annotation.var "msg")
-                           )
-                        :: bodyParams
-                        ++ urlParams
-                    )
-                )
+            , (authorizationInfo.params
+                ++ ( "toMsg"
+                   , Elm.Annotation.function
+                        [ Gen.Result.annotation_.result Gen.Http.annotation_.error successType ]
+                        (Elm.Annotation.var "msg")
+                   )
+                :: bodyParams
+                ++ urlParams
+              )
+                |> recordType
+                |> Just
             )
         )
         (operationToUrlParams operation)
@@ -880,11 +876,18 @@ operationToUrlParams operation =
                         |> CliMonad.andThen paramToAnnotation
                 )
             |> CliMonad.map
-                (\types -> [ ( "params", Elm.Annotation.record types ) ])
+                (\types -> [ ( "params", recordType types ) ])
 
 
-queryParameterToUrlBuilderArgument : Elm.Expression -> OpenApi.Parameter.Parameter -> CliMonad Elm.Expression
-queryParameterToUrlBuilderArgument config param =
+recordType : List ( String, Elm.Annotation.Annotation ) -> Elm.Annotation.Annotation
+recordType fields =
+    fields
+        |> List.map (Tuple.mapFirst toValueName)
+        |> Elm.Annotation.record
+
+
+queryParameterToUrlBuilderArgument : OpenApi.Parameter.Parameter -> CliMonad (Elm.Expression -> Elm.Expression)
+queryParameterToUrlBuilderArgument param =
     paramToAnnotation param
         |> CliMonad.andThen
             (\( paramName, annotation ) ->
@@ -892,8 +895,8 @@ queryParameterToUrlBuilderArgument config param =
                     name =
                         Elm.string paramName
 
-                    value =
-                        Elm.get paramName (Elm.get "params" config)
+                    value config =
+                        Elm.get (toValueName paramName) (Elm.get "params" config)
 
                     paramBuilderHelper : List String -> CliMonad (Elm.Expression -> Elm.Expression)
                     paramBuilderHelper parts =
@@ -930,31 +933,32 @@ queryParameterToUrlBuilderArgument config param =
                     [ a ] ->
                         paramBuilderHelper [ a ]
                             |> CliMonad.map
-                                (\f ->
-                                    f value
+                                (\f config ->
+                                    f (value config)
                                         |> Gen.Url.Builder.call_.string name
                                         |> Gen.Maybe.make_.just
                                 )
 
                     "Maybe" :: rest ->
                         paramBuilderHelper rest
-                            |> CliMonad.map (\f -> Gen.Maybe.map (f >> Gen.Url.Builder.call_.string name) value)
+                            |> CliMonad.map (\f config -> Gen.Maybe.map (f >> Gen.Url.Builder.call_.string name) (value config))
 
                     "List" :: rest ->
                         paramBuilderHelper rest
                             |> CliMonad.map
-                                (\f ->
+                                (\f config ->
                                     Gen.Maybe.map
                                         (f
                                             >> Gen.String.call_.join (Elm.string ",")
                                             >> Gen.Url.Builder.call_.string name
                                         )
-                                        value
+                                        (value config)
                                 )
 
                     t ->
                         -- TODO: This seems to be mostly aliases, at least in the GitHub OAS
                         CliMonad.todo ("Params of type \"" ++ String.join " " t ++ "\"")
+                            |> CliMonad.map (\e _ -> e)
             )
 
 
@@ -1124,15 +1128,11 @@ typifyName name =
 
 toValueName : String -> String
 toValueName name =
-    typeNameToValueName (typifyName name)
-
-
-typeNameToValueName : TypeName -> String
-typeNameToValueName (TypeName name) =
     name
         |> String.uncons
-        |> Maybe.map (\( first, rest ) -> String.cons (Char.toLower first) rest)
+        |> Maybe.map (\( first, rest ) -> String.cons (Char.toLower first) (String.replace "-" "_" rest))
         |> Maybe.withDefault ""
+        |> deSymbolify
 
 
 {-| Sometimes a word in the schema contains invalid characers for an Elm name.
@@ -1349,7 +1349,7 @@ typeToAnnotation type_ =
         Object fields ->
             Dict.toList fields
                 |> CliMonad.combineMap (\( k, v ) -> CliMonad.map (Tuple.pair k) (typeToAnnotation v))
-                |> CliMonad.map Elm.Annotation.record
+                |> CliMonad.map recordType
 
         String ->
             CliMonad.succeed Elm.Annotation.string
@@ -1513,7 +1513,7 @@ objectSchemaToType subSchema =
                     (\( key, valueSchema ) ->
                         schemaToType valueSchema
                             |> CliMonad.withPath key
-                            |> CliMonad.map (\ann -> ( toValueName key, ann ))
+                            |> CliMonad.map (\ann -> ( key, ann ))
                     )
                 |> CliMonad.map Dict.fromList
 

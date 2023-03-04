@@ -1,4 +1,4 @@
-module CliMonad exposing (CliMonad, Warning, andThen, combine, combineMap, fail, fromApiSpec, fromResult, map, map2, map3, run, succeed, todo, todoWithDefault, withPath, withWarning)
+module CliMonad exposing (CliMonad, Warning, andThen, combine, combineMap, errorToWarning, fail, fromApiSpec, fromResult, map, map2, map3, run, succeed, todo, todoWithDefault, withPath, withWarning)
 
 import Elm
 import Gen.Debug
@@ -100,7 +100,7 @@ run : { openApi : OpenApi, generateTodos : Bool } -> CliMonad a -> Result String
 run input (CliMonad x) =
     case x input of
         Err ( path, msg ) ->
-            Err <| "Error! " ++ msg ++ "\n  Path: " ++ String.join " -> " path
+            Err <| errorToString path msg
 
         Ok ( res, warnings ) ->
             Ok ( res, List.reverse warnings )
@@ -132,3 +132,21 @@ fromResult res =
                 Ok r ->
                     Ok ( r, [] )
         )
+
+
+errorToWarning : CliMonad a -> CliMonad (Maybe a)
+errorToWarning (CliMonad f) =
+    CliMonad
+        (\input ->
+            case f input of
+                Ok ( res, warns ) ->
+                    Ok ( Just res, warns )
+
+                Err ( path, msg ) ->
+                    Ok ( Nothing, [ errorToString path msg ] )
+        )
+
+
+errorToString : Path -> String -> String
+errorToString path msg =
+    "Error! " ++ msg ++ "\n  Path: " ++ String.join " -> " path

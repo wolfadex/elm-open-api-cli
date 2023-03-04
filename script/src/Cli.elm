@@ -51,6 +51,7 @@ type alias CliOptions =
     { entryFilePath : String
     , outputFile : Maybe String
     , namespace : Maybe String
+    , generateTodos : Maybe String
     }
 
 
@@ -65,13 +66,15 @@ program =
                     (Cli.Option.optionalKeywordArg "output")
                 |> Cli.OptionsParser.with
                     (Cli.Option.optionalKeywordArg "namespace")
+                |> Cli.OptionsParser.with
+                    (Cli.Option.optionalKeywordArg "generateTodos")
             )
 
 
 run : Pages.Script.Script
 run =
     Pages.Script.withCliOptions program
-        (\{ entryFilePath, outputFile, namespace } ->
+        (\{ entryFilePath, outputFile, namespace, generateTodos } ->
             BackendTask.File.rawFile entryFilePath
                 |> BackendTask.mapError
                     (\error ->
@@ -88,7 +91,7 @@ run =
                                         "Uh oh! Decoding failure!"
                     )
                 |> BackendTask.andThen decodeOpenApiSpecOrFail
-                |> BackendTask.andThen (generateFileFromOpenApiSpec { outputFile = outputFile, namespace = namespace })
+                |> BackendTask.andThen (generateFileFromOpenApiSpec { outputFile = outputFile, namespace = namespace, generateTodos = generateTodos })
         )
 
 
@@ -103,8 +106,14 @@ decodeOpenApiSpecOrFail =
         >> BackendTask.fromResult
 
 
-generateFileFromOpenApiSpec : { outputFile : Maybe String, namespace : Maybe String } -> OpenApi.OpenApi -> BackendTask.BackendTask FatalError.FatalError ()
-generateFileFromOpenApiSpec { outputFile, namespace } apiSpec =
+generateFileFromOpenApiSpec :
+    { outputFile : Maybe String
+    , namespace : Maybe String
+    , generateTodos : Maybe String
+    }
+    -> OpenApi.OpenApi
+    -> BackendTask.BackendTask FatalError.FatalError ()
+generateFileFromOpenApiSpec { outputFile, namespace, generateTodos } apiSpec =
     let
         fileNamespace : String
         fileNamespace =
@@ -158,60 +167,74 @@ generateFileFromOpenApiSpec { outputFile, namespace } apiSpec =
                         , helperDeclarations
                         ]
             in
-            case CliMonad.run apiSpec combined of
+            case
+                CliMonad.run
+                    { openApi = apiSpec
+                    , generateTodos = List.member (String.toLower <| Maybe.withDefault "no" generateTodos) [ "y", "yes", "true" ]
+                    }
+                    combined
+            of
                 Ok decls ->
-                    List.concat decls
+                    BackendTask.succeed (List.concat decls)
 
                 Err e ->
-                    Debug.todo e
+                    BackendTask.fail (FatalError.fromString e)
 
         file =
-            Elm.fileWith [ fileNamespace ]
-                { docs =
-                    List.sortBy
-                        (\{ group } ->
-                            case group of
-                                Just "Request functions" ->
-                                    1
+            BackendTask.map
+                (Elm.fileWith [ fileNamespace ]
+                    { docs =
+                        List.sortBy
+                            (\{ group } ->
+                                case group of
+                                    Just "Request functions" ->
+                                        1
 
-                                Just "Types" ->
-                                    2
+                                    Just "Types" ->
+                                        2
 
-                                Just "Encoders" ->
-                                    3
+                                    Just "Encoders" ->
+                                        3
 
-                                Just "Decoders" ->
-                                    4
+                                    Just "Decoders" ->
+                                        4
 
-                                _ ->
-                                    5
-                        )
-                        >> List.map Elm.docs
-                , aliases = []
-                }
-                declarations
-
-        outputPath =
-            Maybe.withDefault
-                ([ "generated", file.path ]
-                    |> Path.join
-                    |> Path.toRelative
+                                    _ ->
+                                        5
+                            )
+                            >> List.map Elm.docs
+                    , aliases = []
+                    }
                 )
-                outputFile
+                declarations
     in
-    Pages.Script.writeFile
-        { path = outputPath
-        , body = file.contents
-        }
-        |> BackendTask.mapError
-            (\error ->
-                FatalError.fromString <|
-                    Ansi.Color.fontColor Ansi.Color.brightRed <|
-                        case error.recoverable of
-                            Pages.Script.FileWriteError ->
-                                "Uh oh! Failed to write file"
+    file
+        |> BackendTask.andThen
+            (\{ contents, path } ->
+                let
+                    outputPath =
+                        Maybe.withDefault
+                            ([ "generated", path ]
+                                |> Path.join
+                                |> Path.toRelative
+                            )
+                            outputFile
+                in
+                Pages.Script.writeFile
+                    { path = outputPath
+                    , body = contents
+                    }
+                    |> BackendTask.mapError
+                        (\error ->
+                            FatalError.fromString <|
+                                Ansi.Color.fontColor Ansi.Color.brightRed <|
+                                    case error.recoverable of
+                                        Pages.Script.FileWriteError ->
+                                            "Uh oh! Failed to write file"
+                        )
+                    |> BackendTask.map (\_ -> outputPath)
             )
-        |> BackendTask.andThen (\() -> Pages.Script.log ("SDK generated at " ++ outputPath))
+        |> BackendTask.andThen (\outputPath -> Pages.Script.log ("SDK generated at " ++ outputPath))
 
 
 pathDeclarations : CliMonad (List Elm.Declaration)
@@ -447,13 +470,13 @@ toRequestFunction method url operation =
                                                                 |> CliMonad.succeed
 
                                                         else
-                                                            CliMonad.todo "Optional parameters in path are not supported"
+                                                            CliMonad.unsupported "Optional parameters in path"
 
                                                     "query" ->
                                                         CliMonad.succeed ( Nothing, [ concreteParam ] )
 
                                                     paramIn ->
-                                                        CliMonad.todo <| "Parameters not supported in \"" ++ paramIn ++ "\""
+                                                        CliMonad.unsupported <| "Parameters in \"" ++ paramIn ++ "\""
                                             )
                                 )
                             |> CliMonad.andThen
@@ -667,7 +690,7 @@ operationToAuthorizationInfo operation =
                 }
 
         _ ->
-            CliMonad.todo "Don't know how to handle branches with multiple security requirements"
+            CliMonad.unsupported "Multiple security requirements"
 
 
 operationToBodyType : OpenApi.Operation.Operation -> CliMonad BodyType
@@ -800,7 +823,7 @@ queryParameterToUrlBuilderArgument config param =
                                     |> CliMonad.succeed
 
                             t ->
-                                CliMonad.todo ("Params of type \"" ++ String.join " " t ++ "\" not supported yet")
+                                CliMonad.unsupported ("Params of type \"" ++ String.join " " t ++ "\" (in helper)")
                 in
                 case (Elm.ToString.annotation annotation).signature |> String.split " " of
                     [ a ] ->
@@ -830,7 +853,7 @@ queryParameterToUrlBuilderArgument config param =
 
                     t ->
                         -- TODO: This seems to be mostly aliases, at least in the GitHub OAS
-                        CliMonad.todo ("Params of type \"" ++ String.join " " t ++ "\" not supported yet")
+                        CliMonad.unsupported ("Params of type \"" ++ String.join " " t ++ "\"")
             )
 
 
@@ -882,7 +905,7 @@ toConcreteParam param =
                                         )
 
                             _ ->
-                                CliMonad.todo <| "Unsupported param reference: " ++ ref
+                                CliMonad.unsupported <| "Param reference: " ++ ref
                     )
 
 
@@ -950,7 +973,7 @@ schemaTypeRef refUri =
             CliMonad.succeed (typifyName responseName)
 
         _ ->
-            CliMonad.fail <| "Couldn't get the type ref (" ++ refUri ++ ")for the response"
+            CliMonad.fail <| "Couldn't get the type ref (" ++ refUri ++ ") for the response"
 
 
 getFirstSuccessResponse : Dict.Dict String (OpenApi.Reference.ReferenceOr OpenApi.Response.Response) -> Maybe ( String, OpenApi.Reference.ReferenceOr OpenApi.Response.Response )
@@ -1245,7 +1268,7 @@ schemaToType : Json.Schema.Definitions.Schema -> CliMonad Type
 schemaToType schema =
     case schema of
         Json.Schema.Definitions.BooleanSchema bool ->
-            CliMonad.todo "boolean schema"
+            CliMonad.unsupported "Boolean schema"
 
         Json.Schema.Definitions.ObjectSchema subSchema ->
             let
@@ -1271,7 +1294,7 @@ schemaToType schema =
                             CliMonad.succeed Bool
 
                         Json.Schema.Definitions.NullType ->
-                            CliMonad.fail "Null type annotation not supported yet"
+                            CliMonad.unsupported "Null type annotation"
 
                         Json.Schema.Definitions.ArrayType ->
                             case subSchema.items of
@@ -1279,7 +1302,7 @@ schemaToType schema =
                                     CliMonad.fail "Found an array type but no items definition"
 
                                 Json.Schema.Definitions.ArrayOfItems _ ->
-                                    CliMonad.fail "Array of items not supported as item definition yet"
+                                    CliMonad.unsupported "Array of items as item definition"
 
                                 Json.Schema.Definitions.ItemDefinition itemSchema ->
                                     CliMonad.map List (schemaToType itemSchema)
@@ -1303,12 +1326,7 @@ schemaToType schema =
                 Json.Schema.Definitions.AnyType ->
                     case subSchema.ref of
                         Just ref ->
-                            case String.split "/" ref of
-                                [ "#", "components", "schemas", schemaName ] ->
-                                    CliMonad.succeed <| Named (typifyName schemaName)
-
-                                _ ->
-                                    CliMonad.todo <| "some other ref: " ++ ref
+                            CliMonad.map Named <| schemaTypeRef ref
 
                         Nothing ->
                             case subSchema.anyOf of
@@ -1359,7 +1377,7 @@ schemaToType schema =
                     nullable (singleTypeToType singleType)
 
                 Json.Schema.Definitions.UnionType singleTypes ->
-                    CliMonad.todo "union type"
+                    CliMonad.unsupported "union type"
 
 
 objectSchemaToType : Json.Schema.Definitions.SubSchema -> CliMonad Type
@@ -1387,7 +1405,7 @@ objectSchemaToType subSchema =
                         (propertiesFromRef allOfItemSchema)
 
                 Json.Schema.Definitions.BooleanSchema _ ->
-                    CliMonad.fail "Unexpected boolean schema in allOf"
+                    CliMonad.unsupported "Boolean schema inside allOf"
 
         propertiesFromRef : Json.Schema.Definitions.SubSchema -> CliMonad (Dict String Type)
         propertiesFromRef allOfItem =

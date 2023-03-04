@@ -1,5 +1,7 @@
-module CliMonad exposing (CliMonad, andThen, combine, combineMap, fail, fromApiSpec, fromResult, map, map2, run, succeed, todo, withPath)
+module CliMonad exposing (CliMonad, andThen, combine, combineMap, fail, fromApiSpec, fromResult, map, map2, run, succeed, todo, unsupported, withPath)
 
+import Elm
+import Gen.Debug
 import OpenApi exposing (OpenApi)
 
 
@@ -8,22 +10,34 @@ type alias Path =
 
 
 type CliMonad a
-    = CliMonad (OpenApi -> Result ( Path, String ) a)
+    = CliMonad ({ openApi : OpenApi, generateTodos : Bool } -> Result ( Path, String ) a)
 
 
 withPath : String -> CliMonad a -> CliMonad a
 withPath segment (CliMonad f) =
     CliMonad
-        (\openApi ->
+        (\inputs ->
             Result.mapError
                 (\( path, msg ) -> ( segment :: path, msg ))
-                (f openApi)
+                (f inputs)
         )
 
 
-todo : String -> CliMonad a
+todo : String -> CliMonad Elm.Expression
 todo msg =
-    fail ("Todo: " ++ msg)
+    CliMonad
+        (\{ generateTodos } ->
+            if generateTodos then
+                Ok (Gen.Debug.todo msg)
+
+            else
+                Err ( [], "Todo: " ++ msg )
+        )
+
+
+unsupported : String -> CliMonad a
+unsupported msg =
+    fail ("Unsupported: " ++ msg)
 
 
 fail : String -> CliMonad a
@@ -38,33 +52,33 @@ succeed x =
 
 map : (a -> b) -> CliMonad a -> CliMonad b
 map f (CliMonad x) =
-    CliMonad (\openApi -> Result.map f (x openApi))
+    CliMonad (\input -> Result.map f (x input))
 
 
 map2 : (a -> b -> c) -> CliMonad a -> CliMonad b -> CliMonad c
 map2 f (CliMonad x) (CliMonad y) =
-    CliMonad (\openApi -> Result.map2 f (x openApi) (y openApi))
+    CliMonad (\input -> Result.map2 f (x input) (y input))
 
 
 andThen : (a -> CliMonad b) -> CliMonad a -> CliMonad b
 andThen f (CliMonad x) =
     CliMonad
-        (\openApi ->
+        (\input ->
             Result.andThen
                 (\y ->
                     let
                         (CliMonad z) =
                             f y
                     in
-                    z openApi
+                    z input
                 )
-                (x openApi)
+                (x input)
         )
 
 
-run : OpenApi -> CliMonad a -> Result String a
-run openApi (CliMonad x) =
-    x openApi
+run : { openApi : OpenApi, generateTodos : Bool } -> CliMonad a -> Result String a
+run input (CliMonad x) =
+    x input
         |> Result.mapError
             (\( path, msg ) ->
                 "Error\n  Message - " ++ msg ++ "\n  Path " ++ String.join "." path
@@ -83,7 +97,7 @@ combine =
 
 fromApiSpec : (OpenApi -> a) -> CliMonad a
 fromApiSpec f =
-    CliMonad (\openApi -> Ok <| f openApi)
+    CliMonad (\input -> Ok <| f input.openApi)
 
 
 fromResult : Result String a -> CliMonad a

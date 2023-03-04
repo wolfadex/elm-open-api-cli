@@ -3,6 +3,6 @@
   "automatically created by": "elm-review suppress",
   "learn more": "elm-review suppress --help",
   "suppressions": [
-    { "count": 8, "filePath": "src/Cli.elm" }
+    { "count": 1, "filePath": "src/Cli.elm" }
   ]
 }

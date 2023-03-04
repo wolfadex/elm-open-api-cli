@@ -16,6 +16,7 @@ import Elm.ToString
 import FatalError
 import Gen.Basics
 import Gen.Bytes
+import Gen.Debug
 import Gen.Http
 import Gen.Json.Decode
 import Gen.Json.Decode.Extra
@@ -414,7 +415,7 @@ stepOrFail msg f =
                     CliMonad.succeed z
 
                 Nothing ->
-                    CliMonad.fail <| "Couldn't find a response decoder. " ++ msg
+                    CliMonad.fail msg
         )
 
 
@@ -470,13 +471,13 @@ toRequestFunction method url operation =
                                                                 |> CliMonad.succeed
 
                                                         else
-                                                            CliMonad.unsupported "Optional parameters in path"
+                                                            CliMonad.fail "Optional parameters in path"
 
                                                     "query" ->
                                                         CliMonad.succeed ( Nothing, [ concreteParam ] )
 
                                                     paramIn ->
-                                                        CliMonad.unsupported <| "Parameters in \"" ++ paramIn ++ "\""
+                                                        CliMonad.todoWithDefault ( Nothing, [] ) <| "Parameters in \"" ++ paramIn ++ "\""
                                             )
                                 )
                             |> CliMonad.andThen
@@ -641,6 +642,8 @@ toRequestFunction method url operation =
                         )
                         documentation
             )
+        |> CliMonad.withPath method
+        |> CliMonad.withPath url
 
 
 type alias AuthorizationInfo =
@@ -652,17 +655,21 @@ type alias AuthorizationInfo =
 
 operationToAuthorizationInfo : OpenApi.Operation.Operation -> CliMonad AuthorizationInfo
 operationToAuthorizationInfo operation =
+    let
+        empty : AuthorizationInfo
+        empty =
+            { headers = \_ -> []
+            , params = []
+            , scopes = []
+            }
+    in
     case
         List.map
             (Dict.toList << OpenApi.SecurityRequirement.requirements)
             (OpenApi.Operation.security operation)
     of
         [] ->
-            CliMonad.succeed
-                { headers = \_ -> []
-                , params = []
-                , scopes = []
-                }
+            CliMonad.succeed empty
 
         [ [ ( "oauth_2_0", ss ) ] ] ->
             CliMonad.succeed
@@ -690,7 +697,7 @@ operationToAuthorizationInfo operation =
                 }
 
         _ ->
-            CliMonad.unsupported "Multiple security requirements"
+            CliMonad.todoWithDefault empty "Multiple security requirements"
 
 
 operationToBodyType : OpenApi.Operation.Operation -> CliMonad BodyType
@@ -823,7 +830,12 @@ queryParameterToUrlBuilderArgument config param =
                                     |> CliMonad.succeed
 
                             t ->
-                                CliMonad.unsupported ("Params of type \"" ++ String.join " " t ++ "\" (in helper)")
+                                let
+                                    msg : String
+                                    msg =
+                                        "Params of type \"" ++ String.join " " t ++ "\" (in helper)"
+                                in
+                                CliMonad.todoWithDefault (\_ -> Gen.Debug.todo msg) msg
                 in
                 case (Elm.ToString.annotation annotation).signature |> String.split " " of
                     [ a ] ->
@@ -853,7 +865,7 @@ queryParameterToUrlBuilderArgument config param =
 
                     t ->
                         -- TODO: This seems to be mostly aliases, at least in the GitHub OAS
-                        CliMonad.unsupported ("Params of type \"" ++ String.join " " t ++ "\"")
+                        CliMonad.todo ("Params of type \"" ++ String.join " " t ++ "\"")
             )
 
 
@@ -905,7 +917,7 @@ toConcreteParam param =
                                         )
 
                             _ ->
-                                CliMonad.unsupported <| "Param reference: " ++ ref
+                                CliMonad.fail <| "Param reference should be to \"#/components/parameters/ref\", found:" ++ ref
                     )
 
 
@@ -937,7 +949,7 @@ operationToSuccessTypeAndDecoder operation =
 
                             _ ->
                                 CliMonad.succeed content
-                                    |> stepOrFail ("The response doesn't have an application/json content option, it has " ++ String.join " " (Dict.keys content))
+                                    |> stepOrFail ("The response doesn't have an application/json content option, it has " ++ String.join ", " (Dict.keys content))
                                         (Dict.get "application/json")
                                     |> stepOrFail "The response's application/json content option doesn't have a schema"
                                         (OpenApi.MediaType.schema >> Maybe.map OpenApi.Schema.get)
@@ -1268,7 +1280,7 @@ schemaToType : Json.Schema.Definitions.Schema -> CliMonad Type
 schemaToType schema =
     case schema of
         Json.Schema.Definitions.BooleanSchema bool ->
-            CliMonad.unsupported "Boolean schema"
+            CliMonad.todoWithDefault Value "Boolean schema"
 
         Json.Schema.Definitions.ObjectSchema subSchema ->
             let
@@ -1294,7 +1306,7 @@ schemaToType schema =
                             CliMonad.succeed Bool
 
                         Json.Schema.Definitions.NullType ->
-                            CliMonad.unsupported "Null type annotation"
+                            CliMonad.todoWithDefault Value "Null type annotation"
 
                         Json.Schema.Definitions.ArrayType ->
                             case subSchema.items of
@@ -1302,7 +1314,7 @@ schemaToType schema =
                                     CliMonad.fail "Found an array type but no items definition"
 
                                 Json.Schema.Definitions.ArrayOfItems _ ->
-                                    CliMonad.unsupported "Array of items as item definition"
+                                    CliMonad.todoWithDefault Value "Array of items as item definition"
 
                                 Json.Schema.Definitions.ItemDefinition itemSchema ->
                                     CliMonad.map List (schemaToType itemSchema)
@@ -1377,7 +1389,7 @@ schemaToType schema =
                     nullable (singleTypeToType singleType)
 
                 Json.Schema.Definitions.UnionType singleTypes ->
-                    CliMonad.unsupported "union type"
+                    CliMonad.todoWithDefault Value "union type"
 
 
 objectSchemaToType : Json.Schema.Definitions.SubSchema -> CliMonad Type
@@ -1405,7 +1417,7 @@ objectSchemaToType subSchema =
                         (propertiesFromRef allOfItemSchema)
 
                 Json.Schema.Definitions.BooleanSchema _ ->
-                    CliMonad.unsupported "Boolean schema inside allOf"
+                    CliMonad.todoWithDefault Dict.empty "Boolean schema inside allOf"
 
         propertiesFromRef : Json.Schema.Definitions.SubSchema -> CliMonad (Dict String Type)
         propertiesFromRef allOfItem =

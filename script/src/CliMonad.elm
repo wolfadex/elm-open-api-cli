@@ -1,4 +1,4 @@
-module CliMonad exposing (CliMonad, andThen, combine, combineMap, fail, fromApiSpec, fromResult, map, map2, run, succeed, todo, unsupported, withPath)
+module CliMonad exposing (CliMonad, andThen, combine, combineMap, fail, fromApiSpec, fromResult, map, map2, run, succeed, todo, todoWithDefault, withPath)
 
 import Elm
 import Gen.Debug
@@ -25,19 +25,19 @@ withPath segment (CliMonad f) =
 
 todo : String -> CliMonad Elm.Expression
 todo msg =
+    todoWithDefault (Gen.Debug.todo msg) msg
+
+
+todoWithDefault : a -> String -> CliMonad a
+todoWithDefault default msg =
     CliMonad
         (\{ generateTodos } ->
             if generateTodos then
-                Ok (Gen.Debug.todo msg)
+                Ok default
 
             else
                 Err ( [], "Todo: " ++ msg )
         )
-
-
-unsupported : String -> CliMonad a
-unsupported msg =
-    fail ("Unsupported: " ++ msg)
 
 
 fail : String -> CliMonad a
@@ -81,7 +81,7 @@ run input (CliMonad x) =
     x input
         |> Result.mapError
             (\( path, msg ) ->
-                "Error\n  Message - " ++ msg ++ "\n  Path " ++ String.join "." path
+                "Error! " ++ msg ++ "\n  Path: " ++ String.join " -> " path
             )
 
 

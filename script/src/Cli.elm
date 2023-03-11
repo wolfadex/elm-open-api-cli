@@ -213,7 +213,7 @@ generateFileFromOpenApiSpec { outputFile, namespace, generateTodos } apiSpec =
                     combined
             of
                 Ok ( decls, warnings ) ->
-                    BackendTask.combine (List.map (\warning -> Pages.Script.log <| Ansi.Color.fontColor Ansi.Color.brightYellow "Warning: " ++ Ansi.Color.end Ansi.Color.Font ++ warning) warnings)
+                    BackendTask.combine (List.map (\warning -> Pages.Script.log <| Ansi.Color.fontColor Ansi.Color.brightYellow "Warning: " ++ warning) warnings)
                         |> BackendTask.map (\_ -> List.concat decls)
 
                 Err e ->

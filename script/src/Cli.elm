@@ -12,6 +12,7 @@ import Dict exposing (Dict)
 import Elm
 import Elm.Annotation
 import Elm.Case
+import Elm.Declare
 import Elm.Op
 import Elm.ToString
 import FatalError
@@ -45,6 +46,7 @@ import OpenApi.SecurityRequirement
 import OpenApi.Server
 import Pages.Script
 import Path
+import Set
 import String.Extra
 
 
@@ -76,7 +78,7 @@ type alias AuthorizationInfo =
 
 type Type
     = Nullable Type
-    | Object (Dict String Type)
+    | Object (Dict String Field)
     | String
     | Int
     | Float
@@ -87,6 +89,12 @@ type Type
     | Named TypeName
     | Bytes
     | Unit
+
+
+type alias Field =
+    { type_ : Type
+    , required : Bool
+    }
 
 
 program : Cli.Program.Config CliOptions
@@ -195,7 +203,10 @@ generateFileFromOpenApiSpec { outputFile, namespace, generateTodos } apiSpec =
                 combined =
                     CliMonad.combine
                         [ pathDeclarations
-                        , CliMonad.succeed [ nullableType ]
+                        , CliMonad.succeed
+                            [ decodeOptionalField.declaration
+                            , nullableType
+                            ]
                         , componentDeclarations
                         , responsesDeclarations
                         ]
@@ -1114,21 +1125,35 @@ typeToEncoder type_ =
             properties
                 |> Dict.toList
                 |> CliMonad.combineMap
-                    (\( key, valueType ) ->
-                        typeToEncoder valueType
+                    (\( key, field ) ->
+                        typeToEncoder field.type_
                             |> CliMonad.map
                                 (\encoder rec ->
-                                    Elm.tuple
-                                        (Elm.string key)
-                                        (Elm.apply encoder [ Elm.get (toValueName key) rec ])
+                                    let
+                                        fieldExpr : Elm.Expression
+                                        fieldExpr =
+                                            Elm.get (toValueName key) rec
+
+                                        toTuple : Elm.Expression -> Elm.Expression
+                                        toTuple value =
+                                            Elm.tuple
+                                                (Elm.string key)
+                                                (Elm.apply encoder [ value ])
+                                    in
+                                    if field.required then
+                                        Gen.Maybe.make_.just (toTuple fieldExpr)
+
+                                    else
+                                        Gen.Maybe.map toTuple fieldExpr
                                 )
                     )
-                |> CliMonad.map (\toProperties rec -> Gen.Json.Encode.object (List.map (\prop -> prop rec) toProperties))
                 |> CliMonad.map
-                    (\toEncoder ->
+                    (\toProperties ->
                         Elm.fn ( "rec", Nothing )
                             (\rec ->
-                                toEncoder rec
+                                Gen.Json.Encode.call_.object <|
+                                    Gen.List.filterMap Gen.Basics.identity
+                                        (List.map (\prop -> prop rec) toProperties)
                             )
                     )
 
@@ -1183,22 +1208,27 @@ typeToDecoder type_ =
     case type_ of
         Object properties ->
             let
-                propertiesList : List ( String, Type )
+                propertiesList : List ( String, Field )
                 propertiesList =
                     Dict.toList properties
             in
             List.foldl
-                (\( key, valueType ) prevExprRes ->
+                (\( key, field ) prevExprRes ->
                     CliMonad.map2
                         (\internalDecoder prevExpr ->
                             Elm.Op.pipe
                                 (Elm.apply
                                     Gen.Json.Decode.Extra.values_.andMap
-                                    [ Gen.Json.Decode.field key internalDecoder ]
+                                    [ if field.required then
+                                        Gen.Json.Decode.field key internalDecoder
+
+                                      else
+                                        decodeOptionalField.call (Elm.string key) internalDecoder
+                                    ]
                                 )
                                 prevExpr
                         )
-                        (typeToDecoder valueType)
+                        (typeToDecoder field.type_)
                         prevExprRes
                 )
                 (CliMonad.succeed
@@ -1262,6 +1292,58 @@ typeToDecoder type_ =
             CliMonad.todo "Bytes decoder not implemented yet"
 
 
+{-| Decode an optional field
+
+    decodeString (decodeOptionalField "x" int) "{ \"x\": 3 }"
+    --> Ok (Just 3)
+
+    decodeString (decodeOptionalField "x" int) "{ \"x\": true }"
+    --> Err ...
+
+    decodeString (decodeOptionalField "x" int) "{ \"y\": 4 }"
+    --> Ok Nothing
+
+-}
+decodeOptionalField :
+    { declaration : Elm.Declaration
+    , call : Elm.Expression -> Elm.Expression -> Elm.Expression
+    , callFrom : List String -> Elm.Expression -> Elm.Expression -> Elm.Expression
+    }
+decodeOptionalField =
+    let
+        decoderAnnotation =
+            Gen.Json.Decode.annotation_.decoder (Elm.Annotation.var "t")
+
+        resultAnnotation =
+            Gen.Json.Decode.annotation_.decoder (Gen.Maybe.annotation_.maybe <| Elm.Annotation.var "t")
+    in
+    Elm.Declare.fn2 "decodeOptionalField"
+        ( "key", Just Elm.Annotation.string )
+        ( "fieldDecoder", Just decoderAnnotation )
+    <|
+        \key fieldDecoder ->
+            -- The tricky part is that we want to make sure that
+            -- if the field exists we error out if it has an incorrect shape.
+            -- So what we do is we `oneOf` with `value` to avoid the `Nothing` branch,
+            -- `andThen` we decode it. This is why we can't just use `maybe`, we would
+            -- give `Nothing` when the shape is wrong.
+            Gen.Json.Decode.oneOf
+                [ Gen.Json.Decode.call_.map
+                    (Elm.fn ( "_", Nothing ) <| \_ -> Elm.bool True)
+                    (Gen.Json.Decode.call_.field key Gen.Json.Decode.value)
+                , Gen.Json.Decode.succeed (Elm.bool False)
+                ]
+                |> Gen.Json.Decode.andThen
+                    (\hasField ->
+                        Elm.ifThen hasField
+                            (Gen.Json.Decode.map Gen.Maybe.make_.just
+                                (Gen.Json.Decode.call_.field key fieldDecoder)
+                            )
+                            (Gen.Json.Decode.succeed Gen.Maybe.make_.nothing)
+                    )
+                |> Elm.withType resultAnnotation
+
+
 responseToSchema : OpenApi.Response.Response -> CliMonad Json.Schema.Definitions.Schema
 responseToSchema response =
     CliMonad.succeed response
@@ -1293,7 +1375,7 @@ typeToAnnotation type_ =
 
         Object fields ->
             Dict.toList fields
-                |> CliMonad.combineMap (\( k, v ) -> CliMonad.map (Tuple.pair k) (typeToAnnotation v))
+                |> CliMonad.combineMap (\( k, v ) -> CliMonad.map (Tuple.pair k) (fieldToAnnotation v))
                 |> CliMonad.map recordType
 
         String ->
@@ -1327,6 +1409,15 @@ typeToAnnotation type_ =
 
         Unit ->
             CliMonad.succeed Elm.Annotation.unit
+
+
+fieldToAnnotation : Field -> CliMonad Elm.Annotation.Annotation
+fieldToAnnotation { type_, required } =
+    if required then
+        typeToAnnotation type_
+
+    else
+        CliMonad.map Gen.Maybe.annotation_.maybe (typeToAnnotation type_)
 
 
 schemaToType : Json.Schema.Definitions.Schema -> CliMonad Type
@@ -1442,8 +1533,14 @@ schemaToType schema =
 objectSchemaToType : Json.Schema.Definitions.SubSchema -> CliMonad Type
 objectSchemaToType subSchema =
     let
-        propertiesFromSchema : Json.Schema.Definitions.SubSchema -> CliMonad (Dict String Type)
+        propertiesFromSchema : Json.Schema.Definitions.SubSchema -> CliMonad (Dict String Field)
         propertiesFromSchema sch =
+            let
+                requiredSet =
+                    sch.required
+                        |> Maybe.withDefault []
+                        |> Set.fromList
+            in
             sch.properties
                 |> Maybe.map (\(Json.Schema.Definitions.Schemata schemata) -> schemata)
                 |> Maybe.withDefault []
@@ -1451,11 +1548,18 @@ objectSchemaToType subSchema =
                     (\( key, valueSchema ) ->
                         schemaToType valueSchema
                             |> CliMonad.withPath key
-                            |> CliMonad.map (\ann -> ( key, ann ))
+                            |> CliMonad.map
+                                (\type_ ->
+                                    ( key
+                                    , { type_ = type_
+                                      , required = Set.member key requiredSet
+                                      }
+                                    )
+                                )
                     )
                 |> CliMonad.map Dict.fromList
 
-        schemaToProperties : Json.Schema.Definitions.Schema -> CliMonad (Dict String Type)
+        schemaToProperties : Json.Schema.Definitions.Schema -> CliMonad (Dict String Field)
         schemaToProperties allOfItem =
             case allOfItem of
                 Json.Schema.Definitions.ObjectSchema allOfItemSchema ->
@@ -1466,7 +1570,7 @@ objectSchemaToType subSchema =
                 Json.Schema.Definitions.BooleanSchema _ ->
                     CliMonad.todoWithDefault Dict.empty "Boolean schema inside allOf"
 
-        propertiesFromRef : Json.Schema.Definitions.SubSchema -> CliMonad (Dict String Type)
+        propertiesFromRef : Json.Schema.Definitions.SubSchema -> CliMonad (Dict String Field)
         propertiesFromRef allOfItem =
             case allOfItem.ref of
                 Nothing ->

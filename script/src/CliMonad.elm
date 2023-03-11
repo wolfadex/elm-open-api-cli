@@ -139,37 +139,34 @@ run input m =
 
 helperDeclarations : Result String (List Elm.Declaration)
 helperDeclarations =
-    -- The max value here should match with the max value supported by `intToWord`
-    List.range 1 99
-        |> List.map enumDeclaration
-        |> Result.Extra.combine
+    Result.Extra.combineMap
+        enumDeclaration
+        -- The max value here should match with the max value supported by `intToWord`
+        (List.range 1 99)
 
 
 enumDeclaration : Int -> Result String Elm.Declaration
 enumDeclaration i =
     intToWord i
         |> Result.andThen
-            (\intWord ->
+            (\iWord ->
                 let
                     (TypeName typeName) =
-                        typifyName ("enum_" ++ intWord)
+                        typifyName ("enum_" ++ iWord)
+
+                    variantDeclaration j =
+                        Result.map
+                            (\jWord ->
+                                let
+                                    (TypeName variantName) =
+                                        typifyName ("enum_" ++ iWord ++ "_" ++ jWord)
+                                in
+                                Elm.variantWith variantName [ Elm.Annotation.var (toValueName jWord) ]
+                            )
+                            (intToWord j)
                 in
                 List.range 1 i
-                    |> List.foldr
-                        (\j res ->
-                            Result.map2
-                                (\jWord r ->
-                                    let
-                                        (TypeName variantName) =
-                                            typifyName ("enum_" ++ intWord ++ "_" ++ jWord)
-                                    in
-                                    Elm.variantWith variantName [ Elm.Annotation.var (toValueName jWord) ]
-                                        :: r
-                                )
-                                (intToWord j)
-                                res
-                        )
-                        (Ok [])
+                    |> Result.Extra.combineMap variantDeclaration
                     |> Result.map (Elm.customType typeName)
             )
 

@@ -816,22 +816,30 @@ contentToContentSchema content =
             CliMonad.succeed EmptyContent
 
         [ ( singleKey, singleValue ) ] ->
-            if singleKey == "application/octet-stream" then
-                CliMonad.succeed (BytesContent singleKey)
+            let
+                fallback : CliMonad ContentSchema
+                fallback =
+                    CliMonad.succeed
+                        (BytesContent singleKey)
+                        |> CliMonad.withWarning ("Unrecognized mime type: " ++ singleKey ++ ", treating it as bytes")
+            in
+            case
+                singleValue
+                    |> OpenApi.MediaType.schema
+                    |> Maybe.map OpenApi.Schema.get
+            of
+                Just (Json.Schema.Definitions.ObjectSchema schema) ->
+                    if schema.type_ == Json.Schema.Definitions.SingleType Json.Schema.Definitions.StringType then
+                        -- This is used by, e.g., base64 encoded data
+                        CliMonad.succeed (StringContent singleKey)
 
-            else
-                let
-                    fallback : CliMonad ContentSchema
-                    fallback =
-                        CliMonad.succeed
-                            (BytesContent singleKey)
-                            |> CliMonad.withWarning ("Unrecognized mime type: " ++ singleKey ++ ", treating it as bytes")
-                in
-                if String.startsWith "image/" singleKey then
-                    -- TODO: handle base64
-                    default (Just fallback)
+                    else if singleKey == "application/octet-stream" then
+                        CliMonad.succeed (BytesContent singleKey)
 
-                else
+                    else
+                        default (Just fallback)
+
+                _ ->
                     default (Just fallback)
 
         _ ->

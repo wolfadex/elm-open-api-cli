@@ -3,6 +3,7 @@ module CliMonad exposing (CliMonad, Warning, andThen, combine, combineMap, enumA
 import Common exposing (TypeName(..), intToWord, toValueName, typifyName)
 import Elm
 import Elm.Annotation
+import FastDict
 import Gen.Debug
 import OpenApi exposing (OpenApi)
 import Result.Extra
@@ -22,8 +23,12 @@ type alias Warning =
     String
 
 
+type alias FastSet k =
+    FastDict.Dict k ()
+
+
 type CliMonad a
-    = CliMonad ({ openApi : OpenApi, generateTodos : Bool } -> Result Message ( a, List Message ))
+    = CliMonad ({ openApi : OpenApi, generateTodos : Bool } -> Result Message ( a, List Message, FastSet Int ))
 
 
 withPath : String -> CliMonad a -> CliMonad a
@@ -34,8 +39,8 @@ withPath segment (CliMonad f) =
                 Err message ->
                     Err (addPath segment message)
 
-                Ok ( res, warns ) ->
-                    Ok ( res, List.map (addPath segment) warns )
+                Ok ( res, warns, enums ) ->
+                    Ok ( res, List.map (addPath segment) warns, enums )
         )
 
 
@@ -51,7 +56,7 @@ withWarning message (CliMonad f) =
     CliMonad
         (\inputs ->
             Result.map
-                (\( res, warnings ) -> ( res, { path = [], message = message } :: warnings ))
+                (\( res, warnings, enums ) -> ( res, { path = [], message = message } :: warnings, enums ))
                 (f inputs)
         )
 
@@ -66,7 +71,7 @@ todoWithDefault default message =
     CliMonad
         (\{ generateTodos } ->
             if generateTodos then
-                Ok ( default, [ { path = [], message = message } ] )
+                Ok ( default, [ { path = [], message = message } ], FastDict.empty )
 
             else
                 Err
@@ -83,22 +88,22 @@ fail message =
 
 succeed : a -> CliMonad a
 succeed x =
-    CliMonad (\_ -> Ok ( x, [] ))
+    CliMonad (\_ -> Ok ( x, [], FastDict.empty ))
 
 
 map : (a -> b) -> CliMonad a -> CliMonad b
 map f (CliMonad x) =
-    CliMonad (\input -> Result.map (\( xr, xw ) -> ( f xr, xw )) (x input))
+    CliMonad (\input -> Result.map (\( xr, xw, xm ) -> ( f xr, xw, xm )) (x input))
 
 
 map2 : (a -> b -> c) -> CliMonad a -> CliMonad b -> CliMonad c
 map2 f (CliMonad x) (CliMonad y) =
-    CliMonad (\input -> Result.map2 (\( xr, xw ) ( yr, yw ) -> ( f xr yr, xw ++ yw )) (x input) (y input))
+    CliMonad (\input -> Result.map2 (\( xr, xw, xm ) ( yr, yw, ym ) -> ( f xr yr, xw ++ yw, FastDict.union xm ym )) (x input) (y input))
 
 
 map3 : (a -> b -> c -> d) -> CliMonad a -> CliMonad b -> CliMonad c -> CliMonad d
 map3 f (CliMonad x) (CliMonad y) (CliMonad z) =
-    CliMonad (\input -> Result.map3 (\( xr, xw ) ( yr, yw ) ( zr, zw ) -> ( f xr yr zr, xw ++ yw ++ zw )) (x input) (y input) (z input))
+    CliMonad (\input -> Result.map3 (\( xr, xw, xm ) ( yr, yw, ym ) ( zr, zw, zm ) -> ( f xr yr zr, xw ++ yw ++ zw, FastDict.union (FastDict.union xm ym) zm )) (x input) (y input) (z input))
 
 
 andThen : (a -> CliMonad b) -> CliMonad a -> CliMonad b
@@ -106,13 +111,13 @@ andThen f (CliMonad x) =
     CliMonad
         (\input ->
             Result.andThen
-                (\( y, yw ) ->
+                (\( y, yw, ym ) ->
                     let
                         (CliMonad z) =
                             f y
                     in
                     z input
-                        |> Result.map (\( w, ww ) -> ( w, yw ++ ww ))
+                        |> Result.map (\( w, ww, wm ) -> ( w, yw ++ ww, FastDict.union ym wm ))
                 )
                 (x input)
         )
@@ -124,25 +129,32 @@ Automatically appends the needed `enum` declarations.
 
 -}
 run : { openApi : OpenApi, generateTodos : Bool } -> CliMonad (List Elm.Declaration) -> Result String ( List Elm.Declaration, List Warning )
-run input m =
-    let
-        (CliMonad x) =
-            map2 (++) m (fromResult helperDeclarations)
-    in
+run input (CliMonad x) =
     case x input of
         Err message ->
             Err <| messageToString message
 
-        Ok ( res, warnings ) ->
-            Ok ( res, List.reverse warnings |> List.map messageToString )
+        Ok ( decls, warnings, enums ) ->
+            case helperDeclarations enums of
+                Err message ->
+                    messageToString
+                        { message = message
+                        , path = [ "While generating enums" ]
+                        }
+                        |> Err
+
+                Ok enumDecls ->
+                    Ok
+                        ( decls ++ enumDecls
+                        , List.reverse warnings |> List.map messageToString
+                        )
 
 
-helperDeclarations : Result String (List Elm.Declaration)
-helperDeclarations =
+helperDeclarations : FastSet Int -> Result String (List Elm.Declaration)
+helperDeclarations enums =
     Result.Extra.combineMap
         enumDeclaration
-        -- The max value here should match with the max value supported by `intToWord`
-        (List.range 1 99)
+        (FastDict.keys enums)
 
 
 enumDeclaration : Int -> Result String Elm.Declaration
@@ -183,7 +195,7 @@ combine =
 
 fromApiSpec : (OpenApi -> a) -> CliMonad a
 fromApiSpec f =
-    CliMonad (\input -> Ok ( f input.openApi, [] ))
+    CliMonad (\input -> Ok ( f input.openApi, [], FastDict.empty ))
 
 
 fromResult : Result String a -> CliMonad a
@@ -195,7 +207,7 @@ fromResult res =
                     Err { path = [], message = message }
 
                 Ok r ->
-                    Ok ( r, [] )
+                    Ok ( r, [], FastDict.empty )
         )
 
 
@@ -204,11 +216,11 @@ errorToWarning (CliMonad f) =
     CliMonad
         (\input ->
             case f input of
-                Ok ( res, warns ) ->
-                    Ok ( Just res, warns )
+                Ok ( res, warns, enums ) ->
+                    Ok ( Just res, warns, enums )
 
                 Err { path, message } ->
-                    Ok ( Nothing, [ { path = path, message = message } ] )
+                    Ok ( Nothing, [ { path = path, message = message } ], FastDict.empty )
         )
 
 
@@ -226,8 +238,8 @@ enumAnnotation annotations =
     annotations
         |> andThen
             (\anns ->
-                map
-                    (\intWord ->
+                map2
+                    (\intWord _ ->
                         let
                             (TypeName typeName) =
                                 typifyName ("enum_" ++ intWord)
@@ -235,4 +247,10 @@ enumAnnotation annotations =
                         Elm.Annotation.namedWith [] typeName anns
                     )
                     (fromResult <| intToWord (List.length anns))
+                    (requiresEnum (List.length anns))
             )
+
+
+requiresEnum : Int -> CliMonad ()
+requiresEnum size =
+    CliMonad (\_ -> Ok ( (), [], FastDict.singleton size () ))

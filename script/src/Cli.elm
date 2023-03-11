@@ -7,6 +7,7 @@ import Cli.Option
 import Cli.OptionsParser
 import Cli.Program
 import CliMonad exposing (CliMonad)
+import Common exposing (TypeName(..), toValueName, typifyName)
 import Dict exposing (Dict)
 import Elm
 import Elm.Annotation
@@ -44,7 +45,6 @@ import OpenApi.SecurityRequirement
 import OpenApi.Server
 import Pages.Script
 import Path
-import Result.Extra
 import String.Extra
 
 
@@ -87,10 +87,6 @@ type Type
     | Named TypeName
     | Bytes
     | Unit
-
-
-type TypeName
-    = TypeName String
 
 
 program : Cli.Program.Config CliOptions
@@ -202,8 +198,8 @@ generateFileFromOpenApiSpec { outputFile, namespace, generateTodos } apiSpec =
                         , CliMonad.succeed [ nullableType ]
                         , componentDeclarations
                         , responsesDeclarations
-                        , helperDeclarations
                         ]
+                        |> CliMonad.map List.concat
             in
             case
                 CliMonad.run
@@ -213,8 +209,10 @@ generateFileFromOpenApiSpec { outputFile, namespace, generateTodos } apiSpec =
                     combined
             of
                 Ok ( decls, warnings ) ->
-                    BackendTask.combine (List.map (\warning -> Pages.Script.log <| Ansi.Color.fontColor Ansi.Color.brightYellow "Warning: " ++ warning) warnings)
-                        |> BackendTask.map (\_ -> List.concat decls)
+                    warnings
+                        |> List.map logWarning
+                        |> BackendTask.combine
+                        |> BackendTask.map (\_ -> decls)
 
                 Err e ->
                     BackendTask.fail (FatalError.fromString e)
@@ -274,6 +272,13 @@ generateFileFromOpenApiSpec { outputFile, namespace, generateTodos } apiSpec =
                     |> BackendTask.map (\_ -> outputPath)
             )
         |> BackendTask.andThen (\outputPath -> Pages.Script.log ("SDK generated at " ++ outputPath))
+
+
+logWarning : String -> BackendTask.BackendTask FatalError.FatalError ()
+logWarning warning =
+    Pages.Script.log <|
+        Ansi.Color.fontColor Ansi.Color.brightYellow "Warning: "
+            ++ warning
 
 
 pathDeclarations : CliMonad (List Elm.Declaration)
@@ -347,42 +352,6 @@ componentDeclarations =
                 (CliMonad.succeed [])
             )
         |> CliMonad.map List.concat
-
-
-helperDeclarations : CliMonad (List Elm.Declaration)
-helperDeclarations =
-    -- The max value here should match with the max value supported by `intToWord`
-    List.range 1 99
-        |> List.map
-            (\i ->
-                intToWord i
-                    |> Result.andThen
-                        (\intWord ->
-                            let
-                                (TypeName typeName) =
-                                    typifyName ("enum_" ++ intWord)
-                            in
-                            List.range 1 i
-                                |> List.foldr
-                                    (\j res ->
-                                        Result.map2
-                                            (\jWord r ->
-                                                let
-                                                    (TypeName variantName) =
-                                                        typifyName ("enum_" ++ intWord ++ "_" ++ jWord)
-                                                in
-                                                Elm.variantWith variantName [ Elm.Annotation.var (toValueName jWord) ]
-                                                    :: r
-                                            )
-                                            (intToWord j)
-                                            res
-                                    )
-                                    (Ok [])
-                                |> Result.map (Elm.customType typeName)
-                        )
-            )
-        |> Result.Extra.combine
-        |> CliMonad.fromResult
 
 
 schemaToDeclarations : String -> Json.Schema.Definitions.Schema -> CliMonad (List Elm.Declaration)
@@ -1121,38 +1090,6 @@ nullableType =
             }
 
 
-typifyName : String -> TypeName
-typifyName name =
-    name
-        |> String.uncons
-        |> Maybe.map (\( first, rest ) -> String.cons first (String.replace "-" " " rest))
-        |> Maybe.withDefault ""
-        |> String.replace "_" " "
-        |> String.Extra.toTitleCase
-        |> String.replace " " ""
-        |> deSymbolify
-        |> TypeName
-
-
-toValueName : String -> String
-toValueName name =
-    name
-        |> String.uncons
-        |> Maybe.map (\( first, rest ) -> String.cons (Char.toLower first) (String.replace "-" "_" rest))
-        |> Maybe.withDefault ""
-        |> deSymbolify
-
-
-{-| Sometimes a word in the schema contains invalid characers for an Elm name.
-We don't want to completely remove them though.
--}
-deSymbolify : String -> String
-deSymbolify str =
-    str
-        |> String.replace "+" "Plus"
-        |> String.replace "-" "Minus"
-
-
 schemaToEncoder : Json.Schema.Definitions.Schema -> CliMonad Elm.Expression
 schemaToEncoder schema =
     schemaToType schema |> CliMonad.andThen typeToEncoder
@@ -1375,16 +1312,9 @@ typeToAnnotation type_ =
             CliMonad.map Elm.Annotation.list (typeToAnnotation t)
 
         Enum anyOf ->
-            CliMonad.map2
-                (\intWord anns ->
-                    let
-                        (TypeName typeName) =
-                            typifyName ("enum_" ++ intWord)
-                    in
-                    Elm.Annotation.namedWith [] typeName anns
-                )
-                (CliMonad.fromResult <| intToWord (List.length anyOf))
-                (CliMonad.combineMap typeToAnnotation anyOf)
+            anyOf
+                |> CliMonad.combineMap typeToAnnotation
+                |> CliMonad.enumAnnotation
 
         Value ->
             CliMonad.succeed Gen.Json.Encode.annotation_.value
@@ -1610,130 +1540,3 @@ invalidModuleNameChars =
     , '}'
     , '-'
     ]
-
-
-intToWord : Int -> Result String String
-intToWord i =
-    case i of
-        1 ->
-            Ok "one"
-
-        2 ->
-            Ok "two"
-
-        3 ->
-            Ok "three"
-
-        4 ->
-            Ok "four"
-
-        5 ->
-            Ok "five"
-
-        6 ->
-            Ok "six"
-
-        7 ->
-            Ok "seven"
-
-        8 ->
-            Ok "eight"
-
-        9 ->
-            Ok "nine"
-
-        10 ->
-            Ok "ten"
-
-        11 ->
-            Ok "eleven"
-
-        12 ->
-            Ok "twelve"
-
-        13 ->
-            Ok "thirteen"
-
-        14 ->
-            Ok "fourteen"
-
-        15 ->
-            Ok "fifteen"
-
-        16 ->
-            Ok "sixteen"
-
-        17 ->
-            Ok "seventeen"
-
-        18 ->
-            Ok "eighteen"
-
-        19 ->
-            Ok "nineteen"
-
-        _ ->
-            if i < 0 then
-                Err "Negative numbers aren't supported"
-
-            else if i == 0 then
-                Err "Zero isn't supported"
-
-            else if i == 20 then
-                Ok "twenty"
-
-            else if i < 30 then
-                intToWord (i - 20)
-                    |> Result.map (\ones -> "twenty-" ++ ones)
-
-            else if i == 30 then
-                Ok "thirty"
-
-            else if i < 40 then
-                intToWord (i - 30)
-                    |> Result.map (\ones -> "thirty-" ++ ones)
-
-            else if i == 40 then
-                Ok "forty"
-
-            else if i < 50 then
-                intToWord (i - 40)
-                    |> Result.map (\ones -> "forty-" ++ ones)
-
-            else if i == 50 then
-                Ok "fifty"
-
-            else if i < 60 then
-                intToWord (i - 50)
-                    |> Result.map (\ones -> "fifty-" ++ ones)
-
-            else if i == 60 then
-                Ok "sixty"
-
-            else if i < 70 then
-                intToWord (i - 60)
-                    |> Result.map (\ones -> "sixty-" ++ ones)
-
-            else if i == 70 then
-                Ok "seventy"
-
-            else if i < 80 then
-                intToWord (i - 70)
-                    |> Result.map (\ones -> "seventy-" ++ ones)
-
-            else if i == 80 then
-                Ok "eighty"
-
-            else if i < 90 then
-                intToWord (i - 80)
-                    |> Result.map (\ones -> "eighty-" ++ ones)
-
-            else if i == 90 then
-                Ok "ninety"
-
-            else if i < 100 then
-                intToWord (i - 90)
-                    |> Result.map (\ones -> "ninety-" ++ ones)
-
-            else
-                Err ("Numbers larger than 99 aren't currently supported and I got an " ++ String.fromInt i)

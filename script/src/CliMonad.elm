@@ -1,8 +1,11 @@
-module CliMonad exposing (CliMonad, Warning, andThen, combine, combineMap, errorToWarning, fail, fromApiSpec, fromResult, map, map2, map3, run, succeed, todo, todoWithDefault, withPath, withWarning)
+module CliMonad exposing (CliMonad, Warning, andThen, combine, combineMap, enumAnnotation, errorToWarning, fail, fromApiSpec, map, map2, map3, run, succeed, todo, todoWithDefault, withPath, withWarning)
 
+import Common exposing (TypeName(..), intToWord, toValueName, typifyName)
 import Elm
+import Elm.Annotation
 import Gen.Debug
 import OpenApi exposing (OpenApi)
+import Result.Extra
 
 
 type alias Message =
@@ -115,14 +118,60 @@ andThen f (CliMonad x) =
         )
 
 
-run : { openApi : OpenApi, generateTodos : Bool } -> CliMonad a -> Result String ( a, List Warning )
-run input (CliMonad x) =
+{-| Runs the transformation from OpenApi to declaration.
+
+Automatically appends the needed `enum` declarations.
+
+-}
+run : { openApi : OpenApi, generateTodos : Bool } -> CliMonad (List Elm.Declaration) -> Result String ( List Elm.Declaration, List Warning )
+run input m =
+    let
+        (CliMonad x) =
+            map2 (++) m (fromResult helperDeclarations)
+    in
     case x input of
         Err message ->
             Err <| messageToString message
 
         Ok ( res, warnings ) ->
             Ok ( res, List.reverse warnings |> List.map messageToString )
+
+
+helperDeclarations : Result String (List Elm.Declaration)
+helperDeclarations =
+    -- The max value here should match with the max value supported by `intToWord`
+    List.range 1 99
+        |> List.map enumDeclaration
+        |> Result.Extra.combine
+
+
+enumDeclaration : Int -> Result String Elm.Declaration
+enumDeclaration i =
+    intToWord i
+        |> Result.andThen
+            (\intWord ->
+                let
+                    (TypeName typeName) =
+                        typifyName ("enum_" ++ intWord)
+                in
+                List.range 1 i
+                    |> List.foldr
+                        (\j res ->
+                            Result.map2
+                                (\jWord r ->
+                                    let
+                                        (TypeName variantName) =
+                                            typifyName ("enum_" ++ intWord ++ "_" ++ jWord)
+                                    in
+                                    Elm.variantWith variantName [ Elm.Annotation.var (toValueName jWord) ]
+                                        :: r
+                                )
+                                (intToWord j)
+                                res
+                        )
+                        (Ok [])
+                    |> Result.map (Elm.customType typeName)
+            )
 
 
 combineMap : (a -> CliMonad b) -> List a -> CliMonad (List b)
@@ -173,3 +222,20 @@ messageToString { path, message } =
 
     else
         "Error! " ++ message ++ "\n  Path: " ++ String.join " -> " path
+
+
+enumAnnotation : CliMonad (List Elm.Annotation.Annotation) -> CliMonad Elm.Annotation.Annotation
+enumAnnotation annotations =
+    annotations
+        |> andThen
+            (\anns ->
+                map
+                    (\intWord ->
+                        let
+                            (TypeName typeName) =
+                                typifyName ("enum_" ++ intWord)
+                        in
+                        Elm.Annotation.namedWith [] typeName anns
+                    )
+                    (fromResult <| intToWord (List.length anns))
+            )

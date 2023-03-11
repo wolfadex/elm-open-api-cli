@@ -4,6 +4,7 @@
   "description": "A tool for generating Elm SDKs from OpenAPI Specs.",
   "main": "dist/elm-oas.js",
   "scripts": {
+    "elm-pages": "elm-pages",
     "dev": "elm-pages run Cli",
     "build": "elm-pages bundle-script Cli --output dist/elm-oas.js"
   },

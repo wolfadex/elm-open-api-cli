@@ -18,6 +18,7 @@
             "json-tools/json-schema": "1.0.2",
             "lamdera/codecs": "1.0.0",
             "mdgriffith/elm-codegen": "2.1.0",
+            "miniBill/elm-fast-dict": "1.0.0",
             "wolfadex/elm-ansi": "1.1.0",
             "wolfadex/elm-open-api": "1.1.1"
         },

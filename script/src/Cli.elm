@@ -8,13 +8,14 @@ import Cli.OptionsParser
 import Cli.Program
 import CliMonad exposing (CliMonad)
 import Common exposing (TypeName(..), toValueName, typifyName)
-import Dict exposing (Dict)
+import Dict
 import Elm
 import Elm.Annotation
 import Elm.Case
 import Elm.Declare
 import Elm.Op
 import Elm.ToString
+import FastDict exposing (Dict)
 import FatalError
 import Gen.Basics
 import Gen.Bytes
@@ -746,7 +747,7 @@ operationToContentSchema operation =
                         |> CliMonad.map (\typeName -> JsonContent (Named typeName))
 
 
-contentToContentSchema : Dict String OpenApi.MediaType.MediaType -> CliMonad ContentSchema
+contentToContentSchema : Dict.Dict String OpenApi.MediaType.MediaType -> CliMonad ContentSchema
 contentToContentSchema content =
     let
         default : Maybe (CliMonad ContentSchema) -> CliMonad ContentSchema
@@ -1123,7 +1124,7 @@ typeToEncoder type_ =
 
         Object properties ->
             properties
-                |> Dict.toList
+                |> FastDict.toList
                 |> CliMonad.combineMap
                     (\( key, field ) ->
                         typeToEncoder field.type_
@@ -1210,7 +1211,7 @@ typeToDecoder type_ =
             let
                 propertiesList : List ( String, Field )
                 propertiesList =
-                    Dict.toList properties
+                    FastDict.toList properties
             in
             List.foldl
                 (\( key, field ) prevExprRes ->
@@ -1374,7 +1375,7 @@ typeToAnnotation type_ =
                     )
 
         Object fields ->
-            Dict.toList fields
+            FastDict.toList fields
                 |> CliMonad.combineMap (\( k, v ) -> CliMonad.map (Tuple.pair k) (fieldToAnnotation v))
                 |> CliMonad.map recordType
 
@@ -1557,24 +1558,24 @@ objectSchemaToType subSchema =
                                     )
                                 )
                     )
-                |> CliMonad.map Dict.fromList
+                |> CliMonad.map FastDict.fromList
 
         schemaToProperties : Json.Schema.Definitions.Schema -> CliMonad (Dict String Field)
         schemaToProperties allOfItem =
             case allOfItem of
                 Json.Schema.Definitions.ObjectSchema allOfItemSchema ->
-                    CliMonad.map2 Dict.union
+                    CliMonad.map2 FastDict.union
                         (propertiesFromSchema allOfItemSchema)
                         (propertiesFromRef allOfItemSchema)
 
                 Json.Schema.Definitions.BooleanSchema _ ->
-                    CliMonad.todoWithDefault Dict.empty "Boolean schema inside allOf"
+                    CliMonad.todoWithDefault FastDict.empty "Boolean schema inside allOf"
 
         propertiesFromRef : Json.Schema.Definitions.SubSchema -> CliMonad (Dict String Field)
         propertiesFromRef allOfItem =
             case allOfItem.ref of
                 Nothing ->
-                    CliMonad.succeed Dict.empty
+                    CliMonad.succeed FastDict.empty
 
                 Just ref ->
                     case String.split "/" ref of
@@ -1605,12 +1606,12 @@ objectSchemaToType subSchema =
             subSchema.allOf
                 |> Maybe.withDefault []
                 |> CliMonad.combineMap schemaToProperties
-                |> CliMonad.map (List.foldl Dict.union Dict.empty)
+                |> CliMonad.map (List.foldl FastDict.union FastDict.empty)
     in
     CliMonad.map2
         (\schemaProps allOfProps ->
             allOfProps
-                |> Dict.union schemaProps
+                |> FastDict.union schemaProps
                 |> Object
         )
         (propertiesFromSchema subSchema)

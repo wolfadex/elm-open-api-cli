@@ -1,4 +1,4 @@
-module CliMonad exposing (CliMonad, Warning, andThen, combine, combineMap, enumAnnotation, errorToWarning, fail, fromApiSpec, map, map2, map3, run, succeed, todo, todoWithDefault, withPath, withWarning)
+module CliMonad exposing (CliMonad, Warning, andThen, andThen2, combine, combineMap, enumAnnotation, errorToWarning, fail, fromApiSpec, map, map2, map3, run, succeed, todo, todoWithDefault, withPath, withWarning)
 
 import Common exposing (TypeName(..), intToWord, toValueName, typifyName)
 import Elm
@@ -121,6 +121,16 @@ andThen f (CliMonad x) =
                 )
                 (x input)
         )
+
+
+andThen2 : (a -> b -> CliMonad c) -> CliMonad a -> CliMonad b -> CliMonad c
+andThen2 f x y =
+    x
+        |> andThen
+            (\xr ->
+                y
+                    |> andThen (\yr -> f xr yr)
+            )
 
 
 {-| Runs the transformation from OpenApi to declaration.

@@ -28,6 +28,7 @@ import Gen.List
 import Gen.Maybe
 import Gen.Result
 import Gen.String
+import Gen.Task
 import Gen.Url.Builder
 import Json.Decode
 import Json.Schema.Definitions
@@ -206,6 +207,9 @@ generateFileFromOpenApiSpec { outputFile, namespace, generateTodos } apiSpec =
                         [ pathDeclarations
                         , CliMonad.succeed
                             [ decodeOptionalField.declaration
+                            , responseToResult.declaration
+                            , jsonResolver.declaration
+                            , whateverResolver.declaration
                             , nullableType
                             ]
                         , componentDeclarations
@@ -313,10 +317,10 @@ pathDeclarations =
                                 |> List.filterMap (\( method, getter ) -> Maybe.map (Tuple.pair method) (getter path))
                                 |> CliMonad.combineMap
                                     (\( method, operation ) ->
-                                        toRequestFunction method url operation
+                                        toRequestFunctions method url operation
                                             |> CliMonad.errorToWarning
                                     )
-                                |> CliMonad.map (List.filterMap identity)
+                                |> CliMonad.map (List.filterMap identity >> List.concat)
                         )
                     |> CliMonad.map
                         (List.concat
@@ -450,11 +454,11 @@ stepOrFail msg f =
         )
 
 
-toRequestFunction : String -> String -> OpenApi.Operation.Operation -> CliMonad Elm.Declaration
-toRequestFunction method url operation =
-    operationToSuccessTypeAndExpect operation
+toRequestFunctions : String -> String -> OpenApi.Operation.Operation -> CliMonad (List Elm.Declaration)
+toRequestFunctions method url operation =
+    operationToSuccessTypeAndExpectAndResolver operation
         |> CliMonad.andThen
-            (\( successType, toExpect ) ->
+            (\( successType, toExpect, resolver ) ->
                 let
                     functionName : String
                     functionName =
@@ -599,15 +603,15 @@ toRequestFunction method url operation =
                             BytesContent _ ->
                                 CliMonad.succeed [ ( "body", Gen.Bytes.annotation_.bytes ) ]
 
-                    function : ContentSchema -> CliMonad Elm.Expression
-                    function bodyContent =
+                    requestCommand : ContentSchema -> CliMonad ( Elm.Expression, Elm.Annotation.Annotation )
+                    requestCommand bodyContent =
                         authorizationInfo
                             |> CliMonad.andThen
                                 (\auth ->
                                     CliMonad.map3
-                                        (\toBody param replaced ->
-                                            Elm.fn
-                                                param
+                                        (\toBody paramType replaced ->
+                                            ( Elm.fn
+                                                ( "config", Just paramType )
                                                 (\config ->
                                                     Gen.Http.call_.request
                                                         (Elm.record
@@ -621,20 +625,73 @@ toRequestFunction method url operation =
                                                             ]
                                                         )
                                                 )
+                                            , Elm.Annotation.function
+                                                [ paramType ]
+                                                (Elm.Annotation.cmd (Elm.Annotation.var "msg"))
+                                            )
                                         )
                                         (body bodyContent)
-                                        (bodyParams bodyContent
-                                            |> CliMonad.andThen
-                                                (\bp ->
-                                                    typeToAnnotation successType
-                                                        |> CliMonad.andThen
-                                                            (\successAnnotation ->
-                                                                toConfigParam operation successAnnotation auth bp
-                                                            )
-                                                )
+                                        (CliMonad.andThen2
+                                            (\bp successAnnotation ->
+                                                toConfigParamAnnotation
+                                                    { operation = operation
+                                                    , requireToMsg = True
+                                                    , successAnnotation = successAnnotation
+                                                    , authorizationInfo = auth
+                                                    , bodyParams = bp
+                                                    }
+                                            )
+                                            (bodyParams bodyContent)
+                                            (typeToAnnotation successType)
                                         )
                                         replacedUrl
                                 )
+
+                    requestTask : ContentSchema -> CliMonad ( Elm.Expression, Elm.Annotation.Annotation )
+                    requestTask bodyContent =
+                        CliMonad.andThen2
+                            (\auth successAnnotation ->
+                                CliMonad.map3
+                                    (\toBody paramType replaced ->
+                                        ( Elm.fn
+                                            ( "config", Just paramType )
+                                            (\config ->
+                                                Gen.Http.call_.task
+                                                    (Elm.record
+                                                        [ ( "url", replaced config )
+                                                        , ( "method", Elm.string method )
+                                                        , ( "headers", Elm.list <| auth.headers config )
+                                                        , ( "resolver", resolver )
+                                                        , ( "body", toBody config )
+                                                        , ( "timeout", Gen.Maybe.make_.nothing )
+                                                        ]
+                                                    )
+                                            )
+                                        , Elm.Annotation.function
+                                            [ paramType ]
+                                            (Gen.Task.annotation_.task
+                                                Gen.Http.annotation_.error
+                                                successAnnotation
+                                            )
+                                        )
+                                    )
+                                    (body bodyContent)
+                                    (CliMonad.andThen
+                                        (\bp ->
+                                            toConfigParamAnnotation
+                                                { operation = operation
+                                                , requireToMsg = False
+                                                , successAnnotation = successAnnotation
+                                                , authorizationInfo = auth
+                                                , bodyParams = bp
+                                                }
+                                        )
+                                        (bodyParams bodyContent)
+                                    )
+                                    replacedUrl
+                            )
+                            authorizationInfo
+                            (typeToAnnotation successType)
 
                     authorizationInfo =
                         operationToAuthorizationInfo operation
@@ -644,34 +701,48 @@ toRequestFunction method url operation =
                         authorizationInfo
                             |> CliMonad.map
                                 (\{ scopes } ->
-                                    OpenApi.Operation.description operation
-                                        |> Maybe.withDefault ""
-                                        |> (\d ->
-                                                if List.isEmpty scopes then
-                                                    d
+                                    let
+                                        descriptionDoc : String
+                                        descriptionDoc =
+                                            OpenApi.Operation.description operation
+                                                |> Maybe.withDefault ""
+                                    in
+                                    if List.isEmpty scopes then
+                                        descriptionDoc
 
-                                                else
-                                                    ([ d
-                                                     , ""
-                                                     , "This operations requires the following scopes:"
-                                                     ]
-                                                        ++ List.map
-                                                            (\scope ->
-                                                                " - `" ++ scope ++ "`"
-                                                            )
-                                                            scopes
-                                                    )
-                                                        |> String.join "\n"
-                                           )
+                                    else
+                                        ([ descriptionDoc
+                                         , ""
+                                         , "This operations requires the following scopes:"
+                                         ]
+                                            ++ List.map
+                                                (\scope ->
+                                                    " - `" ++ scope ++ "`"
+                                                )
+                                                scopes
+                                        )
+                                            |> String.join "\n"
                                 )
                 in
                 operationToContentSchema operation
-                    |> CliMonad.andThen function
+                    |> CliMonad.andThen
+                        (\contentSchema ->
+                            CliMonad.map2
+                                Tuple.pair
+                                (requestCommand contentSchema)
+                                (requestTask contentSchema)
+                        )
                     |> CliMonad.map2
-                        (\doc fun ->
-                            fun
+                        (\doc ( ( requestCmd, requestCmdType ), ( requestTsk, requestTskType ) ) ->
+                            [ requestCmd
+                                |> Elm.withType requestCmdType
                                 |> Elm.declaration functionName
                                 |> Elm.withDocumentation doc
+                            , requestTsk
+                                |> Elm.withType requestTskType
+                                |> Elm.declaration (functionName ++ "Task")
+                                |> Elm.withDocumentation doc
+                            ]
                         )
                         documentation
             )
@@ -827,23 +898,33 @@ contentToContentSchema content =
             default Nothing
 
 
-toConfigParam : OpenApi.Operation.Operation -> Elm.Annotation.Annotation -> AuthorizationInfo -> List ( String, Elm.Annotation.Annotation ) -> CliMonad ( String, Maybe Elm.Annotation.Annotation )
-toConfigParam operation successType authorizationInfo bodyParams =
+toConfigParamAnnotation :
+    { operation : OpenApi.Operation.Operation
+    , requireToMsg : Bool
+    , successAnnotation : Elm.Annotation.Annotation
+    , authorizationInfo : AuthorizationInfo
+    , bodyParams : List ( String, Elm.Annotation.Annotation )
+    }
+    -> CliMonad Elm.Annotation.Annotation
+toConfigParamAnnotation { operation, requireToMsg, successAnnotation, authorizationInfo, bodyParams } =
     CliMonad.map
         (\urlParams ->
-            ( "config"
-            , (authorizationInfo.params
-                ++ ( "toMsg"
-                   , Elm.Annotation.function
-                        [ Gen.Result.annotation_.result Gen.Http.annotation_.error successType ]
-                        (Elm.Annotation.var "msg")
+            (authorizationInfo.params
+                ++ (if requireToMsg then
+                        [ ( "toMsg"
+                          , Elm.Annotation.function
+                                [ Gen.Result.annotation_.result Gen.Http.annotation_.error successAnnotation ]
+                                (Elm.Annotation.var "msg")
+                          )
+                        ]
+
+                    else
+                        []
                    )
-                :: bodyParams
+                ++ bodyParams
                 ++ urlParams
-              )
-                |> recordType
-                |> Just
             )
+                |> recordType
         )
         (operationToUrlParams operation)
 
@@ -932,16 +1013,30 @@ queryParameterToUrlBuilderArgument param =
                         paramBuilderHelper rest
                             |> CliMonad.map (\f config -> Gen.Maybe.map (f >> Gen.Url.Builder.call_.string name) (value config))
 
+                    [ "List", "String" ] ->
+                        CliMonad.succeed
+                            (\config ->
+                                Elm.ifThen (Gen.List.call_.isEmpty (value config))
+                                    Gen.Maybe.make_.nothing
+                                    (value config
+                                        |> Gen.String.call_.join (Elm.string ",")
+                                        |> Gen.Url.Builder.call_.string name
+                                        |> Gen.Maybe.make_.just
+                                    )
+                            )
+
                     "List" :: rest ->
                         paramBuilderHelper rest
                             |> CliMonad.map
                                 (\f config ->
-                                    Gen.Maybe.map
-                                        (f
-                                            >> Gen.String.call_.join (Elm.string ",")
-                                            >> Gen.Url.Builder.call_.string name
+                                    Elm.ifThen (Gen.List.call_.isEmpty (value config))
+                                        Gen.Maybe.make_.nothing
+                                        (value config
+                                            |> Gen.List.call_.map (Elm.functionReduced "fArg" f)
+                                            |> Gen.String.call_.join (Elm.string ",")
+                                            |> Gen.Url.Builder.call_.string name
+                                            |> Gen.Maybe.make_.just
                                         )
-                                        (value config)
                                 )
 
                     t ->
@@ -1003,8 +1098,8 @@ toConcreteParam param =
                     )
 
 
-operationToSuccessTypeAndExpect : OpenApi.Operation.Operation -> CliMonad ( Type, (Elm.Expression -> Elm.Expression) -> Elm.Expression )
-operationToSuccessTypeAndExpect operation =
+operationToSuccessTypeAndExpectAndResolver : OpenApi.Operation.Operation -> CliMonad ( Type, (Elm.Expression -> Elm.Expression) -> Elm.Expression, Elm.Expression )
+operationToSuccessTypeAndExpectAndResolver operation =
     let
         responses : Dict.Dict String (OpenApi.Reference.ReferenceOr OpenApi.Response.Response)
         responses =
@@ -1032,25 +1127,33 @@ operationToSuccessTypeAndExpect operation =
                                     case contentSchema of
                                         JsonContent type_ ->
                                             CliMonad.map
-                                                (\decoder -> ( type_, expectJson decoder ))
+                                                (\decoder ->
+                                                    ( type_
+                                                    , expectJson decoder
+                                                    , jsonResolver.call decoder
+                                                    )
+                                                )
                                                 (typeToDecoder type_)
 
                                         StringContent _ ->
                                             CliMonad.succeed
                                                 ( String
                                                 , Gen.Http.expectString
+                                                , Gen.Http.stringResolver responseToResult.call
                                                 )
 
                                         BytesContent _ ->
                                             CliMonad.succeed
                                                 ( Bytes
                                                 , \toMsg -> Gen.Http.expectBytes toMsg Gen.Basics.values_.identity
+                                                , Gen.Http.bytesResolver responseToResult.call
                                                 )
 
                                         EmptyContent ->
                                             CliMonad.succeed
                                                 ( Unit
                                                 , Gen.Http.expectWhatever
+                                                , whateverResolver.call []
                                                 )
                                 )
 
@@ -1064,9 +1167,56 @@ operationToSuccessTypeAndExpect operation =
                                 (\((TypeName typeName) as st) ->
                                     ( Named st
                                     , expectJson <| Elm.val ("decode" ++ typeName)
+                                    , jsonResolver.call <| Elm.val ("decode" ++ typeName)
                                     )
                                 )
             )
+
+
+jsonResolver :
+    { declaration : Elm.Declaration
+    , call : Elm.Expression -> Elm.Expression
+    , callFrom : List String -> Elm.Expression -> Elm.Expression
+    }
+jsonResolver =
+    Elm.Declare.fn "jsonResolver"
+        ( "decoder"
+        , Just <| Gen.Json.Decode.annotation_.decoder (Elm.Annotation.var "t")
+        )
+    <|
+        \decoder ->
+            Gen.Http.stringResolver
+                (\response ->
+                    response
+                        |> responseToResult.call
+                        |> Gen.Result.andThen
+                            (\body ->
+                                body
+                                    |> Gen.Json.Decode.call_.decodeString decoder
+                                    |> Gen.Result.mapError (\err -> Gen.Http.make_.badBody (Gen.Json.Decode.errorToString err))
+                            )
+                )
+
+
+whateverResolver :
+    { declaration : Elm.Declaration
+    , call : List Elm.Expression -> Elm.Expression
+    , callFrom : List String -> List Elm.Expression -> Elm.Expression
+    }
+whateverResolver =
+    Elm.Declare.function "whateverResolver"
+        []
+    <|
+        \_ ->
+            Gen.Http.stringResolver
+                (\response ->
+                    response
+                        |> responseToResult.call
+                        |> Gen.Result.map
+                            (\_ -> Elm.unit)
+                )
+                |> Elm.withType
+                    (Gen.Http.annotation_.resolver Gen.Http.annotation_.error Elm.Annotation.unit)
 
 
 schemaTypeRef : String -> CliMonad TypeName
@@ -1343,6 +1493,51 @@ decodeOptionalField =
                             (Gen.Json.Decode.succeed Gen.Maybe.make_.nothing)
                     )
                 |> Elm.withType resultAnnotation
+
+
+responseToResult :
+    { declaration : Elm.Declaration
+    , call : Elm.Expression -> Elm.Expression
+    , callFrom : List String -> Elm.Expression -> Elm.Expression
+    }
+responseToResult =
+    Elm.Declare.fn "responseToResult"
+        ( "response"
+        , Just <|
+            Gen.Http.annotation_.response
+                (Elm.Annotation.var "body")
+        )
+    <|
+        \response ->
+            Elm.Case.custom
+                response
+                (Elm.Annotation.namedWith [ "Http" ] "Response" [ Elm.Annotation.var "body" ])
+                [ Elm.Case.branch1
+                    "BadUrl_"
+                    ( "string", Elm.Annotation.string )
+                    (\url -> Gen.Result.make_.err <| Gen.Http.make_.badUrl url)
+                , Elm.Case.branch0
+                    "Timeout_"
+                    (Gen.Result.make_.err Gen.Http.make_.timeout)
+                , Elm.Case.branch0
+                    "NetworkError_"
+                    (Gen.Result.make_.err Gen.Http.make_.networkError)
+                , Elm.Case.branch2
+                    "BadStatus_"
+                    ( "metadata", Elm.Annotation.namedWith [ "Http" ] "Metadata" [] )
+                    ( "_", Elm.Annotation.var "body" )
+                    (\metadata _ -> Gen.Result.make_.err <| Gen.Http.make_.badStatus (Elm.get "statusCode" metadata))
+                , Elm.Case.branch2
+                    "GoodStatus_"
+                    ( "_", Elm.Annotation.namedWith [ "Http" ] "Metadata" [] )
+                    ( "body", Elm.Annotation.var "body" )
+                    (\_ body -> Gen.Result.make_.ok body)
+                ]
+                |> Elm.withType
+                    (Gen.Result.annotation_.result
+                        Gen.Http.annotation_.error
+                        (Elm.Annotation.var "body")
+                    )
 
 
 responseToSchema : OpenApi.Response.Response -> CliMonad Json.Schema.Definitions.Schema

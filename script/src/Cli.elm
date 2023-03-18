@@ -31,6 +31,7 @@ import Gen.String
 import Gen.Task
 import Gen.Url.Builder
 import Json.Decode
+import Json.Encode
 import Json.Schema.Definitions
 import List.Extra
 import OpenApi
@@ -50,6 +51,7 @@ import Pages.Script
 import Path
 import Set
 import String.Extra
+import Yaml.Decode
 
 
 type alias CliOptions =
@@ -141,13 +143,37 @@ run =
 
 decodeOpenApiSpecOrFail : String -> BackendTask.BackendTask FatalError.FatalError OpenApi.OpenApi
 decodeOpenApiSpecOrFail =
-    Json.Decode.decodeString OpenApi.decode
+    Yaml.Decode.fromString yamlToJsonDecoder
         >> Result.mapError
-            (Json.Decode.errorToString
+            (Yaml.Decode.errorToString
                 >> Ansi.Color.fontColor Ansi.Color.brightRed
                 >> FatalError.fromString
             )
+        >> Result.andThen
+            (Json.Decode.decodeValue OpenApi.decode
+                >> Result.mapError
+                    (Json.Decode.errorToString
+                        >> Ansi.Color.fontColor Ansi.Color.brightRed
+                        >> FatalError.fromString
+                    )
+            )
         >> BackendTask.fromResult
+
+
+yamlToJsonDecoder : Yaml.Decode.Decoder Json.Encode.Value
+yamlToJsonDecoder =
+    Yaml.Decode.oneOf
+        [ Yaml.Decode.map Json.Encode.float Yaml.Decode.float
+        , Yaml.Decode.map Json.Encode.string Yaml.Decode.string
+        , Yaml.Decode.map Json.Encode.bool Yaml.Decode.bool
+        , Yaml.Decode.map (\_ -> Json.Encode.null) Yaml.Decode.null
+        , Yaml.Decode.map
+            (Json.Encode.list identity)
+            (Yaml.Decode.list (Yaml.Decode.lazy (\_ -> yamlToJsonDecoder)))
+        , Yaml.Decode.map
+            (Json.Encode.dict identity identity)
+            (Yaml.Decode.dict (Yaml.Decode.lazy (\_ -> yamlToJsonDecoder)))
+        ]
 
 
 generateFileFromOpenApiSpec :

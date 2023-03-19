@@ -201,7 +201,13 @@ oneOfDeclaration ( oneOfName, variants ) =
     in
     variants
         |> combineMap variantDeclaration
-        |> map (Elm.customType oneOfName)
+        |> map
+            (Elm.customType oneOfName
+                >> Elm.exposeWith
+                    { exposeConstructor = True
+                    , group = Just "Types"
+                    }
+            )
 
 
 combineMap : (a -> CliMonad b) -> List a -> CliMonad (List b)

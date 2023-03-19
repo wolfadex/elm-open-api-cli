@@ -1646,15 +1646,18 @@ schemaToType schema =
                             schemaToType s
                                 |> CliMonad.andThen
                                     (\t ->
-                                        case t of
-                                            Named n ->
-                                                CliMonad.succeed
-                                                    { name = typifyName n
+                                        t
+                                            |> CliMonad.typeToAnnotation
+                                            |> CliMonad.map
+                                                (\ann ->
+                                                    { name =
+                                                        ann
+                                                            |> Elm.ToString.annotation
+                                                            |> .signature
+                                                            |> typifyName
                                                     , type_ = t
                                                     }
-
-                                            _ ->
-                                                CliMonad.fail (Debug.toString t ++ " not supported as part of a `oneOf`.")
+                                                )
                                     )
                     in
                     CliMonad.combineMap extractSubSchema oneOf

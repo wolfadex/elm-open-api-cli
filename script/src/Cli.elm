@@ -7,7 +7,7 @@ import Cli.Option
 import Cli.OptionsParser
 import Cli.Program
 import CliMonad exposing (CliMonad)
-import Common exposing (TypeName(..), toValueName, typifyName)
+import Common exposing (Field, Type(..), TypeName, toValueName, typifyName)
 import Dict
 import Elm
 import Elm.Annotation
@@ -77,27 +77,6 @@ type alias AuthorizationInfo =
     { headers : Elm.Expression -> List Elm.Expression
     , params : List ( String, Elm.Annotation.Annotation )
     , scopes : List String
-    }
-
-
-type Type
-    = Nullable Type
-    | Object (Dict String Field)
-    | String
-    | Int
-    | Float
-    | Bool
-    | List Type
-    | Enum (List Type)
-    | Value
-    | Named TypeName
-    | Bytes
-    | Unit
-
-
-type alias Field =
-    { type_ : Type
-    , required : Bool
     }
 
 
@@ -402,7 +381,7 @@ schemaToDeclarations name schema =
         |> CliMonad.andThen
             (\ann ->
                 let
-                    (TypeName typeName) =
+                    typeName =
                         typifyName name
                 in
                 if (Elm.ToString.annotation ann).signature == typeName then
@@ -620,7 +599,7 @@ toRequestFunctions method url operation =
                                 CliMonad.succeed []
 
                             JsonContent type_ ->
-                                typeToAnnotation type_
+                                CliMonad.typeToAnnotation type_
                                     |> CliMonad.map (\annotation -> [ ( "body", annotation ) ])
 
                             StringContent _ ->
@@ -668,7 +647,7 @@ toRequestFunctions method url operation =
                                                     }
                                             )
                                             (bodyParams bodyContent)
-                                            (typeToAnnotation successType)
+                                            (CliMonad.typeToAnnotation successType)
                                         )
                                         replacedUrl
                                 )
@@ -717,7 +696,7 @@ toRequestFunctions method url operation =
                                     replacedUrl
                             )
                             authorizationInfo
-                            (typeToAnnotation successType)
+                            (CliMonad.typeToAnnotation successType)
 
                     authorizationInfo =
                         operationToAuthorizationInfo operation
@@ -950,7 +929,7 @@ toConfigParamAnnotation { operation, requireToMsg, successAnnotation, authorizat
                 ++ bodyParams
                 ++ urlParams
             )
-                |> recordType
+                |> CliMonad.recordType
         )
         (operationToUrlParams operation)
 
@@ -972,14 +951,7 @@ operationToUrlParams operation =
                         |> CliMonad.andThen paramToAnnotation
                 )
             |> CliMonad.map
-                (\types -> [ ( "params", recordType types ) ])
-
-
-recordType : List ( String, Elm.Annotation.Annotation ) -> Elm.Annotation.Annotation
-recordType fields =
-    fields
-        |> List.map (Tuple.mapFirst toValueName)
-        |> Elm.Annotation.record
+                (\types -> [ ( "params", CliMonad.recordType types ) ])
 
 
 queryParameterToUrlBuilderArgument : OpenApi.Parameter.Parameter -> CliMonad (Elm.Expression -> Elm.Expression)
@@ -1190,8 +1162,8 @@ operationToSuccessTypeAndExpectAndResolver operation =
                             |> CliMonad.map OpenApi.Reference.ref
                             |> CliMonad.andThen schemaTypeRef
                             |> CliMonad.map
-                                (\((TypeName typeName) as st) ->
-                                    ( Named st
+                                (\typeName ->
+                                    ( Named typeName
                                     , expectJson <| Elm.val ("decode" ++ typeName)
                                     , jsonResolver.call <| Elm.val ("decode" ++ typeName)
                                     )
@@ -1361,11 +1333,31 @@ typeToEncoder type_ =
         Value ->
             CliMonad.succeed <| Gen.Basics.values_.identity
 
-        Named (TypeName name) ->
+        Named name ->
             CliMonad.succeed <| Elm.val ("encode" ++ name)
 
-        Enum _ ->
-            CliMonad.todo "encoder for enum not implemented"
+        OneOf oneOfName oneOfData ->
+            oneOfData
+                |> CliMonad.combineMap
+                    (\variant ->
+                        CliMonad.map2
+                            (\ann variantEncoder ->
+                                Elm.Case.branch1 (oneOfName ++ "_" ++ variant.name)
+                                    ( "content", ann )
+                                    (\content -> Elm.apply variantEncoder [ content ])
+                            )
+                            (CliMonad.typeToAnnotation variant.type_)
+                            (typeToEncoder variant.type_)
+                    )
+                |> CliMonad.map
+                    (\branches ->
+                        Elm.functionReduced "rec"
+                            (\rec ->
+                                Elm.Case.custom rec
+                                    (Elm.Annotation.named [] oneOfName)
+                                    branches
+                            )
+                    )
 
         Bytes ->
             CliMonad.todo "encoder for bytes not implemented"
@@ -1459,11 +1451,25 @@ typeToDecoder type_ =
                 )
                 (typeToDecoder t)
 
-        Named (TypeName name) ->
+        Named name ->
             CliMonad.succeed (Elm.val ("decode" ++ name))
 
-        Enum _ ->
-            CliMonad.todo "Enum decoder not implemented yet"
+        OneOf oneOfName variants ->
+            variants
+                |> CliMonad.combineMap
+                    (\variant ->
+                        typeToDecoder variant.type_
+                            |> CliMonad.map
+                                (Gen.Json.Decode.call_.map
+                                    (Elm.val
+                                        (oneOfName ++ "_" ++ variant.name)
+                                    )
+                                )
+                    )
+                |> CliMonad.map
+                    (Gen.Json.Decode.oneOf
+                        >> Elm.withType (Elm.Annotation.named [] oneOfName)
+                    )
 
         Bytes ->
             CliMonad.todo "Bytes decoder not implemented yet"
@@ -1580,66 +1586,7 @@ responseToSchema response =
 
 schemaToAnnotation : Json.Schema.Definitions.Schema -> CliMonad Elm.Annotation.Annotation
 schemaToAnnotation schema =
-    schemaToType schema |> CliMonad.andThen typeToAnnotation
-
-
-typeToAnnotation : Type -> CliMonad Elm.Annotation.Annotation
-typeToAnnotation type_ =
-    case type_ of
-        Nullable t ->
-            typeToAnnotation t
-                |> CliMonad.map
-                    (\ann ->
-                        Elm.Annotation.namedWith []
-                            "Nullable"
-                            [ ann ]
-                    )
-
-        Object fields ->
-            FastDict.toList fields
-                |> CliMonad.combineMap (\( k, v ) -> CliMonad.map (Tuple.pair k) (fieldToAnnotation v))
-                |> CliMonad.map recordType
-
-        String ->
-            CliMonad.succeed Elm.Annotation.string
-
-        Int ->
-            CliMonad.succeed Elm.Annotation.int
-
-        Float ->
-            CliMonad.succeed Elm.Annotation.float
-
-        Bool ->
-            CliMonad.succeed Elm.Annotation.bool
-
-        List t ->
-            CliMonad.map Elm.Annotation.list (typeToAnnotation t)
-
-        Enum anyOf ->
-            anyOf
-                |> CliMonad.combineMap typeToAnnotation
-                |> CliMonad.enumAnnotation
-
-        Value ->
-            CliMonad.succeed Gen.Json.Encode.annotation_.value
-
-        Named (TypeName name) ->
-            CliMonad.succeed <| Elm.Annotation.named [] name
-
-        Bytes ->
-            CliMonad.succeed Gen.Bytes.annotation_.bytes
-
-        Unit ->
-            CliMonad.succeed Elm.Annotation.unit
-
-
-fieldToAnnotation : Field -> CliMonad Elm.Annotation.Annotation
-fieldToAnnotation { type_, required } =
-    if required then
-        typeToAnnotation type_
-
-    else
-        CliMonad.map Gen.Maybe.annotation_.maybe (typeToAnnotation type_)
+    schemaToType schema |> CliMonad.andThen CliMonad.typeToAnnotation
 
 
 schemaToType : Json.Schema.Definitions.Schema -> CliMonad Type
@@ -1685,11 +1632,40 @@ schemaToType schema =
                                 Json.Schema.Definitions.ItemDefinition itemSchema ->
                                     CliMonad.map List (schemaToType itemSchema)
 
-                enumAnnotation : List Json.Schema.Definitions.Schema -> CliMonad Type
-                enumAnnotation anyOf =
-                    anyOf
-                        |> CliMonad.combineMap schemaToType
-                        |> CliMonad.map Enum
+                anyOfToType : List Json.Schema.Definitions.Schema -> CliMonad Type
+                anyOfToType _ =
+                    CliMonad.succeed Value
+
+                oneOfToType : List Json.Schema.Definitions.Schema -> CliMonad Type
+                oneOfToType oneOf =
+                    let
+                        extractSubSchema : Json.Schema.Definitions.Schema -> CliMonad { name : String, type_ : Type }
+                        extractSubSchema s =
+                            schemaToType s
+                                |> CliMonad.andThen
+                                    (\t ->
+                                        case t of
+                                            Named n ->
+                                                CliMonad.succeed
+                                                    { name = typifyName n
+                                                    , type_ = t
+                                                    }
+
+                                            _ ->
+                                                CliMonad.fail (Debug.toString t ++ " not supported as part of a `oneOf`.")
+                                    )
+                    in
+                    CliMonad.combineMap extractSubSchema oneOf
+                        |> CliMonad.map
+                            (\variants ->
+                                let
+                                    oneOfName =
+                                        variants
+                                            |> List.map .name
+                                            |> String.join "Or"
+                                in
+                                OneOf oneOfName variants
+                            )
             in
             case subSchema.type_ of
                 Json.Schema.Definitions.SingleType singleType ->
@@ -1702,6 +1678,31 @@ schemaToType schema =
 
                         Nothing ->
                             case subSchema.anyOf of
+                                Just [ onlySchema ] ->
+                                    schemaToType onlySchema
+
+                                Just [ firstSchema, secondSchema ] ->
+                                    case ( firstSchema, secondSchema ) of
+                                        ( Json.Schema.Definitions.ObjectSchema firstSubSchema, Json.Schema.Definitions.ObjectSchema secondSubSchema ) ->
+                                            -- The first 2 cases here are for pseudo-nullable schemas where the higher level schema type is AnyOf
+                                            -- but it's actually made up of only 2 types and 1 of them is nullable. This acts as a hack of sorts to
+                                            -- mark a value as nullable in the schema.
+                                            case ( firstSubSchema.type_, secondSubSchema.type_ ) of
+                                                ( Json.Schema.Definitions.SingleType Json.Schema.Definitions.NullType, _ ) ->
+                                                    nullable (schemaToType secondSchema)
+
+                                                ( _, Json.Schema.Definitions.SingleType Json.Schema.Definitions.NullType ) ->
+                                                    nullable (schemaToType firstSchema)
+
+                                                _ ->
+                                                    anyOfToType [ firstSchema, secondSchema ]
+
+                                        _ ->
+                                            anyOfToType [ firstSchema, secondSchema ]
+
+                                Just anyOf ->
+                                    anyOfToType anyOf
+
                                 Nothing ->
                                     case subSchema.allOf of
                                         Just [ onlySchema ] ->
@@ -1716,34 +1717,18 @@ schemaToType schema =
                                             objectSchemaToType subSchema
 
                                         Nothing ->
-                                            CliMonad.succeed Value
+                                            case subSchema.oneOf of
+                                                Just [ onlySchema ] ->
+                                                    schemaToType onlySchema
 
-                                Just anyOf ->
-                                    case anyOf of
-                                        [ onlySchema ] ->
-                                            schemaToType onlySchema
+                                                Just [] ->
+                                                    CliMonad.succeed Value
 
-                                        [ firstSchema, secondSchema ] ->
-                                            case ( firstSchema, secondSchema ) of
-                                                ( Json.Schema.Definitions.ObjectSchema firstSubSchema, Json.Schema.Definitions.ObjectSchema secondSubSchema ) ->
-                                                    -- The first 2 cases here are for pseudo-nullable schemas where the higher level schema type is AnyOf
-                                                    -- but it's actually made up of only 2 types and 1 of them is nullable. This acts as a hack of sorts to
-                                                    -- mark a value as nullable in the schema.
-                                                    case ( firstSubSchema.type_, secondSubSchema.type_ ) of
-                                                        ( Json.Schema.Definitions.SingleType Json.Schema.Definitions.NullType, _ ) ->
-                                                            nullable (schemaToType secondSchema)
+                                                Just oneOfs ->
+                                                    oneOfToType oneOfs
 
-                                                        ( _, Json.Schema.Definitions.SingleType Json.Schema.Definitions.NullType ) ->
-                                                            nullable (schemaToType firstSchema)
-
-                                                        _ ->
-                                                            enumAnnotation anyOf
-
-                                                _ ->
-                                                    enumAnnotation anyOf
-
-                                        _ ->
-                                            enumAnnotation anyOf
+                                                Nothing ->
+                                                    CliMonad.succeed Value
 
                 Json.Schema.Definitions.NullableType singleType ->
                     nullable (singleTypeToType singleType)

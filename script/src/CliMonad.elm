@@ -1,12 +1,14 @@
-module CliMonad exposing (CliMonad, Warning, andThen, andThen2, combine, combineMap, enumAnnotation, errorToWarning, fail, fromApiSpec, map, map2, map3, run, succeed, todo, todoWithDefault, withPath, withWarning)
+module CliMonad exposing (CliMonad, Warning, andThen, andThen2, combine, combineMap, errorToWarning, fail, fromApiSpec, map, map2, map3, recordType, run, succeed, todo, todoWithDefault, typeToAnnotation, withPath, withWarning)
 
-import Common exposing (TypeName(..), intToWord, toValueName, typifyName)
+import Common exposing (Field, Object, OneOfData, Type(..), TypeName, toValueName)
 import Elm
 import Elm.Annotation
-import FastDict
+import FastDict exposing (Dict)
+import Gen.Bytes
 import Gen.Debug
+import Gen.Json.Encode
+import Gen.Maybe
 import OpenApi exposing (OpenApi)
-import Result.Extra
 
 
 type alias Message =
@@ -23,12 +25,21 @@ type alias Warning =
     String
 
 
-type alias FastSet k =
-    FastDict.Dict k ()
+type alias OneOfName =
+    TypeName
 
 
 type CliMonad a
-    = CliMonad ({ openApi : OpenApi, generateTodos : Bool } -> Result Message ( a, List Message, FastSet Int ))
+    = CliMonad
+        ({ openApi : OpenApi, generateTodos : Bool }
+         ->
+            Result
+                Message
+                ( a
+                , List Message
+                , Dict OneOfName OneOfData
+                )
+        )
 
 
 withPath : String -> CliMonad a -> CliMonad a
@@ -144,53 +155,53 @@ run input (CliMonad x) =
         Err message ->
             Err <| messageToString message
 
-        Ok ( decls, warnings, enums ) ->
-            case helperDeclarations enums of
+        Ok ( decls, warnings, oneOfs ) ->
+            let
+                (CliMonad h) =
+                    oneOfDeclarations oneOfs |> withPath "While generating `oneOf`s"
+            in
+            case h input of
                 Err message ->
-                    messageToString
-                        { message = message
-                        , path = [ "While generating enums" ]
-                        }
+                    messageToString message
                         |> Err
 
-                Ok enumDecls ->
+                Ok ( enumDecls, enumWarnings, _ ) ->
                     Ok
                         ( decls ++ enumDecls
-                        , List.reverse warnings |> List.map messageToString
+                        , (enumWarnings ++ warnings)
+                            |> List.reverse
+                            |> List.map messageToString
                         )
 
 
-helperDeclarations : FastSet Int -> Result String (List Elm.Declaration)
-helperDeclarations enums =
-    Result.Extra.combineMap
-        enumDeclaration
-        (FastDict.keys enums)
+oneOfDeclarations :
+    Dict OneOfName OneOfData
+    -> CliMonad (List Elm.Declaration)
+oneOfDeclarations enums =
+    combineMap
+        oneOfDeclaration
+        (FastDict.toList enums)
 
 
-enumDeclaration : Int -> Result String Elm.Declaration
-enumDeclaration i =
-    intToWord i
-        |> Result.andThen
-            (\iWord ->
-                let
-                    (TypeName typeName) =
-                        typifyName ("enum_" ++ iWord)
-
-                    variantDeclaration j =
-                        Result.map
-                            (\jWord ->
-                                let
-                                    (TypeName variantName) =
-                                        typifyName ("enum_" ++ iWord ++ "_" ++ jWord)
-                                in
-                                Elm.variantWith variantName [ Elm.Annotation.var (toValueName jWord) ]
-                            )
-                            (intToWord j)
-                in
-                List.range 1 i
-                    |> Result.Extra.combineMap variantDeclaration
-                    |> Result.map (Elm.customType typeName)
-            )
+oneOfDeclaration :
+    ( OneOfName, OneOfData )
+    -> CliMonad Elm.Declaration
+oneOfDeclaration ( oneOfName, variants ) =
+    let
+        variantDeclaration { name, type_ } =
+            typeToAnnotation type_
+                |> map
+                    (\variantAnnotation ->
+                        let
+                            variantName =
+                                oneOfName ++ "_" ++ name
+                        in
+                        Elm.variantWith variantName [ variantAnnotation ]
+                    )
+    in
+    variants
+        |> combineMap variantDeclaration
+        |> map (Elm.customType oneOfName)
 
 
 combineMap : (a -> CliMonad b) -> List a -> CliMonad (List b)
@@ -206,19 +217,6 @@ combine =
 fromApiSpec : (OpenApi -> a) -> CliMonad a
 fromApiSpec f =
     CliMonad (\input -> Ok ( f input.openApi, [], FastDict.empty ))
-
-
-fromResult : Result String a -> CliMonad a
-fromResult res =
-    CliMonad
-        (\_ ->
-            case res of
-                Err message ->
-                    Err { path = [], message = message }
-
-                Ok r ->
-                    Ok ( r, [], FastDict.empty )
-        )
 
 
 errorToWarning : CliMonad a -> CliMonad (Maybe a)
@@ -243,24 +241,82 @@ messageToString { path, message } =
         "Error! " ++ message ++ "\n  Path: " ++ String.join " -> " path
 
 
-enumAnnotation : CliMonad (List Elm.Annotation.Annotation) -> CliMonad Elm.Annotation.Annotation
-enumAnnotation annotations =
-    annotations
-        |> andThen
-            (\anns ->
-                map2
-                    (\intWord _ ->
-                        let
-                            (TypeName typeName) =
-                                typifyName ("enum_" ++ intWord)
-                        in
-                        Elm.Annotation.namedWith [] typeName anns
+objectToAnnotation : Object -> CliMonad Elm.Annotation.Annotation
+objectToAnnotation fields =
+    FastDict.toList fields
+        |> combineMap (\( k, v ) -> map (Tuple.pair k) (fieldToAnnotation v))
+        |> map recordType
+
+
+fieldToAnnotation : Field -> CliMonad Elm.Annotation.Annotation
+fieldToAnnotation { type_, required } =
+    if required then
+        typeToAnnotation type_
+
+    else
+        map Gen.Maybe.annotation_.maybe (typeToAnnotation type_)
+
+
+recordType : List ( String, Elm.Annotation.Annotation ) -> Elm.Annotation.Annotation
+recordType fields =
+    fields
+        |> List.map (Tuple.mapFirst toValueName)
+        |> Elm.Annotation.record
+
+
+typeToAnnotation : Type -> CliMonad Elm.Annotation.Annotation
+typeToAnnotation type_ =
+    case type_ of
+        Nullable t ->
+            typeToAnnotation t
+                |> map
+                    (\ann ->
+                        Elm.Annotation.namedWith []
+                            "Nullable"
+                            [ ann ]
                     )
-                    (fromResult <| intToWord (List.length anns))
-                    (requiresEnum (List.length anns))
-            )
+
+        Object fields ->
+            objectToAnnotation fields
+
+        String ->
+            succeed Elm.Annotation.string
+
+        Int ->
+            succeed Elm.Annotation.int
+
+        Float ->
+            succeed Elm.Annotation.float
+
+        Bool ->
+            succeed Elm.Annotation.bool
+
+        List t ->
+            map Elm.Annotation.list (typeToAnnotation t)
+
+        OneOf oneOfName oneOfData ->
+            oneOfAnnotation oneOfName oneOfData
+
+        Value ->
+            succeed Gen.Json.Encode.annotation_.value
+
+        Named name ->
+            succeed <| Elm.Annotation.named [] name
+
+        Bytes ->
+            succeed Gen.Bytes.annotation_.bytes
+
+        Unit ->
+            succeed Elm.Annotation.unit
 
 
-requiresEnum : Int -> CliMonad ()
-requiresEnum size =
-    CliMonad (\_ -> Ok ( (), [], FastDict.singleton size () ))
+oneOfAnnotation : TypeName -> OneOfData -> CliMonad Elm.Annotation.Annotation
+oneOfAnnotation oneOfName oneOfData =
+    CliMonad
+        (\_ ->
+            Ok
+                ( Elm.Annotation.named [] oneOfName
+                , []
+                , FastDict.singleton oneOfName oneOfData
+                )
+        )

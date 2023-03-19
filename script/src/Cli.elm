@@ -121,22 +121,24 @@ run =
 
 
 decodeOpenApiSpecOrFail : String -> BackendTask.BackendTask FatalError.FatalError OpenApi.OpenApi
-decodeOpenApiSpecOrFail =
-    Yaml.Decode.fromString yamlToJsonDecoder
-        >> Result.mapError
-            (Yaml.Decode.errorToString
+decodeOpenApiSpecOrFail input =
+    let
+        decoded : Result Json.Decode.Error OpenApi.OpenApi
+        decoded =
+            case Yaml.Decode.fromString yamlToJsonDecoder input of
+                Err _ ->
+                    Json.Decode.decodeString OpenApi.decode input
+
+                Ok jsonFromYaml ->
+                    Json.Decode.decodeValue OpenApi.decode jsonFromYaml
+    in
+    decoded
+        |> Result.mapError
+            (Json.Decode.errorToString
                 >> Ansi.Color.fontColor Ansi.Color.brightRed
                 >> FatalError.fromString
             )
-        >> Result.andThen
-            (Json.Decode.decodeValue OpenApi.decode
-                >> Result.mapError
-                    (Json.Decode.errorToString
-                        >> Ansi.Color.fontColor Ansi.Color.brightRed
-                        >> FatalError.fromString
-                    )
-            )
-        >> BackendTask.fromResult
+        |> BackendTask.fromResult
 
 
 yamlToJsonDecoder : Yaml.Decode.Decoder Json.Encode.Value

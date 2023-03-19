@@ -1438,9 +1438,9 @@ typeToDecoder type_ =
             CliMonad.map
                 (\decoder ->
                     Gen.Json.Decode.oneOf
-                        [ Elm.apply
-                            Gen.Json.Decode.values_.map
-                            [ Elm.val "Present", decoder ]
+                        [ Gen.Json.Decode.call_.map
+                            (Elm.val "Present")
+                            decoder
                         , Gen.Json.Decode.null (Elm.val "Null")
                         ]
                 )

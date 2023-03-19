@@ -1514,8 +1514,12 @@ decodeOptionalField =
                 |> Gen.Json.Decode.andThen
                     (\hasField ->
                         Elm.ifThen hasField
-                            (Gen.Json.Decode.map Gen.Maybe.make_.just
-                                (Gen.Json.Decode.call_.field key fieldDecoder)
+                            (Gen.Json.Decode.call_.field key
+                                (Gen.Json.Decode.oneOf
+                                    [ Gen.Json.Decode.map Gen.Maybe.make_.just fieldDecoder
+                                    , Gen.Json.Decode.null Gen.Maybe.make_.nothing
+                                    ]
+                                )
                             )
                             (Gen.Json.Decode.succeed Gen.Maybe.make_.nothing)
                     )

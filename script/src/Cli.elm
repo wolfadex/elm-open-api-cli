@@ -411,7 +411,7 @@ schemaToDeclarations name schema =
                     , CliMonad.map
                         (\encoder ->
                             Elm.declaration ("encode" ++ typeName)
-                                (encoder
+                                (Elm.functionReduced "rec" encoder
                                     |> Elm.withType (Elm.Annotation.function [ Elm.Annotation.named [] typeName ] Gen.Json.Encode.annotation_.value)
                                 )
                                 |> Elm.exposeWith
@@ -581,7 +581,7 @@ toRequestFunctions method url operation =
                                     |> CliMonad.map
                                         (\encoder config ->
                                             Gen.Http.jsonBody
-                                                (Elm.apply encoder [ Elm.get "body" config ])
+                                                (encoder <| Elm.get "body" config)
                                         )
 
                             StringContent mime ->
@@ -1252,25 +1252,25 @@ nullableType =
             }
 
 
-schemaToEncoder : Json.Schema.Definitions.Schema -> CliMonad Elm.Expression
+schemaToEncoder : Json.Schema.Definitions.Schema -> CliMonad (Elm.Expression -> Elm.Expression)
 schemaToEncoder schema =
     schemaToType schema |> CliMonad.andThen typeToEncoder
 
 
-typeToEncoder : Type -> CliMonad Elm.Expression
+typeToEncoder : Type -> CliMonad (Elm.Expression -> Elm.Expression)
 typeToEncoder type_ =
     case type_ of
         String ->
-            CliMonad.succeed Gen.Json.Encode.values_.string
+            CliMonad.succeed Gen.Json.Encode.call_.string
 
         Int ->
-            CliMonad.succeed Gen.Json.Encode.values_.int
+            CliMonad.succeed Gen.Json.Encode.call_.int
 
         Float ->
-            CliMonad.succeed Gen.Json.Encode.values_.float
+            CliMonad.succeed Gen.Json.Encode.call_.float
 
         Bool ->
-            CliMonad.succeed Gen.Json.Encode.values_.bool
+            CliMonad.succeed Gen.Json.Encode.call_.bool
 
         Object properties ->
             properties
@@ -1289,7 +1289,7 @@ typeToEncoder type_ =
                                         toTuple value =
                                             Elm.tuple
                                                 (Elm.string key)
-                                                (Elm.apply encoder [ value ])
+                                                (encoder value)
                                     in
                                     if field.required then
                                         Gen.Maybe.make_.just (toTuple fieldExpr)
@@ -1300,43 +1300,38 @@ typeToEncoder type_ =
                     )
                 |> CliMonad.map
                     (\toProperties ->
-                        Elm.fn ( "rec", Nothing )
-                            (\rec ->
-                                Gen.Json.Encode.call_.object <|
-                                    Gen.List.filterMap Gen.Basics.identity
-                                        (List.map (\prop -> prop rec) toProperties)
-                            )
+                        \value ->
+                            Gen.Json.Encode.call_.object <|
+                                Gen.List.filterMap Gen.Basics.identity
+                                    (List.map (\prop -> prop value) toProperties)
                     )
 
         List t ->
             typeToEncoder t
                 |> CliMonad.map
                     (\encoder ->
-                        Elm.apply Gen.Json.Encode.values_.list [ encoder ]
+                        Gen.Json.Encode.call_.list (Elm.functionReduced "rec" encoder)
                     )
 
         Nullable t ->
             typeToEncoder t
                 |> CliMonad.map
-                    (\encoder ->
-                        Elm.fn ( "nullableValue", Nothing )
-                            (\nullableValue ->
-                                Elm.Case.custom
-                                    nullableValue
-                                    (Elm.Annotation.namedWith [] "Nullable" [ Elm.Annotation.var "value" ])
-                                    [ Elm.Case.branch0 "Null" Gen.Json.Encode.null
-                                    , Elm.Case.branch1 "Present"
-                                        ( "value", Elm.Annotation.var "value" )
-                                        (\value -> Elm.apply encoder [ value ])
-                                    ]
-                            )
+                    (\encoder nullableValue ->
+                        Elm.Case.custom
+                            nullableValue
+                            (Elm.Annotation.namedWith [] "Nullable" [ Elm.Annotation.var "value" ])
+                            [ Elm.Case.branch0 "Null" Gen.Json.Encode.null
+                            , Elm.Case.branch1 "Present"
+                                ( "value", Elm.Annotation.var "value" )
+                                encoder
+                            ]
                     )
 
         Value ->
-            CliMonad.succeed <| Gen.Basics.values_.identity
+            CliMonad.succeed <| Gen.Basics.identity
 
         Named name ->
-            CliMonad.succeed <| Elm.val ("encode" ++ name)
+            CliMonad.succeed <| \rec -> Elm.apply (Elm.val ("encode" ++ name)) [ rec ]
 
         OneOf oneOfName oneOfData ->
             oneOfData
@@ -1346,26 +1341,24 @@ typeToEncoder type_ =
                             (\ann variantEncoder ->
                                 Elm.Case.branch1 (oneOfName ++ "_" ++ variant.name)
                                     ( "content", ann )
-                                    (\content -> Elm.apply variantEncoder [ content ])
+                                    variantEncoder
                             )
                             (CliMonad.typeToAnnotation variant.type_)
                             (typeToEncoder variant.type_)
                     )
                 |> CliMonad.map
-                    (\branches ->
-                        Elm.functionReduced "rec"
-                            (\rec ->
-                                Elm.Case.custom rec
-                                    (Elm.Annotation.named [] oneOfName)
-                                    branches
-                            )
+                    (\branches rec ->
+                        Elm.Case.custom rec
+                            (Elm.Annotation.named [] oneOfName)
+                            branches
                     )
 
         Bytes ->
             CliMonad.todo "encoder for bytes not implemented"
+                |> CliMonad.map (\encoder _ -> encoder)
 
         Unit ->
-            CliMonad.succeed Gen.Json.Encode.null
+            CliMonad.succeed (\_ -> Gen.Json.Encode.null)
 
 
 schemaToDecoder : Json.Schema.Definitions.Schema -> CliMonad Elm.Expression

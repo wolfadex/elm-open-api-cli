@@ -1,20 +1,15 @@
-# This defines a function taking `pkgs` as parameter, and uses
-# `nixpkgs` by default if no argument is passed to it.
-{ pkgs ? import <nixpkgs> { } }:
+let
+    tb = builtins.fetchTarball https://github.com/NixOS/nixpkgs/archive/refs/tags/22.11.tar.gz;
+    pkgs = import tb {};
 
-# This avoids typing `pkgs.` before each package name.
-with pkgs;
-
-# Defines a shell.
-mkShell {
-  # Sets the build inputs, i.e. what will be available in our
-  # local environment.
-  buildInputs = [
-    elmPackages.elm
-    elmPackages.elm-format
-    elmPackages.elm-test-rs
-    elmPackages.elm-review
-    nodejs-18_x
-    git
-  ];
-}
+    shell = pkgs.mkShell {
+        buildInputs = [
+            pkgs.elmPackages.elm
+            pkgs.elmPackages.elm-format
+            pkgs.elmPackages.elm-test-rs
+            pkgs.elmPackages.elm-review
+            pkgs.nodejs-18_x
+            pkgs.git
+        ];
+    };
+in shell

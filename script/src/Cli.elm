@@ -34,6 +34,7 @@ import Json.Decode
 import Json.Encode
 import Json.Schema.Definitions
 import List.Extra
+import Maybe.Extra
 import OpenApi
 import OpenApi.Components
 import OpenApi.Info
@@ -1638,7 +1639,7 @@ schemaToType schema =
                 oneOfToType : List Json.Schema.Definitions.Schema -> CliMonad Type
                 oneOfToType oneOf =
                     let
-                        extractSubSchema : Json.Schema.Definitions.Schema -> CliMonad { name : String, type_ : Type }
+                        extractSubSchema : Json.Schema.Definitions.Schema -> CliMonad (Maybe { name : String, type_ : Type })
                         extractSubSchema s =
                             schemaToType s
                                 |> CliMonad.andThen
@@ -1647,26 +1648,39 @@ schemaToType schema =
                                             |> CliMonad.typeToAnnotation
                                             |> CliMonad.map
                                                 (\ann ->
-                                                    { name =
-                                                        ann
-                                                            |> Elm.ToString.annotation
-                                                            |> .signature
-                                                            |> typifyName
-                                                    , type_ = t
-                                                    }
+                                                    let
+                                                        rawName : TypeName
+                                                        rawName =
+                                                            ann
+                                                                |> Elm.ToString.annotation
+                                                                |> .signature
+                                                                |> typifyName
+                                                    in
+                                                    if String.contains "{" rawName then
+                                                        Nothing
+
+                                                    else
+                                                        Just
+                                                            { name = rawName
+                                                            , type_ = t
+                                                            }
                                                 )
                                     )
                     in
                     CliMonad.combineMap extractSubSchema oneOf
                         |> CliMonad.map
-                            (\variants ->
-                                let
-                                    oneOfName =
-                                        variants
-                                            |> List.map .name
-                                            |> String.join "Or"
-                                in
-                                OneOf oneOfName variants
+                            (\maybeVariants ->
+                                case Maybe.Extra.combine maybeVariants of
+                                    Nothing ->
+                                        Value
+
+                                    Just variants ->
+                                        let
+                                            names : List String
+                                            names =
+                                                List.map .name variants
+                                        in
+                                        OneOf (String.join "Or" names) variants
                             )
             in
             case subSchema.type_ of

@@ -1274,8 +1274,15 @@ typeToEncoder type_ =
             CliMonad.succeed Gen.Json.Encode.call_.bool
 
         Object properties ->
-            properties
-                |> FastDict.toList
+            let
+                propertiesList =
+                    properties
+                        |> FastDict.toList
+
+                allRequired =
+                    List.all (\( _, { required } ) -> required) propertiesList
+            in
+            propertiesList
                 |> CliMonad.combineMap
                     (\( key, field ) ->
                         typeToEncoder field.type_
@@ -1292,7 +1299,10 @@ typeToEncoder type_ =
                                                 (Elm.string key)
                                                 (encoder value)
                                     in
-                                    if field.required then
+                                    if allRequired then
+                                        toTuple fieldExpr
+
+                                    else if field.required then
                                         Gen.Maybe.make_.just (toTuple fieldExpr)
 
                                     else
@@ -1300,11 +1310,15 @@ typeToEncoder type_ =
                                 )
                     )
                 |> CliMonad.map
-                    (\toProperties ->
-                        \value ->
+                    (\toProperties value ->
+                        if allRequired then
+                            Gen.Json.Encode.object <|
+                                List.map (\prop -> prop value) toProperties
+
+                        else
                             Gen.Json.Encode.call_.object <|
-                                Gen.List.filterMap Gen.Basics.identity
-                                    (List.map (\prop -> prop value) toProperties)
+                                Gen.List.filterMap Gen.Basics.identity <|
+                                    List.map (\prop -> prop value) toProperties
                     )
 
         List t ->

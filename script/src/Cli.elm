@@ -49,9 +49,9 @@ import OpenApi.Schema
 import OpenApi.SecurityRequirement
 import OpenApi.Server
 import Pages.Script
-import Path
 import Set
 import String.Extra
+import UrlPath
 import Yaml.Decode
 
 
@@ -276,8 +276,8 @@ generateFileFromOpenApiSpec { outputFile, namespace, generateTodos } apiSpec =
                     outputPath =
                         Maybe.withDefault
                             ([ "generated", path ]
-                                |> Path.join
-                                |> Path.toRelative
+                                |> UrlPath.join
+                                |> UrlPath.toRelative
                             )
                             outputFile
                 in
@@ -1178,6 +1178,7 @@ jsonResolver :
     { declaration : Elm.Declaration
     , call : Elm.Expression -> Elm.Expression
     , callFrom : List String -> Elm.Expression -> Elm.Expression
+    , value : List String -> Elm.Expression
     }
 jsonResolver =
     Elm.Declare.fn "jsonResolver"
@@ -1203,6 +1204,7 @@ whateverResolver :
     { declaration : Elm.Declaration
     , call : List Elm.Expression -> Elm.Expression
     , callFrom : List String -> List Elm.Expression -> Elm.Expression
+    , value : List String -> Elm.Expression
     }
 whateverResolver =
     Elm.Declare.function "whateverResolver"
@@ -1501,6 +1503,7 @@ decodeOptionalField :
     { declaration : Elm.Declaration
     , call : Elm.Expression -> Elm.Expression -> Elm.Expression
     , callFrom : List String -> Elm.Expression -> Elm.Expression -> Elm.Expression
+    , value : List String -> Elm.Expression
     }
 decodeOptionalField =
     let
@@ -1545,6 +1548,7 @@ responseToResult :
     { declaration : Elm.Declaration
     , call : Elm.Expression -> Elm.Expression
     , callFrom : List String -> Elm.Expression -> Elm.Expression
+    , value : List String -> Elm.Expression
     }
 responseToResult =
     Elm.Declare.fn "responseToResult"

@@ -1,11 +1,10 @@
-# Elm Nix Template
+# Elm API SDK Generator
 
-A very basic template for an [Elm](https://elm-lang.org/) project, using [Nix](https://nixos.org/) and [direnv](https://direnv.net/).
+Generate an Elm SDK from an OpenAPI spec.
 
 ## Getting Started
 
-- Make sure you have both Nix and direnv installed
-- Clone this repo, or use the GitHub `Use this template` button
+- Clone this repo
 - Inside your cloned repo, run `direnv allow`
 - Start coding in `./script/src/Cli.elm`!
 - Run `npm run dev <path to oas spec>.json`

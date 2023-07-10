@@ -1235,11 +1235,16 @@ schemaTypeRef refUri =
             CliMonad.fail <| "Couldn't get the type ref (" ++ refUri ++ ") for the response"
 
 
+isSuccessResponseStatus : String -> Bool
+isSuccessResponseStatus status =
+    String.startsWith "2" status || String.startsWith "3" status
+
+
 getFirstSuccessResponse : Dict.Dict String (OpenApi.Reference.ReferenceOr OpenApi.Response.Response) -> Maybe ( String, OpenApi.Reference.ReferenceOr OpenApi.Response.Response )
 getFirstSuccessResponse responses =
     responses
         |> Dict.toList
-        |> List.filter (\( statusCode, _ ) -> String.startsWith "2" statusCode)
+        |> List.filter (Tuple.first >> isSuccessResponseStatus)
         |> List.head
 
 

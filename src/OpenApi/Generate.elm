@@ -897,6 +897,32 @@ paramToString type_ =
                 |> CliMonad.andThen schemaToType
                 |> CliMonad.andThen paramToString
 
+        OneOf name data ->
+            CliMonad.map2
+                (\valType branches ->
+                    { toString =
+                        \val -> Elm.Case.custom val valType branches
+                    , alwaysJust = True
+                    }
+                )
+                (CliMonad.typeToAnnotation type_)
+                (CliMonad.combineMap
+                    (\alternative ->
+                        CliMonad.andThen2
+                            (\{ toString, alwaysJust } annotation ->
+                                if not alwaysJust then
+                                    CliMonad.fail "Nullable alternative"
+
+                                else
+                                    Elm.Case.branch1 (name ++ "_" ++ alternative.name) ( "alternative", annotation ) toString
+                                        |> CliMonad.succeed
+                            )
+                            (paramToString alternative.type_)
+                            (CliMonad.typeToAnnotation alternative.type_)
+                    )
+                    data
+                )
+
         _ ->
             CliMonad.typeToAnnotation type_
                 |> CliMonad.andThen

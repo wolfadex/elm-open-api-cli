@@ -1,4 +1,4 @@
-module CliMonad exposing (CliMonad, Warning, andThen, andThen2, combine, combineMap, errorToWarning, fail, fromApiSpec, map, map2, map3, recordType, run, succeed, todo, todoWithDefault, typeToAnnotation, typeToAnnotationMaybe, withPath, withWarning)
+module CliMonad exposing (CliMonad, Warning, andThen, andThen2, combine, combineMap, errorToWarning, fail, fromApiSpec, map, map2, map3, recordType, refToTypeName, run, stepOrFail, succeed, todo, todoWithDefault, typeToAnnotation, typeToAnnotationMaybe, withPath, withWarning)
 
 import Common exposing (Field, Object, OneOfData, Type(..), TypeName, VariantName, toValueName)
 import Elm
@@ -317,14 +317,18 @@ typeToAnnotation type_ =
         Value ->
             succeed Gen.Json.Encode.annotation_.value
 
-        Named name ->
-            succeed <| Elm.Annotation.named [] name
+        Ref ref ->
+            map (Elm.Annotation.named []) (refToTypeName ref)
 
         Bytes ->
             succeed Gen.Bytes.annotation_.bytes
 
         Unit ->
             succeed Elm.Annotation.unit
+
+
+
+--String.split "/"
 
 
 typeToAnnotationMaybe : Type -> CliMonad Elm.Annotation.Annotation
@@ -357,8 +361,8 @@ typeToAnnotationMaybe type_ =
         Value ->
             succeed Gen.Json.Encode.annotation_.value
 
-        Named name ->
-            succeed <| Elm.Annotation.named [] name
+        Ref ref ->
+            map (Elm.Annotation.named []) (refToTypeName ref)
 
         Bytes ->
             succeed Gen.Bytes.annotation_.bytes
@@ -377,3 +381,29 @@ oneOfAnnotation oneOfName oneOfData =
                 , FastDict.singleton oneOfName oneOfData
                 )
         )
+
+
+stepOrFail : String -> (a -> Maybe value) -> CliMonad a -> CliMonad value
+stepOrFail msg f =
+    andThen
+        (\y ->
+            case f y of
+                Just z ->
+                    succeed z
+
+                Nothing ->
+                    fail msg
+        )
+
+
+refToTypeName : List String -> CliMonad TypeName
+refToTypeName ref =
+    case ref of
+        [ "#", "components", "schemas", schemaName ] ->
+            succeed (Common.typifyName schemaName)
+
+        [ "#", "components", "responses", responseName ] ->
+            succeed (Common.typifyName responseName)
+
+        _ ->
+            fail <| "Couldn't get the type ref (" ++ String.join "/" ref ++ ") for the response"

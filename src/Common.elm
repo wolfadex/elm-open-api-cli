@@ -1,4 +1,4 @@
-module Common exposing (Field, FieldName, Object, OneOfData, Type(..), TypeName, VariantName, toValueName, typifyName)
+module Common exposing (Field, FieldName, Object, OneOfData, Type(..), TypeName, VariantName, ref, toValueName, typifyName)
 
 import FastDict exposing (Dict)
 import String.Extra
@@ -65,7 +65,7 @@ type Type
     | List Type
     | OneOf TypeName OneOfData
     | Value
-    | Named TypeName
+    | Ref (List String)
     | Bytes
     | Unit
 
@@ -97,3 +97,8 @@ type alias Field =
     { type_ : Type
     , required : Bool
     }
+
+
+ref : String -> Type
+ref str =
+    Ref (String.split "/" str)

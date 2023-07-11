@@ -9,7 +9,7 @@ import Elm.Case
 import Elm.Declare
 import Elm.Op
 import Elm.ToString
-import FastDict exposing (Dict)
+import FastDict
 import Gen.Basics
 import Gen.Bytes
 import Gen.Debug
@@ -24,7 +24,6 @@ import Gen.String
 import Gen.Task
 import Gen.Url.Builder
 import Json.Schema.Definitions
-import Maybe.Extra
 import OpenApi
 import OpenApi.Components
 import OpenApi.MediaType
@@ -37,7 +36,7 @@ import OpenApi.Response
 import OpenApi.Schema
 import OpenApi.SecurityRequirement
 import OpenApi.Server
-import Set exposing (Set)
+import SchemaUtils exposing (getAlias, schemaToAnnotation, schemaToType)
 import String.Extra
 
 
@@ -259,19 +258,6 @@ responseToDeclarations name reference =
                 |> CliMonad.withPath name
 
 
-stepOrFail : String -> (a -> Maybe value) -> CliMonad a -> CliMonad value
-stepOrFail msg f =
-    CliMonad.andThen
-        (\y ->
-            case f y of
-                Just z ->
-                    CliMonad.succeed z
-
-                Nothing ->
-                    CliMonad.fail msg
-        )
-
-
 toRequestFunctions : String -> String -> OpenApi.Operation.Operation -> CliMonad (List Elm.Declaration)
 toRequestFunctions method url operation =
     operationToSuccessTypeAndExpectAndResolver operation
@@ -300,32 +286,36 @@ toRequestFunctions method url operation =
                                     toConcreteParam param
                                         |> CliMonad.andThen
                                             (\concreteParam ->
-                                                case OpenApi.Parameter.in_ concreteParam of
-                                                    "path" ->
-                                                        if OpenApi.Parameter.required concreteParam then
-                                                            let
-                                                                pname : String
-                                                                pname =
-                                                                    OpenApi.Parameter.name concreteParam
-                                                            in
-                                                            ( Just
-                                                                (\config ->
-                                                                    Gen.String.call_.replace
-                                                                        (Elm.string <| "{" ++ pname ++ "}")
-                                                                        (Elm.get (toValueName pname) (Elm.get "params" config))
-                                                                )
-                                                            , []
-                                                            )
-                                                                |> CliMonad.succeed
+                                                paramToType concreteParam
+                                                    |> CliMonad.andThen
+                                                        (\( paramName, type_ ) ->
+                                                            paramToString type_
+                                                                |> CliMonad.andThen
+                                                                    (\{ toString, alwaysJust } ->
+                                                                        case OpenApi.Parameter.in_ concreteParam of
+                                                                            "path" ->
+                                                                                if OpenApi.Parameter.required concreteParam && alwaysJust then
+                                                                                    ( Just
+                                                                                        (\config ->
+                                                                                            Elm.get (toValueName paramName) (Elm.get "params" config)
+                                                                                                |> toString
+                                                                                                |> Gen.String.call_.replace
+                                                                                                    (Elm.string <| "{" ++ paramName ++ "}")
+                                                                                        )
+                                                                                    , []
+                                                                                    )
+                                                                                        |> CliMonad.succeed
 
-                                                        else
-                                                            CliMonad.fail "Optional parameters in path"
+                                                                                else
+                                                                                    CliMonad.fail "Optional parameters in path"
 
-                                                    "query" ->
-                                                        CliMonad.succeed ( Nothing, [ concreteParam ] )
+                                                                            "query" ->
+                                                                                CliMonad.succeed ( Nothing, [ concreteParam ] )
 
-                                                    paramIn ->
-                                                        CliMonad.todoWithDefault ( Nothing, [] ) <| "Parameters in \"" ++ paramIn ++ "\""
+                                                                            paramIn ->
+                                                                                CliMonad.todoWithDefault ( Nothing, [] ) <| "Parameters in \"" ++ paramIn ++ "\""
+                                                                    )
+                                                        )
                                             )
                                 )
                             |> CliMonad.andThen
@@ -631,11 +621,9 @@ operationToContentSchema operation =
 
                 Nothing ->
                     CliMonad.succeed requestOrRef
-                        |> stepOrFail "I found a successfull response, but I couldn't convert it to a concrete one"
+                        |> CliMonad.stepOrFail "I found a successfull response, but I couldn't convert it to a concrete one"
                             OpenApi.Reference.toReference
-                        |> CliMonad.map OpenApi.Reference.ref
-                        |> CliMonad.andThen schemaTypeRef
-                        |> CliMonad.map (\typeName -> JsonContent (Named typeName))
+                        |> CliMonad.map (\ref -> JsonContent (Ref <| String.split "/" <| OpenApi.Reference.ref ref))
 
 
 contentToContentSchema : Dict.Dict String OpenApi.MediaType.MediaType -> CliMonad ContentSchema
@@ -646,7 +634,7 @@ contentToContentSchema content =
             case Dict.get "application/json" content of
                 Just jsonSchema ->
                     CliMonad.succeed jsonSchema
-                        |> stepOrFail "The request's application/json content option doesn't have a schema"
+                        |> CliMonad.stepOrFail "The request's application/json content option doesn't have a schema"
                             (OpenApi.MediaType.schema >> Maybe.map OpenApi.Schema.get)
                         |> CliMonad.andThen schemaToType
                         |> CliMonad.map JsonContent
@@ -673,7 +661,7 @@ contentToContentSchema content =
         stringContent : String -> OpenApi.MediaType.MediaType -> CliMonad ContentSchema
         stringContent mime htmlSchema =
             CliMonad.succeed htmlSchema
-                |> stepOrFail ("The request's " ++ mime ++ " content option doesn't have a schema")
+                |> CliMonad.stepOrFail ("The request's " ++ mime ++ " content option doesn't have a schema")
                     (OpenApi.MediaType.schema >> Maybe.map OpenApi.Schema.get)
                 |> CliMonad.andThen schemaToType
                 |> CliMonad.andThen
@@ -895,6 +883,12 @@ paramToString type_ =
                             |> Gen.Maybe.make_.just
                         )
 
+        Ref ref ->
+            --  These are mostly aliases
+            getAlias ref
+                |> CliMonad.andThen schemaToType
+                |> CliMonad.andThen paramToString
+
         _ ->
             CliMonad.typeToAnnotation type_
                 |> CliMonad.andThen
@@ -931,7 +925,7 @@ paramToType concreteParam =
             OpenApi.Parameter.name concreteParam
     in
     CliMonad.succeed concreteParam
-        |> stepOrFail ("Could not get schema for parameter " ++ pname)
+        |> CliMonad.stepOrFail ("Could not get schema for parameter " ++ pname)
             (OpenApi.Parameter.schema >> Maybe.map OpenApi.Schema.get)
         |> CliMonad.andThen schemaToType
         |> CliMonad.map
@@ -954,7 +948,7 @@ toConcreteParam param =
 
         Nothing ->
             CliMonad.succeed param
-                |> stepOrFail "I found a params, but I couldn't convert it to a concrete one" OpenApi.Reference.toReference
+                |> CliMonad.stepOrFail "I found a params, but I couldn't convert it to a concrete one" OpenApi.Reference.toReference
                 |> CliMonad.map OpenApi.Reference.ref
                 |> CliMonad.andThen
                     (\ref ->
@@ -987,7 +981,7 @@ operationToSuccessTypeAndExpectAndResolver operation =
             Gen.Http.expectJson toMsg decoder
     in
     CliMonad.succeed responses
-        |> stepOrFail
+        |> CliMonad.stepOrFail
             ("Among the "
                 ++ String.fromInt (Dict.size responses)
                 ++ " possible responses, there was no successfull one."
@@ -1036,16 +1030,23 @@ operationToSuccessTypeAndExpectAndResolver operation =
 
                     Nothing ->
                         CliMonad.succeed responseOrRef
-                            |> stepOrFail "I found a successfull response, but I couldn't convert it to a concrete one"
+                            |> CliMonad.stepOrFail "I found a successfull response, but I couldn't convert it to a concrete one"
                                 OpenApi.Reference.toReference
-                            |> CliMonad.map OpenApi.Reference.ref
-                            |> CliMonad.andThen schemaTypeRef
-                            |> CliMonad.map
-                                (\typeName ->
-                                    ( Named typeName
-                                    , expectJson <| Elm.val ("decode" ++ typeName)
-                                    , jsonResolver.call <| Elm.val ("decode" ++ typeName)
-                                    )
+                            |> CliMonad.andThen
+                                (\ref ->
+                                    let
+                                        inner : String
+                                        inner =
+                                            OpenApi.Reference.ref ref
+                                    in
+                                    CliMonad.refToTypeName (String.split "/" inner)
+                                        |> CliMonad.map
+                                            (\typeName ->
+                                                ( Common.ref inner
+                                                , expectJson <| Elm.val ("decode" ++ typeName)
+                                                , jsonResolver.call <| Elm.val ("decode" ++ typeName)
+                                                )
+                                            )
                                 )
             )
 
@@ -1096,19 +1097,6 @@ whateverResolver =
                 )
                 |> Elm.withType
                     (Gen.Http.annotation_.resolver Gen.Http.annotation_.error Elm.Annotation.unit)
-
-
-schemaTypeRef : String -> CliMonad TypeName
-schemaTypeRef refUri =
-    case String.split "/" refUri of
-        [ "#", "components", "schemas", schemaName ] ->
-            CliMonad.succeed (typifyName schemaName)
-
-        [ "#", "components", "responses", responseName ] ->
-            CliMonad.succeed (typifyName responseName)
-
-        _ ->
-            CliMonad.fail <| "Couldn't get the type ref (" ++ refUri ++ ") for the response"
 
 
 isSuccessResponseStatus : String -> Bool
@@ -1229,8 +1217,8 @@ typeToEncoder type_ =
         Value ->
             CliMonad.succeed <| Gen.Basics.identity
 
-        Named name ->
-            CliMonad.succeed <| \rec -> Elm.apply (Elm.val ("encode" ++ name)) [ rec ]
+        Ref ref ->
+            CliMonad.map (\name rec -> Elm.apply (Elm.val ("encode" ++ name)) [ rec ]) (CliMonad.refToTypeName ref)
 
         OneOf oneOfName oneOfData ->
             oneOfData
@@ -1345,8 +1333,8 @@ typeToDecoder type_ =
                 )
                 (typeToDecoder t)
 
-        Named name ->
-            CliMonad.succeed (Elm.val ("decode" ++ name))
+        Ref ref ->
+            CliMonad.map (\name -> Elm.val ("decode" ++ name)) (CliMonad.refToTypeName ref)
 
         OneOf oneOfName variants ->
             variants
@@ -1477,272 +1465,13 @@ responseToResult =
 responseToSchema : OpenApi.Response.Response -> CliMonad Json.Schema.Definitions.Schema
 responseToSchema response =
     CliMonad.succeed response
-        |> stepOrFail "Could not get application's application/json content"
+        |> CliMonad.stepOrFail "Could not get application's application/json content"
             (OpenApi.Response.content
                 >> Dict.get "application/json"
             )
-        |> stepOrFail "The response's application/json content option doesn't have a schema"
+        |> CliMonad.stepOrFail "The response's application/json content option doesn't have a schema"
             OpenApi.MediaType.schema
         |> CliMonad.map OpenApi.Schema.get
-
-
-schemaToAnnotation : Json.Schema.Definitions.Schema -> CliMonad Elm.Annotation.Annotation
-schemaToAnnotation schema =
-    schemaToType schema |> CliMonad.andThen CliMonad.typeToAnnotation
-
-
-schemaToType : Json.Schema.Definitions.Schema -> CliMonad Type
-schemaToType schema =
-    case schema of
-        Json.Schema.Definitions.BooleanSchema _ ->
-            CliMonad.todoWithDefault Value "Boolean schema"
-
-        Json.Schema.Definitions.ObjectSchema subSchema ->
-            let
-                nullable : CliMonad Type -> CliMonad Type
-                nullable =
-                    CliMonad.map Nullable
-
-                singleTypeToType : Json.Schema.Definitions.SingleType -> CliMonad Type
-                singleTypeToType singleType =
-                    case singleType of
-                        Json.Schema.Definitions.ObjectType ->
-                            objectSchemaToType subSchema
-
-                        Json.Schema.Definitions.StringType ->
-                            CliMonad.succeed String
-
-                        Json.Schema.Definitions.IntegerType ->
-                            CliMonad.succeed Int
-
-                        Json.Schema.Definitions.NumberType ->
-                            CliMonad.succeed Float
-
-                        Json.Schema.Definitions.BooleanType ->
-                            CliMonad.succeed Bool
-
-                        Json.Schema.Definitions.NullType ->
-                            CliMonad.todoWithDefault Value "Null type annotation"
-
-                        Json.Schema.Definitions.ArrayType ->
-                            case subSchema.items of
-                                Json.Schema.Definitions.NoItems ->
-                                    CliMonad.fail "Found an array type but no items definition"
-
-                                Json.Schema.Definitions.ArrayOfItems _ ->
-                                    CliMonad.todoWithDefault Value "Array of items as item definition"
-
-                                Json.Schema.Definitions.ItemDefinition itemSchema ->
-                                    CliMonad.map List (schemaToType itemSchema)
-
-                anyOfToType : List Json.Schema.Definitions.Schema -> CliMonad Type
-                anyOfToType _ =
-                    CliMonad.succeed Value
-
-                oneOfToType : List Json.Schema.Definitions.Schema -> CliMonad Type
-                oneOfToType oneOf =
-                    let
-                        extractSubSchema : Json.Schema.Definitions.Schema -> CliMonad (Maybe { name : String, type_ : Type })
-                        extractSubSchema s =
-                            schemaToType s
-                                |> CliMonad.andThen
-                                    (\t ->
-                                        t
-                                            |> CliMonad.typeToAnnotation
-                                            |> CliMonad.map
-                                                (\ann ->
-                                                    let
-                                                        rawName : TypeName
-                                                        rawName =
-                                                            ann
-                                                                |> Elm.ToString.annotation
-                                                                |> .signature
-                                                                |> typifyName
-                                                    in
-                                                    if String.contains "{" rawName then
-                                                        Nothing
-
-                                                    else
-                                                        Just
-                                                            { name = rawName
-                                                            , type_ = t
-                                                            }
-                                                )
-                                    )
-                    in
-                    CliMonad.combineMap extractSubSchema oneOf
-                        |> CliMonad.map
-                            (\maybeVariants ->
-                                case Maybe.Extra.combine maybeVariants of
-                                    Nothing ->
-                                        Value
-
-                                    Just variants ->
-                                        let
-                                            names : List String
-                                            names =
-                                                List.map .name variants
-                                        in
-                                        OneOf (String.join "Or" names) variants
-                            )
-            in
-            case subSchema.type_ of
-                Json.Schema.Definitions.SingleType singleType ->
-                    singleTypeToType singleType
-
-                Json.Schema.Definitions.AnyType ->
-                    case subSchema.ref of
-                        Just ref ->
-                            CliMonad.map Named <| schemaTypeRef ref
-
-                        Nothing ->
-                            case subSchema.anyOf of
-                                Just [ onlySchema ] ->
-                                    schemaToType onlySchema
-
-                                Just [ firstSchema, secondSchema ] ->
-                                    case ( firstSchema, secondSchema ) of
-                                        ( Json.Schema.Definitions.ObjectSchema firstSubSchema, Json.Schema.Definitions.ObjectSchema secondSubSchema ) ->
-                                            -- The first 2 cases here are for pseudo-nullable schemas where the higher level schema type is AnyOf
-                                            -- but it's actually made up of only 2 types and 1 of them is nullable. This acts as a hack of sorts to
-                                            -- mark a value as nullable in the schema.
-                                            case ( firstSubSchema.type_, secondSubSchema.type_ ) of
-                                                ( Json.Schema.Definitions.SingleType Json.Schema.Definitions.NullType, _ ) ->
-                                                    nullable (schemaToType secondSchema)
-
-                                                ( _, Json.Schema.Definitions.SingleType Json.Schema.Definitions.NullType ) ->
-                                                    nullable (schemaToType firstSchema)
-
-                                                _ ->
-                                                    anyOfToType [ firstSchema, secondSchema ]
-
-                                        _ ->
-                                            anyOfToType [ firstSchema, secondSchema ]
-
-                                Just anyOf ->
-                                    anyOfToType anyOf
-
-                                Nothing ->
-                                    case subSchema.allOf of
-                                        Just [ onlySchema ] ->
-                                            schemaToType onlySchema
-
-                                        Just [] ->
-                                            CliMonad.succeed Value
-
-                                        Just _ ->
-                                            -- If we have more than one item in `allOf`, then it's _probably_ an object
-                                            -- TODO: improve this to actually check if all the `allOf` subschema are objects.
-                                            objectSchemaToType subSchema
-
-                                        Nothing ->
-                                            case subSchema.oneOf of
-                                                Just [ onlySchema ] ->
-                                                    schemaToType onlySchema
-
-                                                Just [] ->
-                                                    CliMonad.succeed Value
-
-                                                Just oneOfs ->
-                                                    oneOfToType oneOfs
-
-                                                Nothing ->
-                                                    CliMonad.succeed Value
-
-                Json.Schema.Definitions.NullableType singleType ->
-                    nullable (singleTypeToType singleType)
-
-                Json.Schema.Definitions.UnionType _ ->
-                    CliMonad.todoWithDefault Value "union type"
-
-
-objectSchemaToType : Json.Schema.Definitions.SubSchema -> CliMonad Type
-objectSchemaToType subSchema =
-    let
-        propertiesFromSchema : Json.Schema.Definitions.SubSchema -> CliMonad (Dict String Field)
-        propertiesFromSchema sch =
-            let
-                requiredSet : Set String
-                requiredSet =
-                    sch.required
-                        |> Maybe.withDefault []
-                        |> Set.fromList
-            in
-            sch.properties
-                |> Maybe.map (\(Json.Schema.Definitions.Schemata schemata) -> schemata)
-                |> Maybe.withDefault []
-                |> CliMonad.combineMap
-                    (\( key, valueSchema ) ->
-                        schemaToType valueSchema
-                            |> CliMonad.withPath key
-                            |> CliMonad.map
-                                (\type_ ->
-                                    ( key
-                                    , { type_ = type_
-                                      , required = Set.member key requiredSet
-                                      }
-                                    )
-                                )
-                    )
-                |> CliMonad.map FastDict.fromList
-
-        schemaToProperties : Json.Schema.Definitions.Schema -> CliMonad (Dict String Field)
-        schemaToProperties allOfItem =
-            case allOfItem of
-                Json.Schema.Definitions.ObjectSchema allOfItemSchema ->
-                    CliMonad.map2 FastDict.union
-                        (propertiesFromSchema allOfItemSchema)
-                        (propertiesFromRef allOfItemSchema)
-
-                Json.Schema.Definitions.BooleanSchema _ ->
-                    CliMonad.todoWithDefault FastDict.empty "Boolean schema inside allOf"
-
-        propertiesFromRef : Json.Schema.Definitions.SubSchema -> CliMonad (Dict String Field)
-        propertiesFromRef allOfItem =
-            case allOfItem.ref of
-                Nothing ->
-                    CliMonad.succeed FastDict.empty
-
-                Just ref ->
-                    case String.split "/" ref of
-                        [ "#", "components", "schemas", refName ] ->
-                            CliMonad.fromApiSpec OpenApi.components
-                                |> CliMonad.andThen
-                                    (\maybeComponents ->
-                                        case maybeComponents of
-                                            Nothing ->
-                                                CliMonad.fail <| "Could not find components in the schema, while looking up" ++ ref
-
-                                            Just components ->
-                                                case Dict.get refName (OpenApi.Components.schemas components) of
-                                                    Nothing ->
-                                                        CliMonad.fail <| "Could not find component's schema, while looking up" ++ ref
-
-                                                    Just found ->
-                                                        found
-                                                            |> OpenApi.Schema.get
-                                                            |> schemaToProperties
-                                                            |> CliMonad.withPath refName
-                                    )
-
-                        _ ->
-                            CliMonad.fail <| "Cannot understand reference " ++ ref
-
-        propertiesFromAllOf : CliMonad (Dict String Field)
-        propertiesFromAllOf =
-            subSchema.allOf
-                |> Maybe.withDefault []
-                |> CliMonad.combineMap schemaToProperties
-                |> CliMonad.map (List.foldl FastDict.union FastDict.empty)
-    in
-    CliMonad.map2
-        (\schemaProps allOfProps ->
-            allOfProps
-                |> FastDict.union schemaProps
-                |> Object
-        )
-        (propertiesFromSchema subSchema)
-        propertiesFromAllOf
 
 
 makeNamespaceValid : String -> String

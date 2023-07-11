@@ -936,16 +936,36 @@ paramToType concreteParam =
         |> CliMonad.stepOrFail ("Could not get schema for parameter " ++ pname)
             (OpenApi.Parameter.schema >> Maybe.map OpenApi.Schema.get)
         |> CliMonad.andThen schemaToType
-        |> CliMonad.map
+        |> CliMonad.andThen
             (\type_ ->
-                ( pname
-                , if OpenApi.Parameter.required concreteParam then
-                    type_
+                case type_ of
+                    Ref ref ->
+                        ref
+                            |> getAlias
+                            |> CliMonad.andThen schemaToType
+                            |> CliMonad.map
+                                (\inner ->
+                                    case inner of
+                                        Nullable _ ->
+                                            -- If it's a ref to a nullable type, we don't want another layer of nullable
+                                            inner
 
-                  else
-                    Nullable type_
-                )
+                                        _ ->
+                                            if OpenApi.Parameter.required concreteParam then
+                                                type_
+
+                                            else
+                                                Nullable type_
+                                )
+
+                    _ ->
+                        if OpenApi.Parameter.required concreteParam then
+                            CliMonad.succeed type_
+
+                        else
+                            CliMonad.succeed <| Nullable type_
             )
+        |> CliMonad.map (Tuple.pair pname)
 
 
 toConcreteParam : OpenApi.Reference.ReferenceOr OpenApi.Parameter.Parameter -> CliMonad OpenApi.Parameter.Parameter

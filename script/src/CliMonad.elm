@@ -250,7 +250,7 @@ messageToString { path, message } =
 objectToAnnotation : { useMaybe : Bool } -> Object -> CliMonad Elm.Annotation.Annotation
 objectToAnnotation config fields =
     FastDict.toList fields
-        |> combineMap (\( k, v ) -> map (Tuple.pair k) (fieldToAnnotation config v))
+        |> combineMap (\( k, v ) -> map (Tuple.pair (Common.toValueName k)) (fieldToAnnotation config v))
         |> map recordType
 
 

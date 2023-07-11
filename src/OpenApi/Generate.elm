@@ -1,7 +1,5 @@
 module OpenApi.Generate exposing (ContentSchema(..), Mime, file, makeNamespaceValid, removeInvalidChars)
 
-import Ansi.Color
-import BackendTask
 import CliMonad exposing (CliMonad)
 import Common exposing (Field, Type(..), TypeName, toValueName, typifyName)
 import Dict
@@ -12,7 +10,6 @@ import Elm.Declare
 import Elm.Op
 import Elm.ToString
 import FastDict exposing (Dict)
-import FatalError
 import Gen.Basics
 import Gen.Bytes
 import Gen.Debug
@@ -40,7 +37,6 @@ import OpenApi.Response
 import OpenApi.Schema
 import OpenApi.SecurityRequirement
 import OpenApi.Server
-import Pages.Script
 import Set
 import String.Extra
 
@@ -63,80 +59,54 @@ type alias AuthorizationInfo =
     }
 
 
-file :
-    { namespace : String
-    , generateTodos : Bool
-    }
-    -> OpenApi.OpenApi
-    -> BackendTask.BackendTask FatalError.FatalError Elm.File
+file : { namespace : String, generateTodos : Bool } -> OpenApi.OpenApi -> Result String ( Elm.File, List CliMonad.Warning )
 file { namespace, generateTodos } apiSpec =
-    let
-        declarations =
-            let
-                combined =
-                    CliMonad.combine
-                        [ pathDeclarations
-                        , CliMonad.succeed
-                            [ decodeOptionalField.declaration
-                            , responseToResult.declaration
-                            , jsonResolver.declaration
-                            , whateverResolver.declaration
-                            , nullableType
-                            ]
-                        , componentDeclarations
-                        , responsesDeclarations
-                        ]
-                        |> CliMonad.map List.concat
-            in
-            case
-                CliMonad.run
-                    { openApi = apiSpec
-                    , generateTodos = generateTodos
-                    }
-                    combined
-            of
-                Ok ( decls, warnings ) ->
-                    warnings
-                        |> List.map logWarning
-                        |> BackendTask.combine
-                        |> BackendTask.map (\_ -> decls)
-
-                Err e ->
-                    BackendTask.fail (FatalError.fromString e)
-    in
-    BackendTask.map
-        (Elm.fileWith [ namespace ]
-            { docs =
-                List.sortBy
-                    (\{ group } ->
-                        case group of
-                            Just "Request functions" ->
-                                1
-
-                            Just "Types" ->
-                                2
-
-                            Just "Encoders" ->
-                                3
-
-                            Just "Decoders" ->
-                                4
-
-                            _ ->
-                                5
-                    )
-                    >> List.map Elm.docs
-            , aliases = []
+    CliMonad.combine
+        [ pathDeclarations
+        , CliMonad.succeed
+            [ decodeOptionalField.declaration
+            , responseToResult.declaration
+            , jsonResolver.declaration
+            , whateverResolver.declaration
+            , nullableType
+            ]
+        , componentDeclarations
+        , responsesDeclarations
+        ]
+        |> CliMonad.map List.concat
+        |> CliMonad.run
+            { openApi = apiSpec
+            , generateTodos = generateTodos
             }
-        )
-        declarations
+        |> Result.map
+            (\( decls, warnings ) ->
+                ( Elm.fileWith [ namespace ]
+                    { docs =
+                        List.sortBy
+                            (\{ group } ->
+                                case group of
+                                    Just "Request functions" ->
+                                        1
 
+                                    Just "Types" ->
+                                        2
 
-logWarning : String -> BackendTask.BackendTask FatalError.FatalError ()
-logWarning warning =
-    Pages.Script.log <|
-        Ansi.Color.fontColor Ansi.Color.brightYellow "Warning: "
-            ++ warning
+                                    Just "Encoders" ->
+                                        3
+
+                                    Just "Decoders" ->
+                                        4
+
+                                    _ ->
+                                        5
+                            )
+                            >> List.map Elm.docs
+                    , aliases = []
+                    }
+                    decls
+                , warnings
+                )
+            )
 
 
 pathDeclarations : CliMonad (List Elm.Declaration)

@@ -160,10 +160,18 @@ generateFileFromOpenApiSpec config apiSpec =
     in
     OpenApi.Generate.file
         { namespace = fileNamespace
-        , generateTodos =
-            generateTodos
+        , generateTodos = generateTodos
         }
         apiSpec
+        |> Result.mapError FatalError.fromString
+        |> BackendTask.fromResult
+        |> BackendTask.andThen
+            (\( decls, warnings ) ->
+                warnings
+                    |> List.map logWarning
+                    |> BackendTask.combine
+                    |> BackendTask.map (\_ -> decls)
+            )
         |> BackendTask.andThen
             (\{ contents, path } ->
                 let
@@ -190,3 +198,10 @@ generateFileFromOpenApiSpec config apiSpec =
                     |> BackendTask.map (\_ -> outputPath)
             )
         |> BackendTask.andThen (\outputPath -> Pages.Script.log ("SDK generated at " ++ outputPath))
+
+
+logWarning : String -> BackendTask.BackendTask FatalError.FatalError ()
+logWarning warning =
+    Pages.Script.log <|
+        Ansi.Color.fontColor Ansi.Color.brightYellow "Warning: "
+            ++ warning

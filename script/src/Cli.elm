@@ -996,6 +996,23 @@ paramToString type_ =
             -> CliMonad { toString : Elm.Expression -> Elm.Expression, alwaysJust : Bool }
         basic f =
             CliMonad.succeed { toString = f, alwaysJust = True }
+
+        recursive :
+            Type
+            -> ({ toString : Elm.Expression, alwaysJust : Bool } -> Elm.Expression -> Elm.Expression)
+            -> CliMonad { toString : Elm.Expression -> Elm.Expression, alwaysJust : Bool }
+        recursive p f =
+            paramToString p
+                |> CliMonad.map
+                    (\{ toString, alwaysJust } ->
+                        { toString =
+                            f
+                                { alwaysJust = alwaysJust
+                                , toString = Elm.functionReduced "toStringArg" toString
+                                }
+                        , alwaysJust = False
+                        }
+                    )
     in
     case type_ of
         String ->
@@ -1016,45 +1033,33 @@ paramToString type_ =
                 |> basic
 
         Nullable p ->
-            paramToString p
-                |> CliMonad.map
-                    (\{ toString, alwaysJust } ->
-                        { toString =
-                            \val ->
-                                if alwaysJust then
-                                    Gen.Maybe.call_.map (Elm.functionReduced "toStringArg" toString) val
+            recursive p <|
+                \{ toString, alwaysJust } val ->
+                    if alwaysJust then
+                        Gen.Maybe.call_.map toString val
 
-                                else
-                                    Gen.Maybe.call_.andThen (Elm.functionReduced "toStringArg" toString) val
-                        , alwaysJust = False
-                        }
-                    )
+                    else
+                        Gen.Maybe.call_.andThen toString val
 
         List p ->
-            paramToString p
-                |> CliMonad.map
-                    (\{ toString, alwaysJust } ->
-                        { toString =
-                            \val ->
-                                let
-                                    map : Elm.Expression -> Elm.Expression -> Elm.Expression
-                                    map =
-                                        if alwaysJust then
-                                            Gen.List.call_.map
+            recursive p <|
+                \{ toString, alwaysJust } val ->
+                    let
+                        map : Elm.Expression -> Elm.Expression -> Elm.Expression
+                        map =
+                            if alwaysJust then
+                                Gen.List.call_.map
 
-                                        else
-                                            Gen.List.call_.filterMap
-                                in
-                                Elm.ifThen (Gen.List.call_.isEmpty val)
-                                    Gen.Maybe.make_.nothing
-                                    (val
-                                        |> map (Elm.functionReduced "fArg" toString)
-                                        |> Gen.String.call_.join (Elm.string ",")
-                                        |> Gen.Maybe.make_.just
-                                    )
-                        , alwaysJust = False
-                        }
-                    )
+                            else
+                                Gen.List.call_.filterMap
+                    in
+                    Elm.ifThen (Gen.List.call_.isEmpty val)
+                        Gen.Maybe.make_.nothing
+                        (val
+                            |> map toString
+                            |> Gen.String.call_.join (Elm.string ",")
+                            |> Gen.Maybe.make_.just
+                        )
 
         _ ->
             CliMonad.typeToAnnotation type_

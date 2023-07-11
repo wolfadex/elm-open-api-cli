@@ -15,6 +15,8 @@ typifyName name =
         |> Maybe.map (\( first, rest ) -> String.cons first (String.replace "-" " " rest))
         |> Maybe.withDefault ""
         |> String.replace "_" " "
+        |> String.replace "(" " "
+        |> String.replace ")" " "
         |> String.Extra.toTitleCase
         |> String.replace " " ""
         |> deSymbolify
@@ -37,7 +39,19 @@ toValueName name =
     name
         |> deSymbolify
         |> String.uncons
-        |> Maybe.map (\( first, rest ) -> String.cons (Char.toLower first) (String.replace "-" "_" rest))
+        |> Maybe.map
+            (\( first, rest ) ->
+                let
+                    replaced : String
+                    replaced =
+                        String.replace "-" "_" rest
+                in
+                if first == '_' then
+                    replaced
+
+                else
+                    String.cons (Char.toLower first) replaced
+            )
         |> Maybe.withDefault ""
 
 

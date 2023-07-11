@@ -959,96 +959,133 @@ operationToUrlParams operation =
 
 queryParameterToUrlBuilderArgument : OpenApi.Parameter.Parameter -> CliMonad (Elm.Expression -> Elm.Expression)
 queryParameterToUrlBuilderArgument param =
-    paramToAnnotation param
+    paramToType param
         |> CliMonad.andThen
-            (\( paramName, annotation ) ->
-                let
-                    name =
-                        Elm.string paramName
+            (\( paramName, type_ ) ->
+                paramToString type_
+                    |> CliMonad.map
+                        (\{ toString, alwaysJust } config ->
+                            let
+                                name : Elm.Expression
+                                name =
+                                    Elm.string paramName
 
-                    value config =
-                        Elm.get (toValueName paramName) (Elm.get "params" config)
+                                value : Elm.Expression
+                                value =
+                                    Elm.get (toValueName paramName) (Elm.get "params" config)
+                                        |> toString
 
-                    paramBuilderHelper : List String -> CliMonad (Elm.Expression -> Elm.Expression)
-                    paramBuilderHelper parts =
-                        case parts of
-                            "String" :: [] ->
-                                identity
-                                    |> CliMonad.succeed
+                                build : Elm.Expression -> Elm.Expression
+                                build =
+                                    Gen.Url.Builder.call_.string name
+                            in
+                            if alwaysJust then
+                                Gen.Maybe.make_.just (build value)
 
-                            "Int" :: [] ->
-                                Gen.String.call_.fromInt
-                                    |> CliMonad.succeed
+                            else
+                                Gen.Maybe.map build value
+                        )
+            )
 
-                            "Float" :: [] ->
-                                Gen.String.call_.fromFloat
-                                    |> CliMonad.succeed
 
-                            "Bool" :: [] ->
-                                (\val ->
-                                    Elm.ifThen val
-                                        (Elm.string "true")
-                                        (Elm.string "false")
-                                )
-                                    |> CliMonad.succeed
+paramToString : Type -> CliMonad { toString : Elm.Expression -> Elm.Expression, alwaysJust : Bool }
+paramToString type_ =
+    let
+        basic :
+            (Elm.Expression -> Elm.Expression)
+            -> CliMonad { toString : Elm.Expression -> Elm.Expression, alwaysJust : Bool }
+        basic f =
+            CliMonad.succeed { toString = f, alwaysJust = True }
+    in
+    case type_ of
+        String ->
+            basic identity
 
-                            t ->
+        Int ->
+            basic Gen.String.call_.fromInt
+
+        Float ->
+            basic Gen.String.call_.fromFloat
+
+        Bool ->
+            (\val ->
+                Elm.ifThen val
+                    (Elm.string "true")
+                    (Elm.string "false")
+            )
+                |> basic
+
+        Nullable p ->
+            paramToString p
+                |> CliMonad.map
+                    (\{ toString, alwaysJust } ->
+                        { toString =
+                            \val ->
+                                if alwaysJust then
+                                    Gen.Maybe.call_.map (Elm.functionReduced "toStringArg" toString) val
+
+                                else
+                                    Gen.Maybe.call_.andThen (Elm.functionReduced "toStringArg" toString) val
+                        , alwaysJust = False
+                        }
+                    )
+
+        List p ->
+            paramToString p
+                |> CliMonad.map
+                    (\{ toString, alwaysJust } ->
+                        { toString =
+                            \val ->
                                 let
-                                    msg : String
-                                    msg =
-                                        "Params of type \"" ++ String.join " " t ++ "\" (in helper)"
+                                    map : Elm.Expression -> Elm.Expression -> Elm.Expression
+                                    map =
+                                        if alwaysJust then
+                                            Gen.List.call_.map
+
+                                        else
+                                            Gen.List.call_.filterMap
                                 in
-                                CliMonad.todoWithDefault (\_ -> Gen.Debug.todo msg) msg
-                in
-                case (Elm.ToString.annotation annotation).signature |> String.split " " of
-                    [ a ] ->
-                        paramBuilderHelper [ a ]
-                            |> CliMonad.map
-                                (\f config ->
-                                    f (value config)
-                                        |> Gen.Url.Builder.call_.string name
-                                        |> Gen.Maybe.make_.just
-                                )
-
-                    "Maybe" :: rest ->
-                        paramBuilderHelper rest
-                            |> CliMonad.map (\f config -> Gen.Maybe.map (f >> Gen.Url.Builder.call_.string name) (value config))
-
-                    [ "List", "String" ] ->
-                        CliMonad.succeed
-                            (\config ->
-                                Elm.ifThen (Gen.List.call_.isEmpty (value config))
+                                Elm.ifThen (Gen.List.call_.isEmpty val)
                                     Gen.Maybe.make_.nothing
-                                    (value config
+                                    (val
+                                        |> map (Elm.functionReduced "fArg" toString)
                                         |> Gen.String.call_.join (Elm.string ",")
-                                        |> Gen.Url.Builder.call_.string name
                                         |> Gen.Maybe.make_.just
                                     )
-                            )
+                        , alwaysJust = False
+                        }
+                    )
 
-                    "List" :: rest ->
-                        paramBuilderHelper rest
-                            |> CliMonad.map
-                                (\f config ->
-                                    Elm.ifThen (Gen.List.call_.isEmpty (value config))
-                                        Gen.Maybe.make_.nothing
-                                        (value config
-                                            |> Gen.List.call_.map (Elm.functionReduced "fArg" f)
-                                            |> Gen.String.call_.join (Elm.string ",")
-                                            |> Gen.Url.Builder.call_.string name
-                                            |> Gen.Maybe.make_.just
-                                        )
-                                )
-
-                    t ->
-                        -- TODO: This seems to be mostly aliases, at least in the GitHub OAS
-                        CliMonad.todo ("Params of type \"" ++ String.join " " t ++ "\"")
-                            |> CliMonad.map (\e _ -> e)
-            )
+        _ ->
+            CliMonad.typeToAnnotation type_
+                |> CliMonad.andThen
+                    (\annotation ->
+                        let
+                            msg : String
+                            msg =
+                                "Params of type \"" ++ Elm.Annotation.toString annotation ++ "\""
+                        in
+                        CliMonad.todoWithDefault
+                            { toString = \_ -> Gen.Debug.todo msg
+                            , alwaysJust = True
+                            }
+                            msg
+                    )
 
 
 paramToAnnotation : OpenApi.Parameter.Parameter -> CliMonad ( String, Elm.Annotation.Annotation )
 paramToAnnotation concreteParam =
+    paramToType concreteParam
+        |> CliMonad.andThen
+            (\( pname, type_ ) ->
+                CliMonad.typeToAnnotationMaybe type_
+                    |> CliMonad.map
+                        (\annotation -> ( pname, annotation ))
+            )
+
+
+paramToType : OpenApi.Parameter.Parameter -> CliMonad ( String, Type )
+paramToType concreteParam =
     let
         pname : String
         pname =
@@ -1057,15 +1094,15 @@ paramToAnnotation concreteParam =
     CliMonad.succeed concreteParam
         |> stepOrFail ("Could not get schema for parameter " ++ pname)
             (OpenApi.Parameter.schema >> Maybe.map OpenApi.Schema.get)
-        |> CliMonad.andThen schemaToAnnotation
+        |> CliMonad.andThen schemaToType
         |> CliMonad.map
-            (\annotation ->
+            (\type_ ->
                 ( pname
                 , if OpenApi.Parameter.required concreteParam then
-                    annotation
+                    type_
 
                   else
-                    Elm.Annotation.maybe annotation
+                    Nullable type_
                 )
             )
 

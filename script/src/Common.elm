@@ -15,6 +15,8 @@ typifyName name =
         |> Maybe.map (\( first, rest ) -> String.cons first (String.replace "-" " " rest))
         |> Maybe.withDefault ""
         |> String.replace "_" " "
+        |> String.replace "(" " "
+        |> String.replace ")" " "
         |> String.Extra.toTitleCase
         |> String.replace " " ""
         |> deSymbolify

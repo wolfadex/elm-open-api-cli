@@ -1,4 +1,4 @@
-module CliMonad exposing (CliMonad, Warning, andThen, andThen2, combine, combineMap, errorToWarning, fail, fromApiSpec, map, map2, map3, recordType, run, succeed, todo, todoWithDefault, typeToAnnotation, withPath, withWarning)
+module CliMonad exposing (CliMonad, Warning, andThen, andThen2, combine, combineMap, errorToWarning, fail, fromApiSpec, map, map2, map3, recordType, run, succeed, todo, todoWithDefault, typeToAnnotation, typeToAnnotationMaybe, withPath, withWarning)
 
 import Common exposing (Field, Object, OneOfData, Type(..), TypeName, toValueName)
 import Elm
@@ -247,20 +247,28 @@ messageToString { path, message } =
         "Error! " ++ message ++ "\n  Path: " ++ String.join " -> " path
 
 
-objectToAnnotation : Object -> CliMonad Elm.Annotation.Annotation
-objectToAnnotation fields =
+objectToAnnotation : { useMaybe : Bool } -> Object -> CliMonad Elm.Annotation.Annotation
+objectToAnnotation config fields =
     FastDict.toList fields
-        |> combineMap (\( k, v ) -> map (Tuple.pair k) (fieldToAnnotation v))
+        |> combineMap (\( k, v ) -> map (Tuple.pair k) (fieldToAnnotation config v))
         |> map recordType
 
 
-fieldToAnnotation : Field -> CliMonad Elm.Annotation.Annotation
-fieldToAnnotation { type_, required } =
+fieldToAnnotation : { useMaybe : Bool } -> Field -> CliMonad Elm.Annotation.Annotation
+fieldToAnnotation { useMaybe } { type_, required } =
+    let
+        annotation =
+            if useMaybe then
+                typeToAnnotationMaybe type_
+
+            else
+                typeToAnnotation type_
+    in
     if required then
-        typeToAnnotation type_
+        annotation
 
     else
-        map Gen.Maybe.annotation_.maybe (typeToAnnotation type_)
+        map Gen.Maybe.annotation_.maybe annotation
 
 
 recordType : List ( String, Elm.Annotation.Annotation ) -> Elm.Annotation.Annotation
@@ -283,7 +291,7 @@ typeToAnnotation type_ =
                     )
 
         Object fields ->
-            objectToAnnotation fields
+            objectToAnnotation { useMaybe = False } fields
 
         String ->
             succeed Elm.Annotation.string
@@ -299,6 +307,46 @@ typeToAnnotation type_ =
 
         List t ->
             map Elm.Annotation.list (typeToAnnotation t)
+
+        OneOf oneOfName oneOfData ->
+            oneOfAnnotation oneOfName oneOfData
+
+        Value ->
+            succeed Gen.Json.Encode.annotation_.value
+
+        Named name ->
+            succeed <| Elm.Annotation.named [] name
+
+        Bytes ->
+            succeed Gen.Bytes.annotation_.bytes
+
+        Unit ->
+            succeed Elm.Annotation.unit
+
+
+typeToAnnotationMaybe : Type -> CliMonad Elm.Annotation.Annotation
+typeToAnnotationMaybe type_ =
+    case type_ of
+        Nullable t ->
+            map Elm.Annotation.maybe (typeToAnnotationMaybe t)
+
+        Object fields ->
+            objectToAnnotation { useMaybe = True } fields
+
+        String ->
+            succeed Elm.Annotation.string
+
+        Int ->
+            succeed Elm.Annotation.int
+
+        Float ->
+            succeed Elm.Annotation.float
+
+        Bool ->
+            succeed Elm.Annotation.bool
+
+        List t ->
+            map Elm.Annotation.list (typeToAnnotationMaybe t)
 
         OneOf oneOfName oneOfData ->
             oneOfAnnotation oneOfName oneOfData

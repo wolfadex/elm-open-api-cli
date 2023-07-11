@@ -12,7 +12,7 @@ To allow developers to generate an Elm module(s) from an OpenAPI Spec. This is p
 - Inside your cloned repo, run `direnv allow`
 - Start coding in `./script/src/Cli.elm`!
 - Run `npm run dev <path to oas spec>.json`
-  - e.g. `npm run dev ./src/github-spec.json` will produce `generated/GitHub_v3_REST_API.elm`
+  - e.g. `npm run dev ./example/github-spec.json` will produce `generated/GitHub_v3_REST_API.elm`
 
 ## Development
 

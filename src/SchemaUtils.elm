@@ -139,50 +139,8 @@ schemaToType schema =
 
                 oneOfToType : List Json.Schema.Definitions.Schema -> CliMonad Type
                 oneOfToType oneOf =
-                    let
-                        extractSubSchema : Json.Schema.Definitions.Schema -> CliMonad (Maybe { name : String, type_ : Type })
-                        extractSubSchema s =
-                            schemaToType s
-                                |> CliMonad.andThen
-                                    (\t ->
-                                        t
-                                            |> CliMonad.typeToAnnotation
-                                            |> CliMonad.map
-                                                (\ann ->
-                                                    let
-                                                        rawName : TypeName
-                                                        rawName =
-                                                            ann
-                                                                |> Elm.ToString.annotation
-                                                                |> .signature
-                                                                |> typifyName
-                                                    in
-                                                    if String.contains "{" rawName then
-                                                        Nothing
-
-                                                    else
-                                                        Just
-                                                            { name = rawName
-                                                            , type_ = t
-                                                            }
-                                                )
-                                    )
-                    in
-                    CliMonad.combineMap extractSubSchema oneOf
-                        |> CliMonad.map
-                            (\maybeVariants ->
-                                case Maybe.Extra.combine maybeVariants of
-                                    Nothing ->
-                                        Value
-
-                                    Just variants ->
-                                        let
-                                            names : List String
-                                            names =
-                                                List.map .name variants
-                                        in
-                                        OneOf (String.join "Or" names) variants
-                            )
+                    CliMonad.combineMap schemaToType oneOf
+                        |> CliMonad.andThen oneOfType
             in
             case subSchema.type_ of
                 Json.Schema.Definitions.SingleType singleType ->
@@ -250,8 +208,73 @@ schemaToType schema =
                 Json.Schema.Definitions.NullableType singleType ->
                     nullable (singleTypeToType singleType)
 
-                Json.Schema.Definitions.UnionType _ ->
-                    CliMonad.todoWithDefault Value "union type"
+                Json.Schema.Definitions.UnionType singleTypes ->
+                    let
+                        ( nulls, nonNulls ) =
+                            List.partition
+                                (\st -> st == Json.Schema.Definitions.NullType)
+                                singleTypes
+                    in
+                    nonNulls
+                        |> CliMonad.combineMap singleTypeToType
+                        |> CliMonad.andThen oneOfType
+                        |> CliMonad.map
+                            (\res ->
+                                if List.isEmpty nulls then
+                                    res
+
+                                else
+                                    Nullable res
+                            )
+
+
+typeToOneOfVariant : Type -> CliMonad (Maybe { name : TypeName, type_ : Type })
+typeToOneOfVariant type_ =
+    type_
+        |> CliMonad.typeToAnnotation
+        |> CliMonad.map
+            (\ann ->
+                let
+                    rawName : TypeName
+                    rawName =
+                        ann
+                            |> Elm.ToString.annotation
+                            |> .signature
+                            |> typifyName
+                in
+                if String.contains "{" rawName then
+                    Nothing
+
+                else
+                    Just
+                        { name = rawName
+                        , type_ = type_
+                        }
+            )
+
+
+oneOfType : List Type -> CliMonad Type
+oneOfType types =
+    types
+        |> CliMonad.combineMap typeToOneOfVariant
+        |> CliMonad.map
+            (\maybeVariants ->
+                case Maybe.Extra.combine maybeVariants of
+                    Nothing ->
+                        Value
+
+                    Just variants ->
+                        let
+                            sortedVariants : List { name : TypeName, type_ : Type }
+                            sortedVariants =
+                                List.sortBy .name variants
+
+                            names : List String
+                            names =
+                                List.map .name sortedVariants
+                        in
+                        OneOf (String.join "Or" names) sortedVariants
+            )
 
 
 objectSchemaToType : Json.Schema.Definitions.SubSchema -> CliMonad Type

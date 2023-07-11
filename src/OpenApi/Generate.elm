@@ -1,7 +1,7 @@
 module OpenApi.Generate exposing (ContentSchema(..), Mime, file, makeNamespaceValid, removeInvalidChars)
 
 import CliMonad exposing (CliMonad)
-import Common exposing (Field, Type(..), TypeName, toValueName, typifyName)
+import Common exposing (Field, FieldName, Type(..), TypeName, toValueName, typifyName)
 import Dict
 import Elm
 import Elm.Annotation
@@ -37,11 +37,15 @@ import OpenApi.Response
 import OpenApi.Schema
 import OpenApi.SecurityRequirement
 import OpenApi.Server
-import Set
+import Set exposing (Set)
 import String.Extra
 
 
 type alias Mime =
+    String
+
+
+type alias Warning =
     String
 
 
@@ -59,7 +63,7 @@ type alias AuthorizationInfo =
     }
 
 
-file : { namespace : String, generateTodos : Bool } -> OpenApi.OpenApi -> Result String ( Elm.File, List CliMonad.Warning )
+file : { namespace : String, generateTodos : Bool } -> OpenApi.OpenApi -> Result String ( Elm.File, List Warning )
 file { namespace, generateTodos } apiSpec =
     CliMonad.combine
         [ pathDeclarations
@@ -188,6 +192,7 @@ schemaToDeclarations name schema =
         |> CliMonad.andThen
             (\ann ->
                 let
+                    typeName : TypeName
                     typeName =
                         typifyName name
                 in
@@ -236,6 +241,7 @@ responseToDeclarations name reference =
     case OpenApi.Reference.toConcrete reference of
         Just response ->
             let
+                content : Dict.Dict String OpenApi.MediaType.MediaType
                 content =
                     OpenApi.Response.content response
             in
@@ -284,6 +290,7 @@ toRequestFunctions method url operation =
                     replacedUrl : CliMonad (Elm.Expression -> Elm.Expression)
                     replacedUrl =
                         let
+                            params : List (OpenApi.Reference.ReferenceOr OpenApi.Parameter.Parameter)
                             params =
                                 OpenApi.Operation.parameters operation
                         in
@@ -505,6 +512,7 @@ toRequestFunctions method url operation =
                             authorizationInfo
                             (CliMonad.typeToAnnotation successType)
 
+                    authorizationInfo : CliMonad AuthorizationInfo
                     authorizationInfo =
                         operationToAuthorizationInfo operation
 
@@ -655,12 +663,14 @@ contentToContentSchema content =
 
                                 Nothing ->
                                     let
+                                        msg : String
                                         msg =
                                             "The content doesn't have an application/json, text/html or text/plain option, it has " ++ String.join ", " (Dict.keys content)
                                     in
                                     fallback
                                         |> Maybe.withDefault (CliMonad.fail msg)
 
+        stringContent : String -> OpenApi.MediaType.MediaType -> CliMonad ContentSchema
         stringContent mime htmlSchema =
             CliMonad.succeed htmlSchema
                 |> stepOrFail ("The request's " ++ mime ++ " content option doesn't have a schema")
@@ -744,6 +754,7 @@ toConfigParamAnnotation { operation, requireToMsg, successAnnotation, authorizat
 operationToUrlParams : OpenApi.Operation.Operation -> CliMonad (List ( String, Elm.Annotation.Annotation ))
 operationToUrlParams operation =
     let
+        params : List (OpenApi.Reference.ReferenceOr OpenApi.Parameter.Parameter)
         params =
             OpenApi.Operation.parameters operation
     in
@@ -1147,10 +1158,11 @@ typeToEncoder type_ =
 
         Object properties ->
             let
+                propertiesList : List ( FieldName, Field )
                 propertiesList =
-                    properties
-                        |> FastDict.toList
+                    FastDict.toList properties
 
+                allRequired : Bool
                 allRequired =
                     List.all (\( _, { required } ) -> required) propertiesList
             in
@@ -1377,9 +1389,11 @@ decodeOptionalField :
     }
 decodeOptionalField =
     let
+        decoderAnnotation : Elm.Annotation.Annotation
         decoderAnnotation =
             Gen.Json.Decode.annotation_.decoder (Elm.Annotation.var "t")
 
+        resultAnnotation : Elm.Annotation.Annotation
         resultAnnotation =
             Gen.Json.Decode.annotation_.decoder (Gen.Maybe.annotation_.maybe <| Elm.Annotation.var "t")
     in
@@ -1489,6 +1503,7 @@ schemaToType schema =
                 nullable =
                     CliMonad.map Nullable
 
+                singleTypeToType : Json.Schema.Definitions.SingleType -> CliMonad Type
                 singleTypeToType singleType =
                     case singleType of
                         Json.Schema.Definitions.ObjectType ->
@@ -1647,6 +1662,7 @@ objectSchemaToType subSchema =
         propertiesFromSchema : Json.Schema.Definitions.SubSchema -> CliMonad (Dict String Field)
         propertiesFromSchema sch =
             let
+                requiredSet : Set String
                 requiredSet =
                     sch.required
                         |> Maybe.withDefault []
@@ -1712,6 +1728,7 @@ objectSchemaToType subSchema =
                         _ ->
                             CliMonad.fail <| "Cannot understand reference " ++ ref
 
+        propertiesFromAllOf : CliMonad (Dict String Field)
         propertiesFromAllOf =
             subSchema.allOf
                 |> Maybe.withDefault []

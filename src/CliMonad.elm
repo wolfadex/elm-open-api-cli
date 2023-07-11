@@ -1,6 +1,6 @@
 module CliMonad exposing (CliMonad, Warning, andThen, andThen2, combine, combineMap, errorToWarning, fail, fromApiSpec, map, map2, map3, recordType, run, succeed, todo, todoWithDefault, typeToAnnotation, typeToAnnotationMaybe, withPath, withWarning)
 
-import Common exposing (Field, Object, OneOfData, Type(..), TypeName, toValueName)
+import Common exposing (Field, Object, OneOfData, Type(..), TypeName, VariantName, toValueName)
 import Elm
 import Elm.Annotation
 import FastDict exposing (Dict)
@@ -188,11 +188,13 @@ oneOfDeclaration :
     -> CliMonad Elm.Declaration
 oneOfDeclaration ( oneOfName, variants ) =
     let
+        variantDeclaration : { name : VariantName, type_ : Type } -> CliMonad Elm.Variant
         variantDeclaration { name, type_ } =
             typeToAnnotation type_
                 |> map
                     (\variantAnnotation ->
                         let
+                            variantName : VariantName
                             variantName =
                                 oneOfName ++ "_" ++ name
                         in
@@ -257,6 +259,7 @@ objectToAnnotation config fields =
 fieldToAnnotation : { useMaybe : Bool } -> Field -> CliMonad Elm.Annotation.Annotation
 fieldToAnnotation { useMaybe } { type_, required } =
     let
+        annotation : CliMonad Elm.Annotation.Annotation
         annotation =
             if useMaybe then
                 typeToAnnotationMaybe type_

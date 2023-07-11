@@ -6,7 +6,6 @@ import BackendTask.File
 import Cli.Option
 import Cli.OptionsParser
 import Cli.Program
-import Common exposing (Type(..))
 import FatalError
 import Json.Decode
 import Json.Encode

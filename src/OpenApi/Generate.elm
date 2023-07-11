@@ -428,7 +428,7 @@ toRequestFunctions method url operation =
                                     CliMonad.map3
                                         (\toBody paramType replaced ->
                                             ( Elm.fn
-                                                ( "config", Just paramType )
+                                                ( "config", Nothing )
                                                 (\config ->
                                                     Gen.Http.call_.request
                                                         (Elm.record
@@ -471,7 +471,7 @@ toRequestFunctions method url operation =
                                 CliMonad.map3
                                     (\toBody paramType replaced ->
                                         ( Elm.fn
-                                            ( "config", Just paramType )
+                                            ( "config", Nothing )
                                             (\config ->
                                                 Gen.Http.call_.task
                                                     (Elm.record

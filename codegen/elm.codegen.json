@@ -10,8 +10,6 @@
             "elm-community/json-extra": "4.3.0",
             "elm/url": "1.0.0"
         },
-        "local": [
-            "codegen/helpers/"
-        ]
+        "local": []
     }
 }

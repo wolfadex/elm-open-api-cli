@@ -27,11 +27,9 @@ getSchema refName =
 getAlias : List String -> CliMonad Json.Schema.Definitions.Schema
 getAlias refUri =
     case refUri of
-        [ "#", "components", "schemas", schemaName ] ->
-            getSchema schemaName
+        [ "#", "components", _, name ] ->
+            getSchema name
 
-        -- [ "#", "components", "responses", responseName ] ->
-        --     succeed (Common.typifyName responseName)
         _ ->
             CliMonad.fail <| "Couldn't get the type ref (" ++ String.join "/" refUri ++ ") for the response"
 

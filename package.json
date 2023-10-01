@@ -11,12 +11,12 @@
   "author": "Wolfgang Schuster",
   "license": "MIT",
   "devDependencies": {
+    "@lydell/elm-json": "^0.2.13-1",
     "@openapitools/openapi-generator-cli": "^2.5.2",
     "@redocly/cli": "^1.0.0-beta.110",
     "elm-codegen": "^0.3.0",
-    "elm-json": "^0.2.13",
     "elm-optimize-level-2": "^0.3.5",
-    "elm-pages": "^3.0.6",
-    "elm-review": "^2.10.2"
+    "elm-pages": "^3.0.8",
+    "elm-review": "^2.10.3"
   }
 }

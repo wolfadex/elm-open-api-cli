@@ -34,3 +34,9 @@ The general flow of the app is: parse args & read in the spec using `elm-pages`,
 - This was setup with Nix, and I'm not a Nix expert.
 - This currently compiles everything into a single file. This isn't neessarily bad as Elm has live-code-inclusion, but it does make it harder to work with. Maybe we should compile to multiple modules?
   - The GitHub Spec currently generates 120k+ loc, well below the ~1M loc limit for a module.
+
+## Thank you
+
+- [miniBill](https://github.com/miniBill/) for your **many** contributions
+- [elm-pages](https://elm-pages.com/) for making it easy to write a CLI app in Elm
+- [Elm](https://elm-lang.org/) for an easy to use & maintain language

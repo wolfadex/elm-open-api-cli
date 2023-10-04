@@ -121,6 +121,7 @@ generateFileFromOpenApiSpec config apiSpec =
 
                 Nothing ->
                     let
+                        defaultNamespace : String
                         defaultNamespace =
                             apiSpec
                                 |> OpenApi.info
@@ -154,6 +155,7 @@ generateFileFromOpenApiSpec config apiSpec =
                         Nothing ->
                             defaultNamespace
 
+        generateTodos : Bool
         generateTodos =
             List.member
                 (String.toLower <| Maybe.withDefault "no" config.generateTodos)
@@ -176,6 +178,7 @@ generateFileFromOpenApiSpec config apiSpec =
         |> BackendTask.andThen
             (\{ contents, path } ->
                 let
+                    outputPath : String
                     outputPath =
                         Maybe.withDefault
                             ([ "generated", path ]

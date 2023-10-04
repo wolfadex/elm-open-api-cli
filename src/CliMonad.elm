@@ -399,11 +399,8 @@ stepOrFail msg f =
 refToTypeName : List String -> CliMonad TypeName
 refToTypeName ref =
     case ref of
-        [ "#", "components", "schemas", schemaName ] ->
-            succeed (Common.typifyName schemaName)
-
-        [ "#", "components", "responses", responseName ] ->
-            succeed (Common.typifyName responseName)
+        [ "#", "components", _, name ] ->
+            succeed (Common.typifyName name)
 
         _ ->
             fail <| "Couldn't get the type ref (" ++ String.join "/" ref ++ ") for the response"

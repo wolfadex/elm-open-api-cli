@@ -75,6 +75,7 @@ file { namespace, generateTodos } apiSpec =
             ]
         , componentDeclarations
         , responsesDeclarations
+        , requestBodiesDeclarations
         ]
         |> CliMonad.map List.concat
         |> CliMonad.run
@@ -167,6 +168,24 @@ responsesDeclarations =
         |> CliMonad.map List.concat
 
 
+requestBodiesDeclarations : CliMonad (List Elm.Declaration)
+requestBodiesDeclarations =
+    CliMonad.fromApiSpec
+        (OpenApi.components
+            >> Maybe.map OpenApi.Components.requestBodies
+            >> Maybe.withDefault Dict.empty
+        )
+        |> CliMonad.andThen
+            (Dict.foldl
+                (\name schema ->
+                    CliMonad.map2 (::)
+                        (requestBodyToDeclarations name schema)
+                )
+                (CliMonad.succeed [])
+            )
+        |> CliMonad.map List.concat
+
+
 componentDeclarations : CliMonad (List Elm.Declaration)
 componentDeclarations =
     CliMonad.fromApiSpec
@@ -183,6 +202,47 @@ componentDeclarations =
                 (CliMonad.succeed [])
             )
         |> CliMonad.map List.concat
+
+
+unitDeclarations : String -> CliMonad (List Elm.Declaration)
+unitDeclarations name =
+    let
+        typeName : TypeName
+        typeName =
+            typifyName name
+    in
+    CliMonad.combine
+        [ Elm.alias typeName Elm.Annotation.unit
+            |> Elm.exposeWith
+                { exposeConstructor = False
+                , group = Just "Types"
+                }
+            |> CliMonad.succeed
+        , CliMonad.map
+            (\schemaDecoder ->
+                Elm.declaration ("decode" ++ typeName)
+                    (schemaDecoder
+                        |> Elm.withType (Gen.Json.Decode.annotation_.decoder (Elm.Annotation.named [] typeName))
+                    )
+                    |> Elm.exposeWith
+                        { exposeConstructor = False
+                        , group = Just "Decoders"
+                        }
+            )
+            (typeToDecoder Unit)
+        , CliMonad.map
+            (\encoder ->
+                Elm.declaration ("encode" ++ typeName)
+                    (Elm.functionReduced "rec" encoder
+                        |> Elm.withType (Elm.Annotation.function [ Elm.Annotation.named [] typeName ] Gen.Json.Encode.annotation_.value)
+                    )
+                    |> Elm.exposeWith
+                        { exposeConstructor = False
+                        , group = Just "Encoders"
+                        }
+            )
+            (typeToEncoder Unit)
+        ]
 
 
 schemaToDeclarations : String -> Json.Schema.Definitions.Schema -> CliMonad (List Elm.Declaration)
@@ -246,10 +306,33 @@ responseToDeclarations name reference =
             in
             if Dict.isEmpty content then
                 -- If there is no content then we go with the unit value, `()` as the response type
-                CliMonad.succeed []
+                unitDeclarations name
 
             else
                 responseToSchema response
+                    |> CliMonad.withPath name
+                    |> CliMonad.andThen (schemaToDeclarations name)
+
+        Nothing ->
+            CliMonad.fail "Could not convert reference to concrete value"
+                |> CliMonad.withPath name
+
+
+requestBodyToDeclarations : String -> OpenApi.Reference.ReferenceOr OpenApi.RequestBody.RequestBody -> CliMonad (List Elm.Declaration)
+requestBodyToDeclarations name reference =
+    case OpenApi.Reference.toConcrete reference of
+        Just requestBody ->
+            let
+                content : Dict.Dict String OpenApi.MediaType.MediaType
+                content =
+                    OpenApi.RequestBody.content requestBody
+            in
+            if Dict.isEmpty content then
+                -- If there is no content then we go with the unit value, `()` as the requestBody type
+                unitDeclarations name
+
+            else
+                requestBodyToSchema requestBody
                     |> CliMonad.withPath name
                     |> CliMonad.andThen (schemaToDeclarations name)
 
@@ -609,6 +692,31 @@ operationToAuthorizationInfo operation =
                       )
                     ]
                 , scopes = ss
+                }
+
+        [ [ ( "Token", [] ) ] ] ->
+            CliMonad.succeed
+                { headers =
+                    \config ->
+                        [ Gen.Http.call_.header (Elm.string "authorization")
+                            (Elm.Op.append
+                                (Elm.string "Token ")
+                                (config
+                                    |> Elm.get "authorization"
+                                    |> Elm.get "token"
+                                )
+                            )
+                        ]
+                , params =
+                    [ ( "authorization"
+                      , Elm.Annotation.record
+                            [ ( "token"
+                              , Elm.Annotation.string
+                              )
+                            ]
+                      )
+                    ]
+                , scopes = []
                 }
 
         _ ->
@@ -1524,6 +1632,18 @@ responseToSchema response =
                 >> Dict.get "application/json"
             )
         |> CliMonad.stepOrFail "The response's application/json content option doesn't have a schema"
+            OpenApi.MediaType.schema
+        |> CliMonad.map OpenApi.Schema.get
+
+
+requestBodyToSchema : OpenApi.RequestBody.RequestBody -> CliMonad Json.Schema.Definitions.Schema
+requestBodyToSchema requestBody =
+    CliMonad.succeed requestBody
+        |> CliMonad.stepOrFail "Could not get application's application/json content"
+            (OpenApi.RequestBody.content
+                >> Dict.get "application/json"
+            )
+        |> CliMonad.stepOrFail "The request body's application/json content option doesn't have a schema"
             OpenApi.MediaType.schema
         |> CliMonad.map OpenApi.Schema.get
 

@@ -69,7 +69,7 @@ run =
 decodeOpenApiSpecOrFail : String -> BackendTask.BackendTask FatalError.FatalError OpenApi.OpenApi
 decodeOpenApiSpecOrFail input =
     let
-        -- TODO: Better handling of errors here
+        -- TODO: Better handling of errors: https://github.com/wolfadex/elm-api-sdk-generator/issues/40
         decoded : Result Json.Decode.Error OpenApi.OpenApi
         decoded =
             case Yaml.Decode.fromString yamlToJsonDecoder input of

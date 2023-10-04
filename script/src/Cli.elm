@@ -69,6 +69,7 @@ run =
 decodeOpenApiSpecOrFail : String -> BackendTask.BackendTask FatalError.FatalError OpenApi.OpenApi
 decodeOpenApiSpecOrFail input =
     let
+        -- TODO: Better handling of errors here
         decoded : Result Json.Decode.Error OpenApi.OpenApi
         decoded =
             case Yaml.Decode.fromString yamlToJsonDecoder input of

@@ -7,7 +7,7 @@
   "scripts": {
     "elm-pages": "elm-pages",
     "dev": "elm-pages run src/Cli.elm",
-    "build": "elm-pages bundle-script script/src/Cli.elm --output dist/elm-open-api.js --debug",
+    "build": "elm-pages bundle-script src/Cli.elm --output dist/elm-open-api.js --debug",
     "review": "elm-review --watch --fix"
   },
   "author": "Wolfgang Schuster",

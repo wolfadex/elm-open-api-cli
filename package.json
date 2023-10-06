@@ -1,11 +1,10 @@
 {
   "name": "elm-open-api",
-  "version": "0.1.0",
+  "version": "0.1.0-beta.0",
   "description": "A tool for generating Elm SDKs from OpenAPI Specs.",
   "main": "dist/elm-open-api.js",
   "type": "module",
   "scripts": {
-    "elm-pages": "elm-pages",
     "dev": "elm-pages run src/Cli.elm",
     "build": "elm-pages bundle-script src/Cli.elm --output dist/elm-open-api.js --debug",
     "review": "elm-review --watch --fix"

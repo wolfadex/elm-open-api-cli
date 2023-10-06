@@ -3,6 +3,7 @@
   "version": "0.1.0-alpha.0",
   "description": "A tool for generating Elm SDKs from OpenAPI Specs.",
   "main": "dist/elm-open-api.js",
+  "bin": "dist/elm-open-api.js",
   "type": "module",
   "scripts": {
     "dev": "elm-pages run src/Cli.elm",

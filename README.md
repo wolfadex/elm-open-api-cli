@@ -6,6 +6,10 @@ Generate an Elm SDK from an OpenAPI Spec (OAS).
 
 To allow developers to generate an Elm module(s) from an OpenAPI Spec. This is primarily for developers wanting to integrate with a 3rd party service that doesn't provide an Elm SDK for their service. It can also be used within a company where the back end generates an OAS from the written code or an OAS is written and used to generate both the backend and Elm SDKs.
 
+## Example Usage
+
+[A RealWorld app](https://github.com/wolfadex/realworld-app) using a generated SDK to demonstrate how to use it.
+
 ## Getting Started
 
 - `npm install -D elm-open-api`
@@ -28,12 +32,6 @@ The general flow of the app is: parse args & read in the spec using `elm-pages`,
 - Start coding!
 - Run `npm run dev <path to oas spec>.json`
   - e.g. `npm run dev ./example/github-spec.json` will produce `generated/GitHub_v3_REST_API.elm`
-
-## Notes
-
-- This was setup with Nix, and I'm not a Nix expert.
-- This currently compiles everything into a single file. This isn't neessarily bad as Elm has live-code-inclusion, but it does make it harder to work with. Maybe we should compile to multiple modules?
-  - The GitHub Spec currently generates 120k+ loc, well below the ~1M loc limit for a module.
 
 ## Thank you
 

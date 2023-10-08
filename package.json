@@ -1,21 +1,27 @@
 {
-  "name": "elm-api-sdk-generator",
-  "version": "0.1.0",
+  "name": "elm-open-api",
+  "version": "0.1.0-alpha.3",
   "description": "A tool for generating Elm SDKs from OpenAPI Specs.",
-  "main": "dist/elm-oas.js",
+  "main": "dist/elm-open-api.js",
+  "bin": "dist/elm-open-api.js",
+  "type": "module",
   "scripts": {
-    "elm-pages": "elm-pages",
-    "dev": "elm-pages run script/src/Cli.elm",
-    "build": "elm-pages bundle-script script/src/Cli.elm --output dist/elm-oas.js"
+    "dev": "elm-pages run src/Cli.elm",
+    "build": "elm-pages bundle-script src/Cli.elm --output dist/elm-open-api.js --debug",
+    "review": "elm-review --watch --fix"
   },
   "author": "Wolfgang Schuster",
-  "license": "ISC",
+  "license": "MIT",
   "devDependencies": {
+    "@lydell/elm-json": "^0.2.13-1",
     "@openapitools/openapi-generator-cli": "^2.5.2",
     "@redocly/cli": "^1.0.0-beta.110",
     "elm-codegen": "^0.3.0",
-    "elm-json": "^0.2.13",
-    "elm-pages": "^3.0.6",
-    "elm-review": "^2.10.2"
+    "elm-optimize-level-2": "^0.3.5",
+    "elm-pages": "^3.0.8",
+    "elm-review": "^2.10.3"
+  },
+  "volta": {
+    "node": "18.18.0"
   }
 }

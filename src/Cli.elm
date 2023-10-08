@@ -20,8 +20,8 @@ import Yaml.Decode
 
 type alias CliOptions =
     { entryFilePath : String
-    , outputFile : Maybe String
-    , namespace : Maybe String
+    , outputDirectory : String
+    , outputModuleName : Maybe String
     , generateTodos : Maybe String
     }
 
@@ -34,9 +34,11 @@ program =
                 |> Cli.OptionsParser.with
                     (Cli.Option.requiredPositionalArg "entryFilePath")
                 |> Cli.OptionsParser.with
-                    (Cli.Option.optionalKeywordArg "output")
+                    (Cli.Option.optionalKeywordArg "output-dir"
+                        |> Cli.Option.withDefault "generated"
+                    )
                 |> Cli.OptionsParser.with
-                    (Cli.Option.optionalKeywordArg "namespace")
+                    (Cli.Option.optionalKeywordArg "module-name")
                 |> Cli.OptionsParser.with
                     (Cli.Option.optionalKeywordArg "generateTodos")
             )
@@ -45,7 +47,7 @@ program =
 run : Pages.Script.Script
 run =
     Pages.Script.withCliOptions program
-        (\{ entryFilePath, outputFile, namespace, generateTodos } ->
+        (\{ entryFilePath, outputDirectory, outputModuleName, generateTodos } ->
             BackendTask.File.rawFile entryFilePath
                 |> BackendTask.mapError
                     (\error ->
@@ -62,7 +64,13 @@ run =
                                         "Uh oh! Decoding failure!"
                     )
                 |> BackendTask.andThen decodeOpenApiSpecOrFail
-                |> BackendTask.andThen (generateFileFromOpenApiSpec { outputFile = outputFile, namespace = namespace, generateTodos = generateTodos })
+                |> BackendTask.andThen
+                    (generateFileFromOpenApiSpec
+                        { outputDirectory = outputDirectory
+                        , outputModuleName = outputModuleName
+                        , generateTodos = generateTodos
+                        }
+                    )
         )
 
 
@@ -105,55 +113,34 @@ yamlToJsonDecoder =
 
 
 generateFileFromOpenApiSpec :
-    { outputFile : Maybe String
-    , namespace : Maybe String
+    { outputDirectory : String
+    , outputModuleName : Maybe String
     , generateTodos : Maybe String
     }
     -> OpenApi.OpenApi
     -> BackendTask.BackendTask FatalError.FatalError ()
 generateFileFromOpenApiSpec config apiSpec =
     let
-        fileNamespace : String
-        fileNamespace =
-            case config.namespace of
-                Just n ->
-                    n
+        moduleName : String
+        moduleName =
+            config.outputModuleName
+                |> Maybe.withDefault
+                    (apiSpec
+                        |> OpenApi.info
+                        |> OpenApi.Info.title
+                        |> OpenApi.Generate.makeNamespaceValid
+                        |> OpenApi.Generate.removeInvalidChars
+                    )
 
-                Nothing ->
-                    let
-                        defaultNamespace : String
-                        defaultNamespace =
-                            apiSpec
-                                |> OpenApi.info
-                                |> OpenApi.Info.title
-                                |> OpenApi.Generate.makeNamespaceValid
-                                |> OpenApi.Generate.removeInvalidChars
-                    in
-                    case config.outputFile of
-                        Just path ->
-                            let
-                                split : List String
-                                split =
-                                    String.split "/" path
-                            in
-                            case List.Extra.dropWhile ((/=) "generated") split of
-                                "generated" :: rest ->
-                                    rest
-                                        |> String.join "."
-                                        |> String.replace ".elm" ""
-
-                                _ ->
-                                    case List.Extra.dropWhile ((/=) "src") split of
-                                        "src" :: rest ->
-                                            rest
-                                                |> String.join "."
-                                                |> String.replace ".elm" ""
-
-                                        _ ->
-                                            defaultNamespace
-
-                        Nothing ->
-                            defaultNamespace
+        filePath : String
+        filePath =
+            config.outputDirectory
+                ++ "/"
+                ++ (moduleName
+                        |> String.split "."
+                        |> String.join "/"
+                   )
+                ++ ".elm"
 
         generateTodos : Bool
         generateTodos =
@@ -162,7 +149,7 @@ generateFileFromOpenApiSpec config apiSpec =
                 [ "y", "yes", "true" ]
     in
     OpenApi.Generate.file
-        { namespace = fileNamespace
+        { namespace = moduleName
         , generateTodos = generateTodos
         }
         apiSpec
@@ -180,12 +167,10 @@ generateFileFromOpenApiSpec config apiSpec =
                 let
                     outputPath : String
                     outputPath =
-                        Maybe.withDefault
-                            ([ "generated", path ]
-                                |> UrlPath.join
-                                |> UrlPath.toRelative
-                            )
-                            config.outputFile
+                        filePath
+                            |> String.split "/"
+                            |> UrlPath.join
+                            |> UrlPath.toRelative
                 in
                 Pages.Script.writeFile
                     { path = outputPath

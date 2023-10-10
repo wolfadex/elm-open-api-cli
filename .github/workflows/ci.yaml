@@ -5,7 +5,7 @@ on:
     branches:
       - main
 jobs:
-  lint & test:
+  lint-and-test:
     permissions:
       checks: write
     runs-on: ubuntu-latest

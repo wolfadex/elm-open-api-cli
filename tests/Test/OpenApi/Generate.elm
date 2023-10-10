@@ -62,7 +62,7 @@ suite =
                                 OpenApi.Generate.sanitizeModuleName inputName
                                     |> Maybe.withDefault "Api"
 
-                            genFile : Result String ( Elm.File, List Elm.Warning )
+                            genFile : Result String ( Elm.File, List String )
                             genFile =
                                 OpenApi.Generate.file
                                     { namespace = moduleName

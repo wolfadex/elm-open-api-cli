@@ -9,6 +9,7 @@
     "dev": "elm-pages run src/Cli.elm",
     "build": "elm-pages bundle-script src/Cli.elm --output dist/elm-open-api.js --debug",
     "review": "elm-review --watch --fix",
+    "test": "elm-test",
     "test:watch": "elm-test --watch"
   },
   "author": "Wolfgang Schuster",
@@ -17,7 +18,9 @@
     "@lydell/elm-json": "^0.2.13-1",
     "@openapitools/openapi-generator-cli": "^2.5.2",
     "@redocly/cli": "^1.0.0-beta.110",
+    "elm": "^0.19.1-5",
     "elm-codegen": "^0.3.0",
+    "elm-format": "^0.8.7",
     "elm-optimize-level-2": "^0.3.5",
     "elm-pages": "^3.0.8",
     "elm-review": "^2.10.3",

@@ -8,7 +8,9 @@
   "scripts": {
     "dev": "elm-pages run src/Cli.elm",
     "build": "elm-pages bundle-script src/Cli.elm --output dist/elm-open-api.js --debug",
-    "review": "elm-review --watch --fix",
+    "review": "elm-review",
+    "review:watch": "elm-review --watch --fix",
+    "format": "elm-format src tests --validate",
     "test": "elm-test",
     "test:watch": "elm-test --watch"
   },

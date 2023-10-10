@@ -1,0 +1,17 @@
+name: Merge Checks
+run-name: ${{ github.actor }} is testing out GitHub Actions 🚀
+on:
+  pull_request:
+    branches:
+      - main
+jobs:
+  lint-and-test:
+    permissions:
+      checks: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - run: npm ci
+      - run: npm run format
+      - run: npm run review
+      - run: npm run test

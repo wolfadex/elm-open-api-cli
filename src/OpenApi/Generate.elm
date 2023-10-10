@@ -1,4 +1,9 @@
-module OpenApi.Generate exposing (ContentSchema(..), Mime, file, makeNamespaceValid, removeInvalidChars)
+module OpenApi.Generate exposing
+    ( ContentSchema(..)
+    , Mime
+    , file
+    , sanitizeModuleName
+    )
 
 import CliMonad exposing (CliMonad)
 import Common exposing (Field, FieldName, Type(..), TypeName, toValueName, typifyName)
@@ -38,6 +43,7 @@ import OpenApi.SecurityRequirement
 import OpenApi.Server
 import SchemaUtils exposing (getAlias, schemaToAnnotation, schemaToType)
 import String.Extra
+import Util.List
 
 
 type alias Mime =
@@ -1661,6 +1667,77 @@ makeNamespaceValid str =
         str
 
 
+sanitizeModuleName : String -> Maybe String
+sanitizeModuleName str =
+    let
+        finalName : String
+        finalName =
+            String.filter
+                (\char ->
+                    Char.isAlphaNum char
+                        || (char == '_')
+                        || (char == '-')
+                        || (char == ' ')
+                        || (char == ':')
+                )
+                str
+                |> String.replace "_" " "
+                |> String.replace "-" " "
+                |> String.replace ":" " "
+                |> String.words
+                |> Util.List.mapFirst numberToString
+                |> List.map (String.toLower >> String.Extra.toSentenceCase)
+                |> String.concat
+    in
+    if String.isEmpty finalName then
+        Nothing
+
+    else
+        Just finalName
+
+
+numberToString : String -> String
+numberToString str =
+    case String.uncons str of
+        Just ( first, rest ) ->
+            case first of
+                '0' ->
+                    "Zero" ++ rest
+
+                '1' ->
+                    "One" ++ rest
+
+                '2' ->
+                    "Two" ++ rest
+
+                '3' ->
+                    "Three" ++ rest
+
+                '4' ->
+                    "Four" ++ rest
+
+                '5' ->
+                    "Five" ++ rest
+
+                '6' ->
+                    "Six" ++ rest
+
+                '7' ->
+                    "Seven" ++ rest
+
+                '8' ->
+                    "Eight" ++ rest
+
+                '9' ->
+                    "Nine" ++ rest
+
+                _ ->
+                    str
+
+        Nothing ->
+            str
+
+
 removeInvalidChars : String -> String
 removeInvalidChars str =
     String.filter (\char -> char /= '\'') str
@@ -1674,4 +1751,7 @@ invalidModuleNameChars =
     , '{'
     , '}'
     , '-'
+    , ':'
+    , '('
+    , ')'
     ]

@@ -9,7 +9,6 @@ import Cli.Program
 import FatalError
 import Json.Decode
 import Json.Encode
-import List.Extra
 import OpenApi
 import OpenApi.Generate
 import OpenApi.Info
@@ -123,14 +122,16 @@ generateFileFromOpenApiSpec config apiSpec =
     let
         moduleName : String
         moduleName =
-            config.outputModuleName
-                |> Maybe.withDefault
-                    (apiSpec
+            case config.outputModuleName of
+                Just modName ->
+                    modName
+
+                Nothing ->
+                    apiSpec
                         |> OpenApi.info
                         |> OpenApi.Info.title
-                        |> OpenApi.Generate.makeNamespaceValid
-                        |> OpenApi.Generate.removeInvalidChars
-                    )
+                        |> OpenApi.Generate.sanitizeModuleName
+                        |> Maybe.withDefault "Api"
 
         filePath : String
         filePath =
@@ -163,7 +164,7 @@ generateFileFromOpenApiSpec config apiSpec =
                     |> BackendTask.map (\_ -> decls)
             )
         |> BackendTask.andThen
-            (\{ contents, path } ->
+            (\{ contents } ->
                 let
                     outputPath : String
                     outputPath =

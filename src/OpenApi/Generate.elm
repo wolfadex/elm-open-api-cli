@@ -17,7 +17,9 @@ import Elm.ToString
 import FastDict
 import Gen.Basics
 import Gen.Bytes
+import Gen.Bytes.Decode
 import Gen.Debug
+import Gen.Dict
 import Gen.Http
 import Gen.Json.Decode
 import Gen.Json.Decode.Extra
@@ -75,7 +77,9 @@ file { namespace, generateTodos } apiSpec =
         , CliMonad.succeed
             [ decodeOptionalField.declaration
             , responseToResult.declaration
-            , jsonResolver.declaration
+            , customHttpError
+            , expectJsonCustom.declaration
+            , jsonResolverCustom.declaration
             , whateverResolver.declaration
             , nullableType
             ]
@@ -349,19 +353,20 @@ requestBodyToDeclarations name reference =
 
 toRequestFunctions : String -> String -> OpenApi.Operation.Operation -> CliMonad (List Elm.Declaration)
 toRequestFunctions method url operation =
-    operationToSuccessTypeAndExpectAndResolver operation
+    let
+        functionName : String
+        functionName =
+            (OpenApi.Operation.operationId operation
+                |> Maybe.withDefault url
+            )
+                |> makeNamespaceValid
+                |> removeInvalidChars
+                |> String.Extra.camelize
+    in
+    operationToTypesExpectAndResolver functionName operation
         |> CliMonad.andThen
-            (\( successType, toExpect, resolver ) ->
+            (\{ successType, bodyTypeAnnotation, errorTypeDeclaration, errorTypeAnnotation, toExpect, resolver } ->
                 let
-                    functionName : String
-                    functionName =
-                        (OpenApi.Operation.operationId operation
-                            |> Maybe.withDefault url
-                        )
-                            |> makeNamespaceValid
-                            |> removeInvalidChars
-                            |> String.Extra.camelize
-
                     replacedUrl : CliMonad (Elm.Expression -> Elm.Expression)
                     replacedUrl =
                         let
@@ -543,6 +548,8 @@ toRequestFunctions method url operation =
                                                     { operation = operation
                                                     , requireToMsg = True
                                                     , successAnnotation = successAnnotation
+                                                    , errorBodyAnnotation = bodyTypeAnnotation
+                                                    , errorTypeAnnotation = errorTypeAnnotation
                                                     , authorizationInfo = auth
                                                     , bodyParams = bp
                                                     }
@@ -576,7 +583,12 @@ toRequestFunctions method url operation =
                                         , Elm.Annotation.function
                                             [ paramType ]
                                             (Gen.Task.annotation_.task
-                                                Gen.Http.annotation_.error
+                                                (Elm.Annotation.namedWith []
+                                                    "Error"
+                                                    [ errorTypeAnnotation
+                                                    , bodyTypeAnnotation
+                                                    ]
+                                                )
                                                 successAnnotation
                                             )
                                         )
@@ -588,6 +600,8 @@ toRequestFunctions method url operation =
                                                 { operation = operation
                                                 , requireToMsg = False
                                                 , successAnnotation = successAnnotation
+                                                , errorBodyAnnotation = bodyTypeAnnotation
+                                                , errorTypeAnnotation = errorTypeAnnotation
                                                 , authorizationInfo = auth
                                                 , bodyParams = bp
                                                 }
@@ -649,6 +663,7 @@ toRequestFunctions method url operation =
                                 |> Elm.withType requestTskType
                                 |> Elm.declaration (functionName ++ "Task")
                                 |> Elm.withDocumentation doc
+                            , errorTypeDeclaration
                             ]
                         )
                         documentation
@@ -834,18 +849,28 @@ toConfigParamAnnotation :
     { operation : OpenApi.Operation.Operation
     , requireToMsg : Bool
     , successAnnotation : Elm.Annotation.Annotation
+    , errorBodyAnnotation : Elm.Annotation.Annotation
+    , errorTypeAnnotation : Elm.Annotation.Annotation
     , authorizationInfo : AuthorizationInfo
     , bodyParams : List ( String, Elm.Annotation.Annotation )
     }
     -> CliMonad Elm.Annotation.Annotation
-toConfigParamAnnotation { operation, requireToMsg, successAnnotation, authorizationInfo, bodyParams } =
+toConfigParamAnnotation options =
     CliMonad.map
         (\urlParams ->
-            (authorizationInfo.params
-                ++ (if requireToMsg then
+            (options.authorizationInfo.params
+                ++ (if options.requireToMsg then
                         [ ( "toMsg"
                           , Elm.Annotation.function
-                                [ Gen.Result.annotation_.result Gen.Http.annotation_.error successAnnotation ]
+                                [ Gen.Result.annotation_.result
+                                    (Elm.Annotation.namedWith []
+                                        "Error"
+                                        [ options.errorTypeAnnotation
+                                        , options.errorBodyAnnotation
+                                        ]
+                                    )
+                                    options.successAnnotation
+                                ]
                                 (Elm.Annotation.var "msg")
                           )
                         ]
@@ -853,12 +878,12 @@ toConfigParamAnnotation { operation, requireToMsg, successAnnotation, authorizat
                     else
                         []
                    )
-                ++ bodyParams
+                ++ options.bodyParams
                 ++ urlParams
             )
                 |> CliMonad.recordType
         )
-        (operationToUrlParams operation)
+        (operationToUrlParams options.operation)
 
 
 operationToUrlParams : OpenApi.Operation.Operation -> CliMonad (List ( String, Elm.Annotation.Annotation ))
@@ -1137,16 +1162,31 @@ toConcreteParam param =
                     )
 
 
-operationToSuccessTypeAndExpectAndResolver : OpenApi.Operation.Operation -> CliMonad ( Type, (Elm.Expression -> Elm.Expression) -> Elm.Expression, Elm.Expression )
-operationToSuccessTypeAndExpectAndResolver operation =
+operationToTypesExpectAndResolver :
+    String
+    -> OpenApi.Operation.Operation
+    ->
+        CliMonad
+            { successType : Type
+            , bodyTypeAnnotation : Elm.Annotation.Annotation
+            , errorTypeDeclaration : Elm.Declaration
+            , errorTypeAnnotation : Elm.Annotation.Annotation
+            , toExpect : (Elm.Expression -> Elm.Expression) -> Elm.Expression
+            , resolver : Elm.Expression
+            }
+operationToTypesExpectAndResolver functionName operation =
     let
         responses : Dict.Dict String (OpenApi.Reference.ReferenceOr OpenApi.Response.Response)
         responses =
             OpenApi.Operation.responses operation
 
-        expectJson : Elm.Expression -> ((Elm.Expression -> Elm.Expression) -> Elm.Expression)
+        expectJson : Elm.Expression -> (Elm.Expression -> Elm.Expression) -> Elm.Expression
         expectJson decoder toMsg =
             Gen.Http.expectJson toMsg decoder
+
+        expectJsonBetter : Elm.Expression -> Elm.Expression -> (Elm.Expression -> Elm.Expression) -> Elm.Expression
+        expectJsonBetter errorDecoders successDecoder toMsg =
+            expectJsonCustom.call (toMsg (Elm.val "")) errorDecoders successDecoder
     in
     CliMonad.succeed responses
         |> CliMonad.stepOrFail
@@ -1157,6 +1197,155 @@ operationToSuccessTypeAndExpectAndResolver operation =
             getFirstSuccessResponse
         |> CliMonad.andThen
             (\( _, responseOrRef ) ->
+                let
+                    errorResponses : Dict.Dict String (OpenApi.Reference.ReferenceOr OpenApi.Response.Response)
+                    errorResponses =
+                        getErrorResponses responses
+
+                    toErrorVariant : String -> String
+                    toErrorVariant statusCode =
+                        String.Extra.toSentenceCase functionName ++ "_" ++ statusCode
+
+                    errorDecoders : CliMonad Elm.Expression
+                    errorDecoders =
+                        errorResponses
+                            |> Dict.map
+                                (\statusCode errRespOrRef ->
+                                    case OpenApi.Reference.toConcrete errRespOrRef of
+                                        Just errResp ->
+                                            OpenApi.Response.content errResp
+                                                |> contentToContentSchema
+                                                |> CliMonad.andThen
+                                                    (\contentSchema ->
+                                                        case contentSchema of
+                                                            JsonContent type_ ->
+                                                                typeToDecoder type_
+                                                                    |> CliMonad.map
+                                                                        (toErrorVariant statusCode
+                                                                            |> Elm.val
+                                                                            |> Gen.Json.Decode.call_.map
+                                                                        )
+
+                                                            StringContent _ ->
+                                                                CliMonad.succeed (Gen.Debug.todo "decode string err?")
+                                                                    |> CliMonad.map
+                                                                        (toErrorVariant statusCode
+                                                                            |> Elm.val
+                                                                            |> Gen.Json.Decode.call_.map
+                                                                        )
+
+                                                            BytesContent _ ->
+                                                                CliMonad.succeed (Gen.Debug.todo "decode bytes err?")
+                                                                    |> CliMonad.map
+                                                                        (toErrorVariant statusCode
+                                                                            |> Elm.val
+                                                                            |> Gen.Json.Decode.call_.map
+                                                                        )
+
+                                                            EmptyContent ->
+                                                                CliMonad.succeed (Gen.Debug.todo "decode empty err?")
+                                                                    |> CliMonad.map
+                                                                        (toErrorVariant statusCode
+                                                                            |> Elm.val
+                                                                            |> Gen.Json.Decode.call_.map
+                                                                        )
+                                                    )
+
+                                        Nothing ->
+                                            CliMonad.succeed errRespOrRef
+                                                |> CliMonad.stepOrFail "I found an error response, but I couldn't convert it to a concrete decoder"
+                                                    OpenApi.Reference.toReference
+                                                |> CliMonad.andThen
+                                                    (\ref ->
+                                                        let
+                                                            inner : String
+                                                            inner =
+                                                                OpenApi.Reference.ref ref
+                                                        in
+                                                        CliMonad.refToTypeName (String.split "/" inner)
+                                                            |> CliMonad.map
+                                                                (\typeName ->
+                                                                    Elm.val ("decode" ++ typeName)
+                                                                )
+                                                            |> CliMonad.map
+                                                                (toErrorVariant statusCode
+                                                                    |> Elm.val
+                                                                    |> Gen.Json.Decode.call_.map
+                                                                )
+                                                    )
+                                )
+                            |> CliMonad.combineDict
+                            |> CliMonad.map
+                                (\decoders ->
+                                    Dict.toList decoders
+                                        |> List.map (\( k, v ) -> Elm.tuple (Elm.string k) v)
+                                        |> Elm.list
+                                        |> Gen.Dict.call_.fromList
+                                )
+
+                    errorTypeDeclaration : CliMonad ( Elm.Declaration, Elm.Annotation.Annotation )
+                    errorTypeDeclaration =
+                        errorResponses
+                            |> Dict.map
+                                (\_ errRespOrRef ->
+                                    case OpenApi.Reference.toConcrete errRespOrRef of
+                                        Just errResp ->
+                                            OpenApi.Response.content errResp
+                                                |> contentToContentSchema
+                                                |> CliMonad.andThen
+                                                    (\contentSchema ->
+                                                        case contentSchema of
+                                                            JsonContent type_ ->
+                                                                CliMonad.typeToAnnotation type_
+
+                                                            StringContent _ ->
+                                                                CliMonad.succeed Elm.Annotation.string
+
+                                                            BytesContent _ ->
+                                                                CliMonad.succeed Gen.Bytes.annotation_.bytes
+
+                                                            EmptyContent ->
+                                                                CliMonad.succeed Elm.Annotation.unit
+                                                    )
+
+                                        Nothing ->
+                                            CliMonad.succeed errRespOrRef
+                                                |> CliMonad.stepOrFail "I found an error response, but I couldn't convert it to a concrete annotation"
+                                                    OpenApi.Reference.toReference
+                                                |> CliMonad.andThen
+                                                    (\ref ->
+                                                        let
+                                                            inner : String
+                                                            inner =
+                                                                OpenApi.Reference.ref ref
+                                                        in
+                                                        CliMonad.refToTypeName (String.split "/" inner)
+                                                            |> CliMonad.map
+                                                                (\typeName ->
+                                                                    Elm.Annotation.named [] typeName
+                                                                )
+                                                    )
+                                )
+                            |> CliMonad.combineDict
+                            |> CliMonad.map
+                                (\dict ->
+                                    let
+                                        errorName : String
+                                        errorName =
+                                            String.Extra.toSentenceCase functionName ++ "_Error"
+                                    in
+                                    ( dict
+                                        |> Dict.toList
+                                        |> List.map (\( statusCode, annotation ) -> Elm.variantWith (toErrorVariant statusCode) [ annotation ])
+                                        |> Elm.customType errorName
+                                        |> Elm.exposeWith
+                                            { exposeConstructor = True
+                                            , group = Just "Types"
+                                            }
+                                    , Elm.Annotation.named [] errorName
+                                    )
+                                )
+                in
                 case OpenApi.Reference.toConcrete responseOrRef of
                     Just response ->
                         OpenApi.Response.content response
@@ -1165,35 +1354,58 @@ operationToSuccessTypeAndExpectAndResolver operation =
                                 (\contentSchema ->
                                     case contentSchema of
                                         JsonContent type_ ->
-                                            CliMonad.map
-                                                (\decoder ->
-                                                    ( type_
-                                                    , expectJson decoder
-                                                    , jsonResolver.call decoder
-                                                    )
+                                            CliMonad.map3
+                                                (\successDecoder errorDecoders_ ( errorTypeDeclaration_, errorTypeAnnotation ) ->
+                                                    { successType = type_
+                                                    , bodyTypeAnnotation = Elm.Annotation.string
+                                                    , errorTypeDeclaration = errorTypeDeclaration_
+                                                    , errorTypeAnnotation = errorTypeAnnotation
+                                                    , toExpect = expectJsonBetter errorDecoders_ successDecoder
+                                                    , resolver = jsonResolverCustom.call errorDecoders_ successDecoder
+                                                    }
                                                 )
                                                 (typeToDecoder type_)
+                                                errorDecoders
+                                                errorTypeDeclaration
 
                                         StringContent _ ->
-                                            CliMonad.succeed
-                                                ( String
-                                                , Gen.Http.expectString
-                                                , Gen.Http.stringResolver responseToResult.call
+                                            CliMonad.map
+                                                (\( errorTypeDeclaration_, errorTypeAnnotation ) ->
+                                                    { successType = String
+                                                    , bodyTypeAnnotation = Elm.Annotation.string
+                                                    , errorTypeDeclaration = errorTypeDeclaration_
+                                                    , errorTypeAnnotation = errorTypeAnnotation
+                                                    , toExpect = Gen.Http.expectString
+                                                    , resolver = Gen.Http.stringResolver responseToResult.call
+                                                    }
                                                 )
+                                                errorTypeDeclaration
 
                                         BytesContent _ ->
-                                            CliMonad.succeed
-                                                ( Bytes
-                                                , \toMsg -> Gen.Http.expectBytes toMsg Gen.Basics.values_.identity
-                                                , Gen.Http.bytesResolver responseToResult.call
+                                            CliMonad.map
+                                                (\( errorTypeDeclaration_, errorTypeAnnotation ) ->
+                                                    { successType = Bytes
+                                                    , bodyTypeAnnotation = Gen.Bytes.annotation_.bytes
+                                                    , errorTypeDeclaration = errorTypeDeclaration_
+                                                    , errorTypeAnnotation = errorTypeAnnotation
+                                                    , toExpect = \toMsg -> Gen.Http.expectBytes toMsg Gen.Basics.values_.identity
+                                                    , resolver = Gen.Http.bytesResolver responseToResult.call
+                                                    }
                                                 )
+                                                errorTypeDeclaration
 
                                         EmptyContent ->
-                                            CliMonad.succeed
-                                                ( Unit
-                                                , Gen.Http.expectWhatever
-                                                , whateverResolver.call []
+                                            CliMonad.map
+                                                (\( errorTypeDeclaration_, errorTypeAnnotation ) ->
+                                                    { successType = Unit
+                                                    , bodyTypeAnnotation = Elm.Annotation.unit
+                                                    , errorTypeDeclaration = errorTypeDeclaration_
+                                                    , errorTypeAnnotation = errorTypeAnnotation
+                                                    , toExpect = Gen.Http.expectWhatever
+                                                    , resolver = whateverResolver.call []
+                                                    }
                                                 )
+                                                errorTypeDeclaration
                                 )
 
                     Nothing ->
@@ -1208,41 +1420,230 @@ operationToSuccessTypeAndExpectAndResolver operation =
                                             OpenApi.Reference.ref ref
                                     in
                                     CliMonad.refToTypeName (String.split "/" inner)
-                                        |> CliMonad.map
-                                            (\typeName ->
-                                                ( Common.ref inner
-                                                , expectJson <| Elm.val ("decode" ++ typeName)
-                                                , jsonResolver.call <| Elm.val ("decode" ++ typeName)
-                                                )
+                                        |> CliMonad.map3
+                                            (\errorDecoders_ ( errorTypeDeclaration_, errorTypeAnnotation ) typeName ->
+                                                { successType = Common.ref inner
+                                                , bodyTypeAnnotation = Elm.Annotation.string
+                                                , errorTypeDeclaration = errorTypeDeclaration_
+                                                , errorTypeAnnotation = errorTypeAnnotation
+                                                , toExpect = expectJsonBetter errorDecoders_ (Elm.val ("decode" ++ typeName))
+                                                , resolver = jsonResolverCustom.call errorDecoders_ <| Elm.val ("decode" ++ typeName)
+                                                }
                                             )
+                                            errorDecoders
+                                            errorTypeDeclaration
                                 )
             )
 
 
-jsonResolver :
+customHttpError : Elm.Declaration
+customHttpError =
+    Elm.customType "Error"
+        [ Elm.variantWith "BadUrl" [ Elm.Annotation.string ]
+        , Elm.variant "Timeout"
+        , Elm.variant "NetworkError"
+        , Elm.variantWith "KnownBadStatus" [ Elm.Annotation.int, Elm.Annotation.var "err" ]
+        , Elm.variantWith "UnknownBadStatus" [ Gen.Http.annotation_.metadata, Elm.Annotation.var "body" ]
+        , Elm.variantWith "BadErrorBody" [ Gen.Http.annotation_.metadata, Elm.Annotation.var "body" ]
+        , Elm.variantWith "BadBody" [ Gen.Http.annotation_.metadata, Elm.Annotation.var "body" ]
+        ]
+        |> Elm.exposeWith
+            { exposeConstructor = True
+            , group = Just "Types"
+            }
+
+
+expectJsonCustom :
     { declaration : Elm.Declaration
-    , call : Elm.Expression -> Elm.Expression
-    , callFrom : List String -> Elm.Expression -> Elm.Expression
+    , call : Elm.Expression -> Elm.Expression -> Elm.Expression -> Elm.Expression
+    , callFrom : List String -> Elm.Expression -> Elm.Expression -> Elm.Expression -> Elm.Expression
     , value : List String -> Elm.Expression
     }
-jsonResolver =
-    Elm.Declare.fn "jsonResolver"
-        ( "decoder"
-        , Just <| Gen.Json.Decode.annotation_.decoder (Elm.Annotation.var "t")
+expectJsonCustom =
+    Elm.Declare.fn3 "expectJsonCustom"
+        ( "toMsg"
+        , Just
+            (Elm.Annotation.function
+                [ Gen.Result.annotation_.result
+                    (Elm.Annotation.namedWith [] "Error" [ Elm.Annotation.var "err", Elm.Annotation.string ])
+                    (Elm.Annotation.var "success")
+                ]
+                (Elm.Annotation.var "msg")
+            )
+        )
+        ( "errorDecoders"
+        , Just
+            (Gen.Dict.annotation_.dict
+                Gen.String.annotation_.string
+                (Gen.Json.Decode.annotation_.decoder (Elm.Annotation.var "err"))
+            )
+        )
+        ( "successDecoder"
+        , Just
+            (Gen.Json.Decode.annotation_.decoder (Elm.Annotation.var "success"))
+        )
+        (\toMsg errorDecoders successDecoder ->
+            Gen.Http.expectStringResponse (\result -> Elm.apply toMsg [ result ]) <|
+                \response ->
+                    -- NOTE: The below results in unexpected codegen like:
+                    --
+                    --     Http.BadUrl_ string.String ->
+                    --         Result.Err (BadUrl string.String)
+                    --
+                    -- so we manually write this codegen.
+                    --
+                    -- Gen.Http.caseOf_.response response
+                    --     { badUrl_ = \url -> Gen.Result.make_.err (Elm.apply (Elm.val "BadUrl") [ url ])
+                    --     , timeout_ = Gen.Result.make_.err (Elm.val "Timeout")
+                    --     , networkError_ = Gen.Result.make_.err (Elm.val "NetworkError")
+                    --     , badStatus_ =
+                    --         \metadata body ->
+                    --             Gen.Maybe.caseOf_.maybe
+                    --                 (Gen.Dict.call_.get (Gen.String.call_.fromInt (Elm.get "statusCode" metadata)) errorDecoders)
+                    --                 { nothing = Gen.Result.make_.err (Elm.apply (Elm.val "UnknownBadStatus") [ metadata, body ])
+                    --                 , just =
+                    --                     \errorDecoder ->
+                    --                         Gen.Result.caseOf_.result
+                    --                             (Gen.Json.Decode.call_.decodeString errorDecoder body)
+                    --                             { ok = \x -> Gen.Result.make_.err (Elm.apply (Elm.val "KnownBadStatus") [ Elm.get "statusCode" metadata, x ])
+                    --                             , err = \_ -> Gen.Result.make_.err (Elm.apply (Elm.val "BadErrorBody") [ metadata, body ])
+                    --                             }
+                    --                 }
+                    --     , goodStatus_ =
+                    --         \metadata body ->
+                    --             Gen.Result.caseOf_.result
+                    --                 (Gen.Json.Decode.call_.decodeString successDecoder body)
+                    --                 { err = \_ -> Gen.Result.make_.err (Elm.apply (Elm.val "BadBody") [ metadata, body ])
+                    --                 , ok = \a -> Gen.Result.make_.ok a
+                    --                 }
+                    --     }
+                    Elm.Case.custom response
+                        (Gen.Http.annotation_.response Elm.Annotation.string)
+                        [ Elm.Case.branch1 "BadUrl_"
+                            ( "url", Elm.Annotation.string )
+                            (\url -> Gen.Result.make_.err (Elm.apply (Elm.val "BadUrl") [ url ]))
+                        , Elm.Case.branch0 "Timeout_"
+                            (Gen.Result.make_.err (Elm.val "Timeout"))
+                        , Elm.Case.branch0 "NetworkError_"
+                            (Gen.Result.make_.err (Elm.val "NetworkError"))
+                        , Elm.Case.branch2 "BadStatus_"
+                            ( "metadata", Gen.Http.annotation_.metadata )
+                            ( "body", Elm.Annotation.string )
+                            (\metadata body ->
+                                Gen.Maybe.caseOf_.maybe
+                                    (Gen.Dict.call_.get (Gen.String.call_.fromInt (Elm.get "statusCode" metadata)) errorDecoders)
+                                    { nothing = Gen.Result.make_.err (Elm.apply (Elm.val "UnknownBadStatus") [ metadata, body ])
+                                    , just =
+                                        \errorDecoder ->
+                                            Gen.Result.caseOf_.result
+                                                (Gen.Json.Decode.call_.decodeString errorDecoder body)
+                                                { ok = \x -> Gen.Result.make_.err (Elm.apply (Elm.val "KnownBadStatus") [ Elm.get "statusCode" metadata, x ])
+                                                , err = \_ -> Gen.Result.make_.err (Elm.apply (Elm.val "BadErrorBody") [ metadata, body ])
+                                                }
+                                    }
+                            )
+                        , Elm.Case.branch2 "GoodStatus_"
+                            ( "metadata", Gen.Http.annotation_.metadata )
+                            ( "body", Elm.Annotation.string )
+                            (\metadata body ->
+                                Gen.Result.caseOf_.result
+                                    (Gen.Json.Decode.call_.decodeString successDecoder body)
+                                    { err = \_ -> Gen.Result.make_.err (Elm.apply (Elm.val "BadBody") [ metadata, body ])
+                                    , ok = \a -> Gen.Result.make_.ok a
+                                    }
+                            )
+                        ]
+        )
+
+
+jsonResolverCustom :
+    { declaration : Elm.Declaration
+    , call : Elm.Expression -> Elm.Expression -> Elm.Expression
+    , callFrom : List String -> Elm.Expression -> Elm.Expression -> Elm.Expression
+    , value : List String -> Elm.Expression
+    }
+jsonResolverCustom =
+    Elm.Declare.fn2 "jsonResolverCustom"
+        ( "errorDecoders"
+        , Just
+            (Gen.Dict.annotation_.dict
+                Gen.String.annotation_.string
+                (Gen.Json.Decode.annotation_.decoder (Elm.Annotation.var "err"))
+            )
+        )
+        ( "successDecoder"
+        , Just
+            (Gen.Json.Decode.annotation_.decoder (Elm.Annotation.var "success"))
         )
     <|
-        \decoder ->
+        \errorDecoders successDecoder ->
             Gen.Http.stringResolver
                 (\response ->
-                    response
-                        |> responseToResult.call
-                        |> Gen.Result.andThen
-                            (\body ->
-                                body
-                                    |> Gen.Json.Decode.call_.decodeString decoder
-                                    |> Gen.Result.mapError (\err -> Gen.Http.make_.badBody (Gen.Json.Decode.errorToString err))
+                    Elm.Case.custom response
+                        (Gen.Http.annotation_.response Elm.Annotation.string)
+                        [ Elm.Case.branch1 "BadUrl_"
+                            ( "url", Elm.Annotation.string )
+                            (\url -> Gen.Result.make_.err (Elm.apply (Elm.val "BadUrl") [ url ]))
+                        , Elm.Case.branch0 "Timeout_"
+                            (Gen.Result.make_.err (Elm.val "Timeout"))
+                        , Elm.Case.branch0 "NetworkError_"
+                            (Gen.Result.make_.err (Elm.val "NetworkError"))
+                        , Elm.Case.branch2 "BadStatus_"
+                            ( "metadata", Gen.Http.annotation_.metadata )
+                            ( "body", Elm.Annotation.string )
+                            (\metadata body ->
+                                Gen.Maybe.caseOf_.maybe
+                                    (Gen.Dict.call_.get (Gen.String.call_.fromInt (Elm.get "statusCode" metadata)) errorDecoders)
+                                    { nothing = Gen.Result.make_.err (Elm.apply (Elm.val "UnknownBadStatus") [ metadata, body ])
+                                    , just =
+                                        \errorDecoder ->
+                                            Gen.Result.caseOf_.result
+                                                (Gen.Json.Decode.call_.decodeString errorDecoder body)
+                                                { ok = \x -> Gen.Result.make_.err (Elm.apply (Elm.val "KnownBadStatus") [ Elm.get "statusCode" metadata, x ])
+                                                , err = \_ -> Gen.Result.make_.err (Elm.apply (Elm.val "BadErrorBody") [ metadata, body ])
+                                                }
+                                    }
                             )
+                        , Elm.Case.branch2 "GoodStatus_"
+                            ( "metadata", Gen.Http.annotation_.metadata )
+                            ( "body", Elm.Annotation.string )
+                            (\metadata body ->
+                                Gen.Result.caseOf_.result
+                                    (Gen.Json.Decode.call_.decodeString successDecoder body)
+                                    { err = \_ -> Gen.Result.make_.err (Elm.apply (Elm.val "BadBody") [ metadata, body ])
+                                    , ok = \a -> Gen.Result.make_.ok a
+                                    }
+                            )
+                        ]
                 )
+
+
+
+-- NOTE: Maybe we keep this around and let people choose the type of error handling they want?
+-- jsonResolver :
+--     { declaration : Elm.Declaration
+--     , call : Elm.Expression -> Elm.Expression
+--     , callFrom : List String -> Elm.Expression -> Elm.Expression
+--     , value : List String -> Elm.Expression
+--     }
+-- jsonResolver =
+--     Elm.Declare.fn "jsonResolver"
+--         ( "decoder"
+--         , Just <| Gen.Json.Decode.annotation_.decoder (Elm.Annotation.var "t")
+--         )
+--     <|
+--         \decoder ->
+--             Gen.Http.stringResolver
+--                 (\response ->
+--                     response
+--                         |> responseToResult.call
+--                         |> Gen.Result.andThen
+--                             (\body ->
+--                                 body
+--                                     |> Gen.Json.Decode.call_.decodeString decoder
+--                                     |> Gen.Result.mapError (\err -> Gen.Http.make_.badBody (Gen.Json.Decode.errorToString err))
+--                             )
+--                 )
 
 
 whateverResolver :
@@ -1278,6 +1679,12 @@ getFirstSuccessResponse responses =
         |> Dict.toList
         |> List.filter (Tuple.first >> isSuccessResponseStatus)
         |> List.head
+
+
+getErrorResponses : Dict.Dict String (OpenApi.Reference.ReferenceOr OpenApi.Response.Response) -> Dict.Dict String (OpenApi.Reference.ReferenceOr OpenApi.Response.Response)
+getErrorResponses responses =
+    responses
+        |> Dict.filter (\status _ -> not <| isSuccessResponseStatus status)
 
 
 nullableType : Elm.Declaration

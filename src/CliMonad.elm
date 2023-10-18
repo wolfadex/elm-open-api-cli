@@ -1,6 +1,32 @@
-module CliMonad exposing (CliMonad, Warning, andThen, andThen2, combine, combineMap, errorToWarning, fail, fromApiSpec, map, map2, map3, recordType, refToTypeName, run, stepOrFail, succeed, todo, todoWithDefault, typeToAnnotation, typeToAnnotationMaybe, withPath, withWarning)
+module CliMonad exposing
+    ( CliMonad
+    , Warning
+    , andThen
+    , andThen2
+    , combine
+    , combineDict
+    , combineMap
+    , errorToWarning
+    , fail
+    , fromApiSpec
+    , map
+    , map2
+    , map3
+    , recordType
+    , refToTypeName
+    , run
+    , stepOrFail
+    , succeed
+    , todo
+    , todoWithDefault
+    , typeToAnnotation
+    , typeToAnnotationMaybe
+    , withPath
+    , withWarning
+    )
 
 import Common exposing (Field, Object, OneOfData, Type(..), TypeName, VariantName, toValueName)
+import Dict
 import Elm
 import Elm.Annotation
 import FastDict exposing (Dict)
@@ -404,3 +430,20 @@ refToTypeName ref =
 
         _ ->
             fail <| "Couldn't get the type ref (" ++ String.join "/" ref ++ ") for the response"
+
+
+combineDict : Dict.Dict comparable (CliMonad a) -> CliMonad (Dict.Dict comparable a)
+combineDict dict =
+    dict
+        |> Dict.toList
+        |> List.foldr
+            (\( k, vcm ) rescm ->
+                map2
+                    (\v res ->
+                        ( k, v ) :: res
+                    )
+                    vcm
+                    rescm
+            )
+            (succeed [])
+        |> map Dict.fromList

@@ -148,15 +148,7 @@ pathDeclarations =
                                     )
                                 |> CliMonad.map (List.filterMap identity >> List.concat)
                         )
-                    |> CliMonad.map
-                        (List.concat
-                            >> List.map
-                                (Elm.exposeWith
-                                    { exposeConstructor = False
-                                    , group = Just "Request functions"
-                                    }
-                                )
-                        )
+                    |> CliMonad.map List.concat
             )
 
 
@@ -659,10 +651,18 @@ toRequestFunctions method url operation =
                                 |> Elm.withType requestCmdType
                                 |> Elm.declaration functionName
                                 |> Elm.withDocumentation doc
+                                |> Elm.exposeWith
+                                    { exposeConstructor = False
+                                    , group = Just "Request functions"
+                                    }
                             , requestTsk
                                 |> Elm.withType requestTskType
                                 |> Elm.declaration (functionName ++ "Task")
                                 |> Elm.withDocumentation doc
+                                |> Elm.exposeWith
+                                    { exposeConstructor = False
+                                    , group = Just "Request functions"
+                                    }
                             , errorTypeDeclaration
                             ]
                         )

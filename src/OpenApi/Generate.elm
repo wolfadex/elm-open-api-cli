@@ -348,9 +348,8 @@ toRequestFunctions method url operation =
     let
         functionName : String
         functionName =
-            (OpenApi.Operation.operationId operation
+            OpenApi.Operation.operationId operation
                 |> Maybe.withDefault url
-            )
                 |> makeNamespaceValid
                 |> removeInvalidChars
                 |> String.Extra.camelize

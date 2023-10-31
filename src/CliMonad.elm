@@ -435,9 +435,8 @@ refToTypeName ref =
 combineDict : Dict.Dict comparable (CliMonad a) -> CliMonad (Dict.Dict comparable a)
 combineDict dict =
     dict
-        |> Dict.toList
-        |> List.foldr
-            (\( k, vcm ) rescm ->
+        |> Dict.foldr
+            (\k vcm rescm ->
                 map2
                     (\v res ->
                         ( k, v ) :: res

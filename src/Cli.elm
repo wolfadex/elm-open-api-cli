@@ -62,7 +62,7 @@ run =
                                     BackendTask.File.DecodingError _ ->
                                         "Uh oh! Decoding failure!"
                     )
-                |> BackendTask.andThen decodeOpenApiSpecOrFail
+                |> BackendTask.andThen (decodeOpenApiSpecOrFail entryFilePath)
                 |> BackendTask.andThen
                     (generateFileFromOpenApiSpec
                         { outputDirectory = outputDirectory
@@ -73,18 +73,28 @@ run =
         )
 
 
-decodeOpenApiSpecOrFail : String -> BackendTask.BackendTask FatalError.FatalError OpenApi.OpenApi
-decodeOpenApiSpecOrFail input =
+decodeOpenApiSpecOrFail : String -> String -> BackendTask.BackendTask FatalError.FatalError OpenApi.OpenApi
+decodeOpenApiSpecOrFail filePath input =
     let
         -- TODO: Better handling of errors: https://github.com/wolfadex/elm-api-sdk-generator/issues/40
+        isJson : Bool
+        isJson =
+            String.endsWith ".json" filePath
+
         decoded : Result Json.Decode.Error OpenApi.OpenApi
         decoded =
-            case Yaml.Decode.fromString yamlToJsonDecoder input of
-                Err _ ->
-                    Json.Decode.decodeString OpenApi.decode input
+            -- Short-circuit the error-prone yaml parsing of JSON structures if we
+            -- are reasonably confident that it is a JSON file
+            if isJson then
+                Json.Decode.decodeString OpenApi.decode input
 
-                Ok jsonFromYaml ->
-                    Json.Decode.decodeValue OpenApi.decode jsonFromYaml
+            else
+                case Yaml.Decode.fromString yamlToJsonDecoder input of
+                    Err _ ->
+                        Json.Decode.decodeString OpenApi.decode input
+
+                    Ok jsonFromYaml ->
+                        Json.Decode.decodeValue OpenApi.decode jsonFromYaml
     in
     decoded
         |> Result.mapError

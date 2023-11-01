@@ -574,12 +574,7 @@ toRequestFunctions method url operation =
                                         , Elm.Annotation.function
                                             [ paramType ]
                                             (Gen.Task.annotation_.task
-                                                (Elm.Annotation.namedWith []
-                                                    "Error"
-                                                    [ errorTypeAnnotation
-                                                    , bodyTypeAnnotation
-                                                    ]
-                                                )
+                                                (customErrorAnnotation errorTypeAnnotation bodyTypeAnnotation)
                                                 successAnnotation
                                             )
                                         )
@@ -669,6 +664,15 @@ toRequestFunctions method url operation =
             )
         |> CliMonad.withPath method
         |> CliMonad.withPath url
+
+
+customErrorAnnotation : Elm.Annotation.Annotation -> Elm.Annotation.Annotation -> Elm.Annotation.Annotation
+customErrorAnnotation errorTypeAnnotation bodyTypeAnnotation =
+    Elm.Annotation.namedWith []
+        "Error"
+        [ errorTypeAnnotation
+        , bodyTypeAnnotation
+        ]
 
 
 operationToAuthorizationInfo : OpenApi.Operation.Operation -> CliMonad AuthorizationInfo
@@ -862,12 +866,7 @@ toConfigParamAnnotation options =
                         [ ( "toMsg"
                           , Elm.Annotation.function
                                 [ Gen.Result.annotation_.result
-                                    (Elm.Annotation.namedWith []
-                                        "Error"
-                                        [ options.errorTypeAnnotation
-                                        , options.errorBodyAnnotation
-                                        ]
-                                    )
+                                    (customErrorAnnotation options.errorTypeAnnotation options.errorBodyAnnotation)
                                     options.successAnnotation
                                 ]
                                 (Elm.Annotation.var "msg")

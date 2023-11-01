@@ -1225,7 +1225,7 @@ operationToTypesExpectAndResolver functionName operation =
                                                                         )
 
                                                             StringContent _ ->
-                                                                CliMonad.succeed (Gen.Debug.todo "decode string err?")
+                                                                CliMonad.succeed Gen.Json.Decode.string
                                                                     |> CliMonad.map
                                                                         (toErrorVariant statusCode
                                                                             |> Elm.val
@@ -1241,7 +1241,7 @@ operationToTypesExpectAndResolver functionName operation =
                                                                         )
 
                                                             EmptyContent ->
-                                                                CliMonad.succeed (Gen.Debug.todo "decode empty err?")
+                                                                CliMonad.succeed (Gen.Json.Decode.succeed Elm.unit)
                                                                     |> CliMonad.map
                                                                         (toErrorVariant statusCode
                                                                             |> Elm.val

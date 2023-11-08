@@ -487,7 +487,7 @@ toRequestFunctions method url operation =
 
                     expect : Elm.Expression -> Elm.Expression
                     expect config =
-                        toExpect (\toMsgArg -> Elm.apply (Elm.get "toMsg" config) [ toMsgArg ])
+                        toExpect (Elm.get "toMsg" config)
 
                     bodyParams : ContentSchema -> CliMonad (List ( String, Elm.Annotation.Annotation ))
                     bodyParams contentSchema =
@@ -1169,7 +1169,7 @@ operationToTypesExpectAndResolver :
             , bodyTypeAnnotation : Elm.Annotation.Annotation
             , errorTypeDeclaration : Elm.Declaration
             , errorTypeAnnotation : Elm.Annotation.Annotation
-            , toExpect : (Elm.Expression -> Elm.Expression) -> Elm.Expression
+            , toExpect : Elm.Expression -> Elm.Expression
             , resolver : Elm.Expression
             }
 operationToTypesExpectAndResolver functionName operation =
@@ -1178,13 +1178,9 @@ operationToTypesExpectAndResolver functionName operation =
         responses =
             OpenApi.Operation.responses operation
 
-        expectJson : Elm.Expression -> (Elm.Expression -> Elm.Expression) -> Elm.Expression
-        expectJson decoder toMsg =
-            Gen.Http.expectJson toMsg decoder
-
-        expectJsonBetter : Elm.Expression -> Elm.Expression -> (Elm.Expression -> Elm.Expression) -> Elm.Expression
+        expectJsonBetter : Elm.Expression -> Elm.Expression -> Elm.Expression -> Elm.Expression
         expectJsonBetter errorDecoders successDecoder toMsg =
-            expectJsonCustom.call (toMsg (Elm.val "")) errorDecoders successDecoder
+            expectJsonCustom.call toMsg errorDecoders successDecoder
     in
     CliMonad.succeed responses
         |> CliMonad.stepOrFail
@@ -1373,7 +1369,7 @@ operationToTypesExpectAndResolver functionName operation =
                                                     , bodyTypeAnnotation = Elm.Annotation.string
                                                     , errorTypeDeclaration = errorTypeDeclaration_
                                                     , errorTypeAnnotation = errorTypeAnnotation
-                                                    , toExpect = Gen.Http.expectString
+                                                    , toExpect = Gen.Http.call_.expectString
                                                     , resolver = Gen.Http.stringResolver responseToResult.call
                                                     }
                                                 )
@@ -1386,7 +1382,7 @@ operationToTypesExpectAndResolver functionName operation =
                                                     , bodyTypeAnnotation = Gen.Bytes.annotation_.bytes
                                                     , errorTypeDeclaration = errorTypeDeclaration_
                                                     , errorTypeAnnotation = errorTypeAnnotation
-                                                    , toExpect = \toMsg -> Gen.Http.expectBytes toMsg Gen.Basics.values_.identity
+                                                    , toExpect = \toMsg -> Gen.Http.call_.expectBytes toMsg Gen.Basics.values_.identity
                                                     , resolver = Gen.Http.bytesResolver responseToResult.call
                                                     }
                                                 )
@@ -1399,7 +1395,7 @@ operationToTypesExpectAndResolver functionName operation =
                                                     , bodyTypeAnnotation = Elm.Annotation.unit
                                                     , errorTypeDeclaration = errorTypeDeclaration_
                                                     , errorTypeAnnotation = errorTypeAnnotation
-                                                    , toExpect = Gen.Http.expectWhatever
+                                                    , toExpect = Gen.Http.call_.expectWhatever
                                                     , resolver = whateverResolver.call []
                                                     }
                                                 )

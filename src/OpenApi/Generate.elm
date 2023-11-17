@@ -17,7 +17,6 @@ import Elm.ToString
 import FastDict
 import Gen.Basics
 import Gen.Bytes
-import Gen.Bytes.Decode
 import Gen.Debug
 import Gen.Dict
 import Gen.Http

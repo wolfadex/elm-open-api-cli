@@ -208,6 +208,7 @@ logWarning warning =
 readFromUrl : Url.Url -> BackendTask.BackendTask FatalError.FatalError String
 readFromUrl url =
     let
+        path : String
         path =
             Url.toString url
     in

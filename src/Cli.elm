@@ -3,6 +3,7 @@ module Cli exposing (run)
 import Ansi.Color
 import BackendTask
 import BackendTask.File
+import BackendTask.Http
 import Cli.Option
 import Cli.OptionsParser
 import Cli.Program
@@ -13,6 +14,7 @@ import OpenApi
 import OpenApi.Generate
 import OpenApi.Info
 import Pages.Script
+import Url
 import UrlPath
 import Yaml.Decode
 
@@ -47,21 +49,13 @@ run : Pages.Script.Script
 run =
     Pages.Script.withCliOptions program
         (\{ entryFilePath, outputDirectory, outputModuleName, generateTodos } ->
-            BackendTask.File.rawFile entryFilePath
-                |> BackendTask.mapError
-                    (\error ->
-                        FatalError.fromString <|
-                            Ansi.Color.fontColor Ansi.Color.brightRed <|
-                                case error.recoverable of
-                                    BackendTask.File.FileDoesntExist ->
-                                        "Uh oh! There is no file at " ++ entryFilePath
+            (case typeOfPath entryFilePath of
+                Url url ->
+                    readFromUrl url
 
-                                    BackendTask.File.FileReadError _ ->
-                                        "Uh oh! Can't read!"
-
-                                    BackendTask.File.DecodingError _ ->
-                                        "Uh oh! Decoding failure!"
-                    )
+                File path ->
+                    readFromFile path
+            )
                 |> BackendTask.andThen (decodeOpenApiSpecOrFail entryFilePath)
                 |> BackendTask.andThen
                     (generateFileFromOpenApiSpec
@@ -205,3 +199,70 @@ logWarning warning =
     Pages.Script.log <|
         Ansi.Color.fontColor Ansi.Color.brightYellow "Warning: "
             ++ warning
+
+
+
+-- HELPERS
+
+
+readFromUrl : Url.Url -> BackendTask.BackendTask FatalError.FatalError String
+readFromUrl url =
+    let
+        path =
+            Url.toString url
+    in
+    BackendTask.Http.get path BackendTask.Http.expectString
+        |> BackendTask.mapError
+            (\error ->
+                FatalError.fromString <|
+                    Ansi.Color.fontColor Ansi.Color.brightRed <|
+                        case error.recoverable of
+                            BackendTask.Http.BadUrl _ ->
+                                "Uh oh! There is no file at " ++ path
+
+                            BackendTask.Http.Timeout ->
+                                "Uh oh! Timed out waiting for response"
+
+                            BackendTask.Http.NetworkError ->
+                                "Uh oh! A network error happened"
+
+                            BackendTask.Http.BadStatus { statusCode, statusText } _ ->
+                                "Uh oh! The server responded with a " ++ String.fromInt statusCode ++ " " ++ statusText ++ " status"
+
+                            BackendTask.Http.BadBody _ _ ->
+                                "Uh oh! The body of the response was invalid"
+            )
+
+
+readFromFile : String -> BackendTask.BackendTask FatalError.FatalError String
+readFromFile entryFilePath =
+    BackendTask.File.rawFile entryFilePath
+        |> BackendTask.mapError
+            (\error ->
+                FatalError.fromString <|
+                    Ansi.Color.fontColor Ansi.Color.brightRed <|
+                        case error.recoverable of
+                            BackendTask.File.FileDoesntExist ->
+                                "Uh oh! There is no file at " ++ entryFilePath
+
+                            BackendTask.File.FileReadError _ ->
+                                "Uh oh! Can't read!"
+
+                            BackendTask.File.DecodingError _ ->
+                                "Uh oh! Decoding failure!"
+            )
+
+
+typeOfPath : String -> PathType
+typeOfPath path =
+    case Url.fromString path of
+        Just url ->
+            Url url
+
+        Nothing ->
+            File path
+
+
+type PathType
+    = File String -- swagger.json ./swagger.json /folder/swagger.json
+    | Url Url.Url -- https://petstore3.swagger.io/api/v3/openapi.json

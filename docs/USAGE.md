@@ -5,7 +5,7 @@
 - `npm install -D elm-open-api`
 
 ### Run the CLI:
-- `node elm-open-api ./page/to/oas.json`
+- `npx elm-open-api ./page/to/oas.json`
 
 ### Arguments you can pass:
 

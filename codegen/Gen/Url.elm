@@ -1,7 +1,7 @@
 module Gen.Url exposing (annotation_, call_, caseOf_, fromString, make_, moduleName_, percentDecode, percentEncode, toString, values_)
 
 {-| 
-@docs values_, call_, caseOf_, make_, annotation_, percentDecode, percentEncode, fromString, toString, moduleName_
+@docs moduleName_, toString, fromString, percentEncode, percentDecode, annotation_, make_, caseOf_, call_, values_
 -}
 
 
@@ -390,5 +390,3 @@ values_ =
                 Just (Type.function [ Type.string ] (Type.maybe Type.string))
             }
     }
-
-

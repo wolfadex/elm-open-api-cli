@@ -1,7 +1,7 @@
 module Gen.Url.Builder exposing (absolute, annotation_, call_, caseOf_, crossOrigin, custom, int, make_, moduleName_, relative, string, toQuery, values_)
 
 {-| 
-@docs values_, call_, caseOf_, make_, annotation_, toQuery, int, string, custom, crossOrigin, relative, absolute, moduleName_
+@docs moduleName_, absolute, relative, crossOrigin, custom, string, int, toQuery, annotation_, make_, caseOf_, call_, values_
 -}
 
 
@@ -366,7 +366,7 @@ caseOf_ =
                 , Elm.Case.branch0 "Relative" rootTags.relative
                 , Elm.Case.branch1
                     "CrossOrigin"
-                    ( "string.String", Type.string )
+                    ( "stringString", Type.string )
                     rootTags.crossOrigin
                 ]
     }
@@ -668,5 +668,3 @@ values_ =
                     )
             }
     }
-
-

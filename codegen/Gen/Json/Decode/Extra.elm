@@ -1,7 +1,7 @@
 module Gen.Json.Decode.Extra exposing (andMap, call_, collection, combine, datetime, dict2, doubleEncoded, fromMaybe, fromResult, indexedList, keys, moduleName_, optionalField, optionalNullableField, parseFloat, parseInt, sequence, set, url, values_, when, withDefault)
 
 {-| 
-@docs values_, call_, doubleEncoded, parseFloat, parseInt, fromResult, fromMaybe, optionalNullableField, optionalField, withDefault, dict2, set, keys, indexedList, combine, sequence, collection, when, andMap, url, datetime, moduleName_
+@docs moduleName_, datetime, url, andMap, when, collection, sequence, combine, indexedList, keys, set, dict2, withDefault, optionalField, optionalNullableField, fromMaybe, fromResult, parseInt, parseFloat, doubleEncoded, call_, values_
 -}
 
 
@@ -1665,5 +1665,3 @@ values_ =
                     )
             }
     }
-
-

@@ -1,7 +1,7 @@
 module Gen.Bytes exposing (annotation_, call_, caseOf_, getHostEndianness, make_, moduleName_, values_, width)
 
 {-| 
-@docs values_, call_, caseOf_, make_, annotation_, getHostEndianness, width, moduleName_
+@docs moduleName_, width, getHostEndianness, annotation_, make_, caseOf_, call_, values_
 -}
 
 
@@ -151,5 +151,3 @@ values_ =
                     )
             }
     }
-
-

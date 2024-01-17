@@ -1,7 +1,7 @@
 module Gen.Bytes.Decode exposing (andThen, annotation_, bytes, call_, caseOf_, decode, fail, float32, float64, loop, make_, map, map2, map3, map4, map5, moduleName_, signedInt16, signedInt32, signedInt8, string, succeed, unsignedInt16, unsignedInt32, unsignedInt8, values_)
 
 {-| 
-@docs values_, call_, caseOf_, make_, annotation_, loop, fail, succeed, andThen, map5, map4, map3, map2, map, string, bytes, float64, float32, unsignedInt32, unsignedInt16, unsignedInt8, signedInt32, signedInt16, signedInt8, decode, moduleName_
+@docs moduleName_, decode, signedInt8, signedInt16, signedInt32, unsignedInt8, unsignedInt16, unsignedInt32, float32, float64, bytes, string, map, map2, map3, map4, map5, andThen, succeed, fail, loop, annotation_, make_, caseOf_, call_, values_
 -}
 
 
@@ -1820,5 +1820,3 @@ values_ =
                     )
             }
     }
-
-

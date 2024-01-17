@@ -1,7 +1,7 @@
 module Gen.Url.Parser.Query exposing (annotation_, call_, custom, enum, int, map, map2, map3, map4, map5, map6, map7, map8, moduleName_, string, values_)
 
 {-| 
-@docs values_, call_, annotation_, map8, map7, map6, map5, map4, map3, map2, map, custom, enum, int, string, moduleName_
+@docs moduleName_, string, int, enum, custom, map, map2, map3, map4, map5, map6, map7, map8, annotation_, call_, values_
 -}
 
 
@@ -1876,5 +1876,3 @@ values_ =
                     )
             }
     }
-
-

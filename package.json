@@ -1,6 +1,6 @@
 {
   "name": "elm-open-api",
-  "version": "0.1.3-beta.1",
+  "version": "0.2.0",
   "description": "A tool for generating Elm SDKs from OpenAPI Specs.",
   "main": "dist/elm-open-api.js",
   "bin": "dist/elm-open-api.js",

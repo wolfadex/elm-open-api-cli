@@ -10,28 +10,9 @@ To allow developers to generate an Elm module(s) from an OpenAPI Spec. This is p
 
 [A RealWorld app](https://github.com/wolfadex/realworld-app) using a generated SDK to demonstrate how to use it.
 
-## Getting Started
+## [Using the CLI](./docs/USAGE.md)
 
-- `npm install -D elm-open-api`
-- `node elm-open-api ./page/to/oas.json`
-
-Arguments you can pass:
-
-- `<entryFilePath>`: The path to the Open API Spec, either `.json` or `.y[a]ml`
-  - Technically the OAS allows for parts of a spec to be in separate files, but this isn't supported yet.
-- `[--output-dir <output dir>]`: The directory to output to. Defaults to `generated/`.
-- `[--module-name <module name>]`: The Elm module name. Default to `<OAS info.title>`.
-- `[--generateTodos <generateTodos>]`: Whether to generate TODOs for unimplemented endpoints, or fail when something unexpected is encountered. Defaults to `no`. To generate `Debug.todo ""` instead of failing use one of: `yes`, `y`, `true`.
-
-## Development
-
-The general flow of the app is: parse args & read in the spec using `elm-pages`, generate the Elm code with `elm-codegen`, and write it to disk using `elm-pages`.
-
-- Clone this repo
-- Inside your cloned repo, run `direnv allow`
-- Start coding!
-- Run `npm run dev <path to oas spec>.json`
-  - e.g. `npm run dev ./example/github-spec.json` will produce `generated/GitHub_v3_REST_API.elm`
+## [Contributing to Development](./docs/CONTRIBUTING.md)
 
 ## Thank you
 

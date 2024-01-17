@@ -1,7 +1,7 @@
 module Gen.Url.Parser exposing (annotation_, call_, custom, fragment, int, map, moduleName_, oneOf, parse, query, s, string, top, values_)
 
 {-| 
-@docs values_, call_, annotation_, parse, fragment, query, custom, top, oneOf, map, s, int, string, moduleName_
+@docs moduleName_, string, int, s, map, oneOf, top, custom, query, fragment, parse, annotation_, call_, values_
 -}
 
 
@@ -833,5 +833,3 @@ values_ =
                     )
             }
     }
-
-

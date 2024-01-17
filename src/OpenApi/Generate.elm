@@ -1485,44 +1485,12 @@ expectJsonCustom =
                     --
                     -- so we manually write this codegen.
                     --
-                    -- Gen.Http.caseOf_.response response
-                    --     { badUrl_ = \url -> Gen.Result.make_.err (Elm.apply (Elm.val "BadUrl") [ url ])
-                    --     , timeout_ = Gen.Result.make_.err (Elm.val "Timeout")
-                    --     , networkError_ = Gen.Result.make_.err (Elm.val "NetworkError")
-                    --     , badStatus_ =
-                    --         \metadata body ->
-                    --             Gen.Maybe.caseOf_.maybe
-                    --                 (Gen.Dict.call_.get (Gen.String.call_.fromInt (Elm.get "statusCode" metadata)) errorDecoders)
-                    --                 { nothing = Gen.Result.make_.err (Elm.apply (Elm.val "UnknownBadStatus") [ metadata, body ])
-                    --                 , just =
-                    --                     \errorDecoder ->
-                    --                         Gen.Result.caseOf_.result
-                    --                             (Gen.Json.Decode.call_.decodeString errorDecoder body)
-                    --                             { ok = \x -> Gen.Result.make_.err (Elm.apply (Elm.val "KnownBadStatus") [ Elm.get "statusCode" metadata, x ])
-                    --                             , err = \_ -> Gen.Result.make_.err (Elm.apply (Elm.val "BadErrorBody") [ metadata, body ])
-                    --                             }
-                    --                 }
-                    --     , goodStatus_ =
-                    --         \metadata body ->
-                    --             Gen.Result.caseOf_.result
-                    --                 (Gen.Json.Decode.call_.decodeString successDecoder body)
-                    --                 { err = \_ -> Gen.Result.make_.err (Elm.apply (Elm.val "BadBody") [ metadata, body ])
-                    --                 , ok = \a -> Gen.Result.make_.ok a
-                    --                 }
-                    --     }
-                    Elm.Case.custom response
-                        (Gen.Http.annotation_.response Elm.Annotation.string)
-                        [ Elm.Case.branch1 "BadUrl_"
-                            ( "url", Elm.Annotation.string )
-                            (\url -> Gen.Result.make_.err (Elm.apply (Elm.val "BadUrl") [ url ]))
-                        , Elm.Case.branch0 "Timeout_"
-                            (Gen.Result.make_.err (Elm.val "Timeout"))
-                        , Elm.Case.branch0 "NetworkError_"
-                            (Gen.Result.make_.err (Elm.val "NetworkError"))
-                        , Elm.Case.branch2 "BadStatus_"
-                            ( "metadata", Gen.Http.annotation_.metadata )
-                            ( "body", Elm.Annotation.string )
-                            (\metadata body ->
+                    Gen.Http.caseOf_.response response
+                        { badUrl_ = \url -> Gen.Result.make_.err (Elm.apply (Elm.val "BadUrl") [ url ])
+                        , timeout_ = Gen.Result.make_.err (Elm.val "Timeout")
+                        , networkError_ = Gen.Result.make_.err (Elm.val "NetworkError")
+                        , badStatus_ =
+                            \metadata body ->
                                 Gen.Maybe.caseOf_.maybe
                                     (Gen.Dict.call_.get (Gen.String.call_.fromInt (Elm.get "statusCode" metadata)) errorDecoders)
                                     { nothing = Gen.Result.make_.err (Elm.apply (Elm.val "UnknownBadStatus") [ metadata, body ])
@@ -1534,18 +1502,50 @@ expectJsonCustom =
                                                 , err = \_ -> Gen.Result.make_.err (Elm.apply (Elm.val "BadErrorBody") [ metadata, body ])
                                                 }
                                     }
-                            )
-                        , Elm.Case.branch2 "GoodStatus_"
-                            ( "metadata", Gen.Http.annotation_.metadata )
-                            ( "body", Elm.Annotation.string )
-                            (\metadata body ->
+                        , goodStatus_ =
+                            \metadata body ->
                                 Gen.Result.caseOf_.result
                                     (Gen.Json.Decode.call_.decodeString successDecoder body)
                                     { err = \_ -> Gen.Result.make_.err (Elm.apply (Elm.val "BadBody") [ metadata, body ])
                                     , ok = \a -> Gen.Result.make_.ok a
                                     }
-                            )
-                        ]
+                        }
+         -- Elm.Case.custom response
+         --     (Gen.Http.annotation_.response Elm.Annotation.string)
+         --     [ Elm.Case.branch1 "BadUrl_"
+         --         ( "url", Elm.Annotation.string )
+         --         (\url -> Gen.Result.make_.err (Elm.apply (Elm.val "BadUrl") [ url ]))
+         --     , Elm.Case.branch0 "Timeout_"
+         --         (Gen.Result.make_.err (Elm.val "Timeout"))
+         --     , Elm.Case.branch0 "NetworkError_"
+         --         (Gen.Result.make_.err (Elm.val "NetworkError"))
+         --     , Elm.Case.branch2 "BadStatus_"
+         --         ( "metadata", Gen.Http.annotation_.metadata )
+         --         ( "body", Elm.Annotation.string )
+         --         (\metadata body ->
+         --             Gen.Maybe.caseOf_.maybe
+         --                 (Gen.Dict.call_.get (Gen.String.call_.fromInt (Elm.get "statusCode" metadata)) errorDecoders)
+         --                 { nothing = Gen.Result.make_.err (Elm.apply (Elm.val "UnknownBadStatus") [ metadata, body ])
+         --                 , just =
+         --                     \errorDecoder ->
+         --                         Gen.Result.caseOf_.result
+         --                             (Gen.Json.Decode.call_.decodeString errorDecoder body)
+         --                             { ok = \x -> Gen.Result.make_.err (Elm.apply (Elm.val "KnownBadStatus") [ Elm.get "statusCode" metadata, x ])
+         --                             , err = \_ -> Gen.Result.make_.err (Elm.apply (Elm.val "BadErrorBody") [ metadata, body ])
+         --                             }
+         --                 }
+         --         )
+         --     , Elm.Case.branch2 "GoodStatus_"
+         --         ( "metadata", Gen.Http.annotation_.metadata )
+         --         ( "body", Elm.Annotation.string )
+         --         (\metadata body ->
+         --             Gen.Result.caseOf_.result
+         --                 (Gen.Json.Decode.call_.decodeString successDecoder body)
+         --                 { err = \_ -> Gen.Result.make_.err (Elm.apply (Elm.val "BadBody") [ metadata, body ])
+         --                 , ok = \a -> Gen.Result.make_.ok a
+         --                 }
+         --         )
+         --     ]
         )
 
 

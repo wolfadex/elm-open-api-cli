@@ -1,7 +1,7 @@
 module Gen.Bytes.Encode exposing (annotation_, bytes, call_, encode, float32, float64, getStringWidth, moduleName_, sequence, signedInt16, signedInt32, signedInt8, string, unsignedInt16, unsignedInt32, unsignedInt8, values_)
 
 {-| 
-@docs values_, call_, annotation_, getStringWidth, string, bytes, float64, float32, unsignedInt32, unsignedInt16, unsignedInt8, signedInt32, signedInt16, signedInt8, sequence, encode, moduleName_
+@docs moduleName_, encode, sequence, signedInt8, signedInt16, signedInt32, unsignedInt8, unsignedInt16, unsignedInt32, float32, float64, bytes, string, getStringWidth, annotation_, call_, values_
 -}
 
 
@@ -835,5 +835,3 @@ values_ =
             , annotation = Just (Type.function [ Type.string ] Type.int)
             }
     }
-
-

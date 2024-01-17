@@ -1,7 +1,7 @@
 module Gen.Http exposing (annotation_, bytesBody, bytesPart, bytesResolver, call_, cancel, caseOf_, emptyBody, expectBytes, expectBytesResponse, expectJson, expectString, expectStringResponse, expectWhatever, fileBody, filePart, fractionReceived, fractionSent, get, header, jsonBody, make_, moduleName_, multipartBody, post, request, riskyRequest, riskyTask, stringBody, stringPart, stringResolver, task, track, values_)
 
 {-| 
-@docs values_, call_, caseOf_, make_, annotation_, riskyTask, bytesResolver, stringResolver, task, expectBytesResponse, expectStringResponse, riskyRequest, cancel, fractionReceived, fractionSent, track, expectWhatever, expectBytes, expectJson, expectString, bytesPart, filePart, stringPart, multipartBody, bytesBody, fileBody, jsonBody, stringBody, emptyBody, header, request, post, get, moduleName_
+@docs moduleName_, get, post, request, header, emptyBody, stringBody, jsonBody, fileBody, bytesBody, multipartBody, stringPart, filePart, bytesPart, expectString, expectJson, expectBytes, expectWhatever, track, fractionSent, fractionReceived, cancel, riskyRequest, expectStringResponse, expectBytesResponse, task, stringResolver, bytesResolver, riskyTask, annotation_, make_, caseOf_, call_, values_
 -}
 
 
@@ -1563,17 +1563,17 @@ caseOf_ =
                 (Type.namedWith [ "Http" ] "Error" [])
                 [ Elm.Case.branch1
                     "BadUrl"
-                    ( "string.String", Type.string )
+                    ( "stringString", Type.string )
                     errorTags.badUrl
                 , Elm.Case.branch0 "Timeout" errorTags.timeout
                 , Elm.Case.branch0 "NetworkError" errorTags.networkError
                 , Elm.Case.branch1
                     "BadStatus"
-                    ( "basics.Int", Type.int )
+                    ( "basicsInt", Type.int )
                     errorTags.badStatus
                 , Elm.Case.branch1
                     "BadBody"
-                    ( "string.String", Type.string )
+                    ( "stringString", Type.string )
                     errorTags.badBody
                 ]
     , progress =
@@ -1604,18 +1604,18 @@ caseOf_ =
                 (Type.namedWith [ "Http" ] "Response" [ Type.var "body" ])
                 [ Elm.Case.branch1
                     "BadUrl_"
-                    ( "string.String", Type.string )
+                    ( "stringString", Type.string )
                     responseTags.badUrl_
                 , Elm.Case.branch0 "Timeout_" responseTags.timeout_
                 , Elm.Case.branch0 "NetworkError_" responseTags.networkError_
                 , Elm.Case.branch2
                     "BadStatus_"
-                    ( "http.Metadata", Type.namedWith [ "Http" ] "Metadata" [] )
+                    ( "httpMetadata", Type.namedWith [ "Http" ] "Metadata" [] )
                     ( "body", Type.var "body" )
                     responseTags.badStatus_
                 , Elm.Case.branch2
                     "GoodStatus_"
-                    ( "http.Metadata", Type.namedWith [ "Http" ] "Metadata" [] )
+                    ( "httpMetadata", Type.namedWith [ "Http" ] "Metadata" [] )
                     ( "body", Type.var "body" )
                     responseTags.goodStatus_
                 ]
@@ -2889,5 +2889,3 @@ values_ =
                     )
             }
     }
-
-

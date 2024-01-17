@@ -1,7 +1,7 @@
 module Gen.Json.Encode.Extra exposing (call_, maybe, moduleName_, values_)
 
 {-| 
-@docs values_, call_, maybe, moduleName_
+@docs moduleName_, maybe, call_, values_
 -}
 
 
@@ -96,5 +96,3 @@ values_ =
                     )
             }
     }
-
-

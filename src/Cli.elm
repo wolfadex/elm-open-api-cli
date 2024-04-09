@@ -194,28 +194,24 @@ generateFileFromOpenApiSpec config apiSpec =
         |> BackendTask.andThen
             (\outputPath ->
                 let
-                    padLeft : { spaces : Int, text : String } -> String
-                    padLeft { spaces, text } =
-                        String.repeat spaces " " ++ text
-
-                    crlf : String
-                    crlf =
-                        "\u{000D}\n"
-
-                    message : String
-                    message =
-                        "SDK generated at "
-                            ++ outputPath
-                            ++ String.repeat 2 crlf
-                            ++ "You'll need elm/http, elm/json and elm-community/json-extra installed. Try running:"
-                            ++ String.repeat 2 crlf
-                            ++ padLeft { spaces = 4, text = "elm install elm/http" }
-                            ++ crlf
-                            ++ padLeft { spaces = 4, text = "elm install elm/json" }
-                            ++ crlf
-                            ++ padLeft { spaces = 4, text = "elm install elm-community/json-extra" }
+                    padLeftBy4Spaces : String -> String
+                    padLeftBy4Spaces =
+                        String.padLeft 4 ' '
                 in
-                Pages.Script.log message
+                BackendTask.combine
+                    [ Pages.Script.log <| "SDK generated at " ++ outputPath
+                    , Pages.Script.log ""
+                    , Pages.Script.log ""
+                    , Pages.Script.log "You'll need elm/http, elm/json and elm-community/json-extra installed. Try running:"
+                    , Pages.Script.log ""
+                    , Pages.Script.log ""
+                    , Pages.Script.log <| padLeftBy4Spaces "elm install elm/http"
+                    , Pages.Script.log ""
+                    , Pages.Script.log <| padLeftBy4Spaces "elm install elm/json"
+                    , Pages.Script.log ""
+                    , Pages.Script.log <| padLeftBy4Spaces "elm install elm-community/json-extra"
+                    ]
+                    |> BackendTask.map (always ())
             )
 
 

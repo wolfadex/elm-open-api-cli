@@ -191,7 +191,28 @@ generateFileFromOpenApiSpec config apiSpec =
                         )
                     |> BackendTask.map (\_ -> outputPath)
             )
-        |> BackendTask.andThen (\outputPath -> Pages.Script.log ("SDK generated at " ++ outputPath))
+        |> BackendTask.andThen
+            (\outputPath ->
+                let
+                    padLeftBy4Spaces : String -> String
+                    padLeftBy4Spaces =
+                        String.padLeft 4 ' '
+                in
+                BackendTask.combine
+                    [ Pages.Script.log <| "SDK generated at " ++ outputPath
+                    , Pages.Script.log ""
+                    , Pages.Script.log ""
+                    , Pages.Script.log "You'll need elm/http, elm/json and elm-community/json-extra installed. Try running:"
+                    , Pages.Script.log ""
+                    , Pages.Script.log ""
+                    , Pages.Script.log <| padLeftBy4Spaces "elm install elm/http"
+                    , Pages.Script.log ""
+                    , Pages.Script.log <| padLeftBy4Spaces "elm install elm/json"
+                    , Pages.Script.log ""
+                    , Pages.Script.log <| padLeftBy4Spaces "elm install elm-community/json-extra"
+                    ]
+                    |> BackendTask.map (always ())
+            )
 
 
 logWarning : String -> BackendTask.BackendTask FatalError.FatalError ()

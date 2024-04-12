@@ -1,6 +1,7 @@
 module CliMonad exposing
     ( CliMonad
-    , Warning
+    , Message
+    , Path
     , andThen
     , andThen2
     , combine
@@ -45,10 +46,6 @@ type alias Message =
 
 type alias Path =
     List String
-
-
-type alias Warning =
-    String
 
 
 type alias OneOfName =
@@ -175,29 +172,24 @@ andThen2 f x y =
 Automatically appends the needed `enum` declarations.
 
 -}
-run : { openApi : OpenApi, generateTodos : Bool } -> CliMonad (List Elm.Declaration) -> Result String ( List Elm.Declaration, List Warning )
+run : { openApi : OpenApi, generateTodos : Bool } -> CliMonad (List Elm.Declaration) -> Result Message ( List Elm.Declaration, List Message )
 run input (CliMonad x) =
-    case x input of
-        Err message ->
-            Err <| messageToString message
-
-        Ok ( decls, warnings, oneOfs ) ->
-            let
-                (CliMonad h) =
-                    oneOfDeclarations oneOfs |> withPath "While generating `oneOf`s"
-            in
-            case h input of
-                Err message ->
-                    messageToString message
-                        |> Err
-
-                Ok ( enumDecls, enumWarnings, _ ) ->
-                    Ok
-                        ( decls ++ enumDecls
-                        , (enumWarnings ++ warnings)
-                            |> List.reverse
-                            |> List.map messageToString
+    x input
+        |> Result.andThen
+            (\( decls, warnings, oneOfs ) ->
+                let
+                    (CliMonad h) =
+                        oneOfDeclarations oneOfs |> withPath "While generating `oneOf`s"
+                in
+                h input
+                    |> Result.map
+                        (\( enumDecls, enumWarnings, _ ) ->
+                            ( decls ++ enumDecls
+                            , (enumWarnings ++ warnings)
+                                |> List.reverse
+                            )
                         )
+            )
 
 
 oneOfDeclarations :
@@ -264,15 +256,6 @@ errorToWarning (CliMonad f) =
                 Err { path, message } ->
                     Ok ( Nothing, [ { path = path, message = message } ], FastDict.empty )
         )
-
-
-messageToString : Message -> String
-messageToString { path, message } =
-    if List.isEmpty path then
-        "Error! " ++ message
-
-    else
-        "Error! " ++ message ++ "\n  Path: " ++ String.join " -> " path
 
 
 objectToAnnotation : { useMaybe : Bool } -> Object -> CliMonad Elm.Annotation.Annotation

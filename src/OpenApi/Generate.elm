@@ -5,7 +5,7 @@ module OpenApi.Generate exposing
     , sanitizeModuleName
     )
 
-import CliMonad exposing (CliMonad)
+import CliMonad exposing (CliMonad, Message)
 import Common exposing (Field, FieldName, Type(..), TypeName, toValueName, typifyName)
 import Dict
 import Elm
@@ -51,10 +51,6 @@ type alias Mime =
     String
 
 
-type alias Warning =
-    String
-
-
 type ContentSchema
     = EmptyContent
     | JsonContent Type
@@ -69,7 +65,7 @@ type alias AuthorizationInfo =
     }
 
 
-file : { namespace : String, generateTodos : Bool } -> OpenApi.OpenApi -> Result String ( Elm.File, List Warning )
+file : { namespace : String, generateTodos : Bool } -> OpenApi.OpenApi -> Result Message ( Elm.File, List Message )
 file { namespace, generateTodos } apiSpec =
     CliMonad.combine
         [ pathDeclarations

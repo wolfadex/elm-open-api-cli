@@ -7,9 +7,11 @@ import BackendTask.Http
 import Cli.Option
 import Cli.OptionsParser
 import Cli.Program
+import CliMonad exposing (Message)
 import FatalError
 import Json.Decode
 import Json.Encode
+import List.Extra
 import OpenApi
 import OpenApi.Generate
 import OpenApi.Info
@@ -158,13 +160,14 @@ generateFileFromOpenApiSpec config apiSpec =
         , generateTodos = generateTodos
         }
         apiSpec
-        |> Result.mapError FatalError.fromString
+        |> Result.mapError (messageToString >> FatalError.fromString)
         |> BackendTask.fromResult
         |> BackendTask.andThen
             (\( decls, warnings ) ->
                 warnings
+                    |> List.Extra.gatherEqualsBy .message
                     |> List.map logWarning
-                    |> BackendTask.combine
+                    |> doAll
                     |> BackendTask.map (\_ -> decls)
             )
         |> BackendTask.andThen
@@ -183,10 +186,10 @@ generateFileFromOpenApiSpec config apiSpec =
                     }
                     |> BackendTask.mapError
                         (\error ->
-                            FatalError.fromString <|
-                                Ansi.Color.fontColor Ansi.Color.brightRed <|
-                                    case error.recoverable of
-                                        Pages.Script.FileWriteError ->
+                            case error.recoverable of
+                                Pages.Script.FileWriteError ->
+                                    FatalError.fromString <|
+                                        Ansi.Color.fontColor Ansi.Color.brightRed <|
                                             "Uh oh! Failed to write file"
                         )
                     |> BackendTask.map (\_ -> outputPath)
@@ -198,28 +201,64 @@ generateFileFromOpenApiSpec config apiSpec =
                     padLeftBy4Spaces =
                         String.padLeft 4 ' '
                 in
-                BackendTask.combine
-                    [ Pages.Script.log <| "SDK generated at " ++ outputPath
-                    , Pages.Script.log ""
-                    , Pages.Script.log ""
-                    , Pages.Script.log "You'll need elm/http, elm/json and elm-community/json-extra installed. Try running:"
-                    , Pages.Script.log ""
-                    , Pages.Script.log ""
-                    , Pages.Script.log <| padLeftBy4Spaces "elm install elm/http"
-                    , Pages.Script.log ""
-                    , Pages.Script.log <| padLeftBy4Spaces "elm install elm/json"
-                    , Pages.Script.log ""
-                    , Pages.Script.log <| padLeftBy4Spaces "elm install elm-community/json-extra"
-                    ]
-                    |> BackendTask.map (always ())
+                [ "SDK generated at " ++ outputPath
+                , ""
+                , ""
+                , "You'll need elm/http, elm/json and elm-community/json-extra installed. Try running:"
+                , ""
+                , ""
+                , padLeftBy4Spaces "elm install elm/http"
+                , ""
+                , padLeftBy4Spaces "elm install elm/json"
+                , ""
+                , padLeftBy4Spaces "elm install elm-community/json-extra"
+                ]
+                    |> List.map Pages.Script.log
+                    |> doAll
             )
 
 
-logWarning : String -> BackendTask.BackendTask FatalError.FatalError ()
-logWarning warning =
-    Pages.Script.log <|
-        Ansi.Color.fontColor Ansi.Color.brightYellow "Warning: "
-            ++ warning
+doAll : List (BackendTask.BackendTask error ()) -> BackendTask.BackendTask error ()
+doAll list =
+    case list of
+        [] ->
+            BackendTask.succeed ()
+
+        head :: tail ->
+            head |> BackendTask.andThen (\_ -> doAll tail)
+
+
+messageToString : Message -> String
+messageToString { path, message } =
+    if List.isEmpty path then
+        "Error! " ++ message
+
+    else
+        "Error! " ++ message ++ "\n  Path: " ++ String.join " -> " path
+
+
+logWarning : ( Message, List Message ) -> BackendTask.BackendTask FatalError.FatalError ()
+logWarning ( head, tail ) =
+    let
+        firstLine : String
+        firstLine =
+            Ansi.Color.fontColor Ansi.Color.brightYellow "Warning: " ++ head.message
+
+        paths : List String
+        paths =
+            (head :: tail)
+                |> List.filterMap
+                    (\{ path } ->
+                        if List.isEmpty path then
+                            Nothing
+
+                        else
+                            Just ("  at " ++ String.join " -> " path)
+                    )
+    in
+    (firstLine :: paths)
+        |> List.map Pages.Script.log
+        |> doAll
 
 
 

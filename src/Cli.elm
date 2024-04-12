@@ -186,10 +186,10 @@ generateFileFromOpenApiSpec config apiSpec =
                     }
                     |> BackendTask.mapError
                         (\error ->
-                            FatalError.fromString <|
-                                Ansi.Color.fontColor Ansi.Color.brightRed <|
-                                    case error.recoverable of
-                                        Pages.Script.FileWriteError ->
+                            case error.recoverable of
+                                Pages.Script.FileWriteError ->
+                                    FatalError.fromString <|
+                                        Ansi.Color.fontColor Ansi.Color.brightRed <|
                                             "Uh oh! Failed to write file"
                         )
                     |> BackendTask.map (\_ -> outputPath)

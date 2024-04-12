@@ -1,6 +1,7 @@
 module Test.OpenApi.Generate exposing (suite)
 
 import Char
+import CliMonad exposing (Message)
 import Elm
 import Expect
 import Fuzz
@@ -62,7 +63,7 @@ suite =
                                 OpenApi.Generate.sanitizeModuleName inputName
                                     |> Maybe.withDefault "Api"
 
-                            genFile : Result String ( Elm.File, List String )
+                            genFile : Result Message ( Elm.File, List Message )
                             genFile =
                                 OpenApi.Generate.file
                                     { namespace = moduleName

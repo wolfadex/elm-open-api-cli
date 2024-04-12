@@ -7,9 +7,11 @@ import BackendTask.Http
 import Cli.Option
 import Cli.OptionsParser
 import Cli.Program
+import CliMonad exposing (Message)
 import FatalError
 import Json.Decode
 import Json.Encode
+import List.Extra
 import OpenApi
 import OpenApi.Generate
 import OpenApi.Info
@@ -158,11 +160,12 @@ generateFileFromOpenApiSpec config apiSpec =
         , generateTodos = generateTodos
         }
         apiSpec
-        |> Result.mapError FatalError.fromString
+        |> Result.mapError (messageToString >> FatalError.fromString)
         |> BackendTask.fromResult
         |> BackendTask.andThen
             (\( decls, warnings ) ->
                 warnings
+                    |> List.Extra.gatherEqualsBy .message
                     |> List.map logWarning
                     |> BackendTask.combine
                     |> BackendTask.map (\_ -> decls)
@@ -215,11 +218,38 @@ generateFileFromOpenApiSpec config apiSpec =
             )
 
 
-logWarning : String -> BackendTask.BackendTask FatalError.FatalError ()
-logWarning warning =
-    Pages.Script.log <|
-        Ansi.Color.fontColor Ansi.Color.brightYellow "Warning: "
-            ++ warning
+messageToString : Message -> String
+messageToString { path, message } =
+    if List.isEmpty path then
+        "Error! " ++ message
+
+    else
+        "Error! " ++ message ++ "\n  Path: " ++ String.join " -> " path
+
+
+logWarning : ( Message, List Message ) -> BackendTask.BackendTask FatalError.FatalError ()
+logWarning ( head, tail ) =
+    let
+        firstLine : String
+        firstLine =
+            Ansi.Color.fontColor Ansi.Color.brightYellow "Warning: " ++ head.message
+
+        paths : List String
+        paths =
+            (head :: tail)
+                |> List.filterMap
+                    (\{ path } ->
+                        if List.isEmpty path then
+                            Nothing
+
+                        else
+                            Just (String.join " -> " path)
+                    )
+    in
+    (firstLine :: paths)
+        |> List.map Pages.Script.log
+        |> BackendTask.combine
+        |> BackendTask.map (\_ -> ())
 
 
 

@@ -1,6 +1,7 @@
 module CliMonad exposing
     ( CliMonad
     , Message
+    , Path
     , andThen
     , andThen2
     , combine

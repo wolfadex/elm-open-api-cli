@@ -243,7 +243,7 @@ logWarning ( head, tail ) =
                             Nothing
 
                         else
-                            Just (String.join " -> " path)
+                            Just ("  at " ++ String.join " -> " path)
                     )
     in
     (firstLine :: paths)

@@ -201,21 +201,31 @@ generateFileFromOpenApiSpec config apiSpec =
                     padLeftBy4Spaces =
                         String.padLeft 4 ' '
                 in
-                BackendTask.combine
-                    [ Pages.Script.log <| "SDK generated at " ++ outputPath
-                    , Pages.Script.log ""
-                    , Pages.Script.log ""
-                    , Pages.Script.log "You'll need elm/http, elm/json and elm-community/json-extra installed. Try running:"
-                    , Pages.Script.log ""
-                    , Pages.Script.log ""
-                    , Pages.Script.log <| padLeftBy4Spaces "elm install elm/http"
-                    , Pages.Script.log ""
-                    , Pages.Script.log <| padLeftBy4Spaces "elm install elm/json"
-                    , Pages.Script.log ""
-                    , Pages.Script.log <| padLeftBy4Spaces "elm install elm-community/json-extra"
-                    ]
-                    |> BackendTask.map (always ())
+                [ "SDK generated at " ++ outputPath
+                , ""
+                , ""
+                , "You'll need elm/http, elm/json and elm-community/json-extra installed. Try running:"
+                , ""
+                , ""
+                , padLeftBy4Spaces "elm install elm/http"
+                , ""
+                , padLeftBy4Spaces "elm install elm/json"
+                , ""
+                , padLeftBy4Spaces "elm install elm-community/json-extra"
+                ]
+                    |> List.map Pages.Script.log
+                    |> doAll
             )
+
+
+doAll : List (BackendTask.BackendTask error ()) -> BackendTask.BackendTask error ()
+doAll list =
+    case list of
+        [] ->
+            BackendTask.succeed ()
+
+        head :: tail ->
+            head |> BackendTask.andThen (\_ -> doAll tail)
 
 
 messageToString : Message -> String

@@ -167,7 +167,7 @@ generateFileFromOpenApiSpec config apiSpec =
                 warnings
                     |> List.Extra.gatherEqualsBy .message
                     |> List.map logWarning
-                    |> BackendTask.combine
+                    |> doAll
                     |> BackendTask.map (\_ -> decls)
             )
         |> BackendTask.andThen
@@ -258,8 +258,7 @@ logWarning ( head, tail ) =
     in
     (firstLine :: paths)
         |> List.map Pages.Script.log
-        |> BackendTask.combine
-        |> BackendTask.map (\_ -> ())
+        |> doAll
 
 
 

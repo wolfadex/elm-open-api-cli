@@ -204,14 +204,12 @@ generateFileFromOpenApiSpec config apiSpec =
                 [ "SDK generated at " ++ outputPath
                 , ""
                 , ""
-                , "You'll need elm/http, elm/json and elm-community/json-extra installed. Try running:"
+                , "You'll need elm/http and elm/json installed. Try running:"
                 , ""
                 , ""
                 , padLeftBy4Spaces "elm install elm/http"
                 , ""
                 , padLeftBy4Spaces "elm install elm/json"
-                , ""
-                , padLeftBy4Spaces "elm install elm-community/json-extra"
                 ]
                     |> List.map Pages.Script.log
                     |> doAll

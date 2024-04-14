@@ -24,15 +24,15 @@ toString : Elm.Expression -> Elm.Expression
 toString toStringArg =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Url" ]
-            , name = "toString"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.namedWith [ "Url" ] "Url" [] ]
-                        Type.string
-                    )
-            }
+             { importFrom = [ "Url" ]
+             , name = "toString"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.namedWith [ "Url" ] "Url" [] ]
+                          Type.string
+                     )
+             }
         )
         [ toStringArg ]
 
@@ -88,15 +88,15 @@ fromString : String -> Elm.Expression
 fromString fromStringArg =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Url" ]
-            , name = "fromString"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.string ]
-                        (Type.maybe (Type.namedWith [ "Url" ] "Url" []))
-                    )
-            }
+             { importFrom = [ "Url" ]
+             , name = "fromString"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.string ]
+                          (Type.maybe (Type.namedWith [ "Url" ] "Url" []))
+                     )
+             }
         )
         [ Elm.string fromStringArg ]
 
@@ -137,10 +137,10 @@ percentEncode : String -> Elm.Expression
 percentEncode percentEncodeArg =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Url" ]
-            , name = "percentEncode"
-            , annotation = Just (Type.function [ Type.string ] Type.string)
-            }
+             { importFrom = [ "Url" ]
+             , name = "percentEncode"
+             , annotation = Just (Type.function [ Type.string ] Type.string)
+             }
         )
         [ Elm.string percentEncodeArg ]
 
@@ -179,11 +179,11 @@ percentDecode : String -> Elm.Expression
 percentDecode percentDecodeArg =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Url" ]
-            , name = "percentDecode"
-            , annotation =
-                Just (Type.function [ Type.string ] (Type.maybe Type.string))
-            }
+             { importFrom = [ "Url" ]
+             , name = "percentDecode"
+             , annotation =
+                 Just (Type.function [ Type.string ] (Type.maybe Type.string))
+             }
         )
         [ Elm.string percentDecodeArg ]
 
@@ -196,13 +196,13 @@ annotation_ =
             "Url"
             []
             (Type.record
-                [ ( "protocol", Type.namedWith [ "Url" ] "Protocol" [] )
-                , ( "host", Type.string )
-                , ( "port_", Type.maybe Type.int )
-                , ( "path", Type.string )
-                , ( "query", Type.maybe Type.string )
-                , ( "fragment", Type.maybe Type.string )
-                ]
+                 [ ( "protocol", Type.namedWith [ "Url" ] "Protocol" [] )
+                 , ( "host", Type.string )
+                 , ( "port_", Type.maybe Type.int )
+                 , ( "path", Type.string )
+                 , ( "query", Type.maybe Type.string )
+                 , ( "fragment", Type.maybe Type.string )
+                 ]
             )
     , protocol = Type.namedWith [ "Url" ] "Protocol" []
     }
@@ -226,27 +226,29 @@ make_ =
         \url_args ->
             Elm.withType
                 (Type.alias
-                    [ "Url" ]
-                    "Url"
-                    []
-                    (Type.record
-                        [ ( "protocol", Type.namedWith [ "Url" ] "Protocol" [] )
-                        , ( "host", Type.string )
-                        , ( "port_", Type.maybe Type.int )
-                        , ( "path", Type.string )
-                        , ( "query", Type.maybe Type.string )
-                        , ( "fragment", Type.maybe Type.string )
-                        ]
-                    )
+                     [ "Url" ]
+                     "Url"
+                     []
+                     (Type.record
+                          [ ( "protocol"
+                            , Type.namedWith [ "Url" ] "Protocol" []
+                            )
+                          , ( "host", Type.string )
+                          , ( "port_", Type.maybe Type.int )
+                          , ( "path", Type.string )
+                          , ( "query", Type.maybe Type.string )
+                          , ( "fragment", Type.maybe Type.string )
+                          ]
+                     )
                 )
                 (Elm.record
-                    [ Tuple.pair "protocol" url_args.protocol
-                    , Tuple.pair "host" url_args.host
-                    , Tuple.pair "port_" url_args.port_
-                    , Tuple.pair "path" url_args.path
-                    , Tuple.pair "query" url_args.query
-                    , Tuple.pair "fragment" url_args.fragment
-                    ]
+                     [ Tuple.pair "protocol" url_args.protocol
+                     , Tuple.pair "host" url_args.host
+                     , Tuple.pair "port_" url_args.port_
+                     , Tuple.pair "path" url_args.path
+                     , Tuple.pair "query" url_args.query
+                     , Tuple.pair "fragment" url_args.fragment
+                     ]
                 )
     , http =
         Elm.value
@@ -292,56 +294,58 @@ call_ =
         \toStringArg ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Url" ]
-                    , name = "toString"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.namedWith [ "Url" ] "Url" [] ]
-                                Type.string
-                            )
-                    }
+                     { importFrom = [ "Url" ]
+                     , name = "toString"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.namedWith [ "Url" ] "Url" [] ]
+                                  Type.string
+                             )
+                     }
                 )
                 [ toStringArg ]
     , fromString =
         \fromStringArg ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Url" ]
-                    , name = "fromString"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.string ]
-                                (Type.maybe (Type.namedWith [ "Url" ] "Url" []))
-                            )
-                    }
+                     { importFrom = [ "Url" ]
+                     , name = "fromString"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.string ]
+                                  (Type.maybe
+                                       (Type.namedWith [ "Url" ] "Url" [])
+                                  )
+                             )
+                     }
                 )
                 [ fromStringArg ]
     , percentEncode =
         \percentEncodeArg ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Url" ]
-                    , name = "percentEncode"
-                    , annotation =
-                        Just (Type.function [ Type.string ] Type.string)
-                    }
+                     { importFrom = [ "Url" ]
+                     , name = "percentEncode"
+                     , annotation =
+                         Just (Type.function [ Type.string ] Type.string)
+                     }
                 )
                 [ percentEncodeArg ]
     , percentDecode =
         \percentDecodeArg ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Url" ]
-                    , name = "percentDecode"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.string ]
-                                (Type.maybe Type.string)
-                            )
-                    }
+                     { importFrom = [ "Url" ]
+                     , name = "percentDecode"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.string ]
+                                  (Type.maybe Type.string)
+                             )
+                     }
                 )
                 [ percentDecodeArg ]
     }
@@ -361,8 +365,8 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.namedWith [ "Url" ] "Url" [] ]
-                        Type.string
+                         [ Type.namedWith [ "Url" ] "Url" [] ]
+                         Type.string
                     )
             }
     , fromString =
@@ -372,8 +376,8 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.string ]
-                        (Type.maybe (Type.namedWith [ "Url" ] "Url" []))
+                         [ Type.string ]
+                         (Type.maybe (Type.namedWith [ "Url" ] "Url" []))
                     )
             }
     , percentEncode =

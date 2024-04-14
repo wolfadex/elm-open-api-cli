@@ -29,15 +29,15 @@ width : Elm.Expression -> Elm.Expression
 width widthArg =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Bytes" ]
-            , name = "width"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.namedWith [ "Bytes" ] "Bytes" [] ]
-                        Type.int
-                    )
-            }
+             { importFrom = [ "Bytes" ]
+             , name = "width"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.namedWith [ "Bytes" ] "Bytes" [] ]
+                          Type.int
+                     )
+             }
         )
         [ widthArg ]
 
@@ -54,9 +54,11 @@ getHostEndianness =
         , annotation =
             Just
                 (Type.namedWith
-                    [ "Task" ]
-                    "Task"
-                    [ Type.var "x", Type.namedWith [ "Bytes" ] "Endianness" [] ]
+                     [ "Task" ]
+                     "Task"
+                     [ Type.var "x"
+                     , Type.namedWith [ "Bytes" ] "Endianness" []
+                     ]
                 )
         }
 
@@ -109,15 +111,15 @@ call_ =
         \widthArg ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Bytes" ]
-                    , name = "width"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.namedWith [ "Bytes" ] "Bytes" [] ]
-                                Type.int
-                            )
-                    }
+                     { importFrom = [ "Bytes" ]
+                     , name = "width"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.namedWith [ "Bytes" ] "Bytes" [] ]
+                                  Type.int
+                             )
+                     }
                 )
                 [ widthArg ]
     }
@@ -132,8 +134,8 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.namedWith [ "Bytes" ] "Bytes" [] ]
-                        Type.int
+                         [ Type.namedWith [ "Bytes" ] "Bytes" [] ]
+                         Type.int
                     )
             }
     , getHostEndianness =
@@ -143,11 +145,11 @@ values_ =
             , annotation =
                 Just
                     (Type.namedWith
-                        [ "Task" ]
-                        "Task"
-                        [ Type.var "x"
-                        , Type.namedWith [ "Bytes" ] "Endianness" []
-                        ]
+                         [ "Task" ]
+                         "Task"
+                         [ Type.var "x"
+                         , Type.namedWith [ "Bytes" ] "Endianness" []
+                         ]
                     )
             }
     }

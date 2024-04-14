@@ -21,7 +21,6 @@ import Gen.Debug
 import Gen.Dict
 import Gen.Http
 import Gen.Json.Decode
-import Gen.Json.Decode.Extra
 import Gen.Json.Encode
 import Gen.List
 import Gen.Maybe
@@ -76,6 +75,7 @@ file { namespace, generateTodos } apiSpec =
             , expectJsonCustom.declaration
             , jsonResolverCustom.declaration
             , whateverResolver.declaration
+            , jsonDecodeAndMap
             , nullableType
             ]
         , componentDeclarations
@@ -1790,7 +1790,7 @@ typeToDecoder type_ =
                         (\internalDecoder prevExpr ->
                             Elm.Op.pipe
                                 (Elm.apply
-                                    Gen.Json.Decode.Extra.values_.andMap
+                                    (Elm.val "jsonDecodeAndMap")
                                     [ if field.required then
                                         Gen.Json.Decode.field key internalDecoder
 
@@ -1876,6 +1876,37 @@ typeToDecoder type_ =
 
         Bytes ->
             CliMonad.todo "Bytes decoder not implemented yet"
+
+
+jsonDecodeAndMap : Elm.Declaration
+jsonDecodeAndMap =
+    let
+        aVarAnnotation : Elm.Annotation.Annotation
+        aVarAnnotation =
+            Elm.Annotation.var "a"
+
+        aToBAnnotation : Elm.Annotation.Annotation
+        aToBAnnotation =
+            Elm.Annotation.function [ Elm.Annotation.var "a" ] (Elm.Annotation.var "b")
+
+        bVarAnnotation : Elm.Annotation.Annotation
+        bVarAnnotation =
+            Elm.Annotation.var "b"
+    in
+    Elm.function []
+        (\_ ->
+            Elm.apply
+                Gen.Json.Decode.values_.map2
+                [ Elm.val "(|>)" ]
+        )
+        |> Elm.withType
+            (Elm.Annotation.function
+                [ Gen.Json.Decode.annotation_.decoder aVarAnnotation
+                , Gen.Json.Decode.annotation_.decoder aToBAnnotation
+                ]
+                (Gen.Json.Decode.annotation_.decoder bVarAnnotation)
+            )
+        |> Elm.declaration "jsonDecodeAndMap"
 
 
 {-| Decode an optional field

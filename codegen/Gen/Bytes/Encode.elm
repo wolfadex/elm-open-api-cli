@@ -53,15 +53,15 @@ encode : Elm.Expression -> Elm.Expression
 encode encodeArg =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Bytes", "Encode" ]
-            , name = "encode"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.namedWith [ "Bytes", "Encode" ] "Encoder" [] ]
-                        (Type.namedWith [ "Bytes" ] "Bytes" [])
-                    )
-            }
+             { importFrom = [ "Bytes", "Encode" ]
+             , name = "encode"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.namedWith [ "Bytes", "Encode" ] "Encoder" [] ]
+                          (Type.namedWith [ "Bytes" ] "Bytes" [])
+                     )
+             }
         )
         [ encodeArg ]
 
@@ -88,17 +88,18 @@ sequence : List Elm.Expression -> Elm.Expression
 sequence sequenceArg =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Bytes", "Encode" ]
-            , name = "sequence"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.list
-                            (Type.namedWith [ "Bytes", "Encode" ] "Encoder" [])
-                        ]
-                        (Type.namedWith [ "Bytes", "Encode" ] "Encoder" [])
-                    )
-            }
+             { importFrom = [ "Bytes", "Encode" ]
+             , name = "sequence"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.list
+                              (Type.namedWith [ "Bytes", "Encode" ] "Encoder" []
+                              )
+                          ]
+                          (Type.namedWith [ "Bytes", "Encode" ] "Encoder" [])
+                     )
+             }
         )
         [ Elm.list sequenceArg ]
 
@@ -111,15 +112,15 @@ signedInt8 : Int -> Elm.Expression
 signedInt8 signedInt8Arg =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Bytes", "Encode" ]
-            , name = "signedInt8"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.int ]
-                        (Type.namedWith [ "Bytes", "Encode" ] "Encoder" [])
-                    )
-            }
+             { importFrom = [ "Bytes", "Encode" ]
+             , name = "signedInt8"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.int ]
+                          (Type.namedWith [ "Bytes", "Encode" ] "Encoder" [])
+                     )
+             }
         )
         [ Elm.int signedInt8Arg ]
 
@@ -132,15 +133,17 @@ signedInt16 : Elm.Expression -> Int -> Elm.Expression
 signedInt16 signedInt16Arg signedInt16Arg0 =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Bytes", "Encode" ]
-            , name = "signedInt16"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.namedWith [ "Bytes" ] "Endianness" [], Type.int ]
-                        (Type.namedWith [ "Bytes", "Encode" ] "Encoder" [])
-                    )
-            }
+             { importFrom = [ "Bytes", "Encode" ]
+             , name = "signedInt16"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.namedWith [ "Bytes" ] "Endianness" []
+                          , Type.int
+                          ]
+                          (Type.namedWith [ "Bytes", "Encode" ] "Encoder" [])
+                     )
+             }
         )
         [ signedInt16Arg, Elm.int signedInt16Arg0 ]
 
@@ -153,15 +156,17 @@ signedInt32 : Elm.Expression -> Int -> Elm.Expression
 signedInt32 signedInt32Arg signedInt32Arg0 =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Bytes", "Encode" ]
-            , name = "signedInt32"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.namedWith [ "Bytes" ] "Endianness" [], Type.int ]
-                        (Type.namedWith [ "Bytes", "Encode" ] "Encoder" [])
-                    )
-            }
+             { importFrom = [ "Bytes", "Encode" ]
+             , name = "signedInt32"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.namedWith [ "Bytes" ] "Endianness" []
+                          , Type.int
+                          ]
+                          (Type.namedWith [ "Bytes", "Encode" ] "Encoder" [])
+                     )
+             }
         )
         [ signedInt32Arg, Elm.int signedInt32Arg0 ]
 
@@ -174,15 +179,15 @@ unsignedInt8 : Int -> Elm.Expression
 unsignedInt8 unsignedInt8Arg =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Bytes", "Encode" ]
-            , name = "unsignedInt8"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.int ]
-                        (Type.namedWith [ "Bytes", "Encode" ] "Encoder" [])
-                    )
-            }
+             { importFrom = [ "Bytes", "Encode" ]
+             , name = "unsignedInt8"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.int ]
+                          (Type.namedWith [ "Bytes", "Encode" ] "Encoder" [])
+                     )
+             }
         )
         [ Elm.int unsignedInt8Arg ]
 
@@ -195,15 +200,17 @@ unsignedInt16 : Elm.Expression -> Int -> Elm.Expression
 unsignedInt16 unsignedInt16Arg unsignedInt16Arg0 =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Bytes", "Encode" ]
-            , name = "unsignedInt16"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.namedWith [ "Bytes" ] "Endianness" [], Type.int ]
-                        (Type.namedWith [ "Bytes", "Encode" ] "Encoder" [])
-                    )
-            }
+             { importFrom = [ "Bytes", "Encode" ]
+             , name = "unsignedInt16"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.namedWith [ "Bytes" ] "Endianness" []
+                          , Type.int
+                          ]
+                          (Type.namedWith [ "Bytes", "Encode" ] "Encoder" [])
+                     )
+             }
         )
         [ unsignedInt16Arg, Elm.int unsignedInt16Arg0 ]
 
@@ -216,15 +223,17 @@ unsignedInt32 : Elm.Expression -> Int -> Elm.Expression
 unsignedInt32 unsignedInt32Arg unsignedInt32Arg0 =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Bytes", "Encode" ]
-            , name = "unsignedInt32"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.namedWith [ "Bytes" ] "Endianness" [], Type.int ]
-                        (Type.namedWith [ "Bytes", "Encode" ] "Encoder" [])
-                    )
-            }
+             { importFrom = [ "Bytes", "Encode" ]
+             , name = "unsignedInt32"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.namedWith [ "Bytes" ] "Endianness" []
+                          , Type.int
+                          ]
+                          (Type.namedWith [ "Bytes", "Encode" ] "Encoder" [])
+                     )
+             }
         )
         [ unsignedInt32Arg, Elm.int unsignedInt32Arg0 ]
 
@@ -237,17 +246,17 @@ float32 : Elm.Expression -> Float -> Elm.Expression
 float32 float32Arg float32Arg0 =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Bytes", "Encode" ]
-            , name = "float32"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.namedWith [ "Bytes" ] "Endianness" []
-                        , Type.float
-                        ]
-                        (Type.namedWith [ "Bytes", "Encode" ] "Encoder" [])
-                    )
-            }
+             { importFrom = [ "Bytes", "Encode" ]
+             , name = "float32"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.namedWith [ "Bytes" ] "Endianness" []
+                          , Type.float
+                          ]
+                          (Type.namedWith [ "Bytes", "Encode" ] "Encoder" [])
+                     )
+             }
         )
         [ float32Arg, Elm.float float32Arg0 ]
 
@@ -260,17 +269,17 @@ float64 : Elm.Expression -> Float -> Elm.Expression
 float64 float64Arg float64Arg0 =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Bytes", "Encode" ]
-            , name = "float64"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.namedWith [ "Bytes" ] "Endianness" []
-                        , Type.float
-                        ]
-                        (Type.namedWith [ "Bytes", "Encode" ] "Encoder" [])
-                    )
-            }
+             { importFrom = [ "Bytes", "Encode" ]
+             , name = "float64"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.namedWith [ "Bytes" ] "Endianness" []
+                          , Type.float
+                          ]
+                          (Type.namedWith [ "Bytes", "Encode" ] "Encoder" [])
+                     )
+             }
         )
         [ float64Arg, Elm.float float64Arg0 ]
 
@@ -301,15 +310,15 @@ bytes : Elm.Expression -> Elm.Expression
 bytes bytesArg =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Bytes", "Encode" ]
-            , name = "bytes"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.namedWith [ "Bytes" ] "Bytes" [] ]
-                        (Type.namedWith [ "Bytes", "Encode" ] "Encoder" [])
-                    )
-            }
+             { importFrom = [ "Bytes", "Encode" ]
+             , name = "bytes"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.namedWith [ "Bytes" ] "Bytes" [] ]
+                          (Type.namedWith [ "Bytes", "Encode" ] "Encoder" [])
+                     )
+             }
         )
         [ bytesArg ]
 
@@ -354,15 +363,15 @@ string : String -> Elm.Expression
 string stringArg =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Bytes", "Encode" ]
-            , name = "string"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.string ]
-                        (Type.namedWith [ "Bytes", "Encode" ] "Encoder" [])
-                    )
-            }
+             { importFrom = [ "Bytes", "Encode" ]
+             , name = "string"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.string ]
+                          (Type.namedWith [ "Bytes", "Encode" ] "Encoder" [])
+                     )
+             }
         )
         [ Elm.string stringArg ]
 
@@ -386,10 +395,10 @@ getStringWidth : String -> Elm.Expression
 getStringWidth getStringWidthArg =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Bytes", "Encode" ]
-            , name = "getStringWidth"
-            , annotation = Just (Type.function [ Type.string ] Type.int)
-            }
+             { importFrom = [ "Bytes", "Encode" ]
+             , name = "getStringWidth"
+             , annotation = Just (Type.function [ Type.string ] Type.int)
+             }
         )
         [ Elm.string getStringWidthArg ]
 
@@ -419,256 +428,257 @@ call_ =
         \encodeArg ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Bytes", "Encode" ]
-                    , name = "encode"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.namedWith
-                                    [ "Bytes", "Encode" ]
-                                    "Encoder"
-                                    []
-                                ]
-                                (Type.namedWith [ "Bytes" ] "Bytes" [])
-                            )
-                    }
+                     { importFrom = [ "Bytes", "Encode" ]
+                     , name = "encode"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.namedWith
+                                      [ "Bytes", "Encode" ]
+                                      "Encoder"
+                                      []
+                                  ]
+                                  (Type.namedWith [ "Bytes" ] "Bytes" [])
+                             )
+                     }
                 )
                 [ encodeArg ]
     , sequence =
         \sequenceArg ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Bytes", "Encode" ]
-                    , name = "sequence"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.list
-                                    (Type.namedWith
-                                        [ "Bytes", "Encode" ]
-                                        "Encoder"
-                                        []
-                                    )
-                                ]
-                                (Type.namedWith
-                                    [ "Bytes", "Encode" ]
-                                    "Encoder"
-                                    []
-                                )
-                            )
-                    }
+                     { importFrom = [ "Bytes", "Encode" ]
+                     , name = "sequence"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.list
+                                      (Type.namedWith
+                                         [ "Bytes", "Encode" ]
+                                         "Encoder"
+                                         []
+                                      )
+                                  ]
+                                  (Type.namedWith
+                                       [ "Bytes", "Encode" ]
+                                       "Encoder"
+                                       []
+                                  )
+                             )
+                     }
                 )
                 [ sequenceArg ]
     , signedInt8 =
         \signedInt8Arg ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Bytes", "Encode" ]
-                    , name = "signedInt8"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.int ]
-                                (Type.namedWith
-                                    [ "Bytes", "Encode" ]
-                                    "Encoder"
-                                    []
-                                )
-                            )
-                    }
+                     { importFrom = [ "Bytes", "Encode" ]
+                     , name = "signedInt8"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.int ]
+                                  (Type.namedWith
+                                       [ "Bytes", "Encode" ]
+                                       "Encoder"
+                                       []
+                                  )
+                             )
+                     }
                 )
                 [ signedInt8Arg ]
     , signedInt16 =
         \signedInt16Arg signedInt16Arg0 ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Bytes", "Encode" ]
-                    , name = "signedInt16"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.namedWith [ "Bytes" ] "Endianness" []
-                                , Type.int
-                                ]
-                                (Type.namedWith
-                                    [ "Bytes", "Encode" ]
-                                    "Encoder"
-                                    []
-                                )
-                            )
-                    }
+                     { importFrom = [ "Bytes", "Encode" ]
+                     , name = "signedInt16"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.namedWith [ "Bytes" ] "Endianness" []
+                                  , Type.int
+                                  ]
+                                  (Type.namedWith
+                                       [ "Bytes", "Encode" ]
+                                       "Encoder"
+                                       []
+                                  )
+                             )
+                     }
                 )
                 [ signedInt16Arg, signedInt16Arg0 ]
     , signedInt32 =
         \signedInt32Arg signedInt32Arg0 ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Bytes", "Encode" ]
-                    , name = "signedInt32"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.namedWith [ "Bytes" ] "Endianness" []
-                                , Type.int
-                                ]
-                                (Type.namedWith
-                                    [ "Bytes", "Encode" ]
-                                    "Encoder"
-                                    []
-                                )
-                            )
-                    }
+                     { importFrom = [ "Bytes", "Encode" ]
+                     , name = "signedInt32"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.namedWith [ "Bytes" ] "Endianness" []
+                                  , Type.int
+                                  ]
+                                  (Type.namedWith
+                                       [ "Bytes", "Encode" ]
+                                       "Encoder"
+                                       []
+                                  )
+                             )
+                     }
                 )
                 [ signedInt32Arg, signedInt32Arg0 ]
     , unsignedInt8 =
         \unsignedInt8Arg ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Bytes", "Encode" ]
-                    , name = "unsignedInt8"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.int ]
-                                (Type.namedWith
-                                    [ "Bytes", "Encode" ]
-                                    "Encoder"
-                                    []
-                                )
-                            )
-                    }
+                     { importFrom = [ "Bytes", "Encode" ]
+                     , name = "unsignedInt8"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.int ]
+                                  (Type.namedWith
+                                       [ "Bytes", "Encode" ]
+                                       "Encoder"
+                                       []
+                                  )
+                             )
+                     }
                 )
                 [ unsignedInt8Arg ]
     , unsignedInt16 =
         \unsignedInt16Arg unsignedInt16Arg0 ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Bytes", "Encode" ]
-                    , name = "unsignedInt16"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.namedWith [ "Bytes" ] "Endianness" []
-                                , Type.int
-                                ]
-                                (Type.namedWith
-                                    [ "Bytes", "Encode" ]
-                                    "Encoder"
-                                    []
-                                )
-                            )
-                    }
+                     { importFrom = [ "Bytes", "Encode" ]
+                     , name = "unsignedInt16"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.namedWith [ "Bytes" ] "Endianness" []
+                                  , Type.int
+                                  ]
+                                  (Type.namedWith
+                                       [ "Bytes", "Encode" ]
+                                       "Encoder"
+                                       []
+                                  )
+                             )
+                     }
                 )
                 [ unsignedInt16Arg, unsignedInt16Arg0 ]
     , unsignedInt32 =
         \unsignedInt32Arg unsignedInt32Arg0 ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Bytes", "Encode" ]
-                    , name = "unsignedInt32"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.namedWith [ "Bytes" ] "Endianness" []
-                                , Type.int
-                                ]
-                                (Type.namedWith
-                                    [ "Bytes", "Encode" ]
-                                    "Encoder"
-                                    []
-                                )
-                            )
-                    }
+                     { importFrom = [ "Bytes", "Encode" ]
+                     , name = "unsignedInt32"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.namedWith [ "Bytes" ] "Endianness" []
+                                  , Type.int
+                                  ]
+                                  (Type.namedWith
+                                       [ "Bytes", "Encode" ]
+                                       "Encoder"
+                                       []
+                                  )
+                             )
+                     }
                 )
                 [ unsignedInt32Arg, unsignedInt32Arg0 ]
     , float32 =
         \float32Arg float32Arg0 ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Bytes", "Encode" ]
-                    , name = "float32"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.namedWith [ "Bytes" ] "Endianness" []
-                                , Type.float
-                                ]
-                                (Type.namedWith
-                                    [ "Bytes", "Encode" ]
-                                    "Encoder"
-                                    []
-                                )
-                            )
-                    }
+                     { importFrom = [ "Bytes", "Encode" ]
+                     , name = "float32"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.namedWith [ "Bytes" ] "Endianness" []
+                                  , Type.float
+                                  ]
+                                  (Type.namedWith
+                                       [ "Bytes", "Encode" ]
+                                       "Encoder"
+                                       []
+                                  )
+                             )
+                     }
                 )
                 [ float32Arg, float32Arg0 ]
     , float64 =
         \float64Arg float64Arg0 ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Bytes", "Encode" ]
-                    , name = "float64"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.namedWith [ "Bytes" ] "Endianness" []
-                                , Type.float
-                                ]
-                                (Type.namedWith
-                                    [ "Bytes", "Encode" ]
-                                    "Encoder"
-                                    []
-                                )
-                            )
-                    }
+                     { importFrom = [ "Bytes", "Encode" ]
+                     , name = "float64"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.namedWith [ "Bytes" ] "Endianness" []
+                                  , Type.float
+                                  ]
+                                  (Type.namedWith
+                                       [ "Bytes", "Encode" ]
+                                       "Encoder"
+                                       []
+                                  )
+                             )
+                     }
                 )
                 [ float64Arg, float64Arg0 ]
     , bytes =
         \bytesArg ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Bytes", "Encode" ]
-                    , name = "bytes"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.namedWith [ "Bytes" ] "Bytes" [] ]
-                                (Type.namedWith
-                                    [ "Bytes", "Encode" ]
-                                    "Encoder"
-                                    []
-                                )
-                            )
-                    }
+                     { importFrom = [ "Bytes", "Encode" ]
+                     , name = "bytes"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.namedWith [ "Bytes" ] "Bytes" [] ]
+                                  (Type.namedWith
+                                       [ "Bytes", "Encode" ]
+                                       "Encoder"
+                                       []
+                                  )
+                             )
+                     }
                 )
                 [ bytesArg ]
     , string =
         \stringArg ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Bytes", "Encode" ]
-                    , name = "string"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.string ]
-                                (Type.namedWith
-                                    [ "Bytes", "Encode" ]
-                                    "Encoder"
-                                    []
-                                )
-                            )
-                    }
+                     { importFrom = [ "Bytes", "Encode" ]
+                     , name = "string"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.string ]
+                                  (Type.namedWith
+                                       [ "Bytes", "Encode" ]
+                                       "Encoder"
+                                       []
+                                  )
+                             )
+                     }
                 )
                 [ stringArg ]
     , getStringWidth =
         \getStringWidthArg ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Bytes", "Encode" ]
-                    , name = "getStringWidth"
-                    , annotation = Just (Type.function [ Type.string ] Type.int)
-                    }
+                     { importFrom = [ "Bytes", "Encode" ]
+                     , name = "getStringWidth"
+                     , annotation =
+                         Just (Type.function [ Type.string ] Type.int)
+                     }
                 )
                 [ getStringWidthArg ]
     }
@@ -697,8 +707,8 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.namedWith [ "Bytes", "Encode" ] "Encoder" [] ]
-                        (Type.namedWith [ "Bytes" ] "Bytes" [])
+                         [ Type.namedWith [ "Bytes", "Encode" ] "Encoder" [] ]
+                         (Type.namedWith [ "Bytes" ] "Bytes" [])
                     )
             }
     , sequence =
@@ -708,10 +718,10 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.list
-                            (Type.namedWith [ "Bytes", "Encode" ] "Encoder" [])
-                        ]
-                        (Type.namedWith [ "Bytes", "Encode" ] "Encoder" [])
+                         [ Type.list
+                             (Type.namedWith [ "Bytes", "Encode" ] "Encoder" [])
+                         ]
+                         (Type.namedWith [ "Bytes", "Encode" ] "Encoder" [])
                     )
             }
     , signedInt8 =
@@ -721,8 +731,8 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.int ]
-                        (Type.namedWith [ "Bytes", "Encode" ] "Encoder" [])
+                         [ Type.int ]
+                         (Type.namedWith [ "Bytes", "Encode" ] "Encoder" [])
                     )
             }
     , signedInt16 =
@@ -732,8 +742,10 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.namedWith [ "Bytes" ] "Endianness" [], Type.int ]
-                        (Type.namedWith [ "Bytes", "Encode" ] "Encoder" [])
+                         [ Type.namedWith [ "Bytes" ] "Endianness" []
+                         , Type.int
+                         ]
+                         (Type.namedWith [ "Bytes", "Encode" ] "Encoder" [])
                     )
             }
     , signedInt32 =
@@ -743,8 +755,10 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.namedWith [ "Bytes" ] "Endianness" [], Type.int ]
-                        (Type.namedWith [ "Bytes", "Encode" ] "Encoder" [])
+                         [ Type.namedWith [ "Bytes" ] "Endianness" []
+                         , Type.int
+                         ]
+                         (Type.namedWith [ "Bytes", "Encode" ] "Encoder" [])
                     )
             }
     , unsignedInt8 =
@@ -754,8 +768,8 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.int ]
-                        (Type.namedWith [ "Bytes", "Encode" ] "Encoder" [])
+                         [ Type.int ]
+                         (Type.namedWith [ "Bytes", "Encode" ] "Encoder" [])
                     )
             }
     , unsignedInt16 =
@@ -765,8 +779,10 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.namedWith [ "Bytes" ] "Endianness" [], Type.int ]
-                        (Type.namedWith [ "Bytes", "Encode" ] "Encoder" [])
+                         [ Type.namedWith [ "Bytes" ] "Endianness" []
+                         , Type.int
+                         ]
+                         (Type.namedWith [ "Bytes", "Encode" ] "Encoder" [])
                     )
             }
     , unsignedInt32 =
@@ -776,8 +792,10 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.namedWith [ "Bytes" ] "Endianness" [], Type.int ]
-                        (Type.namedWith [ "Bytes", "Encode" ] "Encoder" [])
+                         [ Type.namedWith [ "Bytes" ] "Endianness" []
+                         , Type.int
+                         ]
+                         (Type.namedWith [ "Bytes", "Encode" ] "Encoder" [])
                     )
             }
     , float32 =
@@ -787,10 +805,10 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.namedWith [ "Bytes" ] "Endianness" []
-                        , Type.float
-                        ]
-                        (Type.namedWith [ "Bytes", "Encode" ] "Encoder" [])
+                         [ Type.namedWith [ "Bytes" ] "Endianness" []
+                         , Type.float
+                         ]
+                         (Type.namedWith [ "Bytes", "Encode" ] "Encoder" [])
                     )
             }
     , float64 =
@@ -800,10 +818,10 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.namedWith [ "Bytes" ] "Endianness" []
-                        , Type.float
-                        ]
-                        (Type.namedWith [ "Bytes", "Encode" ] "Encoder" [])
+                         [ Type.namedWith [ "Bytes" ] "Endianness" []
+                         , Type.float
+                         ]
+                         (Type.namedWith [ "Bytes", "Encode" ] "Encoder" [])
                     )
             }
     , bytes =
@@ -813,8 +831,8 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.namedWith [ "Bytes" ] "Bytes" [] ]
-                        (Type.namedWith [ "Bytes", "Encode" ] "Encoder" [])
+                         [ Type.namedWith [ "Bytes" ] "Bytes" [] ]
+                         (Type.namedWith [ "Bytes", "Encode" ] "Encoder" [])
                     )
             }
     , string =
@@ -824,8 +842,8 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.string ]
-                        (Type.namedWith [ "Bytes", "Encode" ] "Encoder" [])
+                         [ Type.string ]
+                         (Type.namedWith [ "Bytes", "Encode" ] "Encoder" [])
                     )
             }
     , getStringWidth =

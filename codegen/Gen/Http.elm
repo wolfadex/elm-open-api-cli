@@ -43,24 +43,24 @@ get : { url : String, expect : Elm.Expression } -> Elm.Expression
 get getArg =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Http" ]
-            , name = "get"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.record
-                            [ ( "url", Type.string )
-                            , ( "expect"
-                              , Type.namedWith
+             { importFrom = [ "Http" ]
+             , name = "get"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.record
+                              [ ( "url", Type.string )
+                              , ( "expect"
+                                , Type.namedWith
                                     [ "Http" ]
                                     "Expect"
                                     [ Type.var "msg" ]
-                              )
-                            ]
-                        ]
-                        (Type.namedWith [] "Cmd" [ Type.var "msg" ])
-                    )
-            }
+                                )
+                              ]
+                          ]
+                          (Type.namedWith [] "Cmd" [ Type.var "msg" ])
+                     )
+             }
         )
         [ Elm.record
             [ Tuple.pair "url" (Elm.string getArg.url)
@@ -105,25 +105,25 @@ post :
 post postArg =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Http" ]
-            , name = "post"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.record
-                            [ ( "url", Type.string )
-                            , ( "body", Type.namedWith [ "Http" ] "Body" [] )
-                            , ( "expect"
-                              , Type.namedWith
+             { importFrom = [ "Http" ]
+             , name = "post"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.record
+                              [ ( "url", Type.string )
+                              , ( "body", Type.namedWith [ "Http" ] "Body" [] )
+                              , ( "expect"
+                                , Type.namedWith
                                     [ "Http" ]
                                     "Expect"
                                     [ Type.var "msg" ]
-                              )
-                            ]
-                        ]
-                        (Type.namedWith [] "Cmd" [ Type.var "msg" ])
-                    )
-            }
+                                )
+                              ]
+                          ]
+                          (Type.namedWith [] "Cmd" [ Type.var "msg" ])
+                     )
+             }
         )
         [ Elm.record
             [ Tuple.pair "url" (Elm.string postArg.url)
@@ -180,32 +180,32 @@ request :
 request requestArg =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Http" ]
-            , name = "request"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.record
-                            [ ( "method", Type.string )
-                            , ( "headers"
-                              , Type.list
+             { importFrom = [ "Http" ]
+             , name = "request"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.record
+                              [ ( "method", Type.string )
+                              , ( "headers"
+                                , Type.list
                                     (Type.namedWith [ "Http" ] "Header" [])
-                              )
-                            , ( "url", Type.string )
-                            , ( "body", Type.namedWith [ "Http" ] "Body" [] )
-                            , ( "expect"
-                              , Type.namedWith
+                                )
+                              , ( "url", Type.string )
+                              , ( "body", Type.namedWith [ "Http" ] "Body" [] )
+                              , ( "expect"
+                                , Type.namedWith
                                     [ "Http" ]
                                     "Expect"
                                     [ Type.var "msg" ]
-                              )
-                            , ( "timeout", Type.maybe Type.float )
-                            , ( "tracker", Type.maybe Type.string )
-                            ]
-                        ]
-                        (Type.namedWith [] "Cmd" [ Type.var "msg" ])
-                    )
-            }
+                                )
+                              , ( "timeout", Type.maybe Type.float )
+                              , ( "tracker", Type.maybe Type.string )
+                              ]
+                          ]
+                          (Type.namedWith [] "Cmd" [ Type.var "msg" ])
+                     )
+             }
         )
         [ Elm.record
             [ Tuple.pair "method" (Elm.string requestArg.method)
@@ -231,15 +231,15 @@ header : String -> String -> Elm.Expression
 header headerArg headerArg0 =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Http" ]
-            , name = "header"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.string, Type.string ]
-                        (Type.namedWith [ "Http" ] "Header" [])
-                    )
-            }
+             { importFrom = [ "Http" ]
+             , name = "header"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.string, Type.string ]
+                          (Type.namedWith [ "Http" ] "Header" [])
+                     )
+             }
         )
         [ Elm.string headerArg, Elm.string headerArg0 ]
 
@@ -276,15 +276,15 @@ stringBody : String -> String -> Elm.Expression
 stringBody stringBodyArg stringBodyArg0 =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Http" ]
-            , name = "stringBody"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.string, Type.string ]
-                        (Type.namedWith [ "Http" ] "Body" [])
-                    )
-            }
+             { importFrom = [ "Http" ]
+             , name = "stringBody"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.string, Type.string ]
+                          (Type.namedWith [ "Http" ] "Body" [])
+                     )
+             }
         )
         [ Elm.string stringBodyArg, Elm.string stringBodyArg0 ]
 
@@ -298,15 +298,15 @@ jsonBody : Elm.Expression -> Elm.Expression
 jsonBody jsonBodyArg =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Http" ]
-            , name = "jsonBody"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.namedWith [ "Json", "Encode" ] "Value" [] ]
-                        (Type.namedWith [ "Http" ] "Body" [])
-                    )
-            }
+             { importFrom = [ "Http" ]
+             , name = "jsonBody"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.namedWith [ "Json", "Encode" ] "Value" [] ]
+                          (Type.namedWith [ "Http" ] "Body" [])
+                     )
+             }
         )
         [ jsonBodyArg ]
 
@@ -325,15 +325,15 @@ fileBody : Elm.Expression -> Elm.Expression
 fileBody fileBodyArg =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Http" ]
-            , name = "fileBody"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.namedWith [ "File" ] "File" [] ]
-                        (Type.namedWith [ "Http" ] "Body" [])
-                    )
-            }
+             { importFrom = [ "Http" ]
+             , name = "fileBody"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.namedWith [ "File" ] "File" [] ]
+                          (Type.namedWith [ "Http" ] "Body" [])
+                     )
+             }
         )
         [ fileBodyArg ]
 
@@ -361,15 +361,15 @@ bytesBody : String -> Elm.Expression -> Elm.Expression
 bytesBody bytesBodyArg bytesBodyArg0 =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Http" ]
-            , name = "bytesBody"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.string, Type.namedWith [ "Bytes" ] "Bytes" [] ]
-                        (Type.namedWith [ "Http" ] "Body" [])
-                    )
-            }
+             { importFrom = [ "Http" ]
+             , name = "bytesBody"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.string, Type.namedWith [ "Bytes" ] "Bytes" [] ]
+                          (Type.namedWith [ "Http" ] "Body" [])
+                     )
+             }
         )
         [ Elm.string bytesBodyArg, bytesBodyArg0 ]
 
@@ -421,15 +421,15 @@ multipartBody : List Elm.Expression -> Elm.Expression
 multipartBody multipartBodyArg =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Http" ]
-            , name = "multipartBody"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.list (Type.namedWith [ "Http" ] "Part" []) ]
-                        (Type.namedWith [ "Http" ] "Body" [])
-                    )
-            }
+             { importFrom = [ "Http" ]
+             , name = "multipartBody"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.list (Type.namedWith [ "Http" ] "Part" []) ]
+                          (Type.namedWith [ "Http" ] "Body" [])
+                     )
+             }
         )
         [ Elm.list multipartBodyArg ]
 
@@ -447,15 +447,15 @@ stringPart : String -> String -> Elm.Expression
 stringPart stringPartArg stringPartArg0 =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Http" ]
-            , name = "stringPart"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.string, Type.string ]
-                        (Type.namedWith [ "Http" ] "Part" [])
-                    )
-            }
+             { importFrom = [ "Http" ]
+             , name = "stringPart"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.string, Type.string ]
+                          (Type.namedWith [ "Http" ] "Part" [])
+                     )
+             }
         )
         [ Elm.string stringPartArg, Elm.string stringPartArg0 ]
 
@@ -478,15 +478,15 @@ filePart : String -> Elm.Expression -> Elm.Expression
 filePart filePartArg filePartArg0 =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Http" ]
-            , name = "filePart"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.string, Type.namedWith [ "File" ] "File" [] ]
-                        (Type.namedWith [ "Http" ] "Part" [])
-                    )
-            }
+             { importFrom = [ "Http" ]
+             , name = "filePart"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.string, Type.namedWith [ "File" ] "File" [] ]
+                          (Type.namedWith [ "Http" ] "Part" [])
+                     )
+             }
         )
         [ Elm.string filePartArg, filePartArg0 ]
 
@@ -509,18 +509,18 @@ bytesPart : String -> String -> Elm.Expression -> Elm.Expression
 bytesPart bytesPartArg bytesPartArg0 bytesPartArg1 =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Http" ]
-            , name = "bytesPart"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.string
-                        , Type.string
-                        , Type.namedWith [ "Bytes" ] "Bytes" []
-                        ]
-                        (Type.namedWith [ "Http" ] "Part" [])
-                    )
-            }
+             { importFrom = [ "Http" ]
+             , name = "bytesPart"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.string
+                          , Type.string
+                          , Type.namedWith [ "Bytes" ] "Bytes" []
+                          ]
+                          (Type.namedWith [ "Http" ] "Part" [])
+                     )
+             }
         )
         [ Elm.string bytesPartArg, Elm.string bytesPartArg0, bytesPartArg1 ]
 
@@ -549,24 +549,25 @@ expectString : (Elm.Expression -> Elm.Expression) -> Elm.Expression
 expectString expectStringArg =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Http" ]
-            , name = "expectString"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.function
-                            [ Type.namedWith
-                                [ "Result" ]
-                                "Result"
-                                [ Type.namedWith [ "Http" ] "Error" []
-                                , Type.string
-                                ]
-                            ]
-                            (Type.var "msg")
-                        ]
-                        (Type.namedWith [ "Http" ] "Expect" [ Type.var "msg" ])
-                    )
-            }
+             { importFrom = [ "Http" ]
+             , name = "expectString"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.function
+                              [ Type.namedWith
+                                    [ "Result" ]
+                                    "Result"
+                                    [ Type.namedWith [ "Http" ] "Error" []
+                                    , Type.string
+                                    ]
+                              ]
+                              (Type.var "msg")
+                          ]
+                          (Type.namedWith [ "Http" ] "Expect" [ Type.var "msg" ]
+                          )
+                     )
+             }
         )
         [ Elm.functionReduced "expectStringUnpack" expectStringArg ]
 
@@ -608,28 +609,29 @@ expectJson :
 expectJson expectJsonArg expectJsonArg0 =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Http" ]
-            , name = "expectJson"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.function
-                            [ Type.namedWith
-                                [ "Result" ]
-                                "Result"
-                                [ Type.namedWith [ "Http" ] "Error" []
-                                , Type.var "a"
-                                ]
-                            ]
-                            (Type.var "msg")
-                        , Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "a" ]
-                        ]
-                        (Type.namedWith [ "Http" ] "Expect" [ Type.var "msg" ])
-                    )
-            }
+             { importFrom = [ "Http" ]
+             , name = "expectJson"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.function
+                              [ Type.namedWith
+                                    [ "Result" ]
+                                    "Result"
+                                    [ Type.namedWith [ "Http" ] "Error" []
+                                    , Type.var "a"
+                                    ]
+                              ]
+                              (Type.var "msg")
+                          , Type.namedWith
+                              [ "Json", "Decode" ]
+                              "Decoder"
+                              [ Type.var "a" ]
+                          ]
+                          (Type.namedWith [ "Http" ] "Expect" [ Type.var "msg" ]
+                          )
+                     )
+             }
         )
         [ Elm.functionReduced "expectJsonUnpack" expectJsonArg, expectJsonArg0 ]
 
@@ -666,28 +668,29 @@ expectBytes :
 expectBytes expectBytesArg expectBytesArg0 =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Http" ]
-            , name = "expectBytes"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.function
-                            [ Type.namedWith
-                                [ "Result" ]
-                                "Result"
-                                [ Type.namedWith [ "Http" ] "Error" []
-                                , Type.var "a"
-                                ]
-                            ]
-                            (Type.var "msg")
-                        , Type.namedWith
-                            [ "Bytes", "Decode" ]
-                            "Decoder"
-                            [ Type.var "a" ]
-                        ]
-                        (Type.namedWith [ "Http" ] "Expect" [ Type.var "msg" ])
-                    )
-            }
+             { importFrom = [ "Http" ]
+             , name = "expectBytes"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.function
+                              [ Type.namedWith
+                                    [ "Result" ]
+                                    "Result"
+                                    [ Type.namedWith [ "Http" ] "Error" []
+                                    , Type.var "a"
+                                    ]
+                              ]
+                              (Type.var "msg")
+                          , Type.namedWith
+                              [ "Bytes", "Decode" ]
+                              "Decoder"
+                              [ Type.var "a" ]
+                          ]
+                          (Type.namedWith [ "Http" ] "Expect" [ Type.var "msg" ]
+                          )
+                     )
+             }
         )
         [ Elm.functionReduced "expectBytesUnpack" expectBytesArg
         , expectBytesArg0
@@ -718,24 +721,25 @@ expectWhatever : (Elm.Expression -> Elm.Expression) -> Elm.Expression
 expectWhatever expectWhateverArg =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Http" ]
-            , name = "expectWhatever"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.function
-                            [ Type.namedWith
-                                [ "Result" ]
-                                "Result"
-                                [ Type.namedWith [ "Http" ] "Error" []
-                                , Type.unit
-                                ]
-                            ]
-                            (Type.var "msg")
-                        ]
-                        (Type.namedWith [ "Http" ] "Expect" [ Type.var "msg" ])
-                    )
-            }
+             { importFrom = [ "Http" ]
+             , name = "expectWhatever"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.function
+                              [ Type.namedWith
+                                    [ "Result" ]
+                                    "Result"
+                                    [ Type.namedWith [ "Http" ] "Error" []
+                                    , Type.unit
+                                    ]
+                              ]
+                              (Type.var "msg")
+                          ]
+                          (Type.namedWith [ "Http" ] "Expect" [ Type.var "msg" ]
+                          )
+                     )
+             }
         )
         [ Elm.functionReduced "expectWhateverUnpack" expectWhateverArg ]
 
@@ -750,19 +754,19 @@ track : String -> (Elm.Expression -> Elm.Expression) -> Elm.Expression
 track trackArg trackArg0 =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Http" ]
-            , name = "track"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.string
-                        , Type.function
-                            [ Type.namedWith [ "Http" ] "Progress" [] ]
-                            (Type.var "msg")
-                        ]
-                        (Type.namedWith [] "Sub" [ Type.var "msg" ])
-                    )
-            }
+             { importFrom = [ "Http" ]
+             , name = "track"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.string
+                          , Type.function
+                              [ Type.namedWith [ "Http" ] "Progress" [] ]
+                              (Type.var "msg")
+                          ]
+                          (Type.namedWith [] "Sub" [ Type.var "msg" ])
+                     )
+             }
         )
         [ Elm.string trackArg, Elm.functionReduced "trackUnpack" trackArg0 ]
 
@@ -790,17 +794,17 @@ fractionSent : { sent : Int, size : Int } -> Elm.Expression
 fractionSent fractionSentArg =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Http" ]
-            , name = "fractionSent"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.record
-                            [ ( "sent", Type.int ), ( "size", Type.int ) ]
-                        ]
-                        Type.float
-                    )
-            }
+             { importFrom = [ "Http" ]
+             , name = "fractionSent"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.record
+                              [ ( "sent", Type.int ), ( "size", Type.int ) ]
+                          ]
+                          Type.float
+                     )
+             }
         )
         [ Elm.record
             [ Tuple.pair "sent" (Elm.int fractionSentArg.sent)
@@ -841,19 +845,19 @@ fractionReceived : { received : Int, size : Elm.Expression } -> Elm.Expression
 fractionReceived fractionReceivedArg =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Http" ]
-            , name = "fractionReceived"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.record
-                            [ ( "received", Type.int )
-                            , ( "size", Type.maybe Type.int )
-                            ]
-                        ]
-                        Type.float
-                    )
-            }
+             { importFrom = [ "Http" ]
+             , name = "fractionReceived"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.record
+                              [ ( "received", Type.int )
+                              , ( "size", Type.maybe Type.int )
+                              ]
+                          ]
+                          Type.float
+                     )
+             }
         )
         [ Elm.record
             [ Tuple.pair "received" (Elm.int fractionReceivedArg.received)
@@ -870,15 +874,15 @@ cancel : String -> Elm.Expression
 cancel cancelArg =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Http" ]
-            , name = "cancel"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.string ]
-                        (Type.namedWith [] "Cmd" [ Type.var "msg" ])
-                    )
-            }
+             { importFrom = [ "Http" ]
+             , name = "cancel"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.string ]
+                          (Type.namedWith [] "Cmd" [ Type.var "msg" ])
+                     )
+             }
         )
         [ Elm.string cancelArg ]
 
@@ -937,32 +941,32 @@ riskyRequest :
 riskyRequest riskyRequestArg =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Http" ]
-            , name = "riskyRequest"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.record
-                            [ ( "method", Type.string )
-                            , ( "headers"
-                              , Type.list
+             { importFrom = [ "Http" ]
+             , name = "riskyRequest"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.record
+                              [ ( "method", Type.string )
+                              , ( "headers"
+                                , Type.list
                                     (Type.namedWith [ "Http" ] "Header" [])
-                              )
-                            , ( "url", Type.string )
-                            , ( "body", Type.namedWith [ "Http" ] "Body" [] )
-                            , ( "expect"
-                              , Type.namedWith
+                                )
+                              , ( "url", Type.string )
+                              , ( "body", Type.namedWith [ "Http" ] "Body" [] )
+                              , ( "expect"
+                                , Type.namedWith
                                     [ "Http" ]
                                     "Expect"
                                     [ Type.var "msg" ]
-                              )
-                            , ( "timeout", Type.maybe Type.float )
-                            , ( "tracker", Type.maybe Type.string )
-                            ]
-                        ]
-                        (Type.namedWith [] "Cmd" [ Type.var "msg" ])
-                    )
-            }
+                                )
+                              , ( "timeout", Type.maybe Type.float )
+                              , ( "tracker", Type.maybe Type.string )
+                              ]
+                          ]
+                          (Type.namedWith [] "Cmd" [ Type.var "msg" ])
+                     )
+             }
         )
         [ Elm.record
             [ Tuple.pair "method" (Elm.string riskyRequestArg.method)
@@ -1026,33 +1030,34 @@ expectStringResponse :
 expectStringResponse expectStringResponseArg expectStringResponseArg0 =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Http" ]
-            , name = "expectStringResponse"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.function
-                            [ Type.namedWith
-                                [ "Result" ]
-                                "Result"
-                                [ Type.var "x", Type.var "a" ]
-                            ]
-                            (Type.var "msg")
-                        , Type.function
-                            [ Type.namedWith
-                                [ "Http" ]
-                                "Response"
-                                [ Type.string ]
-                            ]
-                            (Type.namedWith
-                                [ "Result" ]
-                                "Result"
-                                [ Type.var "x", Type.var "a" ]
-                            )
-                        ]
-                        (Type.namedWith [ "Http" ] "Expect" [ Type.var "msg" ])
-                    )
-            }
+             { importFrom = [ "Http" ]
+             , name = "expectStringResponse"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.function
+                              [ Type.namedWith
+                                    [ "Result" ]
+                                    "Result"
+                                    [ Type.var "x", Type.var "a" ]
+                              ]
+                              (Type.var "msg")
+                          , Type.function
+                              [ Type.namedWith
+                                    [ "Http" ]
+                                    "Response"
+                                    [ Type.string ]
+                              ]
+                              (Type.namedWith
+                                 [ "Result" ]
+                                 "Result"
+                                 [ Type.var "x", Type.var "a" ]
+                              )
+                          ]
+                          (Type.namedWith [ "Http" ] "Expect" [ Type.var "msg" ]
+                          )
+                     )
+             }
         )
         [ Elm.functionReduced
             "expectStringResponseUnpack"
@@ -1080,33 +1085,34 @@ expectBytesResponse :
 expectBytesResponse expectBytesResponseArg expectBytesResponseArg0 =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Http" ]
-            , name = "expectBytesResponse"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.function
-                            [ Type.namedWith
-                                [ "Result" ]
-                                "Result"
-                                [ Type.var "x", Type.var "a" ]
-                            ]
-                            (Type.var "msg")
-                        , Type.function
-                            [ Type.namedWith
-                                [ "Http" ]
-                                "Response"
-                                [ Type.namedWith [ "Bytes" ] "Bytes" [] ]
-                            ]
-                            (Type.namedWith
-                                [ "Result" ]
-                                "Result"
-                                [ Type.var "x", Type.var "a" ]
-                            )
-                        ]
-                        (Type.namedWith [ "Http" ] "Expect" [ Type.var "msg" ])
-                    )
-            }
+             { importFrom = [ "Http" ]
+             , name = "expectBytesResponse"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.function
+                              [ Type.namedWith
+                                    [ "Result" ]
+                                    "Result"
+                                    [ Type.var "x", Type.var "a" ]
+                              ]
+                              (Type.var "msg")
+                          , Type.function
+                              [ Type.namedWith
+                                    [ "Http" ]
+                                    "Response"
+                                    [ Type.namedWith [ "Bytes" ] "Bytes" [] ]
+                              ]
+                              (Type.namedWith
+                                 [ "Result" ]
+                                 "Result"
+                                 [ Type.var "x", Type.var "a" ]
+                              )
+                          ]
+                          (Type.namedWith [ "Http" ] "Expect" [ Type.var "msg" ]
+                          )
+                     )
+             }
         )
         [ Elm.functionReduced "expectBytesResponseUnpack" expectBytesResponseArg
         , Elm.functionReduced
@@ -1141,35 +1147,35 @@ task :
 task taskArg =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Http" ]
-            , name = "task"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.record
-                            [ ( "method", Type.string )
-                            , ( "headers"
-                              , Type.list
+             { importFrom = [ "Http" ]
+             , name = "task"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.record
+                              [ ( "method", Type.string )
+                              , ( "headers"
+                                , Type.list
                                     (Type.namedWith [ "Http" ] "Header" [])
-                              )
-                            , ( "url", Type.string )
-                            , ( "body", Type.namedWith [ "Http" ] "Body" [] )
-                            , ( "resolver"
-                              , Type.namedWith
+                                )
+                              , ( "url", Type.string )
+                              , ( "body", Type.namedWith [ "Http" ] "Body" [] )
+                              , ( "resolver"
+                                , Type.namedWith
                                     [ "Http" ]
                                     "Resolver"
                                     [ Type.var "x", Type.var "a" ]
-                              )
-                            , ( "timeout", Type.maybe Type.float )
-                            ]
-                        ]
-                        (Type.namedWith
-                            [ "Task" ]
-                            "Task"
-                            [ Type.var "x", Type.var "a" ]
-                        )
-                    )
-            }
+                                )
+                              , ( "timeout", Type.maybe Type.float )
+                              ]
+                          ]
+                          (Type.namedWith
+                               [ "Task" ]
+                               "Task"
+                               [ Type.var "x", Type.var "a" ]
+                          )
+                     )
+             }
         )
         [ Elm.record
             [ Tuple.pair "method" (Elm.string taskArg.method)
@@ -1191,30 +1197,30 @@ stringResolver : (Elm.Expression -> Elm.Expression) -> Elm.Expression
 stringResolver stringResolverArg =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Http" ]
-            , name = "stringResolver"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.function
-                            [ Type.namedWith
-                                [ "Http" ]
-                                "Response"
-                                [ Type.string ]
-                            ]
-                            (Type.namedWith
-                                [ "Result" ]
-                                "Result"
-                                [ Type.var "x", Type.var "a" ]
-                            )
-                        ]
-                        (Type.namedWith
-                            [ "Http" ]
-                            "Resolver"
-                            [ Type.var "x", Type.var "a" ]
-                        )
-                    )
-            }
+             { importFrom = [ "Http" ]
+             , name = "stringResolver"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.function
+                              [ Type.namedWith
+                                    [ "Http" ]
+                                    "Response"
+                                    [ Type.string ]
+                              ]
+                              (Type.namedWith
+                                 [ "Result" ]
+                                 "Result"
+                                 [ Type.var "x", Type.var "a" ]
+                              )
+                          ]
+                          (Type.namedWith
+                               [ "Http" ]
+                               "Resolver"
+                               [ Type.var "x", Type.var "a" ]
+                          )
+                     )
+             }
         )
         [ Elm.functionReduced "stringResolverUnpack" stringResolverArg ]
 
@@ -1228,30 +1234,30 @@ bytesResolver : (Elm.Expression -> Elm.Expression) -> Elm.Expression
 bytesResolver bytesResolverArg =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Http" ]
-            , name = "bytesResolver"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.function
-                            [ Type.namedWith
-                                [ "Http" ]
-                                "Response"
-                                [ Type.namedWith [ "Bytes" ] "Bytes" [] ]
-                            ]
-                            (Type.namedWith
-                                [ "Result" ]
-                                "Result"
-                                [ Type.var "x", Type.var "a" ]
-                            )
-                        ]
-                        (Type.namedWith
-                            [ "Http" ]
-                            "Resolver"
-                            [ Type.var "x", Type.var "a" ]
-                        )
-                    )
-            }
+             { importFrom = [ "Http" ]
+             , name = "bytesResolver"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.function
+                              [ Type.namedWith
+                                    [ "Http" ]
+                                    "Response"
+                                    [ Type.namedWith [ "Bytes" ] "Bytes" [] ]
+                              ]
+                              (Type.namedWith
+                                 [ "Result" ]
+                                 "Result"
+                                 [ Type.var "x", Type.var "a" ]
+                              )
+                          ]
+                          (Type.namedWith
+                               [ "Http" ]
+                               "Resolver"
+                               [ Type.var "x", Type.var "a" ]
+                          )
+                     )
+             }
         )
         [ Elm.functionReduced "bytesResolverUnpack" bytesResolverArg ]
 
@@ -1281,35 +1287,35 @@ riskyTask :
 riskyTask riskyTaskArg =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Http" ]
-            , name = "riskyTask"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.record
-                            [ ( "method", Type.string )
-                            , ( "headers"
-                              , Type.list
+             { importFrom = [ "Http" ]
+             , name = "riskyTask"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.record
+                              [ ( "method", Type.string )
+                              , ( "headers"
+                                , Type.list
                                     (Type.namedWith [ "Http" ] "Header" [])
-                              )
-                            , ( "url", Type.string )
-                            , ( "body", Type.namedWith [ "Http" ] "Body" [] )
-                            , ( "resolver"
-                              , Type.namedWith
+                                )
+                              , ( "url", Type.string )
+                              , ( "body", Type.namedWith [ "Http" ] "Body" [] )
+                              , ( "resolver"
+                                , Type.namedWith
                                     [ "Http" ]
                                     "Resolver"
                                     [ Type.var "x", Type.var "a" ]
-                              )
-                            , ( "timeout", Type.maybe Type.float )
-                            ]
-                        ]
-                        (Type.namedWith
-                            [ "Task" ]
-                            "Task"
-                            [ Type.var "x", Type.var "a" ]
-                        )
-                    )
-            }
+                                )
+                              , ( "timeout", Type.maybe Type.float )
+                              ]
+                          ]
+                          (Type.namedWith
+                               [ "Task" ]
+                               "Task"
+                               [ Type.var "x", Type.var "a" ]
+                          )
+                     )
+             }
         )
         [ Elm.record
             [ Tuple.pair "method" (Elm.string riskyTaskArg.method)
@@ -1348,16 +1354,16 @@ annotation_ =
             "Metadata"
             []
             (Type.record
-                [ ( "url", Type.string )
-                , ( "statusCode", Type.int )
-                , ( "statusText", Type.string )
-                , ( "headers"
-                  , Type.namedWith
-                        [ "Dict" ]
-                        "Dict"
-                        [ Type.string, Type.string ]
-                  )
-                ]
+                 [ ( "url", Type.string )
+                 , ( "statusCode", Type.int )
+                 , ( "statusText", Type.string )
+                 , ( "headers"
+                   , Type.namedWith
+                         [ "Dict" ]
+                         "Dict"
+                         [ Type.string, Type.string ]
+                   )
+                 ]
             )
     , resolver =
         \resolverArg0 resolverArg1 ->
@@ -1391,10 +1397,10 @@ make_ =
         \ar0 ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Http" ]
-                    , name = "BadUrl"
-                    , annotation = Just (Type.namedWith [] "Error" [])
-                    }
+                     { importFrom = [ "Http" ]
+                     , name = "BadUrl"
+                     , annotation = Just (Type.namedWith [] "Error" [])
+                     }
                 )
                 [ ar0 ]
     , timeout =
@@ -1413,51 +1419,51 @@ make_ =
         \ar0 ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Http" ]
-                    , name = "BadStatus"
-                    , annotation = Just (Type.namedWith [] "Error" [])
-                    }
+                     { importFrom = [ "Http" ]
+                     , name = "BadStatus"
+                     , annotation = Just (Type.namedWith [] "Error" [])
+                     }
                 )
                 [ ar0 ]
     , badBody =
         \ar0 ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Http" ]
-                    , name = "BadBody"
-                    , annotation = Just (Type.namedWith [] "Error" [])
-                    }
+                     { importFrom = [ "Http" ]
+                     , name = "BadBody"
+                     , annotation = Just (Type.namedWith [] "Error" [])
+                     }
                 )
                 [ ar0 ]
     , sending =
         \ar0 ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Http" ]
-                    , name = "Sending"
-                    , annotation = Just (Type.namedWith [] "Progress" [])
-                    }
+                     { importFrom = [ "Http" ]
+                     , name = "Sending"
+                     , annotation = Just (Type.namedWith [] "Progress" [])
+                     }
                 )
                 [ ar0 ]
     , receiving =
         \ar0 ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Http" ]
-                    , name = "Receiving"
-                    , annotation = Just (Type.namedWith [] "Progress" [])
-                    }
+                     { importFrom = [ "Http" ]
+                     , name = "Receiving"
+                     , annotation = Just (Type.namedWith [] "Progress" [])
+                     }
                 )
                 [ ar0 ]
     , badUrl_ =
         \ar0 ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Http" ]
-                    , name = "BadUrl_"
-                    , annotation =
-                        Just (Type.namedWith [] "Response" [ Type.var "body" ])
-                    }
+                     { importFrom = [ "Http" ]
+                     , name = "BadUrl_"
+                     , annotation =
+                         Just (Type.namedWith [] "Response" [ Type.var "body" ])
+                     }
                 )
                 [ ar0 ]
     , timeout_ =
@@ -1478,50 +1484,50 @@ make_ =
         \ar0 ar1 ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Http" ]
-                    , name = "BadStatus_"
-                    , annotation =
-                        Just (Type.namedWith [] "Response" [ Type.var "body" ])
-                    }
+                     { importFrom = [ "Http" ]
+                     , name = "BadStatus_"
+                     , annotation =
+                         Just (Type.namedWith [] "Response" [ Type.var "body" ])
+                     }
                 )
                 [ ar0, ar1 ]
     , goodStatus_ =
         \ar0 ar1 ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Http" ]
-                    , name = "GoodStatus_"
-                    , annotation =
-                        Just (Type.namedWith [] "Response" [ Type.var "body" ])
-                    }
+                     { importFrom = [ "Http" ]
+                     , name = "GoodStatus_"
+                     , annotation =
+                         Just (Type.namedWith [] "Response" [ Type.var "body" ])
+                     }
                 )
                 [ ar0, ar1 ]
     , metadata =
         \metadata_args ->
             Elm.withType
                 (Type.alias
-                    [ "Http" ]
-                    "Metadata"
-                    []
-                    (Type.record
-                        [ ( "url", Type.string )
-                        , ( "statusCode", Type.int )
-                        , ( "statusText", Type.string )
-                        , ( "headers"
-                          , Type.namedWith
-                                [ "Dict" ]
-                                "Dict"
-                                [ Type.string, Type.string ]
-                          )
-                        ]
-                    )
+                     [ "Http" ]
+                     "Metadata"
+                     []
+                     (Type.record
+                          [ ( "url", Type.string )
+                          , ( "statusCode", Type.int )
+                          , ( "statusText", Type.string )
+                          , ( "headers"
+                            , Type.namedWith
+                                  [ "Dict" ]
+                                  "Dict"
+                                  [ Type.string, Type.string ]
+                            )
+                          ]
+                     )
                 )
                 (Elm.record
-                    [ Tuple.pair "url" metadata_args.url
-                    , Tuple.pair "statusCode" metadata_args.statusCode
-                    , Tuple.pair "statusText" metadata_args.statusText
-                    , Tuple.pair "headers" metadata_args.headers
-                    ]
+                     [ Tuple.pair "url" metadata_args.url
+                     , Tuple.pair "statusCode" metadata_args.statusCode
+                     , Tuple.pair "statusText" metadata_args.statusText
+                     , Tuple.pair "headers" metadata_args.headers
+                     ]
                 )
     }
 
@@ -1591,9 +1597,9 @@ caseOf_ =
                     "Receiving"
                     ( "one"
                     , Type.record
-                        [ ( "received", Type.int )
-                        , ( "size", Type.maybe Type.int )
-                        ]
+                          [ ( "received", Type.int )
+                          , ( "size", Type.maybe Type.int )
+                          ]
                     )
                     progressTags.receiving
                 ]
@@ -1657,682 +1663,704 @@ call_ =
         \getArg ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Http" ]
-                    , name = "get"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.record
-                                    [ ( "url", Type.string )
-                                    , ( "expect"
-                                      , Type.namedWith
+                     { importFrom = [ "Http" ]
+                     , name = "get"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.record
+                                      [ ( "url", Type.string )
+                                      , ( "expect"
+                                        , Type.namedWith
                                             [ "Http" ]
                                             "Expect"
                                             [ Type.var "msg" ]
-                                      )
-                                    ]
-                                ]
-                                (Type.namedWith [] "Cmd" [ Type.var "msg" ])
-                            )
-                    }
+                                        )
+                                      ]
+                                  ]
+                                  (Type.namedWith [] "Cmd" [ Type.var "msg" ])
+                             )
+                     }
                 )
                 [ getArg ]
     , post =
         \postArg ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Http" ]
-                    , name = "post"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.record
-                                    [ ( "url", Type.string )
-                                    , ( "body"
-                                      , Type.namedWith [ "Http" ] "Body" []
-                                      )
-                                    , ( "expect"
-                                      , Type.namedWith
+                     { importFrom = [ "Http" ]
+                     , name = "post"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.record
+                                      [ ( "url", Type.string )
+                                      , ( "body"
+                                        , Type.namedWith [ "Http" ] "Body" []
+                                        )
+                                      , ( "expect"
+                                        , Type.namedWith
                                             [ "Http" ]
                                             "Expect"
                                             [ Type.var "msg" ]
-                                      )
-                                    ]
-                                ]
-                                (Type.namedWith [] "Cmd" [ Type.var "msg" ])
-                            )
-                    }
+                                        )
+                                      ]
+                                  ]
+                                  (Type.namedWith [] "Cmd" [ Type.var "msg" ])
+                             )
+                     }
                 )
                 [ postArg ]
     , request =
         \requestArg ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Http" ]
-                    , name = "request"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.record
-                                    [ ( "method", Type.string )
-                                    , ( "headers"
-                                      , Type.list
+                     { importFrom = [ "Http" ]
+                     , name = "request"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.record
+                                      [ ( "method", Type.string )
+                                      , ( "headers"
+                                        , Type.list
                                             (Type.namedWith
-                                                [ "Http" ]
-                                                "Header"
-                                                []
+                                               [ "Http" ]
+                                               "Header"
+                                               []
                                             )
-                                      )
-                                    , ( "url", Type.string )
-                                    , ( "body"
-                                      , Type.namedWith [ "Http" ] "Body" []
-                                      )
-                                    , ( "expect"
-                                      , Type.namedWith
+                                        )
+                                      , ( "url", Type.string )
+                                      , ( "body"
+                                        , Type.namedWith [ "Http" ] "Body" []
+                                        )
+                                      , ( "expect"
+                                        , Type.namedWith
                                             [ "Http" ]
                                             "Expect"
                                             [ Type.var "msg" ]
-                                      )
-                                    , ( "timeout", Type.maybe Type.float )
-                                    , ( "tracker", Type.maybe Type.string )
-                                    ]
-                                ]
-                                (Type.namedWith [] "Cmd" [ Type.var "msg" ])
-                            )
-                    }
+                                        )
+                                      , ( "timeout", Type.maybe Type.float )
+                                      , ( "tracker", Type.maybe Type.string )
+                                      ]
+                                  ]
+                                  (Type.namedWith [] "Cmd" [ Type.var "msg" ])
+                             )
+                     }
                 )
                 [ requestArg ]
     , header =
         \headerArg headerArg0 ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Http" ]
-                    , name = "header"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.string, Type.string ]
-                                (Type.namedWith [ "Http" ] "Header" [])
-                            )
-                    }
+                     { importFrom = [ "Http" ]
+                     , name = "header"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.string, Type.string ]
+                                  (Type.namedWith [ "Http" ] "Header" [])
+                             )
+                     }
                 )
                 [ headerArg, headerArg0 ]
     , stringBody =
         \stringBodyArg stringBodyArg0 ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Http" ]
-                    , name = "stringBody"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.string, Type.string ]
-                                (Type.namedWith [ "Http" ] "Body" [])
-                            )
-                    }
+                     { importFrom = [ "Http" ]
+                     , name = "stringBody"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.string, Type.string ]
+                                  (Type.namedWith [ "Http" ] "Body" [])
+                             )
+                     }
                 )
                 [ stringBodyArg, stringBodyArg0 ]
     , jsonBody =
         \jsonBodyArg ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Http" ]
-                    , name = "jsonBody"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.namedWith [ "Json", "Encode" ] "Value" []
-                                ]
-                                (Type.namedWith [ "Http" ] "Body" [])
-                            )
-                    }
+                     { importFrom = [ "Http" ]
+                     , name = "jsonBody"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.namedWith
+                                      [ "Json", "Encode" ]
+                                      "Value"
+                                      []
+                                  ]
+                                  (Type.namedWith [ "Http" ] "Body" [])
+                             )
+                     }
                 )
                 [ jsonBodyArg ]
     , fileBody =
         \fileBodyArg ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Http" ]
-                    , name = "fileBody"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.namedWith [ "File" ] "File" [] ]
-                                (Type.namedWith [ "Http" ] "Body" [])
-                            )
-                    }
+                     { importFrom = [ "Http" ]
+                     , name = "fileBody"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.namedWith [ "File" ] "File" [] ]
+                                  (Type.namedWith [ "Http" ] "Body" [])
+                             )
+                     }
                 )
                 [ fileBodyArg ]
     , bytesBody =
         \bytesBodyArg bytesBodyArg0 ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Http" ]
-                    , name = "bytesBody"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.string
-                                , Type.namedWith [ "Bytes" ] "Bytes" []
-                                ]
-                                (Type.namedWith [ "Http" ] "Body" [])
-                            )
-                    }
+                     { importFrom = [ "Http" ]
+                     , name = "bytesBody"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.string
+                                  , Type.namedWith [ "Bytes" ] "Bytes" []
+                                  ]
+                                  (Type.namedWith [ "Http" ] "Body" [])
+                             )
+                     }
                 )
                 [ bytesBodyArg, bytesBodyArg0 ]
     , multipartBody =
         \multipartBodyArg ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Http" ]
-                    , name = "multipartBody"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.list
-                                    (Type.namedWith [ "Http" ] "Part" [])
-                                ]
-                                (Type.namedWith [ "Http" ] "Body" [])
-                            )
-                    }
+                     { importFrom = [ "Http" ]
+                     , name = "multipartBody"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.list
+                                      (Type.namedWith [ "Http" ] "Part" [])
+                                  ]
+                                  (Type.namedWith [ "Http" ] "Body" [])
+                             )
+                     }
                 )
                 [ multipartBodyArg ]
     , stringPart =
         \stringPartArg stringPartArg0 ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Http" ]
-                    , name = "stringPart"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.string, Type.string ]
-                                (Type.namedWith [ "Http" ] "Part" [])
-                            )
-                    }
+                     { importFrom = [ "Http" ]
+                     , name = "stringPart"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.string, Type.string ]
+                                  (Type.namedWith [ "Http" ] "Part" [])
+                             )
+                     }
                 )
                 [ stringPartArg, stringPartArg0 ]
     , filePart =
         \filePartArg filePartArg0 ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Http" ]
-                    , name = "filePart"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.string
-                                , Type.namedWith [ "File" ] "File" []
-                                ]
-                                (Type.namedWith [ "Http" ] "Part" [])
-                            )
-                    }
+                     { importFrom = [ "Http" ]
+                     , name = "filePart"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.string
+                                  , Type.namedWith [ "File" ] "File" []
+                                  ]
+                                  (Type.namedWith [ "Http" ] "Part" [])
+                             )
+                     }
                 )
                 [ filePartArg, filePartArg0 ]
     , bytesPart =
         \bytesPartArg bytesPartArg0 bytesPartArg1 ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Http" ]
-                    , name = "bytesPart"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.string
-                                , Type.string
-                                , Type.namedWith [ "Bytes" ] "Bytes" []
-                                ]
-                                (Type.namedWith [ "Http" ] "Part" [])
-                            )
-                    }
+                     { importFrom = [ "Http" ]
+                     , name = "bytesPart"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.string
+                                  , Type.string
+                                  , Type.namedWith [ "Bytes" ] "Bytes" []
+                                  ]
+                                  (Type.namedWith [ "Http" ] "Part" [])
+                             )
+                     }
                 )
                 [ bytesPartArg, bytesPartArg0, bytesPartArg1 ]
     , expectString =
         \expectStringArg ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Http" ]
-                    , name = "expectString"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.function
-                                    [ Type.namedWith
-                                        [ "Result" ]
-                                        "Result"
-                                        [ Type.namedWith [ "Http" ] "Error" []
-                                        , Type.string
-                                        ]
-                                    ]
-                                    (Type.var "msg")
-                                ]
-                                (Type.namedWith
-                                    [ "Http" ]
-                                    "Expect"
-                                    [ Type.var "msg" ]
-                                )
-                            )
-                    }
+                     { importFrom = [ "Http" ]
+                     , name = "expectString"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.function
+                                      [ Type.namedWith
+                                            [ "Result" ]
+                                            "Result"
+                                            [ Type.namedWith
+                                                [ "Http" ]
+                                                "Error"
+                                                []
+                                            , Type.string
+                                            ]
+                                      ]
+                                      (Type.var "msg")
+                                  ]
+                                  (Type.namedWith
+                                       [ "Http" ]
+                                       "Expect"
+                                       [ Type.var "msg" ]
+                                  )
+                             )
+                     }
                 )
                 [ expectStringArg ]
     , expectJson =
         \expectJsonArg expectJsonArg0 ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Http" ]
-                    , name = "expectJson"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.function
-                                    [ Type.namedWith
-                                        [ "Result" ]
-                                        "Result"
-                                        [ Type.namedWith [ "Http" ] "Error" []
-                                        , Type.var "a"
-                                        ]
-                                    ]
-                                    (Type.var "msg")
-                                , Type.namedWith
-                                    [ "Json", "Decode" ]
-                                    "Decoder"
-                                    [ Type.var "a" ]
-                                ]
-                                (Type.namedWith
-                                    [ "Http" ]
-                                    "Expect"
-                                    [ Type.var "msg" ]
-                                )
-                            )
-                    }
+                     { importFrom = [ "Http" ]
+                     , name = "expectJson"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.function
+                                      [ Type.namedWith
+                                            [ "Result" ]
+                                            "Result"
+                                            [ Type.namedWith
+                                                [ "Http" ]
+                                                "Error"
+                                                []
+                                            , Type.var "a"
+                                            ]
+                                      ]
+                                      (Type.var "msg")
+                                  , Type.namedWith
+                                      [ "Json", "Decode" ]
+                                      "Decoder"
+                                      [ Type.var "a" ]
+                                  ]
+                                  (Type.namedWith
+                                       [ "Http" ]
+                                       "Expect"
+                                       [ Type.var "msg" ]
+                                  )
+                             )
+                     }
                 )
                 [ expectJsonArg, expectJsonArg0 ]
     , expectBytes =
         \expectBytesArg expectBytesArg0 ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Http" ]
-                    , name = "expectBytes"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.function
-                                    [ Type.namedWith
-                                        [ "Result" ]
-                                        "Result"
-                                        [ Type.namedWith [ "Http" ] "Error" []
-                                        , Type.var "a"
-                                        ]
-                                    ]
-                                    (Type.var "msg")
-                                , Type.namedWith
-                                    [ "Bytes", "Decode" ]
-                                    "Decoder"
-                                    [ Type.var "a" ]
-                                ]
-                                (Type.namedWith
-                                    [ "Http" ]
-                                    "Expect"
-                                    [ Type.var "msg" ]
-                                )
-                            )
-                    }
+                     { importFrom = [ "Http" ]
+                     , name = "expectBytes"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.function
+                                      [ Type.namedWith
+                                            [ "Result" ]
+                                            "Result"
+                                            [ Type.namedWith
+                                                [ "Http" ]
+                                                "Error"
+                                                []
+                                            , Type.var "a"
+                                            ]
+                                      ]
+                                      (Type.var "msg")
+                                  , Type.namedWith
+                                      [ "Bytes", "Decode" ]
+                                      "Decoder"
+                                      [ Type.var "a" ]
+                                  ]
+                                  (Type.namedWith
+                                       [ "Http" ]
+                                       "Expect"
+                                       [ Type.var "msg" ]
+                                  )
+                             )
+                     }
                 )
                 [ expectBytesArg, expectBytesArg0 ]
     , expectWhatever =
         \expectWhateverArg ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Http" ]
-                    , name = "expectWhatever"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.function
-                                    [ Type.namedWith
-                                        [ "Result" ]
-                                        "Result"
-                                        [ Type.namedWith [ "Http" ] "Error" []
-                                        , Type.unit
-                                        ]
-                                    ]
-                                    (Type.var "msg")
-                                ]
-                                (Type.namedWith
-                                    [ "Http" ]
-                                    "Expect"
-                                    [ Type.var "msg" ]
-                                )
-                            )
-                    }
+                     { importFrom = [ "Http" ]
+                     , name = "expectWhatever"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.function
+                                      [ Type.namedWith
+                                            [ "Result" ]
+                                            "Result"
+                                            [ Type.namedWith
+                                                [ "Http" ]
+                                                "Error"
+                                                []
+                                            , Type.unit
+                                            ]
+                                      ]
+                                      (Type.var "msg")
+                                  ]
+                                  (Type.namedWith
+                                       [ "Http" ]
+                                       "Expect"
+                                       [ Type.var "msg" ]
+                                  )
+                             )
+                     }
                 )
                 [ expectWhateverArg ]
     , track =
         \trackArg trackArg0 ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Http" ]
-                    , name = "track"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.string
-                                , Type.function
-                                    [ Type.namedWith [ "Http" ] "Progress" [] ]
-                                    (Type.var "msg")
-                                ]
-                                (Type.namedWith [] "Sub" [ Type.var "msg" ])
-                            )
-                    }
+                     { importFrom = [ "Http" ]
+                     , name = "track"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.string
+                                  , Type.function
+                                      [ Type.namedWith [ "Http" ] "Progress" []
+                                      ]
+                                      (Type.var "msg")
+                                  ]
+                                  (Type.namedWith [] "Sub" [ Type.var "msg" ])
+                             )
+                     }
                 )
                 [ trackArg, trackArg0 ]
     , fractionSent =
         \fractionSentArg ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Http" ]
-                    , name = "fractionSent"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.record
-                                    [ ( "sent", Type.int )
-                                    , ( "size", Type.int )
-                                    ]
-                                ]
-                                Type.float
-                            )
-                    }
+                     { importFrom = [ "Http" ]
+                     , name = "fractionSent"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.record
+                                      [ ( "sent", Type.int )
+                                      , ( "size", Type.int )
+                                      ]
+                                  ]
+                                  Type.float
+                             )
+                     }
                 )
                 [ fractionSentArg ]
     , fractionReceived =
         \fractionReceivedArg ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Http" ]
-                    , name = "fractionReceived"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.record
-                                    [ ( "received", Type.int )
-                                    , ( "size", Type.maybe Type.int )
-                                    ]
-                                ]
-                                Type.float
-                            )
-                    }
+                     { importFrom = [ "Http" ]
+                     , name = "fractionReceived"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.record
+                                      [ ( "received", Type.int )
+                                      , ( "size", Type.maybe Type.int )
+                                      ]
+                                  ]
+                                  Type.float
+                             )
+                     }
                 )
                 [ fractionReceivedArg ]
     , cancel =
         \cancelArg ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Http" ]
-                    , name = "cancel"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.string ]
-                                (Type.namedWith [] "Cmd" [ Type.var "msg" ])
-                            )
-                    }
+                     { importFrom = [ "Http" ]
+                     , name = "cancel"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.string ]
+                                  (Type.namedWith [] "Cmd" [ Type.var "msg" ])
+                             )
+                     }
                 )
                 [ cancelArg ]
     , riskyRequest =
         \riskyRequestArg ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Http" ]
-                    , name = "riskyRequest"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.record
-                                    [ ( "method", Type.string )
-                                    , ( "headers"
-                                      , Type.list
+                     { importFrom = [ "Http" ]
+                     , name = "riskyRequest"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.record
+                                      [ ( "method", Type.string )
+                                      , ( "headers"
+                                        , Type.list
                                             (Type.namedWith
-                                                [ "Http" ]
-                                                "Header"
-                                                []
+                                               [ "Http" ]
+                                               "Header"
+                                               []
                                             )
-                                      )
-                                    , ( "url", Type.string )
-                                    , ( "body"
-                                      , Type.namedWith [ "Http" ] "Body" []
-                                      )
-                                    , ( "expect"
-                                      , Type.namedWith
+                                        )
+                                      , ( "url", Type.string )
+                                      , ( "body"
+                                        , Type.namedWith [ "Http" ] "Body" []
+                                        )
+                                      , ( "expect"
+                                        , Type.namedWith
                                             [ "Http" ]
                                             "Expect"
                                             [ Type.var "msg" ]
-                                      )
-                                    , ( "timeout", Type.maybe Type.float )
-                                    , ( "tracker", Type.maybe Type.string )
-                                    ]
-                                ]
-                                (Type.namedWith [] "Cmd" [ Type.var "msg" ])
-                            )
-                    }
+                                        )
+                                      , ( "timeout", Type.maybe Type.float )
+                                      , ( "tracker", Type.maybe Type.string )
+                                      ]
+                                  ]
+                                  (Type.namedWith [] "Cmd" [ Type.var "msg" ])
+                             )
+                     }
                 )
                 [ riskyRequestArg ]
     , expectStringResponse =
         \expectStringResponseArg expectStringResponseArg0 ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Http" ]
-                    , name = "expectStringResponse"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.function
-                                    [ Type.namedWith
-                                        [ "Result" ]
-                                        "Result"
-                                        [ Type.var "x", Type.var "a" ]
-                                    ]
-                                    (Type.var "msg")
-                                , Type.function
-                                    [ Type.namedWith
-                                        [ "Http" ]
-                                        "Response"
-                                        [ Type.string ]
-                                    ]
-                                    (Type.namedWith
-                                        [ "Result" ]
-                                        "Result"
-                                        [ Type.var "x", Type.var "a" ]
-                                    )
-                                ]
-                                (Type.namedWith
-                                    [ "Http" ]
-                                    "Expect"
-                                    [ Type.var "msg" ]
-                                )
-                            )
-                    }
+                     { importFrom = [ "Http" ]
+                     , name = "expectStringResponse"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.function
+                                      [ Type.namedWith
+                                            [ "Result" ]
+                                            "Result"
+                                            [ Type.var "x", Type.var "a" ]
+                                      ]
+                                      (Type.var "msg")
+                                  , Type.function
+                                      [ Type.namedWith
+                                            [ "Http" ]
+                                            "Response"
+                                            [ Type.string ]
+                                      ]
+                                      (Type.namedWith
+                                         [ "Result" ]
+                                         "Result"
+                                         [ Type.var "x", Type.var "a" ]
+                                      )
+                                  ]
+                                  (Type.namedWith
+                                       [ "Http" ]
+                                       "Expect"
+                                       [ Type.var "msg" ]
+                                  )
+                             )
+                     }
                 )
                 [ expectStringResponseArg, expectStringResponseArg0 ]
     , expectBytesResponse =
         \expectBytesResponseArg expectBytesResponseArg0 ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Http" ]
-                    , name = "expectBytesResponse"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.function
-                                    [ Type.namedWith
-                                        [ "Result" ]
-                                        "Result"
-                                        [ Type.var "x", Type.var "a" ]
-                                    ]
-                                    (Type.var "msg")
-                                , Type.function
-                                    [ Type.namedWith
-                                        [ "Http" ]
-                                        "Response"
-                                        [ Type.namedWith [ "Bytes" ] "Bytes" []
-                                        ]
-                                    ]
-                                    (Type.namedWith
-                                        [ "Result" ]
-                                        "Result"
-                                        [ Type.var "x", Type.var "a" ]
-                                    )
-                                ]
-                                (Type.namedWith
-                                    [ "Http" ]
-                                    "Expect"
-                                    [ Type.var "msg" ]
-                                )
-                            )
-                    }
+                     { importFrom = [ "Http" ]
+                     , name = "expectBytesResponse"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.function
+                                      [ Type.namedWith
+                                            [ "Result" ]
+                                            "Result"
+                                            [ Type.var "x", Type.var "a" ]
+                                      ]
+                                      (Type.var "msg")
+                                  , Type.function
+                                      [ Type.namedWith
+                                            [ "Http" ]
+                                            "Response"
+                                            [ Type.namedWith
+                                                [ "Bytes" ]
+                                                "Bytes"
+                                                []
+                                            ]
+                                      ]
+                                      (Type.namedWith
+                                         [ "Result" ]
+                                         "Result"
+                                         [ Type.var "x", Type.var "a" ]
+                                      )
+                                  ]
+                                  (Type.namedWith
+                                       [ "Http" ]
+                                       "Expect"
+                                       [ Type.var "msg" ]
+                                  )
+                             )
+                     }
                 )
                 [ expectBytesResponseArg, expectBytesResponseArg0 ]
     , task =
         \taskArg ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Http" ]
-                    , name = "task"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.record
-                                    [ ( "method", Type.string )
-                                    , ( "headers"
-                                      , Type.list
+                     { importFrom = [ "Http" ]
+                     , name = "task"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.record
+                                      [ ( "method", Type.string )
+                                      , ( "headers"
+                                        , Type.list
                                             (Type.namedWith
-                                                [ "Http" ]
-                                                "Header"
-                                                []
+                                               [ "Http" ]
+                                               "Header"
+                                               []
                                             )
-                                      )
-                                    , ( "url", Type.string )
-                                    , ( "body"
-                                      , Type.namedWith [ "Http" ] "Body" []
-                                      )
-                                    , ( "resolver"
-                                      , Type.namedWith
+                                        )
+                                      , ( "url", Type.string )
+                                      , ( "body"
+                                        , Type.namedWith [ "Http" ] "Body" []
+                                        )
+                                      , ( "resolver"
+                                        , Type.namedWith
                                             [ "Http" ]
                                             "Resolver"
                                             [ Type.var "x", Type.var "a" ]
-                                      )
-                                    , ( "timeout", Type.maybe Type.float )
-                                    ]
-                                ]
-                                (Type.namedWith
-                                    [ "Task" ]
-                                    "Task"
-                                    [ Type.var "x", Type.var "a" ]
-                                )
-                            )
-                    }
+                                        )
+                                      , ( "timeout", Type.maybe Type.float )
+                                      ]
+                                  ]
+                                  (Type.namedWith
+                                       [ "Task" ]
+                                       "Task"
+                                       [ Type.var "x", Type.var "a" ]
+                                  )
+                             )
+                     }
                 )
                 [ taskArg ]
     , stringResolver =
         \stringResolverArg ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Http" ]
-                    , name = "stringResolver"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.function
-                                    [ Type.namedWith
-                                        [ "Http" ]
-                                        "Response"
-                                        [ Type.string ]
-                                    ]
-                                    (Type.namedWith
-                                        [ "Result" ]
-                                        "Result"
-                                        [ Type.var "x", Type.var "a" ]
-                                    )
-                                ]
-                                (Type.namedWith
-                                    [ "Http" ]
-                                    "Resolver"
-                                    [ Type.var "x", Type.var "a" ]
-                                )
-                            )
-                    }
+                     { importFrom = [ "Http" ]
+                     , name = "stringResolver"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.function
+                                      [ Type.namedWith
+                                            [ "Http" ]
+                                            "Response"
+                                            [ Type.string ]
+                                      ]
+                                      (Type.namedWith
+                                         [ "Result" ]
+                                         "Result"
+                                         [ Type.var "x", Type.var "a" ]
+                                      )
+                                  ]
+                                  (Type.namedWith
+                                       [ "Http" ]
+                                       "Resolver"
+                                       [ Type.var "x", Type.var "a" ]
+                                  )
+                             )
+                     }
                 )
                 [ stringResolverArg ]
     , bytesResolver =
         \bytesResolverArg ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Http" ]
-                    , name = "bytesResolver"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.function
-                                    [ Type.namedWith
-                                        [ "Http" ]
-                                        "Response"
-                                        [ Type.namedWith [ "Bytes" ] "Bytes" []
-                                        ]
-                                    ]
-                                    (Type.namedWith
-                                        [ "Result" ]
-                                        "Result"
-                                        [ Type.var "x", Type.var "a" ]
-                                    )
-                                ]
-                                (Type.namedWith
-                                    [ "Http" ]
-                                    "Resolver"
-                                    [ Type.var "x", Type.var "a" ]
-                                )
-                            )
-                    }
+                     { importFrom = [ "Http" ]
+                     , name = "bytesResolver"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.function
+                                      [ Type.namedWith
+                                            [ "Http" ]
+                                            "Response"
+                                            [ Type.namedWith
+                                                [ "Bytes" ]
+                                                "Bytes"
+                                                []
+                                            ]
+                                      ]
+                                      (Type.namedWith
+                                         [ "Result" ]
+                                         "Result"
+                                         [ Type.var "x", Type.var "a" ]
+                                      )
+                                  ]
+                                  (Type.namedWith
+                                       [ "Http" ]
+                                       "Resolver"
+                                       [ Type.var "x", Type.var "a" ]
+                                  )
+                             )
+                     }
                 )
                 [ bytesResolverArg ]
     , riskyTask =
         \riskyTaskArg ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Http" ]
-                    , name = "riskyTask"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.record
-                                    [ ( "method", Type.string )
-                                    , ( "headers"
-                                      , Type.list
+                     { importFrom = [ "Http" ]
+                     , name = "riskyTask"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.record
+                                      [ ( "method", Type.string )
+                                      , ( "headers"
+                                        , Type.list
                                             (Type.namedWith
-                                                [ "Http" ]
-                                                "Header"
-                                                []
+                                               [ "Http" ]
+                                               "Header"
+                                               []
                                             )
-                                      )
-                                    , ( "url", Type.string )
-                                    , ( "body"
-                                      , Type.namedWith [ "Http" ] "Body" []
-                                      )
-                                    , ( "resolver"
-                                      , Type.namedWith
+                                        )
+                                      , ( "url", Type.string )
+                                      , ( "body"
+                                        , Type.namedWith [ "Http" ] "Body" []
+                                        )
+                                      , ( "resolver"
+                                        , Type.namedWith
                                             [ "Http" ]
                                             "Resolver"
                                             [ Type.var "x", Type.var "a" ]
-                                      )
-                                    , ( "timeout", Type.maybe Type.float )
-                                    ]
-                                ]
-                                (Type.namedWith
-                                    [ "Task" ]
-                                    "Task"
-                                    [ Type.var "x", Type.var "a" ]
-                                )
-                            )
-                    }
+                                        )
+                                      , ( "timeout", Type.maybe Type.float )
+                                      ]
+                                  ]
+                                  (Type.namedWith
+                                       [ "Task" ]
+                                       "Task"
+                                       [ Type.var "x", Type.var "a" ]
+                                  )
+                             )
+                     }
                 )
                 [ riskyTaskArg ]
     }
@@ -2376,17 +2404,17 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.record
-                            [ ( "url", Type.string )
-                            , ( "expect"
-                              , Type.namedWith
-                                    [ "Http" ]
-                                    "Expect"
-                                    [ Type.var "msg" ]
-                              )
-                            ]
-                        ]
-                        (Type.namedWith [] "Cmd" [ Type.var "msg" ])
+                         [ Type.record
+                             [ ( "url", Type.string )
+                             , ( "expect"
+                               , Type.namedWith
+                                   [ "Http" ]
+                                   "Expect"
+                                   [ Type.var "msg" ]
+                               )
+                             ]
+                         ]
+                         (Type.namedWith [] "Cmd" [ Type.var "msg" ])
                     )
             }
     , post =
@@ -2396,18 +2424,18 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.record
-                            [ ( "url", Type.string )
-                            , ( "body", Type.namedWith [ "Http" ] "Body" [] )
-                            , ( "expect"
-                              , Type.namedWith
-                                    [ "Http" ]
-                                    "Expect"
-                                    [ Type.var "msg" ]
-                              )
-                            ]
-                        ]
-                        (Type.namedWith [] "Cmd" [ Type.var "msg" ])
+                         [ Type.record
+                             [ ( "url", Type.string )
+                             , ( "body", Type.namedWith [ "Http" ] "Body" [] )
+                             , ( "expect"
+                               , Type.namedWith
+                                   [ "Http" ]
+                                   "Expect"
+                                   [ Type.var "msg" ]
+                               )
+                             ]
+                         ]
+                         (Type.namedWith [] "Cmd" [ Type.var "msg" ])
                     )
             }
     , request =
@@ -2417,25 +2445,25 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.record
-                            [ ( "method", Type.string )
-                            , ( "headers"
-                              , Type.list
-                                    (Type.namedWith [ "Http" ] "Header" [])
-                              )
-                            , ( "url", Type.string )
-                            , ( "body", Type.namedWith [ "Http" ] "Body" [] )
-                            , ( "expect"
-                              , Type.namedWith
-                                    [ "Http" ]
-                                    "Expect"
-                                    [ Type.var "msg" ]
-                              )
-                            , ( "timeout", Type.maybe Type.float )
-                            , ( "tracker", Type.maybe Type.string )
-                            ]
-                        ]
-                        (Type.namedWith [] "Cmd" [ Type.var "msg" ])
+                         [ Type.record
+                             [ ( "method", Type.string )
+                             , ( "headers"
+                               , Type.list
+                                   (Type.namedWith [ "Http" ] "Header" [])
+                               )
+                             , ( "url", Type.string )
+                             , ( "body", Type.namedWith [ "Http" ] "Body" [] )
+                             , ( "expect"
+                               , Type.namedWith
+                                   [ "Http" ]
+                                   "Expect"
+                                   [ Type.var "msg" ]
+                               )
+                             , ( "timeout", Type.maybe Type.float )
+                             , ( "tracker", Type.maybe Type.string )
+                             ]
+                         ]
+                         (Type.namedWith [] "Cmd" [ Type.var "msg" ])
                     )
             }
     , header =
@@ -2445,8 +2473,8 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.string, Type.string ]
-                        (Type.namedWith [ "Http" ] "Header" [])
+                         [ Type.string, Type.string ]
+                         (Type.namedWith [ "Http" ] "Header" [])
                     )
             }
     , emptyBody =
@@ -2462,8 +2490,8 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.string, Type.string ]
-                        (Type.namedWith [ "Http" ] "Body" [])
+                         [ Type.string, Type.string ]
+                         (Type.namedWith [ "Http" ] "Body" [])
                     )
             }
     , jsonBody =
@@ -2473,8 +2501,8 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.namedWith [ "Json", "Encode" ] "Value" [] ]
-                        (Type.namedWith [ "Http" ] "Body" [])
+                         [ Type.namedWith [ "Json", "Encode" ] "Value" [] ]
+                         (Type.namedWith [ "Http" ] "Body" [])
                     )
             }
     , fileBody =
@@ -2484,8 +2512,8 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.namedWith [ "File" ] "File" [] ]
-                        (Type.namedWith [ "Http" ] "Body" [])
+                         [ Type.namedWith [ "File" ] "File" [] ]
+                         (Type.namedWith [ "Http" ] "Body" [])
                     )
             }
     , bytesBody =
@@ -2495,8 +2523,8 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.string, Type.namedWith [ "Bytes" ] "Bytes" [] ]
-                        (Type.namedWith [ "Http" ] "Body" [])
+                         [ Type.string, Type.namedWith [ "Bytes" ] "Bytes" [] ]
+                         (Type.namedWith [ "Http" ] "Body" [])
                     )
             }
     , multipartBody =
@@ -2506,8 +2534,8 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.list (Type.namedWith [ "Http" ] "Part" []) ]
-                        (Type.namedWith [ "Http" ] "Body" [])
+                         [ Type.list (Type.namedWith [ "Http" ] "Part" []) ]
+                         (Type.namedWith [ "Http" ] "Body" [])
                     )
             }
     , stringPart =
@@ -2517,8 +2545,8 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.string, Type.string ]
-                        (Type.namedWith [ "Http" ] "Part" [])
+                         [ Type.string, Type.string ]
+                         (Type.namedWith [ "Http" ] "Part" [])
                     )
             }
     , filePart =
@@ -2528,8 +2556,8 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.string, Type.namedWith [ "File" ] "File" [] ]
-                        (Type.namedWith [ "Http" ] "Part" [])
+                         [ Type.string, Type.namedWith [ "File" ] "File" [] ]
+                         (Type.namedWith [ "Http" ] "Part" [])
                     )
             }
     , bytesPart =
@@ -2539,11 +2567,11 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.string
-                        , Type.string
-                        , Type.namedWith [ "Bytes" ] "Bytes" []
-                        ]
-                        (Type.namedWith [ "Http" ] "Part" [])
+                         [ Type.string
+                         , Type.string
+                         , Type.namedWith [ "Bytes" ] "Bytes" []
+                         ]
+                         (Type.namedWith [ "Http" ] "Part" [])
                     )
             }
     , expectString =
@@ -2553,17 +2581,17 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.function
-                            [ Type.namedWith
-                                [ "Result" ]
-                                "Result"
-                                [ Type.namedWith [ "Http" ] "Error" []
-                                , Type.string
-                                ]
-                            ]
-                            (Type.var "msg")
-                        ]
-                        (Type.namedWith [ "Http" ] "Expect" [ Type.var "msg" ])
+                         [ Type.function
+                             [ Type.namedWith
+                                   [ "Result" ]
+                                   "Result"
+                                   [ Type.namedWith [ "Http" ] "Error" []
+                                   , Type.string
+                                   ]
+                             ]
+                             (Type.var "msg")
+                         ]
+                         (Type.namedWith [ "Http" ] "Expect" [ Type.var "msg" ])
                     )
             }
     , expectJson =
@@ -2573,21 +2601,21 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.function
-                            [ Type.namedWith
-                                [ "Result" ]
-                                "Result"
-                                [ Type.namedWith [ "Http" ] "Error" []
-                                , Type.var "a"
-                                ]
-                            ]
-                            (Type.var "msg")
-                        , Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "a" ]
-                        ]
-                        (Type.namedWith [ "Http" ] "Expect" [ Type.var "msg" ])
+                         [ Type.function
+                             [ Type.namedWith
+                                   [ "Result" ]
+                                   "Result"
+                                   [ Type.namedWith [ "Http" ] "Error" []
+                                   , Type.var "a"
+                                   ]
+                             ]
+                             (Type.var "msg")
+                         , Type.namedWith
+                             [ "Json", "Decode" ]
+                             "Decoder"
+                             [ Type.var "a" ]
+                         ]
+                         (Type.namedWith [ "Http" ] "Expect" [ Type.var "msg" ])
                     )
             }
     , expectBytes =
@@ -2597,21 +2625,21 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.function
-                            [ Type.namedWith
-                                [ "Result" ]
-                                "Result"
-                                [ Type.namedWith [ "Http" ] "Error" []
-                                , Type.var "a"
-                                ]
-                            ]
-                            (Type.var "msg")
-                        , Type.namedWith
-                            [ "Bytes", "Decode" ]
-                            "Decoder"
-                            [ Type.var "a" ]
-                        ]
-                        (Type.namedWith [ "Http" ] "Expect" [ Type.var "msg" ])
+                         [ Type.function
+                             [ Type.namedWith
+                                   [ "Result" ]
+                                   "Result"
+                                   [ Type.namedWith [ "Http" ] "Error" []
+                                   , Type.var "a"
+                                   ]
+                             ]
+                             (Type.var "msg")
+                         , Type.namedWith
+                             [ "Bytes", "Decode" ]
+                             "Decoder"
+                             [ Type.var "a" ]
+                         ]
+                         (Type.namedWith [ "Http" ] "Expect" [ Type.var "msg" ])
                     )
             }
     , expectWhatever =
@@ -2621,17 +2649,17 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.function
-                            [ Type.namedWith
-                                [ "Result" ]
-                                "Result"
-                                [ Type.namedWith [ "Http" ] "Error" []
-                                , Type.unit
-                                ]
-                            ]
-                            (Type.var "msg")
-                        ]
-                        (Type.namedWith [ "Http" ] "Expect" [ Type.var "msg" ])
+                         [ Type.function
+                             [ Type.namedWith
+                                   [ "Result" ]
+                                   "Result"
+                                   [ Type.namedWith [ "Http" ] "Error" []
+                                   , Type.unit
+                                   ]
+                             ]
+                             (Type.var "msg")
+                         ]
+                         (Type.namedWith [ "Http" ] "Expect" [ Type.var "msg" ])
                     )
             }
     , track =
@@ -2641,12 +2669,12 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.string
-                        , Type.function
-                            [ Type.namedWith [ "Http" ] "Progress" [] ]
-                            (Type.var "msg")
-                        ]
-                        (Type.namedWith [] "Sub" [ Type.var "msg" ])
+                         [ Type.string
+                         , Type.function
+                             [ Type.namedWith [ "Http" ] "Progress" [] ]
+                             (Type.var "msg")
+                         ]
+                         (Type.namedWith [] "Sub" [ Type.var "msg" ])
                     )
             }
     , fractionSent =
@@ -2656,10 +2684,10 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.record
-                            [ ( "sent", Type.int ), ( "size", Type.int ) ]
-                        ]
-                        Type.float
+                         [ Type.record
+                             [ ( "sent", Type.int ), ( "size", Type.int ) ]
+                         ]
+                         Type.float
                     )
             }
     , fractionReceived =
@@ -2669,12 +2697,12 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.record
-                            [ ( "received", Type.int )
-                            , ( "size", Type.maybe Type.int )
-                            ]
-                        ]
-                        Type.float
+                         [ Type.record
+                             [ ( "received", Type.int )
+                             , ( "size", Type.maybe Type.int )
+                             ]
+                         ]
+                         Type.float
                     )
             }
     , cancel =
@@ -2684,8 +2712,8 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.string ]
-                        (Type.namedWith [] "Cmd" [ Type.var "msg" ])
+                         [ Type.string ]
+                         (Type.namedWith [] "Cmd" [ Type.var "msg" ])
                     )
             }
     , riskyRequest =
@@ -2695,25 +2723,25 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.record
-                            [ ( "method", Type.string )
-                            , ( "headers"
-                              , Type.list
-                                    (Type.namedWith [ "Http" ] "Header" [])
-                              )
-                            , ( "url", Type.string )
-                            , ( "body", Type.namedWith [ "Http" ] "Body" [] )
-                            , ( "expect"
-                              , Type.namedWith
-                                    [ "Http" ]
-                                    "Expect"
-                                    [ Type.var "msg" ]
-                              )
-                            , ( "timeout", Type.maybe Type.float )
-                            , ( "tracker", Type.maybe Type.string )
-                            ]
-                        ]
-                        (Type.namedWith [] "Cmd" [ Type.var "msg" ])
+                         [ Type.record
+                             [ ( "method", Type.string )
+                             , ( "headers"
+                               , Type.list
+                                   (Type.namedWith [ "Http" ] "Header" [])
+                               )
+                             , ( "url", Type.string )
+                             , ( "body", Type.namedWith [ "Http" ] "Body" [] )
+                             , ( "expect"
+                               , Type.namedWith
+                                   [ "Http" ]
+                                   "Expect"
+                                   [ Type.var "msg" ]
+                               )
+                             , ( "timeout", Type.maybe Type.float )
+                             , ( "tracker", Type.maybe Type.string )
+                             ]
+                         ]
+                         (Type.namedWith [] "Cmd" [ Type.var "msg" ])
                     )
             }
     , expectStringResponse =
@@ -2723,26 +2751,26 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.function
-                            [ Type.namedWith
+                         [ Type.function
+                             [ Type.namedWith
+                                   [ "Result" ]
+                                   "Result"
+                                   [ Type.var "x", Type.var "a" ]
+                             ]
+                             (Type.var "msg")
+                         , Type.function
+                             [ Type.namedWith
+                                   [ "Http" ]
+                                   "Response"
+                                   [ Type.string ]
+                             ]
+                             (Type.namedWith
                                 [ "Result" ]
                                 "Result"
                                 [ Type.var "x", Type.var "a" ]
-                            ]
-                            (Type.var "msg")
-                        , Type.function
-                            [ Type.namedWith
-                                [ "Http" ]
-                                "Response"
-                                [ Type.string ]
-                            ]
-                            (Type.namedWith
-                                [ "Result" ]
-                                "Result"
-                                [ Type.var "x", Type.var "a" ]
-                            )
-                        ]
-                        (Type.namedWith [ "Http" ] "Expect" [ Type.var "msg" ])
+                             )
+                         ]
+                         (Type.namedWith [ "Http" ] "Expect" [ Type.var "msg" ])
                     )
             }
     , expectBytesResponse =
@@ -2752,26 +2780,26 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.function
-                            [ Type.namedWith
+                         [ Type.function
+                             [ Type.namedWith
+                                   [ "Result" ]
+                                   "Result"
+                                   [ Type.var "x", Type.var "a" ]
+                             ]
+                             (Type.var "msg")
+                         , Type.function
+                             [ Type.namedWith
+                                   [ "Http" ]
+                                   "Response"
+                                   [ Type.namedWith [ "Bytes" ] "Bytes" [] ]
+                             ]
+                             (Type.namedWith
                                 [ "Result" ]
                                 "Result"
                                 [ Type.var "x", Type.var "a" ]
-                            ]
-                            (Type.var "msg")
-                        , Type.function
-                            [ Type.namedWith
-                                [ "Http" ]
-                                "Response"
-                                [ Type.namedWith [ "Bytes" ] "Bytes" [] ]
-                            ]
-                            (Type.namedWith
-                                [ "Result" ]
-                                "Result"
-                                [ Type.var "x", Type.var "a" ]
-                            )
-                        ]
-                        (Type.namedWith [ "Http" ] "Expect" [ Type.var "msg" ])
+                             )
+                         ]
+                         (Type.namedWith [ "Http" ] "Expect" [ Type.var "msg" ])
                     )
             }
     , task =
@@ -2781,28 +2809,28 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.record
-                            [ ( "method", Type.string )
-                            , ( "headers"
-                              , Type.list
-                                    (Type.namedWith [ "Http" ] "Header" [])
-                              )
-                            , ( "url", Type.string )
-                            , ( "body", Type.namedWith [ "Http" ] "Body" [] )
-                            , ( "resolver"
-                              , Type.namedWith
-                                    [ "Http" ]
-                                    "Resolver"
-                                    [ Type.var "x", Type.var "a" ]
-                              )
-                            , ( "timeout", Type.maybe Type.float )
-                            ]
-                        ]
-                        (Type.namedWith
-                            [ "Task" ]
-                            "Task"
-                            [ Type.var "x", Type.var "a" ]
-                        )
+                         [ Type.record
+                             [ ( "method", Type.string )
+                             , ( "headers"
+                               , Type.list
+                                   (Type.namedWith [ "Http" ] "Header" [])
+                               )
+                             , ( "url", Type.string )
+                             , ( "body", Type.namedWith [ "Http" ] "Body" [] )
+                             , ( "resolver"
+                               , Type.namedWith
+                                   [ "Http" ]
+                                   "Resolver"
+                                   [ Type.var "x", Type.var "a" ]
+                               )
+                             , ( "timeout", Type.maybe Type.float )
+                             ]
+                         ]
+                         (Type.namedWith
+                              [ "Task" ]
+                              "Task"
+                              [ Type.var "x", Type.var "a" ]
+                         )
                     )
             }
     , stringResolver =
@@ -2812,23 +2840,23 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.function
-                            [ Type.namedWith
-                                [ "Http" ]
-                                "Response"
-                                [ Type.string ]
-                            ]
-                            (Type.namedWith
+                         [ Type.function
+                             [ Type.namedWith
+                                   [ "Http" ]
+                                   "Response"
+                                   [ Type.string ]
+                             ]
+                             (Type.namedWith
                                 [ "Result" ]
                                 "Result"
                                 [ Type.var "x", Type.var "a" ]
-                            )
-                        ]
-                        (Type.namedWith
-                            [ "Http" ]
-                            "Resolver"
-                            [ Type.var "x", Type.var "a" ]
-                        )
+                             )
+                         ]
+                         (Type.namedWith
+                              [ "Http" ]
+                              "Resolver"
+                              [ Type.var "x", Type.var "a" ]
+                         )
                     )
             }
     , bytesResolver =
@@ -2838,23 +2866,23 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.function
-                            [ Type.namedWith
-                                [ "Http" ]
-                                "Response"
-                                [ Type.namedWith [ "Bytes" ] "Bytes" [] ]
-                            ]
-                            (Type.namedWith
+                         [ Type.function
+                             [ Type.namedWith
+                                   [ "Http" ]
+                                   "Response"
+                                   [ Type.namedWith [ "Bytes" ] "Bytes" [] ]
+                             ]
+                             (Type.namedWith
                                 [ "Result" ]
                                 "Result"
                                 [ Type.var "x", Type.var "a" ]
-                            )
-                        ]
-                        (Type.namedWith
-                            [ "Http" ]
-                            "Resolver"
-                            [ Type.var "x", Type.var "a" ]
-                        )
+                             )
+                         ]
+                         (Type.namedWith
+                              [ "Http" ]
+                              "Resolver"
+                              [ Type.var "x", Type.var "a" ]
+                         )
                     )
             }
     , riskyTask =
@@ -2864,28 +2892,28 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.record
-                            [ ( "method", Type.string )
-                            , ( "headers"
-                              , Type.list
-                                    (Type.namedWith [ "Http" ] "Header" [])
-                              )
-                            , ( "url", Type.string )
-                            , ( "body", Type.namedWith [ "Http" ] "Body" [] )
-                            , ( "resolver"
-                              , Type.namedWith
-                                    [ "Http" ]
-                                    "Resolver"
-                                    [ Type.var "x", Type.var "a" ]
-                              )
-                            , ( "timeout", Type.maybe Type.float )
-                            ]
-                        ]
-                        (Type.namedWith
-                            [ "Task" ]
-                            "Task"
-                            [ Type.var "x", Type.var "a" ]
-                        )
+                         [ Type.record
+                             [ ( "method", Type.string )
+                             , ( "headers"
+                               , Type.list
+                                   (Type.namedWith [ "Http" ] "Header" [])
+                               )
+                             , ( "url", Type.string )
+                             , ( "body", Type.namedWith [ "Http" ] "Body" [] )
+                             , ( "resolver"
+                               , Type.namedWith
+                                   [ "Http" ]
+                                   "Resolver"
+                                   [ Type.var "x", Type.var "a" ]
+                               )
+                             , ( "timeout", Type.maybe Type.float )
+                             ]
+                         ]
+                         (Type.namedWith
+                              [ "Task" ]
+                              "Task"
+                              [ Type.var "x", Type.var "a" ]
+                         )
                     )
             }
     }

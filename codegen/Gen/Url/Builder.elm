@@ -38,22 +38,22 @@ absolute : List String -> List Elm.Expression -> Elm.Expression
 absolute absoluteArg absoluteArg0 =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Url", "Builder" ]
-            , name = "absolute"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.list Type.string
-                        , Type.list
-                            (Type.namedWith
-                                [ "Url", "Builder" ]
-                                "QueryParameter"
-                                []
-                            )
-                        ]
-                        Type.string
-                    )
-            }
+             { importFrom = [ "Url", "Builder" ]
+             , name = "absolute"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.list Type.string
+                          , Type.list
+                              (Type.namedWith
+                                 [ "Url", "Builder" ]
+                                 "QueryParameter"
+                                 []
+                              )
+                          ]
+                          Type.string
+                     )
+             }
         )
         [ Elm.list (List.map Elm.string absoluteArg), Elm.list absoluteArg0 ]
 
@@ -80,22 +80,22 @@ relative : List String -> List Elm.Expression -> Elm.Expression
 relative relativeArg relativeArg0 =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Url", "Builder" ]
-            , name = "relative"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.list Type.string
-                        , Type.list
-                            (Type.namedWith
-                                [ "Url", "Builder" ]
-                                "QueryParameter"
-                                []
-                            )
-                        ]
-                        Type.string
-                    )
-            }
+             { importFrom = [ "Url", "Builder" ]
+             , name = "relative"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.list Type.string
+                          , Type.list
+                              (Type.namedWith
+                                 [ "Url", "Builder" ]
+                                 "QueryParameter"
+                                 []
+                              )
+                          ]
+                          Type.string
+                     )
+             }
         )
         [ Elm.list (List.map Elm.string relativeArg), Elm.list relativeArg0 ]
 
@@ -128,23 +128,23 @@ crossOrigin : String -> List String -> List Elm.Expression -> Elm.Expression
 crossOrigin crossOriginArg crossOriginArg0 crossOriginArg1 =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Url", "Builder" ]
-            , name = "crossOrigin"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.string
-                        , Type.list Type.string
-                        , Type.list
-                            (Type.namedWith
-                                [ "Url", "Builder" ]
-                                "QueryParameter"
-                                []
-                            )
-                        ]
-                        Type.string
-                    )
-            }
+             { importFrom = [ "Url", "Builder" ]
+             , name = "crossOrigin"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.string
+                          , Type.list Type.string
+                          , Type.list
+                              (Type.namedWith
+                                 [ "Url", "Builder" ]
+                                 "QueryParameter"
+                                 []
+                              )
+                          ]
+                          Type.string
+                     )
+             }
         )
         [ Elm.string crossOriginArg
         , Elm.list (List.map Elm.string crossOriginArg0)
@@ -186,24 +186,24 @@ custom :
 custom customArg customArg0 customArg1 customArg2 =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Url", "Builder" ]
-            , name = "custom"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.namedWith [ "Url", "Builder" ] "Root" []
-                        , Type.list Type.string
-                        , Type.list
-                            (Type.namedWith
-                                [ "Url", "Builder" ]
-                                "QueryParameter"
-                                []
-                            )
-                        , Type.maybe Type.string
-                        ]
-                        Type.string
-                    )
-            }
+             { importFrom = [ "Url", "Builder" ]
+             , name = "custom"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.namedWith [ "Url", "Builder" ] "Root" []
+                          , Type.list Type.string
+                          , Type.list
+                              (Type.namedWith
+                                 [ "Url", "Builder" ]
+                                 "QueryParameter"
+                                 []
+                              )
+                          , Type.maybe Type.string
+                          ]
+                          Type.string
+                     )
+             }
         )
         [ customArg
         , Elm.list (List.map Elm.string customArg0)
@@ -226,16 +226,19 @@ string : String -> String -> Elm.Expression
 string stringArg stringArg0 =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Url", "Builder" ]
-            , name = "string"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.string, Type.string ]
-                        (Type.namedWith [ "Url", "Builder" ] "QueryParameter" []
-                        )
-                    )
-            }
+             { importFrom = [ "Url", "Builder" ]
+             , name = "string"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.string, Type.string ]
+                          (Type.namedWith
+                               [ "Url", "Builder" ]
+                               "QueryParameter"
+                               []
+                          )
+                     )
+             }
         )
         [ Elm.string stringArg, Elm.string stringArg0 ]
 
@@ -254,16 +257,19 @@ int : String -> Int -> Elm.Expression
 int intArg intArg0 =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Url", "Builder" ]
-            , name = "int"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.string, Type.int ]
-                        (Type.namedWith [ "Url", "Builder" ] "QueryParameter" []
-                        )
-                    )
-            }
+             { importFrom = [ "Url", "Builder" ]
+             , name = "int"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.string, Type.int ]
+                          (Type.namedWith
+                               [ "Url", "Builder" ]
+                               "QueryParameter"
+                               []
+                          )
+                     )
+             }
         )
         [ Elm.string intArg, Elm.int intArg0 ]
 
@@ -289,21 +295,21 @@ toQuery : List Elm.Expression -> Elm.Expression
 toQuery toQueryArg =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Url", "Builder" ]
-            , name = "toQuery"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.list
-                            (Type.namedWith
-                                [ "Url", "Builder" ]
-                                "QueryParameter"
-                                []
-                            )
-                        ]
-                        Type.string
-                    )
-            }
+             { importFrom = [ "Url", "Builder" ]
+             , name = "toQuery"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.list
+                              (Type.namedWith
+                                 [ "Url", "Builder" ]
+                                 "QueryParameter"
+                                 []
+                              )
+                          ]
+                          Type.string
+                     )
+             }
         )
         [ Elm.list toQueryArg ]
 
@@ -337,10 +343,10 @@ make_ =
         \ar0 ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Url", "Builder" ]
-                    , name = "CrossOrigin"
-                    , annotation = Just (Type.namedWith [] "Root" [])
-                    }
+                     { importFrom = [ "Url", "Builder" ]
+                     , name = "CrossOrigin"
+                     , annotation = Just (Type.namedWith [] "Root" [])
+                     }
                 )
                 [ ar0 ]
     }
@@ -392,150 +398,153 @@ call_ =
         \absoluteArg absoluteArg0 ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Url", "Builder" ]
-                    , name = "absolute"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.list Type.string
-                                , Type.list
-                                    (Type.namedWith
-                                        [ "Url", "Builder" ]
-                                        "QueryParameter"
-                                        []
-                                    )
-                                ]
-                                Type.string
-                            )
-                    }
+                     { importFrom = [ "Url", "Builder" ]
+                     , name = "absolute"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.list Type.string
+                                  , Type.list
+                                      (Type.namedWith
+                                         [ "Url", "Builder" ]
+                                         "QueryParameter"
+                                         []
+                                      )
+                                  ]
+                                  Type.string
+                             )
+                     }
                 )
                 [ absoluteArg, absoluteArg0 ]
     , relative =
         \relativeArg relativeArg0 ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Url", "Builder" ]
-                    , name = "relative"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.list Type.string
-                                , Type.list
-                                    (Type.namedWith
-                                        [ "Url", "Builder" ]
-                                        "QueryParameter"
-                                        []
-                                    )
-                                ]
-                                Type.string
-                            )
-                    }
+                     { importFrom = [ "Url", "Builder" ]
+                     , name = "relative"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.list Type.string
+                                  , Type.list
+                                      (Type.namedWith
+                                         [ "Url", "Builder" ]
+                                         "QueryParameter"
+                                         []
+                                      )
+                                  ]
+                                  Type.string
+                             )
+                     }
                 )
                 [ relativeArg, relativeArg0 ]
     , crossOrigin =
         \crossOriginArg crossOriginArg0 crossOriginArg1 ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Url", "Builder" ]
-                    , name = "crossOrigin"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.string
-                                , Type.list Type.string
-                                , Type.list
-                                    (Type.namedWith
-                                        [ "Url", "Builder" ]
-                                        "QueryParameter"
-                                        []
-                                    )
-                                ]
-                                Type.string
-                            )
-                    }
+                     { importFrom = [ "Url", "Builder" ]
+                     , name = "crossOrigin"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.string
+                                  , Type.list Type.string
+                                  , Type.list
+                                      (Type.namedWith
+                                         [ "Url", "Builder" ]
+                                         "QueryParameter"
+                                         []
+                                      )
+                                  ]
+                                  Type.string
+                             )
+                     }
                 )
                 [ crossOriginArg, crossOriginArg0, crossOriginArg1 ]
     , custom =
         \customArg customArg0 customArg1 customArg2 ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Url", "Builder" ]
-                    , name = "custom"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.namedWith [ "Url", "Builder" ] "Root" []
-                                , Type.list Type.string
-                                , Type.list
-                                    (Type.namedWith
-                                        [ "Url", "Builder" ]
-                                        "QueryParameter"
-                                        []
-                                    )
-                                , Type.maybe Type.string
-                                ]
-                                Type.string
-                            )
-                    }
+                     { importFrom = [ "Url", "Builder" ]
+                     , name = "custom"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.namedWith
+                                      [ "Url", "Builder" ]
+                                      "Root"
+                                      []
+                                  , Type.list Type.string
+                                  , Type.list
+                                      (Type.namedWith
+                                         [ "Url", "Builder" ]
+                                         "QueryParameter"
+                                         []
+                                      )
+                                  , Type.maybe Type.string
+                                  ]
+                                  Type.string
+                             )
+                     }
                 )
                 [ customArg, customArg0, customArg1, customArg2 ]
     , string =
         \stringArg stringArg0 ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Url", "Builder" ]
-                    , name = "string"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.string, Type.string ]
-                                (Type.namedWith
-                                    [ "Url", "Builder" ]
-                                    "QueryParameter"
-                                    []
-                                )
-                            )
-                    }
+                     { importFrom = [ "Url", "Builder" ]
+                     , name = "string"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.string, Type.string ]
+                                  (Type.namedWith
+                                       [ "Url", "Builder" ]
+                                       "QueryParameter"
+                                       []
+                                  )
+                             )
+                     }
                 )
                 [ stringArg, stringArg0 ]
     , int =
         \intArg intArg0 ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Url", "Builder" ]
-                    , name = "int"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.string, Type.int ]
-                                (Type.namedWith
-                                    [ "Url", "Builder" ]
-                                    "QueryParameter"
-                                    []
-                                )
-                            )
-                    }
+                     { importFrom = [ "Url", "Builder" ]
+                     , name = "int"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.string, Type.int ]
+                                  (Type.namedWith
+                                       [ "Url", "Builder" ]
+                                       "QueryParameter"
+                                       []
+                                  )
+                             )
+                     }
                 )
                 [ intArg, intArg0 ]
     , toQuery =
         \toQueryArg ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Url", "Builder" ]
-                    , name = "toQuery"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.list
-                                    (Type.namedWith
-                                        [ "Url", "Builder" ]
-                                        "QueryParameter"
-                                        []
-                                    )
-                                ]
-                                Type.string
-                            )
-                    }
+                     { importFrom = [ "Url", "Builder" ]
+                     , name = "toQuery"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.list
+                                      (Type.namedWith
+                                         [ "Url", "Builder" ]
+                                         "QueryParameter"
+                                         []
+                                      )
+                                  ]
+                                  Type.string
+                             )
+                     }
                 )
                 [ toQueryArg ]
     }
@@ -558,15 +567,15 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.list Type.string
-                        , Type.list
-                            (Type.namedWith
+                         [ Type.list Type.string
+                         , Type.list
+                             (Type.namedWith
                                 [ "Url", "Builder" ]
                                 "QueryParameter"
                                 []
-                            )
-                        ]
-                        Type.string
+                             )
+                         ]
+                         Type.string
                     )
             }
     , relative =
@@ -576,15 +585,15 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.list Type.string
-                        , Type.list
-                            (Type.namedWith
+                         [ Type.list Type.string
+                         , Type.list
+                             (Type.namedWith
                                 [ "Url", "Builder" ]
                                 "QueryParameter"
                                 []
-                            )
-                        ]
-                        Type.string
+                             )
+                         ]
+                         Type.string
                     )
             }
     , crossOrigin =
@@ -594,16 +603,16 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.string
-                        , Type.list Type.string
-                        , Type.list
-                            (Type.namedWith
+                         [ Type.string
+                         , Type.list Type.string
+                         , Type.list
+                             (Type.namedWith
                                 [ "Url", "Builder" ]
                                 "QueryParameter"
                                 []
-                            )
-                        ]
-                        Type.string
+                             )
+                         ]
+                         Type.string
                     )
             }
     , custom =
@@ -613,17 +622,17 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.namedWith [ "Url", "Builder" ] "Root" []
-                        , Type.list Type.string
-                        , Type.list
-                            (Type.namedWith
+                         [ Type.namedWith [ "Url", "Builder" ] "Root" []
+                         , Type.list Type.string
+                         , Type.list
+                             (Type.namedWith
                                 [ "Url", "Builder" ]
                                 "QueryParameter"
                                 []
-                            )
-                        , Type.maybe Type.string
-                        ]
-                        Type.string
+                             )
+                         , Type.maybe Type.string
+                         ]
+                         Type.string
                     )
             }
     , string =
@@ -633,9 +642,12 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.string, Type.string ]
-                        (Type.namedWith [ "Url", "Builder" ] "QueryParameter" []
-                        )
+                         [ Type.string, Type.string ]
+                         (Type.namedWith
+                              [ "Url", "Builder" ]
+                              "QueryParameter"
+                              []
+                         )
                     )
             }
     , int =
@@ -645,9 +657,12 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.string, Type.int ]
-                        (Type.namedWith [ "Url", "Builder" ] "QueryParameter" []
-                        )
+                         [ Type.string, Type.int ]
+                         (Type.namedWith
+                              [ "Url", "Builder" ]
+                              "QueryParameter"
+                              []
+                         )
                     )
             }
     , toQuery =
@@ -657,14 +672,14 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.list
-                            (Type.namedWith
+                         [ Type.list
+                             (Type.namedWith
                                 [ "Url", "Builder" ]
                                 "QueryParameter"
                                 []
-                            )
-                        ]
-                        Type.string
+                             )
+                         ]
+                         Type.string
                     )
             }
     }

@@ -35,19 +35,19 @@ string : String -> Elm.Expression
 string stringArg =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Url", "Parser", "Query" ]
-            , name = "string"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.string ]
-                        (Type.namedWith
-                            [ "Url", "Parser", "Query" ]
-                            "Parser"
-                            [ Type.maybe Type.string ]
-                        )
-                    )
-            }
+             { importFrom = [ "Url", "Parser", "Query" ]
+             , name = "string"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.string ]
+                          (Type.namedWith
+                               [ "Url", "Parser", "Query" ]
+                               "Parser"
+                               [ Type.maybe Type.string ]
+                          )
+                     )
+             }
         )
         [ Elm.string stringArg ]
 
@@ -73,19 +73,19 @@ int : String -> Elm.Expression
 int intArg =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Url", "Parser", "Query" ]
-            , name = "int"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.string ]
-                        (Type.namedWith
-                            [ "Url", "Parser", "Query" ]
-                            "Parser"
-                            [ Type.maybe Type.int ]
-                        )
-                    )
-            }
+             { importFrom = [ "Url", "Parser", "Query" ]
+             , name = "int"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.string ]
+                          (Type.namedWith
+                               [ "Url", "Parser", "Query" ]
+                               "Parser"
+                               [ Type.maybe Type.int ]
+                          )
+                     )
+             }
         )
         [ Elm.string intArg ]
 
@@ -118,24 +118,24 @@ enum : String -> Elm.Expression -> Elm.Expression
 enum enumArg enumArg0 =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Url", "Parser", "Query" ]
-            , name = "enum"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.string
-                        , Type.namedWith
-                            [ "Dict" ]
-                            "Dict"
-                            [ Type.string, Type.var "a" ]
-                        ]
-                        (Type.namedWith
-                            [ "Url", "Parser", "Query" ]
-                            "Parser"
-                            [ Type.maybe (Type.var "a") ]
-                        )
-                    )
-            }
+             { importFrom = [ "Url", "Parser", "Query" ]
+             , name = "enum"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.string
+                          , Type.namedWith
+                              [ "Dict" ]
+                              "Dict"
+                              [ Type.string, Type.var "a" ]
+                          ]
+                          (Type.namedWith
+                               [ "Url", "Parser", "Query" ]
+                               "Parser"
+                               [ Type.maybe (Type.var "a") ]
+                          )
+                     )
+             }
         )
         [ Elm.string enumArg, enumArg0 ]
 
@@ -162,21 +162,23 @@ custom : String -> (Elm.Expression -> Elm.Expression) -> Elm.Expression
 custom customArg customArg0 =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Url", "Parser", "Query" ]
-            , name = "custom"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.string
-                        , Type.function [ Type.list Type.string ] (Type.var "a")
-                        ]
-                        (Type.namedWith
-                            [ "Url", "Parser", "Query" ]
-                            "Parser"
-                            [ Type.var "a" ]
-                        )
-                    )
-            }
+             { importFrom = [ "Url", "Parser", "Query" ]
+             , name = "custom"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.string
+                          , Type.function
+                              [ Type.list Type.string ]
+                              (Type.var "a")
+                          ]
+                          (Type.namedWith
+                               [ "Url", "Parser", "Query" ]
+                               "Parser"
+                               [ Type.var "a" ]
+                          )
+                     )
+             }
         )
         [ Elm.string customArg, Elm.functionReduced "customUnpack" customArg0 ]
 
@@ -194,24 +196,24 @@ map : (Elm.Expression -> Elm.Expression) -> Elm.Expression -> Elm.Expression
 map mapArg mapArg0 =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Url", "Parser", "Query" ]
-            , name = "map"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.function [ Type.var "a" ] (Type.var "b")
-                        , Type.namedWith
-                            [ "Url", "Parser", "Query" ]
-                            "Parser"
-                            [ Type.var "a" ]
-                        ]
-                        (Type.namedWith
-                            [ "Url", "Parser", "Query" ]
-                            "Parser"
-                            [ Type.var "b" ]
-                        )
-                    )
-            }
+             { importFrom = [ "Url", "Parser", "Query" ]
+             , name = "map"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.function [ Type.var "a" ] (Type.var "b")
+                          , Type.namedWith
+                              [ "Url", "Parser", "Query" ]
+                              "Parser"
+                              [ Type.var "a" ]
+                          ]
+                          (Type.namedWith
+                               [ "Url", "Parser", "Query" ]
+                               "Parser"
+                               [ Type.var "b" ]
+                          )
+                     )
+             }
         )
         [ Elm.functionReduced "mapUnpack" mapArg, mapArg0 ]
 
@@ -242,35 +244,35 @@ map2 :
 map2 map2Arg map2Arg0 map2Arg1 =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Url", "Parser", "Query" ]
-            , name = "map2"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.function
-                            [ Type.var "a", Type.var "b" ]
-                            (Type.var "result")
-                        , Type.namedWith
-                            [ "Url", "Parser", "Query" ]
-                            "Parser"
-                            [ Type.var "a" ]
-                        , Type.namedWith
-                            [ "Url", "Parser", "Query" ]
-                            "Parser"
-                            [ Type.var "b" ]
-                        ]
-                        (Type.namedWith
-                            [ "Url", "Parser", "Query" ]
-                            "Parser"
-                            [ Type.var "result" ]
-                        )
-                    )
-            }
+             { importFrom = [ "Url", "Parser", "Query" ]
+             , name = "map2"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.function
+                              [ Type.var "a", Type.var "b" ]
+                              (Type.var "result")
+                          , Type.namedWith
+                              [ "Url", "Parser", "Query" ]
+                              "Parser"
+                              [ Type.var "a" ]
+                          , Type.namedWith
+                              [ "Url", "Parser", "Query" ]
+                              "Parser"
+                              [ Type.var "b" ]
+                          ]
+                          (Type.namedWith
+                               [ "Url", "Parser", "Query" ]
+                               "Parser"
+                               [ Type.var "result" ]
+                          )
+                     )
+             }
         )
         [ Elm.functionReduced
             "map2Unpack"
             (\functionReducedUnpack ->
-                Elm.functionReduced "unpack" (map2Arg functionReducedUnpack)
+               Elm.functionReduced "unpack" (map2Arg functionReducedUnpack)
             )
         , map2Arg0
         , map2Arg1
@@ -317,47 +319,47 @@ map3 :
 map3 map3Arg map3Arg0 map3Arg1 map3Arg2 =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Url", "Parser", "Query" ]
-            , name = "map3"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.function
-                            [ Type.var "a", Type.var "b", Type.var "c" ]
-                            (Type.var "result")
-                        , Type.namedWith
-                            [ "Url", "Parser", "Query" ]
-                            "Parser"
-                            [ Type.var "a" ]
-                        , Type.namedWith
-                            [ "Url", "Parser", "Query" ]
-                            "Parser"
-                            [ Type.var "b" ]
-                        , Type.namedWith
-                            [ "Url", "Parser", "Query" ]
-                            "Parser"
-                            [ Type.var "c" ]
-                        ]
-                        (Type.namedWith
-                            [ "Url", "Parser", "Query" ]
-                            "Parser"
-                            [ Type.var "result" ]
-                        )
-                    )
-            }
+             { importFrom = [ "Url", "Parser", "Query" ]
+             , name = "map3"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.function
+                              [ Type.var "a", Type.var "b", Type.var "c" ]
+                              (Type.var "result")
+                          , Type.namedWith
+                              [ "Url", "Parser", "Query" ]
+                              "Parser"
+                              [ Type.var "a" ]
+                          , Type.namedWith
+                              [ "Url", "Parser", "Query" ]
+                              "Parser"
+                              [ Type.var "b" ]
+                          , Type.namedWith
+                              [ "Url", "Parser", "Query" ]
+                              "Parser"
+                              [ Type.var "c" ]
+                          ]
+                          (Type.namedWith
+                               [ "Url", "Parser", "Query" ]
+                               "Parser"
+                               [ Type.var "result" ]
+                          )
+                     )
+             }
         )
         [ Elm.functionReduced
             "map3Unpack"
             (\functionReducedUnpack ->
-                Elm.functionReduced
-                    "unpack"
-                    (\functionReducedUnpack0 ->
+               Elm.functionReduced
+                   "unpack"
+                   (\functionReducedUnpack0 ->
                         Elm.functionReduced
                             "unpack"
-                            (map3Arg functionReducedUnpack
-                                functionReducedUnpack0
+                            ((map3Arg functionReducedUnpack)
+                                 functionReducedUnpack0
                             )
-                    )
+                   )
             )
         , map3Arg0
         , map3Arg1
@@ -387,60 +389,61 @@ map4 :
 map4 map4Arg map4Arg0 map4Arg1 map4Arg2 map4Arg3 =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Url", "Parser", "Query" ]
-            , name = "map4"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.function
-                            [ Type.var "a"
-                            , Type.var "b"
-                            , Type.var "c"
-                            , Type.var "d"
-                            ]
-                            (Type.var "result")
-                        , Type.namedWith
-                            [ "Url", "Parser", "Query" ]
-                            "Parser"
-                            [ Type.var "a" ]
-                        , Type.namedWith
-                            [ "Url", "Parser", "Query" ]
-                            "Parser"
-                            [ Type.var "b" ]
-                        , Type.namedWith
-                            [ "Url", "Parser", "Query" ]
-                            "Parser"
-                            [ Type.var "c" ]
-                        , Type.namedWith
-                            [ "Url", "Parser", "Query" ]
-                            "Parser"
-                            [ Type.var "d" ]
-                        ]
-                        (Type.namedWith
-                            [ "Url", "Parser", "Query" ]
-                            "Parser"
-                            [ Type.var "result" ]
-                        )
-                    )
-            }
+             { importFrom = [ "Url", "Parser", "Query" ]
+             , name = "map4"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.function
+                              [ Type.var "a"
+                              , Type.var "b"
+                              , Type.var "c"
+                              , Type.var "d"
+                              ]
+                              (Type.var "result")
+                          , Type.namedWith
+                              [ "Url", "Parser", "Query" ]
+                              "Parser"
+                              [ Type.var "a" ]
+                          , Type.namedWith
+                              [ "Url", "Parser", "Query" ]
+                              "Parser"
+                              [ Type.var "b" ]
+                          , Type.namedWith
+                              [ "Url", "Parser", "Query" ]
+                              "Parser"
+                              [ Type.var "c" ]
+                          , Type.namedWith
+                              [ "Url", "Parser", "Query" ]
+                              "Parser"
+                              [ Type.var "d" ]
+                          ]
+                          (Type.namedWith
+                               [ "Url", "Parser", "Query" ]
+                               "Parser"
+                               [ Type.var "result" ]
+                          )
+                     )
+             }
         )
         [ Elm.functionReduced
             "map4Unpack"
             (\functionReducedUnpack ->
-                Elm.functionReduced
-                    "unpack"
-                    (\functionReducedUnpack0 ->
+               Elm.functionReduced
+                   "unpack"
+                   (\functionReducedUnpack0 ->
                         Elm.functionReduced
                             "unpack"
                             (\functionReducedUnpack_2_1_2_0_2_0_2_0_0 ->
-                                Elm.functionReduced
-                                    "unpack"
-                                    (map4Arg functionReducedUnpack
-                                         functionReducedUnpack0
-                                        functionReducedUnpack_2_1_2_0_2_0_2_0_0
-                                    )
+                                 Elm.functionReduced
+                                     "unpack"
+                                     (((map4Arg functionReducedUnpack)
+                                           functionReducedUnpack0
+                                      )
+                                          functionReducedUnpack_2_1_2_0_2_0_2_0_0
+                                     )
                             )
-                    )
+                   )
             )
         , map4Arg0
         , map4Arg1
@@ -474,70 +477,72 @@ map5 :
 map5 map5Arg map5Arg0 map5Arg1 map5Arg2 map5Arg3 map5Arg4 =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Url", "Parser", "Query" ]
-            , name = "map5"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.function
-                            [ Type.var "a"
-                            , Type.var "b"
-                            , Type.var "c"
-                            , Type.var "d"
-                            , Type.var "e"
-                            ]
-                            (Type.var "result")
-                        , Type.namedWith
-                            [ "Url", "Parser", "Query" ]
-                            "Parser"
-                            [ Type.var "a" ]
-                        , Type.namedWith
-                            [ "Url", "Parser", "Query" ]
-                            "Parser"
-                            [ Type.var "b" ]
-                        , Type.namedWith
-                            [ "Url", "Parser", "Query" ]
-                            "Parser"
-                            [ Type.var "c" ]
-                        , Type.namedWith
-                            [ "Url", "Parser", "Query" ]
-                            "Parser"
-                            [ Type.var "d" ]
-                        , Type.namedWith
-                            [ "Url", "Parser", "Query" ]
-                            "Parser"
-                            [ Type.var "e" ]
-                        ]
-                        (Type.namedWith
-                            [ "Url", "Parser", "Query" ]
-                            "Parser"
-                            [ Type.var "result" ]
-                        )
-                    )
-            }
+             { importFrom = [ "Url", "Parser", "Query" ]
+             , name = "map5"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.function
+                              [ Type.var "a"
+                              , Type.var "b"
+                              , Type.var "c"
+                              , Type.var "d"
+                              , Type.var "e"
+                              ]
+                              (Type.var "result")
+                          , Type.namedWith
+                              [ "Url", "Parser", "Query" ]
+                              "Parser"
+                              [ Type.var "a" ]
+                          , Type.namedWith
+                              [ "Url", "Parser", "Query" ]
+                              "Parser"
+                              [ Type.var "b" ]
+                          , Type.namedWith
+                              [ "Url", "Parser", "Query" ]
+                              "Parser"
+                              [ Type.var "c" ]
+                          , Type.namedWith
+                              [ "Url", "Parser", "Query" ]
+                              "Parser"
+                              [ Type.var "d" ]
+                          , Type.namedWith
+                              [ "Url", "Parser", "Query" ]
+                              "Parser"
+                              [ Type.var "e" ]
+                          ]
+                          (Type.namedWith
+                               [ "Url", "Parser", "Query" ]
+                               "Parser"
+                               [ Type.var "result" ]
+                          )
+                     )
+             }
         )
         [ Elm.functionReduced
             "map5Unpack"
             (\functionReducedUnpack ->
-                Elm.functionReduced
-                    "unpack"
-                    (\functionReducedUnpack0 ->
+               Elm.functionReduced
+                   "unpack"
+                   (\functionReducedUnpack0 ->
                         Elm.functionReduced
                             "unpack"
                             (\functionReducedUnpack_2_1_2_0_2_0_2_0_0 ->
-                                Elm.functionReduced
-                                    "unpack"
-                                    (\functionReducedUnpack_2_1_2_1_2_0_2_0_2_0_0 ->
-                                        Elm.functionReduced
-                                            "unpack"
-                                            (map5Arg functionReducedUnpack
-                                                 functionReducedUnpack0
-                                                 functionReducedUnpack_2_1_2_0_2_0_2_0_0
-                                                functionReducedUnpack_2_1_2_1_2_0_2_0_2_0_0
-                                            )
-                                    )
+                                 Elm.functionReduced
+                                     "unpack"
+                                     (\functionReducedUnpack_2_1_2_1_2_0_2_0_2_0_0 ->
+                                          Elm.functionReduced
+                                              "unpack"
+                                              ((((map5Arg functionReducedUnpack)
+                                                     functionReducedUnpack0
+                                                )
+                                                    functionReducedUnpack_2_1_2_0_2_0_2_0_0
+                                               )
+                                                   functionReducedUnpack_2_1_2_1_2_0_2_0_2_0_0
+                                              )
+                                     )
                             )
-                    )
+                   )
             )
         , map5Arg0
         , map5Arg1
@@ -575,81 +580,85 @@ map6 :
 map6 map6Arg map6Arg0 map6Arg1 map6Arg2 map6Arg3 map6Arg4 map6Arg5 =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Url", "Parser", "Query" ]
-            , name = "map6"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.function
-                            [ Type.var "a"
-                            , Type.var "b"
-                            , Type.var "c"
-                            , Type.var "d"
-                            , Type.var "e"
-                            , Type.var "f"
-                            ]
-                            (Type.var "result")
-                        , Type.namedWith
-                            [ "Url", "Parser", "Query" ]
-                            "Parser"
-                            [ Type.var "a" ]
-                        , Type.namedWith
-                            [ "Url", "Parser", "Query" ]
-                            "Parser"
-                            [ Type.var "b" ]
-                        , Type.namedWith
-                            [ "Url", "Parser", "Query" ]
-                            "Parser"
-                            [ Type.var "c" ]
-                        , Type.namedWith
-                            [ "Url", "Parser", "Query" ]
-                            "Parser"
-                            [ Type.var "d" ]
-                        , Type.namedWith
-                            [ "Url", "Parser", "Query" ]
-                            "Parser"
-                            [ Type.var "e" ]
-                        , Type.namedWith
-                            [ "Url", "Parser", "Query" ]
-                            "Parser"
-                            [ Type.var "f" ]
-                        ]
-                        (Type.namedWith
-                            [ "Url", "Parser", "Query" ]
-                            "Parser"
-                            [ Type.var "result" ]
-                        )
-                    )
-            }
+             { importFrom = [ "Url", "Parser", "Query" ]
+             , name = "map6"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.function
+                              [ Type.var "a"
+                              , Type.var "b"
+                              , Type.var "c"
+                              , Type.var "d"
+                              , Type.var "e"
+                              , Type.var "f"
+                              ]
+                              (Type.var "result")
+                          , Type.namedWith
+                              [ "Url", "Parser", "Query" ]
+                              "Parser"
+                              [ Type.var "a" ]
+                          , Type.namedWith
+                              [ "Url", "Parser", "Query" ]
+                              "Parser"
+                              [ Type.var "b" ]
+                          , Type.namedWith
+                              [ "Url", "Parser", "Query" ]
+                              "Parser"
+                              [ Type.var "c" ]
+                          , Type.namedWith
+                              [ "Url", "Parser", "Query" ]
+                              "Parser"
+                              [ Type.var "d" ]
+                          , Type.namedWith
+                              [ "Url", "Parser", "Query" ]
+                              "Parser"
+                              [ Type.var "e" ]
+                          , Type.namedWith
+                              [ "Url", "Parser", "Query" ]
+                              "Parser"
+                              [ Type.var "f" ]
+                          ]
+                          (Type.namedWith
+                               [ "Url", "Parser", "Query" ]
+                               "Parser"
+                               [ Type.var "result" ]
+                          )
+                     )
+             }
         )
         [ Elm.functionReduced
             "map6Unpack"
             (\functionReducedUnpack ->
-                Elm.functionReduced
-                    "unpack"
-                    (\functionReducedUnpack0 ->
+               Elm.functionReduced
+                   "unpack"
+                   (\functionReducedUnpack0 ->
                         Elm.functionReduced
                             "unpack"
                             (\functionReducedUnpack_2_1_2_0_2_0_2_0_0 ->
-                                Elm.functionReduced
-                                    "unpack"
-                                    (\functionReducedUnpack_2_1_2_1_2_0_2_0_2_0_0 ->
-                                        Elm.functionReduced
-                                            "unpack"
-                                            (\functionReducedUnpack_2_1_2_1_2_1_2_0_2_0_2_0_0 ->
-                                                Elm.functionReduced
-                                                    "unpack"
-                                                    (map6Arg
-                                                         functionReducedUnpack
-                                                         functionReducedUnpack0
-                                                         functionReducedUnpack_2_1_2_0_2_0_2_0_0
-                                                         functionReducedUnpack_2_1_2_1_2_0_2_0_2_0_0
-                                                        functionReducedUnpack_2_1_2_1_2_1_2_0_2_0_2_0_0
-                                                    )
-                                            )
-                                    )
+                                 Elm.functionReduced
+                                     "unpack"
+                                     (\functionReducedUnpack_2_1_2_1_2_0_2_0_2_0_0 ->
+                                          Elm.functionReduced
+                                              "unpack"
+                                              (\functionReducedUnpack_2_1_2_1_2_1_2_0_2_0_2_0_0 ->
+                                                   Elm.functionReduced
+                                                       "unpack"
+                                                       (((((map6Arg
+                                                                functionReducedUnpack
+                                                           )
+                                                               functionReducedUnpack0
+                                                          )
+                                                              functionReducedUnpack_2_1_2_0_2_0_2_0_0
+                                                         )
+                                                             functionReducedUnpack_2_1_2_1_2_0_2_0_2_0_0
+                                                        )
+                                                            functionReducedUnpack_2_1_2_1_2_1_2_0_2_0_2_0_0
+                                                       )
+                                              )
+                                     )
                             )
-                    )
+                   )
             )
         , map6Arg0
         , map6Arg1
@@ -691,91 +700,96 @@ map7 :
 map7 map7Arg map7Arg0 map7Arg1 map7Arg2 map7Arg3 map7Arg4 map7Arg5 map7Arg6 =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Url", "Parser", "Query" ]
-            , name = "map7"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.function
-                            [ Type.var "a"
-                            , Type.var "b"
-                            , Type.var "c"
-                            , Type.var "d"
-                            , Type.var "e"
-                            , Type.var "f"
-                            , Type.var "g"
-                            ]
-                            (Type.var "result")
-                        , Type.namedWith
-                            [ "Url", "Parser", "Query" ]
-                            "Parser"
-                            [ Type.var "a" ]
-                        , Type.namedWith
-                            [ "Url", "Parser", "Query" ]
-                            "Parser"
-                            [ Type.var "b" ]
-                        , Type.namedWith
-                            [ "Url", "Parser", "Query" ]
-                            "Parser"
-                            [ Type.var "c" ]
-                        , Type.namedWith
-                            [ "Url", "Parser", "Query" ]
-                            "Parser"
-                            [ Type.var "d" ]
-                        , Type.namedWith
-                            [ "Url", "Parser", "Query" ]
-                            "Parser"
-                            [ Type.var "e" ]
-                        , Type.namedWith
-                            [ "Url", "Parser", "Query" ]
-                            "Parser"
-                            [ Type.var "f" ]
-                        , Type.namedWith
-                            [ "Url", "Parser", "Query" ]
-                            "Parser"
-                            [ Type.var "g" ]
-                        ]
-                        (Type.namedWith
-                            [ "Url", "Parser", "Query" ]
-                            "Parser"
-                            [ Type.var "result" ]
-                        )
-                    )
-            }
+             { importFrom = [ "Url", "Parser", "Query" ]
+             , name = "map7"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.function
+                              [ Type.var "a"
+                              , Type.var "b"
+                              , Type.var "c"
+                              , Type.var "d"
+                              , Type.var "e"
+                              , Type.var "f"
+                              , Type.var "g"
+                              ]
+                              (Type.var "result")
+                          , Type.namedWith
+                              [ "Url", "Parser", "Query" ]
+                              "Parser"
+                              [ Type.var "a" ]
+                          , Type.namedWith
+                              [ "Url", "Parser", "Query" ]
+                              "Parser"
+                              [ Type.var "b" ]
+                          , Type.namedWith
+                              [ "Url", "Parser", "Query" ]
+                              "Parser"
+                              [ Type.var "c" ]
+                          , Type.namedWith
+                              [ "Url", "Parser", "Query" ]
+                              "Parser"
+                              [ Type.var "d" ]
+                          , Type.namedWith
+                              [ "Url", "Parser", "Query" ]
+                              "Parser"
+                              [ Type.var "e" ]
+                          , Type.namedWith
+                              [ "Url", "Parser", "Query" ]
+                              "Parser"
+                              [ Type.var "f" ]
+                          , Type.namedWith
+                              [ "Url", "Parser", "Query" ]
+                              "Parser"
+                              [ Type.var "g" ]
+                          ]
+                          (Type.namedWith
+                               [ "Url", "Parser", "Query" ]
+                               "Parser"
+                               [ Type.var "result" ]
+                          )
+                     )
+             }
         )
         [ Elm.functionReduced
             "map7Unpack"
             (\functionReducedUnpack ->
-                Elm.functionReduced
-                    "unpack"
-                    (\functionReducedUnpack0 ->
+               Elm.functionReduced
+                   "unpack"
+                   (\functionReducedUnpack0 ->
                         Elm.functionReduced
                             "unpack"
                             (\functionReducedUnpack_2_1_2_0_2_0_2_0_0 ->
-                                Elm.functionReduced
-                                    "unpack"
-                                    (\functionReducedUnpack_2_1_2_1_2_0_2_0_2_0_0 ->
-                                        Elm.functionReduced
-                                            "unpack"
-                                            (\functionReducedUnpack_2_1_2_1_2_1_2_0_2_0_2_0_0 ->
-                                                Elm.functionReduced
-                                                    "unpack"
-                                                    (\functionReducedUnpack_2_1_2_1_2_1_2_1_2_0_2_0_2_0_0 ->
-                                                        Elm.functionReduced
-                                                            "unpack"
-                                                            (map7Arg
-                                                                 functionReducedUnpack
-                                                                 functionReducedUnpack0
-                                                                 functionReducedUnpack_2_1_2_0_2_0_2_0_0
-                                                                 functionReducedUnpack_2_1_2_1_2_0_2_0_2_0_0
-                                                                 functionReducedUnpack_2_1_2_1_2_1_2_0_2_0_2_0_0
-                                                                functionReducedUnpack_2_1_2_1_2_1_2_1_2_0_2_0_2_0_0
-                                                            )
-                                                    )
-                                            )
-                                    )
+                                 Elm.functionReduced
+                                     "unpack"
+                                     (\functionReducedUnpack_2_1_2_1_2_0_2_0_2_0_0 ->
+                                          Elm.functionReduced
+                                              "unpack"
+                                              (\functionReducedUnpack_2_1_2_1_2_1_2_0_2_0_2_0_0 ->
+                                                   Elm.functionReduced
+                                                       "unpack"
+                                                       (\functionReducedUnpack_2_1_2_1_2_1_2_1_2_0_2_0_2_0_0 ->
+                                                            Elm.functionReduced
+                                                                "unpack"
+                                                                ((((((map7Arg
+                                                                          functionReducedUnpack
+                                                                     )
+                                                                         functionReducedUnpack0
+                                                                    )
+                                                                        functionReducedUnpack_2_1_2_0_2_0_2_0_0
+                                                                   )
+                                                                       functionReducedUnpack_2_1_2_1_2_0_2_0_2_0_0
+                                                                  )
+                                                                      functionReducedUnpack_2_1_2_1_2_1_2_0_2_0_2_0_0
+                                                                 )
+                                                                     functionReducedUnpack_2_1_2_1_2_1_2_1_2_0_2_0_2_0_0
+                                                                )
+                                                       )
+                                              )
+                                     )
                             )
-                    )
+                   )
             )
         , map7Arg0
         , map7Arg1
@@ -833,101 +847,107 @@ map8 :
 map8 map8Arg map8Arg0 map8Arg1 map8Arg2 map8Arg3 map8Arg4 map8Arg5 map8Arg6 map8Arg7 =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Url", "Parser", "Query" ]
-            , name = "map8"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.function
-                            [ Type.var "a"
-                            , Type.var "b"
-                            , Type.var "c"
-                            , Type.var "d"
-                            , Type.var "e"
-                            , Type.var "f"
-                            , Type.var "g"
-                            , Type.var "h"
-                            ]
-                            (Type.var "result")
-                        , Type.namedWith
-                            [ "Url", "Parser", "Query" ]
-                            "Parser"
-                            [ Type.var "a" ]
-                        , Type.namedWith
-                            [ "Url", "Parser", "Query" ]
-                            "Parser"
-                            [ Type.var "b" ]
-                        , Type.namedWith
-                            [ "Url", "Parser", "Query" ]
-                            "Parser"
-                            [ Type.var "c" ]
-                        , Type.namedWith
-                            [ "Url", "Parser", "Query" ]
-                            "Parser"
-                            [ Type.var "d" ]
-                        , Type.namedWith
-                            [ "Url", "Parser", "Query" ]
-                            "Parser"
-                            [ Type.var "e" ]
-                        , Type.namedWith
-                            [ "Url", "Parser", "Query" ]
-                            "Parser"
-                            [ Type.var "f" ]
-                        , Type.namedWith
-                            [ "Url", "Parser", "Query" ]
-                            "Parser"
-                            [ Type.var "g" ]
-                        , Type.namedWith
-                            [ "Url", "Parser", "Query" ]
-                            "Parser"
-                            [ Type.var "h" ]
-                        ]
-                        (Type.namedWith
-                            [ "Url", "Parser", "Query" ]
-                            "Parser"
-                            [ Type.var "result" ]
-                        )
-                    )
-            }
+             { importFrom = [ "Url", "Parser", "Query" ]
+             , name = "map8"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.function
+                              [ Type.var "a"
+                              , Type.var "b"
+                              , Type.var "c"
+                              , Type.var "d"
+                              , Type.var "e"
+                              , Type.var "f"
+                              , Type.var "g"
+                              , Type.var "h"
+                              ]
+                              (Type.var "result")
+                          , Type.namedWith
+                              [ "Url", "Parser", "Query" ]
+                              "Parser"
+                              [ Type.var "a" ]
+                          , Type.namedWith
+                              [ "Url", "Parser", "Query" ]
+                              "Parser"
+                              [ Type.var "b" ]
+                          , Type.namedWith
+                              [ "Url", "Parser", "Query" ]
+                              "Parser"
+                              [ Type.var "c" ]
+                          , Type.namedWith
+                              [ "Url", "Parser", "Query" ]
+                              "Parser"
+                              [ Type.var "d" ]
+                          , Type.namedWith
+                              [ "Url", "Parser", "Query" ]
+                              "Parser"
+                              [ Type.var "e" ]
+                          , Type.namedWith
+                              [ "Url", "Parser", "Query" ]
+                              "Parser"
+                              [ Type.var "f" ]
+                          , Type.namedWith
+                              [ "Url", "Parser", "Query" ]
+                              "Parser"
+                              [ Type.var "g" ]
+                          , Type.namedWith
+                              [ "Url", "Parser", "Query" ]
+                              "Parser"
+                              [ Type.var "h" ]
+                          ]
+                          (Type.namedWith
+                               [ "Url", "Parser", "Query" ]
+                               "Parser"
+                               [ Type.var "result" ]
+                          )
+                     )
+             }
         )
         [ Elm.functionReduced
             "map8Unpack"
             (\functionReducedUnpack ->
-                Elm.functionReduced
-                    "unpack"
-                    (\functionReducedUnpack0 ->
+               Elm.functionReduced
+                   "unpack"
+                   (\functionReducedUnpack0 ->
                         Elm.functionReduced
                             "unpack"
                             (\functionReducedUnpack_2_1_2_0_2_0_2_0_0 ->
-                                Elm.functionReduced
-                                    "unpack"
-                                    (\functionReducedUnpack_2_1_2_1_2_0_2_0_2_0_0 ->
-                                        Elm.functionReduced
-                                            "unpack"
-                                            (\functionReducedUnpack_2_1_2_1_2_1_2_0_2_0_2_0_0 ->
-                                                Elm.functionReduced
-                                                    "unpack"
-                                                    (\functionReducedUnpack_2_1_2_1_2_1_2_1_2_0_2_0_2_0_0 ->
-                                                        Elm.functionReduced
-                                                            "unpack"
-                                                            (\functionReducedUnpack_2_1_2_1_2_1_2_1_2_1_2_0_2_0_2_0_0 ->
-                                                                Elm.functionReduced
-                                                                    "unpack"
-                                                                    (map8Arg
-                                                                         functionReducedUnpack
-                                                                         functionReducedUnpack0
-                                                                         functionReducedUnpack_2_1_2_0_2_0_2_0_0
-                                                                         functionReducedUnpack_2_1_2_1_2_0_2_0_2_0_0
-                                                                         functionReducedUnpack_2_1_2_1_2_1_2_0_2_0_2_0_0
-                                                                         functionReducedUnpack_2_1_2_1_2_1_2_1_2_0_2_0_2_0_0
-                                                                        functionReducedUnpack_2_1_2_1_2_1_2_1_2_1_2_0_2_0_2_0_0
-                                                                    )
-                                                            )
-                                                    )
-                                            )
-                                    )
+                                 Elm.functionReduced
+                                     "unpack"
+                                     (\functionReducedUnpack_2_1_2_1_2_0_2_0_2_0_0 ->
+                                          Elm.functionReduced
+                                              "unpack"
+                                              (\functionReducedUnpack_2_1_2_1_2_1_2_0_2_0_2_0_0 ->
+                                                   Elm.functionReduced
+                                                       "unpack"
+                                                       (\functionReducedUnpack_2_1_2_1_2_1_2_1_2_0_2_0_2_0_0 ->
+                                                            Elm.functionReduced
+                                                                "unpack"
+                                                                (\functionReducedUnpack_2_1_2_1_2_1_2_1_2_1_2_0_2_0_2_0_0 ->
+                                                                     Elm.functionReduced
+                                                                         "unpack"
+                                                                         (((((((map8Arg
+                                                                                    functionReducedUnpack
+                                                                               )
+                                                                                   functionReducedUnpack0
+                                                                              )
+                                                                                  functionReducedUnpack_2_1_2_0_2_0_2_0_0
+                                                                             )
+                                                                                 functionReducedUnpack_2_1_2_1_2_0_2_0_2_0_0
+                                                                            )
+                                                                                functionReducedUnpack_2_1_2_1_2_1_2_0_2_0_2_0_0
+                                                                           )
+                                                                               functionReducedUnpack_2_1_2_1_2_1_2_1_2_0_2_0_2_0_0
+                                                                          )
+                                                                              functionReducedUnpack_2_1_2_1_2_1_2_1_2_1_2_0_2_0_2_0_0
+                                                                         )
+                                                                )
+                                                       )
+                                              )
+                                     )
                             )
-                    )
+                   )
             )
         , map8Arg0
         , map8Arg1
@@ -949,9 +969,9 @@ annotation_ =
                 "Parser"
                 [ parserArg0 ]
                 (Type.namedWith
-                    [ "Url", "Parser", "Internal" ]
-                    "QueryParser"
-                    [ Type.var "a" ]
+                     [ "Url", "Parser", "Internal" ]
+                     "QueryParser"
+                     [ Type.var "a" ]
                 )
     }
 
@@ -1021,314 +1041,319 @@ call_ =
         \stringArg ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Url", "Parser", "Query" ]
-                    , name = "string"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.string ]
-                                (Type.namedWith
-                                    [ "Url", "Parser", "Query" ]
-                                    "Parser"
-                                    [ Type.maybe Type.string ]
-                                )
-                            )
-                    }
+                     { importFrom = [ "Url", "Parser", "Query" ]
+                     , name = "string"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.string ]
+                                  (Type.namedWith
+                                       [ "Url", "Parser", "Query" ]
+                                       "Parser"
+                                       [ Type.maybe Type.string ]
+                                  )
+                             )
+                     }
                 )
                 [ stringArg ]
     , int =
         \intArg ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Url", "Parser", "Query" ]
-                    , name = "int"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.string ]
-                                (Type.namedWith
-                                    [ "Url", "Parser", "Query" ]
-                                    "Parser"
-                                    [ Type.maybe Type.int ]
-                                )
-                            )
-                    }
+                     { importFrom = [ "Url", "Parser", "Query" ]
+                     , name = "int"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.string ]
+                                  (Type.namedWith
+                                       [ "Url", "Parser", "Query" ]
+                                       "Parser"
+                                       [ Type.maybe Type.int ]
+                                  )
+                             )
+                     }
                 )
                 [ intArg ]
     , enum =
         \enumArg enumArg0 ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Url", "Parser", "Query" ]
-                    , name = "enum"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.string
-                                , Type.namedWith
-                                    [ "Dict" ]
-                                    "Dict"
-                                    [ Type.string, Type.var "a" ]
-                                ]
-                                (Type.namedWith
-                                    [ "Url", "Parser", "Query" ]
-                                    "Parser"
-                                    [ Type.maybe (Type.var "a") ]
-                                )
-                            )
-                    }
+                     { importFrom = [ "Url", "Parser", "Query" ]
+                     , name = "enum"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.string
+                                  , Type.namedWith
+                                      [ "Dict" ]
+                                      "Dict"
+                                      [ Type.string, Type.var "a" ]
+                                  ]
+                                  (Type.namedWith
+                                       [ "Url", "Parser", "Query" ]
+                                       "Parser"
+                                       [ Type.maybe (Type.var "a") ]
+                                  )
+                             )
+                     }
                 )
                 [ enumArg, enumArg0 ]
     , custom =
         \customArg customArg0 ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Url", "Parser", "Query" ]
-                    , name = "custom"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.string
-                                , Type.function
-                                    [ Type.list Type.string ]
-                                    (Type.var "a")
-                                ]
-                                (Type.namedWith
-                                    [ "Url", "Parser", "Query" ]
-                                    "Parser"
-                                    [ Type.var "a" ]
-                                )
-                            )
-                    }
+                     { importFrom = [ "Url", "Parser", "Query" ]
+                     , name = "custom"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.string
+                                  , Type.function
+                                      [ Type.list Type.string ]
+                                      (Type.var "a")
+                                  ]
+                                  (Type.namedWith
+                                       [ "Url", "Parser", "Query" ]
+                                       "Parser"
+                                       [ Type.var "a" ]
+                                  )
+                             )
+                     }
                 )
                 [ customArg, customArg0 ]
     , map =
         \mapArg mapArg0 ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Url", "Parser", "Query" ]
-                    , name = "map"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.function [ Type.var "a" ] (Type.var "b")
-                                , Type.namedWith
-                                    [ "Url", "Parser", "Query" ]
-                                    "Parser"
-                                    [ Type.var "a" ]
-                                ]
-                                (Type.namedWith
-                                    [ "Url", "Parser", "Query" ]
-                                    "Parser"
-                                    [ Type.var "b" ]
-                                )
-                            )
-                    }
+                     { importFrom = [ "Url", "Parser", "Query" ]
+                     , name = "map"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.function
+                                      [ Type.var "a" ]
+                                      (Type.var "b")
+                                  , Type.namedWith
+                                      [ "Url", "Parser", "Query" ]
+                                      "Parser"
+                                      [ Type.var "a" ]
+                                  ]
+                                  (Type.namedWith
+                                       [ "Url", "Parser", "Query" ]
+                                       "Parser"
+                                       [ Type.var "b" ]
+                                  )
+                             )
+                     }
                 )
                 [ mapArg, mapArg0 ]
     , map2 =
         \map2Arg map2Arg0 map2Arg1 ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Url", "Parser", "Query" ]
-                    , name = "map2"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.function
-                                    [ Type.var "a", Type.var "b" ]
-                                    (Type.var "result")
-                                , Type.namedWith
-                                    [ "Url", "Parser", "Query" ]
-                                    "Parser"
-                                    [ Type.var "a" ]
-                                , Type.namedWith
-                                    [ "Url", "Parser", "Query" ]
-                                    "Parser"
-                                    [ Type.var "b" ]
-                                ]
-                                (Type.namedWith
-                                    [ "Url", "Parser", "Query" ]
-                                    "Parser"
-                                    [ Type.var "result" ]
-                                )
-                            )
-                    }
+                     { importFrom = [ "Url", "Parser", "Query" ]
+                     , name = "map2"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.function
+                                      [ Type.var "a", Type.var "b" ]
+                                      (Type.var "result")
+                                  , Type.namedWith
+                                      [ "Url", "Parser", "Query" ]
+                                      "Parser"
+                                      [ Type.var "a" ]
+                                  , Type.namedWith
+                                      [ "Url", "Parser", "Query" ]
+                                      "Parser"
+                                      [ Type.var "b" ]
+                                  ]
+                                  (Type.namedWith
+                                       [ "Url", "Parser", "Query" ]
+                                       "Parser"
+                                       [ Type.var "result" ]
+                                  )
+                             )
+                     }
                 )
                 [ map2Arg, map2Arg0, map2Arg1 ]
     , map3 =
         \map3Arg map3Arg0 map3Arg1 map3Arg2 ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Url", "Parser", "Query" ]
-                    , name = "map3"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.function
-                                    [ Type.var "a", Type.var "b", Type.var "c" ]
-                                    (Type.var "result")
-                                , Type.namedWith
-                                    [ "Url", "Parser", "Query" ]
-                                    "Parser"
-                                    [ Type.var "a" ]
-                                , Type.namedWith
-                                    [ "Url", "Parser", "Query" ]
-                                    "Parser"
-                                    [ Type.var "b" ]
-                                , Type.namedWith
-                                    [ "Url", "Parser", "Query" ]
-                                    "Parser"
-                                    [ Type.var "c" ]
-                                ]
-                                (Type.namedWith
-                                    [ "Url", "Parser", "Query" ]
-                                    "Parser"
-                                    [ Type.var "result" ]
-                                )
-                            )
-                    }
+                     { importFrom = [ "Url", "Parser", "Query" ]
+                     , name = "map3"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.function
+                                      [ Type.var "a"
+                                      , Type.var "b"
+                                      , Type.var "c"
+                                      ]
+                                      (Type.var "result")
+                                  , Type.namedWith
+                                      [ "Url", "Parser", "Query" ]
+                                      "Parser"
+                                      [ Type.var "a" ]
+                                  , Type.namedWith
+                                      [ "Url", "Parser", "Query" ]
+                                      "Parser"
+                                      [ Type.var "b" ]
+                                  , Type.namedWith
+                                      [ "Url", "Parser", "Query" ]
+                                      "Parser"
+                                      [ Type.var "c" ]
+                                  ]
+                                  (Type.namedWith
+                                       [ "Url", "Parser", "Query" ]
+                                       "Parser"
+                                       [ Type.var "result" ]
+                                  )
+                             )
+                     }
                 )
                 [ map3Arg, map3Arg0, map3Arg1, map3Arg2 ]
     , map4 =
         \map4Arg map4Arg0 map4Arg1 map4Arg2 map4Arg3 ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Url", "Parser", "Query" ]
-                    , name = "map4"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.function
-                                    [ Type.var "a"
-                                    , Type.var "b"
-                                    , Type.var "c"
-                                    , Type.var "d"
-                                    ]
-                                    (Type.var "result")
-                                , Type.namedWith
-                                    [ "Url", "Parser", "Query" ]
-                                    "Parser"
-                                    [ Type.var "a" ]
-                                , Type.namedWith
-                                    [ "Url", "Parser", "Query" ]
-                                    "Parser"
-                                    [ Type.var "b" ]
-                                , Type.namedWith
-                                    [ "Url", "Parser", "Query" ]
-                                    "Parser"
-                                    [ Type.var "c" ]
-                                , Type.namedWith
-                                    [ "Url", "Parser", "Query" ]
-                                    "Parser"
-                                    [ Type.var "d" ]
-                                ]
-                                (Type.namedWith
-                                    [ "Url", "Parser", "Query" ]
-                                    "Parser"
-                                    [ Type.var "result" ]
-                                )
-                            )
-                    }
+                     { importFrom = [ "Url", "Parser", "Query" ]
+                     , name = "map4"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.function
+                                      [ Type.var "a"
+                                      , Type.var "b"
+                                      , Type.var "c"
+                                      , Type.var "d"
+                                      ]
+                                      (Type.var "result")
+                                  , Type.namedWith
+                                      [ "Url", "Parser", "Query" ]
+                                      "Parser"
+                                      [ Type.var "a" ]
+                                  , Type.namedWith
+                                      [ "Url", "Parser", "Query" ]
+                                      "Parser"
+                                      [ Type.var "b" ]
+                                  , Type.namedWith
+                                      [ "Url", "Parser", "Query" ]
+                                      "Parser"
+                                      [ Type.var "c" ]
+                                  , Type.namedWith
+                                      [ "Url", "Parser", "Query" ]
+                                      "Parser"
+                                      [ Type.var "d" ]
+                                  ]
+                                  (Type.namedWith
+                                       [ "Url", "Parser", "Query" ]
+                                       "Parser"
+                                       [ Type.var "result" ]
+                                  )
+                             )
+                     }
                 )
                 [ map4Arg, map4Arg0, map4Arg1, map4Arg2, map4Arg3 ]
     , map5 =
         \map5Arg map5Arg0 map5Arg1 map5Arg2 map5Arg3 map5Arg4 ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Url", "Parser", "Query" ]
-                    , name = "map5"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.function
-                                    [ Type.var "a"
-                                    , Type.var "b"
-                                    , Type.var "c"
-                                    , Type.var "d"
-                                    , Type.var "e"
-                                    ]
-                                    (Type.var "result")
-                                , Type.namedWith
-                                    [ "Url", "Parser", "Query" ]
-                                    "Parser"
-                                    [ Type.var "a" ]
-                                , Type.namedWith
-                                    [ "Url", "Parser", "Query" ]
-                                    "Parser"
-                                    [ Type.var "b" ]
-                                , Type.namedWith
-                                    [ "Url", "Parser", "Query" ]
-                                    "Parser"
-                                    [ Type.var "c" ]
-                                , Type.namedWith
-                                    [ "Url", "Parser", "Query" ]
-                                    "Parser"
-                                    [ Type.var "d" ]
-                                , Type.namedWith
-                                    [ "Url", "Parser", "Query" ]
-                                    "Parser"
-                                    [ Type.var "e" ]
-                                ]
-                                (Type.namedWith
-                                    [ "Url", "Parser", "Query" ]
-                                    "Parser"
-                                    [ Type.var "result" ]
-                                )
-                            )
-                    }
+                     { importFrom = [ "Url", "Parser", "Query" ]
+                     , name = "map5"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.function
+                                      [ Type.var "a"
+                                      , Type.var "b"
+                                      , Type.var "c"
+                                      , Type.var "d"
+                                      , Type.var "e"
+                                      ]
+                                      (Type.var "result")
+                                  , Type.namedWith
+                                      [ "Url", "Parser", "Query" ]
+                                      "Parser"
+                                      [ Type.var "a" ]
+                                  , Type.namedWith
+                                      [ "Url", "Parser", "Query" ]
+                                      "Parser"
+                                      [ Type.var "b" ]
+                                  , Type.namedWith
+                                      [ "Url", "Parser", "Query" ]
+                                      "Parser"
+                                      [ Type.var "c" ]
+                                  , Type.namedWith
+                                      [ "Url", "Parser", "Query" ]
+                                      "Parser"
+                                      [ Type.var "d" ]
+                                  , Type.namedWith
+                                      [ "Url", "Parser", "Query" ]
+                                      "Parser"
+                                      [ Type.var "e" ]
+                                  ]
+                                  (Type.namedWith
+                                       [ "Url", "Parser", "Query" ]
+                                       "Parser"
+                                       [ Type.var "result" ]
+                                  )
+                             )
+                     }
                 )
                 [ map5Arg, map5Arg0, map5Arg1, map5Arg2, map5Arg3, map5Arg4 ]
     , map6 =
         \map6Arg map6Arg0 map6Arg1 map6Arg2 map6Arg3 map6Arg4 map6Arg5 ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Url", "Parser", "Query" ]
-                    , name = "map6"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.function
-                                    [ Type.var "a"
-                                    , Type.var "b"
-                                    , Type.var "c"
-                                    , Type.var "d"
-                                    , Type.var "e"
-                                    , Type.var "f"
-                                    ]
-                                    (Type.var "result")
-                                , Type.namedWith
-                                    [ "Url", "Parser", "Query" ]
-                                    "Parser"
-                                    [ Type.var "a" ]
-                                , Type.namedWith
-                                    [ "Url", "Parser", "Query" ]
-                                    "Parser"
-                                    [ Type.var "b" ]
-                                , Type.namedWith
-                                    [ "Url", "Parser", "Query" ]
-                                    "Parser"
-                                    [ Type.var "c" ]
-                                , Type.namedWith
-                                    [ "Url", "Parser", "Query" ]
-                                    "Parser"
-                                    [ Type.var "d" ]
-                                , Type.namedWith
-                                    [ "Url", "Parser", "Query" ]
-                                    "Parser"
-                                    [ Type.var "e" ]
-                                , Type.namedWith
-                                    [ "Url", "Parser", "Query" ]
-                                    "Parser"
-                                    [ Type.var "f" ]
-                                ]
-                                (Type.namedWith
-                                    [ "Url", "Parser", "Query" ]
-                                    "Parser"
-                                    [ Type.var "result" ]
-                                )
-                            )
-                    }
+                     { importFrom = [ "Url", "Parser", "Query" ]
+                     , name = "map6"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.function
+                                      [ Type.var "a"
+                                      , Type.var "b"
+                                      , Type.var "c"
+                                      , Type.var "d"
+                                      , Type.var "e"
+                                      , Type.var "f"
+                                      ]
+                                      (Type.var "result")
+                                  , Type.namedWith
+                                      [ "Url", "Parser", "Query" ]
+                                      "Parser"
+                                      [ Type.var "a" ]
+                                  , Type.namedWith
+                                      [ "Url", "Parser", "Query" ]
+                                      "Parser"
+                                      [ Type.var "b" ]
+                                  , Type.namedWith
+                                      [ "Url", "Parser", "Query" ]
+                                      "Parser"
+                                      [ Type.var "c" ]
+                                  , Type.namedWith
+                                      [ "Url", "Parser", "Query" ]
+                                      "Parser"
+                                      [ Type.var "d" ]
+                                  , Type.namedWith
+                                      [ "Url", "Parser", "Query" ]
+                                      "Parser"
+                                      [ Type.var "e" ]
+                                  , Type.namedWith
+                                      [ "Url", "Parser", "Query" ]
+                                      "Parser"
+                                      [ Type.var "f" ]
+                                  ]
+                                  (Type.namedWith
+                                       [ "Url", "Parser", "Query" ]
+                                       "Parser"
+                                       [ Type.var "result" ]
+                                  )
+                             )
+                     }
                 )
                 [ map6Arg
                 , map6Arg0
@@ -1342,57 +1367,57 @@ call_ =
         \map7Arg map7Arg0 map7Arg1 map7Arg2 map7Arg3 map7Arg4 map7Arg5 map7Arg6 ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Url", "Parser", "Query" ]
-                    , name = "map7"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.function
-                                    [ Type.var "a"
-                                    , Type.var "b"
-                                    , Type.var "c"
-                                    , Type.var "d"
-                                    , Type.var "e"
-                                    , Type.var "f"
-                                    , Type.var "g"
-                                    ]
-                                    (Type.var "result")
-                                , Type.namedWith
-                                    [ "Url", "Parser", "Query" ]
-                                    "Parser"
-                                    [ Type.var "a" ]
-                                , Type.namedWith
-                                    [ "Url", "Parser", "Query" ]
-                                    "Parser"
-                                    [ Type.var "b" ]
-                                , Type.namedWith
-                                    [ "Url", "Parser", "Query" ]
-                                    "Parser"
-                                    [ Type.var "c" ]
-                                , Type.namedWith
-                                    [ "Url", "Parser", "Query" ]
-                                    "Parser"
-                                    [ Type.var "d" ]
-                                , Type.namedWith
-                                    [ "Url", "Parser", "Query" ]
-                                    "Parser"
-                                    [ Type.var "e" ]
-                                , Type.namedWith
-                                    [ "Url", "Parser", "Query" ]
-                                    "Parser"
-                                    [ Type.var "f" ]
-                                , Type.namedWith
-                                    [ "Url", "Parser", "Query" ]
-                                    "Parser"
-                                    [ Type.var "g" ]
-                                ]
-                                (Type.namedWith
-                                    [ "Url", "Parser", "Query" ]
-                                    "Parser"
-                                    [ Type.var "result" ]
-                                )
-                            )
-                    }
+                     { importFrom = [ "Url", "Parser", "Query" ]
+                     , name = "map7"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.function
+                                      [ Type.var "a"
+                                      , Type.var "b"
+                                      , Type.var "c"
+                                      , Type.var "d"
+                                      , Type.var "e"
+                                      , Type.var "f"
+                                      , Type.var "g"
+                                      ]
+                                      (Type.var "result")
+                                  , Type.namedWith
+                                      [ "Url", "Parser", "Query" ]
+                                      "Parser"
+                                      [ Type.var "a" ]
+                                  , Type.namedWith
+                                      [ "Url", "Parser", "Query" ]
+                                      "Parser"
+                                      [ Type.var "b" ]
+                                  , Type.namedWith
+                                      [ "Url", "Parser", "Query" ]
+                                      "Parser"
+                                      [ Type.var "c" ]
+                                  , Type.namedWith
+                                      [ "Url", "Parser", "Query" ]
+                                      "Parser"
+                                      [ Type.var "d" ]
+                                  , Type.namedWith
+                                      [ "Url", "Parser", "Query" ]
+                                      "Parser"
+                                      [ Type.var "e" ]
+                                  , Type.namedWith
+                                      [ "Url", "Parser", "Query" ]
+                                      "Parser"
+                                      [ Type.var "f" ]
+                                  , Type.namedWith
+                                      [ "Url", "Parser", "Query" ]
+                                      "Parser"
+                                      [ Type.var "g" ]
+                                  ]
+                                  (Type.namedWith
+                                       [ "Url", "Parser", "Query" ]
+                                       "Parser"
+                                       [ Type.var "result" ]
+                                  )
+                             )
+                     }
                 )
                 [ map7Arg
                 , map7Arg0
@@ -1407,62 +1432,62 @@ call_ =
         \map8Arg map8Arg0 map8Arg1 map8Arg2 map8Arg3 map8Arg4 map8Arg5 map8Arg6 map8Arg7 ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Url", "Parser", "Query" ]
-                    , name = "map8"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.function
-                                    [ Type.var "a"
-                                    , Type.var "b"
-                                    , Type.var "c"
-                                    , Type.var "d"
-                                    , Type.var "e"
-                                    , Type.var "f"
-                                    , Type.var "g"
-                                    , Type.var "h"
-                                    ]
-                                    (Type.var "result")
-                                , Type.namedWith
-                                    [ "Url", "Parser", "Query" ]
-                                    "Parser"
-                                    [ Type.var "a" ]
-                                , Type.namedWith
-                                    [ "Url", "Parser", "Query" ]
-                                    "Parser"
-                                    [ Type.var "b" ]
-                                , Type.namedWith
-                                    [ "Url", "Parser", "Query" ]
-                                    "Parser"
-                                    [ Type.var "c" ]
-                                , Type.namedWith
-                                    [ "Url", "Parser", "Query" ]
-                                    "Parser"
-                                    [ Type.var "d" ]
-                                , Type.namedWith
-                                    [ "Url", "Parser", "Query" ]
-                                    "Parser"
-                                    [ Type.var "e" ]
-                                , Type.namedWith
-                                    [ "Url", "Parser", "Query" ]
-                                    "Parser"
-                                    [ Type.var "f" ]
-                                , Type.namedWith
-                                    [ "Url", "Parser", "Query" ]
-                                    "Parser"
-                                    [ Type.var "g" ]
-                                , Type.namedWith
-                                    [ "Url", "Parser", "Query" ]
-                                    "Parser"
-                                    [ Type.var "h" ]
-                                ]
-                                (Type.namedWith
-                                    [ "Url", "Parser", "Query" ]
-                                    "Parser"
-                                    [ Type.var "result" ]
-                                )
-                            )
-                    }
+                     { importFrom = [ "Url", "Parser", "Query" ]
+                     , name = "map8"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.function
+                                      [ Type.var "a"
+                                      , Type.var "b"
+                                      , Type.var "c"
+                                      , Type.var "d"
+                                      , Type.var "e"
+                                      , Type.var "f"
+                                      , Type.var "g"
+                                      , Type.var "h"
+                                      ]
+                                      (Type.var "result")
+                                  , Type.namedWith
+                                      [ "Url", "Parser", "Query" ]
+                                      "Parser"
+                                      [ Type.var "a" ]
+                                  , Type.namedWith
+                                      [ "Url", "Parser", "Query" ]
+                                      "Parser"
+                                      [ Type.var "b" ]
+                                  , Type.namedWith
+                                      [ "Url", "Parser", "Query" ]
+                                      "Parser"
+                                      [ Type.var "c" ]
+                                  , Type.namedWith
+                                      [ "Url", "Parser", "Query" ]
+                                      "Parser"
+                                      [ Type.var "d" ]
+                                  , Type.namedWith
+                                      [ "Url", "Parser", "Query" ]
+                                      "Parser"
+                                      [ Type.var "e" ]
+                                  , Type.namedWith
+                                      [ "Url", "Parser", "Query" ]
+                                      "Parser"
+                                      [ Type.var "f" ]
+                                  , Type.namedWith
+                                      [ "Url", "Parser", "Query" ]
+                                      "Parser"
+                                      [ Type.var "g" ]
+                                  , Type.namedWith
+                                      [ "Url", "Parser", "Query" ]
+                                      "Parser"
+                                      [ Type.var "h" ]
+                                  ]
+                                  (Type.namedWith
+                                       [ "Url", "Parser", "Query" ]
+                                       "Parser"
+                                       [ Type.var "result" ]
+                                  )
+                             )
+                     }
                 )
                 [ map8Arg
                 , map8Arg0
@@ -1499,12 +1524,12 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.string ]
-                        (Type.namedWith
-                            [ "Url", "Parser", "Query" ]
-                            "Parser"
-                            [ Type.maybe Type.string ]
-                        )
+                         [ Type.string ]
+                         (Type.namedWith
+                              [ "Url", "Parser", "Query" ]
+                              "Parser"
+                              [ Type.maybe Type.string ]
+                         )
                     )
             }
     , int =
@@ -1514,12 +1539,12 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.string ]
-                        (Type.namedWith
-                            [ "Url", "Parser", "Query" ]
-                            "Parser"
-                            [ Type.maybe Type.int ]
-                        )
+                         [ Type.string ]
+                         (Type.namedWith
+                              [ "Url", "Parser", "Query" ]
+                              "Parser"
+                              [ Type.maybe Type.int ]
+                         )
                     )
             }
     , enum =
@@ -1529,17 +1554,17 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.string
-                        , Type.namedWith
-                            [ "Dict" ]
-                            "Dict"
-                            [ Type.string, Type.var "a" ]
-                        ]
-                        (Type.namedWith
-                            [ "Url", "Parser", "Query" ]
-                            "Parser"
-                            [ Type.maybe (Type.var "a") ]
-                        )
+                         [ Type.string
+                         , Type.namedWith
+                             [ "Dict" ]
+                             "Dict"
+                             [ Type.string, Type.var "a" ]
+                         ]
+                         (Type.namedWith
+                              [ "Url", "Parser", "Query" ]
+                              "Parser"
+                              [ Type.maybe (Type.var "a") ]
+                         )
                     )
             }
     , custom =
@@ -1549,14 +1574,16 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.string
-                        , Type.function [ Type.list Type.string ] (Type.var "a")
-                        ]
-                        (Type.namedWith
-                            [ "Url", "Parser", "Query" ]
-                            "Parser"
-                            [ Type.var "a" ]
-                        )
+                         [ Type.string
+                         , Type.function
+                             [ Type.list Type.string ]
+                             (Type.var "a")
+                         ]
+                         (Type.namedWith
+                              [ "Url", "Parser", "Query" ]
+                              "Parser"
+                              [ Type.var "a" ]
+                         )
                     )
             }
     , map =
@@ -1566,17 +1593,17 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.function [ Type.var "a" ] (Type.var "b")
-                        , Type.namedWith
-                            [ "Url", "Parser", "Query" ]
-                            "Parser"
-                            [ Type.var "a" ]
-                        ]
-                        (Type.namedWith
-                            [ "Url", "Parser", "Query" ]
-                            "Parser"
-                            [ Type.var "b" ]
-                        )
+                         [ Type.function [ Type.var "a" ] (Type.var "b")
+                         , Type.namedWith
+                             [ "Url", "Parser", "Query" ]
+                             "Parser"
+                             [ Type.var "a" ]
+                         ]
+                         (Type.namedWith
+                              [ "Url", "Parser", "Query" ]
+                              "Parser"
+                              [ Type.var "b" ]
+                         )
                     )
             }
     , map2 =
@@ -1586,23 +1613,23 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.function
-                            [ Type.var "a", Type.var "b" ]
-                            (Type.var "result")
-                        , Type.namedWith
-                            [ "Url", "Parser", "Query" ]
-                            "Parser"
-                            [ Type.var "a" ]
-                        , Type.namedWith
-                            [ "Url", "Parser", "Query" ]
-                            "Parser"
-                            [ Type.var "b" ]
-                        ]
-                        (Type.namedWith
-                            [ "Url", "Parser", "Query" ]
-                            "Parser"
-                            [ Type.var "result" ]
-                        )
+                         [ Type.function
+                             [ Type.var "a", Type.var "b" ]
+                             (Type.var "result")
+                         , Type.namedWith
+                             [ "Url", "Parser", "Query" ]
+                             "Parser"
+                             [ Type.var "a" ]
+                         , Type.namedWith
+                             [ "Url", "Parser", "Query" ]
+                             "Parser"
+                             [ Type.var "b" ]
+                         ]
+                         (Type.namedWith
+                              [ "Url", "Parser", "Query" ]
+                              "Parser"
+                              [ Type.var "result" ]
+                         )
                     )
             }
     , map3 =
@@ -1612,27 +1639,27 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.function
-                            [ Type.var "a", Type.var "b", Type.var "c" ]
-                            (Type.var "result")
-                        , Type.namedWith
-                            [ "Url", "Parser", "Query" ]
-                            "Parser"
-                            [ Type.var "a" ]
-                        , Type.namedWith
-                            [ "Url", "Parser", "Query" ]
-                            "Parser"
-                            [ Type.var "b" ]
-                        , Type.namedWith
-                            [ "Url", "Parser", "Query" ]
-                            "Parser"
-                            [ Type.var "c" ]
-                        ]
-                        (Type.namedWith
-                            [ "Url", "Parser", "Query" ]
-                            "Parser"
-                            [ Type.var "result" ]
-                        )
+                         [ Type.function
+                             [ Type.var "a", Type.var "b", Type.var "c" ]
+                             (Type.var "result")
+                         , Type.namedWith
+                             [ "Url", "Parser", "Query" ]
+                             "Parser"
+                             [ Type.var "a" ]
+                         , Type.namedWith
+                             [ "Url", "Parser", "Query" ]
+                             "Parser"
+                             [ Type.var "b" ]
+                         , Type.namedWith
+                             [ "Url", "Parser", "Query" ]
+                             "Parser"
+                             [ Type.var "c" ]
+                         ]
+                         (Type.namedWith
+                              [ "Url", "Parser", "Query" ]
+                              "Parser"
+                              [ Type.var "result" ]
+                         )
                     )
             }
     , map4 =
@@ -1642,35 +1669,35 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.function
-                            [ Type.var "a"
-                            , Type.var "b"
-                            , Type.var "c"
-                            , Type.var "d"
-                            ]
-                            (Type.var "result")
-                        , Type.namedWith
-                            [ "Url", "Parser", "Query" ]
-                            "Parser"
-                            [ Type.var "a" ]
-                        , Type.namedWith
-                            [ "Url", "Parser", "Query" ]
-                            "Parser"
-                            [ Type.var "b" ]
-                        , Type.namedWith
-                            [ "Url", "Parser", "Query" ]
-                            "Parser"
-                            [ Type.var "c" ]
-                        , Type.namedWith
-                            [ "Url", "Parser", "Query" ]
-                            "Parser"
-                            [ Type.var "d" ]
-                        ]
-                        (Type.namedWith
-                            [ "Url", "Parser", "Query" ]
-                            "Parser"
-                            [ Type.var "result" ]
-                        )
+                         [ Type.function
+                             [ Type.var "a"
+                             , Type.var "b"
+                             , Type.var "c"
+                             , Type.var "d"
+                             ]
+                             (Type.var "result")
+                         , Type.namedWith
+                             [ "Url", "Parser", "Query" ]
+                             "Parser"
+                             [ Type.var "a" ]
+                         , Type.namedWith
+                             [ "Url", "Parser", "Query" ]
+                             "Parser"
+                             [ Type.var "b" ]
+                         , Type.namedWith
+                             [ "Url", "Parser", "Query" ]
+                             "Parser"
+                             [ Type.var "c" ]
+                         , Type.namedWith
+                             [ "Url", "Parser", "Query" ]
+                             "Parser"
+                             [ Type.var "d" ]
+                         ]
+                         (Type.namedWith
+                              [ "Url", "Parser", "Query" ]
+                              "Parser"
+                              [ Type.var "result" ]
+                         )
                     )
             }
     , map5 =
@@ -1680,40 +1707,40 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.function
-                            [ Type.var "a"
-                            , Type.var "b"
-                            , Type.var "c"
-                            , Type.var "d"
-                            , Type.var "e"
-                            ]
-                            (Type.var "result")
-                        , Type.namedWith
-                            [ "Url", "Parser", "Query" ]
-                            "Parser"
-                            [ Type.var "a" ]
-                        , Type.namedWith
-                            [ "Url", "Parser", "Query" ]
-                            "Parser"
-                            [ Type.var "b" ]
-                        , Type.namedWith
-                            [ "Url", "Parser", "Query" ]
-                            "Parser"
-                            [ Type.var "c" ]
-                        , Type.namedWith
-                            [ "Url", "Parser", "Query" ]
-                            "Parser"
-                            [ Type.var "d" ]
-                        , Type.namedWith
-                            [ "Url", "Parser", "Query" ]
-                            "Parser"
-                            [ Type.var "e" ]
-                        ]
-                        (Type.namedWith
-                            [ "Url", "Parser", "Query" ]
-                            "Parser"
-                            [ Type.var "result" ]
-                        )
+                         [ Type.function
+                             [ Type.var "a"
+                             , Type.var "b"
+                             , Type.var "c"
+                             , Type.var "d"
+                             , Type.var "e"
+                             ]
+                             (Type.var "result")
+                         , Type.namedWith
+                             [ "Url", "Parser", "Query" ]
+                             "Parser"
+                             [ Type.var "a" ]
+                         , Type.namedWith
+                             [ "Url", "Parser", "Query" ]
+                             "Parser"
+                             [ Type.var "b" ]
+                         , Type.namedWith
+                             [ "Url", "Parser", "Query" ]
+                             "Parser"
+                             [ Type.var "c" ]
+                         , Type.namedWith
+                             [ "Url", "Parser", "Query" ]
+                             "Parser"
+                             [ Type.var "d" ]
+                         , Type.namedWith
+                             [ "Url", "Parser", "Query" ]
+                             "Parser"
+                             [ Type.var "e" ]
+                         ]
+                         (Type.namedWith
+                              [ "Url", "Parser", "Query" ]
+                              "Parser"
+                              [ Type.var "result" ]
+                         )
                     )
             }
     , map6 =
@@ -1723,45 +1750,45 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.function
-                            [ Type.var "a"
-                            , Type.var "b"
-                            , Type.var "c"
-                            , Type.var "d"
-                            , Type.var "e"
-                            , Type.var "f"
-                            ]
-                            (Type.var "result")
-                        , Type.namedWith
-                            [ "Url", "Parser", "Query" ]
-                            "Parser"
-                            [ Type.var "a" ]
-                        , Type.namedWith
-                            [ "Url", "Parser", "Query" ]
-                            "Parser"
-                            [ Type.var "b" ]
-                        , Type.namedWith
-                            [ "Url", "Parser", "Query" ]
-                            "Parser"
-                            [ Type.var "c" ]
-                        , Type.namedWith
-                            [ "Url", "Parser", "Query" ]
-                            "Parser"
-                            [ Type.var "d" ]
-                        , Type.namedWith
-                            [ "Url", "Parser", "Query" ]
-                            "Parser"
-                            [ Type.var "e" ]
-                        , Type.namedWith
-                            [ "Url", "Parser", "Query" ]
-                            "Parser"
-                            [ Type.var "f" ]
-                        ]
-                        (Type.namedWith
-                            [ "Url", "Parser", "Query" ]
-                            "Parser"
-                            [ Type.var "result" ]
-                        )
+                         [ Type.function
+                             [ Type.var "a"
+                             , Type.var "b"
+                             , Type.var "c"
+                             , Type.var "d"
+                             , Type.var "e"
+                             , Type.var "f"
+                             ]
+                             (Type.var "result")
+                         , Type.namedWith
+                             [ "Url", "Parser", "Query" ]
+                             "Parser"
+                             [ Type.var "a" ]
+                         , Type.namedWith
+                             [ "Url", "Parser", "Query" ]
+                             "Parser"
+                             [ Type.var "b" ]
+                         , Type.namedWith
+                             [ "Url", "Parser", "Query" ]
+                             "Parser"
+                             [ Type.var "c" ]
+                         , Type.namedWith
+                             [ "Url", "Parser", "Query" ]
+                             "Parser"
+                             [ Type.var "d" ]
+                         , Type.namedWith
+                             [ "Url", "Parser", "Query" ]
+                             "Parser"
+                             [ Type.var "e" ]
+                         , Type.namedWith
+                             [ "Url", "Parser", "Query" ]
+                             "Parser"
+                             [ Type.var "f" ]
+                         ]
+                         (Type.namedWith
+                              [ "Url", "Parser", "Query" ]
+                              "Parser"
+                              [ Type.var "result" ]
+                         )
                     )
             }
     , map7 =
@@ -1771,50 +1798,50 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.function
-                            [ Type.var "a"
-                            , Type.var "b"
-                            , Type.var "c"
-                            , Type.var "d"
-                            , Type.var "e"
-                            , Type.var "f"
-                            , Type.var "g"
-                            ]
-                            (Type.var "result")
-                        , Type.namedWith
-                            [ "Url", "Parser", "Query" ]
-                            "Parser"
-                            [ Type.var "a" ]
-                        , Type.namedWith
-                            [ "Url", "Parser", "Query" ]
-                            "Parser"
-                            [ Type.var "b" ]
-                        , Type.namedWith
-                            [ "Url", "Parser", "Query" ]
-                            "Parser"
-                            [ Type.var "c" ]
-                        , Type.namedWith
-                            [ "Url", "Parser", "Query" ]
-                            "Parser"
-                            [ Type.var "d" ]
-                        , Type.namedWith
-                            [ "Url", "Parser", "Query" ]
-                            "Parser"
-                            [ Type.var "e" ]
-                        , Type.namedWith
-                            [ "Url", "Parser", "Query" ]
-                            "Parser"
-                            [ Type.var "f" ]
-                        , Type.namedWith
-                            [ "Url", "Parser", "Query" ]
-                            "Parser"
-                            [ Type.var "g" ]
-                        ]
-                        (Type.namedWith
-                            [ "Url", "Parser", "Query" ]
-                            "Parser"
-                            [ Type.var "result" ]
-                        )
+                         [ Type.function
+                             [ Type.var "a"
+                             , Type.var "b"
+                             , Type.var "c"
+                             , Type.var "d"
+                             , Type.var "e"
+                             , Type.var "f"
+                             , Type.var "g"
+                             ]
+                             (Type.var "result")
+                         , Type.namedWith
+                             [ "Url", "Parser", "Query" ]
+                             "Parser"
+                             [ Type.var "a" ]
+                         , Type.namedWith
+                             [ "Url", "Parser", "Query" ]
+                             "Parser"
+                             [ Type.var "b" ]
+                         , Type.namedWith
+                             [ "Url", "Parser", "Query" ]
+                             "Parser"
+                             [ Type.var "c" ]
+                         , Type.namedWith
+                             [ "Url", "Parser", "Query" ]
+                             "Parser"
+                             [ Type.var "d" ]
+                         , Type.namedWith
+                             [ "Url", "Parser", "Query" ]
+                             "Parser"
+                             [ Type.var "e" ]
+                         , Type.namedWith
+                             [ "Url", "Parser", "Query" ]
+                             "Parser"
+                             [ Type.var "f" ]
+                         , Type.namedWith
+                             [ "Url", "Parser", "Query" ]
+                             "Parser"
+                             [ Type.var "g" ]
+                         ]
+                         (Type.namedWith
+                              [ "Url", "Parser", "Query" ]
+                              "Parser"
+                              [ Type.var "result" ]
+                         )
                     )
             }
     , map8 =
@@ -1824,55 +1851,55 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.function
-                            [ Type.var "a"
-                            , Type.var "b"
-                            , Type.var "c"
-                            , Type.var "d"
-                            , Type.var "e"
-                            , Type.var "f"
-                            , Type.var "g"
-                            , Type.var "h"
-                            ]
-                            (Type.var "result")
-                        , Type.namedWith
-                            [ "Url", "Parser", "Query" ]
-                            "Parser"
-                            [ Type.var "a" ]
-                        , Type.namedWith
-                            [ "Url", "Parser", "Query" ]
-                            "Parser"
-                            [ Type.var "b" ]
-                        , Type.namedWith
-                            [ "Url", "Parser", "Query" ]
-                            "Parser"
-                            [ Type.var "c" ]
-                        , Type.namedWith
-                            [ "Url", "Parser", "Query" ]
-                            "Parser"
-                            [ Type.var "d" ]
-                        , Type.namedWith
-                            [ "Url", "Parser", "Query" ]
-                            "Parser"
-                            [ Type.var "e" ]
-                        , Type.namedWith
-                            [ "Url", "Parser", "Query" ]
-                            "Parser"
-                            [ Type.var "f" ]
-                        , Type.namedWith
-                            [ "Url", "Parser", "Query" ]
-                            "Parser"
-                            [ Type.var "g" ]
-                        , Type.namedWith
-                            [ "Url", "Parser", "Query" ]
-                            "Parser"
-                            [ Type.var "h" ]
-                        ]
-                        (Type.namedWith
-                            [ "Url", "Parser", "Query" ]
-                            "Parser"
-                            [ Type.var "result" ]
-                        )
+                         [ Type.function
+                             [ Type.var "a"
+                             , Type.var "b"
+                             , Type.var "c"
+                             , Type.var "d"
+                             , Type.var "e"
+                             , Type.var "f"
+                             , Type.var "g"
+                             , Type.var "h"
+                             ]
+                             (Type.var "result")
+                         , Type.namedWith
+                             [ "Url", "Parser", "Query" ]
+                             "Parser"
+                             [ Type.var "a" ]
+                         , Type.namedWith
+                             [ "Url", "Parser", "Query" ]
+                             "Parser"
+                             [ Type.var "b" ]
+                         , Type.namedWith
+                             [ "Url", "Parser", "Query" ]
+                             "Parser"
+                             [ Type.var "c" ]
+                         , Type.namedWith
+                             [ "Url", "Parser", "Query" ]
+                             "Parser"
+                             [ Type.var "d" ]
+                         , Type.namedWith
+                             [ "Url", "Parser", "Query" ]
+                             "Parser"
+                             [ Type.var "e" ]
+                         , Type.namedWith
+                             [ "Url", "Parser", "Query" ]
+                             "Parser"
+                             [ Type.var "f" ]
+                         , Type.namedWith
+                             [ "Url", "Parser", "Query" ]
+                             "Parser"
+                             [ Type.var "g" ]
+                         , Type.namedWith
+                             [ "Url", "Parser", "Query" ]
+                             "Parser"
+                             [ Type.var "h" ]
+                         ]
+                         (Type.namedWith
+                              [ "Url", "Parser", "Query" ]
+                              "Parser"
+                              [ Type.var "result" ]
+                         )
                     )
             }
     }

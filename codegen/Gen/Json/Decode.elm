@@ -109,23 +109,23 @@ nullable : Elm.Expression -> Elm.Expression
 nullable nullableArg =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Json", "Decode" ]
-            , name = "nullable"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "a" ]
-                        ]
-                        (Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.maybe (Type.var "a") ]
-                        )
-                    )
-            }
+             { importFrom = [ "Json", "Decode" ]
+             , name = "nullable"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.namedWith
+                              [ "Json", "Decode" ]
+                              "Decoder"
+                              [ Type.var "a" ]
+                          ]
+                          (Type.namedWith
+                               [ "Json", "Decode" ]
+                               "Decoder"
+                               [ Type.maybe (Type.var "a") ]
+                          )
+                     )
+             }
         )
         [ nullableArg ]
 
@@ -141,23 +141,23 @@ list : Elm.Expression -> Elm.Expression
 list listArg =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Json", "Decode" ]
-            , name = "list"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "a" ]
-                        ]
-                        (Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.list (Type.var "a") ]
-                        )
-                    )
-            }
+             { importFrom = [ "Json", "Decode" ]
+             , name = "list"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.namedWith
+                              [ "Json", "Decode" ]
+                              "Decoder"
+                              [ Type.var "a" ]
+                          ]
+                          (Type.namedWith
+                               [ "Json", "Decode" ]
+                               "Decoder"
+                               [ Type.list (Type.var "a") ]
+                          )
+                     )
+             }
         )
         [ listArg ]
 
@@ -173,27 +173,27 @@ array : Elm.Expression -> Elm.Expression
 array arrayArg =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Json", "Decode" ]
-            , name = "array"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "a" ]
-                        ]
-                        (Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.namedWith
-                                [ "Array" ]
-                                "Array"
-                                [ Type.var "a" ]
-                            ]
-                        )
-                    )
-            }
+             { importFrom = [ "Json", "Decode" ]
+             , name = "array"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.namedWith
+                              [ "Json", "Decode" ]
+                              "Decoder"
+                              [ Type.var "a" ]
+                          ]
+                          (Type.namedWith
+                               [ "Json", "Decode" ]
+                               "Decoder"
+                               [ Type.namedWith
+                                   [ "Array" ]
+                                   "Array"
+                                   [ Type.var "a" ]
+                               ]
+                          )
+                     )
+             }
         )
         [ arrayArg ]
 
@@ -247,27 +247,27 @@ dict : Elm.Expression -> Elm.Expression
 dict dictArg =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Json", "Decode" ]
-            , name = "dict"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "a" ]
-                        ]
-                        (Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.namedWith
-                                [ "Dict" ]
-                                "Dict"
-                                [ Type.string, Type.var "a" ]
-                            ]
-                        )
-                    )
-            }
+             { importFrom = [ "Json", "Decode" ]
+             , name = "dict"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.namedWith
+                              [ "Json", "Decode" ]
+                              "Decoder"
+                              [ Type.var "a" ]
+                          ]
+                          (Type.namedWith
+                               [ "Json", "Decode" ]
+                               "Decoder"
+                               [ Type.namedWith
+                                   [ "Dict" ]
+                                   "Dict"
+                                   [ Type.string, Type.var "a" ]
+                               ]
+                          )
+                     )
+             }
         )
         [ dictArg ]
 
@@ -283,24 +283,25 @@ keyValuePairs : Elm.Expression -> Elm.Expression
 keyValuePairs keyValuePairsArg =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Json", "Decode" ]
-            , name = "keyValuePairs"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "a" ]
-                        ]
-                        (Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.list (Type.tuple Type.string (Type.var "a"))
-                            ]
-                        )
-                    )
-            }
+             { importFrom = [ "Json", "Decode" ]
+             , name = "keyValuePairs"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.namedWith
+                              [ "Json", "Decode" ]
+                              "Decoder"
+                              [ Type.var "a" ]
+                          ]
+                          (Type.namedWith
+                               [ "Json", "Decode" ]
+                               "Decoder"
+                               [ Type.list
+                                   (Type.tuple Type.string (Type.var "a"))
+                               ]
+                          )
+                     )
+             }
         )
         [ keyValuePairsArg ]
 
@@ -330,33 +331,31 @@ oneOrMore :
 oneOrMore oneOrMoreArg oneOrMoreArg0 =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Json", "Decode" ]
-            , name = "oneOrMore"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.function
-                            [ Type.var "a", Type.list (Type.var "a") ]
-                            (Type.var "value")
-                        , Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "a" ]
-                        ]
-                        (Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "value" ]
-                        )
-                    )
-            }
+             { importFrom = [ "Json", "Decode" ]
+             , name = "oneOrMore"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.function
+                              [ Type.var "a", Type.list (Type.var "a") ]
+                              (Type.var "value")
+                          , Type.namedWith
+                              [ "Json", "Decode" ]
+                              "Decoder"
+                              [ Type.var "a" ]
+                          ]
+                          (Type.namedWith
+                               [ "Json", "Decode" ]
+                               "Decoder"
+                               [ Type.var "value" ]
+                          )
+                     )
+             }
         )
         [ Elm.functionReduced
             "oneOrMoreUnpack"
             (\functionReducedUnpack ->
-                Elm.functionReduced
-                    "unpack"
-                    (oneOrMoreArg functionReducedUnpack)
+               Elm.functionReduced "unpack" (oneOrMoreArg functionReducedUnpack)
             )
         , oneOrMoreArg0
         ]
@@ -382,24 +381,24 @@ field : String -> Elm.Expression -> Elm.Expression
 field fieldArg fieldArg0 =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Json", "Decode" ]
-            , name = "field"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.string
-                        , Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "a" ]
-                        ]
-                        (Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "a" ]
-                        )
-                    )
-            }
+             { importFrom = [ "Json", "Decode" ]
+             , name = "field"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.string
+                          , Type.namedWith
+                              [ "Json", "Decode" ]
+                              "Decoder"
+                              [ Type.var "a" ]
+                          ]
+                          (Type.namedWith
+                               [ "Json", "Decode" ]
+                               "Decoder"
+                               [ Type.var "a" ]
+                          )
+                     )
+             }
         )
         [ Elm.string fieldArg, fieldArg0 ]
 
@@ -421,24 +420,24 @@ at : List String -> Elm.Expression -> Elm.Expression
 at atArg atArg0 =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Json", "Decode" ]
-            , name = "at"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.list Type.string
-                        , Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "a" ]
-                        ]
-                        (Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "a" ]
-                        )
-                    )
-            }
+             { importFrom = [ "Json", "Decode" ]
+             , name = "at"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.list Type.string
+                          , Type.namedWith
+                              [ "Json", "Decode" ]
+                              "Decoder"
+                              [ Type.var "a" ]
+                          ]
+                          (Type.namedWith
+                               [ "Json", "Decode" ]
+                               "Decoder"
+                               [ Type.var "a" ]
+                          )
+                     )
+             }
         )
         [ Elm.list (List.map Elm.string atArg), atArg0 ]
 
@@ -458,24 +457,24 @@ index : Int -> Elm.Expression -> Elm.Expression
 index indexArg indexArg0 =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Json", "Decode" ]
-            , name = "index"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.int
-                        , Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "a" ]
-                        ]
-                        (Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "a" ]
-                        )
-                    )
-            }
+             { importFrom = [ "Json", "Decode" ]
+             , name = "index"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.int
+                          , Type.namedWith
+                              [ "Json", "Decode" ]
+                              "Decoder"
+                              [ Type.var "a" ]
+                          ]
+                          (Type.namedWith
+                               [ "Json", "Decode" ]
+                               "Decoder"
+                               [ Type.var "a" ]
+                          )
+                     )
+             }
         )
         [ Elm.int indexArg, indexArg0 ]
 
@@ -505,23 +504,23 @@ maybe : Elm.Expression -> Elm.Expression
 maybe maybeArg =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Json", "Decode" ]
-            , name = "maybe"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "a" ]
-                        ]
-                        (Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.maybe (Type.var "a") ]
-                        )
-                    )
-            }
+             { importFrom = [ "Json", "Decode" ]
+             , name = "maybe"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.namedWith
+                              [ "Json", "Decode" ]
+                              "Decoder"
+                              [ Type.var "a" ]
+                          ]
+                          (Type.namedWith
+                               [ "Json", "Decode" ]
+                               "Decoder"
+                               [ Type.maybe (Type.var "a") ]
+                          )
+                     )
+             }
         )
         [ maybeArg ]
 
@@ -552,25 +551,25 @@ oneOf : List Elm.Expression -> Elm.Expression
 oneOf oneOfArg =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Json", "Decode" ]
-            , name = "oneOf"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.list
-                            (Type.namedWith
-                                [ "Json", "Decode" ]
-                                "Decoder"
-                                [ Type.var "a" ]
-                            )
-                        ]
-                        (Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "a" ]
-                        )
-                    )
-            }
+             { importFrom = [ "Json", "Decode" ]
+             , name = "oneOf"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.list
+                              (Type.namedWith
+                                 [ "Json", "Decode" ]
+                                 "Decoder"
+                                 [ Type.var "a" ]
+                              )
+                          ]
+                          (Type.namedWith
+                               [ "Json", "Decode" ]
+                               "Decoder"
+                               [ Type.var "a" ]
+                          )
+                     )
+             }
         )
         [ Elm.list oneOfArg ]
 
@@ -588,26 +587,26 @@ decodeString : Elm.Expression -> String -> Elm.Expression
 decodeString decodeStringArg decodeStringArg0 =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Json", "Decode" ]
-            , name = "decodeString"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "a" ]
-                        , Type.string
-                        ]
-                        (Type.namedWith
-                            [ "Result" ]
-                            "Result"
-                            [ Type.namedWith [ "Json", "Decode" ] "Error" []
-                            , Type.var "a"
-                            ]
-                        )
-                    )
-            }
+             { importFrom = [ "Json", "Decode" ]
+             , name = "decodeString"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.namedWith
+                              [ "Json", "Decode" ]
+                              "Decoder"
+                              [ Type.var "a" ]
+                          , Type.string
+                          ]
+                          (Type.namedWith
+                               [ "Result" ]
+                               "Result"
+                               [ Type.namedWith [ "Json", "Decode" ] "Error" []
+                               , Type.var "a"
+                               ]
+                          )
+                     )
+             }
         )
         [ decodeStringArg, Elm.string decodeStringArg0 ]
 
@@ -621,26 +620,26 @@ decodeValue : Elm.Expression -> Elm.Expression -> Elm.Expression
 decodeValue decodeValueArg decodeValueArg0 =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Json", "Decode" ]
-            , name = "decodeValue"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "a" ]
-                        , Type.namedWith [ "Json", "Decode" ] "Value" []
-                        ]
-                        (Type.namedWith
-                            [ "Result" ]
-                            "Result"
-                            [ Type.namedWith [ "Json", "Decode" ] "Error" []
-                            , Type.var "a"
-                            ]
-                        )
-                    )
-            }
+             { importFrom = [ "Json", "Decode" ]
+             , name = "decodeValue"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.namedWith
+                              [ "Json", "Decode" ]
+                              "Decoder"
+                              [ Type.var "a" ]
+                          , Type.namedWith [ "Json", "Decode" ] "Value" []
+                          ]
+                          (Type.namedWith
+                               [ "Result" ]
+                               "Result"
+                               [ Type.namedWith [ "Json", "Decode" ] "Error" []
+                               , Type.var "a"
+                               ]
+                          )
+                     )
+             }
         )
         [ decodeValueArg, decodeValueArg0 ]
 
@@ -667,15 +666,15 @@ errorToString : Elm.Expression -> Elm.Expression
 errorToString errorToStringArg =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Json", "Decode" ]
-            , name = "errorToString"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.namedWith [ "Json", "Decode" ] "Error" [] ]
-                        Type.string
-                    )
-            }
+             { importFrom = [ "Json", "Decode" ]
+             , name = "errorToString"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.namedWith [ "Json", "Decode" ] "Error" [] ]
+                          Type.string
+                     )
+             }
         )
         [ errorToStringArg ]
 
@@ -703,24 +702,24 @@ map : (Elm.Expression -> Elm.Expression) -> Elm.Expression -> Elm.Expression
 map mapArg mapArg0 =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Json", "Decode" ]
-            , name = "map"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.function [ Type.var "a" ] (Type.var "value")
-                        , Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "a" ]
-                        ]
-                        (Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "value" ]
-                        )
-                    )
-            }
+             { importFrom = [ "Json", "Decode" ]
+             , name = "map"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.function [ Type.var "a" ] (Type.var "value")
+                          , Type.namedWith
+                              [ "Json", "Decode" ]
+                              "Decoder"
+                              [ Type.var "a" ]
+                          ]
+                          (Type.namedWith
+                               [ "Json", "Decode" ]
+                               "Decoder"
+                               [ Type.var "value" ]
+                          )
+                     )
+             }
         )
         [ Elm.functionReduced "mapUnpack" mapArg, mapArg0 ]
 
@@ -755,35 +754,35 @@ map2 :
 map2 map2Arg map2Arg0 map2Arg1 =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Json", "Decode" ]
-            , name = "map2"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.function
-                            [ Type.var "a", Type.var "b" ]
-                            (Type.var "value")
-                        , Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "a" ]
-                        , Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "b" ]
-                        ]
-                        (Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "value" ]
-                        )
-                    )
-            }
+             { importFrom = [ "Json", "Decode" ]
+             , name = "map2"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.function
+                              [ Type.var "a", Type.var "b" ]
+                              (Type.var "value")
+                          , Type.namedWith
+                              [ "Json", "Decode" ]
+                              "Decoder"
+                              [ Type.var "a" ]
+                          , Type.namedWith
+                              [ "Json", "Decode" ]
+                              "Decoder"
+                              [ Type.var "b" ]
+                          ]
+                          (Type.namedWith
+                               [ "Json", "Decode" ]
+                               "Decoder"
+                               [ Type.var "value" ]
+                          )
+                     )
+             }
         )
         [ Elm.functionReduced
             "map2Unpack"
             (\functionReducedUnpack ->
-                Elm.functionReduced "unpack" (map2Arg functionReducedUnpack)
+               Elm.functionReduced "unpack" (map2Arg functionReducedUnpack)
             )
         , map2Arg0
         , map2Arg1
@@ -824,47 +823,47 @@ map3 :
 map3 map3Arg map3Arg0 map3Arg1 map3Arg2 =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Json", "Decode" ]
-            , name = "map3"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.function
-                            [ Type.var "a", Type.var "b", Type.var "c" ]
-                            (Type.var "value")
-                        , Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "a" ]
-                        , Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "b" ]
-                        , Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "c" ]
-                        ]
-                        (Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "value" ]
-                        )
-                    )
-            }
+             { importFrom = [ "Json", "Decode" ]
+             , name = "map3"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.function
+                              [ Type.var "a", Type.var "b", Type.var "c" ]
+                              (Type.var "value")
+                          , Type.namedWith
+                              [ "Json", "Decode" ]
+                              "Decoder"
+                              [ Type.var "a" ]
+                          , Type.namedWith
+                              [ "Json", "Decode" ]
+                              "Decoder"
+                              [ Type.var "b" ]
+                          , Type.namedWith
+                              [ "Json", "Decode" ]
+                              "Decoder"
+                              [ Type.var "c" ]
+                          ]
+                          (Type.namedWith
+                               [ "Json", "Decode" ]
+                               "Decoder"
+                               [ Type.var "value" ]
+                          )
+                     )
+             }
         )
         [ Elm.functionReduced
             "map3Unpack"
             (\functionReducedUnpack ->
-                Elm.functionReduced
-                    "unpack"
-                    (\functionReducedUnpack0 ->
+               Elm.functionReduced
+                   "unpack"
+                   (\functionReducedUnpack0 ->
                         Elm.functionReduced
                             "unpack"
-                            (map3Arg functionReducedUnpack
-                                functionReducedUnpack0
+                            ((map3Arg functionReducedUnpack)
+                                 functionReducedUnpack0
                             )
-                    )
+                   )
             )
         , map3Arg0
         , map3Arg1
@@ -894,60 +893,61 @@ map4 :
 map4 map4Arg map4Arg0 map4Arg1 map4Arg2 map4Arg3 =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Json", "Decode" ]
-            , name = "map4"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.function
-                            [ Type.var "a"
-                            , Type.var "b"
-                            , Type.var "c"
-                            , Type.var "d"
-                            ]
-                            (Type.var "value")
-                        , Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "a" ]
-                        , Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "b" ]
-                        , Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "c" ]
-                        , Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "d" ]
-                        ]
-                        (Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "value" ]
-                        )
-                    )
-            }
+             { importFrom = [ "Json", "Decode" ]
+             , name = "map4"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.function
+                              [ Type.var "a"
+                              , Type.var "b"
+                              , Type.var "c"
+                              , Type.var "d"
+                              ]
+                              (Type.var "value")
+                          , Type.namedWith
+                              [ "Json", "Decode" ]
+                              "Decoder"
+                              [ Type.var "a" ]
+                          , Type.namedWith
+                              [ "Json", "Decode" ]
+                              "Decoder"
+                              [ Type.var "b" ]
+                          , Type.namedWith
+                              [ "Json", "Decode" ]
+                              "Decoder"
+                              [ Type.var "c" ]
+                          , Type.namedWith
+                              [ "Json", "Decode" ]
+                              "Decoder"
+                              [ Type.var "d" ]
+                          ]
+                          (Type.namedWith
+                               [ "Json", "Decode" ]
+                               "Decoder"
+                               [ Type.var "value" ]
+                          )
+                     )
+             }
         )
         [ Elm.functionReduced
             "map4Unpack"
             (\functionReducedUnpack ->
-                Elm.functionReduced
-                    "unpack"
-                    (\functionReducedUnpack0 ->
+               Elm.functionReduced
+                   "unpack"
+                   (\functionReducedUnpack0 ->
                         Elm.functionReduced
                             "unpack"
                             (\functionReducedUnpack_2_1_2_0_2_0_2_0_0 ->
-                                Elm.functionReduced
-                                    "unpack"
-                                    (map4Arg functionReducedUnpack
-                                         functionReducedUnpack0
-                                        functionReducedUnpack_2_1_2_0_2_0_2_0_0
-                                    )
+                                 Elm.functionReduced
+                                     "unpack"
+                                     (((map4Arg functionReducedUnpack)
+                                           functionReducedUnpack0
+                                      )
+                                          functionReducedUnpack_2_1_2_0_2_0_2_0_0
+                                     )
                             )
-                    )
+                   )
             )
         , map4Arg0
         , map4Arg1
@@ -981,70 +981,72 @@ map5 :
 map5 map5Arg map5Arg0 map5Arg1 map5Arg2 map5Arg3 map5Arg4 =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Json", "Decode" ]
-            , name = "map5"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.function
-                            [ Type.var "a"
-                            , Type.var "b"
-                            , Type.var "c"
-                            , Type.var "d"
-                            , Type.var "e"
-                            ]
-                            (Type.var "value")
-                        , Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "a" ]
-                        , Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "b" ]
-                        , Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "c" ]
-                        , Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "d" ]
-                        , Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "e" ]
-                        ]
-                        (Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "value" ]
-                        )
-                    )
-            }
+             { importFrom = [ "Json", "Decode" ]
+             , name = "map5"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.function
+                              [ Type.var "a"
+                              , Type.var "b"
+                              , Type.var "c"
+                              , Type.var "d"
+                              , Type.var "e"
+                              ]
+                              (Type.var "value")
+                          , Type.namedWith
+                              [ "Json", "Decode" ]
+                              "Decoder"
+                              [ Type.var "a" ]
+                          , Type.namedWith
+                              [ "Json", "Decode" ]
+                              "Decoder"
+                              [ Type.var "b" ]
+                          , Type.namedWith
+                              [ "Json", "Decode" ]
+                              "Decoder"
+                              [ Type.var "c" ]
+                          , Type.namedWith
+                              [ "Json", "Decode" ]
+                              "Decoder"
+                              [ Type.var "d" ]
+                          , Type.namedWith
+                              [ "Json", "Decode" ]
+                              "Decoder"
+                              [ Type.var "e" ]
+                          ]
+                          (Type.namedWith
+                               [ "Json", "Decode" ]
+                               "Decoder"
+                               [ Type.var "value" ]
+                          )
+                     )
+             }
         )
         [ Elm.functionReduced
             "map5Unpack"
             (\functionReducedUnpack ->
-                Elm.functionReduced
-                    "unpack"
-                    (\functionReducedUnpack0 ->
+               Elm.functionReduced
+                   "unpack"
+                   (\functionReducedUnpack0 ->
                         Elm.functionReduced
                             "unpack"
                             (\functionReducedUnpack_2_1_2_0_2_0_2_0_0 ->
-                                Elm.functionReduced
-                                    "unpack"
-                                    (\functionReducedUnpack_2_1_2_1_2_0_2_0_2_0_0 ->
-                                        Elm.functionReduced
-                                            "unpack"
-                                            (map5Arg functionReducedUnpack
-                                                 functionReducedUnpack0
-                                                 functionReducedUnpack_2_1_2_0_2_0_2_0_0
-                                                functionReducedUnpack_2_1_2_1_2_0_2_0_2_0_0
-                                            )
-                                    )
+                                 Elm.functionReduced
+                                     "unpack"
+                                     (\functionReducedUnpack_2_1_2_1_2_0_2_0_2_0_0 ->
+                                          Elm.functionReduced
+                                              "unpack"
+                                              ((((map5Arg functionReducedUnpack)
+                                                     functionReducedUnpack0
+                                                )
+                                                    functionReducedUnpack_2_1_2_0_2_0_2_0_0
+                                               )
+                                                   functionReducedUnpack_2_1_2_1_2_0_2_0_2_0_0
+                                              )
+                                     )
                             )
-                    )
+                   )
             )
         , map5Arg0
         , map5Arg1
@@ -1082,81 +1084,85 @@ map6 :
 map6 map6Arg map6Arg0 map6Arg1 map6Arg2 map6Arg3 map6Arg4 map6Arg5 =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Json", "Decode" ]
-            , name = "map6"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.function
-                            [ Type.var "a"
-                            , Type.var "b"
-                            , Type.var "c"
-                            , Type.var "d"
-                            , Type.var "e"
-                            , Type.var "f"
-                            ]
-                            (Type.var "value")
-                        , Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "a" ]
-                        , Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "b" ]
-                        , Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "c" ]
-                        , Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "d" ]
-                        , Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "e" ]
-                        , Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "f" ]
-                        ]
-                        (Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "value" ]
-                        )
-                    )
-            }
+             { importFrom = [ "Json", "Decode" ]
+             , name = "map6"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.function
+                              [ Type.var "a"
+                              , Type.var "b"
+                              , Type.var "c"
+                              , Type.var "d"
+                              , Type.var "e"
+                              , Type.var "f"
+                              ]
+                              (Type.var "value")
+                          , Type.namedWith
+                              [ "Json", "Decode" ]
+                              "Decoder"
+                              [ Type.var "a" ]
+                          , Type.namedWith
+                              [ "Json", "Decode" ]
+                              "Decoder"
+                              [ Type.var "b" ]
+                          , Type.namedWith
+                              [ "Json", "Decode" ]
+                              "Decoder"
+                              [ Type.var "c" ]
+                          , Type.namedWith
+                              [ "Json", "Decode" ]
+                              "Decoder"
+                              [ Type.var "d" ]
+                          , Type.namedWith
+                              [ "Json", "Decode" ]
+                              "Decoder"
+                              [ Type.var "e" ]
+                          , Type.namedWith
+                              [ "Json", "Decode" ]
+                              "Decoder"
+                              [ Type.var "f" ]
+                          ]
+                          (Type.namedWith
+                               [ "Json", "Decode" ]
+                               "Decoder"
+                               [ Type.var "value" ]
+                          )
+                     )
+             }
         )
         [ Elm.functionReduced
             "map6Unpack"
             (\functionReducedUnpack ->
-                Elm.functionReduced
-                    "unpack"
-                    (\functionReducedUnpack0 ->
+               Elm.functionReduced
+                   "unpack"
+                   (\functionReducedUnpack0 ->
                         Elm.functionReduced
                             "unpack"
                             (\functionReducedUnpack_2_1_2_0_2_0_2_0_0 ->
-                                Elm.functionReduced
-                                    "unpack"
-                                    (\functionReducedUnpack_2_1_2_1_2_0_2_0_2_0_0 ->
-                                        Elm.functionReduced
-                                            "unpack"
-                                            (\functionReducedUnpack_2_1_2_1_2_1_2_0_2_0_2_0_0 ->
-                                                Elm.functionReduced
-                                                    "unpack"
-                                                    (map6Arg
-                                                         functionReducedUnpack
-                                                         functionReducedUnpack0
-                                                         functionReducedUnpack_2_1_2_0_2_0_2_0_0
-                                                         functionReducedUnpack_2_1_2_1_2_0_2_0_2_0_0
-                                                        functionReducedUnpack_2_1_2_1_2_1_2_0_2_0_2_0_0
-                                                    )
-                                            )
-                                    )
+                                 Elm.functionReduced
+                                     "unpack"
+                                     (\functionReducedUnpack_2_1_2_1_2_0_2_0_2_0_0 ->
+                                          Elm.functionReduced
+                                              "unpack"
+                                              (\functionReducedUnpack_2_1_2_1_2_1_2_0_2_0_2_0_0 ->
+                                                   Elm.functionReduced
+                                                       "unpack"
+                                                       (((((map6Arg
+                                                                functionReducedUnpack
+                                                           )
+                                                               functionReducedUnpack0
+                                                          )
+                                                              functionReducedUnpack_2_1_2_0_2_0_2_0_0
+                                                         )
+                                                             functionReducedUnpack_2_1_2_1_2_0_2_0_2_0_0
+                                                        )
+                                                            functionReducedUnpack_2_1_2_1_2_1_2_0_2_0_2_0_0
+                                                       )
+                                              )
+                                     )
                             )
-                    )
+                   )
             )
         , map6Arg0
         , map6Arg1
@@ -1198,91 +1204,96 @@ map7 :
 map7 map7Arg map7Arg0 map7Arg1 map7Arg2 map7Arg3 map7Arg4 map7Arg5 map7Arg6 =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Json", "Decode" ]
-            , name = "map7"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.function
-                            [ Type.var "a"
-                            , Type.var "b"
-                            , Type.var "c"
-                            , Type.var "d"
-                            , Type.var "e"
-                            , Type.var "f"
-                            , Type.var "g"
-                            ]
-                            (Type.var "value")
-                        , Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "a" ]
-                        , Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "b" ]
-                        , Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "c" ]
-                        , Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "d" ]
-                        , Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "e" ]
-                        , Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "f" ]
-                        , Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "g" ]
-                        ]
-                        (Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "value" ]
-                        )
-                    )
-            }
+             { importFrom = [ "Json", "Decode" ]
+             , name = "map7"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.function
+                              [ Type.var "a"
+                              , Type.var "b"
+                              , Type.var "c"
+                              , Type.var "d"
+                              , Type.var "e"
+                              , Type.var "f"
+                              , Type.var "g"
+                              ]
+                              (Type.var "value")
+                          , Type.namedWith
+                              [ "Json", "Decode" ]
+                              "Decoder"
+                              [ Type.var "a" ]
+                          , Type.namedWith
+                              [ "Json", "Decode" ]
+                              "Decoder"
+                              [ Type.var "b" ]
+                          , Type.namedWith
+                              [ "Json", "Decode" ]
+                              "Decoder"
+                              [ Type.var "c" ]
+                          , Type.namedWith
+                              [ "Json", "Decode" ]
+                              "Decoder"
+                              [ Type.var "d" ]
+                          , Type.namedWith
+                              [ "Json", "Decode" ]
+                              "Decoder"
+                              [ Type.var "e" ]
+                          , Type.namedWith
+                              [ "Json", "Decode" ]
+                              "Decoder"
+                              [ Type.var "f" ]
+                          , Type.namedWith
+                              [ "Json", "Decode" ]
+                              "Decoder"
+                              [ Type.var "g" ]
+                          ]
+                          (Type.namedWith
+                               [ "Json", "Decode" ]
+                               "Decoder"
+                               [ Type.var "value" ]
+                          )
+                     )
+             }
         )
         [ Elm.functionReduced
             "map7Unpack"
             (\functionReducedUnpack ->
-                Elm.functionReduced
-                    "unpack"
-                    (\functionReducedUnpack0 ->
+               Elm.functionReduced
+                   "unpack"
+                   (\functionReducedUnpack0 ->
                         Elm.functionReduced
                             "unpack"
                             (\functionReducedUnpack_2_1_2_0_2_0_2_0_0 ->
-                                Elm.functionReduced
-                                    "unpack"
-                                    (\functionReducedUnpack_2_1_2_1_2_0_2_0_2_0_0 ->
-                                        Elm.functionReduced
-                                            "unpack"
-                                            (\functionReducedUnpack_2_1_2_1_2_1_2_0_2_0_2_0_0 ->
-                                                Elm.functionReduced
-                                                    "unpack"
-                                                    (\functionReducedUnpack_2_1_2_1_2_1_2_1_2_0_2_0_2_0_0 ->
-                                                        Elm.functionReduced
-                                                            "unpack"
-                                                            (map7Arg
-                                                                 functionReducedUnpack
-                                                                 functionReducedUnpack0
-                                                                 functionReducedUnpack_2_1_2_0_2_0_2_0_0
-                                                                 functionReducedUnpack_2_1_2_1_2_0_2_0_2_0_0
-                                                                 functionReducedUnpack_2_1_2_1_2_1_2_0_2_0_2_0_0
-                                                                functionReducedUnpack_2_1_2_1_2_1_2_1_2_0_2_0_2_0_0
-                                                            )
-                                                    )
-                                            )
-                                    )
+                                 Elm.functionReduced
+                                     "unpack"
+                                     (\functionReducedUnpack_2_1_2_1_2_0_2_0_2_0_0 ->
+                                          Elm.functionReduced
+                                              "unpack"
+                                              (\functionReducedUnpack_2_1_2_1_2_1_2_0_2_0_2_0_0 ->
+                                                   Elm.functionReduced
+                                                       "unpack"
+                                                       (\functionReducedUnpack_2_1_2_1_2_1_2_1_2_0_2_0_2_0_0 ->
+                                                            Elm.functionReduced
+                                                                "unpack"
+                                                                ((((((map7Arg
+                                                                          functionReducedUnpack
+                                                                     )
+                                                                         functionReducedUnpack0
+                                                                    )
+                                                                        functionReducedUnpack_2_1_2_0_2_0_2_0_0
+                                                                   )
+                                                                       functionReducedUnpack_2_1_2_1_2_0_2_0_2_0_0
+                                                                  )
+                                                                      functionReducedUnpack_2_1_2_1_2_1_2_0_2_0_2_0_0
+                                                                 )
+                                                                     functionReducedUnpack_2_1_2_1_2_1_2_1_2_0_2_0_2_0_0
+                                                                )
+                                                       )
+                                              )
+                                     )
                             )
-                    )
+                   )
             )
         , map7Arg0
         , map7Arg1
@@ -1328,101 +1339,107 @@ map8 :
 map8 map8Arg map8Arg0 map8Arg1 map8Arg2 map8Arg3 map8Arg4 map8Arg5 map8Arg6 map8Arg7 =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Json", "Decode" ]
-            , name = "map8"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.function
-                            [ Type.var "a"
-                            , Type.var "b"
-                            , Type.var "c"
-                            , Type.var "d"
-                            , Type.var "e"
-                            , Type.var "f"
-                            , Type.var "g"
-                            , Type.var "h"
-                            ]
-                            (Type.var "value")
-                        , Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "a" ]
-                        , Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "b" ]
-                        , Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "c" ]
-                        , Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "d" ]
-                        , Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "e" ]
-                        , Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "f" ]
-                        , Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "g" ]
-                        , Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "h" ]
-                        ]
-                        (Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "value" ]
-                        )
-                    )
-            }
+             { importFrom = [ "Json", "Decode" ]
+             , name = "map8"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.function
+                              [ Type.var "a"
+                              , Type.var "b"
+                              , Type.var "c"
+                              , Type.var "d"
+                              , Type.var "e"
+                              , Type.var "f"
+                              , Type.var "g"
+                              , Type.var "h"
+                              ]
+                              (Type.var "value")
+                          , Type.namedWith
+                              [ "Json", "Decode" ]
+                              "Decoder"
+                              [ Type.var "a" ]
+                          , Type.namedWith
+                              [ "Json", "Decode" ]
+                              "Decoder"
+                              [ Type.var "b" ]
+                          , Type.namedWith
+                              [ "Json", "Decode" ]
+                              "Decoder"
+                              [ Type.var "c" ]
+                          , Type.namedWith
+                              [ "Json", "Decode" ]
+                              "Decoder"
+                              [ Type.var "d" ]
+                          , Type.namedWith
+                              [ "Json", "Decode" ]
+                              "Decoder"
+                              [ Type.var "e" ]
+                          , Type.namedWith
+                              [ "Json", "Decode" ]
+                              "Decoder"
+                              [ Type.var "f" ]
+                          , Type.namedWith
+                              [ "Json", "Decode" ]
+                              "Decoder"
+                              [ Type.var "g" ]
+                          , Type.namedWith
+                              [ "Json", "Decode" ]
+                              "Decoder"
+                              [ Type.var "h" ]
+                          ]
+                          (Type.namedWith
+                               [ "Json", "Decode" ]
+                               "Decoder"
+                               [ Type.var "value" ]
+                          )
+                     )
+             }
         )
         [ Elm.functionReduced
             "map8Unpack"
             (\functionReducedUnpack ->
-                Elm.functionReduced
-                    "unpack"
-                    (\functionReducedUnpack0 ->
+               Elm.functionReduced
+                   "unpack"
+                   (\functionReducedUnpack0 ->
                         Elm.functionReduced
                             "unpack"
                             (\functionReducedUnpack_2_1_2_0_2_0_2_0_0 ->
-                                Elm.functionReduced
-                                    "unpack"
-                                    (\functionReducedUnpack_2_1_2_1_2_0_2_0_2_0_0 ->
-                                        Elm.functionReduced
-                                            "unpack"
-                                            (\functionReducedUnpack_2_1_2_1_2_1_2_0_2_0_2_0_0 ->
-                                                Elm.functionReduced
-                                                    "unpack"
-                                                    (\functionReducedUnpack_2_1_2_1_2_1_2_1_2_0_2_0_2_0_0 ->
-                                                        Elm.functionReduced
-                                                            "unpack"
-                                                            (\functionReducedUnpack_2_1_2_1_2_1_2_1_2_1_2_0_2_0_2_0_0 ->
-                                                                Elm.functionReduced
-                                                                    "unpack"
-                                                                    (map8Arg
-                                                                         functionReducedUnpack
-                                                                         functionReducedUnpack0
-                                                                         functionReducedUnpack_2_1_2_0_2_0_2_0_0
-                                                                         functionReducedUnpack_2_1_2_1_2_0_2_0_2_0_0
-                                                                         functionReducedUnpack_2_1_2_1_2_1_2_0_2_0_2_0_0
-                                                                         functionReducedUnpack_2_1_2_1_2_1_2_1_2_0_2_0_2_0_0
-                                                                        functionReducedUnpack_2_1_2_1_2_1_2_1_2_1_2_0_2_0_2_0_0
-                                                                    )
-                                                            )
-                                                    )
-                                            )
-                                    )
+                                 Elm.functionReduced
+                                     "unpack"
+                                     (\functionReducedUnpack_2_1_2_1_2_0_2_0_2_0_0 ->
+                                          Elm.functionReduced
+                                              "unpack"
+                                              (\functionReducedUnpack_2_1_2_1_2_1_2_0_2_0_2_0_0 ->
+                                                   Elm.functionReduced
+                                                       "unpack"
+                                                       (\functionReducedUnpack_2_1_2_1_2_1_2_1_2_0_2_0_2_0_0 ->
+                                                            Elm.functionReduced
+                                                                "unpack"
+                                                                (\functionReducedUnpack_2_1_2_1_2_1_2_1_2_1_2_0_2_0_2_0_0 ->
+                                                                     Elm.functionReduced
+                                                                         "unpack"
+                                                                         (((((((map8Arg
+                                                                                    functionReducedUnpack
+                                                                               )
+                                                                                   functionReducedUnpack0
+                                                                              )
+                                                                                  functionReducedUnpack_2_1_2_0_2_0_2_0_0
+                                                                             )
+                                                                                 functionReducedUnpack_2_1_2_1_2_0_2_0_2_0_0
+                                                                            )
+                                                                                functionReducedUnpack_2_1_2_1_2_1_2_0_2_0_2_0_0
+                                                                           )
+                                                                               functionReducedUnpack_2_1_2_1_2_1_2_1_2_0_2_0_2_0_0
+                                                                          )
+                                                                              functionReducedUnpack_2_1_2_1_2_1_2_1_2_1_2_0_2_0_2_0_0
+                                                                         )
+                                                                )
+                                                       )
+                                              )
+                                     )
                             )
-                    )
+                   )
             )
         , map8Arg0
         , map8Arg1
@@ -1467,26 +1484,26 @@ lazy : (Elm.Expression -> Elm.Expression) -> Elm.Expression
 lazy lazyArg =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Json", "Decode" ]
-            , name = "lazy"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.function
-                            [ Type.unit ]
-                            (Type.namedWith
-                                [ "Json", "Decode" ]
-                                "Decoder"
-                                [ Type.var "a" ]
-                            )
-                        ]
-                        (Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "a" ]
-                        )
-                    )
-            }
+             { importFrom = [ "Json", "Decode" ]
+             , name = "lazy"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.function
+                              [ Type.unit ]
+                              (Type.namedWith
+                                 [ "Json", "Decode" ]
+                                 "Decoder"
+                                 [ Type.var "a" ]
+                              )
+                          ]
+                          (Type.namedWith
+                               [ "Json", "Decode" ]
+                               "Decoder"
+                               [ Type.var "a" ]
+                          )
+                     )
+             }
         )
         [ Elm.functionReduced "lazyUnpack" lazyArg ]
 
@@ -1506,9 +1523,9 @@ value =
         , annotation =
             Just
                 (Type.namedWith
-                    [ "Json", "Decode" ]
-                    "Decoder"
-                    [ Type.namedWith [ "Json", "Decode" ] "Value" [] ]
+                     [ "Json", "Decode" ]
+                     "Decoder"
+                     [ Type.namedWith [ "Json", "Decode" ] "Value" [] ]
                 )
         }
 
@@ -1528,19 +1545,19 @@ null : Elm.Expression -> Elm.Expression
 null nullArg =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Json", "Decode" ]
-            , name = "null"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.var "a" ]
-                        (Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "a" ]
-                        )
-                    )
-            }
+             { importFrom = [ "Json", "Decode" ]
+             , name = "null"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.var "a" ]
+                          (Type.namedWith
+                               [ "Json", "Decode" ]
+                               "Decoder"
+                               [ Type.var "a" ]
+                          )
+                     )
+             }
         )
         [ nullArg ]
 
@@ -1559,19 +1576,19 @@ succeed : Elm.Expression -> Elm.Expression
 succeed succeedArg =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Json", "Decode" ]
-            , name = "succeed"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.var "a" ]
-                        (Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "a" ]
-                        )
-                    )
-            }
+             { importFrom = [ "Json", "Decode" ]
+             , name = "succeed"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.var "a" ]
+                          (Type.namedWith
+                               [ "Json", "Decode" ]
+                               "Decoder"
+                               [ Type.var "a" ]
+                          )
+                     )
+             }
         )
         [ succeedArg ]
 
@@ -1588,19 +1605,19 @@ fail : String -> Elm.Expression
 fail failArg =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Json", "Decode" ]
-            , name = "fail"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.string ]
-                        (Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "a" ]
-                        )
-                    )
-            }
+             { importFrom = [ "Json", "Decode" ]
+             , name = "fail"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.string ]
+                          (Type.namedWith
+                               [ "Json", "Decode" ]
+                               "Decoder"
+                               [ Type.var "a" ]
+                          )
+                     )
+             }
         )
         [ Elm.string failArg ]
 
@@ -1636,30 +1653,30 @@ andThen : (Elm.Expression -> Elm.Expression) -> Elm.Expression -> Elm.Expression
 andThen andThenArg andThenArg0 =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Json", "Decode" ]
-            , name = "andThen"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.function
-                            [ Type.var "a" ]
-                            (Type.namedWith
-                                [ "Json", "Decode" ]
-                                "Decoder"
-                                [ Type.var "b" ]
-                            )
-                        , Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "a" ]
-                        ]
-                        (Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "b" ]
-                        )
-                    )
-            }
+             { importFrom = [ "Json", "Decode" ]
+             , name = "andThen"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.function
+                              [ Type.var "a" ]
+                              (Type.namedWith
+                                 [ "Json", "Decode" ]
+                                 "Decoder"
+                                 [ Type.var "b" ]
+                              )
+                          , Type.namedWith
+                              [ "Json", "Decode" ]
+                              "Decoder"
+                              [ Type.var "a" ]
+                          ]
+                          (Type.namedWith
+                               [ "Json", "Decode" ]
+                               "Decoder"
+                               [ Type.var "b" ]
+                          )
+                     )
+             }
         )
         [ Elm.functionReduced "andThenUnpack" andThenArg, andThenArg0 ]
 
@@ -1694,40 +1711,40 @@ make_ =
         \ar0 ar1 ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Json", "Decode" ]
-                    , name = "Field"
-                    , annotation = Just (Type.namedWith [] "Error" [])
-                    }
+                     { importFrom = [ "Json", "Decode" ]
+                     , name = "Field"
+                     , annotation = Just (Type.namedWith [] "Error" [])
+                     }
                 )
                 [ ar0, ar1 ]
     , index =
         \ar0 ar1 ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Json", "Decode" ]
-                    , name = "Index"
-                    , annotation = Just (Type.namedWith [] "Error" [])
-                    }
+                     { importFrom = [ "Json", "Decode" ]
+                     , name = "Index"
+                     , annotation = Just (Type.namedWith [] "Error" [])
+                     }
                 )
                 [ ar0, ar1 ]
     , oneOf =
         \ar0 ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Json", "Decode" ]
-                    , name = "OneOf"
-                    , annotation = Just (Type.namedWith [] "Error" [])
-                    }
+                     { importFrom = [ "Json", "Decode" ]
+                     , name = "OneOf"
+                     , annotation = Just (Type.namedWith [] "Error" [])
+                     }
                 )
                 [ ar0 ]
     , failure =
         \ar0 ar1 ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Json", "Decode" ]
-                    , name = "Failure"
-                    , annotation = Just (Type.namedWith [] "Error" [])
-                    }
+                     { importFrom = [ "Json", "Decode" ]
+                     , name = "Failure"
+                     , annotation = Just (Type.namedWith [] "Error" [])
+                     }
                 )
                 [ ar0, ar1 ]
     }
@@ -1861,576 +1878,588 @@ call_ =
         \nullableArg ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Json", "Decode" ]
-                    , name = "nullable"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.namedWith
-                                    [ "Json", "Decode" ]
-                                    "Decoder"
-                                    [ Type.var "a" ]
-                                ]
-                                (Type.namedWith
-                                    [ "Json", "Decode" ]
-                                    "Decoder"
-                                    [ Type.maybe (Type.var "a") ]
-                                )
-                            )
-                    }
+                     { importFrom = [ "Json", "Decode" ]
+                     , name = "nullable"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.namedWith
+                                      [ "Json", "Decode" ]
+                                      "Decoder"
+                                      [ Type.var "a" ]
+                                  ]
+                                  (Type.namedWith
+                                       [ "Json", "Decode" ]
+                                       "Decoder"
+                                       [ Type.maybe (Type.var "a") ]
+                                  )
+                             )
+                     }
                 )
                 [ nullableArg ]
     , list =
         \listArg ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Json", "Decode" ]
-                    , name = "list"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.namedWith
-                                    [ "Json", "Decode" ]
-                                    "Decoder"
-                                    [ Type.var "a" ]
-                                ]
-                                (Type.namedWith
-                                    [ "Json", "Decode" ]
-                                    "Decoder"
-                                    [ Type.list (Type.var "a") ]
-                                )
-                            )
-                    }
+                     { importFrom = [ "Json", "Decode" ]
+                     , name = "list"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.namedWith
+                                      [ "Json", "Decode" ]
+                                      "Decoder"
+                                      [ Type.var "a" ]
+                                  ]
+                                  (Type.namedWith
+                                       [ "Json", "Decode" ]
+                                       "Decoder"
+                                       [ Type.list (Type.var "a") ]
+                                  )
+                             )
+                     }
                 )
                 [ listArg ]
     , array =
         \arrayArg ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Json", "Decode" ]
-                    , name = "array"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.namedWith
-                                    [ "Json", "Decode" ]
-                                    "Decoder"
-                                    [ Type.var "a" ]
-                                ]
-                                (Type.namedWith
-                                    [ "Json", "Decode" ]
-                                    "Decoder"
-                                    [ Type.namedWith
-                                        [ "Array" ]
-                                        "Array"
-                                        [ Type.var "a" ]
-                                    ]
-                                )
-                            )
-                    }
+                     { importFrom = [ "Json", "Decode" ]
+                     , name = "array"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.namedWith
+                                      [ "Json", "Decode" ]
+                                      "Decoder"
+                                      [ Type.var "a" ]
+                                  ]
+                                  (Type.namedWith
+                                       [ "Json", "Decode" ]
+                                       "Decoder"
+                                       [ Type.namedWith
+                                           [ "Array" ]
+                                           "Array"
+                                           [ Type.var "a" ]
+                                       ]
+                                  )
+                             )
+                     }
                 )
                 [ arrayArg ]
     , dict =
         \dictArg ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Json", "Decode" ]
-                    , name = "dict"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.namedWith
-                                    [ "Json", "Decode" ]
-                                    "Decoder"
-                                    [ Type.var "a" ]
-                                ]
-                                (Type.namedWith
-                                    [ "Json", "Decode" ]
-                                    "Decoder"
-                                    [ Type.namedWith
-                                        [ "Dict" ]
-                                        "Dict"
-                                        [ Type.string, Type.var "a" ]
-                                    ]
-                                )
-                            )
-                    }
+                     { importFrom = [ "Json", "Decode" ]
+                     , name = "dict"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.namedWith
+                                      [ "Json", "Decode" ]
+                                      "Decoder"
+                                      [ Type.var "a" ]
+                                  ]
+                                  (Type.namedWith
+                                       [ "Json", "Decode" ]
+                                       "Decoder"
+                                       [ Type.namedWith
+                                           [ "Dict" ]
+                                           "Dict"
+                                           [ Type.string, Type.var "a" ]
+                                       ]
+                                  )
+                             )
+                     }
                 )
                 [ dictArg ]
     , keyValuePairs =
         \keyValuePairsArg ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Json", "Decode" ]
-                    , name = "keyValuePairs"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.namedWith
-                                    [ "Json", "Decode" ]
-                                    "Decoder"
-                                    [ Type.var "a" ]
-                                ]
-                                (Type.namedWith
-                                    [ "Json", "Decode" ]
-                                    "Decoder"
-                                    [ Type.list
-                                        (Type.tuple Type.string (Type.var "a"))
-                                    ]
-                                )
-                            )
-                    }
+                     { importFrom = [ "Json", "Decode" ]
+                     , name = "keyValuePairs"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.namedWith
+                                      [ "Json", "Decode" ]
+                                      "Decoder"
+                                      [ Type.var "a" ]
+                                  ]
+                                  (Type.namedWith
+                                       [ "Json", "Decode" ]
+                                       "Decoder"
+                                       [ Type.list
+                                           (Type.tuple
+                                              Type.string
+                                              (Type.var "a")
+                                           )
+                                       ]
+                                  )
+                             )
+                     }
                 )
                 [ keyValuePairsArg ]
     , oneOrMore =
         \oneOrMoreArg oneOrMoreArg0 ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Json", "Decode" ]
-                    , name = "oneOrMore"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.function
-                                    [ Type.var "a", Type.list (Type.var "a") ]
-                                    (Type.var "value")
-                                , Type.namedWith
-                                    [ "Json", "Decode" ]
-                                    "Decoder"
-                                    [ Type.var "a" ]
-                                ]
-                                (Type.namedWith
-                                    [ "Json", "Decode" ]
-                                    "Decoder"
-                                    [ Type.var "value" ]
-                                )
-                            )
-                    }
+                     { importFrom = [ "Json", "Decode" ]
+                     , name = "oneOrMore"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.function
+                                      [ Type.var "a", Type.list (Type.var "a") ]
+                                      (Type.var "value")
+                                  , Type.namedWith
+                                      [ "Json", "Decode" ]
+                                      "Decoder"
+                                      [ Type.var "a" ]
+                                  ]
+                                  (Type.namedWith
+                                       [ "Json", "Decode" ]
+                                       "Decoder"
+                                       [ Type.var "value" ]
+                                  )
+                             )
+                     }
                 )
                 [ oneOrMoreArg, oneOrMoreArg0 ]
     , field =
         \fieldArg fieldArg0 ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Json", "Decode" ]
-                    , name = "field"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.string
-                                , Type.namedWith
-                                    [ "Json", "Decode" ]
-                                    "Decoder"
-                                    [ Type.var "a" ]
-                                ]
-                                (Type.namedWith
-                                    [ "Json", "Decode" ]
-                                    "Decoder"
-                                    [ Type.var "a" ]
-                                )
-                            )
-                    }
+                     { importFrom = [ "Json", "Decode" ]
+                     , name = "field"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.string
+                                  , Type.namedWith
+                                      [ "Json", "Decode" ]
+                                      "Decoder"
+                                      [ Type.var "a" ]
+                                  ]
+                                  (Type.namedWith
+                                       [ "Json", "Decode" ]
+                                       "Decoder"
+                                       [ Type.var "a" ]
+                                  )
+                             )
+                     }
                 )
                 [ fieldArg, fieldArg0 ]
     , at =
         \atArg atArg0 ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Json", "Decode" ]
-                    , name = "at"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.list Type.string
-                                , Type.namedWith
-                                    [ "Json", "Decode" ]
-                                    "Decoder"
-                                    [ Type.var "a" ]
-                                ]
-                                (Type.namedWith
-                                    [ "Json", "Decode" ]
-                                    "Decoder"
-                                    [ Type.var "a" ]
-                                )
-                            )
-                    }
+                     { importFrom = [ "Json", "Decode" ]
+                     , name = "at"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.list Type.string
+                                  , Type.namedWith
+                                      [ "Json", "Decode" ]
+                                      "Decoder"
+                                      [ Type.var "a" ]
+                                  ]
+                                  (Type.namedWith
+                                       [ "Json", "Decode" ]
+                                       "Decoder"
+                                       [ Type.var "a" ]
+                                  )
+                             )
+                     }
                 )
                 [ atArg, atArg0 ]
     , index =
         \indexArg indexArg0 ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Json", "Decode" ]
-                    , name = "index"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.int
-                                , Type.namedWith
-                                    [ "Json", "Decode" ]
-                                    "Decoder"
-                                    [ Type.var "a" ]
-                                ]
-                                (Type.namedWith
-                                    [ "Json", "Decode" ]
-                                    "Decoder"
-                                    [ Type.var "a" ]
-                                )
-                            )
-                    }
+                     { importFrom = [ "Json", "Decode" ]
+                     , name = "index"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.int
+                                  , Type.namedWith
+                                      [ "Json", "Decode" ]
+                                      "Decoder"
+                                      [ Type.var "a" ]
+                                  ]
+                                  (Type.namedWith
+                                       [ "Json", "Decode" ]
+                                       "Decoder"
+                                       [ Type.var "a" ]
+                                  )
+                             )
+                     }
                 )
                 [ indexArg, indexArg0 ]
     , maybe =
         \maybeArg ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Json", "Decode" ]
-                    , name = "maybe"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.namedWith
-                                    [ "Json", "Decode" ]
-                                    "Decoder"
-                                    [ Type.var "a" ]
-                                ]
-                                (Type.namedWith
-                                    [ "Json", "Decode" ]
-                                    "Decoder"
-                                    [ Type.maybe (Type.var "a") ]
-                                )
-                            )
-                    }
+                     { importFrom = [ "Json", "Decode" ]
+                     , name = "maybe"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.namedWith
+                                      [ "Json", "Decode" ]
+                                      "Decoder"
+                                      [ Type.var "a" ]
+                                  ]
+                                  (Type.namedWith
+                                       [ "Json", "Decode" ]
+                                       "Decoder"
+                                       [ Type.maybe (Type.var "a") ]
+                                  )
+                             )
+                     }
                 )
                 [ maybeArg ]
     , oneOf =
         \oneOfArg ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Json", "Decode" ]
-                    , name = "oneOf"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.list
-                                    (Type.namedWith
-                                        [ "Json", "Decode" ]
-                                        "Decoder"
-                                        [ Type.var "a" ]
-                                    )
-                                ]
-                                (Type.namedWith
-                                    [ "Json", "Decode" ]
-                                    "Decoder"
-                                    [ Type.var "a" ]
-                                )
-                            )
-                    }
+                     { importFrom = [ "Json", "Decode" ]
+                     , name = "oneOf"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.list
+                                      (Type.namedWith
+                                         [ "Json", "Decode" ]
+                                         "Decoder"
+                                         [ Type.var "a" ]
+                                      )
+                                  ]
+                                  (Type.namedWith
+                                       [ "Json", "Decode" ]
+                                       "Decoder"
+                                       [ Type.var "a" ]
+                                  )
+                             )
+                     }
                 )
                 [ oneOfArg ]
     , decodeString =
         \decodeStringArg decodeStringArg0 ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Json", "Decode" ]
-                    , name = "decodeString"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.namedWith
-                                    [ "Json", "Decode" ]
-                                    "Decoder"
-                                    [ Type.var "a" ]
-                                , Type.string
-                                ]
-                                (Type.namedWith
-                                    [ "Result" ]
-                                    "Result"
-                                    [ Type.namedWith
-                                        [ "Json", "Decode" ]
-                                        "Error"
-                                        []
-                                    , Type.var "a"
-                                    ]
-                                )
-                            )
-                    }
+                     { importFrom = [ "Json", "Decode" ]
+                     , name = "decodeString"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.namedWith
+                                      [ "Json", "Decode" ]
+                                      "Decoder"
+                                      [ Type.var "a" ]
+                                  , Type.string
+                                  ]
+                                  (Type.namedWith
+                                       [ "Result" ]
+                                       "Result"
+                                       [ Type.namedWith
+                                           [ "Json", "Decode" ]
+                                           "Error"
+                                           []
+                                       , Type.var "a"
+                                       ]
+                                  )
+                             )
+                     }
                 )
                 [ decodeStringArg, decodeStringArg0 ]
     , decodeValue =
         \decodeValueArg decodeValueArg0 ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Json", "Decode" ]
-                    , name = "decodeValue"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.namedWith
-                                    [ "Json", "Decode" ]
-                                    "Decoder"
-                                    [ Type.var "a" ]
-                                , Type.namedWith [ "Json", "Decode" ] "Value" []
-                                ]
-                                (Type.namedWith
-                                    [ "Result" ]
-                                    "Result"
-                                    [ Type.namedWith
-                                        [ "Json", "Decode" ]
-                                        "Error"
-                                        []
-                                    , Type.var "a"
-                                    ]
-                                )
-                            )
-                    }
+                     { importFrom = [ "Json", "Decode" ]
+                     , name = "decodeValue"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.namedWith
+                                      [ "Json", "Decode" ]
+                                      "Decoder"
+                                      [ Type.var "a" ]
+                                  , Type.namedWith
+                                      [ "Json", "Decode" ]
+                                      "Value"
+                                      []
+                                  ]
+                                  (Type.namedWith
+                                       [ "Result" ]
+                                       "Result"
+                                       [ Type.namedWith
+                                           [ "Json", "Decode" ]
+                                           "Error"
+                                           []
+                                       , Type.var "a"
+                                       ]
+                                  )
+                             )
+                     }
                 )
                 [ decodeValueArg, decodeValueArg0 ]
     , errorToString =
         \errorToStringArg ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Json", "Decode" ]
-                    , name = "errorToString"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.namedWith [ "Json", "Decode" ] "Error" []
-                                ]
-                                Type.string
-                            )
-                    }
+                     { importFrom = [ "Json", "Decode" ]
+                     , name = "errorToString"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.namedWith
+                                      [ "Json", "Decode" ]
+                                      "Error"
+                                      []
+                                  ]
+                                  Type.string
+                             )
+                     }
                 )
                 [ errorToStringArg ]
     , map =
         \mapArg mapArg0 ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Json", "Decode" ]
-                    , name = "map"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.function
-                                    [ Type.var "a" ]
-                                    (Type.var "value")
-                                , Type.namedWith
-                                    [ "Json", "Decode" ]
-                                    "Decoder"
-                                    [ Type.var "a" ]
-                                ]
-                                (Type.namedWith
-                                    [ "Json", "Decode" ]
-                                    "Decoder"
-                                    [ Type.var "value" ]
-                                )
-                            )
-                    }
+                     { importFrom = [ "Json", "Decode" ]
+                     , name = "map"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.function
+                                      [ Type.var "a" ]
+                                      (Type.var "value")
+                                  , Type.namedWith
+                                      [ "Json", "Decode" ]
+                                      "Decoder"
+                                      [ Type.var "a" ]
+                                  ]
+                                  (Type.namedWith
+                                       [ "Json", "Decode" ]
+                                       "Decoder"
+                                       [ Type.var "value" ]
+                                  )
+                             )
+                     }
                 )
                 [ mapArg, mapArg0 ]
     , map2 =
         \map2Arg map2Arg0 map2Arg1 ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Json", "Decode" ]
-                    , name = "map2"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.function
-                                    [ Type.var "a", Type.var "b" ]
-                                    (Type.var "value")
-                                , Type.namedWith
-                                    [ "Json", "Decode" ]
-                                    "Decoder"
-                                    [ Type.var "a" ]
-                                , Type.namedWith
-                                    [ "Json", "Decode" ]
-                                    "Decoder"
-                                    [ Type.var "b" ]
-                                ]
-                                (Type.namedWith
-                                    [ "Json", "Decode" ]
-                                    "Decoder"
-                                    [ Type.var "value" ]
-                                )
-                            )
-                    }
+                     { importFrom = [ "Json", "Decode" ]
+                     , name = "map2"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.function
+                                      [ Type.var "a", Type.var "b" ]
+                                      (Type.var "value")
+                                  , Type.namedWith
+                                      [ "Json", "Decode" ]
+                                      "Decoder"
+                                      [ Type.var "a" ]
+                                  , Type.namedWith
+                                      [ "Json", "Decode" ]
+                                      "Decoder"
+                                      [ Type.var "b" ]
+                                  ]
+                                  (Type.namedWith
+                                       [ "Json", "Decode" ]
+                                       "Decoder"
+                                       [ Type.var "value" ]
+                                  )
+                             )
+                     }
                 )
                 [ map2Arg, map2Arg0, map2Arg1 ]
     , map3 =
         \map3Arg map3Arg0 map3Arg1 map3Arg2 ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Json", "Decode" ]
-                    , name = "map3"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.function
-                                    [ Type.var "a", Type.var "b", Type.var "c" ]
-                                    (Type.var "value")
-                                , Type.namedWith
-                                    [ "Json", "Decode" ]
-                                    "Decoder"
-                                    [ Type.var "a" ]
-                                , Type.namedWith
-                                    [ "Json", "Decode" ]
-                                    "Decoder"
-                                    [ Type.var "b" ]
-                                , Type.namedWith
-                                    [ "Json", "Decode" ]
-                                    "Decoder"
-                                    [ Type.var "c" ]
-                                ]
-                                (Type.namedWith
-                                    [ "Json", "Decode" ]
-                                    "Decoder"
-                                    [ Type.var "value" ]
-                                )
-                            )
-                    }
+                     { importFrom = [ "Json", "Decode" ]
+                     , name = "map3"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.function
+                                      [ Type.var "a"
+                                      , Type.var "b"
+                                      , Type.var "c"
+                                      ]
+                                      (Type.var "value")
+                                  , Type.namedWith
+                                      [ "Json", "Decode" ]
+                                      "Decoder"
+                                      [ Type.var "a" ]
+                                  , Type.namedWith
+                                      [ "Json", "Decode" ]
+                                      "Decoder"
+                                      [ Type.var "b" ]
+                                  , Type.namedWith
+                                      [ "Json", "Decode" ]
+                                      "Decoder"
+                                      [ Type.var "c" ]
+                                  ]
+                                  (Type.namedWith
+                                       [ "Json", "Decode" ]
+                                       "Decoder"
+                                       [ Type.var "value" ]
+                                  )
+                             )
+                     }
                 )
                 [ map3Arg, map3Arg0, map3Arg1, map3Arg2 ]
     , map4 =
         \map4Arg map4Arg0 map4Arg1 map4Arg2 map4Arg3 ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Json", "Decode" ]
-                    , name = "map4"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.function
-                                    [ Type.var "a"
-                                    , Type.var "b"
-                                    , Type.var "c"
-                                    , Type.var "d"
-                                    ]
-                                    (Type.var "value")
-                                , Type.namedWith
-                                    [ "Json", "Decode" ]
-                                    "Decoder"
-                                    [ Type.var "a" ]
-                                , Type.namedWith
-                                    [ "Json", "Decode" ]
-                                    "Decoder"
-                                    [ Type.var "b" ]
-                                , Type.namedWith
-                                    [ "Json", "Decode" ]
-                                    "Decoder"
-                                    [ Type.var "c" ]
-                                , Type.namedWith
-                                    [ "Json", "Decode" ]
-                                    "Decoder"
-                                    [ Type.var "d" ]
-                                ]
-                                (Type.namedWith
-                                    [ "Json", "Decode" ]
-                                    "Decoder"
-                                    [ Type.var "value" ]
-                                )
-                            )
-                    }
+                     { importFrom = [ "Json", "Decode" ]
+                     , name = "map4"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.function
+                                      [ Type.var "a"
+                                      , Type.var "b"
+                                      , Type.var "c"
+                                      , Type.var "d"
+                                      ]
+                                      (Type.var "value")
+                                  , Type.namedWith
+                                      [ "Json", "Decode" ]
+                                      "Decoder"
+                                      [ Type.var "a" ]
+                                  , Type.namedWith
+                                      [ "Json", "Decode" ]
+                                      "Decoder"
+                                      [ Type.var "b" ]
+                                  , Type.namedWith
+                                      [ "Json", "Decode" ]
+                                      "Decoder"
+                                      [ Type.var "c" ]
+                                  , Type.namedWith
+                                      [ "Json", "Decode" ]
+                                      "Decoder"
+                                      [ Type.var "d" ]
+                                  ]
+                                  (Type.namedWith
+                                       [ "Json", "Decode" ]
+                                       "Decoder"
+                                       [ Type.var "value" ]
+                                  )
+                             )
+                     }
                 )
                 [ map4Arg, map4Arg0, map4Arg1, map4Arg2, map4Arg3 ]
     , map5 =
         \map5Arg map5Arg0 map5Arg1 map5Arg2 map5Arg3 map5Arg4 ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Json", "Decode" ]
-                    , name = "map5"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.function
-                                    [ Type.var "a"
-                                    , Type.var "b"
-                                    , Type.var "c"
-                                    , Type.var "d"
-                                    , Type.var "e"
-                                    ]
-                                    (Type.var "value")
-                                , Type.namedWith
-                                    [ "Json", "Decode" ]
-                                    "Decoder"
-                                    [ Type.var "a" ]
-                                , Type.namedWith
-                                    [ "Json", "Decode" ]
-                                    "Decoder"
-                                    [ Type.var "b" ]
-                                , Type.namedWith
-                                    [ "Json", "Decode" ]
-                                    "Decoder"
-                                    [ Type.var "c" ]
-                                , Type.namedWith
-                                    [ "Json", "Decode" ]
-                                    "Decoder"
-                                    [ Type.var "d" ]
-                                , Type.namedWith
-                                    [ "Json", "Decode" ]
-                                    "Decoder"
-                                    [ Type.var "e" ]
-                                ]
-                                (Type.namedWith
-                                    [ "Json", "Decode" ]
-                                    "Decoder"
-                                    [ Type.var "value" ]
-                                )
-                            )
-                    }
+                     { importFrom = [ "Json", "Decode" ]
+                     , name = "map5"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.function
+                                      [ Type.var "a"
+                                      , Type.var "b"
+                                      , Type.var "c"
+                                      , Type.var "d"
+                                      , Type.var "e"
+                                      ]
+                                      (Type.var "value")
+                                  , Type.namedWith
+                                      [ "Json", "Decode" ]
+                                      "Decoder"
+                                      [ Type.var "a" ]
+                                  , Type.namedWith
+                                      [ "Json", "Decode" ]
+                                      "Decoder"
+                                      [ Type.var "b" ]
+                                  , Type.namedWith
+                                      [ "Json", "Decode" ]
+                                      "Decoder"
+                                      [ Type.var "c" ]
+                                  , Type.namedWith
+                                      [ "Json", "Decode" ]
+                                      "Decoder"
+                                      [ Type.var "d" ]
+                                  , Type.namedWith
+                                      [ "Json", "Decode" ]
+                                      "Decoder"
+                                      [ Type.var "e" ]
+                                  ]
+                                  (Type.namedWith
+                                       [ "Json", "Decode" ]
+                                       "Decoder"
+                                       [ Type.var "value" ]
+                                  )
+                             )
+                     }
                 )
                 [ map5Arg, map5Arg0, map5Arg1, map5Arg2, map5Arg3, map5Arg4 ]
     , map6 =
         \map6Arg map6Arg0 map6Arg1 map6Arg2 map6Arg3 map6Arg4 map6Arg5 ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Json", "Decode" ]
-                    , name = "map6"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.function
-                                    [ Type.var "a"
-                                    , Type.var "b"
-                                    , Type.var "c"
-                                    , Type.var "d"
-                                    , Type.var "e"
-                                    , Type.var "f"
-                                    ]
-                                    (Type.var "value")
-                                , Type.namedWith
-                                    [ "Json", "Decode" ]
-                                    "Decoder"
-                                    [ Type.var "a" ]
-                                , Type.namedWith
-                                    [ "Json", "Decode" ]
-                                    "Decoder"
-                                    [ Type.var "b" ]
-                                , Type.namedWith
-                                    [ "Json", "Decode" ]
-                                    "Decoder"
-                                    [ Type.var "c" ]
-                                , Type.namedWith
-                                    [ "Json", "Decode" ]
-                                    "Decoder"
-                                    [ Type.var "d" ]
-                                , Type.namedWith
-                                    [ "Json", "Decode" ]
-                                    "Decoder"
-                                    [ Type.var "e" ]
-                                , Type.namedWith
-                                    [ "Json", "Decode" ]
-                                    "Decoder"
-                                    [ Type.var "f" ]
-                                ]
-                                (Type.namedWith
-                                    [ "Json", "Decode" ]
-                                    "Decoder"
-                                    [ Type.var "value" ]
-                                )
-                            )
-                    }
+                     { importFrom = [ "Json", "Decode" ]
+                     , name = "map6"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.function
+                                      [ Type.var "a"
+                                      , Type.var "b"
+                                      , Type.var "c"
+                                      , Type.var "d"
+                                      , Type.var "e"
+                                      , Type.var "f"
+                                      ]
+                                      (Type.var "value")
+                                  , Type.namedWith
+                                      [ "Json", "Decode" ]
+                                      "Decoder"
+                                      [ Type.var "a" ]
+                                  , Type.namedWith
+                                      [ "Json", "Decode" ]
+                                      "Decoder"
+                                      [ Type.var "b" ]
+                                  , Type.namedWith
+                                      [ "Json", "Decode" ]
+                                      "Decoder"
+                                      [ Type.var "c" ]
+                                  , Type.namedWith
+                                      [ "Json", "Decode" ]
+                                      "Decoder"
+                                      [ Type.var "d" ]
+                                  , Type.namedWith
+                                      [ "Json", "Decode" ]
+                                      "Decoder"
+                                      [ Type.var "e" ]
+                                  , Type.namedWith
+                                      [ "Json", "Decode" ]
+                                      "Decoder"
+                                      [ Type.var "f" ]
+                                  ]
+                                  (Type.namedWith
+                                       [ "Json", "Decode" ]
+                                       "Decoder"
+                                       [ Type.var "value" ]
+                                  )
+                             )
+                     }
                 )
                 [ map6Arg
                 , map6Arg0
@@ -2444,57 +2473,57 @@ call_ =
         \map7Arg map7Arg0 map7Arg1 map7Arg2 map7Arg3 map7Arg4 map7Arg5 map7Arg6 ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Json", "Decode" ]
-                    , name = "map7"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.function
-                                    [ Type.var "a"
-                                    , Type.var "b"
-                                    , Type.var "c"
-                                    , Type.var "d"
-                                    , Type.var "e"
-                                    , Type.var "f"
-                                    , Type.var "g"
-                                    ]
-                                    (Type.var "value")
-                                , Type.namedWith
-                                    [ "Json", "Decode" ]
-                                    "Decoder"
-                                    [ Type.var "a" ]
-                                , Type.namedWith
-                                    [ "Json", "Decode" ]
-                                    "Decoder"
-                                    [ Type.var "b" ]
-                                , Type.namedWith
-                                    [ "Json", "Decode" ]
-                                    "Decoder"
-                                    [ Type.var "c" ]
-                                , Type.namedWith
-                                    [ "Json", "Decode" ]
-                                    "Decoder"
-                                    [ Type.var "d" ]
-                                , Type.namedWith
-                                    [ "Json", "Decode" ]
-                                    "Decoder"
-                                    [ Type.var "e" ]
-                                , Type.namedWith
-                                    [ "Json", "Decode" ]
-                                    "Decoder"
-                                    [ Type.var "f" ]
-                                , Type.namedWith
-                                    [ "Json", "Decode" ]
-                                    "Decoder"
-                                    [ Type.var "g" ]
-                                ]
-                                (Type.namedWith
-                                    [ "Json", "Decode" ]
-                                    "Decoder"
-                                    [ Type.var "value" ]
-                                )
-                            )
-                    }
+                     { importFrom = [ "Json", "Decode" ]
+                     , name = "map7"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.function
+                                      [ Type.var "a"
+                                      , Type.var "b"
+                                      , Type.var "c"
+                                      , Type.var "d"
+                                      , Type.var "e"
+                                      , Type.var "f"
+                                      , Type.var "g"
+                                      ]
+                                      (Type.var "value")
+                                  , Type.namedWith
+                                      [ "Json", "Decode" ]
+                                      "Decoder"
+                                      [ Type.var "a" ]
+                                  , Type.namedWith
+                                      [ "Json", "Decode" ]
+                                      "Decoder"
+                                      [ Type.var "b" ]
+                                  , Type.namedWith
+                                      [ "Json", "Decode" ]
+                                      "Decoder"
+                                      [ Type.var "c" ]
+                                  , Type.namedWith
+                                      [ "Json", "Decode" ]
+                                      "Decoder"
+                                      [ Type.var "d" ]
+                                  , Type.namedWith
+                                      [ "Json", "Decode" ]
+                                      "Decoder"
+                                      [ Type.var "e" ]
+                                  , Type.namedWith
+                                      [ "Json", "Decode" ]
+                                      "Decoder"
+                                      [ Type.var "f" ]
+                                  , Type.namedWith
+                                      [ "Json", "Decode" ]
+                                      "Decoder"
+                                      [ Type.var "g" ]
+                                  ]
+                                  (Type.namedWith
+                                       [ "Json", "Decode" ]
+                                       "Decoder"
+                                       [ Type.var "value" ]
+                                  )
+                             )
+                     }
                 )
                 [ map7Arg
                 , map7Arg0
@@ -2509,62 +2538,62 @@ call_ =
         \map8Arg map8Arg0 map8Arg1 map8Arg2 map8Arg3 map8Arg4 map8Arg5 map8Arg6 map8Arg7 ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Json", "Decode" ]
-                    , name = "map8"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.function
-                                    [ Type.var "a"
-                                    , Type.var "b"
-                                    , Type.var "c"
-                                    , Type.var "d"
-                                    , Type.var "e"
-                                    , Type.var "f"
-                                    , Type.var "g"
-                                    , Type.var "h"
-                                    ]
-                                    (Type.var "value")
-                                , Type.namedWith
-                                    [ "Json", "Decode" ]
-                                    "Decoder"
-                                    [ Type.var "a" ]
-                                , Type.namedWith
-                                    [ "Json", "Decode" ]
-                                    "Decoder"
-                                    [ Type.var "b" ]
-                                , Type.namedWith
-                                    [ "Json", "Decode" ]
-                                    "Decoder"
-                                    [ Type.var "c" ]
-                                , Type.namedWith
-                                    [ "Json", "Decode" ]
-                                    "Decoder"
-                                    [ Type.var "d" ]
-                                , Type.namedWith
-                                    [ "Json", "Decode" ]
-                                    "Decoder"
-                                    [ Type.var "e" ]
-                                , Type.namedWith
-                                    [ "Json", "Decode" ]
-                                    "Decoder"
-                                    [ Type.var "f" ]
-                                , Type.namedWith
-                                    [ "Json", "Decode" ]
-                                    "Decoder"
-                                    [ Type.var "g" ]
-                                , Type.namedWith
-                                    [ "Json", "Decode" ]
-                                    "Decoder"
-                                    [ Type.var "h" ]
-                                ]
-                                (Type.namedWith
-                                    [ "Json", "Decode" ]
-                                    "Decoder"
-                                    [ Type.var "value" ]
-                                )
-                            )
-                    }
+                     { importFrom = [ "Json", "Decode" ]
+                     , name = "map8"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.function
+                                      [ Type.var "a"
+                                      , Type.var "b"
+                                      , Type.var "c"
+                                      , Type.var "d"
+                                      , Type.var "e"
+                                      , Type.var "f"
+                                      , Type.var "g"
+                                      , Type.var "h"
+                                      ]
+                                      (Type.var "value")
+                                  , Type.namedWith
+                                      [ "Json", "Decode" ]
+                                      "Decoder"
+                                      [ Type.var "a" ]
+                                  , Type.namedWith
+                                      [ "Json", "Decode" ]
+                                      "Decoder"
+                                      [ Type.var "b" ]
+                                  , Type.namedWith
+                                      [ "Json", "Decode" ]
+                                      "Decoder"
+                                      [ Type.var "c" ]
+                                  , Type.namedWith
+                                      [ "Json", "Decode" ]
+                                      "Decoder"
+                                      [ Type.var "d" ]
+                                  , Type.namedWith
+                                      [ "Json", "Decode" ]
+                                      "Decoder"
+                                      [ Type.var "e" ]
+                                  , Type.namedWith
+                                      [ "Json", "Decode" ]
+                                      "Decoder"
+                                      [ Type.var "f" ]
+                                  , Type.namedWith
+                                      [ "Json", "Decode" ]
+                                      "Decoder"
+                                      [ Type.var "g" ]
+                                  , Type.namedWith
+                                      [ "Json", "Decode" ]
+                                      "Decoder"
+                                      [ Type.var "h" ]
+                                  ]
+                                  (Type.namedWith
+                                       [ "Json", "Decode" ]
+                                       "Decoder"
+                                       [ Type.var "value" ]
+                                  )
+                             )
+                     }
                 )
                 [ map8Arg
                 , map8Arg0
@@ -2580,113 +2609,113 @@ call_ =
         \lazyArg ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Json", "Decode" ]
-                    , name = "lazy"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.function
-                                    [ Type.unit ]
-                                    (Type.namedWith
-                                        [ "Json", "Decode" ]
-                                        "Decoder"
-                                        [ Type.var "a" ]
-                                    )
-                                ]
-                                (Type.namedWith
-                                    [ "Json", "Decode" ]
-                                    "Decoder"
-                                    [ Type.var "a" ]
-                                )
-                            )
-                    }
+                     { importFrom = [ "Json", "Decode" ]
+                     , name = "lazy"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.function
+                                      [ Type.unit ]
+                                      (Type.namedWith
+                                         [ "Json", "Decode" ]
+                                         "Decoder"
+                                         [ Type.var "a" ]
+                                      )
+                                  ]
+                                  (Type.namedWith
+                                       [ "Json", "Decode" ]
+                                       "Decoder"
+                                       [ Type.var "a" ]
+                                  )
+                             )
+                     }
                 )
                 [ lazyArg ]
     , null =
         \nullArg ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Json", "Decode" ]
-                    , name = "null"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.var "a" ]
-                                (Type.namedWith
-                                    [ "Json", "Decode" ]
-                                    "Decoder"
-                                    [ Type.var "a" ]
-                                )
-                            )
-                    }
+                     { importFrom = [ "Json", "Decode" ]
+                     , name = "null"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.var "a" ]
+                                  (Type.namedWith
+                                       [ "Json", "Decode" ]
+                                       "Decoder"
+                                       [ Type.var "a" ]
+                                  )
+                             )
+                     }
                 )
                 [ nullArg ]
     , succeed =
         \succeedArg ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Json", "Decode" ]
-                    , name = "succeed"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.var "a" ]
-                                (Type.namedWith
-                                    [ "Json", "Decode" ]
-                                    "Decoder"
-                                    [ Type.var "a" ]
-                                )
-                            )
-                    }
+                     { importFrom = [ "Json", "Decode" ]
+                     , name = "succeed"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.var "a" ]
+                                  (Type.namedWith
+                                       [ "Json", "Decode" ]
+                                       "Decoder"
+                                       [ Type.var "a" ]
+                                  )
+                             )
+                     }
                 )
                 [ succeedArg ]
     , fail =
         \failArg ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Json", "Decode" ]
-                    , name = "fail"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.string ]
-                                (Type.namedWith
-                                    [ "Json", "Decode" ]
-                                    "Decoder"
-                                    [ Type.var "a" ]
-                                )
-                            )
-                    }
+                     { importFrom = [ "Json", "Decode" ]
+                     , name = "fail"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.string ]
+                                  (Type.namedWith
+                                       [ "Json", "Decode" ]
+                                       "Decoder"
+                                       [ Type.var "a" ]
+                                  )
+                             )
+                     }
                 )
                 [ failArg ]
     , andThen =
         \andThenArg andThenArg0 ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Json", "Decode" ]
-                    , name = "andThen"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.function
-                                    [ Type.var "a" ]
-                                    (Type.namedWith
-                                        [ "Json", "Decode" ]
-                                        "Decoder"
-                                        [ Type.var "b" ]
-                                    )
-                                , Type.namedWith
-                                    [ "Json", "Decode" ]
-                                    "Decoder"
-                                    [ Type.var "a" ]
-                                ]
-                                (Type.namedWith
-                                    [ "Json", "Decode" ]
-                                    "Decoder"
-                                    [ Type.var "b" ]
-                                )
-                            )
-                    }
+                     { importFrom = [ "Json", "Decode" ]
+                     , name = "andThen"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.function
+                                      [ Type.var "a" ]
+                                      (Type.namedWith
+                                         [ "Json", "Decode" ]
+                                         "Decoder"
+                                         [ Type.var "b" ]
+                                      )
+                                  , Type.namedWith
+                                      [ "Json", "Decode" ]
+                                      "Decoder"
+                                      [ Type.var "a" ]
+                                  ]
+                                  (Type.namedWith
+                                       [ "Json", "Decode" ]
+                                       "Decoder"
+                                       [ Type.var "b" ]
+                                  )
+                             )
+                     }
                 )
                 [ andThenArg, andThenArg0 ]
     }
@@ -2734,9 +2763,9 @@ values_ =
             , annotation =
                 Just
                     (Type.namedWith
-                        [ "Json", "Decode" ]
-                        "Decoder"
-                        [ Type.string ]
+                         [ "Json", "Decode" ]
+                         "Decoder"
+                         [ Type.string ]
                     )
             }
     , bool =
@@ -2763,9 +2792,9 @@ values_ =
             , annotation =
                 Just
                     (Type.namedWith
-                        [ "Json", "Decode" ]
-                        "Decoder"
-                        [ Type.float ]
+                         [ "Json", "Decode" ]
+                         "Decoder"
+                         [ Type.float ]
                     )
             }
     , nullable =
@@ -2775,16 +2804,16 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "a" ]
-                        ]
-                        (Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.maybe (Type.var "a") ]
-                        )
+                         [ Type.namedWith
+                             [ "Json", "Decode" ]
+                             "Decoder"
+                             [ Type.var "a" ]
+                         ]
+                         (Type.namedWith
+                              [ "Json", "Decode" ]
+                              "Decoder"
+                              [ Type.maybe (Type.var "a") ]
+                         )
                     )
             }
     , list =
@@ -2794,16 +2823,16 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "a" ]
-                        ]
-                        (Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.list (Type.var "a") ]
-                        )
+                         [ Type.namedWith
+                             [ "Json", "Decode" ]
+                             "Decoder"
+                             [ Type.var "a" ]
+                         ]
+                         (Type.namedWith
+                              [ "Json", "Decode" ]
+                              "Decoder"
+                              [ Type.list (Type.var "a") ]
+                         )
                     )
             }
     , array =
@@ -2813,20 +2842,20 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "a" ]
-                        ]
-                        (Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.namedWith
-                                [ "Array" ]
-                                "Array"
-                                [ Type.var "a" ]
-                            ]
-                        )
+                         [ Type.namedWith
+                             [ "Json", "Decode" ]
+                             "Decoder"
+                             [ Type.var "a" ]
+                         ]
+                         (Type.namedWith
+                              [ "Json", "Decode" ]
+                              "Decoder"
+                              [ Type.namedWith
+                                  [ "Array" ]
+                                  "Array"
+                                  [ Type.var "a" ]
+                              ]
+                         )
                     )
             }
     , dict =
@@ -2836,20 +2865,20 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "a" ]
-                        ]
-                        (Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.namedWith
-                                [ "Dict" ]
-                                "Dict"
-                                [ Type.string, Type.var "a" ]
-                            ]
-                        )
+                         [ Type.namedWith
+                             [ "Json", "Decode" ]
+                             "Decoder"
+                             [ Type.var "a" ]
+                         ]
+                         (Type.namedWith
+                              [ "Json", "Decode" ]
+                              "Decoder"
+                              [ Type.namedWith
+                                  [ "Dict" ]
+                                  "Dict"
+                                  [ Type.string, Type.var "a" ]
+                              ]
+                         )
                     )
             }
     , keyValuePairs =
@@ -2859,17 +2888,18 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "a" ]
-                        ]
-                        (Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.list (Type.tuple Type.string (Type.var "a"))
-                            ]
-                        )
+                         [ Type.namedWith
+                             [ "Json", "Decode" ]
+                             "Decoder"
+                             [ Type.var "a" ]
+                         ]
+                         (Type.namedWith
+                              [ "Json", "Decode" ]
+                              "Decoder"
+                              [ Type.list
+                                  (Type.tuple Type.string (Type.var "a"))
+                              ]
+                         )
                     )
             }
     , oneOrMore =
@@ -2879,19 +2909,19 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.function
-                            [ Type.var "a", Type.list (Type.var "a") ]
-                            (Type.var "value")
-                        , Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "a" ]
-                        ]
-                        (Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "value" ]
-                        )
+                         [ Type.function
+                             [ Type.var "a", Type.list (Type.var "a") ]
+                             (Type.var "value")
+                         , Type.namedWith
+                             [ "Json", "Decode" ]
+                             "Decoder"
+                             [ Type.var "a" ]
+                         ]
+                         (Type.namedWith
+                              [ "Json", "Decode" ]
+                              "Decoder"
+                              [ Type.var "value" ]
+                         )
                     )
             }
     , field =
@@ -2901,17 +2931,17 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.string
-                        , Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "a" ]
-                        ]
-                        (Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "a" ]
-                        )
+                         [ Type.string
+                         , Type.namedWith
+                             [ "Json", "Decode" ]
+                             "Decoder"
+                             [ Type.var "a" ]
+                         ]
+                         (Type.namedWith
+                              [ "Json", "Decode" ]
+                              "Decoder"
+                              [ Type.var "a" ]
+                         )
                     )
             }
     , at =
@@ -2921,17 +2951,17 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.list Type.string
-                        , Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "a" ]
-                        ]
-                        (Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "a" ]
-                        )
+                         [ Type.list Type.string
+                         , Type.namedWith
+                             [ "Json", "Decode" ]
+                             "Decoder"
+                             [ Type.var "a" ]
+                         ]
+                         (Type.namedWith
+                              [ "Json", "Decode" ]
+                              "Decoder"
+                              [ Type.var "a" ]
+                         )
                     )
             }
     , index =
@@ -2941,17 +2971,17 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.int
-                        , Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "a" ]
-                        ]
-                        (Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "a" ]
-                        )
+                         [ Type.int
+                         , Type.namedWith
+                             [ "Json", "Decode" ]
+                             "Decoder"
+                             [ Type.var "a" ]
+                         ]
+                         (Type.namedWith
+                              [ "Json", "Decode" ]
+                              "Decoder"
+                              [ Type.var "a" ]
+                         )
                     )
             }
     , maybe =
@@ -2961,16 +2991,16 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "a" ]
-                        ]
-                        (Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.maybe (Type.var "a") ]
-                        )
+                         [ Type.namedWith
+                             [ "Json", "Decode" ]
+                             "Decoder"
+                             [ Type.var "a" ]
+                         ]
+                         (Type.namedWith
+                              [ "Json", "Decode" ]
+                              "Decoder"
+                              [ Type.maybe (Type.var "a") ]
+                         )
                     )
             }
     , oneOf =
@@ -2980,18 +3010,18 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.list
-                            (Type.namedWith
+                         [ Type.list
+                             (Type.namedWith
                                 [ "Json", "Decode" ]
                                 "Decoder"
                                 [ Type.var "a" ]
-                            )
-                        ]
-                        (Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "a" ]
-                        )
+                             )
+                         ]
+                         (Type.namedWith
+                              [ "Json", "Decode" ]
+                              "Decoder"
+                              [ Type.var "a" ]
+                         )
                     )
             }
     , decodeString =
@@ -3001,19 +3031,19 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "a" ]
-                        , Type.string
-                        ]
-                        (Type.namedWith
-                            [ "Result" ]
-                            "Result"
-                            [ Type.namedWith [ "Json", "Decode" ] "Error" []
-                            , Type.var "a"
-                            ]
-                        )
+                         [ Type.namedWith
+                             [ "Json", "Decode" ]
+                             "Decoder"
+                             [ Type.var "a" ]
+                         , Type.string
+                         ]
+                         (Type.namedWith
+                              [ "Result" ]
+                              "Result"
+                              [ Type.namedWith [ "Json", "Decode" ] "Error" []
+                              , Type.var "a"
+                              ]
+                         )
                     )
             }
     , decodeValue =
@@ -3023,19 +3053,19 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "a" ]
-                        , Type.namedWith [ "Json", "Decode" ] "Value" []
-                        ]
-                        (Type.namedWith
-                            [ "Result" ]
-                            "Result"
-                            [ Type.namedWith [ "Json", "Decode" ] "Error" []
-                            , Type.var "a"
-                            ]
-                        )
+                         [ Type.namedWith
+                             [ "Json", "Decode" ]
+                             "Decoder"
+                             [ Type.var "a" ]
+                         , Type.namedWith [ "Json", "Decode" ] "Value" []
+                         ]
+                         (Type.namedWith
+                              [ "Result" ]
+                              "Result"
+                              [ Type.namedWith [ "Json", "Decode" ] "Error" []
+                              , Type.var "a"
+                              ]
+                         )
                     )
             }
     , errorToString =
@@ -3045,8 +3075,8 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.namedWith [ "Json", "Decode" ] "Error" [] ]
-                        Type.string
+                         [ Type.namedWith [ "Json", "Decode" ] "Error" [] ]
+                         Type.string
                     )
             }
     , map =
@@ -3056,17 +3086,17 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.function [ Type.var "a" ] (Type.var "value")
-                        , Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "a" ]
-                        ]
-                        (Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "value" ]
-                        )
+                         [ Type.function [ Type.var "a" ] (Type.var "value")
+                         , Type.namedWith
+                             [ "Json", "Decode" ]
+                             "Decoder"
+                             [ Type.var "a" ]
+                         ]
+                         (Type.namedWith
+                              [ "Json", "Decode" ]
+                              "Decoder"
+                              [ Type.var "value" ]
+                         )
                     )
             }
     , map2 =
@@ -3076,23 +3106,23 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.function
-                            [ Type.var "a", Type.var "b" ]
-                            (Type.var "value")
-                        , Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "a" ]
-                        , Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "b" ]
-                        ]
-                        (Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "value" ]
-                        )
+                         [ Type.function
+                             [ Type.var "a", Type.var "b" ]
+                             (Type.var "value")
+                         , Type.namedWith
+                             [ "Json", "Decode" ]
+                             "Decoder"
+                             [ Type.var "a" ]
+                         , Type.namedWith
+                             [ "Json", "Decode" ]
+                             "Decoder"
+                             [ Type.var "b" ]
+                         ]
+                         (Type.namedWith
+                              [ "Json", "Decode" ]
+                              "Decoder"
+                              [ Type.var "value" ]
+                         )
                     )
             }
     , map3 =
@@ -3102,27 +3132,27 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.function
-                            [ Type.var "a", Type.var "b", Type.var "c" ]
-                            (Type.var "value")
-                        , Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "a" ]
-                        , Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "b" ]
-                        , Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "c" ]
-                        ]
-                        (Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "value" ]
-                        )
+                         [ Type.function
+                             [ Type.var "a", Type.var "b", Type.var "c" ]
+                             (Type.var "value")
+                         , Type.namedWith
+                             [ "Json", "Decode" ]
+                             "Decoder"
+                             [ Type.var "a" ]
+                         , Type.namedWith
+                             [ "Json", "Decode" ]
+                             "Decoder"
+                             [ Type.var "b" ]
+                         , Type.namedWith
+                             [ "Json", "Decode" ]
+                             "Decoder"
+                             [ Type.var "c" ]
+                         ]
+                         (Type.namedWith
+                              [ "Json", "Decode" ]
+                              "Decoder"
+                              [ Type.var "value" ]
+                         )
                     )
             }
     , map4 =
@@ -3132,35 +3162,35 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.function
-                            [ Type.var "a"
-                            , Type.var "b"
-                            , Type.var "c"
-                            , Type.var "d"
-                            ]
-                            (Type.var "value")
-                        , Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "a" ]
-                        , Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "b" ]
-                        , Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "c" ]
-                        , Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "d" ]
-                        ]
-                        (Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "value" ]
-                        )
+                         [ Type.function
+                             [ Type.var "a"
+                             , Type.var "b"
+                             , Type.var "c"
+                             , Type.var "d"
+                             ]
+                             (Type.var "value")
+                         , Type.namedWith
+                             [ "Json", "Decode" ]
+                             "Decoder"
+                             [ Type.var "a" ]
+                         , Type.namedWith
+                             [ "Json", "Decode" ]
+                             "Decoder"
+                             [ Type.var "b" ]
+                         , Type.namedWith
+                             [ "Json", "Decode" ]
+                             "Decoder"
+                             [ Type.var "c" ]
+                         , Type.namedWith
+                             [ "Json", "Decode" ]
+                             "Decoder"
+                             [ Type.var "d" ]
+                         ]
+                         (Type.namedWith
+                              [ "Json", "Decode" ]
+                              "Decoder"
+                              [ Type.var "value" ]
+                         )
                     )
             }
     , map5 =
@@ -3170,40 +3200,40 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.function
-                            [ Type.var "a"
-                            , Type.var "b"
-                            , Type.var "c"
-                            , Type.var "d"
-                            , Type.var "e"
-                            ]
-                            (Type.var "value")
-                        , Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "a" ]
-                        , Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "b" ]
-                        , Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "c" ]
-                        , Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "d" ]
-                        , Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "e" ]
-                        ]
-                        (Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "value" ]
-                        )
+                         [ Type.function
+                             [ Type.var "a"
+                             , Type.var "b"
+                             , Type.var "c"
+                             , Type.var "d"
+                             , Type.var "e"
+                             ]
+                             (Type.var "value")
+                         , Type.namedWith
+                             [ "Json", "Decode" ]
+                             "Decoder"
+                             [ Type.var "a" ]
+                         , Type.namedWith
+                             [ "Json", "Decode" ]
+                             "Decoder"
+                             [ Type.var "b" ]
+                         , Type.namedWith
+                             [ "Json", "Decode" ]
+                             "Decoder"
+                             [ Type.var "c" ]
+                         , Type.namedWith
+                             [ "Json", "Decode" ]
+                             "Decoder"
+                             [ Type.var "d" ]
+                         , Type.namedWith
+                             [ "Json", "Decode" ]
+                             "Decoder"
+                             [ Type.var "e" ]
+                         ]
+                         (Type.namedWith
+                              [ "Json", "Decode" ]
+                              "Decoder"
+                              [ Type.var "value" ]
+                         )
                     )
             }
     , map6 =
@@ -3213,45 +3243,45 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.function
-                            [ Type.var "a"
-                            , Type.var "b"
-                            , Type.var "c"
-                            , Type.var "d"
-                            , Type.var "e"
-                            , Type.var "f"
-                            ]
-                            (Type.var "value")
-                        , Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "a" ]
-                        , Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "b" ]
-                        , Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "c" ]
-                        , Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "d" ]
-                        , Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "e" ]
-                        , Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "f" ]
-                        ]
-                        (Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "value" ]
-                        )
+                         [ Type.function
+                             [ Type.var "a"
+                             , Type.var "b"
+                             , Type.var "c"
+                             , Type.var "d"
+                             , Type.var "e"
+                             , Type.var "f"
+                             ]
+                             (Type.var "value")
+                         , Type.namedWith
+                             [ "Json", "Decode" ]
+                             "Decoder"
+                             [ Type.var "a" ]
+                         , Type.namedWith
+                             [ "Json", "Decode" ]
+                             "Decoder"
+                             [ Type.var "b" ]
+                         , Type.namedWith
+                             [ "Json", "Decode" ]
+                             "Decoder"
+                             [ Type.var "c" ]
+                         , Type.namedWith
+                             [ "Json", "Decode" ]
+                             "Decoder"
+                             [ Type.var "d" ]
+                         , Type.namedWith
+                             [ "Json", "Decode" ]
+                             "Decoder"
+                             [ Type.var "e" ]
+                         , Type.namedWith
+                             [ "Json", "Decode" ]
+                             "Decoder"
+                             [ Type.var "f" ]
+                         ]
+                         (Type.namedWith
+                              [ "Json", "Decode" ]
+                              "Decoder"
+                              [ Type.var "value" ]
+                         )
                     )
             }
     , map7 =
@@ -3261,50 +3291,50 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.function
-                            [ Type.var "a"
-                            , Type.var "b"
-                            , Type.var "c"
-                            , Type.var "d"
-                            , Type.var "e"
-                            , Type.var "f"
-                            , Type.var "g"
-                            ]
-                            (Type.var "value")
-                        , Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "a" ]
-                        , Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "b" ]
-                        , Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "c" ]
-                        , Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "d" ]
-                        , Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "e" ]
-                        , Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "f" ]
-                        , Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "g" ]
-                        ]
-                        (Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "value" ]
-                        )
+                         [ Type.function
+                             [ Type.var "a"
+                             , Type.var "b"
+                             , Type.var "c"
+                             , Type.var "d"
+                             , Type.var "e"
+                             , Type.var "f"
+                             , Type.var "g"
+                             ]
+                             (Type.var "value")
+                         , Type.namedWith
+                             [ "Json", "Decode" ]
+                             "Decoder"
+                             [ Type.var "a" ]
+                         , Type.namedWith
+                             [ "Json", "Decode" ]
+                             "Decoder"
+                             [ Type.var "b" ]
+                         , Type.namedWith
+                             [ "Json", "Decode" ]
+                             "Decoder"
+                             [ Type.var "c" ]
+                         , Type.namedWith
+                             [ "Json", "Decode" ]
+                             "Decoder"
+                             [ Type.var "d" ]
+                         , Type.namedWith
+                             [ "Json", "Decode" ]
+                             "Decoder"
+                             [ Type.var "e" ]
+                         , Type.namedWith
+                             [ "Json", "Decode" ]
+                             "Decoder"
+                             [ Type.var "f" ]
+                         , Type.namedWith
+                             [ "Json", "Decode" ]
+                             "Decoder"
+                             [ Type.var "g" ]
+                         ]
+                         (Type.namedWith
+                              [ "Json", "Decode" ]
+                              "Decoder"
+                              [ Type.var "value" ]
+                         )
                     )
             }
     , map8 =
@@ -3314,55 +3344,55 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.function
-                            [ Type.var "a"
-                            , Type.var "b"
-                            , Type.var "c"
-                            , Type.var "d"
-                            , Type.var "e"
-                            , Type.var "f"
-                            , Type.var "g"
-                            , Type.var "h"
-                            ]
-                            (Type.var "value")
-                        , Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "a" ]
-                        , Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "b" ]
-                        , Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "c" ]
-                        , Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "d" ]
-                        , Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "e" ]
-                        , Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "f" ]
-                        , Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "g" ]
-                        , Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "h" ]
-                        ]
-                        (Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "value" ]
-                        )
+                         [ Type.function
+                             [ Type.var "a"
+                             , Type.var "b"
+                             , Type.var "c"
+                             , Type.var "d"
+                             , Type.var "e"
+                             , Type.var "f"
+                             , Type.var "g"
+                             , Type.var "h"
+                             ]
+                             (Type.var "value")
+                         , Type.namedWith
+                             [ "Json", "Decode" ]
+                             "Decoder"
+                             [ Type.var "a" ]
+                         , Type.namedWith
+                             [ "Json", "Decode" ]
+                             "Decoder"
+                             [ Type.var "b" ]
+                         , Type.namedWith
+                             [ "Json", "Decode" ]
+                             "Decoder"
+                             [ Type.var "c" ]
+                         , Type.namedWith
+                             [ "Json", "Decode" ]
+                             "Decoder"
+                             [ Type.var "d" ]
+                         , Type.namedWith
+                             [ "Json", "Decode" ]
+                             "Decoder"
+                             [ Type.var "e" ]
+                         , Type.namedWith
+                             [ "Json", "Decode" ]
+                             "Decoder"
+                             [ Type.var "f" ]
+                         , Type.namedWith
+                             [ "Json", "Decode" ]
+                             "Decoder"
+                             [ Type.var "g" ]
+                         , Type.namedWith
+                             [ "Json", "Decode" ]
+                             "Decoder"
+                             [ Type.var "h" ]
+                         ]
+                         (Type.namedWith
+                              [ "Json", "Decode" ]
+                              "Decoder"
+                              [ Type.var "value" ]
+                         )
                     )
             }
     , lazy =
@@ -3372,19 +3402,19 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.function
-                            [ Type.unit ]
-                            (Type.namedWith
+                         [ Type.function
+                             [ Type.unit ]
+                             (Type.namedWith
                                 [ "Json", "Decode" ]
                                 "Decoder"
                                 [ Type.var "a" ]
-                            )
-                        ]
-                        (Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "a" ]
-                        )
+                             )
+                         ]
+                         (Type.namedWith
+                              [ "Json", "Decode" ]
+                              "Decoder"
+                              [ Type.var "a" ]
+                         )
                     )
             }
     , value =
@@ -3394,9 +3424,9 @@ values_ =
             , annotation =
                 Just
                     (Type.namedWith
-                        [ "Json", "Decode" ]
-                        "Decoder"
-                        [ Type.namedWith [ "Json", "Decode" ] "Value" [] ]
+                         [ "Json", "Decode" ]
+                         "Decoder"
+                         [ Type.namedWith [ "Json", "Decode" ] "Value" [] ]
                     )
             }
     , null =
@@ -3406,12 +3436,12 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.var "a" ]
-                        (Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "a" ]
-                        )
+                         [ Type.var "a" ]
+                         (Type.namedWith
+                              [ "Json", "Decode" ]
+                              "Decoder"
+                              [ Type.var "a" ]
+                         )
                     )
             }
     , succeed =
@@ -3421,12 +3451,12 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.var "a" ]
-                        (Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "a" ]
-                        )
+                         [ Type.var "a" ]
+                         (Type.namedWith
+                              [ "Json", "Decode" ]
+                              "Decoder"
+                              [ Type.var "a" ]
+                         )
                     )
             }
     , fail =
@@ -3436,12 +3466,12 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.string ]
-                        (Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "a" ]
-                        )
+                         [ Type.string ]
+                         (Type.namedWith
+                              [ "Json", "Decode" ]
+                              "Decoder"
+                              [ Type.var "a" ]
+                         )
                     )
             }
     , andThen =
@@ -3451,23 +3481,23 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.function
-                            [ Type.var "a" ]
-                            (Type.namedWith
+                         [ Type.function
+                             [ Type.var "a" ]
+                             (Type.namedWith
                                 [ "Json", "Decode" ]
                                 "Decoder"
                                 [ Type.var "b" ]
-                            )
-                        , Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "a" ]
-                        ]
-                        (Type.namedWith
-                            [ "Json", "Decode" ]
-                            "Decoder"
-                            [ Type.var "b" ]
-                        )
+                             )
+                         , Type.namedWith
+                             [ "Json", "Decode" ]
+                             "Decoder"
+                             [ Type.var "a" ]
+                         ]
+                         (Type.namedWith
+                              [ "Json", "Decode" ]
+                              "Decoder"
+                              [ Type.var "b" ]
+                         )
                     )
             }
     }

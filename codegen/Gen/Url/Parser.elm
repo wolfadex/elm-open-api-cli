@@ -32,11 +32,11 @@ string =
         , annotation =
             Just
                 (Type.namedWith
-                    [ "Url", "Parser" ]
-                    "Parser"
-                    [ Type.function [ Type.string ] (Type.var "a")
-                    , Type.var "a"
-                    ]
+                     [ "Url", "Parser" ]
+                     "Parser"
+                     [ Type.function [ Type.string ] (Type.var "a")
+                     , Type.var "a"
+                     ]
                 )
         }
 
@@ -58,9 +58,9 @@ int =
         , annotation =
             Just
                 (Type.namedWith
-                    [ "Url", "Parser" ]
-                    "Parser"
-                    [ Type.function [ Type.int ] (Type.var "a"), Type.var "a" ]
+                     [ "Url", "Parser" ]
+                     "Parser"
+                     [ Type.function [ Type.int ] (Type.var "a"), Type.var "a" ]
                 )
         }
 
@@ -83,19 +83,19 @@ s : String -> Elm.Expression
 s sArg =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Url", "Parser" ]
-            , name = "s"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.string ]
-                        (Type.namedWith
-                            [ "Url", "Parser" ]
-                            "Parser"
-                            [ Type.var "a", Type.var "a" ]
-                        )
-                    )
-            }
+             { importFrom = [ "Url", "Parser" ]
+             , name = "s"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.string ]
+                          (Type.namedWith
+                               [ "Url", "Parser" ]
+                               "Parser"
+                               [ Type.var "a", Type.var "a" ]
+                          )
+                     )
+             }
         )
         [ Elm.string sArg ]
 
@@ -122,26 +122,26 @@ map : Elm.Expression -> Elm.Expression -> Elm.Expression
 map mapArg mapArg0 =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Url", "Parser" ]
-            , name = "map"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.var "a"
-                        , Type.namedWith
-                            [ "Url", "Parser" ]
-                            "Parser"
-                            [ Type.var "a", Type.var "b" ]
-                        ]
-                        (Type.namedWith
-                            [ "Url", "Parser" ]
-                            "Parser"
-                            [ Type.function [ Type.var "b" ] (Type.var "c")
-                            , Type.var "c"
-                            ]
-                        )
-                    )
-            }
+             { importFrom = [ "Url", "Parser" ]
+             , name = "map"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.var "a"
+                          , Type.namedWith
+                              [ "Url", "Parser" ]
+                              "Parser"
+                              [ Type.var "a", Type.var "b" ]
+                          ]
+                          (Type.namedWith
+                               [ "Url", "Parser" ]
+                               "Parser"
+                               [ Type.function [ Type.var "b" ] (Type.var "c")
+                               , Type.var "c"
+                               ]
+                          )
+                     )
+             }
         )
         [ mapArg, mapArg0 ]
 
@@ -182,25 +182,25 @@ oneOf : List Elm.Expression -> Elm.Expression
 oneOf oneOfArg =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Url", "Parser" ]
-            , name = "oneOf"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.list
-                            (Type.namedWith
-                                [ "Url", "Parser" ]
-                                "Parser"
-                                [ Type.var "a", Type.var "b" ]
-                            )
-                        ]
-                        (Type.namedWith
-                            [ "Url", "Parser" ]
-                            "Parser"
-                            [ Type.var "a", Type.var "b" ]
-                        )
-                    )
-            }
+             { importFrom = [ "Url", "Parser" ]
+             , name = "oneOf"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.list
+                              (Type.namedWith
+                                 [ "Url", "Parser" ]
+                                 "Parser"
+                                 [ Type.var "a", Type.var "b" ]
+                              )
+                          ]
+                          (Type.namedWith
+                               [ "Url", "Parser" ]
+                               "Parser"
+                               [ Type.var "a", Type.var "b" ]
+                          )
+                     )
+             }
         )
         [ Elm.list oneOfArg ]
 
@@ -230,9 +230,9 @@ top =
         , annotation =
             Just
                 (Type.namedWith
-                    [ "Url", "Parser" ]
-                    "Parser"
-                    [ Type.var "a", Type.var "a" ]
+                     [ "Url", "Parser" ]
+                     "Parser"
+                     [ Type.var "a", Type.var "a" ]
                 )
         }
 
@@ -260,25 +260,25 @@ custom : String -> (Elm.Expression -> Elm.Expression) -> Elm.Expression
 custom customArg customArg0 =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Url", "Parser" ]
-            , name = "custom"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.string
-                        , Type.function
-                            [ Type.string ]
-                            (Type.maybe (Type.var "a"))
-                        ]
-                        (Type.namedWith
-                            [ "Url", "Parser" ]
-                            "Parser"
-                            [ Type.function [ Type.var "a" ] (Type.var "b")
-                            , Type.var "b"
-                            ]
-                        )
-                    )
-            }
+             { importFrom = [ "Url", "Parser" ]
+             , name = "custom"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.string
+                          , Type.function
+                              [ Type.string ]
+                              (Type.maybe (Type.var "a"))
+                          ]
+                          (Type.namedWith
+                               [ "Url", "Parser" ]
+                               "Parser"
+                               [ Type.function [ Type.var "a" ] (Type.var "b")
+                               , Type.var "b"
+                               ]
+                          )
+                     )
+             }
         )
         [ Elm.string customArg, Elm.functionReduced "customUnpack" customArg0 ]
 
@@ -303,25 +303,27 @@ query : Elm.Expression -> Elm.Expression
 query queryArg =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Url", "Parser" ]
-            , name = "query"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.namedWith
-                            [ "Url", "Parser", "Query" ]
-                            "Parser"
-                            [ Type.var "query" ]
-                        ]
-                        (Type.namedWith
-                            [ "Url", "Parser" ]
-                            "Parser"
-                            [ Type.function [ Type.var "query" ] (Type.var "a")
-                            , Type.var "a"
-                            ]
-                        )
-                    )
-            }
+             { importFrom = [ "Url", "Parser" ]
+             , name = "query"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.namedWith
+                              [ "Url", "Parser", "Query" ]
+                              "Parser"
+                              [ Type.var "query" ]
+                          ]
+                          (Type.namedWith
+                               [ "Url", "Parser" ]
+                               "Parser"
+                               [ Type.function
+                                   [ Type.var "query" ]
+                                   (Type.var "a")
+                               , Type.var "a"
+                               ]
+                          )
+                     )
+             }
         )
         [ queryArg ]
 
@@ -349,26 +351,26 @@ fragment : (Elm.Expression -> Elm.Expression) -> Elm.Expression
 fragment fragmentArg =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Url", "Parser" ]
-            , name = "fragment"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.function
-                            [ Type.maybe Type.string ]
-                            (Type.var "fragment")
-                        ]
-                        (Type.namedWith
-                            [ "Url", "Parser" ]
-                            "Parser"
-                            [ Type.function
-                                [ Type.var "fragment" ]
-                                (Type.var "a")
-                            , Type.var "a"
-                            ]
-                        )
-                    )
-            }
+             { importFrom = [ "Url", "Parser" ]
+             , name = "fragment"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.function
+                              [ Type.maybe Type.string ]
+                              (Type.var "fragment")
+                          ]
+                          (Type.namedWith
+                               [ "Url", "Parser" ]
+                               "Parser"
+                               [ Type.function
+                                   [ Type.var "fragment" ]
+                                   (Type.var "a")
+                               , Type.var "a"
+                               ]
+                          )
+                     )
+             }
         )
         [ Elm.functionReduced "fragmentUnpack" fragmentArg ]
 
@@ -419,22 +421,22 @@ parse : Elm.Expression -> Elm.Expression -> Elm.Expression
 parse parseArg parseArg0 =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Url", "Parser" ]
-            , name = "parse"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.namedWith
-                            [ "Url", "Parser" ]
-                            "Parser"
-                            [ Type.function [ Type.var "a" ] (Type.var "a")
-                            , Type.var "a"
-                            ]
-                        , Type.namedWith [ "Url" ] "Url" []
-                        ]
-                        (Type.maybe (Type.var "a"))
-                    )
-            }
+             { importFrom = [ "Url", "Parser" ]
+             , name = "parse"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.namedWith
+                              [ "Url", "Parser" ]
+                              "Parser"
+                              [ Type.function [ Type.var "a" ] (Type.var "a")
+                              , Type.var "a"
+                              ]
+                          , Type.namedWith [ "Url" ] "Url" []
+                          ]
+                          (Type.maybe (Type.var "a"))
+                     )
+             }
         )
         [ parseArg, parseArg0 ]
 
@@ -464,176 +466,176 @@ call_ =
         \sArg ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Url", "Parser" ]
-                    , name = "s"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.string ]
-                                (Type.namedWith
-                                    [ "Url", "Parser" ]
-                                    "Parser"
-                                    [ Type.var "a", Type.var "a" ]
-                                )
-                            )
-                    }
+                     { importFrom = [ "Url", "Parser" ]
+                     , name = "s"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.string ]
+                                  (Type.namedWith
+                                       [ "Url", "Parser" ]
+                                       "Parser"
+                                       [ Type.var "a", Type.var "a" ]
+                                  )
+                             )
+                     }
                 )
                 [ sArg ]
     , map =
         \mapArg mapArg0 ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Url", "Parser" ]
-                    , name = "map"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.var "a"
-                                , Type.namedWith
-                                    [ "Url", "Parser" ]
-                                    "Parser"
-                                    [ Type.var "a", Type.var "b" ]
-                                ]
-                                (Type.namedWith
-                                    [ "Url", "Parser" ]
-                                    "Parser"
-                                    [ Type.function
-                                        [ Type.var "b" ]
-                                        (Type.var "c")
-                                    , Type.var "c"
-                                    ]
-                                )
-                            )
-                    }
+                     { importFrom = [ "Url", "Parser" ]
+                     , name = "map"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.var "a"
+                                  , Type.namedWith
+                                      [ "Url", "Parser" ]
+                                      "Parser"
+                                      [ Type.var "a", Type.var "b" ]
+                                  ]
+                                  (Type.namedWith
+                                       [ "Url", "Parser" ]
+                                       "Parser"
+                                       [ Type.function
+                                           [ Type.var "b" ]
+                                           (Type.var "c")
+                                       , Type.var "c"
+                                       ]
+                                  )
+                             )
+                     }
                 )
                 [ mapArg, mapArg0 ]
     , oneOf =
         \oneOfArg ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Url", "Parser" ]
-                    , name = "oneOf"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.list
-                                    (Type.namedWith
-                                        [ "Url", "Parser" ]
-                                        "Parser"
-                                        [ Type.var "a", Type.var "b" ]
-                                    )
-                                ]
-                                (Type.namedWith
-                                    [ "Url", "Parser" ]
-                                    "Parser"
-                                    [ Type.var "a", Type.var "b" ]
-                                )
-                            )
-                    }
+                     { importFrom = [ "Url", "Parser" ]
+                     , name = "oneOf"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.list
+                                      (Type.namedWith
+                                         [ "Url", "Parser" ]
+                                         "Parser"
+                                         [ Type.var "a", Type.var "b" ]
+                                      )
+                                  ]
+                                  (Type.namedWith
+                                       [ "Url", "Parser" ]
+                                       "Parser"
+                                       [ Type.var "a", Type.var "b" ]
+                                  )
+                             )
+                     }
                 )
                 [ oneOfArg ]
     , custom =
         \customArg customArg0 ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Url", "Parser" ]
-                    , name = "custom"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.string
-                                , Type.function
-                                    [ Type.string ]
-                                    (Type.maybe (Type.var "a"))
-                                ]
-                                (Type.namedWith
-                                    [ "Url", "Parser" ]
-                                    "Parser"
-                                    [ Type.function
-                                        [ Type.var "a" ]
-                                        (Type.var "b")
-                                    , Type.var "b"
-                                    ]
-                                )
-                            )
-                    }
+                     { importFrom = [ "Url", "Parser" ]
+                     , name = "custom"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.string
+                                  , Type.function
+                                      [ Type.string ]
+                                      (Type.maybe (Type.var "a"))
+                                  ]
+                                  (Type.namedWith
+                                       [ "Url", "Parser" ]
+                                       "Parser"
+                                       [ Type.function
+                                           [ Type.var "a" ]
+                                           (Type.var "b")
+                                       , Type.var "b"
+                                       ]
+                                  )
+                             )
+                     }
                 )
                 [ customArg, customArg0 ]
     , query =
         \queryArg ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Url", "Parser" ]
-                    , name = "query"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.namedWith
-                                    [ "Url", "Parser", "Query" ]
-                                    "Parser"
-                                    [ Type.var "query" ]
-                                ]
-                                (Type.namedWith
-                                    [ "Url", "Parser" ]
-                                    "Parser"
-                                    [ Type.function
-                                        [ Type.var "query" ]
-                                        (Type.var "a")
-                                    , Type.var "a"
-                                    ]
-                                )
-                            )
-                    }
+                     { importFrom = [ "Url", "Parser" ]
+                     , name = "query"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.namedWith
+                                      [ "Url", "Parser", "Query" ]
+                                      "Parser"
+                                      [ Type.var "query" ]
+                                  ]
+                                  (Type.namedWith
+                                       [ "Url", "Parser" ]
+                                       "Parser"
+                                       [ Type.function
+                                           [ Type.var "query" ]
+                                           (Type.var "a")
+                                       , Type.var "a"
+                                       ]
+                                  )
+                             )
+                     }
                 )
                 [ queryArg ]
     , fragment =
         \fragmentArg ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Url", "Parser" ]
-                    , name = "fragment"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.function
-                                    [ Type.maybe Type.string ]
-                                    (Type.var "fragment")
-                                ]
-                                (Type.namedWith
-                                    [ "Url", "Parser" ]
-                                    "Parser"
-                                    [ Type.function
-                                        [ Type.var "fragment" ]
-                                        (Type.var "a")
-                                    , Type.var "a"
-                                    ]
-                                )
-                            )
-                    }
+                     { importFrom = [ "Url", "Parser" ]
+                     , name = "fragment"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.function
+                                      [ Type.maybe Type.string ]
+                                      (Type.var "fragment")
+                                  ]
+                                  (Type.namedWith
+                                       [ "Url", "Parser" ]
+                                       "Parser"
+                                       [ Type.function
+                                           [ Type.var "fragment" ]
+                                           (Type.var "a")
+                                       , Type.var "a"
+                                       ]
+                                  )
+                             )
+                     }
                 )
                 [ fragmentArg ]
     , parse =
         \parseArg parseArg0 ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Url", "Parser" ]
-                    , name = "parse"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.namedWith
-                                    [ "Url", "Parser" ]
-                                    "Parser"
-                                    [ Type.function
-                                        [ Type.var "a" ]
-                                        (Type.var "a")
-                                    , Type.var "a"
-                                    ]
-                                , Type.namedWith [ "Url" ] "Url" []
-                                ]
-                                (Type.maybe (Type.var "a"))
-                            )
-                    }
+                     { importFrom = [ "Url", "Parser" ]
+                     , name = "parse"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.namedWith
+                                      [ "Url", "Parser" ]
+                                      "Parser"
+                                      [ Type.function
+                                            [ Type.var "a" ]
+                                            (Type.var "a")
+                                      , Type.var "a"
+                                      ]
+                                  , Type.namedWith [ "Url" ] "Url" []
+                                  ]
+                                  (Type.maybe (Type.var "a"))
+                             )
+                     }
                 )
                 [ parseArg, parseArg0 ]
     }
@@ -659,11 +661,11 @@ values_ =
             , annotation =
                 Just
                     (Type.namedWith
-                        [ "Url", "Parser" ]
-                        "Parser"
-                        [ Type.function [ Type.string ] (Type.var "a")
-                        , Type.var "a"
-                        ]
+                         [ "Url", "Parser" ]
+                         "Parser"
+                         [ Type.function [ Type.string ] (Type.var "a")
+                         , Type.var "a"
+                         ]
                     )
             }
     , int =
@@ -673,11 +675,11 @@ values_ =
             , annotation =
                 Just
                     (Type.namedWith
-                        [ "Url", "Parser" ]
-                        "Parser"
-                        [ Type.function [ Type.int ] (Type.var "a")
-                        , Type.var "a"
-                        ]
+                         [ "Url", "Parser" ]
+                         "Parser"
+                         [ Type.function [ Type.int ] (Type.var "a")
+                         , Type.var "a"
+                         ]
                     )
             }
     , s =
@@ -687,12 +689,12 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.string ]
-                        (Type.namedWith
-                            [ "Url", "Parser" ]
-                            "Parser"
-                            [ Type.var "a", Type.var "a" ]
-                        )
+                         [ Type.string ]
+                         (Type.namedWith
+                              [ "Url", "Parser" ]
+                              "Parser"
+                              [ Type.var "a", Type.var "a" ]
+                         )
                     )
             }
     , map =
@@ -702,19 +704,19 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.var "a"
-                        , Type.namedWith
-                            [ "Url", "Parser" ]
-                            "Parser"
-                            [ Type.var "a", Type.var "b" ]
-                        ]
-                        (Type.namedWith
-                            [ "Url", "Parser" ]
-                            "Parser"
-                            [ Type.function [ Type.var "b" ] (Type.var "c")
-                            , Type.var "c"
-                            ]
-                        )
+                         [ Type.var "a"
+                         , Type.namedWith
+                             [ "Url", "Parser" ]
+                             "Parser"
+                             [ Type.var "a", Type.var "b" ]
+                         ]
+                         (Type.namedWith
+                              [ "Url", "Parser" ]
+                              "Parser"
+                              [ Type.function [ Type.var "b" ] (Type.var "c")
+                              , Type.var "c"
+                              ]
+                         )
                     )
             }
     , oneOf =
@@ -724,18 +726,18 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.list
-                            (Type.namedWith
+                         [ Type.list
+                             (Type.namedWith
                                 [ "Url", "Parser" ]
                                 "Parser"
                                 [ Type.var "a", Type.var "b" ]
-                            )
-                        ]
-                        (Type.namedWith
-                            [ "Url", "Parser" ]
-                            "Parser"
-                            [ Type.var "a", Type.var "b" ]
-                        )
+                             )
+                         ]
+                         (Type.namedWith
+                              [ "Url", "Parser" ]
+                              "Parser"
+                              [ Type.var "a", Type.var "b" ]
+                         )
                     )
             }
     , top =
@@ -745,9 +747,9 @@ values_ =
             , annotation =
                 Just
                     (Type.namedWith
-                        [ "Url", "Parser" ]
-                        "Parser"
-                        [ Type.var "a", Type.var "a" ]
+                         [ "Url", "Parser" ]
+                         "Parser"
+                         [ Type.var "a", Type.var "a" ]
                     )
             }
     , custom =
@@ -757,18 +759,18 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.string
-                        , Type.function
-                            [ Type.string ]
-                            (Type.maybe (Type.var "a"))
-                        ]
-                        (Type.namedWith
-                            [ "Url", "Parser" ]
-                            "Parser"
-                            [ Type.function [ Type.var "a" ] (Type.var "b")
-                            , Type.var "b"
-                            ]
-                        )
+                         [ Type.string
+                         , Type.function
+                             [ Type.string ]
+                             (Type.maybe (Type.var "a"))
+                         ]
+                         (Type.namedWith
+                              [ "Url", "Parser" ]
+                              "Parser"
+                              [ Type.function [ Type.var "a" ] (Type.var "b")
+                              , Type.var "b"
+                              ]
+                         )
                     )
             }
     , query =
@@ -778,18 +780,20 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.namedWith
-                            [ "Url", "Parser", "Query" ]
-                            "Parser"
-                            [ Type.var "query" ]
-                        ]
-                        (Type.namedWith
-                            [ "Url", "Parser" ]
-                            "Parser"
-                            [ Type.function [ Type.var "query" ] (Type.var "a")
-                            , Type.var "a"
-                            ]
-                        )
+                         [ Type.namedWith
+                             [ "Url", "Parser", "Query" ]
+                             "Parser"
+                             [ Type.var "query" ]
+                         ]
+                         (Type.namedWith
+                              [ "Url", "Parser" ]
+                              "Parser"
+                              [ Type.function
+                                  [ Type.var "query" ]
+                                  (Type.var "a")
+                              , Type.var "a"
+                              ]
+                         )
                     )
             }
     , fragment =
@@ -799,19 +803,19 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.function
-                            [ Type.maybe Type.string ]
-                            (Type.var "fragment")
-                        ]
-                        (Type.namedWith
-                            [ "Url", "Parser" ]
-                            "Parser"
-                            [ Type.function
-                                [ Type.var "fragment" ]
-                                (Type.var "a")
-                            , Type.var "a"
-                            ]
-                        )
+                         [ Type.function
+                             [ Type.maybe Type.string ]
+                             (Type.var "fragment")
+                         ]
+                         (Type.namedWith
+                              [ "Url", "Parser" ]
+                              "Parser"
+                              [ Type.function
+                                  [ Type.var "fragment" ]
+                                  (Type.var "a")
+                              , Type.var "a"
+                              ]
+                         )
                     )
             }
     , parse =
@@ -821,15 +825,15 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.namedWith
-                            [ "Url", "Parser" ]
-                            "Parser"
-                            [ Type.function [ Type.var "a" ] (Type.var "a")
-                            , Type.var "a"
-                            ]
-                        , Type.namedWith [ "Url" ] "Url" []
-                        ]
-                        (Type.maybe (Type.var "a"))
+                         [ Type.namedWith
+                             [ "Url", "Parser" ]
+                             "Parser"
+                             [ Type.function [ Type.var "a" ] (Type.var "a")
+                             , Type.var "a"
+                             ]
+                         , Type.namedWith [ "Url" ] "Url" []
+                         ]
+                         (Type.maybe (Type.var "a"))
                     )
             }
     }

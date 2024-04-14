@@ -33,20 +33,20 @@ decode : Elm.Expression -> Elm.Expression -> Elm.Expression
 decode decodeArg decodeArg0 =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Bytes", "Decode" ]
-            , name = "decode"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.namedWith
-                            [ "Bytes", "Decode" ]
-                            "Decoder"
-                            [ Type.var "a" ]
-                        , Type.namedWith [ "Bytes" ] "Bytes" []
-                        ]
-                        (Type.maybe (Type.var "a"))
-                    )
-            }
+             { importFrom = [ "Bytes", "Decode" ]
+             , name = "decode"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.namedWith
+                              [ "Bytes", "Decode" ]
+                              "Decoder"
+                              [ Type.var "a" ]
+                          , Type.namedWith [ "Bytes" ] "Bytes" []
+                          ]
+                          (Type.maybe (Type.var "a"))
+                     )
+             }
         )
         [ decodeArg, decodeArg0 ]
 
@@ -73,19 +73,19 @@ signedInt16 : Elm.Expression -> Elm.Expression
 signedInt16 signedInt16Arg =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Bytes", "Decode" ]
-            , name = "signedInt16"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.namedWith [ "Bytes" ] "Endianness" [] ]
-                        (Type.namedWith
-                            [ "Bytes", "Decode" ]
-                            "Decoder"
-                            [ Type.int ]
-                        )
-                    )
-            }
+             { importFrom = [ "Bytes", "Decode" ]
+             , name = "signedInt16"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.namedWith [ "Bytes" ] "Endianness" [] ]
+                          (Type.namedWith
+                               [ "Bytes", "Decode" ]
+                               "Decoder"
+                               [ Type.int ]
+                          )
+                     )
+             }
         )
         [ signedInt16Arg ]
 
@@ -98,19 +98,19 @@ signedInt32 : Elm.Expression -> Elm.Expression
 signedInt32 signedInt32Arg =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Bytes", "Decode" ]
-            , name = "signedInt32"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.namedWith [ "Bytes" ] "Endianness" [] ]
-                        (Type.namedWith
-                            [ "Bytes", "Decode" ]
-                            "Decoder"
-                            [ Type.int ]
-                        )
-                    )
-            }
+             { importFrom = [ "Bytes", "Decode" ]
+             , name = "signedInt32"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.namedWith [ "Bytes" ] "Endianness" [] ]
+                          (Type.namedWith
+                               [ "Bytes", "Decode" ]
+                               "Decoder"
+                               [ Type.int ]
+                          )
+                     )
+             }
         )
         [ signedInt32Arg ]
 
@@ -137,19 +137,19 @@ unsignedInt16 : Elm.Expression -> Elm.Expression
 unsignedInt16 unsignedInt16Arg =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Bytes", "Decode" ]
-            , name = "unsignedInt16"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.namedWith [ "Bytes" ] "Endianness" [] ]
-                        (Type.namedWith
-                            [ "Bytes", "Decode" ]
-                            "Decoder"
-                            [ Type.int ]
-                        )
-                    )
-            }
+             { importFrom = [ "Bytes", "Decode" ]
+             , name = "unsignedInt16"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.namedWith [ "Bytes" ] "Endianness" [] ]
+                          (Type.namedWith
+                               [ "Bytes", "Decode" ]
+                               "Decoder"
+                               [ Type.int ]
+                          )
+                     )
+             }
         )
         [ unsignedInt16Arg ]
 
@@ -162,19 +162,19 @@ unsignedInt32 : Elm.Expression -> Elm.Expression
 unsignedInt32 unsignedInt32Arg =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Bytes", "Decode" ]
-            , name = "unsignedInt32"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.namedWith [ "Bytes" ] "Endianness" [] ]
-                        (Type.namedWith
-                            [ "Bytes", "Decode" ]
-                            "Decoder"
-                            [ Type.int ]
-                        )
-                    )
-            }
+             { importFrom = [ "Bytes", "Decode" ]
+             , name = "unsignedInt32"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.namedWith [ "Bytes" ] "Endianness" [] ]
+                          (Type.namedWith
+                               [ "Bytes", "Decode" ]
+                               "Decoder"
+                               [ Type.int ]
+                          )
+                     )
+             }
         )
         [ unsignedInt32Arg ]
 
@@ -187,19 +187,19 @@ float32 : Elm.Expression -> Elm.Expression
 float32 float32Arg =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Bytes", "Decode" ]
-            , name = "float32"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.namedWith [ "Bytes" ] "Endianness" [] ]
-                        (Type.namedWith
-                            [ "Bytes", "Decode" ]
-                            "Decoder"
-                            [ Type.float ]
-                        )
-                    )
-            }
+             { importFrom = [ "Bytes", "Decode" ]
+             , name = "float32"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.namedWith [ "Bytes" ] "Endianness" [] ]
+                          (Type.namedWith
+                               [ "Bytes", "Decode" ]
+                               "Decoder"
+                               [ Type.float ]
+                          )
+                     )
+             }
         )
         [ float32Arg ]
 
@@ -212,19 +212,19 @@ float64 : Elm.Expression -> Elm.Expression
 float64 float64Arg =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Bytes", "Decode" ]
-            , name = "float64"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.namedWith [ "Bytes" ] "Endianness" [] ]
-                        (Type.namedWith
-                            [ "Bytes", "Decode" ]
-                            "Decoder"
-                            [ Type.float ]
-                        )
-                    )
-            }
+             { importFrom = [ "Bytes", "Decode" ]
+             , name = "float64"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.namedWith [ "Bytes" ] "Endianness" [] ]
+                          (Type.namedWith
+                               [ "Bytes", "Decode" ]
+                               "Decoder"
+                               [ Type.float ]
+                          )
+                     )
+             }
         )
         [ float64Arg ]
 
@@ -237,19 +237,19 @@ bytes : Int -> Elm.Expression
 bytes bytesArg =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Bytes", "Decode" ]
-            , name = "bytes"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.int ]
-                        (Type.namedWith
-                            [ "Bytes", "Decode" ]
-                            "Decoder"
-                            [ Type.namedWith [ "Bytes" ] "Bytes" [] ]
-                        )
-                    )
-            }
+             { importFrom = [ "Bytes", "Decode" ]
+             , name = "bytes"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.int ]
+                          (Type.namedWith
+                               [ "Bytes", "Decode" ]
+                               "Decoder"
+                               [ Type.namedWith [ "Bytes" ] "Bytes" [] ]
+                          )
+                     )
+             }
         )
         [ Elm.int bytesArg ]
 
@@ -280,19 +280,19 @@ string : Int -> Elm.Expression
 string stringArg =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Bytes", "Decode" ]
-            , name = "string"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.int ]
-                        (Type.namedWith
-                            [ "Bytes", "Decode" ]
-                            "Decoder"
-                            [ Type.string ]
-                        )
-                    )
-            }
+             { importFrom = [ "Bytes", "Decode" ]
+             , name = "string"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.int ]
+                          (Type.namedWith
+                               [ "Bytes", "Decode" ]
+                               "Decoder"
+                               [ Type.string ]
+                          )
+                     )
+             }
         )
         [ Elm.int stringArg ]
 
@@ -315,24 +315,24 @@ map : (Elm.Expression -> Elm.Expression) -> Elm.Expression -> Elm.Expression
 map mapArg mapArg0 =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Bytes", "Decode" ]
-            , name = "map"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.function [ Type.var "a" ] (Type.var "b")
-                        , Type.namedWith
-                            [ "Bytes", "Decode" ]
-                            "Decoder"
-                            [ Type.var "a" ]
-                        ]
-                        (Type.namedWith
-                            [ "Bytes", "Decode" ]
-                            "Decoder"
-                            [ Type.var "b" ]
-                        )
-                    )
-            }
+             { importFrom = [ "Bytes", "Decode" ]
+             , name = "map"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.function [ Type.var "a" ] (Type.var "b")
+                          , Type.namedWith
+                              [ "Bytes", "Decode" ]
+                              "Decoder"
+                              [ Type.var "a" ]
+                          ]
+                          (Type.namedWith
+                               [ "Bytes", "Decode" ]
+                               "Decoder"
+                               [ Type.var "b" ]
+                          )
+                     )
+             }
         )
         [ Elm.functionReduced "mapUnpack" mapArg, mapArg0 ]
 
@@ -364,35 +364,35 @@ map2 :
 map2 map2Arg map2Arg0 map2Arg1 =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Bytes", "Decode" ]
-            , name = "map2"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.function
-                            [ Type.var "a", Type.var "b" ]
-                            (Type.var "result")
-                        , Type.namedWith
-                            [ "Bytes", "Decode" ]
-                            "Decoder"
-                            [ Type.var "a" ]
-                        , Type.namedWith
-                            [ "Bytes", "Decode" ]
-                            "Decoder"
-                            [ Type.var "b" ]
-                        ]
-                        (Type.namedWith
-                            [ "Bytes", "Decode" ]
-                            "Decoder"
-                            [ Type.var "result" ]
-                        )
-                    )
-            }
+             { importFrom = [ "Bytes", "Decode" ]
+             , name = "map2"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.function
+                              [ Type.var "a", Type.var "b" ]
+                              (Type.var "result")
+                          , Type.namedWith
+                              [ "Bytes", "Decode" ]
+                              "Decoder"
+                              [ Type.var "a" ]
+                          , Type.namedWith
+                              [ "Bytes", "Decode" ]
+                              "Decoder"
+                              [ Type.var "b" ]
+                          ]
+                          (Type.namedWith
+                               [ "Bytes", "Decode" ]
+                               "Decoder"
+                               [ Type.var "result" ]
+                          )
+                     )
+             }
         )
         [ Elm.functionReduced
             "map2Unpack"
             (\functionReducedUnpack ->
-                Elm.functionReduced "unpack" (map2Arg functionReducedUnpack)
+               Elm.functionReduced "unpack" (map2Arg functionReducedUnpack)
             )
         , map2Arg0
         , map2Arg1
@@ -417,47 +417,47 @@ map3 :
 map3 map3Arg map3Arg0 map3Arg1 map3Arg2 =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Bytes", "Decode" ]
-            , name = "map3"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.function
-                            [ Type.var "a", Type.var "b", Type.var "c" ]
-                            (Type.var "result")
-                        , Type.namedWith
-                            [ "Bytes", "Decode" ]
-                            "Decoder"
-                            [ Type.var "a" ]
-                        , Type.namedWith
-                            [ "Bytes", "Decode" ]
-                            "Decoder"
-                            [ Type.var "b" ]
-                        , Type.namedWith
-                            [ "Bytes", "Decode" ]
-                            "Decoder"
-                            [ Type.var "c" ]
-                        ]
-                        (Type.namedWith
-                            [ "Bytes", "Decode" ]
-                            "Decoder"
-                            [ Type.var "result" ]
-                        )
-                    )
-            }
+             { importFrom = [ "Bytes", "Decode" ]
+             , name = "map3"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.function
+                              [ Type.var "a", Type.var "b", Type.var "c" ]
+                              (Type.var "result")
+                          , Type.namedWith
+                              [ "Bytes", "Decode" ]
+                              "Decoder"
+                              [ Type.var "a" ]
+                          , Type.namedWith
+                              [ "Bytes", "Decode" ]
+                              "Decoder"
+                              [ Type.var "b" ]
+                          , Type.namedWith
+                              [ "Bytes", "Decode" ]
+                              "Decoder"
+                              [ Type.var "c" ]
+                          ]
+                          (Type.namedWith
+                               [ "Bytes", "Decode" ]
+                               "Decoder"
+                               [ Type.var "result" ]
+                          )
+                     )
+             }
         )
         [ Elm.functionReduced
             "map3Unpack"
             (\functionReducedUnpack ->
-                Elm.functionReduced
-                    "unpack"
-                    (\functionReducedUnpack0 ->
+               Elm.functionReduced
+                   "unpack"
+                   (\functionReducedUnpack0 ->
                         Elm.functionReduced
                             "unpack"
-                            (map3Arg functionReducedUnpack
-                                functionReducedUnpack0
+                            ((map3Arg functionReducedUnpack)
+                                 functionReducedUnpack0
                             )
-                    )
+                   )
             )
         , map3Arg0
         , map3Arg1
@@ -489,60 +489,61 @@ map4 :
 map4 map4Arg map4Arg0 map4Arg1 map4Arg2 map4Arg3 =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Bytes", "Decode" ]
-            , name = "map4"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.function
-                            [ Type.var "a"
-                            , Type.var "b"
-                            , Type.var "c"
-                            , Type.var "d"
-                            ]
-                            (Type.var "result")
-                        , Type.namedWith
-                            [ "Bytes", "Decode" ]
-                            "Decoder"
-                            [ Type.var "a" ]
-                        , Type.namedWith
-                            [ "Bytes", "Decode" ]
-                            "Decoder"
-                            [ Type.var "b" ]
-                        , Type.namedWith
-                            [ "Bytes", "Decode" ]
-                            "Decoder"
-                            [ Type.var "c" ]
-                        , Type.namedWith
-                            [ "Bytes", "Decode" ]
-                            "Decoder"
-                            [ Type.var "d" ]
-                        ]
-                        (Type.namedWith
-                            [ "Bytes", "Decode" ]
-                            "Decoder"
-                            [ Type.var "result" ]
-                        )
-                    )
-            }
+             { importFrom = [ "Bytes", "Decode" ]
+             , name = "map4"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.function
+                              [ Type.var "a"
+                              , Type.var "b"
+                              , Type.var "c"
+                              , Type.var "d"
+                              ]
+                              (Type.var "result")
+                          , Type.namedWith
+                              [ "Bytes", "Decode" ]
+                              "Decoder"
+                              [ Type.var "a" ]
+                          , Type.namedWith
+                              [ "Bytes", "Decode" ]
+                              "Decoder"
+                              [ Type.var "b" ]
+                          , Type.namedWith
+                              [ "Bytes", "Decode" ]
+                              "Decoder"
+                              [ Type.var "c" ]
+                          , Type.namedWith
+                              [ "Bytes", "Decode" ]
+                              "Decoder"
+                              [ Type.var "d" ]
+                          ]
+                          (Type.namedWith
+                               [ "Bytes", "Decode" ]
+                               "Decoder"
+                               [ Type.var "result" ]
+                          )
+                     )
+             }
         )
         [ Elm.functionReduced
             "map4Unpack"
             (\functionReducedUnpack ->
-                Elm.functionReduced
-                    "unpack"
-                    (\functionReducedUnpack0 ->
+               Elm.functionReduced
+                   "unpack"
+                   (\functionReducedUnpack0 ->
                         Elm.functionReduced
                             "unpack"
                             (\functionReducedUnpack_2_1_2_0_2_0_2_0_0 ->
-                                Elm.functionReduced
-                                    "unpack"
-                                    (map4Arg functionReducedUnpack
-                                         functionReducedUnpack0
-                                        functionReducedUnpack_2_1_2_0_2_0_2_0_0
-                                    )
+                                 Elm.functionReduced
+                                     "unpack"
+                                     (((map4Arg functionReducedUnpack)
+                                           functionReducedUnpack0
+                                      )
+                                          functionReducedUnpack_2_1_2_0_2_0_2_0_0
+                                     )
                             )
-                    )
+                   )
             )
         , map4Arg0
         , map4Arg1
@@ -579,70 +580,72 @@ map5 :
 map5 map5Arg map5Arg0 map5Arg1 map5Arg2 map5Arg3 map5Arg4 =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Bytes", "Decode" ]
-            , name = "map5"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.function
-                            [ Type.var "a"
-                            , Type.var "b"
-                            , Type.var "c"
-                            , Type.var "d"
-                            , Type.var "e"
-                            ]
-                            (Type.var "result")
-                        , Type.namedWith
-                            [ "Bytes", "Decode" ]
-                            "Decoder"
-                            [ Type.var "a" ]
-                        , Type.namedWith
-                            [ "Bytes", "Decode" ]
-                            "Decoder"
-                            [ Type.var "b" ]
-                        , Type.namedWith
-                            [ "Bytes", "Decode" ]
-                            "Decoder"
-                            [ Type.var "c" ]
-                        , Type.namedWith
-                            [ "Bytes", "Decode" ]
-                            "Decoder"
-                            [ Type.var "d" ]
-                        , Type.namedWith
-                            [ "Bytes", "Decode" ]
-                            "Decoder"
-                            [ Type.var "e" ]
-                        ]
-                        (Type.namedWith
-                            [ "Bytes", "Decode" ]
-                            "Decoder"
-                            [ Type.var "result" ]
-                        )
-                    )
-            }
+             { importFrom = [ "Bytes", "Decode" ]
+             , name = "map5"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.function
+                              [ Type.var "a"
+                              , Type.var "b"
+                              , Type.var "c"
+                              , Type.var "d"
+                              , Type.var "e"
+                              ]
+                              (Type.var "result")
+                          , Type.namedWith
+                              [ "Bytes", "Decode" ]
+                              "Decoder"
+                              [ Type.var "a" ]
+                          , Type.namedWith
+                              [ "Bytes", "Decode" ]
+                              "Decoder"
+                              [ Type.var "b" ]
+                          , Type.namedWith
+                              [ "Bytes", "Decode" ]
+                              "Decoder"
+                              [ Type.var "c" ]
+                          , Type.namedWith
+                              [ "Bytes", "Decode" ]
+                              "Decoder"
+                              [ Type.var "d" ]
+                          , Type.namedWith
+                              [ "Bytes", "Decode" ]
+                              "Decoder"
+                              [ Type.var "e" ]
+                          ]
+                          (Type.namedWith
+                               [ "Bytes", "Decode" ]
+                               "Decoder"
+                               [ Type.var "result" ]
+                          )
+                     )
+             }
         )
         [ Elm.functionReduced
             "map5Unpack"
             (\functionReducedUnpack ->
-                Elm.functionReduced
-                    "unpack"
-                    (\functionReducedUnpack0 ->
+               Elm.functionReduced
+                   "unpack"
+                   (\functionReducedUnpack0 ->
                         Elm.functionReduced
                             "unpack"
                             (\functionReducedUnpack_2_1_2_0_2_0_2_0_0 ->
-                                Elm.functionReduced
-                                    "unpack"
-                                    (\functionReducedUnpack_2_1_2_1_2_0_2_0_2_0_0 ->
-                                        Elm.functionReduced
-                                            "unpack"
-                                            (map5Arg functionReducedUnpack
-                                                 functionReducedUnpack0
-                                                 functionReducedUnpack_2_1_2_0_2_0_2_0_0
-                                                functionReducedUnpack_2_1_2_1_2_0_2_0_2_0_0
-                                            )
-                                    )
+                                 Elm.functionReduced
+                                     "unpack"
+                                     (\functionReducedUnpack_2_1_2_1_2_0_2_0_2_0_0 ->
+                                          Elm.functionReduced
+                                              "unpack"
+                                              ((((map5Arg functionReducedUnpack)
+                                                     functionReducedUnpack0
+                                                )
+                                                    functionReducedUnpack_2_1_2_0_2_0_2_0_0
+                                               )
+                                                   functionReducedUnpack_2_1_2_1_2_0_2_0_2_0_0
+                                              )
+                                     )
                             )
-                    )
+                   )
             )
         , map5Arg0
         , map5Arg1
@@ -676,30 +679,30 @@ andThen : (Elm.Expression -> Elm.Expression) -> Elm.Expression -> Elm.Expression
 andThen andThenArg andThenArg0 =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Bytes", "Decode" ]
-            , name = "andThen"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.function
-                            [ Type.var "a" ]
-                            (Type.namedWith
-                                [ "Bytes", "Decode" ]
-                                "Decoder"
-                                [ Type.var "b" ]
-                            )
-                        , Type.namedWith
-                            [ "Bytes", "Decode" ]
-                            "Decoder"
-                            [ Type.var "a" ]
-                        ]
-                        (Type.namedWith
-                            [ "Bytes", "Decode" ]
-                            "Decoder"
-                            [ Type.var "b" ]
-                        )
-                    )
-            }
+             { importFrom = [ "Bytes", "Decode" ]
+             , name = "andThen"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.function
+                              [ Type.var "a" ]
+                              (Type.namedWith
+                                 [ "Bytes", "Decode" ]
+                                 "Decoder"
+                                 [ Type.var "b" ]
+                              )
+                          , Type.namedWith
+                              [ "Bytes", "Decode" ]
+                              "Decoder"
+                              [ Type.var "a" ]
+                          ]
+                          (Type.namedWith
+                               [ "Bytes", "Decode" ]
+                               "Decoder"
+                               [ Type.var "b" ]
+                          )
+                     )
+             }
         )
         [ Elm.functionReduced "andThenUnpack" andThenArg, andThenArg0 ]
 
@@ -730,19 +733,19 @@ succeed : Elm.Expression -> Elm.Expression
 succeed succeedArg =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Bytes", "Decode" ]
-            , name = "succeed"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.var "a" ]
-                        (Type.namedWith
-                            [ "Bytes", "Decode" ]
-                            "Decoder"
-                            [ Type.var "a" ]
-                        )
-                    )
-            }
+             { importFrom = [ "Bytes", "Decode" ]
+             , name = "succeed"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.var "a" ]
+                          (Type.namedWith
+                               [ "Bytes", "Decode" ]
+                               "Decoder"
+                               [ Type.var "a" ]
+                          )
+                     )
+             }
         )
         [ succeedArg ]
 
@@ -823,31 +826,31 @@ loop : Elm.Expression -> (Elm.Expression -> Elm.Expression) -> Elm.Expression
 loop loopArg loopArg0 =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Bytes", "Decode" ]
-            , name = "loop"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.var "state"
-                        , Type.function
-                            [ Type.var "state" ]
-                            (Type.namedWith
-                                [ "Bytes", "Decode" ]
-                                "Decoder"
-                                [ Type.namedWith
-                                    [ "Bytes", "Decode" ]
-                                    "Step"
-                                    [ Type.var "state", Type.var "a" ]
-                                ]
-                            )
-                        ]
-                        (Type.namedWith
-                            [ "Bytes", "Decode" ]
-                            "Decoder"
-                            [ Type.var "a" ]
-                        )
-                    )
-            }
+             { importFrom = [ "Bytes", "Decode" ]
+             , name = "loop"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.var "state"
+                          , Type.function
+                              [ Type.var "state" ]
+                              (Type.namedWith
+                                 [ "Bytes", "Decode" ]
+                                 "Decoder"
+                                 [ Type.namedWith
+                                       [ "Bytes", "Decode" ]
+                                       "Step"
+                                       [ Type.var "state", Type.var "a" ]
+                                 ]
+                              )
+                          ]
+                          (Type.namedWith
+                               [ "Bytes", "Decode" ]
+                               "Decoder"
+                               [ Type.var "a" ]
+                          )
+                     )
+             }
         )
         [ loopArg, Elm.functionReduced "loopUnpack" loopArg0 ]
 
@@ -875,32 +878,32 @@ make_ =
         \ar0 ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Bytes", "Decode" ]
-                    , name = "Loop"
-                    , annotation =
-                        Just
-                            (Type.namedWith
-                                []
-                                "Step"
-                                [ Type.var "state", Type.var "a" ]
-                            )
-                    }
+                     { importFrom = [ "Bytes", "Decode" ]
+                     , name = "Loop"
+                     , annotation =
+                         Just
+                             (Type.namedWith
+                                  []
+                                  "Step"
+                                  [ Type.var "state", Type.var "a" ]
+                             )
+                     }
                 )
                 [ ar0 ]
     , done =
         \ar0 ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Bytes", "Decode" ]
-                    , name = "Done"
-                    , annotation =
-                        Just
-                            (Type.namedWith
-                                []
-                                "Step"
-                                [ Type.var "state", Type.var "a" ]
-                            )
-                    }
+                     { importFrom = [ "Bytes", "Decode" ]
+                     , name = "Done"
+                     , annotation =
+                         Just
+                             (Type.namedWith
+                                  []
+                                  "Step"
+                                  [ Type.var "state", Type.var "a" ]
+                             )
+                     }
                 )
                 [ ar0 ]
     }
@@ -921,9 +924,9 @@ caseOf_ =
             Elm.Case.custom
                 stepExpression
                 (Type.namedWith
-                    [ "Bytes", "Decode" ]
-                    "Step"
-                    [ Type.var "state", Type.var "a" ]
+                     [ "Bytes", "Decode" ]
+                     "Step"
+                     [ Type.var "state", Type.var "a" ]
                 )
                 [ Elm.Case.branch1
                     "Loop"
@@ -977,429 +980,436 @@ call_ =
         \decodeArg decodeArg0 ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Bytes", "Decode" ]
-                    , name = "decode"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.namedWith
-                                    [ "Bytes", "Decode" ]
-                                    "Decoder"
-                                    [ Type.var "a" ]
-                                , Type.namedWith [ "Bytes" ] "Bytes" []
-                                ]
-                                (Type.maybe (Type.var "a"))
-                            )
-                    }
+                     { importFrom = [ "Bytes", "Decode" ]
+                     , name = "decode"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.namedWith
+                                      [ "Bytes", "Decode" ]
+                                      "Decoder"
+                                      [ Type.var "a" ]
+                                  , Type.namedWith [ "Bytes" ] "Bytes" []
+                                  ]
+                                  (Type.maybe (Type.var "a"))
+                             )
+                     }
                 )
                 [ decodeArg, decodeArg0 ]
     , signedInt16 =
         \signedInt16Arg ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Bytes", "Decode" ]
-                    , name = "signedInt16"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.namedWith [ "Bytes" ] "Endianness" [] ]
-                                (Type.namedWith
-                                    [ "Bytes", "Decode" ]
-                                    "Decoder"
-                                    [ Type.int ]
-                                )
-                            )
-                    }
+                     { importFrom = [ "Bytes", "Decode" ]
+                     , name = "signedInt16"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.namedWith [ "Bytes" ] "Endianness" [] ]
+                                  (Type.namedWith
+                                       [ "Bytes", "Decode" ]
+                                       "Decoder"
+                                       [ Type.int ]
+                                  )
+                             )
+                     }
                 )
                 [ signedInt16Arg ]
     , signedInt32 =
         \signedInt32Arg ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Bytes", "Decode" ]
-                    , name = "signedInt32"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.namedWith [ "Bytes" ] "Endianness" [] ]
-                                (Type.namedWith
-                                    [ "Bytes", "Decode" ]
-                                    "Decoder"
-                                    [ Type.int ]
-                                )
-                            )
-                    }
+                     { importFrom = [ "Bytes", "Decode" ]
+                     , name = "signedInt32"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.namedWith [ "Bytes" ] "Endianness" [] ]
+                                  (Type.namedWith
+                                       [ "Bytes", "Decode" ]
+                                       "Decoder"
+                                       [ Type.int ]
+                                  )
+                             )
+                     }
                 )
                 [ signedInt32Arg ]
     , unsignedInt16 =
         \unsignedInt16Arg ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Bytes", "Decode" ]
-                    , name = "unsignedInt16"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.namedWith [ "Bytes" ] "Endianness" [] ]
-                                (Type.namedWith
-                                    [ "Bytes", "Decode" ]
-                                    "Decoder"
-                                    [ Type.int ]
-                                )
-                            )
-                    }
+                     { importFrom = [ "Bytes", "Decode" ]
+                     , name = "unsignedInt16"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.namedWith [ "Bytes" ] "Endianness" [] ]
+                                  (Type.namedWith
+                                       [ "Bytes", "Decode" ]
+                                       "Decoder"
+                                       [ Type.int ]
+                                  )
+                             )
+                     }
                 )
                 [ unsignedInt16Arg ]
     , unsignedInt32 =
         \unsignedInt32Arg ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Bytes", "Decode" ]
-                    , name = "unsignedInt32"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.namedWith [ "Bytes" ] "Endianness" [] ]
-                                (Type.namedWith
-                                    [ "Bytes", "Decode" ]
-                                    "Decoder"
-                                    [ Type.int ]
-                                )
-                            )
-                    }
+                     { importFrom = [ "Bytes", "Decode" ]
+                     , name = "unsignedInt32"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.namedWith [ "Bytes" ] "Endianness" [] ]
+                                  (Type.namedWith
+                                       [ "Bytes", "Decode" ]
+                                       "Decoder"
+                                       [ Type.int ]
+                                  )
+                             )
+                     }
                 )
                 [ unsignedInt32Arg ]
     , float32 =
         \float32Arg ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Bytes", "Decode" ]
-                    , name = "float32"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.namedWith [ "Bytes" ] "Endianness" [] ]
-                                (Type.namedWith
-                                    [ "Bytes", "Decode" ]
-                                    "Decoder"
-                                    [ Type.float ]
-                                )
-                            )
-                    }
+                     { importFrom = [ "Bytes", "Decode" ]
+                     , name = "float32"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.namedWith [ "Bytes" ] "Endianness" [] ]
+                                  (Type.namedWith
+                                       [ "Bytes", "Decode" ]
+                                       "Decoder"
+                                       [ Type.float ]
+                                  )
+                             )
+                     }
                 )
                 [ float32Arg ]
     , float64 =
         \float64Arg ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Bytes", "Decode" ]
-                    , name = "float64"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.namedWith [ "Bytes" ] "Endianness" [] ]
-                                (Type.namedWith
-                                    [ "Bytes", "Decode" ]
-                                    "Decoder"
-                                    [ Type.float ]
-                                )
-                            )
-                    }
+                     { importFrom = [ "Bytes", "Decode" ]
+                     , name = "float64"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.namedWith [ "Bytes" ] "Endianness" [] ]
+                                  (Type.namedWith
+                                       [ "Bytes", "Decode" ]
+                                       "Decoder"
+                                       [ Type.float ]
+                                  )
+                             )
+                     }
                 )
                 [ float64Arg ]
     , bytes =
         \bytesArg ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Bytes", "Decode" ]
-                    , name = "bytes"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.int ]
-                                (Type.namedWith
-                                    [ "Bytes", "Decode" ]
-                                    "Decoder"
-                                    [ Type.namedWith [ "Bytes" ] "Bytes" [] ]
-                                )
-                            )
-                    }
+                     { importFrom = [ "Bytes", "Decode" ]
+                     , name = "bytes"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.int ]
+                                  (Type.namedWith
+                                       [ "Bytes", "Decode" ]
+                                       "Decoder"
+                                       [ Type.namedWith [ "Bytes" ] "Bytes" [] ]
+                                  )
+                             )
+                     }
                 )
                 [ bytesArg ]
     , string =
         \stringArg ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Bytes", "Decode" ]
-                    , name = "string"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.int ]
-                                (Type.namedWith
-                                    [ "Bytes", "Decode" ]
-                                    "Decoder"
-                                    [ Type.string ]
-                                )
-                            )
-                    }
+                     { importFrom = [ "Bytes", "Decode" ]
+                     , name = "string"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.int ]
+                                  (Type.namedWith
+                                       [ "Bytes", "Decode" ]
+                                       "Decoder"
+                                       [ Type.string ]
+                                  )
+                             )
+                     }
                 )
                 [ stringArg ]
     , map =
         \mapArg mapArg0 ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Bytes", "Decode" ]
-                    , name = "map"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.function [ Type.var "a" ] (Type.var "b")
-                                , Type.namedWith
-                                    [ "Bytes", "Decode" ]
-                                    "Decoder"
-                                    [ Type.var "a" ]
-                                ]
-                                (Type.namedWith
-                                    [ "Bytes", "Decode" ]
-                                    "Decoder"
-                                    [ Type.var "b" ]
-                                )
-                            )
-                    }
+                     { importFrom = [ "Bytes", "Decode" ]
+                     , name = "map"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.function
+                                      [ Type.var "a" ]
+                                      (Type.var "b")
+                                  , Type.namedWith
+                                      [ "Bytes", "Decode" ]
+                                      "Decoder"
+                                      [ Type.var "a" ]
+                                  ]
+                                  (Type.namedWith
+                                       [ "Bytes", "Decode" ]
+                                       "Decoder"
+                                       [ Type.var "b" ]
+                                  )
+                             )
+                     }
                 )
                 [ mapArg, mapArg0 ]
     , map2 =
         \map2Arg map2Arg0 map2Arg1 ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Bytes", "Decode" ]
-                    , name = "map2"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.function
-                                    [ Type.var "a", Type.var "b" ]
-                                    (Type.var "result")
-                                , Type.namedWith
-                                    [ "Bytes", "Decode" ]
-                                    "Decoder"
-                                    [ Type.var "a" ]
-                                , Type.namedWith
-                                    [ "Bytes", "Decode" ]
-                                    "Decoder"
-                                    [ Type.var "b" ]
-                                ]
-                                (Type.namedWith
-                                    [ "Bytes", "Decode" ]
-                                    "Decoder"
-                                    [ Type.var "result" ]
-                                )
-                            )
-                    }
+                     { importFrom = [ "Bytes", "Decode" ]
+                     , name = "map2"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.function
+                                      [ Type.var "a", Type.var "b" ]
+                                      (Type.var "result")
+                                  , Type.namedWith
+                                      [ "Bytes", "Decode" ]
+                                      "Decoder"
+                                      [ Type.var "a" ]
+                                  , Type.namedWith
+                                      [ "Bytes", "Decode" ]
+                                      "Decoder"
+                                      [ Type.var "b" ]
+                                  ]
+                                  (Type.namedWith
+                                       [ "Bytes", "Decode" ]
+                                       "Decoder"
+                                       [ Type.var "result" ]
+                                  )
+                             )
+                     }
                 )
                 [ map2Arg, map2Arg0, map2Arg1 ]
     , map3 =
         \map3Arg map3Arg0 map3Arg1 map3Arg2 ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Bytes", "Decode" ]
-                    , name = "map3"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.function
-                                    [ Type.var "a", Type.var "b", Type.var "c" ]
-                                    (Type.var "result")
-                                , Type.namedWith
-                                    [ "Bytes", "Decode" ]
-                                    "Decoder"
-                                    [ Type.var "a" ]
-                                , Type.namedWith
-                                    [ "Bytes", "Decode" ]
-                                    "Decoder"
-                                    [ Type.var "b" ]
-                                , Type.namedWith
-                                    [ "Bytes", "Decode" ]
-                                    "Decoder"
-                                    [ Type.var "c" ]
-                                ]
-                                (Type.namedWith
-                                    [ "Bytes", "Decode" ]
-                                    "Decoder"
-                                    [ Type.var "result" ]
-                                )
-                            )
-                    }
+                     { importFrom = [ "Bytes", "Decode" ]
+                     , name = "map3"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.function
+                                      [ Type.var "a"
+                                      , Type.var "b"
+                                      , Type.var "c"
+                                      ]
+                                      (Type.var "result")
+                                  , Type.namedWith
+                                      [ "Bytes", "Decode" ]
+                                      "Decoder"
+                                      [ Type.var "a" ]
+                                  , Type.namedWith
+                                      [ "Bytes", "Decode" ]
+                                      "Decoder"
+                                      [ Type.var "b" ]
+                                  , Type.namedWith
+                                      [ "Bytes", "Decode" ]
+                                      "Decoder"
+                                      [ Type.var "c" ]
+                                  ]
+                                  (Type.namedWith
+                                       [ "Bytes", "Decode" ]
+                                       "Decoder"
+                                       [ Type.var "result" ]
+                                  )
+                             )
+                     }
                 )
                 [ map3Arg, map3Arg0, map3Arg1, map3Arg2 ]
     , map4 =
         \map4Arg map4Arg0 map4Arg1 map4Arg2 map4Arg3 ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Bytes", "Decode" ]
-                    , name = "map4"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.function
-                                    [ Type.var "a"
-                                    , Type.var "b"
-                                    , Type.var "c"
-                                    , Type.var "d"
-                                    ]
-                                    (Type.var "result")
-                                , Type.namedWith
-                                    [ "Bytes", "Decode" ]
-                                    "Decoder"
-                                    [ Type.var "a" ]
-                                , Type.namedWith
-                                    [ "Bytes", "Decode" ]
-                                    "Decoder"
-                                    [ Type.var "b" ]
-                                , Type.namedWith
-                                    [ "Bytes", "Decode" ]
-                                    "Decoder"
-                                    [ Type.var "c" ]
-                                , Type.namedWith
-                                    [ "Bytes", "Decode" ]
-                                    "Decoder"
-                                    [ Type.var "d" ]
-                                ]
-                                (Type.namedWith
-                                    [ "Bytes", "Decode" ]
-                                    "Decoder"
-                                    [ Type.var "result" ]
-                                )
-                            )
-                    }
+                     { importFrom = [ "Bytes", "Decode" ]
+                     , name = "map4"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.function
+                                      [ Type.var "a"
+                                      , Type.var "b"
+                                      , Type.var "c"
+                                      , Type.var "d"
+                                      ]
+                                      (Type.var "result")
+                                  , Type.namedWith
+                                      [ "Bytes", "Decode" ]
+                                      "Decoder"
+                                      [ Type.var "a" ]
+                                  , Type.namedWith
+                                      [ "Bytes", "Decode" ]
+                                      "Decoder"
+                                      [ Type.var "b" ]
+                                  , Type.namedWith
+                                      [ "Bytes", "Decode" ]
+                                      "Decoder"
+                                      [ Type.var "c" ]
+                                  , Type.namedWith
+                                      [ "Bytes", "Decode" ]
+                                      "Decoder"
+                                      [ Type.var "d" ]
+                                  ]
+                                  (Type.namedWith
+                                       [ "Bytes", "Decode" ]
+                                       "Decoder"
+                                       [ Type.var "result" ]
+                                  )
+                             )
+                     }
                 )
                 [ map4Arg, map4Arg0, map4Arg1, map4Arg2, map4Arg3 ]
     , map5 =
         \map5Arg map5Arg0 map5Arg1 map5Arg2 map5Arg3 map5Arg4 ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Bytes", "Decode" ]
-                    , name = "map5"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.function
-                                    [ Type.var "a"
-                                    , Type.var "b"
-                                    , Type.var "c"
-                                    , Type.var "d"
-                                    , Type.var "e"
-                                    ]
-                                    (Type.var "result")
-                                , Type.namedWith
-                                    [ "Bytes", "Decode" ]
-                                    "Decoder"
-                                    [ Type.var "a" ]
-                                , Type.namedWith
-                                    [ "Bytes", "Decode" ]
-                                    "Decoder"
-                                    [ Type.var "b" ]
-                                , Type.namedWith
-                                    [ "Bytes", "Decode" ]
-                                    "Decoder"
-                                    [ Type.var "c" ]
-                                , Type.namedWith
-                                    [ "Bytes", "Decode" ]
-                                    "Decoder"
-                                    [ Type.var "d" ]
-                                , Type.namedWith
-                                    [ "Bytes", "Decode" ]
-                                    "Decoder"
-                                    [ Type.var "e" ]
-                                ]
-                                (Type.namedWith
-                                    [ "Bytes", "Decode" ]
-                                    "Decoder"
-                                    [ Type.var "result" ]
-                                )
-                            )
-                    }
+                     { importFrom = [ "Bytes", "Decode" ]
+                     , name = "map5"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.function
+                                      [ Type.var "a"
+                                      , Type.var "b"
+                                      , Type.var "c"
+                                      , Type.var "d"
+                                      , Type.var "e"
+                                      ]
+                                      (Type.var "result")
+                                  , Type.namedWith
+                                      [ "Bytes", "Decode" ]
+                                      "Decoder"
+                                      [ Type.var "a" ]
+                                  , Type.namedWith
+                                      [ "Bytes", "Decode" ]
+                                      "Decoder"
+                                      [ Type.var "b" ]
+                                  , Type.namedWith
+                                      [ "Bytes", "Decode" ]
+                                      "Decoder"
+                                      [ Type.var "c" ]
+                                  , Type.namedWith
+                                      [ "Bytes", "Decode" ]
+                                      "Decoder"
+                                      [ Type.var "d" ]
+                                  , Type.namedWith
+                                      [ "Bytes", "Decode" ]
+                                      "Decoder"
+                                      [ Type.var "e" ]
+                                  ]
+                                  (Type.namedWith
+                                       [ "Bytes", "Decode" ]
+                                       "Decoder"
+                                       [ Type.var "result" ]
+                                  )
+                             )
+                     }
                 )
                 [ map5Arg, map5Arg0, map5Arg1, map5Arg2, map5Arg3, map5Arg4 ]
     , andThen =
         \andThenArg andThenArg0 ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Bytes", "Decode" ]
-                    , name = "andThen"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.function
-                                    [ Type.var "a" ]
-                                    (Type.namedWith
-                                        [ "Bytes", "Decode" ]
-                                        "Decoder"
-                                        [ Type.var "b" ]
-                                    )
-                                , Type.namedWith
-                                    [ "Bytes", "Decode" ]
-                                    "Decoder"
-                                    [ Type.var "a" ]
-                                ]
-                                (Type.namedWith
-                                    [ "Bytes", "Decode" ]
-                                    "Decoder"
-                                    [ Type.var "b" ]
-                                )
-                            )
-                    }
+                     { importFrom = [ "Bytes", "Decode" ]
+                     , name = "andThen"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.function
+                                      [ Type.var "a" ]
+                                      (Type.namedWith
+                                         [ "Bytes", "Decode" ]
+                                         "Decoder"
+                                         [ Type.var "b" ]
+                                      )
+                                  , Type.namedWith
+                                      [ "Bytes", "Decode" ]
+                                      "Decoder"
+                                      [ Type.var "a" ]
+                                  ]
+                                  (Type.namedWith
+                                       [ "Bytes", "Decode" ]
+                                       "Decoder"
+                                       [ Type.var "b" ]
+                                  )
+                             )
+                     }
                 )
                 [ andThenArg, andThenArg0 ]
     , succeed =
         \succeedArg ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Bytes", "Decode" ]
-                    , name = "succeed"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.var "a" ]
-                                (Type.namedWith
-                                    [ "Bytes", "Decode" ]
-                                    "Decoder"
-                                    [ Type.var "a" ]
-                                )
-                            )
-                    }
+                     { importFrom = [ "Bytes", "Decode" ]
+                     , name = "succeed"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.var "a" ]
+                                  (Type.namedWith
+                                       [ "Bytes", "Decode" ]
+                                       "Decoder"
+                                       [ Type.var "a" ]
+                                  )
+                             )
+                     }
                 )
                 [ succeedArg ]
     , loop =
         \loopArg loopArg0 ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Bytes", "Decode" ]
-                    , name = "loop"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.var "state"
-                                , Type.function
-                                    [ Type.var "state" ]
-                                    (Type.namedWith
-                                        [ "Bytes", "Decode" ]
-                                        "Decoder"
-                                        [ Type.namedWith
-                                            [ "Bytes", "Decode" ]
-                                            "Step"
-                                            [ Type.var "state", Type.var "a" ]
-                                        ]
-                                    )
-                                ]
-                                (Type.namedWith
-                                    [ "Bytes", "Decode" ]
-                                    "Decoder"
-                                    [ Type.var "a" ]
-                                )
-                            )
-                    }
+                     { importFrom = [ "Bytes", "Decode" ]
+                     , name = "loop"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.var "state"
+                                  , Type.function
+                                      [ Type.var "state" ]
+                                      (Type.namedWith
+                                         [ "Bytes", "Decode" ]
+                                         "Decoder"
+                                         [ Type.namedWith
+                                               [ "Bytes", "Decode" ]
+                                               "Step"
+                                               [ Type.var "state"
+                                               , Type.var "a"
+                                               ]
+                                         ]
+                                      )
+                                  ]
+                                  (Type.namedWith
+                                       [ "Bytes", "Decode" ]
+                                       "Decoder"
+                                       [ Type.var "a" ]
+                                  )
+                             )
+                     }
                 )
                 [ loopArg, loopArg0 ]
     }
@@ -1435,13 +1445,13 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.namedWith
-                            [ "Bytes", "Decode" ]
-                            "Decoder"
-                            [ Type.var "a" ]
-                        , Type.namedWith [ "Bytes" ] "Bytes" []
-                        ]
-                        (Type.maybe (Type.var "a"))
+                         [ Type.namedWith
+                             [ "Bytes", "Decode" ]
+                             "Decoder"
+                             [ Type.var "a" ]
+                         , Type.namedWith [ "Bytes" ] "Bytes" []
+                         ]
+                         (Type.maybe (Type.var "a"))
                     )
             }
     , signedInt8 =
@@ -1460,12 +1470,12 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.namedWith [ "Bytes" ] "Endianness" [] ]
-                        (Type.namedWith
-                            [ "Bytes", "Decode" ]
-                            "Decoder"
-                            [ Type.int ]
-                        )
+                         [ Type.namedWith [ "Bytes" ] "Endianness" [] ]
+                         (Type.namedWith
+                              [ "Bytes", "Decode" ]
+                              "Decoder"
+                              [ Type.int ]
+                         )
                     )
             }
     , signedInt32 =
@@ -1475,12 +1485,12 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.namedWith [ "Bytes" ] "Endianness" [] ]
-                        (Type.namedWith
-                            [ "Bytes", "Decode" ]
-                            "Decoder"
-                            [ Type.int ]
-                        )
+                         [ Type.namedWith [ "Bytes" ] "Endianness" [] ]
+                         (Type.namedWith
+                              [ "Bytes", "Decode" ]
+                              "Decoder"
+                              [ Type.int ]
+                         )
                     )
             }
     , unsignedInt8 =
@@ -1499,12 +1509,12 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.namedWith [ "Bytes" ] "Endianness" [] ]
-                        (Type.namedWith
-                            [ "Bytes", "Decode" ]
-                            "Decoder"
-                            [ Type.int ]
-                        )
+                         [ Type.namedWith [ "Bytes" ] "Endianness" [] ]
+                         (Type.namedWith
+                              [ "Bytes", "Decode" ]
+                              "Decoder"
+                              [ Type.int ]
+                         )
                     )
             }
     , unsignedInt32 =
@@ -1514,12 +1524,12 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.namedWith [ "Bytes" ] "Endianness" [] ]
-                        (Type.namedWith
-                            [ "Bytes", "Decode" ]
-                            "Decoder"
-                            [ Type.int ]
-                        )
+                         [ Type.namedWith [ "Bytes" ] "Endianness" [] ]
+                         (Type.namedWith
+                              [ "Bytes", "Decode" ]
+                              "Decoder"
+                              [ Type.int ]
+                         )
                     )
             }
     , float32 =
@@ -1529,12 +1539,12 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.namedWith [ "Bytes" ] "Endianness" [] ]
-                        (Type.namedWith
-                            [ "Bytes", "Decode" ]
-                            "Decoder"
-                            [ Type.float ]
-                        )
+                         [ Type.namedWith [ "Bytes" ] "Endianness" [] ]
+                         (Type.namedWith
+                              [ "Bytes", "Decode" ]
+                              "Decoder"
+                              [ Type.float ]
+                         )
                     )
             }
     , float64 =
@@ -1544,12 +1554,12 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.namedWith [ "Bytes" ] "Endianness" [] ]
-                        (Type.namedWith
-                            [ "Bytes", "Decode" ]
-                            "Decoder"
-                            [ Type.float ]
-                        )
+                         [ Type.namedWith [ "Bytes" ] "Endianness" [] ]
+                         (Type.namedWith
+                              [ "Bytes", "Decode" ]
+                              "Decoder"
+                              [ Type.float ]
+                         )
                     )
             }
     , bytes =
@@ -1559,12 +1569,12 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.int ]
-                        (Type.namedWith
-                            [ "Bytes", "Decode" ]
-                            "Decoder"
-                            [ Type.namedWith [ "Bytes" ] "Bytes" [] ]
-                        )
+                         [ Type.int ]
+                         (Type.namedWith
+                              [ "Bytes", "Decode" ]
+                              "Decoder"
+                              [ Type.namedWith [ "Bytes" ] "Bytes" [] ]
+                         )
                     )
             }
     , string =
@@ -1574,12 +1584,12 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.int ]
-                        (Type.namedWith
-                            [ "Bytes", "Decode" ]
-                            "Decoder"
-                            [ Type.string ]
-                        )
+                         [ Type.int ]
+                         (Type.namedWith
+                              [ "Bytes", "Decode" ]
+                              "Decoder"
+                              [ Type.string ]
+                         )
                     )
             }
     , map =
@@ -1589,17 +1599,17 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.function [ Type.var "a" ] (Type.var "b")
-                        , Type.namedWith
-                            [ "Bytes", "Decode" ]
-                            "Decoder"
-                            [ Type.var "a" ]
-                        ]
-                        (Type.namedWith
-                            [ "Bytes", "Decode" ]
-                            "Decoder"
-                            [ Type.var "b" ]
-                        )
+                         [ Type.function [ Type.var "a" ] (Type.var "b")
+                         , Type.namedWith
+                             [ "Bytes", "Decode" ]
+                             "Decoder"
+                             [ Type.var "a" ]
+                         ]
+                         (Type.namedWith
+                              [ "Bytes", "Decode" ]
+                              "Decoder"
+                              [ Type.var "b" ]
+                         )
                     )
             }
     , map2 =
@@ -1609,23 +1619,23 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.function
-                            [ Type.var "a", Type.var "b" ]
-                            (Type.var "result")
-                        , Type.namedWith
-                            [ "Bytes", "Decode" ]
-                            "Decoder"
-                            [ Type.var "a" ]
-                        , Type.namedWith
-                            [ "Bytes", "Decode" ]
-                            "Decoder"
-                            [ Type.var "b" ]
-                        ]
-                        (Type.namedWith
-                            [ "Bytes", "Decode" ]
-                            "Decoder"
-                            [ Type.var "result" ]
-                        )
+                         [ Type.function
+                             [ Type.var "a", Type.var "b" ]
+                             (Type.var "result")
+                         , Type.namedWith
+                             [ "Bytes", "Decode" ]
+                             "Decoder"
+                             [ Type.var "a" ]
+                         , Type.namedWith
+                             [ "Bytes", "Decode" ]
+                             "Decoder"
+                             [ Type.var "b" ]
+                         ]
+                         (Type.namedWith
+                              [ "Bytes", "Decode" ]
+                              "Decoder"
+                              [ Type.var "result" ]
+                         )
                     )
             }
     , map3 =
@@ -1635,27 +1645,27 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.function
-                            [ Type.var "a", Type.var "b", Type.var "c" ]
-                            (Type.var "result")
-                        , Type.namedWith
-                            [ "Bytes", "Decode" ]
-                            "Decoder"
-                            [ Type.var "a" ]
-                        , Type.namedWith
-                            [ "Bytes", "Decode" ]
-                            "Decoder"
-                            [ Type.var "b" ]
-                        , Type.namedWith
-                            [ "Bytes", "Decode" ]
-                            "Decoder"
-                            [ Type.var "c" ]
-                        ]
-                        (Type.namedWith
-                            [ "Bytes", "Decode" ]
-                            "Decoder"
-                            [ Type.var "result" ]
-                        )
+                         [ Type.function
+                             [ Type.var "a", Type.var "b", Type.var "c" ]
+                             (Type.var "result")
+                         , Type.namedWith
+                             [ "Bytes", "Decode" ]
+                             "Decoder"
+                             [ Type.var "a" ]
+                         , Type.namedWith
+                             [ "Bytes", "Decode" ]
+                             "Decoder"
+                             [ Type.var "b" ]
+                         , Type.namedWith
+                             [ "Bytes", "Decode" ]
+                             "Decoder"
+                             [ Type.var "c" ]
+                         ]
+                         (Type.namedWith
+                              [ "Bytes", "Decode" ]
+                              "Decoder"
+                              [ Type.var "result" ]
+                         )
                     )
             }
     , map4 =
@@ -1665,35 +1675,35 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.function
-                            [ Type.var "a"
-                            , Type.var "b"
-                            , Type.var "c"
-                            , Type.var "d"
-                            ]
-                            (Type.var "result")
-                        , Type.namedWith
-                            [ "Bytes", "Decode" ]
-                            "Decoder"
-                            [ Type.var "a" ]
-                        , Type.namedWith
-                            [ "Bytes", "Decode" ]
-                            "Decoder"
-                            [ Type.var "b" ]
-                        , Type.namedWith
-                            [ "Bytes", "Decode" ]
-                            "Decoder"
-                            [ Type.var "c" ]
-                        , Type.namedWith
-                            [ "Bytes", "Decode" ]
-                            "Decoder"
-                            [ Type.var "d" ]
-                        ]
-                        (Type.namedWith
-                            [ "Bytes", "Decode" ]
-                            "Decoder"
-                            [ Type.var "result" ]
-                        )
+                         [ Type.function
+                             [ Type.var "a"
+                             , Type.var "b"
+                             , Type.var "c"
+                             , Type.var "d"
+                             ]
+                             (Type.var "result")
+                         , Type.namedWith
+                             [ "Bytes", "Decode" ]
+                             "Decoder"
+                             [ Type.var "a" ]
+                         , Type.namedWith
+                             [ "Bytes", "Decode" ]
+                             "Decoder"
+                             [ Type.var "b" ]
+                         , Type.namedWith
+                             [ "Bytes", "Decode" ]
+                             "Decoder"
+                             [ Type.var "c" ]
+                         , Type.namedWith
+                             [ "Bytes", "Decode" ]
+                             "Decoder"
+                             [ Type.var "d" ]
+                         ]
+                         (Type.namedWith
+                              [ "Bytes", "Decode" ]
+                              "Decoder"
+                              [ Type.var "result" ]
+                         )
                     )
             }
     , map5 =
@@ -1703,40 +1713,40 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.function
-                            [ Type.var "a"
-                            , Type.var "b"
-                            , Type.var "c"
-                            , Type.var "d"
-                            , Type.var "e"
-                            ]
-                            (Type.var "result")
-                        , Type.namedWith
-                            [ "Bytes", "Decode" ]
-                            "Decoder"
-                            [ Type.var "a" ]
-                        , Type.namedWith
-                            [ "Bytes", "Decode" ]
-                            "Decoder"
-                            [ Type.var "b" ]
-                        , Type.namedWith
-                            [ "Bytes", "Decode" ]
-                            "Decoder"
-                            [ Type.var "c" ]
-                        , Type.namedWith
-                            [ "Bytes", "Decode" ]
-                            "Decoder"
-                            [ Type.var "d" ]
-                        , Type.namedWith
-                            [ "Bytes", "Decode" ]
-                            "Decoder"
-                            [ Type.var "e" ]
-                        ]
-                        (Type.namedWith
-                            [ "Bytes", "Decode" ]
-                            "Decoder"
-                            [ Type.var "result" ]
-                        )
+                         [ Type.function
+                             [ Type.var "a"
+                             , Type.var "b"
+                             , Type.var "c"
+                             , Type.var "d"
+                             , Type.var "e"
+                             ]
+                             (Type.var "result")
+                         , Type.namedWith
+                             [ "Bytes", "Decode" ]
+                             "Decoder"
+                             [ Type.var "a" ]
+                         , Type.namedWith
+                             [ "Bytes", "Decode" ]
+                             "Decoder"
+                             [ Type.var "b" ]
+                         , Type.namedWith
+                             [ "Bytes", "Decode" ]
+                             "Decoder"
+                             [ Type.var "c" ]
+                         , Type.namedWith
+                             [ "Bytes", "Decode" ]
+                             "Decoder"
+                             [ Type.var "d" ]
+                         , Type.namedWith
+                             [ "Bytes", "Decode" ]
+                             "Decoder"
+                             [ Type.var "e" ]
+                         ]
+                         (Type.namedWith
+                              [ "Bytes", "Decode" ]
+                              "Decoder"
+                              [ Type.var "result" ]
+                         )
                     )
             }
     , andThen =
@@ -1746,23 +1756,23 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.function
-                            [ Type.var "a" ]
-                            (Type.namedWith
+                         [ Type.function
+                             [ Type.var "a" ]
+                             (Type.namedWith
                                 [ "Bytes", "Decode" ]
                                 "Decoder"
                                 [ Type.var "b" ]
-                            )
-                        , Type.namedWith
-                            [ "Bytes", "Decode" ]
-                            "Decoder"
-                            [ Type.var "a" ]
-                        ]
-                        (Type.namedWith
-                            [ "Bytes", "Decode" ]
-                            "Decoder"
-                            [ Type.var "b" ]
-                        )
+                             )
+                         , Type.namedWith
+                             [ "Bytes", "Decode" ]
+                             "Decoder"
+                             [ Type.var "a" ]
+                         ]
+                         (Type.namedWith
+                              [ "Bytes", "Decode" ]
+                              "Decoder"
+                              [ Type.var "b" ]
+                         )
                     )
             }
     , succeed =
@@ -1772,12 +1782,12 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.var "a" ]
-                        (Type.namedWith
-                            [ "Bytes", "Decode" ]
-                            "Decoder"
-                            [ Type.var "a" ]
-                        )
+                         [ Type.var "a" ]
+                         (Type.namedWith
+                              [ "Bytes", "Decode" ]
+                              "Decoder"
+                              [ Type.var "a" ]
+                         )
                     )
             }
     , fail =
@@ -1787,9 +1797,9 @@ values_ =
             , annotation =
                 Just
                     (Type.namedWith
-                        [ "Bytes", "Decode" ]
-                        "Decoder"
-                        [ Type.var "a" ]
+                         [ "Bytes", "Decode" ]
+                         "Decoder"
+                         [ Type.var "a" ]
                     )
             }
     , loop =
@@ -1799,24 +1809,24 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.var "state"
-                        , Type.function
-                            [ Type.var "state" ]
-                            (Type.namedWith
+                         [ Type.var "state"
+                         , Type.function
+                             [ Type.var "state" ]
+                             (Type.namedWith
                                 [ "Bytes", "Decode" ]
                                 "Decoder"
                                 [ Type.namedWith
-                                    [ "Bytes", "Decode" ]
-                                    "Step"
-                                    [ Type.var "state", Type.var "a" ]
+                                      [ "Bytes", "Decode" ]
+                                      "Step"
+                                      [ Type.var "state", Type.var "a" ]
                                 ]
-                            )
-                        ]
-                        (Type.namedWith
-                            [ "Bytes", "Decode" ]
-                            "Decoder"
-                            [ Type.var "a" ]
-                        )
+                             )
+                         ]
+                         (Type.namedWith
+                              [ "Bytes", "Decode" ]
+                              "Decoder"
+                              [ Type.var "a" ]
+                         )
                     )
             }
     }

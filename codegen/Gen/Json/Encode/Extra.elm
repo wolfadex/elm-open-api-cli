@@ -33,19 +33,19 @@ maybe : (Elm.Expression -> Elm.Expression) -> Elm.Expression -> Elm.Expression
 maybe maybeArg maybeArg0 =
     Elm.apply
         (Elm.value
-            { importFrom = [ "Json", "Encode", "Extra" ]
-            , name = "maybe"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.function
-                            [ Type.var "a" ]
-                            (Type.namedWith [ "Json", "Encode" ] "Value" [])
-                        , Type.maybe (Type.var "a")
-                        ]
-                        (Type.namedWith [ "Json", "Encode" ] "Value" [])
-                    )
-            }
+             { importFrom = [ "Json", "Encode", "Extra" ]
+             , name = "maybe"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.function
+                              [ Type.var "a" ]
+                              (Type.namedWith [ "Json", "Encode" ] "Value" [])
+                          , Type.maybe (Type.var "a")
+                          ]
+                          (Type.namedWith [ "Json", "Encode" ] "Value" [])
+                     )
+             }
         )
         [ Elm.functionReduced "maybeUnpack" maybeArg, maybeArg0 ]
 
@@ -56,23 +56,27 @@ call_ =
         \maybeArg maybeArg0 ->
             Elm.apply
                 (Elm.value
-                    { importFrom = [ "Json", "Encode", "Extra" ]
-                    , name = "maybe"
-                    , annotation =
-                        Just
-                            (Type.function
-                                [ Type.function
-                                    [ Type.var "a" ]
-                                    (Type.namedWith
-                                        [ "Json", "Encode" ]
-                                        "Value"
-                                        []
-                                    )
-                                , Type.maybe (Type.var "a")
-                                ]
-                                (Type.namedWith [ "Json", "Encode" ] "Value" [])
-                            )
-                    }
+                     { importFrom = [ "Json", "Encode", "Extra" ]
+                     , name = "maybe"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.function
+                                      [ Type.var "a" ]
+                                      (Type.namedWith
+                                         [ "Json", "Encode" ]
+                                         "Value"
+                                         []
+                                      )
+                                  , Type.maybe (Type.var "a")
+                                  ]
+                                  (Type.namedWith
+                                       [ "Json", "Encode" ]
+                                       "Value"
+                                       []
+                                  )
+                             )
+                     }
                 )
                 [ maybeArg, maybeArg0 ]
     }
@@ -87,12 +91,12 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                        [ Type.function
-                            [ Type.var "a" ]
-                            (Type.namedWith [ "Json", "Encode" ] "Value" [])
-                        , Type.maybe (Type.var "a")
-                        ]
-                        (Type.namedWith [ "Json", "Encode" ] "Value" [])
+                         [ Type.function
+                             [ Type.var "a" ]
+                             (Type.namedWith [ "Json", "Encode" ] "Value" [])
+                         , Type.maybe (Type.var "a")
+                         ]
+                         (Type.namedWith [ "Json", "Encode" ] "Value" [])
                     )
             }
     }

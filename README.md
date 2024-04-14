@@ -10,9 +10,9 @@ To allow developers to generate an Elm module(s) from an OpenAPI Spec. This is p
 
 [A RealWorld app](https://github.com/wolfadex/realworld-app) using a generated SDK to demonstrate how to use it.
 
-## [Using the CLI](./docs/USAGE.md)
+## [Using the CLI](https://github.com/wolfadex/elm-open-api-cli/blob/main/docs/USAGE.md)
 
-## [Contributing to Development](./docs/CONTRIBUTING.md)
+## [Contributing to Development](https://github.com/wolfadex/elm-open-api-cli/blob/main/docs/CONTRIBUTING.md)
 
 ## Thank you
 

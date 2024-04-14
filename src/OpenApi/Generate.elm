@@ -1893,10 +1893,8 @@ jsonDecodeAndMap =
         bVarAnnotation =
             Elm.Annotation.var "b"
     in
-    Elm.fn2
-        ( "decoder", Just (Gen.Json.Decode.annotation_.decoder aVarAnnotation) )
-        ( "fnDecoder", Just (Gen.Json.Decode.annotation_.decoder aToBAnnotation) )
-        (\decoder fnDecoder ->
+    Elm.function []
+        (\_ ->
             Elm.apply
                 Gen.Json.Decode.values_.map2
                 [ Elm.val "(|>)" ]

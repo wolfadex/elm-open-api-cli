@@ -242,7 +242,7 @@ pathDeclarations namespace =
                                 |> List.filterMap (\( method, getter ) -> Maybe.map (Tuple.pair method) (getter path))
                                 |> CliMonad.combineMap
                                     (\( method, operation ) ->
-                                        toRequestFunctions namespace method url operation
+                                        toRequestFunctions False namespace method url operation
                                             |> CliMonad.errorToWarning
                                     )
                                 |> CliMonad.map (List.filterMap identity >> List.concat)
@@ -342,7 +342,7 @@ unitDeclarations namespace name =
                         , group = Just "Encoders"
                         }
             )
-            (typeToEncoder Unit)
+            (typeToEncoder False namespace Unit)
         ]
 
 
@@ -389,7 +389,7 @@ schemaToDeclarations withinSchema namespace name schema =
                                     , group = Just "Encoders"
                                     }
                         )
-                        (schemaToEncoder schema)
+                        (schemaToEncoder withinSchema namespace schema)
                     ]
                         |> CliMonad.combine
             )
@@ -442,8 +442,8 @@ requestBodyToDeclarations namespace name reference =
                 |> CliMonad.withPath name
 
 
-toRequestFunctions : List String -> String -> String -> OpenApi.Operation.Operation -> CliMonad (List Elm.Declaration)
-toRequestFunctions namespace method url operation =
+toRequestFunctions : Bool -> List String -> String -> String -> OpenApi.Operation.Operation -> CliMonad (List Elm.Declaration)
+toRequestFunctions withinSchema namespace method url operation =
     let
         functionName : String
         functionName =
@@ -571,7 +571,7 @@ toRequestFunctions namespace method url operation =
                                 CliMonad.succeed (\_ -> Gen.Http.emptyBody)
 
                             JsonContent type_ ->
-                                typeToEncoder type_
+                                typeToEncoder withinSchema namespace type_
                                     |> CliMonad.map
                                         (\encoder config ->
                                             Gen.Http.jsonBody
@@ -1808,13 +1808,13 @@ nullableType =
             }
 
 
-schemaToEncoder : Json.Schema.Definitions.Schema -> CliMonad (Elm.Expression -> Elm.Expression)
-schemaToEncoder schema =
-    schemaToType schema |> CliMonad.andThen typeToEncoder
+schemaToEncoder : Bool -> List String -> Json.Schema.Definitions.Schema -> CliMonad (Elm.Expression -> Elm.Expression)
+schemaToEncoder withinSchema namespace schema =
+    schemaToType schema |> CliMonad.andThen (typeToEncoder withinSchema namespace)
 
 
-typeToEncoder : Type -> CliMonad (Elm.Expression -> Elm.Expression)
-typeToEncoder type_ =
+typeToEncoder : Bool -> List String -> Type -> CliMonad (Elm.Expression -> Elm.Expression)
+typeToEncoder withinSchema namespace type_ =
     case type_ of
         String ->
             CliMonad.succeed Gen.Json.Encode.call_.string
@@ -1841,7 +1841,7 @@ typeToEncoder type_ =
             propertiesList
                 |> CliMonad.combineMap
                     (\( key, field ) ->
-                        typeToEncoder field.type_
+                        typeToEncoder withinSchema namespace field.type_
                             |> CliMonad.map
                                 (\encoder rec ->
                                     let
@@ -1878,14 +1878,14 @@ typeToEncoder type_ =
                     )
 
         List t ->
-            typeToEncoder t
+            typeToEncoder withinSchema namespace t
                 |> CliMonad.map
                     (\encoder ->
                         Gen.Json.Encode.call_.list (Elm.functionReduced "rec" encoder)
                     )
 
         Nullable t ->
-            typeToEncoder t
+            typeToEncoder withinSchema namespace t
                 |> CliMonad.map
                     (\encoder nullableValue ->
                         Elm.Case.custom
@@ -1902,7 +1902,23 @@ typeToEncoder type_ =
             CliMonad.succeed <| Gen.Basics.identity
 
         Ref ref ->
-            CliMonad.map (\name rec -> Elm.apply (Elm.val ("encode" ++ name)) [ rec ]) (CliMonad.refToTypeName ref)
+            CliMonad.map
+                (\name rec ->
+                    Elm.apply
+                        (Elm.value
+                            { importFrom =
+                                if withinSchema then
+                                    []
+
+                                else
+                                    namespace ++ [ "Schema" ]
+                            , name = "encode" ++ name
+                            , annotation = Nothing
+                            }
+                        )
+                        [ rec ]
+                )
+                (CliMonad.refToTypeName ref)
 
         OneOf oneOfName oneOfData ->
             oneOfData
@@ -1915,7 +1931,7 @@ typeToEncoder type_ =
                                     variantEncoder
                             )
                             (CliMonad.typeToAnnotation variant.type_)
-                            (typeToEncoder variant.type_)
+                            (typeToEncoder withinSchema namespace variant.type_)
                     )
                 |> CliMonad.map
                     (\branches rec ->

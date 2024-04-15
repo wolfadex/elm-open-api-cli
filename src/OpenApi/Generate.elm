@@ -66,57 +66,95 @@ type alias AuthorizationInfo =
 
 files : { namespace : List String, generateTodos : Bool } -> OpenApi.OpenApi -> Result Message ( List Elm.File, List Message )
 files { namespace, generateTodos } apiSpec =
-    CliMonad.combine
-        [ pathDeclarations namespace
-        , responsesDeclarations namespace
-        , requestBodiesDeclarations namespace
-        , componentDeclarations namespace
-        ]
-        |> CliMonad.map List.concat
-        |> CliMonad.run
-            { openApi = apiSpec
-            , generateTodos = generateTodos
-            }
-        |> Result.map
-            (\( decls, warnings ) ->
-                ( [ Elm.fileWith (namespace ++ [ "Api" ])
-                        { docs =
-                            List.sortBy
-                                (\{ group } ->
-                                    case group of
-                                        Just "Request functions" ->
-                                            1
+    let
+        apiDeclarations : Result Message ( List Elm.Declaration, List Message )
+        apiDeclarations =
+            CliMonad.combine
+                [ pathDeclarations namespace
+                , responsesDeclarations namespace
+                , requestBodiesDeclarations namespace
+                ]
+                |> CliMonad.map List.concat
+                |> CliMonad.run
+                    { openApi = apiSpec
+                    , generateTodos = generateTodos
+                    }
 
-                                        Just "Types" ->
-                                            2
+        compDeclarations : Result Message ( List Elm.Declaration, List Message )
+        compDeclarations =
+            CliMonad.combine
+                [ componentDeclarations namespace
+                ]
+                |> CliMonad.map List.concat
+                |> CliMonad.run
+                    { openApi = apiSpec
+                    , generateTodos = generateTodos
+                    }
+    in
+    Result.map2
+        (\( apiDecs, apiWarns ) ( schemaDecs, compWarns ) ->
+            ( [ Elm.fileWith (namespace ++ [ "Api" ])
+                    { docs =
+                        List.sortBy
+                            (\{ group } ->
+                                case group of
+                                    Just "Request functions" ->
+                                        1
 
-                                        Just "Encoders" ->
-                                            3
+                                    Just "Types" ->
+                                        2
 
-                                        Just "Decoders" ->
-                                            4
+                                    Just "Encoders" ->
+                                        3
 
-                                        _ ->
-                                            5
-                                )
-                                >> List.map Elm.docs
-                        , aliases = []
-                        }
-                        decls
-                  , Elm.file (namespace ++ [ "OpenApi", "Util" ])
-                        [ whateverResolver.declaration
-                            |> Elm.withDocumentation "Similar to `Http.expectWhatever`, but for an `Http.Resolver`"
-                            |> Elm.exposeWith
-                                { exposeConstructor = False
-                                , group = Just "Http"
-                                }
-                        , responseToResult.declaration
-                        , decodeOptionalField.declaration
-                            |> Elm.exposeWith
-                                { exposeConstructor = False
-                                , group = Just "Json"
-                                }
-                            |> Elm.withDocumentation """Decode an optional field
+                                    Just "Decoders" ->
+                                        4
+
+                                    _ ->
+                                        5
+                            )
+                            >> List.map Elm.docs
+                    , aliases = []
+                    }
+                    apiDecs
+              , Elm.fileWith (namespace ++ [ "Schema" ])
+                    { docs =
+                        List.sortBy
+                            (\{ group } ->
+                                case group of
+                                    Just "Request functions" ->
+                                        1
+
+                                    Just "Types" ->
+                                        2
+
+                                    Just "Encoders" ->
+                                        3
+
+                                    Just "Decoders" ->
+                                        4
+
+                                    _ ->
+                                        5
+                            )
+                            >> List.map Elm.docs
+                    , aliases = []
+                    }
+                    schemaDecs
+              , Elm.file (namespace ++ [ "OpenApi", "Util" ])
+                    [ whateverResolver.declaration
+                        |> Elm.withDocumentation "Similar to `Http.expectWhatever`, but for an `Http.Resolver`"
+                        |> Elm.exposeWith
+                            { exposeConstructor = False
+                            , group = Just "Http"
+                            }
+                    , responseToResult.declaration
+                    , decodeOptionalField.declaration
+                        |> Elm.exposeWith
+                            { exposeConstructor = False
+                            , group = Just "Json"
+                            }
+                        |> Elm.withDocumentation """Decode an optional field
 
     decodeString (decodeOptionalField "x" int) "{ "x": 3 }"
     --> Ok (Just 3)
@@ -126,60 +164,62 @@ files { namespace, generateTodos } apiSpec =
 
     decodeString (decodeOptionalField "x" int) "{ "y": 4 }"
     --> Ok Nothing"""
-                        , jsonDecodeAndMap
-                            |> Elm.exposeWith
-                                { exposeConstructor = False
-                                , group = Just "Json"
-                                }
-                        ]
-                  , Elm.fileWith (namespace ++ [ "OpenApi" ])
-                        { docs =
-                            List.sortBy
-                                (\{ group } ->
-                                    case group of
-                                        Just "Request functions" ->
-                                            1
+                    , jsonDecodeAndMap
+                        |> Elm.exposeWith
+                            { exposeConstructor = False
+                            , group = Just "Json"
+                            }
+                    ]
+              , Elm.fileWith (namespace ++ [ "OpenApi" ])
+                    { docs =
+                        List.sortBy
+                            (\{ group } ->
+                                case group of
+                                    Just "Request functions" ->
+                                        1
 
-                                        Just "Types" ->
-                                            2
+                                    Just "Types" ->
+                                        2
 
-                                        Just "Encoders" ->
-                                            3
+                                    Just "Encoders" ->
+                                        3
 
-                                        Just "Decoders" ->
-                                            4
+                                    Just "Decoders" ->
+                                        4
 
-                                        _ ->
-                                            5
-                                )
-                                >> List.map Elm.docs
-                        , aliases = []
-                        }
-                        [ customHttpError
-                            |> Elm.exposeWith
-                                { exposeConstructor = True
-                                , group = Just "Types"
-                                }
-                        , nullableType
-                            |> Elm.exposeWith
-                                { exposeConstructor = True
-                                , group = Just "Types"
-                                }
-                        , expectJsonCustom.declaration
-                            |> Elm.exposeWith
-                                { exposeConstructor = False
-                                , group = Just "Expect"
-                                }
-                        , jsonResolverCustom.declaration
-                            |> Elm.exposeWith
-                                { exposeConstructor = False
-                                , group = Just "Expect"
-                                }
-                        ]
-                  ]
-                , warnings
-                )
+                                    _ ->
+                                        5
+                            )
+                            >> List.map Elm.docs
+                    , aliases = []
+                    }
+                    [ customHttpError
+                        |> Elm.exposeWith
+                            { exposeConstructor = True
+                            , group = Just "Types"
+                            }
+                    , nullableType
+                        |> Elm.exposeWith
+                            { exposeConstructor = True
+                            , group = Just "Types"
+                            }
+                    , expectJsonCustom.declaration
+                        |> Elm.exposeWith
+                            { exposeConstructor = False
+                            , group = Just "Expect"
+                            }
+                    , jsonResolverCustom.declaration
+                        |> Elm.exposeWith
+                            { exposeConstructor = False
+                            , group = Just "Expect"
+                            }
+                    ]
+              ]
+            , apiWarns ++ compWarns
             )
+        )
+        apiDeclarations
+        compDeclarations
 
 
 pathDeclarations : List String -> CliMonad (List Elm.Declaration)

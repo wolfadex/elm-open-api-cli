@@ -172,11 +172,6 @@ generateFileFromOpenApiSpec config apiSpec =
                         filePath =
                             config.outputDirectory
                                 ++ "/"
-                                -- ++ (moduleName
-                                --         |> String.split "."
-                                --         |> String.join "/"
-                                --    )
-                                -- ++ ".elm"
                                 ++ file.path
 
                         outputPath : String

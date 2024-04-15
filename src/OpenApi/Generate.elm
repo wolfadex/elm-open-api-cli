@@ -66,13 +66,13 @@ type alias AuthorizationInfo =
     }
 
 
-files : { namespace : String, generateTodos : Bool } -> OpenApi.OpenApi -> Result Message ( List Elm.File, List Message )
+files : { namespace : List String, generateTodos : Bool } -> OpenApi.OpenApi -> Result Message ( List Elm.File, List Message )
 files { namespace, generateTodos } apiSpec =
     CliMonad.combine
         [ pathDeclarations namespace
-        , componentDeclarations namespace
         , responsesDeclarations namespace
         , requestBodiesDeclarations namespace
+        , componentDeclarations namespace
         ]
         |> CliMonad.map List.concat
         |> CliMonad.run
@@ -81,7 +81,7 @@ files { namespace, generateTodos } apiSpec =
             }
         |> Result.map
             (\( decls, warnings ) ->
-                ( [ Elm.fileWith [ namespace, "Api" ]
+                ( [ Elm.fileWith (namespace ++ [ "Api" ])
                         { docs =
                             List.sortBy
                                 (\{ group } ->
@@ -105,7 +105,7 @@ files { namespace, generateTodos } apiSpec =
                         , aliases = []
                         }
                         decls
-                  , Elm.file [ namespace, "OpenApi", "Util" ]
+                  , Elm.file (namespace ++ [ "OpenApi", "Util" ])
                         [ whateverResolver.declaration
                             |> Elm.withDocumentation "Similar to `Http.expectWhatever`, but for an `Http.Resolver`"
                             |> Elm.exposeWith
@@ -134,7 +134,7 @@ files { namespace, generateTodos } apiSpec =
                                 , group = Just "Json"
                                 }
                         ]
-                  , Elm.fileWith [ namespace, "OpenApi" ]
+                  , Elm.fileWith (namespace ++ [ "OpenApi" ])
                         { docs =
                             List.sortBy
                                 (\{ group } ->
@@ -184,7 +184,7 @@ files { namespace, generateTodos } apiSpec =
             )
 
 
-pathDeclarations : String -> CliMonad (List Elm.Declaration)
+pathDeclarations : List String -> CliMonad (List Elm.Declaration)
 pathDeclarations namespace =
     CliMonad.fromApiSpec OpenApi.paths
         |> CliMonad.andThen
@@ -213,7 +213,7 @@ pathDeclarations namespace =
             )
 
 
-responsesDeclarations : String -> CliMonad (List Elm.Declaration)
+responsesDeclarations : List String -> CliMonad (List Elm.Declaration)
 responsesDeclarations namespace =
     CliMonad.fromApiSpec
         (OpenApi.components
@@ -231,7 +231,7 @@ responsesDeclarations namespace =
         |> CliMonad.map List.concat
 
 
-requestBodiesDeclarations : String -> CliMonad (List Elm.Declaration)
+requestBodiesDeclarations : List String -> CliMonad (List Elm.Declaration)
 requestBodiesDeclarations namespace =
     CliMonad.fromApiSpec
         (OpenApi.components
@@ -249,7 +249,7 @@ requestBodiesDeclarations namespace =
         |> CliMonad.map List.concat
 
 
-componentDeclarations : String -> CliMonad (List Elm.Declaration)
+componentDeclarations : List String -> CliMonad (List Elm.Declaration)
 componentDeclarations namespace =
     CliMonad.fromApiSpec
         (OpenApi.components
@@ -267,7 +267,7 @@ componentDeclarations namespace =
         |> CliMonad.map List.concat
 
 
-unitDeclarations : String -> String -> CliMonad (List Elm.Declaration)
+unitDeclarations : List String -> String -> CliMonad (List Elm.Declaration)
 unitDeclarations namespace name =
     let
         typeName : TypeName
@@ -308,7 +308,7 @@ unitDeclarations namespace name =
         ]
 
 
-schemaToDeclarations : String -> String -> Json.Schema.Definitions.Schema -> CliMonad (List Elm.Declaration)
+schemaToDeclarations : List String -> String -> Json.Schema.Definitions.Schema -> CliMonad (List Elm.Declaration)
 schemaToDeclarations namespace name schema =
     schemaToAnnotation schema
         |> CliMonad.andThen
@@ -358,7 +358,7 @@ schemaToDeclarations namespace name schema =
         |> CliMonad.withPath name
 
 
-responseToDeclarations : String -> String -> OpenApi.Reference.ReferenceOr OpenApi.Response.Response -> CliMonad (List Elm.Declaration)
+responseToDeclarations : List String -> String -> OpenApi.Reference.ReferenceOr OpenApi.Response.Response -> CliMonad (List Elm.Declaration)
 responseToDeclarations namespace name reference =
     case OpenApi.Reference.toConcrete reference of
         Just response ->
@@ -381,7 +381,7 @@ responseToDeclarations namespace name reference =
                 |> CliMonad.withPath name
 
 
-requestBodyToDeclarations : String -> String -> OpenApi.Reference.ReferenceOr OpenApi.RequestBody.RequestBody -> CliMonad (List Elm.Declaration)
+requestBodyToDeclarations : List String -> String -> OpenApi.Reference.ReferenceOr OpenApi.RequestBody.RequestBody -> CliMonad (List Elm.Declaration)
 requestBodyToDeclarations namespace name reference =
     case OpenApi.Reference.toConcrete reference of
         Just requestBody ->
@@ -404,7 +404,7 @@ requestBodyToDeclarations namespace name reference =
                 |> CliMonad.withPath name
 
 
-toRequestFunctions : String -> String -> String -> OpenApi.Operation.Operation -> CliMonad (List Elm.Declaration)
+toRequestFunctions : List String -> String -> String -> OpenApi.Operation.Operation -> CliMonad (List Elm.Declaration)
 toRequestFunctions namespace method url operation =
     let
         functionName : String
@@ -1243,7 +1243,7 @@ toConcreteParam param =
 
 
 operationToTypesExpectAndResolver :
-    String
+    List String
     -> String
     -> OpenApi.Operation.Operation
     ->
@@ -1263,7 +1263,7 @@ operationToTypesExpectAndResolver namespace functionName operation =
 
         expectJsonBetter : Elm.Expression -> Elm.Expression -> Elm.Expression -> Elm.Expression
         expectJsonBetter errorDecoders successDecoder toMsg =
-            expectJsonCustom.callFrom [ namespace, "OpenApi" ] toMsg errorDecoders successDecoder
+            expectJsonCustom.callFrom (namespace ++ [ "OpenApi" ]) toMsg errorDecoders successDecoder
     in
     CliMonad.succeed responses
         |> CliMonad.stepOrFail
@@ -1438,7 +1438,7 @@ operationToTypesExpectAndResolver namespace functionName operation =
                                                     , errorTypeDeclaration = errorTypeDeclaration_
                                                     , errorTypeAnnotation = errorTypeAnnotation
                                                     , toExpect = expectJsonBetter errorDecoders_ successDecoder
-                                                    , resolver = jsonResolverCustom.callFrom [ namespace, "OpenApi" ] errorDecoders_ successDecoder
+                                                    , resolver = jsonResolverCustom.callFrom (namespace ++ [ "OpenApi" ]) errorDecoders_ successDecoder
                                                     }
                                                 )
                                                 (typeToDecoder namespace type_)
@@ -1479,7 +1479,7 @@ operationToTypesExpectAndResolver namespace functionName operation =
                                                     , errorTypeDeclaration = errorTypeDeclaration_
                                                     , errorTypeAnnotation = errorTypeAnnotation
                                                     , toExpect = Gen.Http.call_.expectWhatever
-                                                    , resolver = whateverResolver.callFrom [ namespace, "OpenApi", "Util" ] []
+                                                    , resolver = whateverResolver.callFrom (namespace ++ [ "OpenApi", "Util" ]) []
                                                     }
                                                 )
                                                 errorTypeDeclaration
@@ -1504,7 +1504,7 @@ operationToTypesExpectAndResolver namespace functionName operation =
                                                 , errorTypeDeclaration = errorTypeDeclaration_
                                                 , errorTypeAnnotation = errorTypeAnnotation
                                                 , toExpect = expectJsonBetter errorDecoders_ (Elm.val ("decode" ++ typeName))
-                                                , resolver = jsonResolverCustom.callFrom [ namespace, "OpenApi" ] errorDecoders_ <| Elm.val ("decode" ++ typeName)
+                                                , resolver = jsonResolverCustom.callFrom (namespace ++ [ "OpenApi" ]) errorDecoders_ <| Elm.val ("decode" ++ typeName)
                                                 }
                                             )
                                             errorDecoders
@@ -1914,13 +1914,13 @@ typeToEncoder type_ =
             CliMonad.succeed (\_ -> Gen.Json.Encode.null)
 
 
-schemaToDecoder : String -> Json.Schema.Definitions.Schema -> CliMonad Elm.Expression
+schemaToDecoder : List String -> Json.Schema.Definitions.Schema -> CliMonad Elm.Expression
 schemaToDecoder namespace schema =
     schemaToType schema
         |> CliMonad.andThen (typeToDecoder namespace)
 
 
-typeToDecoder : String -> Type -> CliMonad Elm.Expression
+typeToDecoder : List String -> Type -> CliMonad Elm.Expression
 typeToDecoder namespace type_ =
     case type_ of
         Object properties ->
@@ -1936,7 +1936,7 @@ typeToDecoder namespace type_ =
                             Elm.Op.pipe
                                 (Elm.apply
                                     (Elm.value
-                                        { importFrom = [ namespace, "OpenApi", "Util" ]
+                                        { importFrom = namespace ++ [ "OpenApi", "Util" ]
                                         , name = "jsonDecodeAndMap"
                                         , annotation = Nothing
                                         }
@@ -1945,7 +1945,7 @@ typeToDecoder namespace type_ =
                                         Gen.Json.Decode.field key internalDecoder
 
                                       else
-                                        decodeOptionalField.callFrom [ namespace, "OpenApi", "Util" ] (Elm.string key) internalDecoder
+                                        decodeOptionalField.callFrom (namespace ++ [ "OpenApi", "Util" ]) (Elm.string key) internalDecoder
                                     ]
                                 )
                                 prevExpr

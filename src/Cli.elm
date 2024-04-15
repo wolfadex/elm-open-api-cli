@@ -128,18 +128,20 @@ generateFileFromOpenApiSpec :
     -> BackendTask.BackendTask FatalError.FatalError ()
 generateFileFromOpenApiSpec config apiSpec =
     let
-        moduleName : String
+        moduleName : List String
         moduleName =
             case config.outputModuleName of
                 Just modName ->
                     modName
+                        |> String.split "."
 
                 Nothing ->
                     apiSpec
                         |> OpenApi.info
                         |> OpenApi.Info.title
                         |> OpenApi.Generate.sanitizeModuleName
-                        |> Maybe.withDefault "Api"
+                        |> Maybe.map (String.split ".")
+                        |> Maybe.withDefault [ "Api" ]
 
         generateTodos : Bool
         generateTodos =

@@ -811,7 +811,7 @@ toRequestFunctions namespace method url operation =
 customErrorAnnotation : NamespaceScope -> Elm.Annotation.Annotation -> Elm.Annotation.Annotation -> Elm.Annotation.Annotation
 customErrorAnnotation namespace errorTypeAnnotation bodyTypeAnnotation =
     Elm.Annotation.namedWith
-        (if namespace.within == [ "OpenApi" ] then
+        (if namespace.source == namespace.within then
             []
 
          else
@@ -1443,7 +1443,7 @@ operationToTypesExpectAndResolver namespace functionName operation =
                                                     (\contentSchema ->
                                                         case contentSchema of
                                                             JsonContent type_ ->
-                                                                CliMonad.typeToAnnotation namespace type_
+                                                                CliMonad.typeToAnnotation { namespace | source = [ "Schema" ] } type_
 
                                                             StringContent _ ->
                                                                 CliMonad.succeed Elm.Annotation.string

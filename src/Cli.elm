@@ -199,30 +199,41 @@ generateFileFromOpenApiSpec config apiSpec =
             )
         |> BackendTask.andThen
             (\outputPaths ->
-                let
-                    padLeftBy4Spaces : String -> String
-                    padLeftBy4Spaces =
-                        String.padLeft 4 ' '
-                in
-                [ "SDK generated at: " ++ String.Extra.toSentenceOxford outputPaths
-                , ""
-                , ""
-                , "You'll also need "
-                    ++ Ansi.link
-                        { text = "elm/http"
-                        , url = "https://package.elm-lang.org/packages/elm/http/latest/"
-                        }
-                    ++ " and "
-                    ++ Ansi.link
-                        { text = "elm/json"
-                        , url = "https://package.elm-lang.org/packages/elm/json/latest/"
-                        }
-                    ++ " installed. Try running:"
-                , ""
-                , ""
-                , "    elm install elm/http"
-                , "    elm install elm/json"
+                [ [ ""
+                  , "🎉 SDK generated at:"
+                  , ""
+                  ]
+                , outputPaths
+                    |> List.map (\outputPath -> "    " ++ outputPath)
+                , [ ""
+                  , ""
+                  , "You'll also need "
+                        ++ Ansi.link
+                            { text = "elm/http"
+                            , url = "https://package.elm-lang.org/packages/elm/http/latest/"
+                            }
+                        ++ " and "
+                        ++ Ansi.link
+                            { text = "elm/json"
+                            , url = "https://package.elm-lang.org/packages/elm/json/latest/"
+                            }
+                        ++ " installed. Try running:"
+                  , ""
+                  , "    elm install elm/http"
+                  , "    elm install elm/json"
+                  , ""
+                  , ""
+                  , "and possibly need "
+                        ++ Ansi.link
+                            { text = "elm/bytes"
+                            , url = "https://package.elm-lang.org/packages/elm/bytes/latest/"
+                            }
+                        ++ " installed. Try running:"
+                  , ""
+                  , "    elm install elm/bytes"
+                  ]
                 ]
+                    |> List.concat
                     |> List.map Pages.Script.log
                     |> doAll
             )

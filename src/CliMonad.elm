@@ -1,6 +1,7 @@
 module CliMonad exposing
     ( CliMonad
     , Message
+    , NamespaceScope
     , Path
     , andThen
     , andThen2
@@ -46,6 +47,13 @@ type alias Message =
 
 type alias Path =
     List String
+
+
+type alias NamespaceScope =
+    { within : List String
+    , global : List String
+    , source : List String
+    }
 
 
 type alias OneOfName =
@@ -192,23 +200,24 @@ run input (CliMonad x) =
             )
 
 
-oneOfDeclarations :
-    Dict OneOfName OneOfData
-    -> CliMonad (List Elm.Declaration)
+oneOfDeclarations : Dict OneOfName OneOfData -> CliMonad (List Elm.Declaration)
 oneOfDeclarations enums =
     combineMap
         oneOfDeclaration
         (FastDict.toList enums)
 
 
-oneOfDeclaration :
-    ( OneOfName, OneOfData )
-    -> CliMonad Elm.Declaration
+oneOfDeclaration : ( OneOfName, OneOfData ) -> CliMonad Elm.Declaration
 oneOfDeclaration ( oneOfName, variants ) =
     let
         variantDeclaration : { name : VariantName, type_ : Type } -> CliMonad Elm.Variant
         variantDeclaration { name, type_ } =
-            typeToAnnotation type_
+            typeToAnnotation
+                { global = []
+                , source = []
+                , within = []
+                }
+                type_
                 |> map
                     (\variantAnnotation ->
                         let
@@ -258,23 +267,23 @@ errorToWarning (CliMonad f) =
         )
 
 
-objectToAnnotation : { useMaybe : Bool } -> Object -> CliMonad Elm.Annotation.Annotation
+objectToAnnotation : { useMaybe : Bool, namespace : NamespaceScope } -> Object -> CliMonad Elm.Annotation.Annotation
 objectToAnnotation config fields =
     FastDict.toList fields
         |> combineMap (\( k, v ) -> map (Tuple.pair (Common.toValueName k)) (fieldToAnnotation config v))
         |> map recordType
 
 
-fieldToAnnotation : { useMaybe : Bool } -> Field -> CliMonad Elm.Annotation.Annotation
-fieldToAnnotation { useMaybe } { type_, required } =
+fieldToAnnotation : { useMaybe : Bool, namespace : NamespaceScope } -> Field -> CliMonad Elm.Annotation.Annotation
+fieldToAnnotation { useMaybe, namespace } { type_, required } =
     let
         annotation : CliMonad Elm.Annotation.Annotation
         annotation =
             if useMaybe then
-                typeToAnnotationMaybe type_
+                typeToAnnotationMaybe namespace type_
 
             else
-                typeToAnnotation type_
+                typeToAnnotation namespace type_
     in
     if required then
         annotation
@@ -290,20 +299,20 @@ recordType fields =
         |> Elm.Annotation.record
 
 
-typeToAnnotation : Type -> CliMonad Elm.Annotation.Annotation
-typeToAnnotation type_ =
+typeToAnnotation : NamespaceScope -> Type -> CliMonad Elm.Annotation.Annotation
+typeToAnnotation namespace type_ =
     case type_ of
         Nullable t ->
-            typeToAnnotation t
+            typeToAnnotation namespace t
                 |> map
                     (\ann ->
-                        Elm.Annotation.namedWith []
+                        Elm.Annotation.namedWith (namespace.global ++ [ "OpenApi" ])
                             "Nullable"
                             [ ann ]
                     )
 
         Object fields ->
-            objectToAnnotation { useMaybe = False } fields
+            objectToAnnotation { useMaybe = False, namespace = namespace } fields
 
         String ->
             succeed Elm.Annotation.string
@@ -318,16 +327,25 @@ typeToAnnotation type_ =
             succeed Elm.Annotation.bool
 
         List t ->
-            map Elm.Annotation.list (typeToAnnotation t)
+            map Elm.Annotation.list (typeToAnnotation namespace t)
 
         OneOf oneOfName oneOfData ->
-            oneOfAnnotation oneOfName oneOfData
+            oneOfAnnotation namespace oneOfName oneOfData
 
         Value ->
             succeed Gen.Json.Encode.annotation_.value
 
         Ref ref ->
-            map (Elm.Annotation.named []) (refToTypeName ref)
+            map
+                (Elm.Annotation.named
+                    (if namespace.within == namespace.source then
+                        []
+
+                     else
+                        namespace.global ++ namespace.source
+                    )
+                )
+                (refToTypeName ref)
 
         Bytes ->
             succeed Gen.Bytes.annotation_.bytes
@@ -336,18 +354,14 @@ typeToAnnotation type_ =
             succeed Elm.Annotation.unit
 
 
-
---String.split "/"
-
-
-typeToAnnotationMaybe : Type -> CliMonad Elm.Annotation.Annotation
-typeToAnnotationMaybe type_ =
+typeToAnnotationMaybe : NamespaceScope -> Type -> CliMonad Elm.Annotation.Annotation
+typeToAnnotationMaybe namespace type_ =
     case type_ of
         Nullable t ->
-            map Elm.Annotation.maybe (typeToAnnotationMaybe t)
+            map Elm.Annotation.maybe (typeToAnnotationMaybe namespace t)
 
         Object fields ->
-            objectToAnnotation { useMaybe = True } fields
+            objectToAnnotation { useMaybe = True, namespace = namespace } fields
 
         String ->
             succeed Elm.Annotation.string
@@ -362,16 +376,25 @@ typeToAnnotationMaybe type_ =
             succeed Elm.Annotation.bool
 
         List t ->
-            map Elm.Annotation.list (typeToAnnotationMaybe t)
+            map Elm.Annotation.list (typeToAnnotationMaybe namespace t)
 
         OneOf oneOfName oneOfData ->
-            oneOfAnnotation oneOfName oneOfData
+            oneOfAnnotation namespace oneOfName oneOfData
 
         Value ->
             succeed Gen.Json.Encode.annotation_.value
 
         Ref ref ->
-            map (Elm.Annotation.named []) (refToTypeName ref)
+            map
+                (Elm.Annotation.named
+                    (if namespace.within == namespace.source then
+                        []
+
+                     else
+                        namespace.global ++ namespace.source
+                    )
+                )
+                (refToTypeName ref)
 
         Bytes ->
             succeed Gen.Bytes.annotation_.bytes
@@ -380,12 +403,19 @@ typeToAnnotationMaybe type_ =
             succeed Elm.Annotation.unit
 
 
-oneOfAnnotation : TypeName -> OneOfData -> CliMonad Elm.Annotation.Annotation
-oneOfAnnotation oneOfName oneOfData =
+oneOfAnnotation : NamespaceScope -> TypeName -> OneOfData -> CliMonad Elm.Annotation.Annotation
+oneOfAnnotation namespace oneOfName oneOfData =
     CliMonad
         (\_ ->
             Ok
-                ( Elm.Annotation.named [] oneOfName
+                ( Elm.Annotation.named
+                    (if namespace.within == namespace.source then
+                        []
+
+                     else
+                        namespace.global ++ namespace.source
+                    )
+                    oneOfName
                 , []
                 , FastDict.singleton oneOfName oneOfData
                 )

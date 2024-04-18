@@ -1,5 +1,6 @@
 module Cli exposing (run)
 
+import Ansi
 import Ansi.Color
 import BackendTask
 import BackendTask.File
@@ -16,6 +17,7 @@ import OpenApi
 import OpenApi.Generate
 import OpenApi.Info
 import Pages.Script
+import String.Extra
 import Url
 import UrlPath
 import Yaml.Decode
@@ -126,28 +128,20 @@ generateFileFromOpenApiSpec :
     -> BackendTask.BackendTask FatalError.FatalError ()
 generateFileFromOpenApiSpec config apiSpec =
     let
-        moduleName : String
+        moduleName : List String
         moduleName =
             case config.outputModuleName of
                 Just modName ->
                     modName
+                        |> String.split "."
 
                 Nothing ->
                     apiSpec
                         |> OpenApi.info
                         |> OpenApi.Info.title
                         |> OpenApi.Generate.sanitizeModuleName
-                        |> Maybe.withDefault "Api"
-
-        filePath : String
-        filePath =
-            config.outputDirectory
-                ++ "/"
-                ++ (moduleName
-                        |> String.split "."
-                        |> String.join "/"
-                   )
-                ++ ".elm"
+                        |> Maybe.map (String.split ".")
+                        |> Maybe.withDefault [ "Api" ]
 
         generateTodos : Bool
         generateTodos =
@@ -155,7 +149,7 @@ generateFileFromOpenApiSpec config apiSpec =
                 (String.toLower <| Maybe.withDefault "no" config.generateTodos)
                 [ "y", "yes", "true" ]
     in
-    OpenApi.Generate.file
+    OpenApi.Generate.files
         { namespace = moduleName
         , generateTodos = generateTodos
         }
@@ -163,54 +157,83 @@ generateFileFromOpenApiSpec config apiSpec =
         |> Result.mapError (messageToString >> FatalError.fromString)
         |> BackendTask.fromResult
         |> BackendTask.andThen
-            (\( decls, warnings ) ->
+            (\( files, warnings ) ->
                 warnings
                     |> List.Extra.gatherEqualsBy .message
                     |> List.map logWarning
                     |> doAll
-                    |> BackendTask.map (\_ -> decls)
+                    |> BackendTask.map (\_ -> files)
             )
         |> BackendTask.andThen
-            (\{ contents } ->
-                let
-                    outputPath : String
-                    outputPath =
-                        filePath
-                            |> String.split "/"
-                            |> UrlPath.join
-                            |> UrlPath.toRelative
-                in
-                Pages.Script.writeFile
-                    { path = outputPath
-                    , body = contents
-                    }
-                    |> BackendTask.mapError
-                        (\error ->
-                            case error.recoverable of
-                                Pages.Script.FileWriteError ->
-                                    FatalError.fromString <|
-                                        Ansi.Color.fontColor Ansi.Color.brightRed <|
-                                            "Uh oh! Failed to write file"
-                        )
-                    |> BackendTask.map (\_ -> outputPath)
+            (List.map
+                (\file ->
+                    let
+                        filePath : String
+                        filePath =
+                            config.outputDirectory
+                                ++ "/"
+                                ++ file.path
+
+                        outputPath : String
+                        outputPath =
+                            filePath
+                                |> String.split "/"
+                                |> UrlPath.join
+                                |> UrlPath.toRelative
+                    in
+                    Pages.Script.writeFile
+                        { path = outputPath
+                        , body = file.contents
+                        }
+                        |> BackendTask.mapError
+                            (\error ->
+                                case error.recoverable of
+                                    Pages.Script.FileWriteError ->
+                                        FatalError.fromString <|
+                                            Ansi.Color.fontColor Ansi.Color.brightRed <|
+                                                "Uh oh! Failed to write file"
+                            )
+                        |> BackendTask.map (\_ -> outputPath)
+                )
+                >> BackendTask.combine
             )
         |> BackendTask.andThen
-            (\outputPath ->
-                let
-                    padLeftBy4Spaces : String -> String
-                    padLeftBy4Spaces =
-                        String.padLeft 4 ' '
-                in
-                [ "SDK generated at " ++ outputPath
-                , ""
-                , ""
-                , "You'll need elm/http and elm/json installed. Try running:"
-                , ""
-                , ""
-                , padLeftBy4Spaces "elm install elm/http"
-                , ""
-                , padLeftBy4Spaces "elm install elm/json"
+            (\outputPaths ->
+                [ [ ""
+                  , "🎉 SDK generated at:"
+                  , ""
+                  ]
+                , outputPaths
+                    |> List.map (\outputPath -> "    " ++ outputPath)
+                , [ ""
+                  , ""
+                  , "You'll also need "
+                        ++ Ansi.link
+                            { text = "elm/http"
+                            , url = "https://package.elm-lang.org/packages/elm/http/latest/"
+                            }
+                        ++ " and "
+                        ++ Ansi.link
+                            { text = "elm/json"
+                            , url = "https://package.elm-lang.org/packages/elm/json/latest/"
+                            }
+                        ++ " installed. Try running:"
+                  , ""
+                  , "    elm install elm/http"
+                  , "    elm install elm/json"
+                  , ""
+                  , ""
+                  , "and possibly need "
+                        ++ Ansi.link
+                            { text = "elm/bytes"
+                            , url = "https://package.elm-lang.org/packages/elm/bytes/latest/"
+                            }
+                        ++ " installed. Try running:"
+                  , ""
+                  , "    elm install elm/bytes"
+                  ]
                 ]
+                    |> List.concat
                     |> List.map Pages.Script.log
                     |> doAll
             )

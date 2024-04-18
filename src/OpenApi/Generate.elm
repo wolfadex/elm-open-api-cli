@@ -113,54 +113,66 @@ files { namespace, generateTodos } apiSpec =
                     { openApi = apiSpec
                     , generateTodos = generateTodos
                     }
+
+        toDocs =
+            List.sortBy
+                (\{ group } ->
+                    case group of
+                        Just "Request functions" ->
+                            1
+
+                        Just "Types" ->
+                            2
+
+                        Just "Encoders" ->
+                            3
+
+                        Just "Decoders" ->
+                            4
+
+                        _ ->
+                            5
+                )
+                >> List.map
+                    (\{ group, members } ->
+                        "## "
+                            ++ Maybe.withDefault "Other" group
+                            ++ "\n\n\n"
+                            ++ (members
+                                    |> List.sort
+                                    |> List.foldl
+                                        (\member memberLines ->
+                                            case memberLines of
+                                                [] ->
+                                                    [ [ member ] ]
+
+                                                memberLine :: restOfLines ->
+                                                    let
+                                                        groupSize =
+                                                            String.length (String.join ", " memberLine)
+                                                    in
+                                                    if String.length member + groupSize < 105 then
+                                                        (member :: memberLine) :: restOfLines
+
+                                                    else
+                                                        [ member ] :: memberLines
+                                        )
+                                        []
+                                    |> List.map (\memberLine -> "@docs " ++ String.join ", " (List.reverse memberLine))
+                                    |> List.reverse
+                                    |> String.join "\n"
+                               )
+                    )
     in
     Result.map2
         (\( apiDecs, apiWarns ) ( schemaDecs, compWarns ) ->
             ( [ Elm.fileWith (namespace ++ [ "Api" ])
-                    { docs =
-                        List.sortBy
-                            (\{ group } ->
-                                case group of
-                                    Just "Request functions" ->
-                                        1
-
-                                    Just "Types" ->
-                                        2
-
-                                    Just "Encoders" ->
-                                        3
-
-                                    Just "Decoders" ->
-                                        4
-
-                                    _ ->
-                                        5
-                            )
-                            >> List.map Elm.docs
+                    { docs = toDocs
                     , aliases = []
                     }
                     apiDecs
               , Elm.fileWith (namespace ++ [ "Schema" ])
-                    { docs =
-                        List.sortBy
-                            (\{ group } ->
-                                case group of
-                                    Just "Request functions" ->
-                                        1
-
-                                    Just "Types" ->
-                                        2
-
-                                    Just "Encoders" ->
-                                        3
-
-                                    Just "Decoders" ->
-                                        4
-
-                                    _ ->
-                                        5
-                            )
-                            >> List.map Elm.docs
+                    { docs = toDocs
                     , aliases = []
                     }
                     schemaDecs

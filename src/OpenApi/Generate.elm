@@ -70,16 +70,21 @@ files { namespace, generateTodos } apiSpec =
         apiDeclarations : Result Message ( List Elm.Declaration, List Message )
         apiDeclarations =
             CliMonad.combine
-                [ pathDeclarations
+                [ -- These are the POSTS, PUTS, GETS, etc. that the consumer of the SDK uses
+                  pathDeclarations
                     { within = [ "Api" ]
                     , global = namespace
                     , source = []
                     }
+
+                -- These are the success values returns from the POSTS, GETS, etc.
                 , responsesDeclarations
                     { within = [ "Api" ]
                     , global = namespace
                     , source = []
                     }
+
+                -- These are the values passed to the POSTS, GETS, etc.
                 , requestBodiesDeclarations
                     { within = [ "Api" ]
                     , global = namespace
@@ -95,7 +100,8 @@ files { namespace, generateTodos } apiSpec =
         compDeclarations : Result Message ( List Elm.Declaration, List Message )
         compDeclarations =
             CliMonad.combine
-                [ componentDeclarations
+                [ -- These are the JSON Schema portions of the OAS
+                  componentDeclarations
                     { within = [ "Schema" ]
                     , global = namespace
                     , source = []
@@ -157,6 +163,8 @@ files { namespace, generateTodos } apiSpec =
                     , aliases = []
                     }
                     schemaDecs
+
+              -- These are the utility functions for things like JSON decoding and better HTTP errors
               , Elm.file (namespace ++ [ "OpenApi", "Util" ])
                     [ whateverResolver.declaration
                         |> Elm.withDocumentation "Similar to `Http.expectWhatever`, but for an `Http.Resolver`"
@@ -186,6 +194,8 @@ files { namespace, generateTodos } apiSpec =
                             , group = Just "Json"
                             }
                     ]
+
+              -- Thsee are types and functions specific to the generated SDK from this tool, like the error type wrapper
               , Elm.fileWith (namespace ++ [ "OpenApi" ])
                     { docs =
                         List.sortBy

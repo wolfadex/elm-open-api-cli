@@ -297,4 +297,6 @@ objectSchemaToType namespace subSchema =
 
 schemaToAnnotation : NamespaceScope -> Json.Schema.Definitions.Schema -> CliMonad Elm.Annotation.Annotation
 schemaToAnnotation namespace schema =
-    schemaToType namespace schema |> CliMonad.andThen (CliMonad.typeToAnnotation namespace)
+    schema
+        |> schemaToType namespace
+        |> CliMonad.andThen (CliMonad.typeToAnnotation namespace)

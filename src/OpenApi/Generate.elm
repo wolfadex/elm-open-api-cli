@@ -5,9 +5,11 @@ module OpenApi.Generate exposing
     , sanitizeModuleName
     )
 
+import Cli.Validate exposing (ValidationResult(..), regex)
 import CliMonad exposing (CliMonad, Message)
 import Common exposing (Field, FieldName, Type(..), TypeName, toValueName, typifyName)
 import Dict
+import Dict.Extra
 import Elm
 import Elm.Annotation
 import Elm.Case
@@ -2014,14 +2016,28 @@ responseToResult =
                     )
 
 
+regexToCheckIfJson : String -> Cli.Validate.ValidationResult
+regexToCheckIfJson =
+    regex "^application\\/(vnd\\.[a-z0-9]+(\\.v\\d+)?(\\.[a-z0-9]+)?)?\\+?json$"
+
+
 responseToSchema : OpenApi.Response.Response -> CliMonad Json.Schema.Definitions.Schema
 responseToSchema response =
     CliMonad.succeed response
-        |> CliMonad.stepOrFail "Could not get application's application/json content"
+        |> CliMonad.stepOrFail "Could not get application's json content"
             (OpenApi.Response.content
-                >> Dict.get "application/json"
+                >> Dict.Extra.find
+                    (\mediaType _ ->
+                        case regexToCheckIfJson mediaType of
+                            Valid ->
+                                True
+
+                            Invalid _ ->
+                                False
+                    )
+                >> Maybe.map Tuple.second
             )
-        |> CliMonad.stepOrFail "The response's application/json content option doesn't have a schema"
+        |> CliMonad.stepOrFail "The response's json content option doesn't have a schema"
             OpenApi.MediaType.schema
         |> CliMonad.map OpenApi.Schema.get
 
@@ -2029,11 +2045,20 @@ responseToSchema response =
 requestBodyToSchema : OpenApi.RequestBody.RequestBody -> CliMonad Json.Schema.Definitions.Schema
 requestBodyToSchema requestBody =
     CliMonad.succeed requestBody
-        |> CliMonad.stepOrFail "Could not get application's application/json content"
+        |> CliMonad.stepOrFail "Could not get application's json content"
             (OpenApi.RequestBody.content
-                >> Dict.get "application/json"
+                >> Dict.Extra.find
+                    (\mediaType _ ->
+                        case regexToCheckIfJson mediaType of
+                            Valid ->
+                                True
+
+                            Invalid _ ->
+                                False
+                    )
+                >> Maybe.map Tuple.second
             )
-        |> CliMonad.stepOrFail "The request body's application/json content option doesn't have a schema"
+        |> CliMonad.stepOrFail "The request body's json content option doesn't have a schema"
             OpenApi.MediaType.schema
         |> CliMonad.map OpenApi.Schema.get
 

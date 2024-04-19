@@ -5,16 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.3] - 2024-04-19
+
+### Changed
+
+- Improved accesing JSON content to included vendored JSON. ✨ [James Robb](https://github.com/jamesrweb)
+
 ## [0.2.2] - 2024-04-14
 
 ### Added
 
 - Custom error handling: now generates a custom error type for each endpoint that has a non-2xx responses.
-- Post generation notes: after generating the SDK, a message will be displayed with additional dependencies to install.
+- Post generation notes: after generating the SDK, a message will be displayed with additional dependencies to install. ✨ [James Robb](https://github.com/jamesrweb)
 
 ### Changed
 
-- Warnings are now grouped instead of duplicated
+- Warnings are now grouped instead of duplicated ✨ [Leonardo Taglialegne](https://github.com/miniBill)
 
 ### Removed
 
@@ -45,8 +51,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - [incorrect parsing of JSON files](https://github.com/wolfadex/elm-open-api-cli/issues/53)
 
-  - Resolved by https://github.com/wolfadex/elm-open-api-cli/pull/54/, by @lawik
+  - Resolved by https://github.com/wolfadex/elm-open-api-cli/pull/54/ ✨ [Lars Wikman](https://github.com/lawik)
 
 ## [0.1.0] - 2023-10-06
 
 ### Initial release
+
+_With a large amount of help from [Leonardo Taglialegne](https://github.com/miniBill)_

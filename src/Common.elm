@@ -11,6 +11,7 @@ import String.Extra
 typifyName : String -> TypeName
 typifyName name =
     name
+        |> nameFromStatusCode
         |> String.uncons
         |> Maybe.map (\( first, rest ) -> String.cons first (String.replace "-" " " rest))
         |> Maybe.withDefault ""
@@ -20,6 +21,23 @@ typifyName name =
         |> String.Extra.toTitleCase
         |> String.replace " " ""
         |> deSymbolify
+
+
+{-| Some OAS have reponse refs that are just the status code.
+We need to convert them to a valid Elm name.
+-}
+nameFromStatusCode : String -> String
+nameFromStatusCode name =
+    case String.toInt name of
+        Just int ->
+            if int >= 100 && int <= 599 then
+                "statusCode" ++ name
+
+            else
+                name
+
+        Nothing ->
+            name
 
 
 {-| Sometimes a word in the schema contains invalid characers for an Elm name.

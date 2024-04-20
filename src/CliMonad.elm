@@ -181,14 +181,14 @@ andThen2 f x y =
 Automatically appends the needed `enum` declarations.
 
 -}
-run : { openApi : OpenApi, generateTodos : Bool } -> CliMonad (List Elm.Declaration) -> Result Message ( List Elm.Declaration, List Message )
-run input (CliMonad x) =
+run : NamespaceScope -> { openApi : OpenApi, generateTodos : Bool } -> CliMonad (List Elm.Declaration) -> Result Message ( List Elm.Declaration, List Message )
+run namespace input (CliMonad x) =
     x input
         |> Result.andThen
             (\( decls, warnings, oneOfs ) ->
                 let
                     (CliMonad h) =
-                        oneOfDeclarations oneOfs |> withPath "While generating `oneOf`s"
+                        oneOfDeclarations namespace oneOfs |> withPath "While generating `oneOf`s"
                 in
                 h input
                     |> Result.map
@@ -201,23 +201,20 @@ run input (CliMonad x) =
             )
 
 
-oneOfDeclarations : Dict OneOfName OneOfData -> CliMonad (List Elm.Declaration)
-oneOfDeclarations enums =
+oneOfDeclarations : NamespaceScope -> Dict OneOfName OneOfData -> CliMonad (List Elm.Declaration)
+oneOfDeclarations namespace enums =
     combineMap
-        oneOfDeclaration
+        (oneOfDeclaration namespace)
         (FastDict.toList enums)
 
 
-oneOfDeclaration : ( OneOfName, OneOfData ) -> CliMonad Elm.Declaration
-oneOfDeclaration ( oneOfName, variants ) =
+oneOfDeclaration : NamespaceScope -> ( OneOfName, OneOfData ) -> CliMonad Elm.Declaration
+oneOfDeclaration namespace ( oneOfName, variants ) =
     let
         variantDeclaration : { name : VariantName, type_ : Type } -> CliMonad Elm.Variant
         variantDeclaration { name, type_ } =
             typeToAnnotation
-                { global = []
-                , source = []
-                , within = []
-                }
+                namespace
                 type_
                 |> map
                     (\variantAnnotation ->
@@ -312,7 +309,13 @@ typeToAnnotation namespace type_ =
             typeToAnnotation namespace t
                 |> map
                     (\ann ->
-                        Elm.Annotation.namedWith (namespace.global ++ [ "OpenApi" ])
+                        Elm.Annotation.namedWith
+                            (if namespace.global == [] then
+                                []
+
+                             else
+                                namespace.global ++ [ "OpenApi" ]
+                            )
                             "Nullable"
                             [ ann ]
                     )

@@ -97,6 +97,10 @@ files { namespace, generateTodos } apiSpec =
                 ]
                 |> CliMonad.map List.concat
                 |> CliMonad.run
+                    { within = [ "Api" ]
+                    , global = namespace
+                    , source = []
+                    }
                     { openApi = apiSpec
                     , generateTodos = generateTodos
                     }
@@ -113,6 +117,10 @@ files { namespace, generateTodos } apiSpec =
                 ]
                 |> CliMonad.map List.concat
                 |> CliMonad.run
+                    { within = [ "Schema" ]
+                    , global = namespace
+                    , source = [ "Schema" ]
+                    }
                     { openApi = apiSpec
                     , generateTodos = generateTodos
                     }
@@ -913,7 +921,7 @@ toRequestFunctions namespace method pathUrl operation =
 customErrorAnnotation : NamespaceScope -> Elm.Annotation.Annotation -> Elm.Annotation.Annotation -> Elm.Annotation.Annotation
 customErrorAnnotation namespace errorTypeAnnotation bodyTypeAnnotation =
     Elm.Annotation.namedWith
-        (if namespace.source == namespace.within then
+        (if namespace.within == [ "OpenApi" ] then
             []
 
          else
@@ -2077,12 +2085,7 @@ typeToEncoder namespace type_ =
                         Elm.Case.custom
                             nullableValue
                             (Elm.Annotation.namedWith
-                                (if namespace.within == namespace.source then
-                                    []
-
-                                 else
-                                    namespace.global ++ [ "OpenApi" ]
-                                )
+                                (namespace.global ++ [ "OpenApi" ])
                                 "Nullable"
                                 [ Elm.Annotation.var "value" ]
                             )

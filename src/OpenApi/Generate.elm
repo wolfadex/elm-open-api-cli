@@ -46,6 +46,7 @@ import OpenApi.SecurityRequirement
 import OpenApi.Server
 import SchemaUtils
 import String.Extra
+import Util.Debug
 import Util.List
 
 
@@ -1599,18 +1600,26 @@ operationToTypesExpectAndResolver namespace functionName operation =
                             |> CliMonad.map
                                 (\dict ->
                                     let
+                                        noDefinedErrorResponses : Bool
+                                        noDefinedErrorResponses =
+                                            Dict.isEmpty errorResponses
+
                                         errorName : String
                                         errorName =
                                             String.Extra.toSentenceCase functionName ++ "_Error"
                                     in
-                                    ( dict
-                                        |> Dict.toList
-                                        |> List.map (\( statusCode, annotation ) -> Elm.variantWith (toErrorVariant statusCode) [ annotation ])
-                                        |> Elm.customType errorName
-                                        |> Elm.exposeWith
-                                            { exposeConstructor = True
-                                            , group = Just "Types"
-                                            }
+                                    ( if noDefinedErrorResponses then
+                                        Elm.alias errorName Elm.Annotation.unit
+
+                                      else
+                                        dict
+                                            |> Dict.toList
+                                            |> List.map (\( statusCode, annotation ) -> Elm.variantWith (toErrorVariant statusCode) [ annotation ])
+                                            |> Elm.customType errorName
+                                            |> Elm.exposeWith
+                                                { exposeConstructor = True
+                                                , group = Just "Types"
+                                                }
                                     , Elm.Annotation.named [] errorName
                                     )
                                 )

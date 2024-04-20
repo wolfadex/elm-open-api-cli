@@ -1,7 +1,10 @@
 module ExampleGH exposing (main)
 
 import Browser
-import GitHub_v3_REST_API
+import GitHubV3RestApi.Api
+import GitHubV3RestApi.OpenApi
+import GitHubV3RestApi.OpenApi.Util
+import GitHubV3RestApi.Schema
 import Http
 
 
@@ -22,7 +25,7 @@ type alias Model =
 init : () -> ( Model, Cmd Msg )
 init () =
     ( {}
-    , GitHub_v3_REST_API.metaRoot { toMsg = RootResponsed }
+    , GitHubV3RestApi.Api.metaRoot { toMsg = RootResponsed }
     )
 
 
@@ -32,7 +35,7 @@ subscriptions _ =
 
 
 type Msg
-    = RootResponsed (Result Http.Error GitHub_v3_REST_API.Root)
+    = RootResponsed (Result Http.Error GitHubV3RestApi.Api.Root)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )

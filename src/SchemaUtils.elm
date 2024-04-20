@@ -1,4 +1,8 @@
-module SchemaUtils exposing (getAlias, schemaToAnnotation, schemaToType)
+module SchemaUtils exposing
+    ( getAlias
+    , schemaToAnnotation
+    , schemaToType
+    )
 
 import CliMonad exposing (CliMonad, NamespaceScope)
 import Common exposing (Field, Type(..), TypeName, typifyName)
@@ -245,7 +249,12 @@ typeToOneOfVariant namespace type_ =
 
                 else
                     Just
-                        { name = rawName
+                        { name =
+                            rawName
+                                |> String.split "."
+                                |> List.reverse
+                                |> List.head
+                                |> Maybe.withDefault rawName
                         , type_ = type_
                         }
             )
@@ -265,13 +274,15 @@ oneOfType namespace types =
                         let
                             sortedVariants : List { name : TypeName, type_ : Type }
                             sortedVariants =
-                                List.sortBy .name variants
+                                variants
+                                    |> List.sortBy .name
 
                             names : List String
                             names =
-                                List.map .name sortedVariants
+                                sortedVariants
+                                    |> List.map .name
                         in
-                        OneOf (String.join "Or" names) sortedVariants
+                        OneOf (String.join "_Or_" names) sortedVariants
             )
 
 

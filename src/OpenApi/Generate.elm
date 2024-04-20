@@ -2089,7 +2089,7 @@ typeToEncoder namespace type_ =
                     (\variant ->
                         CliMonad.map2
                             (\ann variantEncoder ->
-                                Elm.Case.branch1 (oneOfName ++ "_" ++ variant.name)
+                                Elm.Case.branch1 (CliMonad.oneOfToVariantName oneOfName variant.name)
                                     ( "content", ann )
                                     variantEncoder
                             )
@@ -2238,7 +2238,7 @@ typeToDecoder namespace type_ =
                             |> CliMonad.map
                                 (Gen.Json.Decode.call_.map
                                     (Elm.val
-                                        (oneOfName ++ "_" ++ variant.name)
+                                        (CliMonad.oneOfToVariantName oneOfName variant.name)
                                     )
                                 )
                     )

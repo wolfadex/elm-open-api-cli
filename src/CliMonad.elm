@@ -14,6 +14,7 @@ module CliMonad exposing
     , map
     , map2
     , map3
+    , oneOfToVariantName
     , recordType
     , refToTypeName
     , run
@@ -223,7 +224,7 @@ oneOfDeclaration ( oneOfName, variants ) =
                         let
                             variantName : VariantName
                             variantName =
-                                oneOfName ++ "_" ++ name
+                                oneOfToVariantName oneOfName name
                         in
                         Elm.variantWith variantName [ variantAnnotation ]
                     )
@@ -237,6 +238,11 @@ oneOfDeclaration ( oneOfName, variants ) =
                     , group = Just "Types"
                     }
             )
+
+
+oneOfToVariantName : String -> String -> String
+oneOfToVariantName prefix name =
+    prefix ++ "__" ++ name
 
 
 combineMap : (a -> CliMonad b) -> List a -> CliMonad (List b)

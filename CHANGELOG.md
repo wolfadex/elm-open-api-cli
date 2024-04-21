@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2024-04-21
+
+### Added
+
+- The risky version of requests, to resolve [issue #71](https://github.com/wolfadex/elm-open-api-cli/issues/71)
+
+### Changed
+
+- Improved the success message to use links to the generated files &necessary Elm dependencies, and list elm/bytes as a possible dependency
+
+### Fixed
+
+- Some resopnse names could be status codes, they now generate as `statusCode<number>`
+- [Issue #72](https://github.com/wolfadex/elm-open-api-cli/issues/72), where URLs would end with a trailing `/` when they shouldn't
+- Names (like this in the BIMcloud API) can start with a `$` prefix, make them Elm compliant
+- [Issue #65](https://github.com/wolfadex/elm-open-api-cli/issues/65), not all paths define error responses
+
 ## [0.2.3] - 2024-04-19
 
 ### Changed

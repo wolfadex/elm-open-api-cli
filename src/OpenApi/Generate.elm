@@ -1423,14 +1423,18 @@ operationToTypesExpectAndResolver functionName operation =
                                         errorName =
                                             String.Extra.toSentenceCase functionName ++ "_Error"
                                     in
-                                    ( dict
-                                        |> Dict.toList
-                                        |> List.map (\( statusCode, annotation ) -> Elm.variantWith (toErrorVariant statusCode) [ annotation ])
-                                        |> Elm.customType errorName
-                                        |> Elm.exposeWith
-                                            { exposeConstructor = True
-                                            , group = Just "Types"
-                                            }
+                                    ( if Dict.isEmpty dict then
+                                        Elm.alias errorName Elm.Annotation.unit
+
+                                      else
+                                        dict
+                                            |> Dict.toList
+                                            |> List.map (\( statusCode, annotation ) -> Elm.variantWith (toErrorVariant statusCode) [ annotation ])
+                                            |> Elm.customType errorName
+                                            |> Elm.exposeWith
+                                                { exposeConstructor = True
+                                                , group = Just "Types"
+                                                }
                                     , Elm.Annotation.named [] errorName
                                     )
                                 )

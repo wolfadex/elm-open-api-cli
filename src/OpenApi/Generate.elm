@@ -534,7 +534,7 @@ toRequestFunctions method pathUrl operation =
                             BytesContent _ ->
                                 CliMonad.succeed [ ( "body", Gen.Bytes.annotation_.bytes ) ]
 
-                    requestCommand : ContentSchema -> CliMonad ( Elm.Expression, Elm.Annotation.Annotation )
+                    requestCommand : ContentSchema -> CliMonad ( Elm.Expression, Elm.Expression, Elm.Annotation.Annotation )
                     requestCommand bodyContent =
                         authorizationInfo
                             |> CliMonad.andThen
@@ -545,6 +545,21 @@ toRequestFunctions method pathUrl operation =
                                                 ( "config", Nothing )
                                                 (\config ->
                                                     Gen.Http.call_.request
+                                                        (Elm.record
+                                                            [ ( "method", Elm.string method )
+                                                            , ( "headers", Elm.list <| auth.headers config )
+                                                            , ( "expect", expect config )
+                                                            , ( "body", toBody config )
+                                                            , ( "timeout", Gen.Maybe.make_.nothing )
+                                                            , ( "tracker", Gen.Maybe.make_.nothing )
+                                                            , ( "url", replaced config )
+                                                            ]
+                                                        )
+                                                )
+                                            , Elm.fn
+                                                ( "config", Nothing )
+                                                (\config ->
+                                                    Gen.Http.call_.riskyRequest
                                                         (Elm.record
                                                             [ ( "method", Elm.string method )
                                                             , ( "headers", Elm.list <| auth.headers config )
@@ -580,7 +595,7 @@ toRequestFunctions method pathUrl operation =
                                         replacedUrl
                                 )
 
-                    requestTask : ContentSchema -> CliMonad ( Elm.Expression, Elm.Annotation.Annotation )
+                    requestTask : ContentSchema -> CliMonad ( Elm.Expression, Elm.Expression, Elm.Annotation.Annotation )
                     requestTask bodyContent =
                         CliMonad.andThen2
                             (\auth successAnnotation ->
@@ -590,6 +605,20 @@ toRequestFunctions method pathUrl operation =
                                             ( "config", Nothing )
                                             (\config ->
                                                 Gen.Http.call_.task
+                                                    (Elm.record
+                                                        [ ( "url", replaced config )
+                                                        , ( "method", Elm.string method )
+                                                        , ( "headers", Elm.list <| auth.headers config )
+                                                        , ( "resolver", resolver )
+                                                        , ( "body", toBody config )
+                                                        , ( "timeout", Gen.Maybe.make_.nothing )
+                                                        ]
+                                                    )
+                                            )
+                                        , Elm.fn
+                                            ( "config", Nothing )
+                                            (\config ->
+                                                Gen.Http.call_.riskyTask
                                                     (Elm.record
                                                         [ ( "url", replaced config )
                                                         , ( "method", Elm.string method )
@@ -669,7 +698,7 @@ toRequestFunctions method pathUrl operation =
                                 (requestTask contentSchema)
                         )
                     |> CliMonad.map2
-                        (\doc ( ( requestCmd, requestCmdType ), ( requestTsk, requestTskType ) ) ->
+                        (\doc ( ( requestCmd, riskyCmd, requestCmdType ), ( requestTsk, riskyTask, requestTskType ) ) ->
                             [ requestCmd
                                 |> Elm.withType requestCmdType
                                 |> Elm.declaration functionName
@@ -678,9 +707,25 @@ toRequestFunctions method pathUrl operation =
                                     { exposeConstructor = False
                                     , group = Just "Request functions"
                                     }
+                            , riskyCmd
+                                |> Elm.withType requestCmdType
+                                |> Elm.declaration (functionName ++ "Risky")
+                                |> Elm.withDocumentation doc
+                                |> Elm.exposeWith
+                                    { exposeConstructor = False
+                                    , group = Just "Request functions"
+                                    }
                             , requestTsk
                                 |> Elm.withType requestTskType
                                 |> Elm.declaration (functionName ++ "Task")
+                                |> Elm.withDocumentation doc
+                                |> Elm.exposeWith
+                                    { exposeConstructor = False
+                                    , group = Just "Request functions"
+                                    }
+                            , riskyTask
+                                |> Elm.withType requestTskType
+                                |> Elm.declaration (functionName ++ "TaskRisky")
                                 |> Elm.withDocumentation doc
                                 |> Elm.exposeWith
                                     { exposeConstructor = False

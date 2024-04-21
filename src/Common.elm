@@ -46,8 +46,11 @@ We don't want to completely remove them though.
 deSymbolify : String -> String
 deSymbolify str =
     str
+        -- These were first identified in the GitHub OAS, for the names of emojis
         |> String.replace "+" "Plus"
         |> String.replace "-" "Minus"
+        -- This was first identified in the BIMcloud OAS, the fields of `Resource` were prefixed with `$`
+        |> String.replace "$" ""
 
 
 {-| Convert into a name suitable to be used in Elm as a variable.

@@ -430,6 +430,7 @@ toRequestFunctions method pathUrl operation =
                                                 (\servers ->
                                                     \config ->
                                                         let
+                                                            initialUrl : String
                                                             initialUrl =
                                                                 case servers of
                                                                     [] ->

@@ -1,0 +1,2645 @@
+{
+  "openapi": "3.0.0",
+  "servers": [
+    {
+      "description": "BIMcloud Manager",
+      "url": "https://bimcloud.graphisoft.com"
+    },
+    {
+      "description": "BIMcoud Blob server",
+      "url": "https://blobserver.graphisoft.com"
+    }
+  ],
+  "info": {
+    "description": "BIMcloud API specifiaction.\nSee the provided example for detailed information.\n",
+    "version": "1.0.0",
+    "title": "BIMcloud API 2023.2 (alpha release)"
+  },
+  "tags": [
+    {
+      "name": "PortalServer",
+      "description": "User login, session, ticket handling and resource management APIs\n"
+    },
+    {
+      "name": "BlobServer",
+      "description": "Blob server login/authentication APIs and file management APIs\n"
+    }
+  ],
+  "paths": {
+    "/management/client/oauth2/authorize": {
+      "get": {
+        "tags": ["PortalServer"],
+        "description": "Initiates oauth2 auth flow with an HTML page for user credentials.",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "state",
+            "schema": {
+              "type": "string",
+              "minLength": 16,
+              "maxLength": 2048
+            },
+            "description": "Client specific state identification. Required minimum length 16, maximum length 2048.",
+            "example": "d290f1ee-6c54-4b01-90e6-d701748f0851",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "redirect_uri",
+            "schema": {
+              "type": "string"
+            },
+            "description": "URI of the site to redirect to as a callback. Will include the authorization code as query parameter `code`.\nWhen provided, it has to match with the `redirect_uri` provided in the POST /token request.\nWhen not provided, it defaults to the BIMcloud manager's unique URL\n",
+            "example": "https://example.com",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "client_id",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Client specific identification",
+            "example": "example.com",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "code_challenge_method",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Optional parameter specifying the PKCE code challenge method. Possible values are `plain` or `S256`",
+            "example": "S256",
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "code_challenge",
+            "schema": {
+              "type": "string",
+              "minLength": 43,
+              "maxLength": 128
+            },
+            "description": "Optional parameter based on `code_challenge_method`. A string between 43 and 128 characters in length used as code verifier for PKCE.",
+            "example": "ghltkgalxhuiwycbetrjgbordizrxxuyvbjeglkmhsdm",
+            "required": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Initiates authentication flow with an HTML page for user credentials."
+          },
+          "500": {
+            "description": "Code already generated for this state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OauthError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/management/client/oauth2/logout": {
+      "get": {
+        "tags": ["PortalServer"],
+        "description": "Serves a HTML page, logs out the user.",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "state",
+            "schema": {
+              "type": "string",
+              "minLength": 16,
+              "maxLength": 2048
+            },
+            "description": "Client specific state identification. Required minimum length 16, maximum length 2048.",
+            "example": "d290f1ee-6c54-4b01-90e6-d701748f0851",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "redirect_uri",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Origin url of the client, the same as the one provided at login. After logging out, a redirect will be initiated to this url.\n",
+            "example": "https://example.com",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "client_id",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Client specific identification",
+            "example": "example.com",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Initiates authentication flow with an HTML page for user credentials."
+          },
+          "400": {
+            "description": "Some required parameters are missing.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OauthError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/management/client/oauth2/get-authorization-code-by-state": {
+      "get": {
+        "tags": ["PortalServer"],
+        "description": "Polls for the status of authorization code generation",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "state",
+            "schema": {
+              "type": "string",
+              "minLength": 16,
+              "maxLength": 2048
+            },
+            "description": "Client specific state identification. Required minimum length 16, maximum length 2048.",
+            "example": "d290f1ee-6c54-4b01-90e6-d701748f0851",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Authentication code generation status",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetAuthenticationCodeByStateResponse"
+                }
+              }
+            }
+          },
+          "430": {
+            "description": "Request errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PortalServerError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/management/client/oauth2/token": {
+      "post": {
+        "tags": ["PortalServer"],
+        "description": "Retrieves an access token by `grant_type`. Not every property is required for every `grant_type`. See schema for details.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GetTokenRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetTokenResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request error, invalid client error, unsupported grant type error, unauthorized client error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OauthError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OauthError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/management/client/ticket-generator/get-ticket": {
+      "post": {
+        "tags": ["PortalServer"],
+        "description": "Requests a ticket. The ticket is required for file operations.\n",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "schema": {
+              "type": "string",
+              "example": "Bearer <access_token>"
+            },
+            "description": "Token type and token"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GetTicketRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful ticket request. When input parameter `format` is `base64`, the resonse content type will be\n`application/json`, else it will be `application/octet-stream`. The preferred format is `base64`.\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetTicketResponseBase64"
+                }
+              },
+              "application/octet-stream": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetTicketResponseLengthPrefixedBuffer"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "`invalid_token` error may be thrown if the provided access token has expired or otherwise invalid",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OauthError"
+                }
+              }
+            }
+          },
+          "430": {
+            "description": "Request errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PortalServerError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Server unavailable, retry the request later."
+          }
+        }
+      }
+    },
+    "/management/client/get-resource": {
+      "get": {
+        "tags": ["PortalServer"],
+        "description": "Request a single resource by ID.\n",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "schema": {
+              "type": "string",
+              "example": "Bearer <access_token>"
+            },
+            "description": "Token type and token"
+          },
+          {
+            "in": "query",
+            "name": "resource-id",
+            "schema": {
+              "type": "string"
+            },
+            "description": "The ID of the requested resource",
+            "example": "8b4989f6-8c31-12f9-1ae0-75b1da4142fc"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Requested resource.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Resource"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "`invalid_token` error may be thrown if the provided access token has expired or otherwise invalid",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OauthError"
+                }
+              }
+            }
+          },
+          "430": {
+            "description": "Request errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PortalServerError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Server unavailable, retry the request later."
+          }
+        }
+      }
+    },
+    "/management/client/get-user": {
+      "get": {
+        "tags": ["PortalServer"],
+        "description": "Request a single user by ID.\n",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "schema": {
+              "type": "string",
+              "example": "Bearer <access_token>"
+            },
+            "description": "Token type and token"
+          },
+          {
+            "in": "query",
+            "name": "user-id",
+            "schema": {
+              "type": "string"
+            },
+            "description": "The ID of the requested user",
+            "example": "211ce018-cce7-44e7-a139-9db45df65142"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Requested user.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "`invalid_token` error may be thrown if the provided access token has expired or otherwise invalid",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OauthError"
+                }
+              }
+            }
+          },
+          "430": {
+            "description": "Request errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PortalServerError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Server unavailable, retry the request later."
+          }
+        }
+      }
+    },
+    "/management/client/get-resources-by-criterion": {
+      "post": {
+        "tags": ["PortalServer"],
+        "description": "Requests an array of resources that match the supplied criterion object\n",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "schema": {
+              "type": "string",
+              "example": "Bearer <access_token>"
+            },
+            "description": "Token type and token"
+          }
+        ],
+        "requestBody": {
+          "description": "The criterion object",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CriterionObject"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful get-resource request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Resource"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "`invalid_token` error may be thrown if the provided access token has expired or otherwise invalid",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OauthError"
+                }
+              }
+            }
+          },
+          "430": {
+            "description": "Request errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PortalServerError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Server unavailable, retry the request later."
+          }
+        }
+      }
+    },
+    "/management/client/insert-resource-group": {
+      "post": {
+        "tags": ["PortalServer"],
+        "description": "Creates a resrource group (folder) entity in the resource tree based on the supplied parameters\n",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "schema": {
+              "type": "string",
+              "example": "Bearer <access_token>"
+            },
+            "description": "Token type and token"
+          },
+          {
+            "in": "query",
+            "name": "parent-id",
+            "schema": {
+              "type": "string"
+            },
+            "description": "The ID of the parent resource group entity. The root entity's ID is `projectRoot`.",
+            "example": "8b4989f6-8c31-12f9-1ae0-75b1da4142fd"
+          }
+        ],
+        "requestBody": {
+          "description": "Resource group description",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "example": "folder2",
+                    "description": "The name of the resource group to be created"
+                  },
+                  "type": {
+                    "type": "string",
+                    "pattern": "resourceGroup",
+                    "example": "resourceGroup",
+                    "description": "The type of the resource to be created."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful insert-resource-group request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "example": "8b4989f6-8c31-12f9-1ae0-75b1da4142fc",
+                  "description": "The ID of the created resource group"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "`invalid_token` error may be thrown if the provided access token has expired or otherwise invalid",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OauthError"
+                }
+              }
+            }
+          },
+          "430": {
+            "description": "Request errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PortalServerError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Server unavailable, retry the request later."
+          }
+        }
+      }
+    },
+    "/management/client/delete-resource-group": {
+      "delete": {
+        "tags": ["PortalServer"],
+        "description": "Deletes an **empty** resrource group (folder) entity from the resource tree by ID.\n",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "schema": {
+              "type": "string",
+              "example": "Bearer <access_token>"
+            },
+            "description": "Token type and token"
+          },
+          {
+            "in": "query",
+            "name": "resource-id",
+            "schema": {
+              "type": "string"
+            },
+            "description": "The ID of the resource group entity to be deleted.",
+            "example": "8b4989f6-8c31-12f9-1ae0-75b1da4142fc"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful delete-resource-group request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "example": {},
+                  "description": "Empty object."
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "`invalid_token` error may be thrown if the provided access token has expired or otherwise invalid",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OauthError"
+                }
+              }
+            }
+          },
+          "430": {
+            "description": "Request errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PortalServerError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Server unavailable, retry the request later."
+          }
+        }
+      }
+    },
+    "/management/client/delete-resources-by-id-list": {
+      "post": {
+        "tags": ["PortalServer"],
+        "description": "Starts a job to delete resources by specified identifiers. The job deletes folders recursively.\n",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "schema": {
+              "type": "string",
+              "example": "Bearer <access_token>"
+            },
+            "description": "Token type and token"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Job of type *destroyResources* representing the on-giong operation to delete resources.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Job"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "`invalid_token` error may be thrown if the provided access token has expired or otherwise invalid",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OauthError"
+                }
+              }
+            }
+          },
+          "430": {
+            "description": "Request errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PortalServerError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Server unavailable, retry the request later."
+          }
+        }
+      }
+    },
+    "/management/client/update-blob": {
+      "put": {
+        "tags": ["PortalServer"],
+        "description": "Updates a blob entity identified by id.\n",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "schema": {
+              "type": "string",
+              "example": "Bearer <access_token>"
+            },
+            "description": "Token type and token"
+          }
+        ],
+        "requestBody": {
+          "description": "Blob data",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "example": "d290f1ee-6c54-4b01-90e6-d701748f0851",
+                    "description": "The id of the blob to be updated"
+                  },
+                  "name": {
+                    "type": "string",
+                    "example": "folder2",
+                    "description": "The new name of the blob"
+                  },
+                  "type": {
+                    "type": "string",
+                    "pattern": "blob",
+                    "example": "blob",
+                    "description": "The type of the resource to be created."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful update-blob request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "example": {},
+                  "description": "Empty object."
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "`invalid_token` error may be thrown if the provided access token has expired or otherwise invalid",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OauthError"
+                }
+              }
+            }
+          },
+          "430": {
+            "description": "Request errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PortalServerError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Server unavailable, retry the request later."
+          }
+        }
+      }
+    },
+    "/management/client/update-blob-parent": {
+      "put": {
+        "tags": ["PortalServer"],
+        "description": "Updates parent of a Blob. Baiscally moves it to a different directory.\n",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "schema": {
+              "type": "string",
+              "example": "Bearer <access_token>"
+            },
+            "description": "Token type and token"
+          },
+          {
+            "in": "query",
+            "name": "blob-id",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "example": "4D7C7BB1-7AEF-4CD2-9146-0286561D6F85",
+            "description": "The ID of the blob to update"
+          }
+        ],
+        "requestBody": {
+          "description": "Request body. Use one of its properties to modify parent by path or by id.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "parentPath": {
+                    "type": "string",
+                    "example": "Project Root/folder2",
+                    "nullable": true,
+                    "description": "New parent folder's path."
+                  },
+                  "parentId": {
+                    "type": "string",
+                    "format": "uuid",
+                    "nullable": true,
+                    "description": "New parent folder's id."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful update.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "boolean",
+                  "example": true,
+                  "description": "Parent has been updated or stayed the same."
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "`invalid_token` error may be thrown if the provided access token has expired or otherwise invalid",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OauthError"
+                }
+              }
+            }
+          },
+          "430": {
+            "description": "Request errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PortalServerError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Server unavailable, retry the request later."
+          }
+        }
+      }
+    },
+    "/management/client/get-blob-changes-for-sync": {
+      "put": {
+        "tags": ["PortalServer"],
+        "description": "Gets blob changes of a specified resource group from a given revision number.\n\nBlob Server side changes are accessible for helping synchronization scenarios.\n  We support a simple polling mechanism for that, by utilizing the get-blob-changes-for-sync API.\n  Changesets are separated by revisions, and synchronization always start at revision 0.\n\nRevision 0 is a special case, it gives all content in the given folder in its result's \"created\" array field.\n  After revision 0 the next set of changes are are accessible by using the last knonw changeset's \"endRevision\" value in the request's \"fromRevison\" parameter.\n",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "schema": {
+              "type": "string",
+              "example": "Bearer <access_token>"
+            },
+            "description": "Token type and token"
+          }
+        ],
+        "requestBody": {
+          "description": "Use either resourceGroupId or path as a parameter but sending both is not necessary.\n",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "resourceGroupId": {
+                    "type": "string",
+                    "example": "d290f1ee-6c54-4b01-90e6-d701748f0852",
+                    "description": "The ID of the resource group",
+                    "nullable": true
+                  },
+                  "path": {
+                    "type": "string",
+                    "example": "Project Root/folder",
+                    "description": "The path of the resource group",
+                    "nullable": true
+                  },
+                  "fromRevision": {
+                    "type": "number",
+                    "example": 1,
+                    "description": "The revision number to get the changes from"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful get-blob-changes-for-sync request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "endRevision": {
+                      "type": "number",
+                      "example": 1,
+                      "description": "Maximum of the received revisions"
+                    },
+                    "created": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/GetBlobChangesForSyncResponseCreatedOrUpdatedObject"
+                      }
+                    },
+                    "updated": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/GetBlobChangesForSyncResponseCreatedOrUpdatedObject"
+                      }
+                    },
+                    "deleted": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "format": "uuid"
+                          },
+                          "path": {
+                            "type": "string",
+                            "example": "Project Root/folder1"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "`invalid_token` error may be thrown if the provided access token has expired or otherwise invalid",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OauthError"
+                }
+              }
+            }
+          },
+          "430": {
+            "description": "Request errors.\n\nError code 9 is a special case there and it means Revision Obsoleted Error.\n  This happen when the underlying content database has been replaced to another one under the hood,\n  for example after restoring backups.\n\nWhen this happens, synchronization flow should reset, and should get started from revision 0.\n  The first request from revision zero will contain the whole content of the folder in the new database in the \"created\" array field of the API result.\n  The client should use this as a basis of a new synchronization cycle, and should reinitializa its content according the content of the \"created\" array.\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PortalServerError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Server unavailable, retry the request later."
+          }
+        }
+      }
+    },
+    "/management/client/delete-blob": {
+      "delete": {
+        "tags": ["PortalServer"],
+        "description": "Deletes a file entity from the resource tree by ID.\n",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "schema": {
+              "type": "string",
+              "example": "Bearer <access_token>"
+            },
+            "description": "Token type and token"
+          },
+          {
+            "in": "query",
+            "name": "resource-id",
+            "schema": {
+              "type": "string"
+            },
+            "description": "The ID of the blob entity to be deleted.",
+            "example": "33E36B98-2758-4C17-83E5-69E93B8B87CB"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful delete-blob request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "example": {},
+                  "description": "Empty object."
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "`invalid_token` error may be thrown if the provided access token has expired or otherwise invalid",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OauthError"
+                }
+              }
+            }
+          },
+          "430": {
+            "description": "Request errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PortalServerError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Server unavailable, retry the request later."
+          }
+        }
+      }
+    },
+    "/management/client/get-inherited-default-blob-server-id": {
+      "get": {
+        "tags": ["PortalServer"],
+        "description": "Requests the inherited default blob server ID of a specified resourceGroup (folder) entitiy\n",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "schema": {
+              "type": "string",
+              "example": "Bearer <access_token>"
+            },
+            "description": "Token type and token"
+          },
+          {
+            "in": "query",
+            "name": "resource-group-id",
+            "schema": {
+              "type": "string"
+            },
+            "description": "The ID of the resource group entity. The root entity's ID is \"projectRoot\".",
+            "example": "8b4989f6-8c31-12f9-1ae0-75b1da4142fc"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The ID of the inherited default blob server associated with the supplied resrouceGroup.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "example": "d290f1ee-6c54-4b01-90e6-d701748f0853",
+                  "format": "uuid",
+                  "description": "The ID of inherited default host server"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "`invalid_token` error may be thrown if the provided access token has expired or otherwise invalid",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OauthError"
+                }
+              }
+            }
+          },
+          "430": {
+            "description": "Request errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PortalServerError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Server unavailable, retry the request later."
+          }
+        }
+      }
+    },
+    "/management/client/get-job": {
+      "get": {
+        "tags": ["PortalServer"],
+        "description": "Request a single job by ID.\n",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "schema": {
+              "type": "string",
+              "example": "Bearer <access_token>"
+            },
+            "description": "Token type and token"
+          },
+          {
+            "in": "query",
+            "name": "job-id",
+            "schema": {
+              "type": "string"
+            },
+            "description": "The ID of the requested job",
+            "example": "8b4989f6-8c31-12f9-1ae0-75b1da4142fc"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Result Job.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Job"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "`invalid_token` error may be thrown if the provided access token has expired or otherwise invalid",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OauthError"
+                }
+              }
+            }
+          },
+          "430": {
+            "description": "Common request errors.\n\nOnly meaningful error code there is 6 (EntityNotFoundError) which means Job has been removed the system entirely.\nIf a job completed or failed, it will stay in the database for a few minutes, but eventually it will get deleted for good.\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PortalServerError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Server unavailable, retry the request later."
+          }
+        }
+      }
+    },
+    "/management/client/abort-job": {
+      "post": {
+        "tags": ["PortalServer"],
+        "description": "Request to abort a running job.\n",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "schema": {
+              "type": "string",
+              "example": "Bearer <access_token>"
+            },
+            "description": "Token type and token"
+          },
+          {
+            "in": "query",
+            "name": "job-id",
+            "schema": {
+              "type": "string"
+            },
+            "description": "The ID of the job",
+            "example": "8b4989f6-8c31-12f9-1ae0-75b1da4142fc"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Responds with *true* if the job was running and was abortable and has been aborted successfully.\n\nResponds with *false* if it hasn't.\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "`invalid_token` error may be thrown if the provided access token has expired or otherwise invalid",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OauthError"
+                }
+              }
+            }
+          },
+          "430": {
+            "description": "Common request errors.\n\nOnly meaningful error code there is 6 (EntityNotFoundError) which means Job has been removed the system entirely.\nIf a job completed or failed, it will stay in the database for a few minutes, but eventually it will get deleted for good.\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PortalServerError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Server unavailable, retry the request later."
+          }
+        }
+      }
+    },
+    "/session-service/1.0/create-session": {
+      "post": {
+        "tags": ["BlobServer"],
+        "description": "Creates a session on the BIMcloud Blob Server. Requires a ticket generated by the BIMcloud Portal server on\npath `/management/client/ticket-generator/get-ticket`.\n",
+        "requestBody": {
+          "content": {
+            "application/vnd.graphisoft.teamwork.session-service-1.0.authentication-request-1.0+json": {
+              "schema": {
+                "$ref": "#/components/schemas/BlobServerAuthenticationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful blob server create-session request",
+            "content": {
+              "application/vnd.graphisoft.teamwork.session-service-1.0.session-1.0+json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data-content-type": {
+                      "type": "string",
+                      "example": "application/vnd.graphisoft.teamwork.session-service-1.0.session-1.0+json"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/BlobServerSessionResponse"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "The supplied ticket is incorrect. The returned error will be:\n- `3` `AuthenticationFailed`\n",
+            "content": {
+              "application/vnd.graphisoft.teamwork.session-service-1.0.session-1.0+json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data-content-type": {
+                      "type": "string",
+                      "example": "application/vnd.graphisoft.teamwork.session-service-1.0.session-1.0+json"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/BlobServerSessionResponse"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "430": {
+            "description": "Unsuccessful blob server create-session request",
+            "content": {
+              "application/vnd.graphisoft.teamwork.generic-service-1.0.detailed-error-1.0+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlobServerDetailedError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/session-service/1.0/get-session": {
+      "get": {
+        "tags": ["BlobServer"],
+        "description": "Requests information about an already existing session by ID.\n",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "session-id",
+            "schema": {
+              "type": "string"
+            },
+            "example": "5cf6ee792cdf05e1ba2b6325c41a5f10",
+            "description": "The ID of the session"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful blob server get-session request",
+            "content": {
+              "application/vnd.graphisoft.teamwork.session-service-1.0.session-1.0+json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data-content-type": {
+                      "type": "string",
+                      "example": "application/vnd.graphisoft.teamwork.session-service-1.0.session-1.0+json"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/BlobServerSessionResponse"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "430": {
+            "description": "Unsuccessful blob server get-session request",
+            "content": {
+              "application/vnd.graphisoft.teamwork.generic-service-1.0.detailed-error-1.0+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlobServerDetailedError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/session-service/1.0/close-session": {
+      "post": {
+        "tags": ["BlobServer"],
+        "description": "Closes the session on the BIMcloud blob server.\n",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "session-id",
+            "schema": {
+              "type": "string"
+            },
+            "example": "5cf6ee792cdf05e1ba2b6325c41a5f10",
+            "description": "the ID of the session to close"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful blob server close-session request"
+          },
+          "430": {
+            "description": "Unsuccessful blob server close-session request",
+            "content": {
+              "application/vnd.graphisoft.teamwork.generic-service-1.0.detailed-error-1.0+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlobServerDetailedError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/blob-store-service/1.0/begin-batch-upload": {
+      "post": {
+        "tags": ["BlobServer"],
+        "description": "Creates a batch upload session.\n",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "session-id",
+            "schema": {
+              "type": "string"
+            },
+            "example": "5cf6ee792cdf05e1ba2b6325c41a5f10",
+            "description": "The ID of the blob server session returned by /session-service/1.0/create-session"
+          },
+          {
+            "in": "query",
+            "name": "description",
+            "schema": {
+              "type": "string"
+            },
+            "example": "This is the description of the batch upload session.",
+            "description": "The description of the batch being uploaded. Any URL encoded text."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Batch upload session successfully created.",
+            "content": {
+              "application/vnd.graphisoft.teamwork.blob-store-service-1.0.batch-upload-session-1.0+json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data-content-type": {
+                      "type": "string",
+                      "example": "application/vnd.graphisoft.teamwork.blob-store-service-1.0.batch-upload-session-1.0+json"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/BlobServerBatchUploadSessionResponse"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "430": {
+            "description": "Unsuccessful blob server begin-batch-upload request",
+            "content": {
+              "application/vnd.graphisoft.teamwork.generic-service-1.0.detailed-error-1.0+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlobServerDetailedError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/blob-store-service/1.0/begin-upload": {
+      "post": {
+        "tags": ["BlobServer"],
+        "description": "Creates an upload session.\n",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "session-id",
+            "schema": {
+              "type": "string"
+            },
+            "example": "5cf6ee792cdf05e1ba2b6325c41a5f10",
+            "description": "The ID of the blob server session returned by /session-service/1.0/create-session"
+          },
+          {
+            "in": "query",
+            "name": "blob-name",
+            "schema": {
+              "type": "string",
+              "format": "path"
+            },
+            "example": "/folder/file.png",
+            "description": "The full path of the file to be uploaded"
+          },
+          {
+            "in": "query",
+            "name": "namespace-name",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "example": "832DBA54-7E0B-463C-B0EF-DB65DAB25745",
+            "description": "The namespace-name returned by begin-batch-upload"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Upload session successfully created.",
+            "content": {
+              "application/vnd.graphisoft.teamwork.blob-store-service-1.0.upload-session-1.0+json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data-content-type": {
+                      "type": "string",
+                      "example": "application/vnd.graphisoft.teamwork.blob-store-service-1.0.upload-session-1.0+json"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/BlobServerUploadSessionResponse"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "430": {
+            "description": "Unsuccessful blob server begin-upload request",
+            "content": {
+              "application/vnd.graphisoft.teamwork.generic-service-1.0.detailed-error-1.0+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlobServerDetailedError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/blob-store-service/1.0/put-blob-content-part": {
+      "post": {
+        "tags": ["BlobServer"],
+        "description": "Uploads a blob chunk.\n",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "session-id",
+            "schema": {
+              "type": "string"
+            },
+            "example": "5cf6ee792cdf05e1ba2b6325c41a5f10",
+            "description": "The ID of the blob server session returned by /session-service/1.0/create-session"
+          },
+          {
+            "in": "query",
+            "name": "upload-session-id",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "example": "6894B3DD-74FE-48AE-BD5E-266861659B13",
+            "description": "The ID of the upload-session this blob chunk belongs to"
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "schema": {
+              "type": "integer"
+            },
+            "example": "0",
+            "description": "The offset of the chunk being uploaded from the beginning of the blob in bytes"
+          },
+          {
+            "in": "query",
+            "name": "length",
+            "schema": {
+              "type": "integer"
+            },
+            "example": 484173,
+            "description": "The size of the chunk being uploaded."
+          }
+        ],
+        "requestBody": {
+          "description": "The actual chunk to be uploaded",
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "string",
+                "format": "binary",
+                "example": "<binary data>"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Chunk successfully uploaded.",
+            "content": {
+              "application/vnd.graphisoft.teamwork.blob-store-service-1.0.upload-session-1.0+json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data-content-type": {
+                      "type": "string",
+                      "example": "application/vnd.graphisoft.teamwork.blob-store-service-1.0.upload-session-1.0+json"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/BlobServerUploadSessionResponse"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "430": {
+            "description": "Unsuccessful blob server put-blob-content-part request",
+            "content": {
+              "application/vnd.graphisoft.teamwork.generic-service-1.0.detailed-error-1.0+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlobServerDetailedError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/blob-store-service/1.0/commit-upload": {
+      "post": {
+        "tags": ["BlobServer"],
+        "description": "Commits a single blob upload session.\n\n**IMPORTANT** The blob-id in the response to this request will be a temporary ID.\n\nThe final ID will get assigned when /blob-store-service/1.0/commit-batch-upload is called by the client!\n",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "session-id",
+            "schema": {
+              "type": "string"
+            },
+            "example": "5cf6ee792cdf05e1ba2b6325c41a5f10",
+            "description": "The ID of the blob server session returned by /session-service/1.0/create-session"
+          },
+          {
+            "in": "query",
+            "name": "upload-session-id",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "example": "6894B3DD-74FE-48AE-BD5E-266861659B13",
+            "description": "The ID of the upload-session to be committed"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Upload session successfully committed.",
+            "content": {
+              "application/vnd.graphisoft.teamwork.blob-store-service-1.0.blob-metadata-1.0+json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data-content-type": {
+                      "type": "string",
+                      "example": "application/vnd.graphisoft.teamwork.blob-store-service-1.0.blob-metadata-1.0+json"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/BlobServerBlobMetadataResponse"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "430": {
+            "description": "Upload session could not be committed.",
+            "content": {
+              "application/vnd.graphisoft.teamwork.generic-service-1.0.detailed-error-1.0+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlobServerDetailedError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/blob-store-service/1.0/commit-batch-upload": {
+      "post": {
+        "tags": ["BlobServer"],
+        "description": "Commits a batch upload session.\n\n**IMPORTANT** The final IDs of the blobs uploaded in this session will be available in the response body of this request.\n",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "session-id",
+            "schema": {
+              "type": "string"
+            },
+            "example": "5cf6ee792cdf05e1ba2b6325c41a5f10",
+            "description": "The ID of the blob server session returned by /session-service/1.0/create-session"
+          },
+          {
+            "in": "query",
+            "name": "batch-upload-session-id",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "example": "832DBA54-7E0B-463C-B0EF-DB65DAB25745",
+            "description": "The ID of the batch-upload-session to be committed"
+          },
+          {
+            "in": "query",
+            "name": "conflict-behavior",
+            "schema": {
+              "type": "string",
+              "pattern": "overwrite|fail"
+            },
+            "example": "overwrite",
+            "description": "The desired conflict resolution method.\nWhen the target blob already exists will either overwrite the existing blob or throw an error.\n\nThe allowed values are `overwrite` and `fail`.\n"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Batch upload session successfully committed.",
+            "content": {
+              "application/vnd.graphisoft.teamwork.blob-store-service-1.0.blob-metadata-1.0-list+json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data-content-type": {
+                      "type": "string",
+                      "example": "application/vnd.graphisoft.teamwork.blob-store-service-1.0.blob-metadata-1.0-list+json"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/BlobServerBlobMetadataResponse"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "430": {
+            "description": "Batch upload session could not be committed.",
+            "content": {
+              "application/vnd.graphisoft.teamwork.generic-service-1.0.detailed-error-1.0+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlobServerDetailedError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/blob-store-service/1.0/get-blob-content": {
+      "get": {
+        "tags": ["BlobServer"],
+        "description": "Downloads a single file from the BIMcloud Blob Server\n",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "session-id",
+            "schema": {
+              "type": "string"
+            },
+            "example": "5cf6ee792cdf05e1ba2b6325c41a5f10",
+            "description": "The ID of the blob server session returned by /session-service/1.0/create-session"
+          },
+          {
+            "in": "query",
+            "name": "blob-id",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "example": "4D7C7BB1-7AEF-4CD2-9146-0286561D6F85",
+            "description": "The final (Portal Server side) ID of the blob to download"
+          },
+          {
+            "in": "query",
+            "name": "filename",
+            "schema": {
+              "type": "string"
+            },
+            "example": "file.png",
+            "description": "The desired filename of the data to be downloaded."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "File data downloading.",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary",
+                  "example": "<binary data>"
+                }
+              }
+            }
+          },
+          "430": {
+            "description": "File can not be downloaded.",
+            "content": {
+              "application/vnd.graphisoft.teamwork.generic-service-1.0.detailed-error-1.0+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlobServerDetailedError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Resource": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "33E36B98-2758-4C17-83E5-69E93B8B87CB",
+            "description": "The ID of the requested resource"
+          },
+          "type": {
+            "type": "string",
+            "example": "blob",
+            "description": "The type of the requested resource"
+          },
+          "name": {
+            "type": "string",
+            "example": "file.png",
+            "pattern": "^[^<>:;,?\\\"*|\\/\\\\\\\\]+$",
+            "description": "The name of the resource excluding path. Similar to filename."
+          },
+          "$path": {
+            "type": "string",
+            "example": "Project Root/folder/file.png",
+            "description": "The full path of the resource. The root folder is called \"Project Root\" and may be translated."
+          },
+          "$loweredPath": {
+            "type": "string",
+            "example": "project root/folder/file.png",
+            "description": "Same as $path, but lowercase."
+          },
+          "$ancestors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "The ancestor's id"
+                },
+                "name": {
+                  "type": "string",
+                  "description": "The ancestor's name"
+                }
+              },
+              "example": [
+                {
+                  "id": "projectRoot",
+                  "name": "Project Root"
+                },
+                {
+                  "id": "8631e8b4-911d-43c0-ae15-cbd3d49018eb",
+                  "name": "folder"
+                }
+              ],
+              "description": "The array of ancestors of the resource entitiy in the resource tree. The 0th item is the root of the tree,\nwhile subsequent items represent one level of depth in the resource tree. The last item is the direct ancestor\nof the requested resource.\n"
+            }
+          },
+          "$parentId": {
+            "type": "string",
+            "format": "uuid",
+            "example": "8631e8b4-911d-43c0-ae15-cbd3d49018eb",
+            "description": "The ID of the requested resource's immediate ancestor."
+          },
+          "$parentName": {
+            "type": "string",
+            "example": "folder",
+            "description": "The name of the requested resource's immediate ancestor."
+          },
+          "$modelServerName": {
+            "type": "string",
+            "example": "model1",
+            "description": "The name of the host server"
+          },
+          "$modelServerPath": {
+            "type": "string",
+            "example": "Server Root/model1",
+            "description": "The path of the host server. Similar to $path. The root folder is called \"Server Root\", which may be translated.\nServers may be nested in folders in a tree the same way as regular resources.\n"
+          },
+          "modelServerId": {
+            "type": "string",
+            "example": "d290f1ee-6c54-4b01-90e6-d701748f0853",
+            "format": "uuid",
+            "description": "The ID of the host server."
+          },
+          "$modifiedDate": {
+            "type": "integer",
+            "example": 1585303324545,
+            "description": "The timestamp of the last modification made to the resource"
+          },
+          "$size": {
+            "type": "integer",
+            "example": 484173,
+            "description": "The size of the requested resource in bytes."
+          }
+        }
+      },
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "211ce018-cce7-44e7-a139-9db45df65142",
+            "description": "The ID of the requested user"
+          },
+          "type": {
+            "type": "string",
+            "example": "user",
+            "description": "The type of the requested user"
+          },
+          "name": {
+            "type": "string",
+            "example": "a",
+            "pattern": "^(^$|[^\\\\x00-\\\\x1f\\\\:*?\\\"<>|]+)$",
+            "description": "The name of the resource excluding path. Similar to filename."
+          },
+          "username": {
+            "type": "string",
+            "example": "a",
+            "description": "The username of the requested user."
+          },
+          "emailAddress": {
+            "type": "string",
+            "example": "a@a.com",
+            "description": "The email address associated with the requested user."
+          },
+          "active": {
+            "type": "boolean",
+            "example": true,
+            "description": "Whether the requested user is active. An inactive user may not log in."
+          },
+          "source": {
+            "type": "object",
+            "properties": {
+              "directoryServiceId": {
+                "type": "string",
+                "example": "",
+                "format": "uuid",
+                "description": "The ID of the directory service the requested user was synchronized from.\nEmpty if the user is not originated from a directory service.\n"
+              },
+              "id": {
+                "type": "string",
+                "example": "",
+                "description": "The ID of the user on the source directory service.\nEmpty if the user is not originated from a directory service.\n"
+              },
+              "principal": {
+                "type": "string",
+                "example": "",
+                "description": "The principal value of the user on the source directory service.\nEmpty if the user is not originated from a directory service.\n"
+              },
+              "directoryServiceType": {
+                "type": "string",
+                "example": "",
+                "description": "The type of directory service the user originates from.\nEmpty if the user is not originated from a directory service.\nThe only possible value is `ldap`.\n"
+              },
+              "passwordLastSet": {
+                "type": "number",
+                "example": 0,
+                "description": "The timestamp of the last known set password of a user originating from\na directory service. Local users always stay with 0. The value is synchronized\nfrom the directory service in regular intervals. During login, this value\nis overwritten when the last known password hash doesn't match.\n"
+              }
+            }
+          },
+          "properties": {
+            "type": "array",
+            "description": "An array of objects describing further linked properties from a\ndirectory service.\n",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "example": "someProperty",
+                  "description": "Mapped property name"
+                },
+                "value": {
+                  "type": "string",
+                  "example": "somePropertyValue",
+                  "description": "Mapped property value"
+                },
+                "linked": {
+                  "type": "boolean",
+                  "example": true,
+                  "description": "Whether the mapped property is linked to the directory serivce"
+                }
+              }
+            }
+          },
+          "color": {
+            "type": "object",
+            "description": "An object describing the color of the user on the frontend.",
+            "properties": {
+              "r": {
+                "type": "number",
+                "example": 0,
+                "description": "Red channel"
+              },
+              "g": {
+                "type": "number",
+                "example": 0,
+                "description": "Green channel"
+              },
+              "b": {
+                "type": "number",
+                "example": 0,
+                "description": "Blue channel"
+              },
+              "a": {
+                "type": "number",
+                "example": 0,
+                "description": "Alpha channel"
+              }
+            }
+          },
+          "defaultPermissionSet": {
+            "type": "string",
+            "example": "",
+            "format": "uuid",
+            "description": "The id of the default permission set of the user. Empty if none."
+          },
+          "enabledNotificationEmails": {
+            "type": "boolean",
+            "example": true,
+            "description": "Whether the user has the notification emails enabled."
+          },
+          "lastOnline": {
+            "type": "number",
+            "example": 0,
+            "description": "Legacy."
+          },
+          "enabledMessageNotification": {
+            "type": "string",
+            "example": "ON",
+            "description": "Legacy."
+          },
+          "enabledMessageNotificationEmails": {
+            "type": "string",
+            "example": "ON",
+            "description": "Legacy."
+          },
+          "wantedNotificationLevel": {
+            "type": "string",
+            "example": "everyNotifications",
+            "description": "The level of notifications the user wants to get.\nPossible values: `everyNotifications`, `onlyWarningNotifications`, `noNotifications`\n"
+          }
+        }
+      },
+      "CriterionObject": {
+        "type": "object",
+        "description": "Describes the criteria of a database query, similar to mongodb criterions or SQL WHERE clauses.\nSee the example for details.\n\nOperators: $and, $or, $eq, $ne, $like, $gt, $gte, $lt, $lte, $not\n",
+        "example": {
+          "$and": [
+            {
+              "$eq": {
+                "name": "file.png"
+              }
+            },
+            {
+              "$eq": {
+                "parentId": "8631e8b4-911d-43c0-ae15-cbd3d49018eb"
+              }
+            }
+          ]
+        }
+      },
+      "GetTicketRequest": {
+        "type": "object",
+        "properties": {
+          "user-id": {
+            "description": "The ID of the user who requested the session. Included in the response from `/token`",
+            "type": "string",
+            "format": "uuid",
+            "example": "d290f1ee-6c54-4b01-90e6-d701748f0852"
+          },
+          "format": {
+            "description": "Controls the format and the response type of the ticket generation. Format `base64` returns the ticket data\nin a string encoded in base64, while `lengthPrefixedBuffer` returns a binary buffer.\nWhen unspecified, it will default to `lengthPrefixedBuffer`. The preferred format is `base64`.\n",
+            "type": "string",
+            "pattern": "base64|lengthPrefixedBuffer",
+            "example": "base64"
+          },
+          "type": {
+            "description": "The type of the ticket to be requested. Only `freeTicket` is supported.",
+            "type": "string",
+            "example": "freeTicket"
+          },
+          "resources": {
+            "description": "A one element array containing the ID of the resource that the ticket is requested for. For file management,\nthe array should contain the ID of the desired blob server. This ID may be obtained by calling\n`/management/client/get-inherited-default-blob-server-id`, where the `resource-group-id` parameter is\nthe ID of the future target upload's parent directory.\n",
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "maxLength": 1,
+            "minLength": 1,
+            "example": ["d290f1ee-6c54-4b01-90e6-d701748f0853"]
+          }
+        }
+      },
+      "GetTicketResponseBase64": {
+        "type": "string",
+        "format": "base64",
+        "example": "VGlja2V0IGRhdGEgcmV0dXJuZWQgZnJvbSAvbWFuYWdlbWVudC9jbGllbnQvdGlja2V0LWdlbmVyYXRvci9nZXQtdGlja2V0Cg==",
+        "description": "The ticket data encoded in base64. For future blob server queries, provide this ticket as-is."
+      },
+      "GetTicketResponseLengthPrefixedBuffer": {
+        "type": "string",
+        "format": "binary",
+        "example": "<binary data>",
+        "description": "Binary ticket data."
+      },
+      "BlobServerAuthenticationRequest": {
+        "type": "object",
+        "properties": {
+          "data-content-type": {
+            "type": "string",
+            "example": "application/vnd.graphisoft.teamwork.session-service-1.0.authentication-request-1.0+json"
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "username": {
+                "type": "string",
+                "example": "some-user",
+                "description": "The username of the user requesting the new session"
+              },
+              "ticket": {
+                "type": "string",
+                "format": "base64",
+                "example": "VGlja2V0IGRhdGEgcmV0dXJuZWQgZnJvbSAvbWFuYWdlbWVudC9jbGllbnQvdGlja2V0LWdlbmVyYXRvci9nZXQtdGlja2V0Cg==",
+                "description": "The base64 ticket data returned by `/management/client/ticket-generator/get-ticket`"
+              }
+            }
+          }
+        }
+      },
+      "BlobServerSessionResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "5cf6ee792cdf05e1ba2b6325c41a5f10",
+            "format": "guid",
+            "description": "The ID of the session created by the Blob Server"
+          },
+          "last-access-time": {
+            "type": "integer",
+            "example": 123456,
+            "description": "Timestamp of the last access of the Blob Server APIs by this session in seconds."
+          },
+          "expiration-time": {
+            "type": "integer",
+            "example": 123456,
+            "description": "Timestamp of the expiration time of this session in seconds"
+          },
+          "creation-time": {
+            "type": "integer",
+            "example": 123456,
+            "description": "Timestamp of when this session expires in seconds"
+          }
+        }
+      },
+      "BlobServerBatchUploadSessionResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "832DBA54-7E0B-463C-B0EF-DB65DAB25745",
+            "format": "uuid",
+            "description": "The ID of the batch upload session created by the Blob Server"
+          },
+          "namespace-name": {
+            "type": "string",
+            "example": "832DBA54-7E0B-463C-B0EF-DB65DAB25745",
+            "format": "uuid",
+            "description": "The ID of the namespace associated with the batch upload session created by the Blob Server"
+          },
+          "description": {
+            "type": "string",
+            "example": "description",
+            "description": "The description of the batch being uploaded, same as the description sent in the request."
+          },
+          "last-access-time": {
+            "type": "integer",
+            "example": 1585234790629,
+            "description": "Timestamp of the last access of the Blob Server APIs by this session in milliseconds."
+          },
+          "expiration-time": {
+            "type": "integer",
+            "example": 1585249190629,
+            "description": "Timestamp of the expiration time of this session in milliseconds."
+          },
+          "creation-time": {
+            "type": "integer",
+            "example": 1585234790629,
+            "description": "Timestamp of when this session was created in milliseconds."
+          },
+          "events": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "example": [],
+            "description": "Names of the events that occured during the session."
+          }
+        }
+      },
+      "BlobServerUploadSessionResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "6894B3DD-74FE-48AE-BD5E-266861659B13",
+            "format": "uuid",
+            "description": "The ID of the upload session created by the Blob Server"
+          },
+          "target-namespace-name": {
+            "type": "string",
+            "example": "832DBA54-7E0B-463C-B0EF-DB65DAB25745",
+            "format": "uuid",
+            "description": "The namespace associated with the batch upload session that this upload session belongs to"
+          },
+          "target-blob-name": {
+            "type": "string",
+            "example": "/folder/file.png",
+            "description": "The filename of the file being uploaded, including the path, as supplied as a query parameter to /blob-store-service/1.0/begin-upload"
+          },
+          "target-blob-id": {
+            "type": "string",
+            "example": "",
+            "description": "The ID of the blob being created by this upload-session, when target-blob-id is given."
+          },
+          "last-access-time": {
+            "type": "integer",
+            "example": 1585234790629,
+            "description": "Timestamp of the last access time of this session in milliseconds."
+          },
+          "expiration-time": {
+            "type": "integer",
+            "example": 1585249190629,
+            "description": "Timestamp of the expiration time of this session in milliseconds."
+          },
+          "creation-time": {
+            "type": "integer",
+            "example": 1585234790629,
+            "description": "Timestamp of when this session was created in milliseconds."
+          },
+          "uploaded-parts": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "offset": {
+                  "type": "integer",
+                  "description": "The offset of the chunk that was already uploaded from the beginning of the blob in bytes",
+                  "example": 0
+                },
+                "length": {
+                  "type": "integer",
+                  "description": "The size of the chunk that was already uploaded in bytes",
+                  "example": 484173
+                }
+              }
+            },
+            "description": "The parts of this file that were already uploaded. Empty initially."
+          }
+        }
+      },
+      "BlobServerBlobMetadataResponse": {
+        "type": "object",
+        "properties": {
+          "standard-metadata": {
+            "type": "object",
+            "properties": {
+              "namespace-name": {
+                "type": "string",
+                "example": "832DBA54-7E0B-463C-B0EF-DB65DAB25745",
+                "format": "uuid",
+                "description": "The namespace associated with the batch upload session that the committed upload session belongs to"
+              },
+              "blob-name": {
+                "type": "string",
+                "example": "/folder/file.png",
+                "description": "The full path of the file that was uploaded"
+              },
+              "blob-id": {
+                "type": "string",
+                "example": "33E36B98-2758-4C17-83E5-69E93B8B87CB",
+                "format": "uuid",
+                "description": "The ID of the uploaded blob.\nThe ID is a temporary, non-final identifier until `/blob-store-service/1.0/commit-batch-upload` is called.\nThe ID retured during `/blob-store-service/1.0/commit-upload` **will** change during\n`/blob-store-service/1.0/commit-upload`!\n"
+              },
+              "metadata-revision": {
+                "type": "string",
+                "format": "number",
+                "example": "1",
+                "description": "The metadata revision number of the file that was uploaded. Edits to the file metadata increase this value."
+              },
+              "content-revision": {
+                "type": "string",
+                "format": "number",
+                "example": "1",
+                "description": "The content revision number of the file that was uploaded. Edits to the contents of the file increase this value."
+              },
+              "access": {
+                "type": "string",
+                "example": "opened",
+                "description": "Describes access status"
+              },
+              "last-modified-by-user-name": {
+                "type": "string",
+                "example": "some-user",
+                "description": "The username of the user who initiated the last edit to this file"
+              },
+              "last-modified-by-user-id": {
+                "type": "string",
+                "format": "uuid",
+                "example": "d290f1ee-6c54-4b01-90e6-d701748f0852",
+                "description": "The ID of the user who initiated the last edit to this file"
+              },
+              "last-modified": {
+                "type": "string",
+                "format": "number",
+                "example": "1585234790835",
+                "description": "The timestamp of the latest change made to this file in milliseconds"
+              },
+              "created-by-user-name": {
+                "type": "string",
+                "example": "some-user",
+                "description": "The username of the user who initially uploaded this file"
+              },
+              "created-by-user-id": {
+                "type": "string",
+                "format": "uuid",
+                "example": "d290f1ee-6c54-4b01-90e6-d701748f0852",
+                "description": "The ID of the user who initially uploaded this file"
+              },
+              "created": {
+                "type": "string",
+                "format": "number",
+                "example": "1585234790835",
+                "description": "The timestamp of the initial upload of this file in milliseconds"
+              },
+              "content-disposition": {
+                "type": "string",
+                "example": "attachment; filename=\"/folder/file.png\"",
+                "description": "Content disposition of the file"
+              },
+              "content-language": {
+                "type": "string",
+                "example": "",
+                "description": "Language of file contents"
+              },
+              "content-type": {
+                "type": "string",
+                "example": "application/octet-stream",
+                "description": "Content type of this file"
+              },
+              "content-hash-algorithm": {
+                "type": "string",
+                "example": "SHA256",
+                "description": "Name of the algorithm used for hashing the file content"
+              },
+              "content-hash": {
+                "type": "string",
+                "example": "E_UXOOjE-SDi-g_Tq6F7dQAd1dp-C5aLTIy1ThHFvFQ",
+                "description": "The hash generated by the hash function described in content-hash-algorithm"
+              },
+              "cache-control": {
+                "type": "string",
+                "example": "no-cache",
+                "description": "Describes cache"
+              },
+              "e-tag": {
+                "type": "string",
+                "example": "E_UXOOjE-SDi-g_Tq6F7dQAd1dp-C5aLTIy1ThHFvFQ",
+                "description": "The e-tag associated with the file."
+              },
+              "size": {
+                "type": "string",
+                "format": "number",
+                "example": "484173"
+              }
+            }
+          },
+          "user-metadata": {
+            "type": "object",
+            "description": "Reserved for future use."
+          }
+        }
+      },
+      "GetBlobChangesForSyncResponseCreatedOrUpdatedObject": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "path": {
+            "type": "string",
+            "example": "Project Root/folder1/blob1.jpg"
+          },
+          "timestamp": {
+            "type": "number",
+            "example": 8124389429384.234
+          },
+          "revision": {
+            "type": "integer",
+            "example": 1
+          }
+        }
+      },
+      "Job": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "authorId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true,
+            "description": "Identifier of the user who started the job."
+          },
+          "isService": {
+            "type": "boolean",
+            "description": "Started by system (true), or by a user (false)."
+          },
+          "startedOn": {
+            "type": "number",
+            "description": "Start time (JavaScript timestamp)."
+          },
+          "progressedOn": {
+            "type": "number",
+            "description": "Last progress time (JavaScript timestamp)."
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "starting",
+              "running",
+              "failed",
+              "completed",
+              "aborted",
+              "aborting",
+              "undoing",
+              "abort failed"
+            ],
+            "description": "Job status:\n  * `starting` - Job is about to get started.\n  * `running` - Job is running.\n  * `failed` - Job failed.\n  * `completed` - Job completed.\n  * `aborted` - Job aborted.\n  * `aborting` - Job has been aborted, and processing its abort state. Status will go to *aborted* or *abort failed* from there eventually.\n  * `undoing` - Job has been failed, and undoing its partially completed operation. Status will go to *failed* from there eventually.\n  * `abort failed` - Job aborted, but there was an error while doing its abort operation.\n"
+          },
+          "jobType": {
+            "type": "string",
+            "example": "destroyResources",
+            "description": "Type of the job."
+          },
+          "progress": {
+            "type": "object",
+            "properties": {
+              "min": {
+                "type": "number",
+                "example": 0
+              },
+              "max": {
+                "type": "number",
+                "example": 100
+              },
+              "current": {
+                "type": "number",
+                "example": 50,
+                "description": "Job actual progress between *min* and *max*."
+              },
+              "phase": {
+                "type": "string",
+                "example": "removingElements",
+                "description": "Phase identifier of multi-phase jobs. Empty string if the job is single phased."
+              }
+            }
+          },
+          "result": {
+            "type": "string",
+            "nullable": true,
+            "description": "Job dependent result value if *status* is *completed*.\n\nError message if *status* is *failed* or *abort failed*.\n"
+          },
+          "resultCode": {
+            "type": "string",
+            "nullable": true,
+            "description": "Job dependent result code if *status* is *completed*, usually zero.\n\nError code if *status* is *failed* or *abort failed*.\n"
+          },
+          "abortable": {
+            "type": "boolean",
+            "description": "If true, job supports abort operation.\n"
+          }
+        }
+      },
+      "BlobServerDetailedError": {
+        "type": "object",
+        "properties": {
+          "data-content-type": {
+            "type": "string",
+            "example": "application/vnd.graphisoft.teamwork.generic-service-1.0.detailed-error-1.0+json"
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "error-message": {
+                "type": "string",
+                "example": "Failed to execute request: 'session-service-create-session'. Error: 'Authentication failed: access control ticket is expired.'.",
+                "description": "The error message generated by the Blob Server"
+              },
+              "error-code": {
+                "type": "integer",
+                "example": 4,
+                "pattern": "[1-5]|1[1-9]|2[0-3]",
+                "description": "Error code-name pairs:\n  - `1` `GenericError`\n  - `2` `AuthenticationRequired`\n  - `3` `AuthenticationFailed`\n  - `4` `AccessControlTicketExpired`\n  - `5` `AccessDenied`\n  - `11` `SessionNotFound`\n  - `12` `BatchUploadCommitFailed`\n  - `13` `InvalidBlobContentPart`\n  - `14` `UploadSessionNotFound`\n  - `15` `IncompleteUpload`\n  - `16` `BlobAttachmentNotFound`\n  - `17` `BlobNamespaceNotFound`\n  - `18` `BlobRevisionNotFound`\n  - `19` `BlobChunkNotFound`\n  - `20` `BlobAlreadyExists`\n  - `21` `BlobNotFound`\n  - `22` `BlobAccessDenied`\n  - `23` `BlobPermissionDenied`\n"
+              },
+              "details": {
+                "type": "object",
+                "properties": {
+                  "message": {
+                    "type": "string",
+                    "example": "Authentication failed: access control ticket is expired.",
+                    "description": "The error message generated by the Blob Server"
+                  },
+                  "reason": {
+                    "type": "string",
+                    "example": "AccessControlTicketExpired",
+                    "description": "The internal name of the error thrown. See the description of error-code for details."
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "PortalServerError": {
+        "type": "object",
+        "properties": {
+          "error-code": {
+            "type": "integer",
+            "example": 6,
+            "description": "The code of the error being thrown. Current error code-name pairs:\n  - `1` `GenericError`\n  - `2` `AuthenticationRequiredError`\n  - `3` `AccessDeniedError`\n  - `4` `EntityCyclicDependencyError`\n  - `5` `EntityExistsError`\n  - `6` `EntityNotFoundError`\n  - `7` `EntityValidationError`\n  - `8` `OptimisticLockError`\n  - `9` `RevisionObsoletedError`\n  - `10` `LdapConnectionError`\n  - `11` `LdapInvalidCredentialsError`\n  - `12` `FileConnectionBaseDnError`\n  - `13` `ModelServerSideError`\n  - `14` `ReferenceError`\n  - `15` `ProhibitDeleteError`\n  - `16` `LicenseManagerError`\n  - `17` `ResultLimitExceededError`\n  - `18` `ModelServerNotCompatibleError`\n  - `19` `NotEnoughFreeSpaceError`\n  - `20` `ChangeHostError`\n  - `21` `GSIDConnectionError`\n  - `22` `GSIDInvalidCredentialsError`\n  - `23` `TagAlreadyAssignedError`\n  - `24` `KeyExistsError`\n  - `25` `NotAllowedError`\n  - `26` `NotYetAvailableError`\n  - `27` `InsufficientLicenseError`\n"
+          },
+          "error-message": {
+            "type": "string",
+            "example": "EntityNotFoundError: No item found by \"projectRootz\"",
+            "description": "Details about why the error has occured"
+          }
+        }
+      },
+      "OauthError": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string",
+            "example": "some_error",
+            "description": "'Error name. Possible values: `access_denied`, `insufficient_scope`, `invalid_argument`, `invalid_client`'\n'`invalid_grant`, `invalid_request`, `invalid_scope`, `invalid_token`, `server_error`, `unauthorized_client`'\n'`unauthorized_request`, `unsupported_grant_type`, `unsupported_response_type`'\n"
+          },
+          "error_description": {
+            "type": "string",
+            "example": "Some error happened",
+            "description": "Additional error information"
+          },
+          "inner": {
+            "description": "Optional inner error object",
+            "properties": {
+              "error-code": {
+                "type": "number",
+                "example": 911
+              },
+              "error-message": {
+                "type": "string",
+                "example": "Some error happened"
+              }
+            }
+          }
+        }
+      },
+      "GetTokenRequest": {
+        "type": "object",
+        "properties": {
+          "grant_type": {
+            "type": "string",
+            "description": "`refresh_token` or `authorization_code`",
+            "example": "authorization_code"
+          },
+          "client-id": {
+            "type": "string",
+            "description": "Client identification",
+            "example": "example.com"
+          },
+          "code": {
+            "type": "string",
+            "description": "The authorization code obtained from redirect_uri or the poll api. Required for `authorization_code` grant type.",
+            "example": "authorization_code"
+          },
+          "redirect_uri": {
+            "type": "string",
+            "description": "The redirect URI. Only for `authorization_code` grant type. Only required if provided in the GET /authorize request and only the same URI is allowed.",
+            "example": "https://example.com"
+          },
+          "refresh_token": {
+            "type": "string",
+            "description": "The refresh token. Only for `refresh_token` grant type.",
+            "example": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJjb25uZWN0aW9uSWQiOiI1OGIyMzVkYS0zMmRkLTE3OGItMjZiNi1lNjA0ODg1YzZmYWUiLCJ1c2VySWQiOiJ0dTEiLCJjbGllbnRJZCI6ImdyYXBoaXNvZnQuY29tIiwicGxhdGZvcm0iOiJ3ZWJVSSIsImV4cCI6MTY3MTAyMzM4MywianRpIjoiNGUzYTEzZTYtYWExNC01YWZhLTBlMjQtY2E2YThlNmRmNmNiIiwiaWF0IjoxNjcxMDIzMzczLCJ0eXBlIjoicmVmcmVzaCJ9.aBzGe3Ce_dmbON67Fs001vSU6H7yEcTlUHMBZHqq9bO0ryA0KKwjHGgZRLNL9S-qBw8obeFqWZ3IsqBGyneY7o--Qxa-jmS4iKBxqValYNOzIAQFVd9PKMWbkyKX204KIAPck5sGWZcRvyNocHluzrimmExhxhWTZ_Y_WU5r8pk"
+          },
+          "code_verifier": {
+            "type": "string",
+            "description": "PKCE code verifier. Must be the same as the encoded string in code_challenge. Only for `authorization_code` grant type.",
+            "example": "eaowlwoarpnxszyclnpkuckdynyfoyhsrvpfoavblct"
+          }
+        }
+      },
+      "GetTokenResponse": {
+        "type": "object",
+        "properties": {
+          "access_token": {
+            "type": "string",
+            "example": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJ0dTEiLCJjbGllbnRJZCI6ImdyYXBoaXNvZnQuY29tIiwicGxhdGZvcm0iOiJ3ZWJVSSIsImV4cCI6MTY3MTAyMzM4MywianRpIjoiMWI5NWI4MWEtZWNjNC0zODYzLTQwNjYtNzc0NzExYjQ4ZGRhIiwiaWF0IjoxNjcxMDIzMzczLCJ0eXBlIjoiYWNjZXNzIn0.GO8vaTNPMeq8GZEU7bAvj6zWNyzt_a1korLhEbdjhsdhm834jBg1mDEQfqpRUq2MwaMQNUb3EyKKj4bxni72UPXPSaDN4mecinqHXqO6sK6gtOF_wAVqV8Z701FfyACors5iwlBARcJZmhcqSMNCwTrVho8FTv8eHXZm9yFf_BQ",
+            "description": "The access token (JWT)"
+          },
+          "access_token_exp": {
+            "type": "number",
+            "example": 1671023383,
+            "description": "The expiration time of the access token (UNIX timestamp)"
+          },
+          "refresh_token": {
+            "type": "string",
+            "example": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJjb25uZWN0aW9uSWQiOiI1OGIyMzVkYS0zMmRkLTE3OGItMjZiNi1lNjA0ODg1YzZmYWUiLCJ1c2VySWQiOiJ0dTEiLCJjbGllbnRJZCI6ImdyYXBoaXNvZnQuY29tIiwicGxhdGZvcm0iOiJ3ZWJVSSIsImV4cCI6MTY3MTAyMzM4MywianRpIjoiNGUzYTEzZTYtYWExNC01YWZhLTBlMjQtY2E2YThlNmRmNmNiIiwiaWF0IjoxNjcxMDIzMzczLCJ0eXBlIjoicmVmcmVzaCJ9.aBzGe3Ce_dmbON67Fs001vSU6H7yEcTlUHMBZHqq9bO0ryA0KKwjHGgZRLNL9S-qBw8obeFqWZ3IsqBGyneY7o--Qxa-jmS4iKBxqValYNOzIAQFVd9PKMWbkyKX204KIAPck5sGWZcRvyNocHluzrimmExhxhWTZ_Y_WU5r8pk",
+            "description": "The refresh token (JWT)"
+          },
+          "token_type": {
+            "type": "string",
+            "example": "Bearer",
+            "description": "The type of the token issued. Only `Bearer` is supported."
+          },
+          "user_id": {
+            "type": "string",
+            "example": "8d597df5-1a4b-44c5-8f39-73173092947d",
+            "description": "The id of the user to whom the token was issued"
+          }
+        }
+      },
+      "GetAuthenticationCodeByStateResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "description": "`succeeded` or `pending`",
+            "example": "succeeded"
+          },
+          "code": {
+            "type": "string",
+            "description": "The authorization code generated or `null`, if pending",
+            "example": "8d597df5-1a4b-44c5-8f39-73173092947d"
+          }
+        }
+      }
+    }
+  }
+}

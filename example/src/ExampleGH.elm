@@ -1,8 +1,8 @@
 module ExampleGH exposing (main)
 
 import Browser
-import GitHub_v3_REST_API
 import Http
+import RealworldConduitApi
 
 
 main : Program () Model Msg
@@ -22,7 +22,7 @@ type alias Model =
 init : () -> ( Model, Cmd Msg )
 init () =
     ( {}
-    , GitHub_v3_REST_API.metaRoot { toMsg = RootResponsed }
+    , RealworldConduitApi.getArticle { toMsg = ApiResponse, params = { slug = "" } }
     )
 
 
@@ -32,13 +32,13 @@ subscriptions _ =
 
 
 type Msg
-    = RootResponsed (Result Http.Error GitHub_v3_REST_API.Root)
+    = ApiResponse (Result (RealworldConduitApi.Error RealworldConduitApi.GetArticle_Error String) RealworldConduitApi.SingleArticleResponse)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        RootResponsed response ->
+        ApiResponse response ->
             ( model, Cmd.none )
 
 

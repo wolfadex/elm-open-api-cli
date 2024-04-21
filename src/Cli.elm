@@ -1,5 +1,6 @@
 module Cli exposing (run)
 
+import Ansi
 import Ansi.Color
 import BackendTask
 import BackendTask.File
@@ -196,20 +197,39 @@ generateFileFromOpenApiSpec config apiSpec =
             )
         |> BackendTask.andThen
             (\outputPath ->
-                let
-                    padLeftBy4Spaces : String -> String
-                    padLeftBy4Spaces =
-                        String.padLeft 4 ' '
-                in
-                [ "SDK generated at " ++ outputPath
+                [ ""
+                , "🎉 SDK generated:"
+                , ""
+                , "    " ++ outputPath
+
+                -- , outputPaths
+                --     |> List.map (\outputPath -> "    " ++ outputPath)
                 , ""
                 , ""
-                , "You'll need elm/http and elm/json installed. Try running:"
+                , "You'll also need "
+                    ++ Ansi.link
+                        { text = "elm/http"
+                        , url = "https://package.elm-lang.org/packages/elm/http/latest/"
+                        }
+                    ++ " and "
+                    ++ Ansi.link
+                        { text = "elm/json"
+                        , url = "https://package.elm-lang.org/packages/elm/json/latest/"
+                        }
+                    ++ " installed. Try running:"
+                , ""
+                , "    elm install elm/http"
+                , "    elm install elm/json"
                 , ""
                 , ""
-                , padLeftBy4Spaces "elm install elm/http"
+                , "and possibly need "
+                    ++ Ansi.link
+                        { text = "elm/bytes"
+                        , url = "https://package.elm-lang.org/packages/elm/bytes/latest/"
+                        }
+                    ++ " installed. Try running:"
                 , ""
-                , padLeftBy4Spaces "elm install elm/json"
+                , "    elm install elm/bytes"
                 ]
                     |> List.map Pages.Script.log
                     |> doAll

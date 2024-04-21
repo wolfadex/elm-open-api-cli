@@ -31,6 +31,7 @@ import Gen.String
 import Gen.Task
 import Gen.Url.Builder
 import Json.Schema.Definitions
+import List.Extra
 import OpenApi
 import OpenApi.Components
 import OpenApi.MediaType
@@ -341,12 +342,12 @@ requestBodyToDeclarations name reference =
 
 
 toRequestFunctions : String -> String -> OpenApi.Operation.Operation -> CliMonad (List Elm.Declaration)
-toRequestFunctions method url operation =
+toRequestFunctions method pathUrl operation =
     let
         functionName : String
         functionName =
             OpenApi.Operation.operationId operation
-                |> Maybe.withDefault url
+                |> Maybe.withDefault pathUrl
                 |> makeNamespaceValid
                 |> removeInvalidChars
                 |> String.Extra.camelize
@@ -387,16 +388,23 @@ toRequestFunctions method url operation =
                                                 case OpenApi.Parameter.in_ concreteParam of
                                                     "path" ->
                                                         if OpenApi.Parameter.required concreteParam && alwaysJust then
-                                                            ( Just
-                                                                (\config ->
-                                                                    Elm.get (toValueName paramName) (Elm.get "params" config)
-                                                                        |> toString
-                                                                        |> Gen.String.call_.replace
-                                                                            (Elm.string <| "{" ++ paramName ++ "}")
+                                                            CliMonad.succeed
+                                                                ( Just
+                                                                    ( -- This is used for the basic URL replacement in a static path
+                                                                      \config ->
+                                                                        Elm.get (toValueName paramName) (Elm.get "params" config)
+                                                                            |> toString
+                                                                            |> Gen.String.call_.replace
+                                                                                (Elm.string <| "{" ++ paramName ++ "}")
+                                                                    , -- This is used for segment replacement when usig `Url.Builder.crossOrigin`
+                                                                      ( "{" ++ paramName ++ "}"
+                                                                      , \config ->
+                                                                            Elm.get (toValueName paramName) (Elm.get "params" config)
+                                                                                |> toString
+                                                                      )
+                                                                    )
+                                                                , []
                                                                 )
-                                                            , []
-                                                            )
-                                                                |> CliMonad.succeed
 
                                                         else
                                                             CliMonad.fail "Optional parameters in path"
@@ -411,55 +419,80 @@ toRequestFunctions method url operation =
                             |> CliMonad.andThen
                                 (\pairs ->
                                     let
-                                        fullUrl : CliMonad String
-                                        fullUrl =
-                                            CliMonad.fromApiSpec OpenApi.servers
-                                                |> CliMonad.map
-                                                    (\servers ->
-                                                        case servers of
-                                                            [] ->
-                                                                url
-
-                                                            firstServer :: _ ->
-                                                                if String.startsWith "/" url then
-                                                                    OpenApi.Server.url firstServer ++ url
-
-                                                                else
-                                                                    OpenApi.Server.url firstServer ++ "/" ++ url
-                                                    )
-
                                         ( replacements, queryParams ) =
                                             List.unzip pairs
                                                 |> Tuple.mapBoth (List.filterMap identity) List.concat
-
-                                        replaced : CliMonad (Elm.Expression -> Elm.Expression)
-                                        replaced =
-                                            fullUrl
-                                                |> CliMonad.map
-                                                    (\u ->
-                                                        \config ->
-                                                            List.foldl
-                                                                (\replacement -> replacement config)
-                                                                (Elm.string u)
-                                                                replacements
-                                                    )
                                     in
                                     if List.isEmpty queryParams then
-                                        replaced
+                                        OpenApi.servers
+                                            |> CliMonad.fromApiSpec
+                                            |> CliMonad.map
+                                                (\servers ->
+                                                    \config ->
+                                                        let
+                                                            initialUrl : String
+                                                            initialUrl =
+                                                                case servers of
+                                                                    [] ->
+                                                                        pathUrl
+
+                                                                    firstServer :: _ ->
+                                                                        if String.startsWith "/" pathUrl then
+                                                                            OpenApi.Server.url firstServer ++ pathUrl
+
+                                                                        else
+                                                                            OpenApi.Server.url firstServer ++ "/" ++ pathUrl
+                                                        in
+                                                        List.foldl
+                                                            (\( replacement, _ ) -> replacement config)
+                                                            (Elm.string initialUrl)
+                                                            replacements
+                                                )
 
                                     else
+                                        let
+                                            serverUrl : CliMonad String
+                                            serverUrl =
+                                                CliMonad.fromApiSpec OpenApi.servers
+                                                    |> CliMonad.map
+                                                        (\servers ->
+                                                            case servers of
+                                                                [] ->
+                                                                    ""
+
+                                                                firstServer :: _ ->
+                                                                    OpenApi.Server.url firstServer
+                                                        )
+                                        in
                                         queryParams
                                             |> CliMonad.combineMap queryParameterToUrlBuilderArgument
                                             |> CliMonad.map2
-                                                (\repl queryArgs config ->
+                                                (\srvUrl queryArgs config ->
                                                     queryArgs
                                                         |> List.map (\arg -> arg config)
                                                         |> Gen.List.filterMap Gen.Basics.identity
                                                         |> Gen.Url.Builder.call_.crossOrigin
-                                                            (repl config)
-                                                            (Elm.list [])
+                                                            (Elm.string srvUrl)
+                                                            (pathUrl
+                                                                |> String.split "/"
+                                                                |> List.filterMap
+                                                                    (\segment ->
+                                                                        if String.isEmpty segment then
+                                                                            Nothing
+
+                                                                        else
+                                                                            Just <|
+                                                                                case List.Extra.find (\( _, ( pattern, _ ) ) -> pattern == segment) replacements of
+                                                                                    Nothing ->
+                                                                                        Elm.string segment
+
+                                                                                    Just ( _, ( _, repl ) ) ->
+                                                                                        repl config
+                                                                    )
+                                                                |> Elm.list
+                                                            )
                                                 )
-                                                replaced
+                                                serverUrl
                                 )
 
                     body : ContentSchema -> CliMonad (Elm.Expression -> Elm.Expression)
@@ -502,7 +535,7 @@ toRequestFunctions method url operation =
                             BytesContent _ ->
                                 CliMonad.succeed [ ( "body", Gen.Bytes.annotation_.bytes ) ]
 
-                    requestCommand : ContentSchema -> CliMonad ( Elm.Expression, Elm.Annotation.Annotation )
+                    requestCommand : ContentSchema -> CliMonad ( Elm.Expression, Elm.Expression, Elm.Annotation.Annotation )
                     requestCommand bodyContent =
                         authorizationInfo
                             |> CliMonad.andThen
@@ -513,6 +546,21 @@ toRequestFunctions method url operation =
                                                 ( "config", Nothing )
                                                 (\config ->
                                                     Gen.Http.call_.request
+                                                        (Elm.record
+                                                            [ ( "method", Elm.string method )
+                                                            , ( "headers", Elm.list <| auth.headers config )
+                                                            , ( "expect", expect config )
+                                                            , ( "body", toBody config )
+                                                            , ( "timeout", Gen.Maybe.make_.nothing )
+                                                            , ( "tracker", Gen.Maybe.make_.nothing )
+                                                            , ( "url", replaced config )
+                                                            ]
+                                                        )
+                                                )
+                                            , Elm.fn
+                                                ( "config", Nothing )
+                                                (\config ->
+                                                    Gen.Http.call_.riskyRequest
                                                         (Elm.record
                                                             [ ( "method", Elm.string method )
                                                             , ( "headers", Elm.list <| auth.headers config )
@@ -548,7 +596,7 @@ toRequestFunctions method url operation =
                                         replacedUrl
                                 )
 
-                    requestTask : ContentSchema -> CliMonad ( Elm.Expression, Elm.Annotation.Annotation )
+                    requestTask : ContentSchema -> CliMonad ( Elm.Expression, Elm.Expression, Elm.Annotation.Annotation )
                     requestTask bodyContent =
                         CliMonad.andThen2
                             (\auth successAnnotation ->
@@ -558,6 +606,20 @@ toRequestFunctions method url operation =
                                             ( "config", Nothing )
                                             (\config ->
                                                 Gen.Http.call_.task
+                                                    (Elm.record
+                                                        [ ( "url", replaced config )
+                                                        , ( "method", Elm.string method )
+                                                        , ( "headers", Elm.list <| auth.headers config )
+                                                        , ( "resolver", resolver )
+                                                        , ( "body", toBody config )
+                                                        , ( "timeout", Gen.Maybe.make_.nothing )
+                                                        ]
+                                                    )
+                                            )
+                                        , Elm.fn
+                                            ( "config", Nothing )
+                                            (\config ->
+                                                Gen.Http.call_.riskyTask
                                                     (Elm.record
                                                         [ ( "url", replaced config )
                                                         , ( "method", Elm.string method )
@@ -637,10 +699,18 @@ toRequestFunctions method url operation =
                                 (requestTask contentSchema)
                         )
                     |> CliMonad.map2
-                        (\doc ( ( requestCmd, requestCmdType ), ( requestTsk, requestTskType ) ) ->
+                        (\doc ( ( requestCmd, riskyCmd, requestCmdType ), ( requestTsk, riskyTask, requestTskType ) ) ->
                             [ requestCmd
                                 |> Elm.withType requestCmdType
                                 |> Elm.declaration functionName
+                                |> Elm.withDocumentation doc
+                                |> Elm.exposeWith
+                                    { exposeConstructor = False
+                                    , group = Just "Request functions"
+                                    }
+                            , riskyCmd
+                                |> Elm.withType requestCmdType
+                                |> Elm.declaration (functionName ++ "Risky")
                                 |> Elm.withDocumentation doc
                                 |> Elm.exposeWith
                                     { exposeConstructor = False
@@ -654,13 +724,21 @@ toRequestFunctions method url operation =
                                     { exposeConstructor = False
                                     , group = Just "Request functions"
                                     }
+                            , riskyTask
+                                |> Elm.withType requestTskType
+                                |> Elm.declaration (functionName ++ "TaskRisky")
+                                |> Elm.withDocumentation doc
+                                |> Elm.exposeWith
+                                    { exposeConstructor = False
+                                    , group = Just "Request functions"
+                                    }
                             , errorTypeDeclaration
                             ]
                         )
                         documentation
             )
         |> CliMonad.withPath method
-        |> CliMonad.withPath url
+        |> CliMonad.withPath pathUrl
 
 
 customErrorAnnotation : Elm.Annotation.Annotation -> Elm.Annotation.Annotation -> Elm.Annotation.Annotation
@@ -1346,14 +1424,18 @@ operationToTypesExpectAndResolver functionName operation =
                                         errorName =
                                             String.Extra.toSentenceCase functionName ++ "_Error"
                                     in
-                                    ( dict
-                                        |> Dict.toList
-                                        |> List.map (\( statusCode, annotation ) -> Elm.variantWith (toErrorVariant statusCode) [ annotation ])
-                                        |> Elm.customType errorName
-                                        |> Elm.exposeWith
-                                            { exposeConstructor = True
-                                            , group = Just "Types"
-                                            }
+                                    ( if Dict.isEmpty dict then
+                                        Elm.alias errorName Elm.Annotation.unit
+
+                                      else
+                                        dict
+                                            |> Dict.toList
+                                            |> List.map (\( statusCode, annotation ) -> Elm.variantWith (toErrorVariant statusCode) [ annotation ])
+                                            |> Elm.customType errorName
+                                            |> Elm.exposeWith
+                                                { exposeConstructor = True
+                                                , group = Just "Types"
+                                                }
                                     , Elm.Annotation.named [] errorName
                                     )
                                 )

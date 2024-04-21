@@ -419,35 +419,9 @@ toRequestFunctions method pathUrl operation =
                             |> CliMonad.andThen
                                 (\pairs ->
                                     let
-                                        -- fullUrl : CliMonad String
-                                        -- fullUrl =
-                                        --     CliMonad.fromApiSpec OpenApi.servers
-                                        --         |> CliMonad.map
-                                        --             (\servers ->
-                                        --                 case servers of
-                                        --                     [] ->
-                                        --                         pathUrl
-                                        --                     firstServer :: _ ->
-                                        --                         if String.startsWith "/" pathUrl then
-                                        --                             OpenApi.Server.url firstServer ++ pathUrl
-                                        --                         else
-                                        --                             OpenApi.Server.url firstServer ++ "/" ++ pathUrl
-                                        --             )
                                         ( replacements, queryParams ) =
                                             List.unzip pairs
                                                 |> Tuple.mapBoth (List.filterMap identity) List.concat
-
-                                        -- replaced : CliMonad (Elm.Expression -> Elm.Expression)
-                                        -- replaced =
-                                        --     fullUrl
-                                        --         |> CliMonad.map
-                                        --             (\u ->
-                                        --                 \config ->
-                                        --                     List.foldl
-                                        --                         (\replacement -> replacement config)
-                                        --                         (Elm.string u)
-                                        --                         replacements
-                                        --             )
                                     in
                                     if List.isEmpty queryParams then
                                         OpenApi.servers

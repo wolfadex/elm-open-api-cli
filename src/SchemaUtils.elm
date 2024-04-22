@@ -38,20 +38,20 @@ getAlias refUri =
             CliMonad.fail <| "Couldn't get the type ref (" ++ String.join "/" refUri ++ ") for the response"
 
 
-schemaToProperties : Json.Schema.Definitions.Schema -> CliMonad (Dict String Field)
-schemaToProperties allOfItem =
+schemaToProperties : List String -> Json.Schema.Definitions.Schema -> CliMonad (Dict String Field)
+schemaToProperties namespace allOfItem =
     case allOfItem of
         Json.Schema.Definitions.ObjectSchema allOfItemSchema ->
             CliMonad.map2 FastDict.union
-                (subSchemaToProperties allOfItemSchema)
-                (subSchemaRefToProperties allOfItemSchema)
+                (subSchemaToProperties namespace allOfItemSchema)
+                (subSchemaRefToProperties namespace allOfItemSchema)
 
         Json.Schema.Definitions.BooleanSchema _ ->
             CliMonad.todoWithDefault FastDict.empty "Boolean schema inside allOf"
 
 
-subSchemaRefToProperties : Json.Schema.Definitions.SubSchema -> CliMonad (Dict String Field)
-subSchemaRefToProperties allOfItem =
+subSchemaRefToProperties : List String -> Json.Schema.Definitions.SubSchema -> CliMonad (Dict String Field)
+subSchemaRefToProperties namespace allOfItem =
     case allOfItem.ref of
         Nothing ->
             CliMonad.succeed FastDict.empty
@@ -59,11 +59,11 @@ subSchemaRefToProperties allOfItem =
         Just ref ->
             getAlias (String.split "/" ref)
                 |> CliMonad.withPath ref
-                |> CliMonad.andThen schemaToProperties
+                |> CliMonad.andThen (schemaToProperties namespace)
 
 
-subSchemaToProperties : Json.Schema.Definitions.SubSchema -> CliMonad (Dict String Field)
-subSchemaToProperties sch =
+subSchemaToProperties : List String -> Json.Schema.Definitions.SubSchema -> CliMonad (Dict String Field)
+subSchemaToProperties namespace sch =
     -- TODO: rename
     let
         requiredSet : Set String
@@ -77,7 +77,7 @@ subSchemaToProperties sch =
         |> Maybe.withDefault []
         |> CliMonad.combineMap
             (\( key, valueSchema ) ->
-                schemaToType valueSchema
+                schemaToType namespace valueSchema
                     |> CliMonad.withPath key
                     |> CliMonad.map
                         (\type_ ->
@@ -91,8 +91,8 @@ subSchemaToProperties sch =
         |> CliMonad.map FastDict.fromList
 
 
-schemaToType : Json.Schema.Definitions.Schema -> CliMonad Type
-schemaToType schema =
+schemaToType : List String -> Json.Schema.Definitions.Schema -> CliMonad Type
+schemaToType namespace schema =
     case schema of
         Json.Schema.Definitions.BooleanSchema _ ->
             CliMonad.todoWithDefault Value "Boolean schema"
@@ -107,7 +107,7 @@ schemaToType schema =
                 singleTypeToType singleType =
                     case singleType of
                         Json.Schema.Definitions.ObjectType ->
-                            objectSchemaToType subSchema
+                            objectSchemaToType namespace subSchema
 
                         Json.Schema.Definitions.StringType ->
                             CliMonad.succeed String
@@ -133,7 +133,7 @@ schemaToType schema =
                                     CliMonad.todoWithDefault Value "Array of items as item definition"
 
                                 Json.Schema.Definitions.ItemDefinition itemSchema ->
-                                    CliMonad.map List (schemaToType itemSchema)
+                                    CliMonad.map List (schemaToType namespace itemSchema)
 
                 anyOfToType : List Json.Schema.Definitions.Schema -> CliMonad Type
                 anyOfToType _ =
@@ -141,8 +141,8 @@ schemaToType schema =
 
                 oneOfToType : List Json.Schema.Definitions.Schema -> CliMonad Type
                 oneOfToType oneOf =
-                    CliMonad.combineMap schemaToType oneOf
-                        |> CliMonad.andThen oneOfType
+                    CliMonad.combineMap (schemaToType namespace) oneOf
+                        |> CliMonad.andThen (oneOfType namespace)
             in
             case subSchema.type_ of
                 Json.Schema.Definitions.SingleType singleType ->
@@ -156,7 +156,7 @@ schemaToType schema =
                         Nothing ->
                             case subSchema.anyOf of
                                 Just [ onlySchema ] ->
-                                    schemaToType onlySchema
+                                    schemaToType namespace onlySchema
 
                                 Just [ firstSchema, secondSchema ] ->
                                     case ( firstSchema, secondSchema ) of
@@ -166,10 +166,10 @@ schemaToType schema =
                                             -- mark a value as nullable in the schema.
                                             case ( firstSubSchema.type_, secondSubSchema.type_ ) of
                                                 ( Json.Schema.Definitions.SingleType Json.Schema.Definitions.NullType, _ ) ->
-                                                    nullable (schemaToType secondSchema)
+                                                    nullable (schemaToType namespace secondSchema)
 
                                                 ( _, Json.Schema.Definitions.SingleType Json.Schema.Definitions.NullType ) ->
-                                                    nullable (schemaToType firstSchema)
+                                                    nullable (schemaToType namespace firstSchema)
 
                                                 _ ->
                                                     anyOfToType [ firstSchema, secondSchema ]
@@ -183,7 +183,7 @@ schemaToType schema =
                                 Nothing ->
                                     case subSchema.allOf of
                                         Just [ onlySchema ] ->
-                                            schemaToType onlySchema
+                                            schemaToType namespace onlySchema
 
                                         Just [] ->
                                             CliMonad.succeed Value
@@ -191,12 +191,12 @@ schemaToType schema =
                                         Just _ ->
                                             -- If we have more than one item in `allOf`, then it's _probably_ an object
                                             -- TODO: improve this to actually check if all the `allOf` subschema are objects.
-                                            objectSchemaToType subSchema
+                                            objectSchemaToType namespace subSchema
 
                                         Nothing ->
                                             case subSchema.oneOf of
                                                 Just [ onlySchema ] ->
-                                                    schemaToType onlySchema
+                                                    schemaToType namespace onlySchema
 
                                                 Just [] ->
                                                     CliMonad.succeed Value
@@ -219,7 +219,7 @@ schemaToType schema =
                     in
                     nonNulls
                         |> CliMonad.combineMap singleTypeToType
-                        |> CliMonad.andThen oneOfType
+                        |> CliMonad.andThen (oneOfType namespace)
                         |> CliMonad.map
                             (\res ->
                                 if List.isEmpty nulls then
@@ -230,10 +230,10 @@ schemaToType schema =
                             )
 
 
-typeToOneOfVariant : Type -> CliMonad (Maybe { name : TypeName, type_ : Type })
-typeToOneOfVariant type_ =
+typeToOneOfVariant : List String -> Type -> CliMonad (Maybe { name : TypeName, type_ : Type })
+typeToOneOfVariant namespace type_ =
     type_
-        |> CliMonad.typeToAnnotation
+        |> CliMonad.typeToAnnotation namespace
         |> CliMonad.map
             (\ann ->
                 let
@@ -255,10 +255,10 @@ typeToOneOfVariant type_ =
             )
 
 
-oneOfType : List Type -> CliMonad Type
-oneOfType types =
+oneOfType : List String -> List Type -> CliMonad Type
+oneOfType namespace types =
     types
-        |> CliMonad.combineMap typeToOneOfVariant
+        |> CliMonad.combineMap (typeToOneOfVariant namespace)
         |> CliMonad.map
             (\maybeVariants ->
                 case Maybe.Extra.combine maybeVariants of
@@ -284,14 +284,14 @@ oneOfType types =
             )
 
 
-objectSchemaToType : Json.Schema.Definitions.SubSchema -> CliMonad Type
-objectSchemaToType subSchema =
+objectSchemaToType : List String -> Json.Schema.Definitions.SubSchema -> CliMonad Type
+objectSchemaToType namespace subSchema =
     let
         propertiesFromAllOf : CliMonad (Dict String Field)
         propertiesFromAllOf =
             subSchema.allOf
                 |> Maybe.withDefault []
-                |> CliMonad.combineMap schemaToProperties
+                |> CliMonad.combineMap (schemaToProperties namespace)
                 |> CliMonad.map (List.foldl FastDict.union FastDict.empty)
     in
     CliMonad.map2
@@ -300,10 +300,10 @@ objectSchemaToType subSchema =
                 |> FastDict.union schemaProps
                 |> Object
         )
-        (subSchemaToProperties subSchema)
+        (subSchemaToProperties namespace subSchema)
         propertiesFromAllOf
 
 
-schemaToAnnotation : Json.Schema.Definitions.Schema -> CliMonad Elm.Annotation.Annotation
-schemaToAnnotation schema =
-    schemaToType schema |> CliMonad.andThen CliMonad.typeToAnnotation
+schemaToAnnotation : List String -> Json.Schema.Definitions.Schema -> CliMonad Elm.Annotation.Annotation
+schemaToAnnotation namespace schema =
+    schemaToType namespace schema |> CliMonad.andThen (CliMonad.typeToAnnotation namespace)

@@ -174,14 +174,14 @@ andThen2 f x y =
 Automatically appends the needed `enum` declarations.
 
 -}
-run : { openApi : OpenApi, generateTodos : Bool } -> CliMonad (List Elm.Declaration) -> Result Message ( List Elm.Declaration, List Message )
-run input (CliMonad x) =
+run : List String -> { openApi : OpenApi, generateTodos : Bool } -> CliMonad (List Elm.Declaration) -> Result Message ( List Elm.Declaration, List Message )
+run namespace input (CliMonad x) =
     x input
         |> Result.andThen
             (\( decls, warnings, oneOfs ) ->
                 let
                     (CliMonad h) =
-                        oneOfDeclarations oneOfs |> withPath "While generating `oneOf`s"
+                        oneOfDeclarations namespace oneOfs |> withPath "While generating `oneOf`s"
                 in
                 h input
                     |> Result.map
@@ -195,22 +195,24 @@ run input (CliMonad x) =
 
 
 oneOfDeclarations :
-    Dict OneOfName OneOfData
+    List String
+    -> Dict OneOfName OneOfData
     -> CliMonad (List Elm.Declaration)
-oneOfDeclarations enums =
+oneOfDeclarations namespace enums =
     combineMap
-        oneOfDeclaration
+        (oneOfDeclaration namespace)
         (FastDict.toList enums)
 
 
 oneOfDeclaration :
-    ( OneOfName, OneOfData )
+    List String
+    -> ( OneOfName, OneOfData )
     -> CliMonad Elm.Declaration
-oneOfDeclaration ( oneOfName, variants ) =
+oneOfDeclaration namespace ( oneOfName, variants ) =
     let
         variantDeclaration : { name : VariantName, type_ : Type } -> CliMonad Elm.Variant
         variantDeclaration { name, type_ } =
-            typeToAnnotation type_
+            typeToAnnotation namespace type_
                 |> map
                     (\variantAnnotation ->
                         let
@@ -260,23 +262,23 @@ errorToWarning (CliMonad f) =
         )
 
 
-objectToAnnotation : { useMaybe : Bool } -> Object -> CliMonad Elm.Annotation.Annotation
-objectToAnnotation config fields =
+objectToAnnotation : List String -> { useMaybe : Bool } -> Object -> CliMonad Elm.Annotation.Annotation
+objectToAnnotation namespace config fields =
     FastDict.toList fields
-        |> combineMap (\( k, v ) -> map (Tuple.pair (Common.toValueName k)) (fieldToAnnotation config v))
+        |> combineMap (\( k, v ) -> map (Tuple.pair (Common.toValueName k)) (fieldToAnnotation namespace config v))
         |> map recordType
 
 
-fieldToAnnotation : { useMaybe : Bool } -> Field -> CliMonad Elm.Annotation.Annotation
-fieldToAnnotation { useMaybe } { type_, required } =
+fieldToAnnotation : List String -> { useMaybe : Bool } -> Field -> CliMonad Elm.Annotation.Annotation
+fieldToAnnotation namespace { useMaybe } { type_, required } =
     let
         annotation : CliMonad Elm.Annotation.Annotation
         annotation =
             if useMaybe then
-                typeToAnnotationMaybe type_
+                typeToAnnotationMaybe namespace type_
 
             else
-                typeToAnnotation type_
+                typeToAnnotation namespace type_
     in
     if required then
         annotation
@@ -292,20 +294,20 @@ recordType fields =
         |> Elm.Annotation.record
 
 
-typeToAnnotation : Type -> CliMonad Elm.Annotation.Annotation
-typeToAnnotation type_ =
+typeToAnnotation : List String -> Type -> CliMonad Elm.Annotation.Annotation
+typeToAnnotation namespace type_ =
     case type_ of
         Nullable t ->
-            typeToAnnotation t
+            typeToAnnotation namespace t
                 |> map
                     (\ann ->
-                        Elm.Annotation.namedWith [ "OpenApi" ]
+                        Elm.Annotation.namedWith (namespace ++ [ "OpenApi" ])
                             "Nullable"
                             [ ann ]
                     )
 
         Object fields ->
-            objectToAnnotation { useMaybe = False } fields
+            objectToAnnotation namespace { useMaybe = False } fields
 
         String ->
             succeed Elm.Annotation.string
@@ -320,7 +322,7 @@ typeToAnnotation type_ =
             succeed Elm.Annotation.bool
 
         List t ->
-            map Elm.Annotation.list (typeToAnnotation t)
+            map Elm.Annotation.list (typeToAnnotation namespace t)
 
         OneOf oneOfName oneOfData ->
             oneOfAnnotation oneOfName oneOfData
@@ -338,14 +340,14 @@ typeToAnnotation type_ =
             succeed Elm.Annotation.unit
 
 
-typeToAnnotationMaybe : Type -> CliMonad Elm.Annotation.Annotation
-typeToAnnotationMaybe type_ =
+typeToAnnotationMaybe : List String -> Type -> CliMonad Elm.Annotation.Annotation
+typeToAnnotationMaybe namespace type_ =
     case type_ of
         Nullable t ->
-            map Elm.Annotation.maybe (typeToAnnotationMaybe t)
+            map Elm.Annotation.maybe (typeToAnnotationMaybe namespace t)
 
         Object fields ->
-            objectToAnnotation { useMaybe = True } fields
+            objectToAnnotation namespace { useMaybe = True } fields
 
         String ->
             succeed Elm.Annotation.string
@@ -360,7 +362,7 @@ typeToAnnotationMaybe type_ =
             succeed Elm.Annotation.bool
 
         List t ->
-            map Elm.Annotation.list (typeToAnnotationMaybe t)
+            map Elm.Annotation.list (typeToAnnotationMaybe namespace t)
 
         OneOf oneOfName oneOfData ->
             oneOfAnnotation oneOfName oneOfData

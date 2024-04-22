@@ -201,7 +201,7 @@ generateFileFromOpenApiSpec config apiSpec =
                 let
                     indentBy : Int -> String -> String
                     indentBy amount input =
-                        String.padLeft amount ' ' input
+                        String.repeat amount " " ++ input
 
                     requiredLinks : List String
                     requiredLinks =

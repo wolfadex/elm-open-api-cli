@@ -193,6 +193,7 @@ formatModuleDocs =
 
                                     memberLine :: restOfLines ->
                                         let
+                                            groupSize : Int
                                             groupSize =
                                                 String.length (String.join ", " memberLine)
                                         in

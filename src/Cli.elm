@@ -197,39 +197,71 @@ generateFileFromOpenApiSpec config apiSpec =
             )
         |> BackendTask.andThen
             (\outputPath ->
+                let
+                    pad4 : String -> String
+                    pad4 =
+                        String.padLeft 4 ' '
+
+                    requiredLinks : List String
+                    requiredLinks =
+                        [ "elm/http", "elm/json" ]
+                            |> List.map toElmDependencyLink
+
+                    optionalLinks : List String
+                    optionalLinks =
+                        [ "elm/bytes", "elm/url" ]
+                            |> List.map toElmDependencyLink
+
+                    toElmDependencyLink : String -> String
+                    toElmDependencyLink dependency =
+                        Ansi.link
+                            { text = dependency
+                            , url = "https://package.elm-lang.org/packages/" ++ dependency ++ "/latest/"
+                            }
+
+                    joinLinks : List String -> String
+                    joinLinks links =
+                        case List.length links of
+                            0 ->
+                                ""
+
+                            1 ->
+                                List.head links
+                                    |> Maybe.withDefault "(unknown)"
+
+                            2 ->
+                                String.join " and " links
+
+                            _ ->
+                                let
+                                    head : String
+                                    head =
+                                        List.take (List.length links - 1) links
+                                            |> String.join ", "
+
+                                    tail : String
+                                    tail =
+                                        List.drop (List.length links - 1) links
+                                            |> List.head
+                                            |> Maybe.withDefault "(unknown)"
+                                in
+                                head ++ ", and " ++ tail
+                in
                 [ ""
                 , "🎉 SDK generated:"
                 , ""
-                , "    " ++ outputPath
-
-                -- , outputPaths
-                --     |> List.map (\outputPath -> "    " ++ outputPath)
+                , pad4 outputPath
                 , ""
                 , ""
-                , "You'll also need "
-                    ++ Ansi.link
-                        { text = "elm/http"
-                        , url = "https://package.elm-lang.org/packages/elm/http/latest/"
-                        }
-                    ++ " and "
-                    ++ Ansi.link
-                        { text = "elm/json"
-                        , url = "https://package.elm-lang.org/packages/elm/json/latest/"
-                        }
-                    ++ " installed. Try running:"
+                , "You'll also need " ++ joinLinks requiredLinks ++ " installed. Try running:"
                 , ""
-                , "    elm install elm/http"
-                , "    elm install elm/json"
+                , pad4 "elm install elm/http"
+                , pad4 "elm install elm/json"
                 , ""
                 , ""
-                , "and possibly need "
-                    ++ Ansi.link
-                        { text = "elm/bytes"
-                        , url = "https://package.elm-lang.org/packages/elm/bytes/latest/"
-                        }
-                    ++ " installed. Try running:"
-                , ""
-                , "    elm install elm/bytes"
+                , "and possibly need " ++ joinLinks optionalLinks ++ " installed. If that's the case, try running:"
+                , pad4 "elm install elm/bytes"
+                , pad4 "elm install elm/url"
                 ]
                     |> List.map Pages.Script.log
                     |> doAll

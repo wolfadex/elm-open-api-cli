@@ -17,6 +17,7 @@ import OpenApi
 import OpenApi.Generate
 import OpenApi.Info
 import Pages.Script
+import String.Extra
 import Url
 import UrlPath
 import Yaml.Decode
@@ -198,9 +199,9 @@ generateFileFromOpenApiSpec config apiSpec =
         |> BackendTask.andThen
             (\outputPath ->
                 let
-                    pad4 : String -> String
-                    pad4 =
-                        String.padLeft 4 ' '
+                    indentBy : Int -> String -> String
+                    indentBy amount input =
+                        String.padLeft amount ' ' input
 
                     requiredLinks : List String
                     requiredLinks =
@@ -218,50 +219,22 @@ generateFileFromOpenApiSpec config apiSpec =
                             { text = dependency
                             , url = "https://package.elm-lang.org/packages/" ++ dependency ++ "/latest/"
                             }
-
-                    joinLinks : List String -> String
-                    joinLinks links =
-                        case List.length links of
-                            0 ->
-                                ""
-
-                            1 ->
-                                List.head links
-                                    |> Maybe.withDefault "(unknown)"
-
-                            2 ->
-                                String.join " and " links
-
-                            _ ->
-                                let
-                                    head : String
-                                    head =
-                                        List.take (List.length links - 1) links
-                                            |> String.join ", "
-
-                                    tail : String
-                                    tail =
-                                        List.drop (List.length links - 1) links
-                                            |> List.head
-                                            |> Maybe.withDefault "(unknown)"
-                                in
-                                head ++ ", and " ++ tail
                 in
                 [ ""
                 , "🎉 SDK generated:"
                 , ""
-                , pad4 outputPath
+                , indentBy 4 outputPath
                 , ""
                 , ""
-                , "You'll also need " ++ joinLinks requiredLinks ++ " installed. Try running:"
+                , "You'll also need " ++ String.Extra.toSentenceOxford requiredLinks ++ " installed. Try running:"
                 , ""
-                , pad4 "elm install elm/http"
-                , pad4 "elm install elm/json"
+                , indentBy 4 "elm install elm/http"
+                , indentBy 4 "elm install elm/json"
                 , ""
                 , ""
-                , "and possibly need " ++ joinLinks optionalLinks ++ " installed. If that's the case, try running:"
-                , pad4 "elm install elm/bytes"
-                , pad4 "elm install elm/url"
+                , "and possibly need " ++ String.Extra.toSentenceOxford optionalLinks ++ " installed. If that's the case, try running:"
+                , indentBy 4 "elm install elm/bytes"
+                , indentBy 4 "elm install elm/url"
                 ]
                     |> List.map Pages.Script.log
                     |> doAll

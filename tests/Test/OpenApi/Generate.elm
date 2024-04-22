@@ -8,6 +8,7 @@ import Fuzz
 import Json.Decode
 import OpenApi
 import OpenApi.Generate
+import String.Extra
 import Test exposing (Test)
 
 
@@ -58,25 +59,55 @@ suite =
 
                     Ok oas ->
                         let
-                            moduleName : String
-                            moduleName =
+                            namespace : List String
+                            namespace =
                                 OpenApi.Generate.sanitizeModuleName inputName
-                                    |> Maybe.withDefault "Api"
+                                    |> Maybe.withDefault "Carl"
+                                    |> List.singleton
 
-                            genFile : Result Message ( Elm.File, List Message )
-                            genFile =
-                                OpenApi.Generate.file
-                                    { namespace = moduleName
+                            genFiles : Result Message ( List Elm.File, List Message )
+                            genFiles =
+                                OpenApi.Generate.files
+                                    { namespace = namespace
                                     , generateTodos = False
                                     }
                                     oas
                         in
-                        case genFile of
+                        case genFiles of
                             Err _ ->
                                 Expect.fail "Unexpected generation error"
 
-                            Ok ( file, _ ) ->
-                                Expect.equal file.path (moduleName ++ ".elm")
+                            Ok ( files, _ ) ->
+                                case files of
+                                    [] ->
+                                        Expect.fail "Expected to generate 2 files but found none"
+
+                                    [ file ] ->
+                                        Expect.fail ("Expected to generate 2 files but found 1: " ++ file.path)
+
+                                    [ apiFile, helperFile ] ->
+                                        let
+                                            apiPath : String
+                                            apiPath =
+                                                String.join "/" namespace ++ "/Api.elm"
+                                        in
+                                        if apiFile.path == apiPath then
+                                            let
+                                                helperPath : String
+                                                helperPath =
+                                                    String.join "/" namespace ++ "/OpenApi.elm"
+                                            in
+                                            if helperFile.path == helperPath then
+                                                Expect.pass
+
+                                            else
+                                                Expect.fail ("Expected to generate a file with the path " ++ helperPath ++ " but I found " ++ helperFile.path)
+
+                                        else
+                                            Expect.fail ("Expected to generate a file with the path " ++ apiPath ++ " but I found " ++ apiFile.path)
+
+                                    _ :: _ :: extraFiles ->
+                                        Expect.fail ("Expected to generate 2 files but found extra: " ++ String.Extra.toSentenceOxford (List.map .path extraFiles))
 
         -- Known bug: https://github.com/wolfadex/elm-open-api-cli/issues/48
         , Test.test "The OAS title: service API (params in:body)" <|

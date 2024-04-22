@@ -1,10 +1,11 @@
-
 # Using the CLI
 
 ### Install the CLI:
+
 - `npm install -D elm-open-api`
 
 ### Run the CLI:
+
 - `npx elm-open-api ./page/to/oas.json`
 
 ### Arguments you can pass:
@@ -14,3 +15,87 @@
 - `[--output-dir <output dir>]`: The directory to output to. Defaults to `generated/`.
 - `[--module-name <module name>]`: The Elm module name. Default to `<OAS info.title>`.
 - `[--generateTodos <generateTodos>]`: Whether to generate TODOs for unimplemented endpoints, or fail when something unexpected is encountered. Defaults to `no`. To generate `Debug.todo ""` instead of failing use one of: `yes`, `y`, `true`.
+
+## Example outputs:
+
+Assume we have an OAS file named `my-cool-company-oas.json` and it has a field `"title": "My Coool Company"` and we run the CLI like so
+
+```sh
+npx elm-open-api ./my-cool-company-oas.json
+```
+
+then we'll output like
+
+```sh
+🎉 SDK generated:
+
+    generated/MyCooolCompany/Api.elm
+    generated/MyCooolCompany/OpenApi.elm
+
+
+You'll also need elm/http and elm/json installed. Try running:
+
+    elm install elm/http
+    elm install elm/json
+
+
+and possibly need elm/bytes and elm/url installed. If that's the case, try running:
+    elm install elm/bytes
+    elm install elm/url
+```
+
+That's nice, but maybe we want to have a less specific module name. We could instead run
+
+```sh
+npx elm-open-api ./my-cool-company-oas.json --module-name="My.Comp"
+```
+
+which would result in
+
+```sh
+🎉 SDK generated:
+
+    generated/My/Comp/Api.elm
+    generated/My/Comp/OpenApi.elm
+
+
+You'll also need elm/http and elm/json installed. Try running:
+
+    elm install elm/http
+    elm install elm/json
+
+
+and possibly need elm/bytes and elm/url installed. If that's the case, try running:
+    elm install elm/bytes
+    elm install elm/url
+```
+
+Notice the new path (and Elm module name) for the `Api.elm` and `OpenApi.elm` files.
+
+Alternatively, maybe we have a different directory naming scheme for our project. We could do
+
+```sh
+npx elm-open-api ./my-cool-company-oas.json --output-dir="src"
+```
+
+which gives us
+
+```sh
+🎉 SDK generated:
+
+    src/MyCooolCompany/Api.elm
+    src/MyCooolCompany/OpenApi.elm
+
+
+You'll also need elm/http and elm/json installed. Try running:
+
+    elm install elm/http
+    elm install elm/json
+
+
+and possibly need elm/bytes and elm/url installed. If that's the case, try running:
+    elm install elm/bytes
+    elm install elm/url
+```
+
+This time only the root directory has changed.

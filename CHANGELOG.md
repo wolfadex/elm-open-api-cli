@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [unreleased]
+
+### Added
+
+- Included `elm/url` in the possible dependencies list. ✨ [James Robb](https://github.com/jamesrweb)
+
+### Changed
+
+- Now generates 2 files: `<namespace>/Api.elm` and `<namespace>/OpenApi.elm`, which resolves [issue #81](https://github.com/wolfadex/elm-open-api-cli/issues/81)
+
 ## [0.3.0] - 2024-04-21
 
 ### Added

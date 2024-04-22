@@ -141,23 +141,13 @@ generateFileFromOpenApiSpec config apiSpec =
                         |> OpenApi.Generate.sanitizeModuleName
                         |> Maybe.withDefault "Api"
 
-        filePath : String
-        filePath =
-            config.outputDirectory
-                ++ "/"
-                ++ (moduleName
-                        |> String.split "."
-                        |> String.join "/"
-                   )
-                ++ ".elm"
-
         generateTodos : Bool
         generateTodos =
             List.member
                 (String.toLower <| Maybe.withDefault "no" config.generateTodos)
                 [ "y", "yes", "true" ]
     in
-    OpenApi.Generate.file
+    OpenApi.Generate.files
         { namespace = moduleName
         , generateTodos = generateTodos
         }
@@ -173,31 +163,40 @@ generateFileFromOpenApiSpec config apiSpec =
                     |> BackendTask.map (\_ -> decls)
             )
         |> BackendTask.andThen
-            (\{ contents } ->
-                let
-                    outputPath : String
-                    outputPath =
-                        filePath
-                            |> String.split "/"
-                            |> UrlPath.join
-                            |> UrlPath.toRelative
-                in
-                Pages.Script.writeFile
-                    { path = outputPath
-                    , body = contents
-                    }
-                    |> BackendTask.mapError
-                        (\error ->
-                            case error.recoverable of
-                                Pages.Script.FileWriteError ->
-                                    FatalError.fromString <|
-                                        Ansi.Color.fontColor Ansi.Color.brightRed <|
-                                            "Uh oh! Failed to write file"
-                        )
-                    |> BackendTask.map (\_ -> outputPath)
+            (List.map
+                (\file ->
+                    let
+                        filePath : String
+                        filePath =
+                            config.outputDirectory
+                                ++ "/"
+                                ++ file.path
+
+                        outputPath : String
+                        outputPath =
+                            filePath
+                                |> String.split "/"
+                                |> UrlPath.join
+                                |> UrlPath.toRelative
+                    in
+                    Pages.Script.writeFile
+                        { path = outputPath
+                        , body = file.contents
+                        }
+                        |> BackendTask.mapError
+                            (\error ->
+                                case error.recoverable of
+                                    Pages.Script.FileWriteError ->
+                                        FatalError.fromString <|
+                                            Ansi.Color.fontColor Ansi.Color.brightRed <|
+                                                "Uh oh! Failed to write file"
+                            )
+                        |> BackendTask.map (\_ -> outputPath)
+                )
+                >> BackendTask.combine
             )
         |> BackendTask.andThen
-            (\outputPath ->
+            (\outputPaths ->
                 let
                     indentBy : Int -> String -> String
                     indentBy amount input =
@@ -220,22 +219,26 @@ generateFileFromOpenApiSpec config apiSpec =
                             , url = "https://package.elm-lang.org/packages/" ++ dependency ++ "/latest/"
                             }
                 in
-                [ ""
-                , "🎉 SDK generated:"
-                , ""
-                , indentBy 4 outputPath
-                , ""
-                , ""
-                , "You'll also need " ++ String.Extra.toSentenceOxford requiredLinks ++ " installed. Try running:"
-                , ""
-                , indentBy 4 "elm install elm/http"
-                , indentBy 4 "elm install elm/json"
-                , ""
-                , ""
-                , "and possibly need " ++ String.Extra.toSentenceOxford optionalLinks ++ " installed. If that's the case, try running:"
-                , indentBy 4 "elm install elm/bytes"
-                , indentBy 4 "elm install elm/url"
+                [ [ ""
+                  , "🎉 SDK generated:"
+                  , ""
+                  ]
+                , outputPaths
+                    |> List.map (indentBy 4)
+                , [ ""
+                  , ""
+                  , "You'll also need " ++ String.Extra.toSentenceOxford requiredLinks ++ " installed. Try running:"
+                  , ""
+                  , indentBy 4 "elm install elm/http"
+                  , indentBy 4 "elm install elm/json"
+                  , ""
+                  , ""
+                  , "and possibly need " ++ String.Extra.toSentenceOxford optionalLinks ++ " installed. If that's the case, try running:"
+                  , indentBy 4 "elm install elm/bytes"
+                  , indentBy 4 "elm install elm/url"
+                  ]
                 ]
+                    |> List.concat
                     |> List.map Pages.Script.log
                     |> doAll
             )

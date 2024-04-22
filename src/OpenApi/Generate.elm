@@ -1,7 +1,7 @@
 module OpenApi.Generate exposing
     ( ContentSchema(..)
     , Mime
-    , file
+    , files
     , sanitizeModuleName
     )
 
@@ -67,20 +67,10 @@ type alias AuthorizationInfo =
     }
 
 
-file : { namespace : String, generateTodos : Bool } -> OpenApi.OpenApi -> Result Message ( Elm.File, List Message )
-file { namespace, generateTodos } apiSpec =
+files : { namespace : String, generateTodos : Bool } -> OpenApi.OpenApi -> Result Message ( List Elm.File, List Message )
+files { namespace, generateTodos } apiSpec =
     CliMonad.combine
         [ pathDeclarations
-        , CliMonad.succeed
-            [ decodeOptionalField.declaration
-            , responseToResult.declaration
-            , customHttpError
-            , expectJsonCustom.declaration
-            , jsonResolverCustom.declaration
-            , whateverResolver.declaration
-            , jsonDecodeAndMap
-            , nullableType
-            ]
         , componentDeclarations
         , responsesDeclarations
         , requestBodiesDeclarations
@@ -92,33 +82,132 @@ file { namespace, generateTodos } apiSpec =
             }
         |> Result.map
             (\( decls, warnings ) ->
-                ( Elm.fileWith [ namespace ]
-                    { docs =
-                        List.sortBy
-                            (\{ group } ->
-                                case group of
-                                    Just "Request functions" ->
-                                        1
+                ( [ Elm.fileWith [ namespace ]
+                        { docs =
+                            List.sortBy
+                                (\{ group } ->
+                                    case group of
+                                        Just "Request functions" ->
+                                            1
 
-                                    Just "Types" ->
-                                        2
+                                        Just "Types" ->
+                                            2
 
-                                    Just "Encoders" ->
-                                        3
+                                        Just "Encoders" ->
+                                            3
 
-                                    Just "Decoders" ->
-                                        4
+                                        Just "Decoders" ->
+                                            4
 
-                                    _ ->
-                                        5
-                            )
-                            >> List.map Elm.docs
-                    , aliases = []
-                    }
-                    decls
+                                        _ ->
+                                            5
+                                )
+                                >> formatModuleDocs
+                        , aliases = []
+                        }
+                        decls
+                  , Elm.fileWith [ "OpenApi" ]
+                        { docs =
+                            List.sortBy
+                                (\{ group } ->
+                                    case group of
+                                        Just "Http" ->
+                                            1
+
+                                        Just "Json" ->
+                                            2
+
+                                        Just "Open API" ->
+                                            3
+
+                                        _ ->
+                                            4
+                                )
+                                >> formatModuleDocs
+                        , aliases = []
+                        }
+                        [ expectJsonCustom.declaration
+                            |> Elm.exposeWith
+                                { exposeConstructor = False
+                                , group = Just "Http"
+                                }
+                        , jsonResolverCustom.declaration
+                            |> Elm.exposeWith
+                                { exposeConstructor = False
+                                , group = Just "Http"
+                                }
+                        , decodeOptionalField.declaration
+                            |> Elm.withDocumentation """{-| Decode an optional field
+
+    decodeString (decodeOptionalField "x" int) "{ "x": 3 }"
+    --> Ok (Just 3)
+
+    decodeString (decodeOptionalField "x" int) "{ "x": true }"
+    --> Err ...
+
+    decodeString (decodeOptionalField "x" int) "{ "y": 4 }"
+    --> Ok Nothing
+
+-}"""
+                            |> Elm.exposeWith
+                                { exposeConstructor = False
+                                , group = Just "Json"
+                                }
+                        , jsonDecodeAndMap
+                            |> Elm.withDocumentation "Chain JSON decoders, when `Json.Decode.map8` isn't enough."
+                            |> Elm.exposeWith
+                                { exposeConstructor = False
+                                , group = Just "Json"
+                                }
+                        , customHttpError
+                            |> Elm.exposeWith
+                                { exposeConstructor = True
+                                , group = Just "Open API"
+                                }
+                        , nullableType
+                            |> Elm.exposeWith
+                                { exposeConstructor = True
+                                , group = Just "Open API"
+                                }
+                        ]
+                  ]
                 , warnings
                 )
             )
+
+
+formatModuleDocs : List { group : Maybe String, members : List String } -> List String
+formatModuleDocs =
+    List.map
+        (\{ group, members } ->
+            "## "
+                ++ Maybe.withDefault "Other" group
+                ++ "\n\n\n"
+                ++ (members
+                        |> List.sort
+                        |> List.foldl
+                            (\member memberLines ->
+                                case memberLines of
+                                    [] ->
+                                        [ [ member ] ]
+
+                                    memberLine :: restOfLines ->
+                                        let
+                                            groupSize =
+                                                String.length (String.join ", " memberLine)
+                                        in
+                                        if String.length member + groupSize < 105 then
+                                            (member :: memberLine) :: restOfLines
+
+                                        else
+                                            [ member ] :: memberLines
+                            )
+                            []
+                        |> List.map (\memberLine -> "@docs " ++ String.join ", " (List.reverse memberLine))
+                        |> List.reverse
+                        |> String.join "\n"
+                   )
+        )
 
 
 pathDeclarations : CliMonad (List Elm.Declaration)
@@ -743,7 +832,7 @@ toRequestFunctions method pathUrl operation =
 
 customErrorAnnotation : Elm.Annotation.Annotation -> Elm.Annotation.Annotation -> Elm.Annotation.Annotation
 customErrorAnnotation errorTypeAnnotation bodyTypeAnnotation =
-    Elm.Annotation.namedWith []
+    Elm.Annotation.namedWith [ "OpenApi" ]
         "Error"
         [ errorTypeAnnotation
         , bodyTypeAnnotation
@@ -1147,7 +1236,7 @@ paramToString type_ =
                                     CliMonad.fail "Nullable alternative"
 
                                 else
-                                    Elm.Case.branch1 (name ++ "_" ++ alternative.name) ( "alternative", annotation ) toString
+                                    Elm.Case.branch1 (CliMonad.toVariantName name alternative.name) ( "alternative", annotation ) toString
                                         |> CliMonad.succeed
                             )
                             (paramToString alternative.type_)
@@ -1276,7 +1365,7 @@ operationToTypesExpectAndResolver functionName operation =
 
         expectJsonBetter : Elm.Expression -> Elm.Expression -> Elm.Expression -> Elm.Expression
         expectJsonBetter errorDecoders successDecoder toMsg =
-            expectJsonCustom.call toMsg errorDecoders successDecoder
+            expectJsonCustom.callFrom [ "OpenApi" ] toMsg errorDecoders successDecoder
     in
     CliMonad.succeed responses
         |> CliMonad.stepOrFail
@@ -1455,7 +1544,7 @@ operationToTypesExpectAndResolver functionName operation =
                                                     , errorTypeDeclaration = errorTypeDeclaration_
                                                     , errorTypeAnnotation = errorTypeAnnotation
                                                     , toExpect = expectJsonBetter errorDecoders_ successDecoder
-                                                    , resolver = jsonResolverCustom.call errorDecoders_ successDecoder
+                                                    , resolver = jsonResolverCustom.callFrom [ "OpenApi" ] errorDecoders_ successDecoder
                                                     }
                                                 )
                                                 (typeToDecoder type_)
@@ -1463,42 +1552,252 @@ operationToTypesExpectAndResolver functionName operation =
                                                 errorTypeDeclaration
 
                                         StringContent _ ->
-                                            CliMonad.map
-                                                (\( errorTypeDeclaration_, errorTypeAnnotation ) ->
+                                            CliMonad.map2
+                                                (\errorDecoders_ ( errorTypeDeclaration_, errorTypeAnnotation ) ->
                                                     { successType = String
                                                     , bodyTypeAnnotation = Elm.Annotation.string
                                                     , errorTypeDeclaration = errorTypeDeclaration_
                                                     , errorTypeAnnotation = errorTypeAnnotation
-                                                    , toExpect = Gen.Http.call_.expectString
-                                                    , resolver = Gen.Http.stringResolver responseToResult.call
+                                                    , toExpect = expectJsonBetter errorDecoders_ Gen.Json.Decode.string
+                                                    , resolver =
+                                                        Gen.Http.stringResolver
+                                                            (\resp ->
+                                                                Elm.Case.custom
+                                                                    resp
+                                                                    (Elm.Annotation.namedWith [ "Http" ] "Response" [ Elm.Annotation.var "body" ])
+                                                                    [ Elm.Case.branch1
+                                                                        "BadUrl_"
+                                                                        ( "string", Elm.Annotation.string )
+                                                                        (\url ->
+                                                                            Gen.Result.make_.err
+                                                                                (Elm.apply
+                                                                                    (Elm.value
+                                                                                        { importFrom = [ "OpenApi" ]
+                                                                                        , name = "BadUrl"
+                                                                                        , annotation = Nothing
+                                                                                        }
+                                                                                    )
+                                                                                    [ url ]
+                                                                                )
+                                                                        )
+                                                                    , Elm.Case.branch0
+                                                                        "Timeout_"
+                                                                        (Gen.Result.make_.err
+                                                                            (Elm.value
+                                                                                { importFrom = [ "OpenApi" ]
+                                                                                , name = "Timeout"
+                                                                                , annotation = Nothing
+                                                                                }
+                                                                            )
+                                                                        )
+                                                                    , Elm.Case.branch0
+                                                                        "NetworkError_"
+                                                                        (Gen.Result.make_.err
+                                                                            (Elm.value
+                                                                                { importFrom = [ "OpenApi" ]
+                                                                                , name = "NetworkError"
+                                                                                , annotation = Nothing
+                                                                                }
+                                                                            )
+                                                                        )
+                                                                    , Elm.Case.branch2 "BadStatus_"
+                                                                        ( "metadata", Gen.Http.annotation_.metadata )
+                                                                        ( "body", Elm.Annotation.string )
+                                                                        (\metadata body ->
+                                                                            Gen.Maybe.caseOf_.maybe
+                                                                                (Gen.Dict.call_.get (Gen.String.call_.fromInt (Elm.get "statusCode" metadata)) errorDecoders_)
+                                                                                { nothing =
+                                                                                    Gen.Result.make_.err
+                                                                                        (Elm.apply
+                                                                                            (Elm.value
+                                                                                                { importFrom = [ "OpenApi" ]
+                                                                                                , name = "UnknownBadStatus"
+                                                                                                , annotation = Nothing
+                                                                                                }
+                                                                                            )
+                                                                                            [ metadata, body ]
+                                                                                        )
+                                                                                , just =
+                                                                                    \errorDecoder ->
+                                                                                        Gen.Result.caseOf_.result
+                                                                                            (Gen.Json.Decode.call_.decodeString errorDecoder body)
+                                                                                            { ok =
+                                                                                                \x ->
+                                                                                                    Gen.Result.make_.err
+                                                                                                        (Elm.apply
+                                                                                                            (Elm.value
+                                                                                                                { importFrom = [ "OpenApi" ]
+                                                                                                                , name = "KnownBadStatus"
+                                                                                                                , annotation = Nothing
+                                                                                                                }
+                                                                                                            )
+                                                                                                            [ Elm.get "statusCode" metadata, x ]
+                                                                                                        )
+                                                                                            , err =
+                                                                                                \_ ->
+                                                                                                    Gen.Result.make_.err
+                                                                                                        (Elm.apply
+                                                                                                            (Elm.value
+                                                                                                                { importFrom = [ "OpenApi" ]
+                                                                                                                , name = "BadErrorBody"
+                                                                                                                , annotation = Nothing
+                                                                                                                }
+                                                                                                            )
+                                                                                                            [ metadata, body ]
+                                                                                                        )
+                                                                                            }
+                                                                                }
+                                                                        )
+                                                                    , Elm.Case.branch2 "GoodStatus_"
+                                                                        ( "metadata", Gen.Http.annotation_.metadata )
+                                                                        ( "body", Elm.Annotation.string )
+                                                                        (\metadata body ->
+                                                                            Gen.Result.caseOf_.result
+                                                                                (Gen.Json.Decode.call_.decodeString Gen.Json.Decode.string body)
+                                                                                { err =
+                                                                                    \_ ->
+                                                                                        Gen.Result.make_.err
+                                                                                            (Elm.apply
+                                                                                                (Elm.value
+                                                                                                    { importFrom = [ "OpenApi" ]
+                                                                                                    , name = "BadBody"
+                                                                                                    , annotation = Nothing
+                                                                                                    }
+                                                                                                )
+                                                                                                [ metadata, body ]
+                                                                                            )
+                                                                                , ok = \a -> Gen.Result.make_.ok a
+                                                                                }
+                                                                        )
+                                                                    ]
+                                                            )
                                                     }
                                                 )
+                                                errorDecoders
                                                 errorTypeDeclaration
 
                                         BytesContent _ ->
-                                            CliMonad.map
-                                                (\( errorTypeDeclaration_, errorTypeAnnotation ) ->
+                                            CliMonad.map2
+                                                (\errorDecoders_ ( errorTypeDeclaration_, errorTypeAnnotation ) ->
                                                     { successType = Bytes
                                                     , bodyTypeAnnotation = Gen.Bytes.annotation_.bytes
                                                     , errorTypeDeclaration = errorTypeDeclaration_
                                                     , errorTypeAnnotation = errorTypeAnnotation
                                                     , toExpect = \toMsg -> Gen.Http.call_.expectBytes toMsg Gen.Basics.values_.identity
-                                                    , resolver = Gen.Http.bytesResolver responseToResult.call
+                                                    , resolver =
+                                                        Gen.Http.bytesResolver
+                                                            (\resp ->
+                                                                Elm.Case.custom
+                                                                    resp
+                                                                    (Elm.Annotation.namedWith [ "Http" ] "Response" [ Elm.Annotation.var "body" ])
+                                                                    [ Elm.Case.branch1
+                                                                        "BadUrl_"
+                                                                        ( "string", Elm.Annotation.string )
+                                                                        (\url ->
+                                                                            Gen.Result.make_.err
+                                                                                (Elm.apply
+                                                                                    (Elm.value
+                                                                                        { importFrom = [ "OpenApi" ]
+                                                                                        , name = "BadUrl"
+                                                                                        , annotation = Nothing
+                                                                                        }
+                                                                                    )
+                                                                                    [ url ]
+                                                                                )
+                                                                        )
+                                                                    , Elm.Case.branch0
+                                                                        "Timeout_"
+                                                                        (Gen.Result.make_.err
+                                                                            (Elm.value
+                                                                                { importFrom = [ "OpenApi" ]
+                                                                                , name = "Timeout"
+                                                                                , annotation = Nothing
+                                                                                }
+                                                                            )
+                                                                        )
+                                                                    , Elm.Case.branch0
+                                                                        "NetworkError_"
+                                                                        (Gen.Result.make_.err
+                                                                            (Elm.value
+                                                                                { importFrom = [ "OpenApi" ]
+                                                                                , name = "NetworkError"
+                                                                                , annotation = Nothing
+                                                                                }
+                                                                            )
+                                                                        )
+                                                                    , Elm.Case.branch2 "BadStatus_"
+                                                                        ( "metadata", Gen.Http.annotation_.metadata )
+                                                                        ( "body", Elm.Annotation.string )
+                                                                        (\metadata body ->
+                                                                            Gen.Maybe.caseOf_.maybe
+                                                                                (Gen.Dict.call_.get (Gen.String.call_.fromInt (Elm.get "statusCode" metadata)) errorDecoders_)
+                                                                                { nothing =
+                                                                                    Gen.Result.make_.err
+                                                                                        (Elm.apply
+                                                                                            (Elm.value
+                                                                                                { importFrom = [ "OpenApi" ]
+                                                                                                , name = "UnknownBadStatus"
+                                                                                                , annotation = Nothing
+                                                                                                }
+                                                                                            )
+                                                                                            [ metadata, body ]
+                                                                                        )
+                                                                                , just =
+                                                                                    \errorDecoder ->
+                                                                                        Gen.Result.caseOf_.result
+                                                                                            (Gen.Json.Decode.call_.decodeString errorDecoder body)
+                                                                                            { ok =
+                                                                                                \x ->
+                                                                                                    Gen.Result.make_.err
+                                                                                                        (Elm.apply
+                                                                                                            (Elm.value
+                                                                                                                { importFrom = [ "OpenApi" ]
+                                                                                                                , name = "KnownBadStatus"
+                                                                                                                , annotation = Nothing
+                                                                                                                }
+                                                                                                            )
+                                                                                                            [ Elm.get "statusCode" metadata, x ]
+                                                                                                        )
+                                                                                            , err =
+                                                                                                \_ ->
+                                                                                                    Gen.Result.make_.err
+                                                                                                        (Elm.apply
+                                                                                                            (Elm.value
+                                                                                                                { importFrom = [ "OpenApi" ]
+                                                                                                                , name = "BadErrorBody"
+                                                                                                                , annotation = Nothing
+                                                                                                                }
+                                                                                                            )
+                                                                                                            [ metadata, body ]
+                                                                                                        )
+                                                                                            }
+                                                                                }
+                                                                        )
+                                                                    , Elm.Case.branch2 "GoodStatus_"
+                                                                        ( "_", Gen.Http.annotation_.metadata )
+                                                                        ( "body", Elm.Annotation.string )
+                                                                        (\_ body ->
+                                                                            Gen.Result.make_.ok body
+                                                                        )
+                                                                    ]
+                                                            )
                                                     }
                                                 )
+                                                errorDecoders
                                                 errorTypeDeclaration
 
                                         EmptyContent ->
-                                            CliMonad.map
-                                                (\( errorTypeDeclaration_, errorTypeAnnotation ) ->
+                                            CliMonad.map2
+                                                (\errorDecoders_ ( errorTypeDeclaration_, errorTypeAnnotation ) ->
                                                     { successType = Unit
-                                                    , bodyTypeAnnotation = Elm.Annotation.unit
+                                                    , bodyTypeAnnotation = Elm.Annotation.string
                                                     , errorTypeDeclaration = errorTypeDeclaration_
                                                     , errorTypeAnnotation = errorTypeAnnotation
-                                                    , toExpect = Gen.Http.call_.expectWhatever
-                                                    , resolver = whateverResolver.call []
+                                                    , toExpect = expectJsonBetter errorDecoders_ (Gen.Json.Decode.succeed Elm.unit)
+                                                    , resolver = jsonResolverCustom.callFrom [ "OpenApi" ] errorDecoders_ (Gen.Json.Decode.succeed Elm.unit)
                                                     }
                                                 )
+                                                errorDecoders
                                                 errorTypeDeclaration
                                 )
 
@@ -1521,7 +1820,7 @@ operationToTypesExpectAndResolver functionName operation =
                                                 , errorTypeDeclaration = errorTypeDeclaration_
                                                 , errorTypeAnnotation = errorTypeAnnotation
                                                 , toExpect = expectJsonBetter errorDecoders_ (Elm.val ("decode" ++ typeName))
-                                                , resolver = jsonResolverCustom.call errorDecoders_ <| Elm.val ("decode" ++ typeName)
+                                                , resolver = jsonResolverCustom.callFrom [ "OpenApi" ] errorDecoders_ <| Elm.val ("decode" ++ typeName)
                                                 }
                                             )
                                             errorDecoders
@@ -1541,10 +1840,6 @@ customHttpError =
         , Elm.variantWith "BadErrorBody" [ Gen.Http.annotation_.metadata, Elm.Annotation.var "body" ]
         , Elm.variantWith "BadBody" [ Gen.Http.annotation_.metadata, Elm.Annotation.var "body" ]
         ]
-        |> Elm.exposeWith
-            { exposeConstructor = True
-            , group = Just "Types"
-            }
 
 
 expectJsonCustom :
@@ -1697,28 +1992,6 @@ jsonResolverCustom =
 --                 )
 
 
-whateverResolver :
-    { declaration : Elm.Declaration
-    , call : List Elm.Expression -> Elm.Expression
-    , callFrom : List String -> List Elm.Expression -> Elm.Expression
-    , value : List String -> Elm.Expression
-    }
-whateverResolver =
-    Elm.Declare.function "whateverResolver"
-        []
-    <|
-        \_ ->
-            Gen.Http.stringResolver
-                (\response ->
-                    response
-                        |> responseToResult.call
-                        |> Gen.Result.map
-                            (\_ -> Elm.unit)
-                )
-                |> Elm.withType
-                    (Gen.Http.annotation_.resolver Gen.Http.annotation_.error Elm.Annotation.unit)
-
-
 isSuccessResponseStatus : String -> Bool
 isSuccessResponseStatus status =
     String.startsWith "2" status || String.startsWith "3" status
@@ -1744,10 +2017,6 @@ nullableType =
         [ Elm.variant "Null"
         , Elm.variantWith "Present" [ Elm.Annotation.var "value" ]
         ]
-        |> Elm.exposeWith
-            { exposeConstructor = True
-            , group = Just "Types"
-            }
 
 
 schemaToEncoder : Json.Schema.Definitions.Schema -> CliMonad (Elm.Expression -> Elm.Expression)
@@ -1832,7 +2101,7 @@ typeToEncoder type_ =
                     (\encoder nullableValue ->
                         Elm.Case.custom
                             nullableValue
-                            (Elm.Annotation.namedWith [] "Nullable" [ Elm.Annotation.var "value" ])
+                            (Elm.Annotation.namedWith [ "OpenApi" ] "Nullable" [ Elm.Annotation.var "value" ])
                             [ Elm.Case.branch0 "Null" Gen.Json.Encode.null
                             , Elm.Case.branch1 "Present"
                                 ( "value", Elm.Annotation.var "value" )
@@ -1852,7 +2121,7 @@ typeToEncoder type_ =
                     (\variant ->
                         CliMonad.map2
                             (\ann variantEncoder ->
-                                Elm.Case.branch1 (oneOfName ++ "_" ++ variant.name)
+                                Elm.Case.branch1 (CliMonad.toVariantName oneOfName variant.name)
                                     ( "content", ann )
                                     variantEncoder
                             )
@@ -1895,12 +2164,17 @@ typeToDecoder type_ =
                         (\internalDecoder prevExpr ->
                             Elm.Op.pipe
                                 (Elm.apply
-                                    (Elm.val "jsonDecodeAndMap")
+                                    (Elm.value
+                                        { importFrom = [ "OpenApi" ]
+                                        , name = "jsonDecodeAndMap"
+                                        , annotation = Nothing
+                                        }
+                                    )
                                     [ if field.required then
                                         Gen.Json.Decode.field key internalDecoder
 
                                       else
-                                        decodeOptionalField.call (Elm.string key) internalDecoder
+                                        decodeOptionalField.callFrom [ "OpenApi" ] (Elm.string key) internalDecoder
                                     ]
                                 )
                                 prevExpr
@@ -1952,9 +2226,20 @@ typeToDecoder type_ =
                 (\decoder ->
                     Gen.Json.Decode.oneOf
                         [ Gen.Json.Decode.call_.map
-                            (Elm.val "Present")
+                            (Elm.value
+                                { importFrom = [ "OpenApi" ]
+                                , name = "Present"
+                                , annotation = Nothing
+                                }
+                            )
                             decoder
-                        , Gen.Json.Decode.null (Elm.val "Null")
+                        , Gen.Json.Decode.null
+                            (Elm.value
+                                { importFrom = [ "OpenApi" ]
+                                , name = "Null"
+                                , annotation = Nothing
+                                }
+                            )
                         ]
                 )
                 (typeToDecoder t)
@@ -1970,7 +2255,7 @@ typeToDecoder type_ =
                             |> CliMonad.map
                                 (Gen.Json.Decode.call_.map
                                     (Elm.val
-                                        (oneOfName ++ "_" ++ variant.name)
+                                        (CliMonad.toVariantName oneOfName variant.name)
                                     )
                                 )
                     )
@@ -2071,52 +2356,6 @@ decodeOptionalField =
                             (Gen.Json.Decode.succeed Gen.Maybe.make_.nothing)
                     )
                 |> Elm.withType resultAnnotation
-
-
-responseToResult :
-    { declaration : Elm.Declaration
-    , call : Elm.Expression -> Elm.Expression
-    , callFrom : List String -> Elm.Expression -> Elm.Expression
-    , value : List String -> Elm.Expression
-    }
-responseToResult =
-    Elm.Declare.fn "responseToResult"
-        ( "response"
-        , Just <|
-            Gen.Http.annotation_.response
-                (Elm.Annotation.var "body")
-        )
-    <|
-        \response ->
-            Elm.Case.custom
-                response
-                (Elm.Annotation.namedWith [ "Http" ] "Response" [ Elm.Annotation.var "body" ])
-                [ Elm.Case.branch1
-                    "BadUrl_"
-                    ( "string", Elm.Annotation.string )
-                    (\url -> Gen.Result.make_.err <| Gen.Http.make_.badUrl url)
-                , Elm.Case.branch0
-                    "Timeout_"
-                    (Gen.Result.make_.err Gen.Http.make_.timeout)
-                , Elm.Case.branch0
-                    "NetworkError_"
-                    (Gen.Result.make_.err Gen.Http.make_.networkError)
-                , Elm.Case.branch2
-                    "BadStatus_"
-                    ( "metadata", Elm.Annotation.namedWith [ "Http" ] "Metadata" [] )
-                    ( "_", Elm.Annotation.var "body" )
-                    (\metadata _ -> Gen.Result.make_.err <| Gen.Http.make_.badStatus (Elm.get "statusCode" metadata))
-                , Elm.Case.branch2
-                    "GoodStatus_"
-                    ( "_", Elm.Annotation.namedWith [ "Http" ] "Metadata" [] )
-                    ( "body", Elm.Annotation.var "body" )
-                    (\_ body -> Gen.Result.make_.ok body)
-                ]
-                |> Elm.withType
-                    (Gen.Result.annotation_.result
-                        Gen.Http.annotation_.error
-                        (Elm.Annotation.var "body")
-                    )
 
 
 responseToSchema : OpenApi.Response.Response -> CliMonad Json.Schema.Definitions.Schema

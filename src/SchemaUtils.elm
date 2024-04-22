@@ -1,4 +1,8 @@
-module SchemaUtils exposing (getAlias, schemaToAnnotation, schemaToType)
+module SchemaUtils exposing
+    ( getAlias
+    , schemaToAnnotation
+    , schemaToType
+    )
 
 import CliMonad exposing (CliMonad)
 import Common exposing (Field, Type(..), TypeName, typifyName)
@@ -271,7 +275,12 @@ oneOfType types =
                             names =
                                 List.map .name sortedVariants
                         in
-                        OneOf (String.join "Or" names) sortedVariants
+                        OneOf
+                            (names
+                                |> List.map CliMonad.fixOneOfName
+                                |> String.join "_Or_"
+                            )
+                            sortedVariants
             )
 
 

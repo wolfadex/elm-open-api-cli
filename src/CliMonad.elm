@@ -9,6 +9,7 @@ module CliMonad exposing
     , combineMap
     , errorToWarning
     , fail
+    , fixOneOfName
     , fromApiSpec
     , map
     , map2
@@ -18,6 +19,7 @@ module CliMonad exposing
     , run
     , stepOrFail
     , succeed
+    , toVariantName
     , todo
     , todoWithDefault
     , typeToAnnotation
@@ -214,7 +216,7 @@ oneOfDeclaration ( oneOfName, variants ) =
                         let
                             variantName : VariantName
                             variantName =
-                                oneOfName ++ "_" ++ name
+                                toVariantName oneOfName name
                         in
                         Elm.variantWith variantName [ variantAnnotation ]
                     )
@@ -297,7 +299,7 @@ typeToAnnotation type_ =
             typeToAnnotation t
                 |> map
                     (\ann ->
-                        Elm.Annotation.namedWith []
+                        Elm.Annotation.namedWith [ "OpenApi" ]
                             "Nullable"
                             [ ann ]
                     )
@@ -334,10 +336,6 @@ typeToAnnotation type_ =
 
         Unit ->
             succeed Elm.Annotation.unit
-
-
-
---String.split "/"
 
 
 typeToAnnotationMaybe : Type -> CliMonad Elm.Annotation.Annotation
@@ -390,6 +388,21 @@ oneOfAnnotation oneOfName oneOfData =
                 , FastDict.singleton oneOfName oneOfData
                 )
         )
+
+
+{-| When we go from `Elm.Annotation` to `String` it includes the module name if it's an imported type.
+We don't want that for our generated types, so we remove it here.
+-}
+fixOneOfName : String -> String
+fixOneOfName name =
+    name
+        |> String.replace "OpenApi.Nullable" "Nullable"
+        |> String.replace "." ""
+
+
+toVariantName : String -> String -> String
+toVariantName oneOfName variantName =
+    oneOfName ++ "__" ++ fixOneOfName variantName
 
 
 stepOrFail : String -> (a -> Maybe value) -> CliMonad a -> CliMonad value

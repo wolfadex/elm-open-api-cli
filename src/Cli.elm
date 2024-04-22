@@ -17,6 +17,7 @@ import OpenApi
 import OpenApi.Generate
 import OpenApi.Info
 import Pages.Script
+import String.Extra
 import Url
 import UrlPath
 import Yaml.Decode
@@ -197,39 +198,43 @@ generateFileFromOpenApiSpec config apiSpec =
             )
         |> BackendTask.andThen
             (\outputPath ->
+                let
+                    indentBy : Int -> String -> String
+                    indentBy amount input =
+                        String.repeat amount " " ++ input
+
+                    requiredLinks : List String
+                    requiredLinks =
+                        [ "elm/http", "elm/json" ]
+                            |> List.map toElmDependencyLink
+
+                    optionalLinks : List String
+                    optionalLinks =
+                        [ "elm/bytes", "elm/url" ]
+                            |> List.map toElmDependencyLink
+
+                    toElmDependencyLink : String -> String
+                    toElmDependencyLink dependency =
+                        Ansi.link
+                            { text = dependency
+                            , url = "https://package.elm-lang.org/packages/" ++ dependency ++ "/latest/"
+                            }
+                in
                 [ ""
                 , "🎉 SDK generated:"
                 , ""
-                , "    " ++ outputPath
-
-                -- , outputPaths
-                --     |> List.map (\outputPath -> "    " ++ outputPath)
+                , indentBy 4 outputPath
                 , ""
                 , ""
-                , "You'll also need "
-                    ++ Ansi.link
-                        { text = "elm/http"
-                        , url = "https://package.elm-lang.org/packages/elm/http/latest/"
-                        }
-                    ++ " and "
-                    ++ Ansi.link
-                        { text = "elm/json"
-                        , url = "https://package.elm-lang.org/packages/elm/json/latest/"
-                        }
-                    ++ " installed. Try running:"
+                , "You'll also need " ++ String.Extra.toSentenceOxford requiredLinks ++ " installed. Try running:"
                 , ""
-                , "    elm install elm/http"
-                , "    elm install elm/json"
+                , indentBy 4 "elm install elm/http"
+                , indentBy 4 "elm install elm/json"
                 , ""
                 , ""
-                , "and possibly need "
-                    ++ Ansi.link
-                        { text = "elm/bytes"
-                        , url = "https://package.elm-lang.org/packages/elm/bytes/latest/"
-                        }
-                    ++ " installed. Try running:"
-                , ""
-                , "    elm install elm/bytes"
+                , "and possibly need " ++ String.Extra.toSentenceOxford optionalLinks ++ " installed. If that's the case, try running:"
+                , indentBy 4 "elm install elm/bytes"
+                , indentBy 4 "elm install elm/url"
                 ]
                     |> List.map Pages.Script.log
                     |> doAll

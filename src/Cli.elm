@@ -5,10 +5,12 @@ import Ansi.Color
 import BackendTask
 import BackendTask.File
 import BackendTask.Http
+import BackendTask.Stream
 import Cli.Option
 import Cli.OptionsParser
 import Cli.Program
 import CliMonad exposing (Message)
+import Elm
 import FatalError
 import Json.Decode
 import Json.Encode
@@ -69,11 +71,21 @@ run =
                     )
                 |> BackendTask.andThen
                     (generateFileFromOpenApiSpec
-                        { outputDirectory = outputDirectory
-                        , outputModuleName = outputModuleName
+                        { outputModuleName = outputModuleName
                         , generateTodos = generateTodos
                         }
                     )
+                |> BackendTask.andThen
+                    (\( decls, warnings ) ->
+                        warnings
+                            |> List.Extra.gatherEqualsBy .message
+                            |> List.map logWarning
+                            |> BackendTask.doEach
+                            |> BackendTask.map (\_ -> decls)
+                    )
+                |> BackendTask.andThen attemptToFormat
+                |> BackendTask.andThen (writeSdkToDisk outputDirectory)
+                |> BackendTask.andThen printSuccessMessage
         )
 
 
@@ -126,12 +138,11 @@ yamlToJsonDecoder =
 
 
 generateFileFromOpenApiSpec :
-    { outputDirectory : String
-    , outputModuleName : Maybe String
+    { outputModuleName : Maybe String
     , generateTodos : Maybe String
     }
     -> OpenApi.OpenApi
-    -> BackendTask.BackendTask FatalError.FatalError ()
+    -> BackendTask.BackendTask FatalError.FatalError ( List Elm.File, List Message )
 generateFileFromOpenApiSpec config apiSpec =
     let
         moduleName : List String
@@ -162,95 +173,122 @@ generateFileFromOpenApiSpec config apiSpec =
         |> Result.mapError (messageToString >> FatalError.fromString)
         |> BackendTask.fromResult
         |> Pages.Script.Spinner.runTask "Generate Elm modules"
+
+
+{-| Check to see if `elm-format` is available, and if so format the files
+-}
+attemptToFormat : List Elm.File -> BackendTask.BackendTask FatalError.FatalError (List Elm.File)
+attemptToFormat files =
+    Pages.Script.which "elm-format"
         |> BackendTask.andThen
-            (\( decls, warnings ) ->
-                warnings
-                    |> List.Extra.gatherEqualsBy .message
-                    |> List.map logWarning
-                    |> BackendTask.doEach
-                    |> BackendTask.map (\_ -> decls)
+            (\mayebFound ->
+                case mayebFound of
+                    Just _ ->
+                        files
+                            |> List.map
+                                (\file ->
+                                    BackendTask.Stream.fromString file.contents
+                                        |> BackendTask.Stream.pipe (BackendTask.Stream.command "elm-format" [ "--stdin" ])
+                                        |> BackendTask.Stream.read
+                                        |> BackendTask.allowFatal
+                                        |> BackendTask.andThen
+                                            (\formatted ->
+                                                BackendTask.succeed
+                                                    { file
+                                                        | contents = formatted.body
+                                                    }
+                                            )
+                                )
+                            |> BackendTask.combine
+                            |> Pages.Script.Spinner.runTask "Format with elm-format"
+
+                    Nothing ->
+                        BackendTask.succeed files
             )
-        |> BackendTask.andThen
-            (List.map
-                (\file ->
-                    let
-                        filePath : String
-                        filePath =
-                            config.outputDirectory
-                                ++ "/"
-                                ++ file.path
 
-                        outputPath : String
-                        outputPath =
-                            filePath
-                                |> String.split "/"
-                                |> UrlPath.join
-                                |> UrlPath.toRelative
-                    in
-                    Pages.Script.writeFile
-                        { path = outputPath
-                        , body = file.contents
-                        }
-                        |> BackendTask.mapError
-                            (\error ->
-                                case error.recoverable of
-                                    Pages.Script.FileWriteError ->
-                                        FatalError.fromString <|
-                                            Ansi.Color.fontColor Ansi.Color.brightRed <|
-                                                "Uh oh! Failed to write file"
-                            )
-                        |> BackendTask.map (\_ -> outputPath)
-                )
-                >> BackendTask.combine
-                >> Pages.Script.Spinner.runTask "Write SDK to disk"
-            )
-        |> BackendTask.andThen
-            (\outputPaths ->
-                let
-                    indentBy : Int -> String -> String
-                    indentBy amount input =
-                        String.repeat amount " " ++ input
 
-                    requiredLinks : List String
-                    requiredLinks =
-                        [ "elm/http", "elm/json" ]
-                            |> List.map toElmDependencyLink
+writeSdkToDisk : String -> List Elm.File -> BackendTask.BackendTask FatalError.FatalError (List String)
+writeSdkToDisk outputDirectory =
+    List.map
+        (\file ->
+            let
+                filePath : String
+                filePath =
+                    outputDirectory
+                        ++ "/"
+                        ++ file.path
 
-                    optionalLinks : List String
-                    optionalLinks =
-                        [ "elm/bytes", "elm/url" ]
-                            |> List.map toElmDependencyLink
+                outputPath : String
+                outputPath =
+                    filePath
+                        |> String.split "/"
+                        |> UrlPath.join
+                        |> UrlPath.toRelative
+            in
+            Pages.Script.writeFile
+                { path = outputPath
+                , body = file.contents
+                }
+                |> BackendTask.mapError
+                    (\error ->
+                        case error.recoverable of
+                            Pages.Script.FileWriteError ->
+                                FatalError.fromString <|
+                                    Ansi.Color.fontColor Ansi.Color.brightRed <|
+                                        "Uh oh! Failed to write file"
+                    )
+                |> BackendTask.map (\_ -> outputPath)
+        )
+        >> BackendTask.combine
+        >> Pages.Script.Spinner.runTask "Write to disk"
 
-                    toElmDependencyLink : String -> String
-                    toElmDependencyLink dependency =
-                        Ansi.link
-                            { text = dependency
-                            , url = "https://package.elm-lang.org/packages/" ++ dependency ++ "/latest/"
-                            }
-                in
-                [ [ ""
-                  , "🎉 SDK generated:"
-                  , ""
-                  ]
-                , outputPaths
-                    |> List.map (indentBy 4)
-                , [ ""
-                  , ""
-                  , "You'll also need " ++ String.Extra.toSentenceOxford requiredLinks ++ " installed. Try running:"
-                  , ""
-                  , indentBy 4 "elm install elm/http"
-                  , indentBy 4 "elm install elm/json"
-                  , ""
-                  , ""
-                  , "and possibly need " ++ String.Extra.toSentenceOxford optionalLinks ++ " installed. If that's the case, try running:"
-                  , indentBy 4 "elm install elm/bytes"
-                  , indentBy 4 "elm install elm/url"
-                  ]
-                ]
-                    |> List.concat
-                    |> List.map Pages.Script.log
-                    |> BackendTask.doEach
-            )
+
+printSuccessMessage : List String -> BackendTask.BackendTask FatalError.FatalError ()
+printSuccessMessage outputPaths =
+    let
+        indentBy : Int -> String -> String
+        indentBy amount input =
+            String.repeat amount " " ++ input
+
+        requiredLinks : List String
+        requiredLinks =
+            [ "elm/http", "elm/json" ]
+                |> List.map toElmDependencyLink
+
+        optionalLinks : List String
+        optionalLinks =
+            [ "elm/bytes", "elm/url" ]
+                |> List.map toElmDependencyLink
+
+        toElmDependencyLink : String -> String
+        toElmDependencyLink dependency =
+            Ansi.link
+                { text = dependency
+                , url = "https://package.elm-lang.org/packages/" ++ dependency ++ "/latest/"
+                }
+    in
+    [ [ ""
+      , "🎉 SDK generated:"
+      , ""
+      ]
+    , outputPaths
+        |> List.map (indentBy 4)
+    , [ ""
+      , ""
+      , "You'll also need " ++ String.Extra.toSentenceOxford requiredLinks ++ " installed. Try running:"
+      , ""
+      , indentBy 4 "elm install elm/http"
+      , indentBy 4 "elm install elm/json"
+      , ""
+      , ""
+      , "and possibly need " ++ String.Extra.toSentenceOxford optionalLinks ++ " installed. If that's the case, try running:"
+      , indentBy 4 "elm install elm/bytes"
+      , indentBy 4 "elm install elm/url"
+      ]
+    ]
+        |> List.concat
+        |> List.map Pages.Script.log
+        |> BackendTask.doEach
 
 
 messageToString : Message -> String

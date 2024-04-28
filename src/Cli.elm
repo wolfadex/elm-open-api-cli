@@ -160,15 +160,14 @@ generateFileFromOpenApiSpec config apiSpec =
         }
         apiSpec
         |> Result.mapError (messageToString >> FatalError.fromString)
-        |> (BackendTask.fromResult
-                >> Pages.Script.Spinner.runTask "Generate Elm modules"
-           )
+        |> BackendTask.fromResult
+        |> Pages.Script.Spinner.runTask "Generate Elm modules"
         |> BackendTask.andThen
             (\( decls, warnings ) ->
                 warnings
                     |> List.Extra.gatherEqualsBy .message
                     |> List.map logWarning
-                    |> doAll
+                    |> BackendTask.doEach
                     |> BackendTask.map (\_ -> decls)
             )
         |> BackendTask.andThen
@@ -250,18 +249,8 @@ generateFileFromOpenApiSpec config apiSpec =
                 ]
                     |> List.concat
                     |> List.map Pages.Script.log
-                    |> doAll
+                    |> BackendTask.doEach
             )
-
-
-doAll : List (BackendTask.BackendTask error ()) -> BackendTask.BackendTask error ()
-doAll list =
-    case list of
-        [] ->
-            BackendTask.succeed ()
-
-        head :: tail ->
-            head |> BackendTask.andThen (\_ -> doAll tail)
 
 
 messageToString : Message -> String
@@ -294,7 +283,7 @@ logWarning ( head, tail ) =
     in
     (firstLine :: paths)
         |> List.map Pages.Script.log
-        |> doAll
+        |> BackendTask.doEach
 
 
 

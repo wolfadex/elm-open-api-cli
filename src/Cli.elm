@@ -17,6 +17,7 @@ import OpenApi
 import OpenApi.Generate
 import OpenApi.Info
 import Pages.Script
+import Pages.Script.Spinner
 import String.Extra
 import Url
 import UrlPath
@@ -56,11 +57,16 @@ run =
             (case typeOfPath entryFilePath of
                 Url url ->
                     readFromUrl url
+                        |> Pages.Script.Spinner.runTask ("Download OAS from " ++ Url.toString url)
 
                 File path ->
                     readFromFile path
+                        |> Pages.Script.Spinner.runTask ("Read OAS from " ++ path)
             )
-                |> BackendTask.andThen (decodeOpenApiSpecOrFail entryFilePath)
+                |> BackendTask.andThen
+                    (decodeOpenApiSpecOrFail entryFilePath
+                        >> Pages.Script.Spinner.runTask "Parse OAS"
+                    )
                 |> BackendTask.andThen
                     (generateFileFromOpenApiSpec
                         { outputDirectory = outputDirectory
@@ -154,7 +160,9 @@ generateFileFromOpenApiSpec config apiSpec =
         }
         apiSpec
         |> Result.mapError (messageToString >> FatalError.fromString)
-        |> BackendTask.fromResult
+        |> (BackendTask.fromResult
+                >> Pages.Script.Spinner.runTask "Generate Elm modules"
+           )
         |> BackendTask.andThen
             (\( decls, warnings ) ->
                 warnings
@@ -195,6 +203,7 @@ generateFileFromOpenApiSpec config apiSpec =
                         |> BackendTask.map (\_ -> outputPath)
                 )
                 >> BackendTask.combine
+                >> Pages.Script.Spinner.runTask "Write SDK to disk"
             )
         |> BackendTask.andThen
             (\outputPaths ->

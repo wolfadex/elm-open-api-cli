@@ -31,6 +31,10 @@ type alias CliOptions =
     , outputDirectory : String
     , outputModuleName : Maybe String
     , generateTodos : Maybe String
+    , autoConvertSwagger : Bool
+    , swaggerConversionUrl : String
+    , swaggerConversionCommand : Maybe String
+    , swaggerConversionCommandArgs : List String
     }
 
 
@@ -49,14 +53,24 @@ program =
                     (Cli.Option.optionalKeywordArg "module-name")
                 |> Cli.OptionsParser.with
                     (Cli.Option.optionalKeywordArg "generateTodos")
+                |> Cli.OptionsParser.with
+                    (Cli.Option.flag "auto-convert-swagger")
+                |> Cli.OptionsParser.with
+                    (Cli.Option.optionalKeywordArg "swagger-conversion-url"
+                        |> Cli.Option.withDefault "https://converter.swagger.io/api/convert"
+                    )
+                |> Cli.OptionsParser.with
+                    (Cli.Option.optionalKeywordArg "swagger-conversion-command")
+                |> Cli.OptionsParser.with
+                    (Cli.Option.keywordArgList "swagger-conversion-command-args")
             )
 
 
 run : Pages.Script.Script
 run =
     Pages.Script.withCliOptions program
-        (\{ entryFilePath, outputDirectory, outputModuleName, generateTodos } ->
-            (case typeOfPath entryFilePath of
+        (\cliOptions ->
+            (case typeOfPath cliOptions.entryFilePath of
                 Url url ->
                     readFromUrl url
                         |> Pages.Script.Spinner.runTask ("Download OAS from " ++ Url.toString url)
@@ -66,13 +80,13 @@ run =
                         |> Pages.Script.Spinner.runTask ("Read OAS from " ++ path)
             )
                 |> BackendTask.andThen
-                    (decodeOpenApiSpecOrFail entryFilePath
+                    (decodeOpenApiSpecOrFail { hasAttemptedToConvertFromSwagger = False } cliOptions
                         >> Pages.Script.Spinner.runTask "Parse OAS"
                     )
                 |> BackendTask.andThen
                     (generateFileFromOpenApiSpec
-                        { outputModuleName = outputModuleName
-                        , generateTodos = generateTodos
+                        { outputModuleName = cliOptions.outputModuleName
+                        , generateTodos = cliOptions.generateTodos
                         }
                     )
                 |> BackendTask.andThen
@@ -84,41 +98,139 @@ run =
                             |> BackendTask.map (\_ -> decls)
                     )
                 |> BackendTask.andThen attemptToFormat
-                |> BackendTask.andThen (writeSdkToDisk outputDirectory)
+                |> BackendTask.andThen (writeSdkToDisk cliOptions.outputDirectory)
                 |> BackendTask.andThen printSuccessMessage
         )
 
 
-decodeOpenApiSpecOrFail : String -> String -> BackendTask.BackendTask FatalError.FatalError OpenApi.OpenApi
-decodeOpenApiSpecOrFail filePath input =
-    let
-        -- TODO: Better handling of errors: https://github.com/wolfadex/elm-api-sdk-generator/issues/40
-        isJson : Bool
-        isJson =
-            String.endsWith ".json" filePath
+decodeOpenApiSpecOrFail : { hasAttemptedToConvertFromSwagger : Bool } -> CliOptions -> String -> BackendTask.BackendTask FatalError.FatalError OpenApi.OpenApi
+decodeOpenApiSpecOrFail config cliOptions input =
+    case decodeMaybeYaml OpenApi.decode cliOptions.entryFilePath input of
+        Ok openApi ->
+            BackendTask.succeed openApi
 
-        decoded : Result Json.Decode.Error OpenApi.OpenApi
-        decoded =
-            -- Short-circuit the error-prone yaml parsing of JSON structures if we
-            -- are reasonably confident that it is a JSON file
-            if isJson then
-                Json.Decode.decodeString OpenApi.decode input
+        Err err ->
+            if config.hasAttemptedToConvertFromSwagger then
+                err
+                    |> Json.Decode.errorToString
+                    |> Ansi.Color.fontColor Ansi.Color.brightRed
+                    |> FatalError.fromString
+                    |> BackendTask.fail
 
             else
-                case Yaml.Decode.fromString yamlToJsonDecoder input of
-                    Err _ ->
-                        Json.Decode.decodeString OpenApi.decode input
+                case decodeMaybeYaml swaggerFieldDecoder cliOptions.entryFilePath input of
+                    Err error ->
+                        error
+                            |> Json.Decode.errorToString
+                            |> Ansi.Color.fontColor Ansi.Color.brightRed
+                            |> FatalError.fromString
+                            |> BackendTask.fail
 
-                    Ok jsonFromYaml ->
-                        Json.Decode.decodeValue OpenApi.decode jsonFromYaml
+                    Ok _ ->
+                        if cliOptions.autoConvertSwagger then
+                            convertSwaggerToOpenApi cliOptions input
+                                |> Pages.Script.Spinner.runTask "Convert Swagger to Open API"
+                                |> BackendTask.andThen (decodeOpenApiSpecOrFail { hasAttemptedToConvertFromSwagger = True } cliOptions)
+
+                        else
+                            ("""The input file appears to be a Swagger doc,
+and the CLI was not configured to automatically convert it to an Open API spec.
+See the """
+                                ++ Ansi.Color.fontColor Ansi.Color.brightCyan "--auto-convert-swagger"
+                                ++ " flag for more info."
+                            )
+                                |> FatalError.fromString
+                                |> BackendTask.fail
+
+
+convertSwaggerToOpenApi : CliOptions -> String -> BackendTask.BackendTask FatalError.FatalError String
+convertSwaggerToOpenApi cliOptions input =
+    case cliOptions.swaggerConversionCommand of
+        Just command ->
+            BackendTask.Stream.fromString input
+                |> BackendTask.Stream.pipe (BackendTask.Stream.command command cliOptions.swaggerConversionCommandArgs)
+                |> BackendTask.Stream.read
+                |> BackendTask.mapError
+                    (\error ->
+                        FatalError.fromString <|
+                            ("Attempted to convert the Swagger doc to an Open API spec using\n"
+                                ++ Ansi.Color.fontColor Ansi.Color.brightCyan
+                                    (String.join " "
+                                        (command :: cliOptions.swaggerConversionCommandArgs)
+                                    )
+                                ++ "\nbut encountered an issue:\n\n"
+                                ++ (Ansi.Color.fontColor Ansi.Color.brightRed <|
+                                        case error.recoverable of
+                                            BackendTask.Stream.StreamError err ->
+                                                err
+
+                                            BackendTask.Stream.CustomError errCode maybeBody ->
+                                                case maybeBody of
+                                                    Just body ->
+                                                        body
+
+                                                    Nothing ->
+                                                        String.fromInt errCode
+                                   )
+                            )
+                    )
+                |> BackendTask.map .body
+
+        Nothing ->
+            BackendTask.Http.post cliOptions.swaggerConversionUrl
+                (BackendTask.Http.stringBody "application/yaml" input)
+                (BackendTask.Http.expectJson Json.Decode.value)
+                |> BackendTask.map (Json.Encode.encode 0)
+                |> BackendTask.mapError
+                    (\error ->
+                        FatalError.fromString
+                            ("Attempted to convert the Swagger doc to an Open API spec but encountered an issue:\n\n"
+                                ++ (Ansi.Color.fontColor Ansi.Color.brightRed <|
+                                        case (Debug.log "error" error).recoverable of
+                                            BackendTask.Http.BadUrl _ ->
+                                                "with the URL: " ++ cliOptions.swaggerConversionUrl
+
+                                            BackendTask.Http.Timeout ->
+                                                "the request timed out"
+
+                                            BackendTask.Http.NetworkError ->
+                                                "with a network error"
+
+                                            BackendTask.Http.BadStatus { statusCode, statusText } _ ->
+                                                "status code " ++ String.fromInt statusCode ++ ", " ++ statusText
+
+                                            BackendTask.Http.BadBody _ _ ->
+                                                "expected a string response body but got something else"
+                                   )
+                            )
+                    )
+
+
+swaggerFieldDecoder : Json.Decode.Decoder String
+swaggerFieldDecoder =
+    Json.Decode.field "swagger" Json.Decode.string
+
+
+decodeMaybeYaml : Json.Decode.Decoder a -> String -> String -> Result Json.Decode.Error a
+decodeMaybeYaml decoder entryFilePath input =
+    let
+        -- TODO: Better handling of errors: https://github.com/wolfadex/elm-open-api-cli/issues/40
+        isJson : Bool
+        isJson =
+            String.endsWith ".json" entryFilePath
     in
-    decoded
-        |> Result.mapError
-            (Json.Decode.errorToString
-                >> Ansi.Color.fontColor Ansi.Color.brightRed
-                >> FatalError.fromString
-            )
-        |> BackendTask.fromResult
+    -- Short-circuit the error-prone yaml parsing of JSON structures if we
+    -- are reasonably confident that it is a JSON file
+    if isJson then
+        Json.Decode.decodeString decoder input
+
+    else
+        case Yaml.Decode.fromString yamlToJsonDecoder input of
+            Err _ ->
+                Json.Decode.decodeString decoder input
+
+            Ok jsonFromYaml ->
+                Json.Decode.decodeValue decoder jsonFromYaml
 
 
 yamlToJsonDecoder : Yaml.Decode.Decoder Json.Encode.Value
@@ -190,14 +302,9 @@ attemptToFormat files =
                                     BackendTask.Stream.fromString file.contents
                                         |> BackendTask.Stream.pipe (BackendTask.Stream.command "elm-format" [ "--stdin" ])
                                         |> BackendTask.Stream.read
-                                        |> BackendTask.allowFatal
-                                        |> BackendTask.andThen
-                                            (\formatted ->
-                                                BackendTask.succeed
-                                                    { file
-                                                        | contents = formatted.body
-                                                    }
-                                            )
+                                        |> BackendTask.andThen (\formatted -> BackendTask.succeed { file | contents = formatted.body })
+                                        -- Never fail on formatting errors
+                                        |> BackendTask.onError (\_ -> BackendTask.succeed file)
                                 )
                             |> BackendTask.combine
                             |> Pages.Script.Spinner.runTask "Format with elm-format"

@@ -1,4 +1,16 @@
-module Common exposing (Field, FieldName, Object, OneOfData, Type(..), TypeName, VariantName, ref, toValueName, typifyName)
+module Common exposing
+    ( Field
+    , FieldName
+    , Object
+    , OneOfData
+    , Type(..)
+    , TypeName
+    , VariantName
+    , nameFromStatusCode
+    , ref
+    , toValueName
+    , typifyName
+    )
 
 import FastDict exposing (Dict)
 import String.Extra
@@ -28,7 +40,7 @@ We need to convert them to a valid Elm name.
 -}
 nameFromStatusCode : String -> String
 nameFromStatusCode name =
-    case String.toInt name of
+    case String.toInt (String.left 3 name) of
         Just int ->
             if int >= 100 && int <= 599 then
                 "statusCode" ++ name

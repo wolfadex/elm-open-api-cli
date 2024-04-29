@@ -251,7 +251,7 @@ responsesDeclarations namespace =
             (Dict.foldl
                 (\name schema ->
                     CliMonad.map2 (::)
-                        (responseToDeclarations namespace name schema)
+                        (responseToDeclarations namespace (Common.typifyName name) schema)
                 )
                 (CliMonad.succeed [])
             )

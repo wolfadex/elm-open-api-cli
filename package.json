@@ -12,6 +12,7 @@
     "review:watch": "elm-review --watch --fix",
     "format": "elm-format src tests --validate",
     "test": "elm-test",
+    "test:gen": "./gen-test.sh",
     "test:watch": "elm-test --watch",
     "publish": "npm run build && npm publish"
   },

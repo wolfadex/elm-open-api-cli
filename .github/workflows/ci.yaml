@@ -46,3 +46,5 @@ jobs:
         run: npm run review
       - name: Test
         run: npm run test
+      - name: Generation Test
+        run: ./gen-test

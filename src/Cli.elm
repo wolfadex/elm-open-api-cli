@@ -80,9 +80,7 @@ run =
                         |> Pages.Script.Spinner.runTask ("Read OAS from " ++ path)
             )
                 |> BackendTask.andThen
-                    (decodeOpenApiSpecOrFail { hasAttemptedToConvertFromSwagger = False } cliOptions
-                        >> Pages.Script.Spinner.runTask "Parse OAS"
-                    )
+                    (decodeOpenApiSpecOrFail { hasAttemptedToConvertFromSwagger = False } cliOptions)
                 |> BackendTask.andThen
                     (generateFileFromOpenApiSpec
                         { outputModuleName = cliOptions.outputModuleName
@@ -105,42 +103,64 @@ run =
 
 decodeOpenApiSpecOrFail : { hasAttemptedToConvertFromSwagger : Bool } -> CliOptions -> String -> BackendTask.BackendTask FatalError.FatalError OpenApi.OpenApi
 decodeOpenApiSpecOrFail config cliOptions input =
-    case decodeMaybeYaml OpenApi.decode cliOptions.entryFilePath input of
-        Ok openApi ->
-            BackendTask.succeed openApi
+    input
+        |> BackendTask.succeed
+        |> BackendTask.andThen
+            (decodeMaybeYaml OpenApi.decode cliOptions.entryFilePath
+                >> BackendTask.fromResult
+            )
+        |> Pages.Script.Spinner.runTask "Parse OAS"
+        |> BackendTask.onError
+            (\decodeError ->
+                if config.hasAttemptedToConvertFromSwagger then
+                    decodeError
+                        |> Json.Decode.errorToString
+                        |> Ansi.Color.fontColor Ansi.Color.brightRed
+                        |> FatalError.fromString
+                        |> BackendTask.fail
 
-        Err err ->
-            if config.hasAttemptedToConvertFromSwagger then
-                err
-                    |> Json.Decode.errorToString
-                    |> Ansi.Color.fontColor Ansi.Color.brightRed
-                    |> FatalError.fromString
-                    |> BackendTask.fail
-
-            else
-                case decodeMaybeYaml swaggerFieldDecoder cliOptions.entryFilePath input of
-                    Err error ->
-                        error
-                            |> Json.Decode.errorToString
-                            |> Ansi.Color.fontColor Ansi.Color.brightRed
-                            |> FatalError.fromString
-                            |> BackendTask.fail
-
-                    Ok _ ->
-                        if cliOptions.autoConvertSwagger then
-                            convertSwaggerToOpenApi cliOptions input
-                                |> Pages.Script.Spinner.runTask "Convert Swagger to Open API"
-                                |> BackendTask.andThen (decodeOpenApiSpecOrFail { hasAttemptedToConvertFromSwagger = True } cliOptions)
-
-                        else
-                            ("""The input file appears to be a Swagger doc,
-and the CLI was not configured to automatically convert it to an Open API spec.
-See the """
-                                ++ Ansi.Color.fontColor Ansi.Color.brightCyan "--auto-convert-swagger"
-                                ++ " flag for more info."
-                            )
+                else
+                    case decodeMaybeYaml swaggerFieldDecoder cliOptions.entryFilePath input of
+                        Err error ->
+                            error
+                                |> Json.Decode.errorToString
+                                |> Ansi.Color.fontColor Ansi.Color.brightRed
                                 |> FatalError.fromString
                                 |> BackendTask.fail
+
+                        Ok _ ->
+                            if cliOptions.autoConvertSwagger then
+                                convertSwaggerToOpenApi cliOptions input
+                                    |> Pages.Script.Spinner.runTask "Convert Swagger to Open API"
+                                    |> BackendTask.andThen (decodeOpenApiSpecOrFail { hasAttemptedToConvertFromSwagger = True } cliOptions)
+
+                            else
+                                Pages.Script.question
+                                    (Ansi.Color.fontColor Ansi.Color.brightCyan cliOptions.entryFilePath
+                                        ++ """ is a Swagger doc (aka Open API v2) and this tool only supports Open API v3.
+Would you like to use """
+                                        ++ Ansi.Color.fontColor Ansi.Color.brightCyan cliOptions.swaggerConversionUrl
+                                        ++ " to upgrade to v3? (y/n)\n"
+                                    )
+                                    |> BackendTask.andThen
+                                        (\response ->
+                                            case String.toLower response of
+                                                "y" ->
+                                                    convertSwaggerToOpenApi cliOptions input
+                                                        |> Pages.Script.Spinner.runTask "Convert Swagger to Open API"
+                                                        |> BackendTask.andThen (decodeOpenApiSpecOrFail { hasAttemptedToConvertFromSwagger = True } cliOptions)
+
+                                                _ ->
+                                                    ("""The input file appears to be a Swagger doc,
+and the CLI was not configured to automatically convert it to an Open API spec.
+See the """
+                                                        ++ Ansi.Color.fontColor Ansi.Color.brightCyan "--auto-convert-swagger"
+                                                        ++ " flag for more info."
+                                                    )
+                                                        |> FatalError.fromString
+                                                        |> BackendTask.fail
+                                        )
+            )
 
 
 convertSwaggerToOpenApi : CliOptions -> String -> BackendTask.BackendTask FatalError.FatalError String
@@ -186,7 +206,7 @@ convertSwaggerToOpenApi cliOptions input =
                         FatalError.fromString
                             ("Attempted to convert the Swagger doc to an Open API spec but encountered an issue:\n\n"
                                 ++ (Ansi.Color.fontColor Ansi.Color.brightRed <|
-                                        case (Debug.log "error" error).recoverable of
+                                        case error.recoverable of
                                             BackendTask.Http.BadUrl _ ->
                                                 "with the URL: " ++ cliOptions.swaggerConversionUrl
 

@@ -6,7 +6,6 @@ module Common exposing
     , Type(..)
     , TypeName
     , VariantName
-    , nameFromStatusCode
     , ref
     , toValueName
     , typifyName

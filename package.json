@@ -12,6 +12,7 @@
     "review:watch": "elm-review --watch --fix",
     "format": "elm-format src tests --validate",
     "test": "elm-test",
+    "test:gen": "./gen-test.sh",
     "test:watch": "elm-test --watch",
     "publish": "npm run build && npm publish"
   },
@@ -25,7 +26,7 @@
     "elm-codegen": "0.5.3",
     "elm-format": "0.8.7",
     "elm-optimize-level-2": "0.3.5",
-    "elm-pages": "3.0.12",
+    "elm-pages": "3.0.13",
     "elm-review": "2.11.1",
     "elm-test": "^0.19.1-revision12"
   },

@@ -1,4 +1,4 @@
-module ExampleGH exposing (main)
+module Example exposing (main)
 
 -- import BimcloudApi20232AlphaRelease
 

@@ -14,6 +14,10 @@
   - Technically the OAS allows for parts of a spec to be in separate files, but this isn't supported yet.
 - `[--output-dir <output dir>]`: The directory to output to. Defaults to `generated/`.
 - `[--module-name <module name>]`: The Elm module name. Default to `<OAS info.title>`.
+- `[--auto-convert-swagger]`: If passed in, and a Swagger doc is encountered, will attempt to convert it to an Open API file. If not passed in, and a Swagger doc is encountered, the user will be manually prompted to convert.
+- `[--swagger-conversion-url]`: The URL to use to convert a Swagger doc to an Open API file. Defaults to `https://converter.swagger.io/api/convert`.
+- `[--swagger-conversion-command]`: Instead of making an HTTP request to convert from Swagger to Open API, use this command.
+- `[--swagger-conversion-command-args]`: Additional arguments to pass to the Swagger conversion command, before the contents of the Swagger file are passed in.
 - `[--generateTodos <generateTodos>]`: Whether to generate TODOs for unimplemented endpoints, or fail when something unexpected is encountered. Defaults to `no`. To generate `Debug.todo ""` instead of failing use one of: `yes`, `y`, `true`.
 
 ## Example outputs:

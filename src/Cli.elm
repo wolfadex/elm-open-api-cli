@@ -5,10 +5,12 @@ import Ansi.Color
 import BackendTask
 import BackendTask.File
 import BackendTask.Http
+import BackendTask.Stream
 import Cli.Option
 import Cli.OptionsParser
 import Cli.Program
 import CliMonad exposing (Message)
+import Elm
 import FatalError
 import Json.Decode
 import Json.Encode
@@ -17,6 +19,7 @@ import OpenApi
 import OpenApi.Generate
 import OpenApi.Info
 import Pages.Script
+import Pages.Script.Spinner
 import String.Extra
 import Url
 import UrlPath
@@ -28,6 +31,10 @@ type alias CliOptions =
     , outputDirectory : String
     , outputModuleName : Maybe String
     , generateTodos : Maybe String
+    , autoConvertSwagger : Bool
+    , swaggerConversionUrl : String
+    , swaggerConversionCommand : Maybe String
+    , swaggerConversionCommandArgs : List String
     }
 
 
@@ -46,61 +53,231 @@ program =
                     (Cli.Option.optionalKeywordArg "module-name")
                 |> Cli.OptionsParser.with
                     (Cli.Option.optionalKeywordArg "generateTodos")
+                |> Cli.OptionsParser.with
+                    (Cli.Option.flag "auto-convert-swagger")
+                |> Cli.OptionsParser.with
+                    (Cli.Option.optionalKeywordArg "swagger-conversion-url"
+                        |> Cli.Option.withDefault "https://converter.swagger.io/api/convert"
+                    )
+                |> Cli.OptionsParser.with
+                    (Cli.Option.optionalKeywordArg "swagger-conversion-command")
+                |> Cli.OptionsParser.with
+                    (Cli.Option.keywordArgList "swagger-conversion-command-args")
+                |> Cli.OptionsParser.withDoc """
+
+  options:
+  
+  --output-dir                       The directory to output to. Defaults to: generated/
+
+  --module-name                      The Elm module name. Default to <OAS info.title>
+    
+  --auto-convert-swagger             If passed in, and a Swagger doc is encountered,
+                                     will attempt to convert it to an Open API file.
+                                     If not passed in, and a Swagger doc is encountered,
+                                     the user will be manually prompted to convert
+    
+  --swagger-conversion-url           The URL to use to convert a Swagger doc to an Open API
+                                     file. Defaults to https://converter.swagger.io/api/convert
+    
+  --swagger-conversion-command       Instead of making an HTTP request to convert
+                                     from Swagger to Open API, use this command
+    
+  --swagger-conversion-command-args  Additional arguments to pass to the Swagger conversion command,
+                                     before the contents of the Swagger file are passed in
+    
+  --generateTodos                    Whether to generate TODOs for unimplemented endpoints,
+                                     or fail when something unexpected is encountered.
+                                     Defaults to `no`. To generate `Debug.todo ""`
+                                     instead of failing use one of: `yes`, `y`, `true`
+"""
             )
 
 
 run : Pages.Script.Script
 run =
     Pages.Script.withCliOptions program
-        (\{ entryFilePath, outputDirectory, outputModuleName, generateTodos } ->
-            (case typeOfPath entryFilePath of
+        (\cliOptions ->
+            (case typeOfPath cliOptions.entryFilePath of
                 Url url ->
                     readFromUrl url
+                        |> Pages.Script.Spinner.runTask ("Download OAS from " ++ Url.toString url)
 
                 File path ->
                     readFromFile path
+                        |> Pages.Script.Spinner.runTask ("Read OAS from " ++ path)
             )
-                |> BackendTask.andThen (decodeOpenApiSpecOrFail entryFilePath)
+                |> BackendTask.andThen
+                    (decodeOpenApiSpecOrFail { hasAttemptedToConvertFromSwagger = False } cliOptions)
                 |> BackendTask.andThen
                     (generateFileFromOpenApiSpec
-                        { outputDirectory = outputDirectory
-                        , outputModuleName = outputModuleName
-                        , generateTodos = generateTodos
+                        { outputModuleName = cliOptions.outputModuleName
+                        , generateTodos = cliOptions.generateTodos
                         }
                     )
+                |> BackendTask.andThen
+                    (\( decls, warnings ) ->
+                        warnings
+                            |> List.Extra.gatherEqualsBy .message
+                            |> List.map logWarning
+                            |> BackendTask.doEach
+                            |> BackendTask.map (\_ -> decls)
+                    )
+                |> BackendTask.andThen attemptToFormat
+                |> BackendTask.andThen (writeSdkToDisk cliOptions.outputDirectory)
+                |> BackendTask.andThen printSuccessMessage
         )
 
 
-decodeOpenApiSpecOrFail : String -> String -> BackendTask.BackendTask FatalError.FatalError OpenApi.OpenApi
-decodeOpenApiSpecOrFail filePath input =
+decodeOpenApiSpecOrFail : { hasAttemptedToConvertFromSwagger : Bool } -> CliOptions -> String -> BackendTask.BackendTask FatalError.FatalError OpenApi.OpenApi
+decodeOpenApiSpecOrFail config cliOptions input =
+    input
+        |> BackendTask.succeed
+        |> BackendTask.andThen
+            (decodeMaybeYaml OpenApi.decode cliOptions.entryFilePath
+                >> BackendTask.fromResult
+            )
+        |> Pages.Script.Spinner.runTask "Parse OAS"
+        |> BackendTask.onError
+            (\decodeError ->
+                if config.hasAttemptedToConvertFromSwagger then
+                    decodeError
+                        |> Json.Decode.errorToString
+                        |> Ansi.Color.fontColor Ansi.Color.brightRed
+                        |> FatalError.fromString
+                        |> BackendTask.fail
+
+                else
+                    case decodeMaybeYaml swaggerFieldDecoder cliOptions.entryFilePath input of
+                        Err error ->
+                            error
+                                |> Json.Decode.errorToString
+                                |> Ansi.Color.fontColor Ansi.Color.brightRed
+                                |> FatalError.fromString
+                                |> BackendTask.fail
+
+                        Ok _ ->
+                            if cliOptions.autoConvertSwagger then
+                                convertSwaggerToOpenApi cliOptions input
+                                    |> Pages.Script.Spinner.runTask "Convert Swagger to Open API"
+                                    |> BackendTask.andThen (decodeOpenApiSpecOrFail { hasAttemptedToConvertFromSwagger = True } cliOptions)
+
+                            else
+                                Pages.Script.question
+                                    (Ansi.Color.fontColor Ansi.Color.brightCyan cliOptions.entryFilePath
+                                        ++ """ is a Swagger doc (aka Open API v2) and this tool only supports Open API v3.
+Would you like to use """
+                                        ++ Ansi.Color.fontColor Ansi.Color.brightCyan cliOptions.swaggerConversionUrl
+                                        ++ " to upgrade to v3? (y/n)\n"
+                                    )
+                                    |> BackendTask.andThen
+                                        (\response ->
+                                            case String.toLower response of
+                                                "y" ->
+                                                    convertSwaggerToOpenApi cliOptions input
+                                                        |> Pages.Script.Spinner.runTask "Convert Swagger to Open API"
+                                                        |> BackendTask.andThen (decodeOpenApiSpecOrFail { hasAttemptedToConvertFromSwagger = True } cliOptions)
+
+                                                _ ->
+                                                    ("""The input file appears to be a Swagger doc,
+and the CLI was not configured to automatically convert it to an Open API spec.
+See the """
+                                                        ++ Ansi.Color.fontColor Ansi.Color.brightCyan "--auto-convert-swagger"
+                                                        ++ " flag for more info."
+                                                    )
+                                                        |> FatalError.fromString
+                                                        |> BackendTask.fail
+                                        )
+            )
+
+
+convertSwaggerToOpenApi : CliOptions -> String -> BackendTask.BackendTask FatalError.FatalError String
+convertSwaggerToOpenApi cliOptions input =
+    case cliOptions.swaggerConversionCommand of
+        Just command ->
+            BackendTask.Stream.fromString input
+                |> BackendTask.Stream.pipe (BackendTask.Stream.command command cliOptions.swaggerConversionCommandArgs)
+                |> BackendTask.Stream.read
+                |> BackendTask.mapError
+                    (\error ->
+                        FatalError.fromString <|
+                            ("Attempted to convert the Swagger doc to an Open API spec using\n"
+                                ++ Ansi.Color.fontColor Ansi.Color.brightCyan
+                                    (String.join " "
+                                        (command :: cliOptions.swaggerConversionCommandArgs)
+                                    )
+                                ++ "\nbut encountered an issue:\n\n"
+                                ++ (Ansi.Color.fontColor Ansi.Color.brightRed <|
+                                        case error.recoverable of
+                                            BackendTask.Stream.StreamError err ->
+                                                err
+
+                                            BackendTask.Stream.CustomError errCode maybeBody ->
+                                                case maybeBody of
+                                                    Just body ->
+                                                        body
+
+                                                    Nothing ->
+                                                        String.fromInt errCode
+                                   )
+                            )
+                    )
+                |> BackendTask.map .body
+
+        Nothing ->
+            BackendTask.Http.post cliOptions.swaggerConversionUrl
+                (BackendTask.Http.stringBody "application/yaml" input)
+                (BackendTask.Http.expectJson Json.Decode.value)
+                |> BackendTask.map (Json.Encode.encode 0)
+                |> BackendTask.mapError
+                    (\error ->
+                        FatalError.fromString
+                            ("Attempted to convert the Swagger doc to an Open API spec but encountered an issue:\n\n"
+                                ++ (Ansi.Color.fontColor Ansi.Color.brightRed <|
+                                        case error.recoverable of
+                                            BackendTask.Http.BadUrl _ ->
+                                                "with the URL: " ++ cliOptions.swaggerConversionUrl
+
+                                            BackendTask.Http.Timeout ->
+                                                "the request timed out"
+
+                                            BackendTask.Http.NetworkError ->
+                                                "with a network error"
+
+                                            BackendTask.Http.BadStatus { statusCode, statusText } _ ->
+                                                "status code " ++ String.fromInt statusCode ++ ", " ++ statusText
+
+                                            BackendTask.Http.BadBody _ _ ->
+                                                "expected a string response body but got something else"
+                                   )
+                            )
+                    )
+
+
+swaggerFieldDecoder : Json.Decode.Decoder String
+swaggerFieldDecoder =
+    Json.Decode.field "swagger" Json.Decode.string
+
+
+decodeMaybeYaml : Json.Decode.Decoder a -> String -> String -> Result Json.Decode.Error a
+decodeMaybeYaml decoder entryFilePath input =
     let
-        -- TODO: Better handling of errors: https://github.com/wolfadex/elm-api-sdk-generator/issues/40
+        -- TODO: Better handling of errors: https://github.com/wolfadex/elm-open-api-cli/issues/40
         isJson : Bool
         isJson =
-            String.endsWith ".json" filePath
-
-        decoded : Result Json.Decode.Error OpenApi.OpenApi
-        decoded =
-            -- Short-circuit the error-prone yaml parsing of JSON structures if we
-            -- are reasonably confident that it is a JSON file
-            if isJson then
-                Json.Decode.decodeString OpenApi.decode input
-
-            else
-                case Yaml.Decode.fromString yamlToJsonDecoder input of
-                    Err _ ->
-                        Json.Decode.decodeString OpenApi.decode input
-
-                    Ok jsonFromYaml ->
-                        Json.Decode.decodeValue OpenApi.decode jsonFromYaml
+            String.endsWith ".json" entryFilePath
     in
-    decoded
-        |> Result.mapError
-            (Json.Decode.errorToString
-                >> Ansi.Color.fontColor Ansi.Color.brightRed
-                >> FatalError.fromString
-            )
-        |> BackendTask.fromResult
+    -- Short-circuit the error-prone yaml parsing of JSON structures if we
+    -- are reasonably confident that it is a JSON file
+    if isJson then
+        Json.Decode.decodeString decoder input
+
+    else
+        case Yaml.Decode.fromString yamlToJsonDecoder input of
+            Err _ ->
+                Json.Decode.decodeString decoder input
+
+            Ok jsonFromYaml ->
+                Json.Decode.decodeValue decoder jsonFromYaml
 
 
 yamlToJsonDecoder : Yaml.Decode.Decoder Json.Encode.Value
@@ -120,12 +297,11 @@ yamlToJsonDecoder =
 
 
 generateFileFromOpenApiSpec :
-    { outputDirectory : String
-    , outputModuleName : Maybe String
+    { outputModuleName : Maybe String
     , generateTodos : Maybe String
     }
     -> OpenApi.OpenApi
-    -> BackendTask.BackendTask FatalError.FatalError ()
+    -> BackendTask.BackendTask FatalError.FatalError ( List Elm.File, List Message )
 generateFileFromOpenApiSpec config apiSpec =
     let
         moduleName : List String
@@ -155,104 +331,118 @@ generateFileFromOpenApiSpec config apiSpec =
         apiSpec
         |> Result.mapError (messageToString >> FatalError.fromString)
         |> BackendTask.fromResult
+        |> Pages.Script.Spinner.runTask "Generate Elm modules"
+
+
+{-| Check to see if `elm-format` is available, and if so format the files
+-}
+attemptToFormat : List Elm.File -> BackendTask.BackendTask FatalError.FatalError (List Elm.File)
+attemptToFormat files =
+    Pages.Script.which "elm-format"
         |> BackendTask.andThen
-            (\( decls, warnings ) ->
-                warnings
-                    |> List.Extra.gatherEqualsBy .message
-                    |> List.map logWarning
-                    |> doAll
-                    |> BackendTask.map (\_ -> decls)
-            )
-        |> BackendTask.andThen
-            (List.map
-                (\file ->
-                    let
-                        filePath : String
-                        filePath =
-                            config.outputDirectory
-                                ++ "/"
-                                ++ file.path
+            (\mayebFound ->
+                case mayebFound of
+                    Just _ ->
+                        files
+                            |> List.map
+                                (\file ->
+                                    BackendTask.Stream.fromString file.contents
+                                        |> BackendTask.Stream.pipe (BackendTask.Stream.command "elm-format" [ "--stdin" ])
+                                        |> BackendTask.Stream.read
+                                        |> BackendTask.andThen (\formatted -> BackendTask.succeed { file | contents = formatted.body })
+                                        -- Never fail on formatting errors
+                                        |> BackendTask.onError (\_ -> BackendTask.succeed file)
+                                )
+                            |> BackendTask.combine
+                            |> Pages.Script.Spinner.runTask "Format with elm-format"
 
-                        outputPath : String
-                        outputPath =
-                            filePath
-                                |> String.split "/"
-                                |> UrlPath.join
-                                |> UrlPath.toRelative
-                    in
-                    Pages.Script.writeFile
-                        { path = outputPath
-                        , body = file.contents
-                        }
-                        |> BackendTask.mapError
-                            (\error ->
-                                case error.recoverable of
-                                    Pages.Script.FileWriteError ->
-                                        FatalError.fromString <|
-                                            Ansi.Color.fontColor Ansi.Color.brightRed <|
-                                                "Uh oh! Failed to write file"
-                            )
-                        |> BackendTask.map (\_ -> outputPath)
-                )
-                >> BackendTask.combine
-            )
-        |> BackendTask.andThen
-            (\outputPaths ->
-                let
-                    indentBy : Int -> String -> String
-                    indentBy amount input =
-                        String.repeat amount " " ++ input
-
-                    requiredLinks : List String
-                    requiredLinks =
-                        [ "elm/http", "elm/json" ]
-                            |> List.map toElmDependencyLink
-
-                    optionalLinks : List String
-                    optionalLinks =
-                        [ "elm/bytes", "elm/url" ]
-                            |> List.map toElmDependencyLink
-
-                    toElmDependencyLink : String -> String
-                    toElmDependencyLink dependency =
-                        Ansi.link
-                            { text = dependency
-                            , url = "https://package.elm-lang.org/packages/" ++ dependency ++ "/latest/"
-                            }
-                in
-                [ [ ""
-                  , "🎉 SDK generated:"
-                  , ""
-                  ]
-                , outputPaths
-                    |> List.map (indentBy 4)
-                , [ ""
-                  , ""
-                  , "You'll also need " ++ String.Extra.toSentenceOxford requiredLinks ++ " installed. Try running:"
-                  , ""
-                  , indentBy 4 "elm install elm/http"
-                  , indentBy 4 "elm install elm/json"
-                  , ""
-                  , ""
-                  , "and possibly need " ++ String.Extra.toSentenceOxford optionalLinks ++ " installed. If that's the case, try running:"
-                  , indentBy 4 "elm install elm/bytes"
-                  , indentBy 4 "elm install elm/url"
-                  ]
-                ]
-                    |> List.concat
-                    |> List.map Pages.Script.log
-                    |> doAll
+                    Nothing ->
+                        BackendTask.succeed files
             )
 
 
-doAll : List (BackendTask.BackendTask error ()) -> BackendTask.BackendTask error ()
-doAll list =
-    case list of
-        [] ->
-            BackendTask.succeed ()
+writeSdkToDisk : String -> List Elm.File -> BackendTask.BackendTask FatalError.FatalError (List String)
+writeSdkToDisk outputDirectory =
+    List.map
+        (\file ->
+            let
+                filePath : String
+                filePath =
+                    outputDirectory
+                        ++ "/"
+                        ++ file.path
 
-        head :: tail ->
-            head |> BackendTask.andThen (\_ -> doAll tail)
+                outputPath : String
+                outputPath =
+                    filePath
+                        |> String.split "/"
+                        |> UrlPath.join
+                        |> UrlPath.toRelative
+            in
+            Pages.Script.writeFile
+                { path = outputPath
+                , body = file.contents
+                }
+                |> BackendTask.mapError
+                    (\error ->
+                        case error.recoverable of
+                            Pages.Script.FileWriteError ->
+                                FatalError.fromString <|
+                                    Ansi.Color.fontColor Ansi.Color.brightRed <|
+                                        "Uh oh! Failed to write file"
+                    )
+                |> BackendTask.map (\_ -> outputPath)
+        )
+        >> BackendTask.combine
+        >> Pages.Script.Spinner.runTask "Write to disk"
+
+
+printSuccessMessage : List String -> BackendTask.BackendTask FatalError.FatalError ()
+printSuccessMessage outputPaths =
+    let
+        indentBy : Int -> String -> String
+        indentBy amount input =
+            String.repeat amount " " ++ input
+
+        requiredLinks : List String
+        requiredLinks =
+            [ "elm/http", "elm/json" ]
+                |> List.map toElmDependencyLink
+
+        optionalLinks : List String
+        optionalLinks =
+            [ "elm/bytes", "elm/url" ]
+                |> List.map toElmDependencyLink
+
+        toElmDependencyLink : String -> String
+        toElmDependencyLink dependency =
+            Ansi.link
+                { text = dependency
+                , url = "https://package.elm-lang.org/packages/" ++ dependency ++ "/latest/"
+                }
+    in
+    [ [ ""
+      , "🎉 SDK generated:"
+      , ""
+      ]
+    , outputPaths
+        |> List.map (indentBy 4)
+    , [ ""
+      , ""
+      , "You'll also need " ++ String.Extra.toSentenceOxford requiredLinks ++ " installed. Try running:"
+      , ""
+      , indentBy 4 "elm install elm/http"
+      , indentBy 4 "elm install elm/json"
+      , ""
+      , ""
+      , "and possibly need " ++ String.Extra.toSentenceOxford optionalLinks ++ " installed. If that's the case, try running:"
+      , indentBy 4 "elm install elm/bytes"
+      , indentBy 4 "elm install elm/url"
+      ]
+    ]
+        |> List.concat
+        |> List.map Pages.Script.log
+        |> BackendTask.doEach
 
 
 messageToString : Message -> String
@@ -285,7 +475,7 @@ logWarning ( head, tail ) =
     in
     (firstLine :: paths)
         |> List.map Pages.Script.log
-        |> doAll
+        |> BackendTask.doEach
 
 
 

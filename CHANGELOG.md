@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unreleased]
 
+## [0.4.1] - 2024-04-28
+
 ### Added
 
 - Support for converting Swagger docs to Open API files, resolves [issue #47](https://github.com/wolfadex/elm-open-api-cli/issues/47)

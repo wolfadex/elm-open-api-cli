@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unreleased]
 
+### Added
+
+- Support for converting Swagger docs to Open API files, resolves [issue #47](https://github.com/wolfadex/elm-open-api-cli/issues/47)
+- Print status of various steps of the process
+  ```sh
+  ✓ Read OAS from ./example/realworld-conduit.yaml
+  ✓ Parse OAS
+  ✓ Generate Elm modules
+  ✓ Format with elm-format
+  ✓ Write to disk
+  ```
+
+### Fixed
+
+- [Issue #86](https://github.com/wolfadex/elm-open-api-cli/issues/86), some response names start with the status code
+
 ## [0.4.0] - 2024-04-23
 
 ### Added

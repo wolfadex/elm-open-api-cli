@@ -10,5 +10,4 @@ npm run dev ./example/github-spec.json
 
 # Compile example Elm
 
-cd example
-npx elm make src/Example.elm --output=/dev/null
+cd example && npx elm make src/Example.elm --output=/dev/null

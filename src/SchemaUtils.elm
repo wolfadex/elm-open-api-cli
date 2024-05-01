@@ -1,13 +1,34 @@
 module SchemaUtils exposing
-    ( getAlias
+    ( OneOfName
+    , decodeOptionalField
+    , getAlias
+    , oneOfDeclarations
+    , recordType
+    , refToTypeName
     , schemaToType
+    , toVariantName
+    , typeToAnnotation
+    , typeToAnnotationMaybe
+    , typeToDecoder
+    , typeToEncoder
     )
 
 import CliMonad exposing (CliMonad)
 import Common
 import Dict
+import Elm
+import Elm.Annotation
+import Elm.Case
+import Elm.Declare
+import Elm.Op
 import Elm.ToString
 import FastDict
+import Gen.Basics
+import Gen.Bytes
+import Gen.Json.Decode
+import Gen.Json.Encode
+import Gen.List
+import Gen.Maybe
 import Json.Schema.Definitions
 import Maybe.Extra
 import OpenApi
@@ -231,7 +252,7 @@ schemaToType namespace schema =
 typeToOneOfVariant : List String -> Common.Type -> CliMonad (Maybe { name : Common.TypeName, type_ : Common.Type })
 typeToOneOfVariant namespace type_ =
     type_
-        |> CliMonad.typeToAnnotation namespace
+        |> typeToAnnotation namespace
         |> CliMonad.map
             (\ann ->
                 let
@@ -275,7 +296,7 @@ oneOfType namespace types =
                         in
                         Common.OneOf
                             (names
-                                |> List.map CliMonad.fixOneOfName
+                                |> List.map fixOneOfName
                                 |> String.join "_Or_"
                             )
                             sortedVariants
@@ -300,3 +321,500 @@ objectSchemaToType namespace subSchema =
         )
         (subSchemaToProperties namespace subSchema)
         propertiesFromAllOf
+
+
+type alias OneOfName =
+    Common.TypeName
+
+
+oneOfDeclarations :
+    List String
+    -> FastDict.Dict OneOfName Common.OneOfData
+    -> CliMonad (List Elm.Declaration)
+oneOfDeclarations namespace enums =
+    CliMonad.combineMap
+        (oneOfDeclaration namespace)
+        (FastDict.toList enums)
+
+
+oneOfDeclaration :
+    List String
+    -> ( OneOfName, Common.OneOfData )
+    -> CliMonad Elm.Declaration
+oneOfDeclaration namespace ( oneOfName, variants ) =
+    let
+        variantDeclaration : { name : Common.VariantName, type_ : Common.Type } -> CliMonad Elm.Variant
+        variantDeclaration { name, type_ } =
+            typeToAnnotation namespace type_
+                |> CliMonad.map
+                    (\variantAnnotation ->
+                        let
+                            variantName : Common.VariantName
+                            variantName =
+                                toVariantName oneOfName name
+                        in
+                        Elm.variantWith variantName [ variantAnnotation ]
+                    )
+    in
+    variants
+        |> CliMonad.combineMap variantDeclaration
+        |> CliMonad.map
+            (Elm.customType oneOfName
+                >> Elm.exposeWith
+                    { exposeConstructor = True
+                    , group = Just "Types"
+                    }
+            )
+
+
+
+--
+--
+--
+
+
+toVariantName : String -> String -> String
+toVariantName oneOfName variantName =
+    oneOfName ++ "__" ++ fixOneOfName variantName
+
+
+{-| When we go from `Elm.Annotation` to `String` it includes the module name if it's an imported type.
+We don't want that for our generated types, so we remove it here.
+-}
+fixOneOfName : String -> String
+fixOneOfName name =
+    name
+        |> String.replace "OpenApi.Nullable" "Nullable"
+        |> String.replace "." ""
+
+
+typeToAnnotation : List String -> Common.Type -> CliMonad Elm.Annotation.Annotation
+typeToAnnotation namespace type_ =
+    case type_ of
+        Common.Nullable t ->
+            typeToAnnotation namespace t
+                |> CliMonad.map
+                    (\ann ->
+                        Elm.Annotation.namedWith (namespace ++ [ "OpenApi" ])
+                            "Nullable"
+                            [ ann ]
+                    )
+
+        Common.Object fields ->
+            objectToAnnotation namespace { useMaybe = False } fields
+
+        Common.String ->
+            CliMonad.succeed Elm.Annotation.string
+
+        Common.Int ->
+            CliMonad.succeed Elm.Annotation.int
+
+        Common.Float ->
+            CliMonad.succeed Elm.Annotation.float
+
+        Common.Bool ->
+            CliMonad.succeed Elm.Annotation.bool
+
+        Common.List t ->
+            CliMonad.map Elm.Annotation.list (typeToAnnotation namespace t)
+
+        Common.OneOf oneOfName oneOfData ->
+            oneOfAnnotation oneOfName oneOfData
+
+        Common.Value ->
+            CliMonad.succeed Gen.Json.Encode.annotation_.value
+
+        Common.Ref ref ->
+            CliMonad.map (Elm.Annotation.named []) (refToTypeName ref)
+
+        Common.Bytes ->
+            CliMonad.succeed Gen.Bytes.annotation_.bytes
+
+        Common.Unit ->
+            CliMonad.succeed Elm.Annotation.unit
+
+
+typeToAnnotationMaybe : List String -> Common.Type -> CliMonad Elm.Annotation.Annotation
+typeToAnnotationMaybe namespace type_ =
+    case type_ of
+        Common.Nullable t ->
+            CliMonad.map Elm.Annotation.maybe (typeToAnnotationMaybe namespace t)
+
+        Common.Object fields ->
+            objectToAnnotation namespace { useMaybe = True } fields
+
+        Common.String ->
+            CliMonad.succeed Elm.Annotation.string
+
+        Common.Int ->
+            CliMonad.succeed Elm.Annotation.int
+
+        Common.Float ->
+            CliMonad.succeed Elm.Annotation.float
+
+        Common.Bool ->
+            CliMonad.succeed Elm.Annotation.bool
+
+        Common.List t ->
+            CliMonad.map Elm.Annotation.list (typeToAnnotationMaybe namespace t)
+
+        Common.OneOf oneOfName oneOfData ->
+            oneOfAnnotation oneOfName oneOfData
+
+        Common.Value ->
+            CliMonad.succeed Gen.Json.Encode.annotation_.value
+
+        Common.Ref ref ->
+            CliMonad.map (Elm.Annotation.named []) (refToTypeName ref)
+
+        Common.Bytes ->
+            CliMonad.succeed Gen.Bytes.annotation_.bytes
+
+        Common.Unit ->
+            CliMonad.succeed Elm.Annotation.unit
+
+
+objectToAnnotation : List String -> { useMaybe : Bool } -> Common.Object -> CliMonad Elm.Annotation.Annotation
+objectToAnnotation namespace config fields =
+    FastDict.toList fields
+        |> CliMonad.combineMap (\( k, v ) -> CliMonad.map (Tuple.pair (Common.toValueName k)) (fieldToAnnotation namespace config v))
+        |> CliMonad.map recordType
+
+
+recordType : List ( String, Elm.Annotation.Annotation ) -> Elm.Annotation.Annotation
+recordType fields =
+    fields
+        |> List.map (Tuple.mapFirst Common.toValueName)
+        |> Elm.Annotation.record
+
+
+fieldToAnnotation : List String -> { useMaybe : Bool } -> Common.Field -> CliMonad Elm.Annotation.Annotation
+fieldToAnnotation namespace { useMaybe } { type_, required } =
+    let
+        annotation : CliMonad Elm.Annotation.Annotation
+        annotation =
+            if useMaybe then
+                typeToAnnotationMaybe namespace type_
+
+            else
+                typeToAnnotation namespace type_
+    in
+    if required then
+        annotation
+
+    else
+        CliMonad.map Gen.Maybe.annotation_.maybe annotation
+
+
+typeToEncoder : List String -> Common.Type -> CliMonad (Elm.Expression -> Elm.Expression)
+typeToEncoder namespace type_ =
+    case type_ of
+        Common.String ->
+            CliMonad.succeed Gen.Json.Encode.call_.string
+
+        Common.Int ->
+            CliMonad.succeed Gen.Json.Encode.call_.int
+
+        Common.Float ->
+            CliMonad.succeed Gen.Json.Encode.call_.float
+
+        Common.Bool ->
+            CliMonad.succeed Gen.Json.Encode.call_.bool
+
+        Common.Object properties ->
+            let
+                propertiesList : List ( Common.FieldName, Common.Field )
+                propertiesList =
+                    FastDict.toList properties
+
+                allRequired : Bool
+                allRequired =
+                    List.all (\( _, { required } ) -> required) propertiesList
+            in
+            propertiesList
+                |> CliMonad.combineMap
+                    (\( key, field ) ->
+                        typeToEncoder namespace field.type_
+                            |> CliMonad.map
+                                (\encoder rec ->
+                                    let
+                                        fieldExpr : Elm.Expression
+                                        fieldExpr =
+                                            Elm.get (Common.toValueName key) rec
+
+                                        toTuple : Elm.Expression -> Elm.Expression
+                                        toTuple value =
+                                            Elm.tuple
+                                                (Elm.string key)
+                                                (encoder value)
+                                    in
+                                    if allRequired then
+                                        toTuple fieldExpr
+
+                                    else if field.required then
+                                        Gen.Maybe.make_.just (toTuple fieldExpr)
+
+                                    else
+                                        Gen.Maybe.map toTuple fieldExpr
+                                )
+                    )
+                |> CliMonad.map
+                    (\toProperties value ->
+                        if allRequired then
+                            Gen.Json.Encode.object <|
+                                List.map (\prop -> prop value) toProperties
+
+                        else
+                            Gen.Json.Encode.call_.object <|
+                                Gen.List.filterMap Gen.Basics.identity <|
+                                    List.map (\prop -> prop value) toProperties
+                    )
+
+        Common.List t ->
+            typeToEncoder namespace t
+                |> CliMonad.map
+                    (\encoder ->
+                        Gen.Json.Encode.call_.list (Elm.functionReduced "rec" encoder)
+                    )
+
+        Common.Nullable t ->
+            typeToEncoder namespace t
+                |> CliMonad.map
+                    (\encoder nullableValue ->
+                        Elm.Case.custom
+                            nullableValue
+                            (Elm.Annotation.namedWith (namespace ++ [ "OpenApi" ]) "Nullable" [ Elm.Annotation.var "value" ])
+                            [ Elm.Case.branch0 "Null" Gen.Json.Encode.null
+                            , Elm.Case.branch1 "Present"
+                                ( "value", Elm.Annotation.var "value" )
+                                encoder
+                            ]
+                    )
+
+        Common.Value ->
+            CliMonad.succeed <| Gen.Basics.identity
+
+        Common.Ref ref ->
+            CliMonad.map (\name rec -> Elm.apply (Elm.val ("encode" ++ name)) [ rec ]) (refToTypeName ref)
+
+        Common.OneOf oneOfName oneOfData ->
+            oneOfData
+                |> CliMonad.combineMap
+                    (\variant ->
+                        CliMonad.map2
+                            (\ann variantEncoder ->
+                                Elm.Case.branch1 (toVariantName oneOfName variant.name)
+                                    ( "content", ann )
+                                    variantEncoder
+                            )
+                            (typeToAnnotation namespace variant.type_)
+                            (typeToEncoder namespace variant.type_)
+                    )
+                |> CliMonad.map
+                    (\branches rec ->
+                        Elm.Case.custom rec
+                            (Elm.Annotation.named [] oneOfName)
+                            branches
+                    )
+
+        Common.Bytes ->
+            CliMonad.todo "encoder for bytes not implemented"
+                |> CliMonad.map (\encoder _ -> encoder)
+
+        Common.Unit ->
+            CliMonad.succeed (\_ -> Gen.Json.Encode.null)
+
+
+oneOfAnnotation : Common.TypeName -> Common.OneOfData -> CliMonad Elm.Annotation.Annotation
+oneOfAnnotation oneOfName oneOfData =
+    Elm.Annotation.named [] oneOfName
+        |> CliMonad.succeedWith
+            (FastDict.singleton oneOfName oneOfData)
+
+
+refToTypeName : List String -> CliMonad Common.TypeName
+refToTypeName ref =
+    case ref of
+        [ "#", "components", _, name ] ->
+            CliMonad.succeed (Common.typifyName name)
+
+        _ ->
+            CliMonad.fail <| "Couldn't get the type ref (" ++ String.join "/" ref ++ ") for the response"
+
+
+typeToDecoder : List String -> Common.Type -> CliMonad Elm.Expression
+typeToDecoder namespace type_ =
+    case type_ of
+        Common.Object properties ->
+            let
+                propertiesList : List ( String, Common.Field )
+                propertiesList =
+                    FastDict.toList properties
+            in
+            List.foldl
+                (\( key, field ) prevExprRes ->
+                    CliMonad.map2
+                        (\internalDecoder prevExpr ->
+                            Elm.Op.pipe
+                                (Elm.apply
+                                    (Elm.value
+                                        { importFrom = namespace ++ [ "OpenApi" ]
+                                        , name = "jsonDecodeAndMap"
+                                        , annotation = Nothing
+                                        }
+                                    )
+                                    [ if field.required then
+                                        Gen.Json.Decode.field key internalDecoder
+
+                                      else
+                                        decodeOptionalField.callFrom (namespace ++ [ "OpenApi" ]) (Elm.string key) internalDecoder
+                                    ]
+                                )
+                                prevExpr
+                        )
+                        (typeToDecoder namespace field.type_)
+                        prevExprRes
+                )
+                (CliMonad.succeed
+                    (Gen.Json.Decode.succeed
+                        (Elm.function
+                            (List.map (\( key, _ ) -> ( Common.toValueName key, Nothing )) propertiesList)
+                            (\args ->
+                                Elm.record
+                                    (List.map2
+                                        (\( key, _ ) arg -> ( Common.toValueName key, arg ))
+                                        propertiesList
+                                        args
+                                    )
+                            )
+                        )
+                    )
+                )
+                propertiesList
+
+        Common.String ->
+            CliMonad.succeed Gen.Json.Decode.string
+
+        Common.Int ->
+            CliMonad.succeed Gen.Json.Decode.int
+
+        Common.Float ->
+            CliMonad.succeed Gen.Json.Decode.float
+
+        Common.Bool ->
+            CliMonad.succeed Gen.Json.Decode.bool
+
+        Common.Unit ->
+            CliMonad.succeed (Gen.Json.Decode.succeed Elm.unit)
+
+        Common.List t ->
+            CliMonad.map Gen.Json.Decode.list
+                (typeToDecoder namespace t)
+
+        Common.Value ->
+            CliMonad.succeed Gen.Json.Decode.value
+
+        Common.Nullable t ->
+            CliMonad.map
+                (\decoder ->
+                    Gen.Json.Decode.oneOf
+                        [ Gen.Json.Decode.call_.map
+                            (Elm.value
+                                { importFrom = namespace ++ [ "OpenApi" ]
+                                , name = "Present"
+                                , annotation = Nothing
+                                }
+                            )
+                            decoder
+                        , Gen.Json.Decode.null
+                            (Elm.value
+                                { importFrom = namespace ++ [ "OpenApi" ]
+                                , name = "Null"
+                                , annotation = Nothing
+                                }
+                            )
+                        ]
+                )
+                (typeToDecoder namespace t)
+
+        Common.Ref ref ->
+            CliMonad.map (\name -> Elm.val ("decode" ++ name)) (refToTypeName ref)
+
+        Common.OneOf oneOfName variants ->
+            variants
+                |> CliMonad.combineMap
+                    (\variant ->
+                        typeToDecoder namespace variant.type_
+                            |> CliMonad.map
+                                (Gen.Json.Decode.call_.map
+                                    (Elm.val
+                                        (toVariantName oneOfName variant.name)
+                                    )
+                                )
+                    )
+                |> CliMonad.map
+                    (Gen.Json.Decode.oneOf
+                        >> Elm.withType (Elm.Annotation.named [] oneOfName)
+                    )
+
+        Common.Bytes ->
+            CliMonad.todo "Bytes decoder not implemented yet"
+
+
+{-| Decode an optional field
+
+    decodeString (decodeOptionalField "x" int) "{ \"x\": 3 }"
+    --> Ok (Just 3)
+
+    decodeString (decodeOptionalField "x" int) "{ \"x\": true }"
+    --> Err ...
+
+    decodeString (decodeOptionalField "x" int) "{ \"y\": 4 }"
+    --> Ok Nothing
+
+-}
+decodeOptionalField :
+    { declaration : Elm.Declaration
+    , call : Elm.Expression -> Elm.Expression -> Elm.Expression
+    , callFrom : List String -> Elm.Expression -> Elm.Expression -> Elm.Expression
+    , value : List String -> Elm.Expression
+    }
+decodeOptionalField =
+    let
+        decoderAnnotation : Elm.Annotation.Annotation
+        decoderAnnotation =
+            Gen.Json.Decode.annotation_.decoder (Elm.Annotation.var "t")
+
+        resultAnnotation : Elm.Annotation.Annotation
+        resultAnnotation =
+            Gen.Json.Decode.annotation_.decoder (Gen.Maybe.annotation_.maybe <| Elm.Annotation.var "t")
+    in
+    Elm.Declare.fn2 "decodeOptionalField"
+        ( "key", Just Elm.Annotation.string )
+        ( "fieldDecoder", Just decoderAnnotation )
+    <|
+        \key fieldDecoder ->
+            -- The tricky part is that we want to make sure that
+            -- if the field exists we error out if it has an incorrect shape.
+            -- So what we do is we `oneOf` with `value` to avoid the `Nothing` branch,
+            -- `andThen` we decode it. This is why we can't just use `maybe`, we would
+            -- give `Nothing` when the shape is wrong.
+            Gen.Json.Decode.oneOf
+                [ Gen.Json.Decode.call_.map
+                    (Elm.fn ( "_", Nothing ) <| \_ -> Elm.bool True)
+                    (Gen.Json.Decode.call_.field key Gen.Json.Decode.value)
+                , Gen.Json.Decode.succeed (Elm.bool False)
+                ]
+                |> Gen.Json.Decode.andThen
+                    (\hasField ->
+                        Elm.ifThen hasField
+                            (Gen.Json.Decode.call_.field key
+                                (Gen.Json.Decode.oneOf
+                                    [ Gen.Json.Decode.map Gen.Maybe.make_.just fieldDecoder
+                                    , Gen.Json.Decode.null Gen.Maybe.make_.nothing
+                                    ]
+                                )
+                            )
+                            (Gen.Json.Decode.succeed Gen.Maybe.make_.nothing)
+                    )
+                |> Elm.withType resultAnnotation

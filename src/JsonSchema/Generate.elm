@@ -63,15 +63,15 @@ schemaToDeclarations namespace name schema =
 
 schemaToAnnotation : List String -> Json.Schema.Definitions.Schema -> CliMonad Elm.Annotation.Annotation
 schemaToAnnotation namespace schema =
-    SchemaUtils.schemaToType namespace schema |> CliMonad.andThen (CliMonad.typeToAnnotation namespace)
+    SchemaUtils.schemaToType namespace schema |> CliMonad.andThen (SchemaUtils.typeToAnnotation namespace)
 
 
 schemaToDecoder : List String -> Json.Schema.Definitions.Schema -> CliMonad Elm.Expression
 schemaToDecoder namespace schema =
     SchemaUtils.schemaToType namespace schema
-        |> CliMonad.andThen (CliMonad.typeToDecoder namespace)
+        |> CliMonad.andThen (SchemaUtils.typeToDecoder namespace)
 
 
 schemaToEncoder : List String -> Json.Schema.Definitions.Schema -> CliMonad (Elm.Expression -> Elm.Expression)
 schemaToEncoder namespace schema =
-    SchemaUtils.schemaToType namespace schema |> CliMonad.andThen (CliMonad.typeToEncoder namespace)
+    SchemaUtils.schemaToType namespace schema |> CliMonad.andThen (SchemaUtils.typeToEncoder namespace)

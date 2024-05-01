@@ -349,7 +349,7 @@ attemptToFormat files =
                                     BackendTask.Stream.fromString file.contents
                                         |> BackendTask.Stream.pipe (BackendTask.Stream.command "elm-format" [ "--stdin" ])
                                         |> BackendTask.Stream.read
-                                        |> BackendTask.andThen (\formatted -> BackendTask.succeed { file | contents = formatted.body })
+                                        |> BackendTask.map (\formatted -> { file | contents = formatted.body })
                                         -- Never fail on formatting errors
                                         |> BackendTask.onError (\_ -> BackendTask.succeed file)
                                 )

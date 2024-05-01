@@ -1,13 +1,11 @@
 module SchemaUtils exposing
     ( getAlias
-    , schemaToAnnotation
     , schemaToType
     )
 
 import CliMonad exposing (CliMonad)
 import Common
 import Dict
-import Elm.Annotation
 import Elm.ToString
 import FastDict
 import Json.Schema.Definitions
@@ -302,8 +300,3 @@ objectSchemaToType namespace subSchema =
         )
         (subSchemaToProperties namespace subSchema)
         propertiesFromAllOf
-
-
-schemaToAnnotation : List String -> Json.Schema.Definitions.Schema -> CliMonad Elm.Annotation.Annotation
-schemaToAnnotation namespace schema =
-    schemaToType namespace schema |> CliMonad.andThen (CliMonad.typeToAnnotation namespace)

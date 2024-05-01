@@ -367,12 +367,6 @@ oneOfDeclaration namespace ( oneOfName, variants ) =
             )
 
 
-
---
---
---
-
-
 toVariantName : String -> String -> String
 toVariantName oneOfName variantName =
     oneOfName ++ "__" ++ fixOneOfName variantName

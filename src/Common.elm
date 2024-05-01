@@ -11,7 +11,7 @@ module Common exposing
     , typifyName
     )
 
-import FastDict exposing (Dict)
+import FastDict
 import String.Extra
 
 
@@ -103,7 +103,7 @@ type Type
 
 
 type alias Object =
-    Dict FieldName Field
+    FastDict.Dict FieldName Field
 
 
 type alias OneOfData =

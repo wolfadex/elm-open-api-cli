@@ -28,11 +28,11 @@ module CliMonad exposing
     , withWarning
     )
 
-import Common exposing (Field, Object, OneOfData, Type(..), TypeName, VariantName, toValueName)
+import Common
 import Dict
 import Elm
 import Elm.Annotation
-import FastDict exposing (Dict)
+import FastDict
 import Gen.Bytes
 import Gen.Debug
 import Gen.Json.Encode
@@ -51,7 +51,7 @@ type alias Path =
 
 
 type alias OneOfName =
-    TypeName
+    Common.TypeName
 
 
 type CliMonad a
@@ -62,7 +62,7 @@ type CliMonad a
                 Message
                 ( a
                 , List Message
-                , Dict OneOfName OneOfData
+                , FastDict.Dict OneOfName Common.OneOfData
                 )
         )
 
@@ -196,7 +196,7 @@ run namespace input (CliMonad x) =
 
 oneOfDeclarations :
     List String
-    -> Dict OneOfName OneOfData
+    -> FastDict.Dict OneOfName Common.OneOfData
     -> CliMonad (List Elm.Declaration)
 oneOfDeclarations namespace enums =
     combineMap
@@ -206,17 +206,17 @@ oneOfDeclarations namespace enums =
 
 oneOfDeclaration :
     List String
-    -> ( OneOfName, OneOfData )
+    -> ( OneOfName, Common.OneOfData )
     -> CliMonad Elm.Declaration
 oneOfDeclaration namespace ( oneOfName, variants ) =
     let
-        variantDeclaration : { name : VariantName, type_ : Type } -> CliMonad Elm.Variant
+        variantDeclaration : { name : Common.VariantName, type_ : Common.Type } -> CliMonad Elm.Variant
         variantDeclaration { name, type_ } =
             typeToAnnotation namespace type_
                 |> map
                     (\variantAnnotation ->
                         let
-                            variantName : VariantName
+                            variantName : Common.VariantName
                             variantName =
                                 toVariantName oneOfName name
                         in
@@ -262,14 +262,14 @@ errorToWarning (CliMonad f) =
         )
 
 
-objectToAnnotation : List String -> { useMaybe : Bool } -> Object -> CliMonad Elm.Annotation.Annotation
+objectToAnnotation : List String -> { useMaybe : Bool } -> Common.Object -> CliMonad Elm.Annotation.Annotation
 objectToAnnotation namespace config fields =
     FastDict.toList fields
         |> combineMap (\( k, v ) -> map (Tuple.pair (Common.toValueName k)) (fieldToAnnotation namespace config v))
         |> map recordType
 
 
-fieldToAnnotation : List String -> { useMaybe : Bool } -> Field -> CliMonad Elm.Annotation.Annotation
+fieldToAnnotation : List String -> { useMaybe : Bool } -> Common.Field -> CliMonad Elm.Annotation.Annotation
 fieldToAnnotation namespace { useMaybe } { type_, required } =
     let
         annotation : CliMonad Elm.Annotation.Annotation
@@ -290,14 +290,14 @@ fieldToAnnotation namespace { useMaybe } { type_, required } =
 recordType : List ( String, Elm.Annotation.Annotation ) -> Elm.Annotation.Annotation
 recordType fields =
     fields
-        |> List.map (Tuple.mapFirst toValueName)
+        |> List.map (Tuple.mapFirst Common.toValueName)
         |> Elm.Annotation.record
 
 
-typeToAnnotation : List String -> Type -> CliMonad Elm.Annotation.Annotation
+typeToAnnotation : List String -> Common.Type -> CliMonad Elm.Annotation.Annotation
 typeToAnnotation namespace type_ =
     case type_ of
-        Nullable t ->
+        Common.Nullable t ->
             typeToAnnotation namespace t
                 |> map
                     (\ann ->
@@ -306,81 +306,81 @@ typeToAnnotation namespace type_ =
                             [ ann ]
                     )
 
-        Object fields ->
+        Common.Object fields ->
             objectToAnnotation namespace { useMaybe = False } fields
 
-        String ->
+        Common.String ->
             succeed Elm.Annotation.string
 
-        Int ->
+        Common.Int ->
             succeed Elm.Annotation.int
 
-        Float ->
+        Common.Float ->
             succeed Elm.Annotation.float
 
-        Bool ->
+        Common.Bool ->
             succeed Elm.Annotation.bool
 
-        List t ->
+        Common.List t ->
             map Elm.Annotation.list (typeToAnnotation namespace t)
 
-        OneOf oneOfName oneOfData ->
+        Common.OneOf oneOfName oneOfData ->
             oneOfAnnotation oneOfName oneOfData
 
-        Value ->
+        Common.Value ->
             succeed Gen.Json.Encode.annotation_.value
 
-        Ref ref ->
+        Common.Ref ref ->
             map (Elm.Annotation.named []) (refToTypeName ref)
 
-        Bytes ->
+        Common.Bytes ->
             succeed Gen.Bytes.annotation_.bytes
 
-        Unit ->
+        Common.Unit ->
             succeed Elm.Annotation.unit
 
 
-typeToAnnotationMaybe : List String -> Type -> CliMonad Elm.Annotation.Annotation
+typeToAnnotationMaybe : List String -> Common.Type -> CliMonad Elm.Annotation.Annotation
 typeToAnnotationMaybe namespace type_ =
     case type_ of
-        Nullable t ->
+        Common.Nullable t ->
             map Elm.Annotation.maybe (typeToAnnotationMaybe namespace t)
 
-        Object fields ->
+        Common.Object fields ->
             objectToAnnotation namespace { useMaybe = True } fields
 
-        String ->
+        Common.String ->
             succeed Elm.Annotation.string
 
-        Int ->
+        Common.Int ->
             succeed Elm.Annotation.int
 
-        Float ->
+        Common.Float ->
             succeed Elm.Annotation.float
 
-        Bool ->
+        Common.Bool ->
             succeed Elm.Annotation.bool
 
-        List t ->
+        Common.List t ->
             map Elm.Annotation.list (typeToAnnotationMaybe namespace t)
 
-        OneOf oneOfName oneOfData ->
+        Common.OneOf oneOfName oneOfData ->
             oneOfAnnotation oneOfName oneOfData
 
-        Value ->
+        Common.Value ->
             succeed Gen.Json.Encode.annotation_.value
 
-        Ref ref ->
+        Common.Ref ref ->
             map (Elm.Annotation.named []) (refToTypeName ref)
 
-        Bytes ->
+        Common.Bytes ->
             succeed Gen.Bytes.annotation_.bytes
 
-        Unit ->
+        Common.Unit ->
             succeed Elm.Annotation.unit
 
 
-oneOfAnnotation : TypeName -> OneOfData -> CliMonad Elm.Annotation.Annotation
+oneOfAnnotation : Common.TypeName -> Common.OneOfData -> CliMonad Elm.Annotation.Annotation
 oneOfAnnotation oneOfName oneOfData =
     CliMonad
         (\_ ->
@@ -420,7 +420,7 @@ stepOrFail msg f =
         )
 
 
-refToTypeName : List String -> CliMonad TypeName
+refToTypeName : List String -> CliMonad Common.TypeName
 refToTypeName ref =
     case ref of
         [ "#", "components", _, name ] ->

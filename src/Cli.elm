@@ -9,7 +9,7 @@ import BackendTask.Stream
 import Cli.Option
 import Cli.OptionsParser
 import Cli.Program
-import CliMonad exposing (Message)
+import CliMonad
 import Elm
 import FatalError
 import Json.Decode
@@ -301,7 +301,7 @@ generateFileFromOpenApiSpec :
     , generateTodos : Maybe String
     }
     -> OpenApi.OpenApi
-    -> BackendTask.BackendTask FatalError.FatalError ( List Elm.File, List Message )
+    -> BackendTask.BackendTask FatalError.FatalError ( List Elm.File, List CliMonad.Message )
 generateFileFromOpenApiSpec config apiSpec =
     let
         moduleName : List String
@@ -445,7 +445,7 @@ printSuccessMessage outputPaths =
         |> BackendTask.doEach
 
 
-messageToString : Message -> String
+messageToString : CliMonad.Message -> String
 messageToString { path, message } =
     if List.isEmpty path then
         "Error! " ++ message
@@ -454,7 +454,7 @@ messageToString { path, message } =
         "Error! " ++ message ++ "\n  Path: " ++ String.join " -> " path
 
 
-logWarning : ( Message, List Message ) -> BackendTask.BackendTask FatalError.FatalError ()
+logWarning : ( CliMonad.Message, List CliMonad.Message ) -> BackendTask.BackendTask FatalError.FatalError ()
 logWarning ( head, tail ) =
     let
         firstLine : String

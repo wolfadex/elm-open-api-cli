@@ -1,42 +1,32 @@
 module CliMonad exposing
-    ( CliMonad
-    , Message
-    , Path
-    , andThen
-    , andThen2
-    , combine
-    , combineDict
-    , combineMap
-    , errorToWarning
-    , fail
-    , fixOneOfName
-    , fromApiSpec
-    , map
-    , map2
-    , map3
-    , recordType
-    , refToTypeName
-    , run
-    , stepOrFail
-    , succeed
-    , toVariantName
-    , todo
-    , todoWithDefault
-    , typeToAnnotation
-    , typeToAnnotationMaybe
-    , withPath
-    , withWarning
+    ( CliMonad, Message, OneOfName, Path
+    , run, stepOrFail
+    , succeed, succeedWith, fail
+    , map, map2, map3
+    , andThen, andThen2, combine, combineDict, combineMap
+    , errorToWarning, fromApiSpec
+    , withPath, withWarning
+    , todo, todoWithDefault
     )
 
-import Common exposing (Field, Object, OneOfData, Type(..), TypeName, VariantName, toValueName)
+{-|
+
+@docs CliMonad, Message, OneOfName, Path
+@docs run, stepOrFail
+@docs succeed, succeedWith, fail
+@docs map, map2, map3
+@docs andThen, andThen2, combine, combineDict, combineMap
+@docs errorToWarning, fromApiSpec
+@docs withPath, withWarning
+@docs todo, todoWithDefault
+
+-}
+
+import Common
 import Dict
 import Elm
-import Elm.Annotation
-import FastDict exposing (Dict)
-import Gen.Bytes
+import FastDict
 import Gen.Debug
-import Gen.Json.Encode
-import Gen.Maybe
 import OpenApi exposing (OpenApi)
 
 
@@ -51,7 +41,7 @@ type alias Path =
 
 
 type alias OneOfName =
-    TypeName
+    Common.TypeName
 
 
 type CliMonad a
@@ -62,7 +52,7 @@ type CliMonad a
                 Message
                 ( a
                 , List Message
-                , Dict OneOfName OneOfData
+                , FastDict.Dict OneOfName Common.OneOfData
                 )
         )
 
@@ -127,6 +117,11 @@ succeed x =
     CliMonad (\_ -> Ok ( x, [], FastDict.empty ))
 
 
+succeedWith : FastDict.Dict OneOfName Common.OneOfData -> a -> CliMonad a
+succeedWith oneOfs x =
+    CliMonad (\_ -> Ok ( x, [], oneOfs ))
+
+
 map : (a -> b) -> CliMonad a -> CliMonad b
 map f (CliMonad x) =
     CliMonad (\input -> Result.map (\( xr, xw, xm ) -> ( f xr, xw, xm )) (x input))
@@ -174,14 +169,19 @@ andThen2 f x y =
 Automatically appends the needed `enum` declarations.
 
 -}
-run : List String -> { openApi : OpenApi, generateTodos : Bool } -> CliMonad (List Elm.Declaration) -> Result Message ( List Elm.Declaration, List Message )
-run namespace input (CliMonad x) =
+run :
+    (FastDict.Dict OneOfName Common.OneOfData -> CliMonad (List Elm.Declaration))
+    -> { openApi : OpenApi, generateTodos : Bool }
+    -> CliMonad (List Elm.Declaration)
+    -> Result Message ( List Elm.Declaration, List Message )
+run oneOfDeclarations input (CliMonad x) =
     x input
         |> Result.andThen
             (\( decls, warnings, oneOfs ) ->
                 let
                     (CliMonad h) =
-                        oneOfDeclarations namespace oneOfs |> withPath "While generating `oneOf`s"
+                        oneOfDeclarations oneOfs
+                            |> withPath "While generating `oneOf`s"
                 in
                 h input
                     |> Result.map
@@ -191,46 +191,6 @@ run namespace input (CliMonad x) =
                                 |> List.reverse
                             )
                         )
-            )
-
-
-oneOfDeclarations :
-    List String
-    -> Dict OneOfName OneOfData
-    -> CliMonad (List Elm.Declaration)
-oneOfDeclarations namespace enums =
-    combineMap
-        (oneOfDeclaration namespace)
-        (FastDict.toList enums)
-
-
-oneOfDeclaration :
-    List String
-    -> ( OneOfName, OneOfData )
-    -> CliMonad Elm.Declaration
-oneOfDeclaration namespace ( oneOfName, variants ) =
-    let
-        variantDeclaration : { name : VariantName, type_ : Type } -> CliMonad Elm.Variant
-        variantDeclaration { name, type_ } =
-            typeToAnnotation namespace type_
-                |> map
-                    (\variantAnnotation ->
-                        let
-                            variantName : VariantName
-                            variantName =
-                                toVariantName oneOfName name
-                        in
-                        Elm.variantWith variantName [ variantAnnotation ]
-                    )
-    in
-    variants
-        |> combineMap variantDeclaration
-        |> map
-            (Elm.customType oneOfName
-                >> Elm.exposeWith
-                    { exposeConstructor = True
-                    , group = Just "Types"
-                    }
             )
 
 
@@ -262,151 +222,6 @@ errorToWarning (CliMonad f) =
         )
 
 
-objectToAnnotation : List String -> { useMaybe : Bool } -> Object -> CliMonad Elm.Annotation.Annotation
-objectToAnnotation namespace config fields =
-    FastDict.toList fields
-        |> combineMap (\( k, v ) -> map (Tuple.pair (Common.toValueName k)) (fieldToAnnotation namespace config v))
-        |> map recordType
-
-
-fieldToAnnotation : List String -> { useMaybe : Bool } -> Field -> CliMonad Elm.Annotation.Annotation
-fieldToAnnotation namespace { useMaybe } { type_, required } =
-    let
-        annotation : CliMonad Elm.Annotation.Annotation
-        annotation =
-            if useMaybe then
-                typeToAnnotationMaybe namespace type_
-
-            else
-                typeToAnnotation namespace type_
-    in
-    if required then
-        annotation
-
-    else
-        map Gen.Maybe.annotation_.maybe annotation
-
-
-recordType : List ( String, Elm.Annotation.Annotation ) -> Elm.Annotation.Annotation
-recordType fields =
-    fields
-        |> List.map (Tuple.mapFirst toValueName)
-        |> Elm.Annotation.record
-
-
-typeToAnnotation : List String -> Type -> CliMonad Elm.Annotation.Annotation
-typeToAnnotation namespace type_ =
-    case type_ of
-        Nullable t ->
-            typeToAnnotation namespace t
-                |> map
-                    (\ann ->
-                        Elm.Annotation.namedWith (namespace ++ [ "OpenApi" ])
-                            "Nullable"
-                            [ ann ]
-                    )
-
-        Object fields ->
-            objectToAnnotation namespace { useMaybe = False } fields
-
-        String ->
-            succeed Elm.Annotation.string
-
-        Int ->
-            succeed Elm.Annotation.int
-
-        Float ->
-            succeed Elm.Annotation.float
-
-        Bool ->
-            succeed Elm.Annotation.bool
-
-        List t ->
-            map Elm.Annotation.list (typeToAnnotation namespace t)
-
-        OneOf oneOfName oneOfData ->
-            oneOfAnnotation oneOfName oneOfData
-
-        Value ->
-            succeed Gen.Json.Encode.annotation_.value
-
-        Ref ref ->
-            map (Elm.Annotation.named []) (refToTypeName ref)
-
-        Bytes ->
-            succeed Gen.Bytes.annotation_.bytes
-
-        Unit ->
-            succeed Elm.Annotation.unit
-
-
-typeToAnnotationMaybe : List String -> Type -> CliMonad Elm.Annotation.Annotation
-typeToAnnotationMaybe namespace type_ =
-    case type_ of
-        Nullable t ->
-            map Elm.Annotation.maybe (typeToAnnotationMaybe namespace t)
-
-        Object fields ->
-            objectToAnnotation namespace { useMaybe = True } fields
-
-        String ->
-            succeed Elm.Annotation.string
-
-        Int ->
-            succeed Elm.Annotation.int
-
-        Float ->
-            succeed Elm.Annotation.float
-
-        Bool ->
-            succeed Elm.Annotation.bool
-
-        List t ->
-            map Elm.Annotation.list (typeToAnnotationMaybe namespace t)
-
-        OneOf oneOfName oneOfData ->
-            oneOfAnnotation oneOfName oneOfData
-
-        Value ->
-            succeed Gen.Json.Encode.annotation_.value
-
-        Ref ref ->
-            map (Elm.Annotation.named []) (refToTypeName ref)
-
-        Bytes ->
-            succeed Gen.Bytes.annotation_.bytes
-
-        Unit ->
-            succeed Elm.Annotation.unit
-
-
-oneOfAnnotation : TypeName -> OneOfData -> CliMonad Elm.Annotation.Annotation
-oneOfAnnotation oneOfName oneOfData =
-    CliMonad
-        (\_ ->
-            Ok
-                ( Elm.Annotation.named [] oneOfName
-                , []
-                , FastDict.singleton oneOfName oneOfData
-                )
-        )
-
-
-{-| When we go from `Elm.Annotation` to `String` it includes the module name if it's an imported type.
-We don't want that for our generated types, so we remove it here.
--}
-fixOneOfName : String -> String
-fixOneOfName name =
-    name
-        |> String.replace "OpenApi.Nullable" "Nullable"
-        |> String.replace "." ""
-
-
-toVariantName : String -> String -> String
-toVariantName oneOfName variantName =
-    oneOfName ++ "__" ++ fixOneOfName variantName
-
-
 stepOrFail : String -> (a -> Maybe value) -> CliMonad a -> CliMonad value
 stepOrFail msg f =
     andThen
@@ -418,16 +233,6 @@ stepOrFail msg f =
                 Nothing ->
                     fail msg
         )
-
-
-refToTypeName : List String -> CliMonad TypeName
-refToTypeName ref =
-    case ref of
-        [ "#", "components", _, name ] ->
-            succeed (Common.typifyName name)
-
-        _ ->
-            fail <| "Couldn't get the type ref (" ++ String.join "/" ref ++ ") for the response"
 
 
 combineDict : Dict.Dict comparable (CliMonad a) -> CliMonad (Dict.Dict comparable a)

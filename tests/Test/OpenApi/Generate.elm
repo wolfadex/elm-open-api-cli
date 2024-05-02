@@ -1,7 +1,7 @@
 module Test.OpenApi.Generate exposing (suite)
 
 import Char
-import CliMonad exposing (Message)
+import CliMonad
 import Elm
 import Expect
 import Fuzz
@@ -65,7 +65,7 @@ suite =
                                     |> Maybe.withDefault "Carl"
                                     |> List.singleton
 
-                            genFiles : Result Message ( List Elm.File, List Message )
+                            genFiles : Result CliMonad.Message ( List Elm.File, List CliMonad.Message )
                             genFiles =
                                 OpenApi.Generate.files
                                     { namespace = namespace

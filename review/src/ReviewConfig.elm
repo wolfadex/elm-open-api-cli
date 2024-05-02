@@ -21,6 +21,7 @@ import NoUnused.Exports
 import NoUnused.Parameters
 import NoUnused.Patterns
 import NoUnused.Variables
+import Review.ImportSimple
 import Review.Rule as Rule exposing (Rule)
 import Simplify
 
@@ -54,5 +55,6 @@ config =
     , NoUnused.Patterns.rule
     , NoUnused.Variables.rule
     , Simplify.rule Simplify.defaults
+    , Review.ImportSimple.rule
     ]
         |> List.map (Rule.ignoreErrorsForDirectories [ "codegen" ])

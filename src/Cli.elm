@@ -97,33 +97,34 @@ run : Pages.Script.Script
 run =
     Pages.Script.withCliOptions program
         (\cliOptions ->
-            (case typeOfPath cliOptions.entryFilePath of
-                Url url ->
-                    readFromUrl url
-                        |> Pages.Script.Spinner.runTask ("Download OAS from " ++ Url.toString url)
+            Pages.Script.Spinner.steps
+                |> (case typeOfPath cliOptions.entryFilePath of
+                        Url url ->
+                            Pages.Script.Spinner.withStep ("Download OAS from " ++ Url.toString url)
+                                (\_ -> readFromUrl url)
 
-                File path ->
-                    readFromFile path
-                        |> Pages.Script.Spinner.runTask ("Read OAS from " ++ path)
-            )
-                |> BackendTask.andThen
-                    (decodeOpenApiSpecOrFail { hasAttemptedToConvertFromSwagger = False } cliOptions)
-                |> BackendTask.andThen
+                        File path ->
+                            Pages.Script.Spinner.withStep ("Read OAS from " ++ path)
+                                (\_ -> readFromFile path)
+                   )
+                |> Pages.Script.Spinner.withStep "Parse OAS" (decodeOpenApiSpecOrFail { hasAttemptedToConvertFromSwagger = False } cliOptions)
+                |> Pages.Script.Spinner.withStep "Generate Elm modules"
                     (generateFileFromOpenApiSpec
                         { outputModuleName = cliOptions.outputModuleName
                         , generateTodos = cliOptions.generateTodos
                         }
+                        >> BackendTask.andThen
+                            (\( decls, warnings ) ->
+                                warnings
+                                    |> List.Extra.gatherEqualsBy .message
+                                    |> List.map logWarning
+                                    |> BackendTask.doEach
+                                    |> BackendTask.map (\_ -> decls)
+                            )
                     )
-                |> BackendTask.andThen
-                    (\( decls, warnings ) ->
-                        warnings
-                            |> List.Extra.gatherEqualsBy .message
-                            |> List.map logWarning
-                            |> BackendTask.doEach
-                            |> BackendTask.map (\_ -> decls)
-                    )
-                |> BackendTask.andThen attemptToFormat
-                |> BackendTask.andThen (writeSdkToDisk cliOptions.outputDirectory)
+                |> Pages.Script.Spinner.withStep "Format with elm-format" attemptToFormat
+                |> Pages.Script.Spinner.withStep "Write to disk" (writeSdkToDisk cliOptions.outputDirectory)
+                |> Pages.Script.Spinner.runSteps
                 |> BackendTask.andThen printSuccessMessage
         )
 
@@ -136,7 +137,6 @@ decodeOpenApiSpecOrFail config cliOptions input =
             (decodeMaybeYaml OpenApi.decode cliOptions.entryFilePath
                 >> BackendTask.fromResult
             )
-        |> Pages.Script.Spinner.runTask "Parse OAS"
         |> BackendTask.onError
             (\decodeError ->
                 if config.hasAttemptedToConvertFromSwagger then
@@ -331,7 +331,6 @@ generateFileFromOpenApiSpec config apiSpec =
         apiSpec
         |> Result.mapError (messageToString >> FatalError.fromString)
         |> BackendTask.fromResult
-        |> Pages.Script.Spinner.runTask "Generate Elm modules"
 
 
 {-| Check to see if `elm-format` is available, and if so format the files
@@ -354,7 +353,6 @@ attemptToFormat files =
                                         |> BackendTask.onError (\_ -> BackendTask.succeed file)
                                 )
                             |> BackendTask.combine
-                            |> Pages.Script.Spinner.runTask "Format with elm-format"
 
                     Nothing ->
                         BackendTask.succeed files
@@ -394,7 +392,6 @@ writeSdkToDisk outputDirectory =
                 |> BackendTask.map (\_ -> outputPath)
         )
         >> BackendTask.combine
-        >> Pages.Script.Spinner.runTask "Write to disk"
 
 
 printSuccessMessage : List String -> BackendTask.BackendTask FatalError.FatalError ()

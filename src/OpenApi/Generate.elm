@@ -874,15 +874,20 @@ operationToAuthorizationInfo operation =
                                                                             CliMonad.todoWithDefault acc (apiKey.name ++ " header already set")
 
                                                                         else
+                                                                            let
+                                                                                cleanName : String
+                                                                                cleanName =
+                                                                                    Common.toValueName apiKey.name
+                                                                            in
                                                                             CliMonad.succeed
                                                                                 { headers =
                                                                                     Dict.insert apiKey.name
                                                                                         (\config ->
                                                                                             config
-                                                                                                |> Elm.get apiKey.name
+                                                                                                |> Elm.get cleanName
                                                                                         )
                                                                                         acc.headers
-                                                                                , params = Dict.insert apiKey.name (Dict.singleton "" Elm.Annotation.string) acc.params
+                                                                                , params = Dict.insert cleanName (Dict.singleton "" Elm.Annotation.string) acc.params
                                                                                 , scopes = []
                                                                                 }
 

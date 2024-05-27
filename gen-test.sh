@@ -4,6 +4,7 @@ set -e
 
 # Generate various SDKs
 
+npm run dev -- ./example/trustmark.json --module-name Trustmark
 npm run dev ./example/realworld-conduit.yaml
 npm run dev ./example/amadeus-airline-lookup.json
 npm run dev ./example/github-spec.json

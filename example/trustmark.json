@@ -1,0 +1,6048 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Trustmark.Retrofit.IntegrationApi",
+    "version": "v1"
+  },
+  "paths": {
+    "/Data/AssessmentSubmit": {
+      "post": {
+        "tags": [
+          "Assessment"
+        ],
+        "summary": "Creates a new Retrofit Assessment, generating an AssessmentReference",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssessmentRequestDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssessmentRequestDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssessmentRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssessmentDtoAssessmentDtoMapperRetrofitAssessmentDtoResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssessmentDtoAssessmentDtoMapperRetrofitAssessmentDtoResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssessmentDtoAssessmentDtoMapperRetrofitAssessmentDtoResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/Data/Assessment": {
+      "get": {
+        "tags": [
+          "Assessment"
+        ],
+        "summary": "Gets the Assessment with a valid AssessmentReference and Postcode combination",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GetAssessmentRequestDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GetAssessmentRequestDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/GetAssessmentRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssessmentDtoAssessmentDtoMapperRetrofitAssessmentDtoResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssessmentDtoAssessmentDtoMapperRetrofitAssessmentDtoResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssessmentDtoAssessmentDtoMapperRetrofitAssessmentDtoResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/Data/FileUploadToken": {
+      "post": {
+        "tags": [
+          "FileUploadToken"
+        ],
+        "summary": "Creates a fileUploadToken and provides an uploadUrl to PUT the file",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateFileUploadTokenDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateFileUploadTokenDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateFileUploadTokenDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/Health": {
+      "get": {
+        "tags": [
+          "Health"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/Data/LodgementSubmit": {
+      "post": {
+        "tags": [
+          "Lodgement"
+        ],
+        "summary": "Create a new lodgement against the project",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LodgementRequestDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LodgementRequestDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/LodgementRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/LodgementDtoLodgementDtoMapperLodgementDtoResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LodgementDtoLodgementDtoMapperLodgementDtoResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LodgementDtoLodgementDtoMapperLodgementDtoResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/Data/LodgementAmend": {
+      "put": {
+        "tags": [
+          "Lodgement"
+        ],
+        "summary": "Processes an Amend measure request with changes added to lodgement.ChangeRequests, a fee taken and the certificate reissued",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LodgementAmendRequestDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LodgementAmendRequestDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/LodgementAmendRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/LodgementDtoLodgementDtoMapperLodgementDtoResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LodgementDtoLodgementDtoMapperLodgementDtoResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LodgementDtoLodgementDtoMapperLodgementDtoResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/Data/LodgementCertificate": {
+      "post": {
+        "tags": [
+          "LodgementCertificate"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LodgementCertificateRequestDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LodgementCertificateRequestDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/LodgementCertificateRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/Data/MCS": {
+      "post": {
+        "tags": [
+          "MCSCertificate"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MCSCertificateRequestDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MCSCertificateRequestDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/MCSCertificateRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/Data/ProjectAmend": {
+      "post": {
+        "tags": [
+          "Project"
+        ],
+        "summary": "Amends an existing retrofit project",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProjectAmendRequestDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProjectAmendRequestDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProjectAmendRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetrofitProjectDtoRetrofitProjectDtoMapperRetrofitProjectDtoResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetrofitProjectDtoRetrofitProjectDtoMapperRetrofitProjectDtoResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetrofitProjectDtoRetrofitProjectDtoMapperRetrofitProjectDtoResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/Data/ProjectComplete": {
+      "post": {
+        "tags": [
+          "Project"
+        ],
+        "summary": "Complete an existing retrofit project",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProjectCompleteRequestDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProjectCompleteRequestDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProjectCompleteRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetrofitProjectDtoRetrofitProjectDtoMapperRetrofitProjectDtoResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetrofitProjectDtoRetrofitProjectDtoMapperRetrofitProjectDtoResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetrofitProjectDtoRetrofitProjectDtoMapperRetrofitProjectDtoResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/Data/ProjectUpdatePropertyInformation": {
+      "put": {
+        "tags": [
+          "Project"
+        ],
+        "summary": "Updates the property information for a retrofit project",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProjectUpdatePropertyInformationRequestDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProjectUpdatePropertyInformationRequestDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProjectUpdatePropertyInformationRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetrofitProjectDtoRetrofitProjectDtoMapperRetrofitProjectDtoResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetrofitProjectDtoRetrofitProjectDtoMapperRetrofitProjectDtoResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetrofitProjectDtoRetrofitProjectDtoMapperRetrofitProjectDtoResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Client Error"
+          }
+        }
+      }
+    },
+    "/Data/ProjectUpdateTenure": {
+      "put": {
+        "tags": [
+          "Project"
+        ],
+        "summary": "Updates the tenure for a retrofit project",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProjectUpdateTenureRequestDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProjectUpdateTenureRequestDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProjectUpdateTenureRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetrofitProjectDtoRetrofitProjectDtoMapperRetrofitProjectDtoResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetrofitProjectDtoRetrofitProjectDtoMapperRetrofitProjectDtoResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetrofitProjectDtoRetrofitProjectDtoMapperRetrofitProjectDtoResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Client Error"
+          }
+        }
+      }
+    },
+    "/Data/ProjectStart": {
+      "post": {
+        "tags": [
+          "Project"
+        ],
+        "summary": "Creates a new Retrofit Project using an AssessmentReference, generating a ProjectReference",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProjectStartRequestDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProjectStartRequestDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProjectStartRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetrofitProjectDtoRetrofitProjectDtoMapperRetrofitProjectDtoResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetrofitProjectDtoRetrofitProjectDtoMapperRetrofitProjectDtoResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetrofitProjectDtoRetrofitProjectDtoMapperRetrofitProjectDtoResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/Data/ProjectUPRNStatus": {
+      "post": {
+        "tags": [
+          "Project"
+        ],
+        "summary": "Returns the status of a UPRN check on a project (whether a UPRN has a related project or not by a third party or the same TMLN)",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProjectUPRNStatusRequestDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProjectUPRNStatusRequestDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProjectUPRNStatusRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/UPRNCheckResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UPRNCheckResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UPRNCheckResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/Data/ProjectVoid": {
+      "post": {
+        "tags": [
+          "Project"
+        ],
+        "summary": "Voids an existing retrofit project",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProjectVoidRequestDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProjectVoidRequestDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProjectVoidRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetrofitProjectDtoRetrofitProjectDtoMapperRetrofitProjectDtoResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetrofitProjectDtoRetrofitProjectDtoMapperRetrofitProjectDtoResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetrofitProjectDtoRetrofitProjectDtoMapperRetrofitProjectDtoResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Client Error"
+          }
+        }
+      }
+    },
+    "/Data/ProjectCertificate": {
+      "post": {
+        "tags": [
+          "ProjectCertificate"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RetrofitProjectCertificateRequestDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RetrofitProjectCertificateRequestDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/RetrofitProjectCertificateRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/Data/StandaloneLodgementSubmit": {
+      "post": {
+        "tags": [
+          "StandaloneLodgement"
+        ],
+        "summary": "Create a new standalone lodgement and new project",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StandaloneLodgementRequestDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StandaloneLodgementRequestDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/StandaloneLodgementRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandaloneLodgementDtoStandaloneLodgementDtoMapperLodgementDtoResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandaloneLodgementDtoStandaloneLodgementDtoMapperLodgementDtoResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandaloneLodgementDtoStandaloneLodgementDtoMapperLodgementDtoResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/Data/SupportingDocument/Project": {
+      "post": {
+        "tags": [
+          "SupportingDocument"
+        ],
+        "summary": "Attach a new Supporting Document against the Project.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateProjectSupportingDocumentDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateProjectSupportingDocumentDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateProjectSupportingDocumentDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/Data/SupportingDocument/Lodgement": {
+      "post": {
+        "tags": [
+          "SupportingDocument"
+        ],
+        "summary": "Attach a new Supporting Document against the Lodgement.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateLodgementSupportingDocumentDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateLodgementSupportingDocumentDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateLodgementSupportingDocumentDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/Taxonomies/CombustionVentilationAcceptableTypes": {
+      "get": {
+        "tags": [
+          "Taxonomies"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "deprecated": true
+      }
+    },
+    "/Taxonomies/CombustionVentilationAcceptableTypesByPASVersion": {
+      "post": {
+        "tags": [
+          "Taxonomies"
+        ],
+        "parameters": [
+          {
+            "name": "PASVersion",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "MatrixType",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/Taxonomies/DeclaredProjectRiskTypes": {
+      "get": {
+        "tags": [
+          "Taxonomies"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/Taxonomies/DefectLocationTypes": {
+      "get": {
+        "tags": [
+          "Taxonomies"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/Taxonomies/DefectTypes": {
+      "get": {
+        "tags": [
+          "Taxonomies"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/Taxonomies/DefectSeverityTypes": {
+      "get": {
+        "tags": [
+          "Taxonomies"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/Taxonomies/DesignerQualificationTypes": {
+      "get": {
+        "tags": [
+          "Taxonomies"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/Taxonomies/DocumentTypes": {
+      "get": {
+        "tags": [
+          "Taxonomies"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "deprecated": true
+      }
+    },
+    "/Taxonomies/DocumentsByMatrixType": {
+      "post": {
+        "tags": [
+          "Taxonomies"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PasMatrixTypeDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PasMatrixTypeDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/PasMatrixTypeDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RequiredDocument"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RequiredDocument"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RequiredDocument"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/Taxonomies/ExistingVentilationProvidedTypes": {
+      "get": {
+        "tags": [
+          "Taxonomies"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "deprecated": true
+      }
+    },
+    "/Taxonomies/ExistingVentilationProvidedTypesByPASVersion": {
+      "post": {
+        "tags": [
+          "Taxonomies"
+        ],
+        "parameters": [
+          {
+            "name": "PASVersion",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "MatrixType",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/Taxonomies/ExposureZoneTypes": {
+      "get": {
+        "tags": [
+          "Taxonomies"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/Taxonomies/GuaranteeTypes": {
+      "get": {
+        "tags": [
+          "Taxonomies"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/GuaranteeType"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/GuaranteeType"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/GuaranteeType"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/Taxonomies/HighestRiskCombinationsTypes": {
+      "get": {
+        "tags": [
+          "Taxonomies"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/Taxonomies/InnovationMeasureTypes": {
+      "get": {
+        "tags": [
+          "Taxonomies"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/InnovationMeasure"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/InnovationMeasure"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/InnovationMeasure"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/Taxonomies/LocalAuthorityProjectsLADS": {
+      "get": {
+        "tags": [
+          "Taxonomies"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "deprecated": true
+      }
+    },
+    "/Taxonomies/LocalAuthorityProjectsSHDF": {
+      "get": {
+        "tags": [
+          "Taxonomies"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "deprecated": true
+      }
+    },
+    "/Taxonomies/LocalAuthorityProjectsHUG": {
+      "get": {
+        "tags": [
+          "Taxonomies"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "deprecated": true
+      }
+    },
+    "/Taxonomies/LocalAuthorityProjectsByMatrixType": {
+      "post": {
+        "tags": [
+          "Taxonomies"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MatrixTypeDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MatrixTypeDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/MatrixTypeDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/LocalAuthorityProject"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/LocalAuthorityProject"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/LocalAuthorityProject"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/Taxonomies/MeasureEligibilityStatusTypes": {
+      "get": {
+        "tags": [
+          "Taxonomies"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/Taxonomies/MeasureTypesByMatrixType": {
+      "post": {
+        "tags": [
+          "Taxonomies"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PasMatrixTypeDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PasMatrixTypeDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/PasMatrixTypeDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MeasureType"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MeasureType"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MeasureType"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/Taxonomies/MeasureTypes": {
+      "get": {
+        "tags": [
+          "Taxonomies"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MeasureType"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MeasureType"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MeasureType"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "deprecated": true
+      }
+    },
+    "/Taxonomies/MeasureTypesECO4": {
+      "get": {
+        "tags": [
+          "Taxonomies"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MeasureType"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MeasureType"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MeasureType"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "deprecated": true
+      }
+    },
+    "/Taxonomies/MeasureTypesHUG": {
+      "get": {
+        "tags": [
+          "Taxonomies"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "deprecated": true
+      }
+    },
+    "/Taxonomies/MeasureTypesLADS": {
+      "get": {
+        "tags": [
+          "Taxonomies"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "deprecated": true
+      }
+    },
+    "/Taxonomies/MeasureTypesLicencePlus": {
+      "get": {
+        "tags": [
+          "Taxonomies"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MeasureType"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MeasureType"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MeasureType"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "deprecated": true
+      }
+    },
+    "/Taxonomies/MeasureTypesSHDF": {
+      "get": {
+        "tags": [
+          "Taxonomies"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "deprecated": true
+      }
+    },
+    "/Taxonomies/MeasureTypesWHD": {
+      "get": {
+        "tags": [
+          "Taxonomies"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "deprecated": true
+      }
+    },
+    "/Taxonomies/PASVersions": {
+      "get": {
+        "tags": [
+          "Taxonomies"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/Taxonomies/ProductInstalledMeasuredByTypes": {
+      "get": {
+        "tags": [
+          "Taxonomies"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/Taxonomies/ProjectTypes": {
+      "get": {
+        "tags": [
+          "Taxonomies"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/Taxonomies/ProjectQuestions": {
+      "get": {
+        "tags": [
+          "Taxonomies"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/Taxonomies/PropertyAgeTypes": {
+      "get": {
+        "tags": [
+          "Taxonomies"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PropertyAge"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PropertyAge"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PropertyAge"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/Taxonomies/PropertyConstructionTypes": {
+      "get": {
+        "tags": [
+          "Taxonomies"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/Taxonomies/PropertyDetachmentTypes": {
+      "get": {
+        "tags": [
+          "Taxonomies"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/Taxonomies/PropertyTypes": {
+      "get": {
+        "tags": [
+          "Taxonomies"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/Taxonomies/SchemeOptions": {
+      "get": {
+        "tags": [
+          "Taxonomies"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SchemeDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SchemeDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SchemeDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/Taxonomies/StandaloneLodgementTypes": {
+      "get": {
+        "tags": [
+          "Taxonomies"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/Taxonomies/StatutoryLimitationTypes": {
+      "get": {
+        "tags": [
+          "Taxonomies"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/Taxonomies/TenureTypes": {
+      "get": {
+        "tags": [
+          "Taxonomies"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/Taxonomies/ThermalBridgeTreatmentTypes": {
+      "get": {
+        "tags": [
+          "Taxonomies"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/Taxonomies/VentilationTreatmentStrategyTypes": {
+      "get": {
+        "tags": [
+          "Taxonomies"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/Taxonomies/VentilationTreatmentTypes": {
+      "get": {
+        "tags": [
+          "Taxonomies"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/Taxonomies/VentilationTypes": {
+      "get": {
+        "tags": [
+          "Taxonomies"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/Taxonomies/VentilationTypesByPASVersion": {
+      "post": {
+        "tags": [
+          "Taxonomies"
+        ],
+        "parameters": [
+          {
+            "name": "PASVersion",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "MatrixType",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/Taxonomies/VentilationTypeOptions": {
+      "get": {
+        "tags": [
+          "Taxonomies"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/Taxonomies/WHDWorkConductedValues": {
+      "get": {
+        "tags": [
+          "Taxonomies"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/Taxonomies/WHDReplaceWhatMeasureValues": {
+      "get": {
+        "tags": [
+          "Taxonomies"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/Taxonomies/WHDQuestions": {
+      "get": {
+        "tags": [
+          "Taxonomies"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AmendMeasure": {
+        "type": "object",
+        "properties": {
+          "improvementOptionEvaluationMeasureId": {
+            "type": "string",
+            "nullable": true
+          },
+          "measureId": {
+            "type": "string",
+            "nullable": true
+          },
+          "umr": {
+            "type": "string",
+            "nullable": true
+          },
+          "handoverDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "installedDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "measureType": {
+            "type": "string",
+            "nullable": true
+          },
+          "workTypeCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "workCarriedOutByTMLN": {
+            "type": "string",
+            "nullable": true
+          },
+          "registeredBusinessName": {
+            "type": "string",
+            "nullable": true
+          },
+          "freeTextDetails": {
+            "type": "string",
+            "nullable": true
+          },
+          "workCarriedOutBySchemeId": {
+            "type": "string",
+            "nullable": true
+          },
+          "trustmarkTradeCode": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "productManufacturer": {
+            "type": "string",
+            "nullable": true
+          },
+          "productModel": {
+            "type": "string",
+            "nullable": true
+          },
+          "productVersion": {
+            "type": "string",
+            "nullable": true
+          },
+          "isInnovationMeasure": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "innovationMeasureNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "innovationMeasureProduct": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "AssessmentDefectAddressedDto": {
+        "type": "object",
+        "properties": {
+          "actualRepairCost": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "toBeAddressedInProject": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "defectId": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "AssessmentDto": {
+        "type": "object",
+        "properties": {
+          "retrofitAssessmentId": {
+            "type": "string",
+            "nullable": true
+          },
+          "rdSAPFileUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "retrofitReference": {
+            "type": "string",
+            "nullable": true
+          },
+          "assessmentDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "assessorTMLN": {
+            "type": "string",
+            "nullable": true
+          },
+          "assessorSchemeId": {
+            "type": "string",
+            "nullable": true
+          },
+          "assessorSchemeName": {
+            "type": "string",
+            "nullable": true
+          },
+          "registeredBusinessName": {
+            "type": "string",
+            "nullable": true
+          },
+          "assessorName": {
+            "type": "string",
+            "nullable": true
+          },
+          "assessorIdentificationNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "rdSAPTransactionType": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "rdSAPStatus": {
+            "type": "string",
+            "nullable": true
+          },
+          "uprn": {
+            "type": "string",
+            "nullable": true
+          },
+          "addressPostcode": {
+            "type": "string",
+            "nullable": true
+          },
+          "addressTown": {
+            "type": "string",
+            "nullable": true
+          },
+          "addressLine1": {
+            "type": "string",
+            "nullable": true
+          },
+          "addressLine2": {
+            "type": "string",
+            "nullable": true
+          },
+          "addressLine3": {
+            "type": "string",
+            "nullable": true
+          },
+          "noDefects": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "defects": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RetrofitAssessmentDefectDto"
+            },
+            "nullable": true
+          },
+          "postcodeLookUpResults": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PropertyAddress"
+            },
+            "nullable": true
+          },
+          "context": {
+            "$ref": "#/components/schemas/RetrofitAssessmentContextDto"
+          },
+          "occupancy": {
+            "$ref": "#/components/schemas/RetrofitAssessmentOccupancyDto"
+          },
+          "energyPerformance": {
+            "$ref": "#/components/schemas/RetrofitAssessmentEnergyPerformanceDto"
+          },
+          "ventilation": {
+            "$ref": "#/components/schemas/RetrofitAssessmentVentilationDto"
+          },
+          "significance": {
+            "$ref": "#/components/schemas/RetrofitAssessmentSignificanceDto"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "updatedBy": {
+            "type": "string",
+            "nullable": true
+          },
+          "isComplete": {
+            "type": "boolean"
+          },
+          "completeDt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "completedBy": {
+            "type": "string",
+            "nullable": true
+          },
+          "verifiedAddress": {
+            "$ref": "#/components/schemas/PropertyAddress"
+          }
+        },
+        "additionalProperties": false
+      },
+      "AssessmentDtoAssessmentDtoMapperRetrofitAssessmentDtoResponse": {
+        "type": "object",
+        "properties": {
+          "model": {
+            "$ref": "#/components/schemas/AssessmentDto"
+          },
+          "isSuccess": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "AssessmentRequestDto": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "string",
+            "nullable": true
+          },
+          "identity": {
+            "$ref": "#/components/schemas/Identity"
+          },
+          "clientRequestToken": {
+            "type": "string",
+            "nullable": true
+          },
+          "request": {
+            "$ref": "#/components/schemas/CreateAssessmentDto"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CreateAssessmentContextDto": {
+        "type": "object",
+        "properties": {
+          "buildingOrientation": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "statutoryLimitationsComment": {
+            "type": "string",
+            "nullable": true
+          },
+          "statutoryLimitations": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "siteAccessNotes": {
+            "type": "string",
+            "nullable": true
+          },
+          "propertyDetachment": {
+            "type": "string",
+            "nullable": true
+          },
+          "propertyConstruction": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "planningComments": {
+            "type": "string",
+            "nullable": true
+          },
+          "planningConstraints": {
+            "type": "boolean"
+          },
+          "exposureZone": {
+            "type": "string",
+            "nullable": true
+          },
+          "combustionVentilationAcceptable": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "CreateAssessmentDto": {
+        "type": "object",
+        "properties": {
+          "rdSAPFileContent": {
+            "type": "string",
+            "nullable": true
+          },
+          "ownerTMLN": {
+            "type": "string",
+            "nullable": true
+          },
+          "assessorTMLN": {
+            "type": "string",
+            "nullable": true
+          },
+          "assessorSchemeId": {
+            "type": "string",
+            "nullable": true
+          },
+          "assessorSchemeName": {
+            "type": "string",
+            "nullable": true
+          },
+          "pasVersion": {
+            "type": "string",
+            "nullable": true
+          },
+          "defects": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RetrofitAssessmentNewDefectDto"
+            },
+            "nullable": true
+          },
+          "occupancy": {
+            "$ref": "#/components/schemas/RetrofitAssessmentOccupancy"
+          },
+          "ventilation": {
+            "$ref": "#/components/schemas/RetrofitAssessmentVentilation"
+          },
+          "significance": {
+            "$ref": "#/components/schemas/RetrofitAssessmentSignificance"
+          },
+          "context": {
+            "$ref": "#/components/schemas/CreateAssessmentContextDto"
+          },
+          "supportingDocumentAttachments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SupportingDocumentAttachmentDto"
+            },
+            "nullable": true
+          },
+          "isPublic": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CreateFileUploadTokenDto": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "string",
+            "nullable": true
+          },
+          "identity": {
+            "$ref": "#/components/schemas/Identity"
+          },
+          "clientRequestToken": {
+            "type": "string",
+            "nullable": true
+          },
+          "request": {
+            "$ref": "#/components/schemas/FileUploadTokenRequestDto"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CreateLodgementDto": {
+        "type": "object",
+        "properties": {
+          "projectReference": {
+            "type": "string",
+            "nullable": true
+          },
+          "ownerTMLN": {
+            "type": "string",
+            "nullable": true
+          },
+          "planStageSequence": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "measures": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InstalledMeasure"
+            },
+            "nullable": true
+          },
+          "workInvoiceTotal": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "customerContribution": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "supportingDocumentAttachments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SupportingDocumentAttachmentDto"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "CreateLodgementSupportingDocumentDto": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "string",
+            "nullable": true
+          },
+          "identity": {
+            "$ref": "#/components/schemas/Identity"
+          },
+          "clientRequestToken": {
+            "type": "string",
+            "nullable": true
+          },
+          "projectReference": {
+            "type": "string",
+            "nullable": true
+          },
+          "lodgementId": {
+            "type": "string",
+            "nullable": true
+          },
+          "request": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CreateLodgementSupportingDocumentRequestDto"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "CreateLodgementSupportingDocumentRequestDto": {
+        "type": "object",
+        "properties": {
+          "fileUploadToken": {
+            "type": "string",
+            "nullable": true
+          },
+          "filename": {
+            "type": "string",
+            "nullable": true
+          },
+          "documentType": {
+            "type": "string",
+            "nullable": true
+          },
+          "comments": {
+            "type": "string",
+            "nullable": true
+          },
+          "measureId": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "CreateProjectSupportingDocumentDto": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "string",
+            "nullable": true
+          },
+          "identity": {
+            "$ref": "#/components/schemas/Identity"
+          },
+          "clientRequestToken": {
+            "type": "string",
+            "nullable": true
+          },
+          "projectReference": {
+            "type": "string",
+            "nullable": true
+          },
+          "request": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CreateProjectSupportingDocumentRequestDto"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "CreateProjectSupportingDocumentRequestDto": {
+        "type": "object",
+        "properties": {
+          "fileUploadToken": {
+            "type": "string",
+            "nullable": true
+          },
+          "filename": {
+            "type": "string",
+            "nullable": true
+          },
+          "documentType": {
+            "type": "string",
+            "nullable": true
+          },
+          "comments": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "DefectEvidenceImageAttachmentDto": {
+        "type": "object",
+        "properties": {
+          "fileUploadToken": {
+            "type": "string",
+            "nullable": true
+          },
+          "filename": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "DefectResolutionDto": {
+        "type": "object",
+        "properties": {
+          "assessmentDefectId": {
+            "type": "string",
+            "nullable": true
+          },
+          "projectDefectYourReference": {
+            "type": "string",
+            "nullable": true
+          },
+          "resolution": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "FileUploadTokenRequestDto": {
+        "type": "object",
+        "properties": {
+          "filename": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "GetAssessmentDto": {
+        "type": "object",
+        "properties": {
+          "assessmentReference": {
+            "type": "string",
+            "nullable": true
+          },
+          "postcode": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "GetAssessmentRequestDto": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "string",
+            "nullable": true
+          },
+          "identity": {
+            "$ref": "#/components/schemas/Identity"
+          },
+          "clientRequestToken": {
+            "type": "string",
+            "nullable": true
+          },
+          "request": {
+            "$ref": "#/components/schemas/GetAssessmentDto"
+          }
+        },
+        "additionalProperties": false
+      },
+      "GuaranteeType": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "measureCategory": {
+            "type": "string",
+            "nullable": true
+          },
+          "issuedBy": {
+            "type": "string",
+            "nullable": true
+          },
+          "productID": {
+            "type": "string",
+            "nullable": true
+          },
+          "codes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "ofgemCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "appropriateFrom": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "appropriateTo": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "duration": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "HighRiskQuestion": {
+        "type": "object",
+        "properties": {
+          "question": {
+            "type": "string",
+            "nullable": true
+          },
+          "answer": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Identity": {
+        "type": "object",
+        "properties": {
+          "trustmarkId": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ImprovementOptionEvaluationDto": {
+        "type": "object",
+        "properties": {
+          "reference": {
+            "type": "string",
+            "nullable": true
+          },
+          "calculationMethodology": {
+            "type": "string",
+            "nullable": true
+          },
+          "householdContribution": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "measuresEvaluated": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ImprovementOptionEvaluationMeasureDto"
+            },
+            "nullable": true
+          },
+          "intendedOutcomes": {
+            "$ref": "#/components/schemas/IntendedOutcomesDto"
+          },
+          "isMediumTermPlanBase": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ImprovementOptionEvaluationMeasureDto": {
+        "type": "object",
+        "properties": {
+          "yourReference": {
+            "type": "string",
+            "nullable": true
+          },
+          "workTypeCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "product": {
+            "type": "string",
+            "nullable": true
+          },
+          "measureEligibilityStatus": {
+            "type": "string",
+            "nullable": true
+          },
+          "measureInstallationCost": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "annualFuelCostSaving": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "sapSavings": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "potentialEnergyRating": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "repaymentYears": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "annualCO2Savings": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "carbonCostEffectiveness": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "productInstalledUnitOfMeasure": {
+            "type": "string",
+            "nullable": true
+          },
+          "productInstalledValue": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "InnovationMeasure": {
+        "type": "object",
+        "properties": {
+          "number": {
+            "type": "string",
+            "nullable": true
+          },
+          "measureType": {
+            "type": "string",
+            "nullable": true
+          },
+          "approvedProducts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "ecoNames": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "notes": {
+            "type": "string",
+            "nullable": true
+          },
+          "manufacturer": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "InstalledMeasure": {
+        "type": "object",
+        "properties": {
+          "improvementOptionEvaluationMeasureReference": {
+            "type": "string",
+            "nullable": true
+          },
+          "workTypeCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "freeTextDetails": {
+            "type": "string",
+            "nullable": true
+          },
+          "percentageMeasureInstalled": {
+            "type": "string",
+            "nullable": true
+          },
+          "trustmarkTradeCode": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "customerContribution": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "measureCost": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "mcsCertificateReference": {
+            "type": "string",
+            "nullable": true
+          },
+          "installerReferenceNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "installedDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "handoverDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "workCarriedOutByTMLN": {
+            "type": "string",
+            "nullable": true
+          },
+          "workCarriedOutBySchemeId": {
+            "type": "string",
+            "nullable": true
+          },
+          "installerPasCertificateNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "operativeName": {
+            "type": "string",
+            "nullable": true
+          },
+          "operativeCertificationReference": {
+            "type": "string",
+            "nullable": true
+          },
+          "isInnovationMeasure": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "innovationMeasureProduct": {
+            "type": "string",
+            "nullable": true
+          },
+          "productManufacturer": {
+            "type": "string",
+            "nullable": true
+          },
+          "productModel": {
+            "type": "string",
+            "nullable": true
+          },
+          "productVersion": {
+            "type": "string",
+            "nullable": true
+          },
+          "productSerialNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "productWarrantyDuration": {
+            "type": "string",
+            "nullable": true
+          },
+          "financialProtectionCategory": {
+            "type": "string",
+            "nullable": true
+          },
+          "guaranteeName": {
+            "type": "string",
+            "nullable": true
+          },
+          "guaranteeStartDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "guaranteePolicyReference": {
+            "type": "string",
+            "nullable": true
+          },
+          "whdReplaceWhatMeasure": {
+            "type": "string",
+            "nullable": true
+          },
+          "whdWorkConducted": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "IntendedOutcomesDto": {
+        "type": "object",
+        "properties": {
+          "reductionEnergyUse": {
+            "type": "boolean",
+            "description": "Yes / No selection; mandatory.",
+            "nullable": true
+          },
+          "reductionInEnergyCosts": {
+            "type": "boolean",
+            "description": "Yes / No selection; mandatory.",
+            "nullable": true
+          },
+          "reductionsInEmissions": {
+            "type": "boolean",
+            "description": "Yes / No selection; mandatory.",
+            "nullable": true
+          },
+          "improvementsInInternalComfort": {
+            "type": "boolean",
+            "description": "Yes / No selection; mandatory.",
+            "nullable": true
+          },
+          "improvementsOfIAQ": {
+            "type": "boolean",
+            "description": "Yes / No selection; mandatory.",
+            "nullable": true
+          },
+          "eliminationDampCondensationMould": {
+            "type": "boolean",
+            "description": "Yes / No selection; mandatory.",
+            "nullable": true
+          },
+          "reduceRiskOverheating": {
+            "type": "boolean",
+            "description": "Yes / No selection; mandatory.",
+            "nullable": true
+          },
+          "improvementsInEnergyRating": {
+            "type": "boolean",
+            "description": "Yes / No selection; mandatory.",
+            "nullable": true
+          },
+          "meetPerformanceStandard": {
+            "type": "boolean",
+            "description": "Yes / No selection; mandatory.",
+            "nullable": true
+          },
+          "improvementsInUsefulnessSustainability": {
+            "type": "boolean",
+            "description": "Yes / No selection; mandatory.",
+            "nullable": true
+          },
+          "protectBuildingAgainstDecay": {
+            "type": "boolean",
+            "description": "Yes / No selection; mandatory.",
+            "nullable": true
+          },
+          "resistanceFloodAndWaterPenetration": {
+            "type": "boolean",
+            "description": "Yes / No selection; mandatory.",
+            "nullable": true
+          },
+          "protectionArchitecturalHeritage": {
+            "type": "boolean",
+            "description": "Yes / No selection; mandatory.",
+            "nullable": true
+          },
+          "integrationEEMSAndOtherImprovements": {
+            "type": "boolean",
+            "description": "Yes / No selection; mandatory.",
+            "nullable": true
+          },
+          "improveManagementOfMoisture": {
+            "type": "boolean",
+            "description": "Yes / No selection; mandatory.",
+            "nullable": true
+          },
+          "improveResilienceToClimateChange": {
+            "type": "boolean",
+            "description": "Yes / No selection; mandatory.",
+            "nullable": true
+          },
+          "otherRelevantIssues": {
+            "type": "string",
+            "description": "Text; optional.",
+            "nullable": true
+          },
+          "monitoringMethod": {
+            "type": "string",
+            "description": "Text; mandatory.",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "LocalAuthorityProject": {
+        "type": "object",
+        "properties": {
+          "phase": {
+            "type": "string",
+            "nullable": true
+          },
+          "reference": {
+            "type": "string",
+            "nullable": true
+          },
+          "key": {
+            "type": "string",
+            "nullable": true
+          },
+          "localAuthority": {
+            "type": "string",
+            "nullable": true
+          },
+          "notificationEmail": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "LodgedMeasureDto": {
+        "type": "object",
+        "properties": {
+          "measureId": {
+            "type": "string",
+            "nullable": true
+          },
+          "umr": {
+            "type": "string",
+            "nullable": true
+          },
+          "trustmarkTradeCode": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "workCarriedOutBySchemeName": {
+            "type": "string",
+            "nullable": true
+          },
+          "mcsTechnology": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "improvementOptionEvaluationMeasureId": {
+            "type": "string",
+            "nullable": true
+          },
+          "workTypeCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "freeTextDetails": {
+            "type": "string",
+            "nullable": true
+          },
+          "percentageMeasureInstalled": {
+            "type": "string",
+            "nullable": true
+          },
+          "customerContribution": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "measureCost": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "installerReferenceNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "installedDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "handoverDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "workCarriedOutByTMLN": {
+            "type": "string",
+            "nullable": true
+          },
+          "workCarriedOutBySchemeId": {
+            "type": "string",
+            "nullable": true
+          },
+          "installerPasCertificateNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "operativeName": {
+            "type": "string",
+            "nullable": true
+          },
+          "isInnovationMeasure": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "innovationMeasureProduct": {
+            "type": "string",
+            "nullable": true
+          },
+          "productManufacturer": {
+            "type": "string",
+            "nullable": true
+          },
+          "productModel": {
+            "type": "string",
+            "nullable": true
+          },
+          "productVersion": {
+            "type": "string",
+            "nullable": true
+          },
+          "productSerialNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "productWarrantyDuration": {
+            "type": "string",
+            "nullable": true
+          },
+          "financialProtectionCategory": {
+            "type": "string",
+            "nullable": true
+          },
+          "guaranteeName": {
+            "type": "string",
+            "nullable": true
+          },
+          "guaranteeStartDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "guaranteePolicyReference": {
+            "type": "string",
+            "nullable": true
+          },
+          "whdWorkConducted": {
+            "type": "string",
+            "nullable": true
+          },
+          "whdReplaceWhatMeasure": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "LodgementAmendRequest": {
+        "type": "object",
+        "properties": {
+          "projectReference": {
+            "type": "string",
+            "nullable": true
+          },
+          "lodgementId": {
+            "type": "string",
+            "nullable": true
+          },
+          "measures": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AmendMeasure"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "LodgementAmendRequestDto": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "string",
+            "nullable": true
+          },
+          "identity": {
+            "$ref": "#/components/schemas/Identity"
+          },
+          "clientRequestToken": {
+            "type": "string",
+            "nullable": true
+          },
+          "request": {
+            "$ref": "#/components/schemas/LodgementAmendRequest"
+          }
+        },
+        "additionalProperties": false
+      },
+      "LodgementCertificateDto": {
+        "type": "object",
+        "properties": {
+          "projectReference": {
+            "type": "string",
+            "nullable": true
+          },
+          "lodgementId": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "LodgementCertificateRequestDto": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "string",
+            "nullable": true
+          },
+          "identity": {
+            "$ref": "#/components/schemas/Identity"
+          },
+          "clientRequestToken": {
+            "type": "string",
+            "nullable": true
+          },
+          "request": {
+            "$ref": "#/components/schemas/LodgementCertificateDto"
+          }
+        },
+        "additionalProperties": false
+      },
+      "LodgementDto": {
+        "type": "object",
+        "properties": {
+          "retrofitProjectReference": {
+            "type": "string",
+            "nullable": true
+          },
+          "assessmentReference": {
+            "type": "string",
+            "nullable": true
+          },
+          "address": {
+            "$ref": "#/components/schemas/PropertyAddress"
+          },
+          "isPaid": {
+            "type": "boolean"
+          },
+          "paidDt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "lodgementCost": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "membersApi": {
+            "type": "boolean"
+          },
+          "isThirdParty": {
+            "type": "boolean"
+          },
+          "retrofitProjectId": {
+            "type": "string",
+            "nullable": true
+          },
+          "certificateIssuedDt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "lodgementType": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "$ref": "#/components/schemas/LodgementStatus"
+          },
+          "mediumTermImprovementPlanId": {
+            "type": "string",
+            "nullable": true
+          },
+          "planStageSequence": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "measures": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LodgedMeasureDto"
+            },
+            "nullable": true
+          },
+          "workInvoiceTotal": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "customerContribution": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "isComplete": {
+            "type": "boolean"
+          },
+          "completeDt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "certificateNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "lodgementId": {
+            "type": "string",
+            "nullable": true
+          },
+          "ownerName": {
+            "type": "string",
+            "nullable": true
+          },
+          "ownerTMLN": {
+            "type": "string",
+            "nullable": true
+          },
+          "creatorName": {
+            "type": "string",
+            "nullable": true
+          },
+          "creatorTMLN": {
+            "type": "string",
+            "nullable": true
+          },
+          "localAuthorityProjectPhase": {
+            "type": "string",
+            "nullable": true
+          },
+          "localAuthorityProjectKey": {
+            "type": "string",
+            "nullable": true
+          },
+          "localAuthorityProjectReference": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "LodgementDtoLodgementDtoMapperLodgementDtoResponse": {
+        "type": "object",
+        "properties": {
+          "model": {
+            "$ref": "#/components/schemas/LodgementDto"
+          },
+          "isSuccess": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "LodgementRequestDto": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "string",
+            "nullable": true
+          },
+          "identity": {
+            "$ref": "#/components/schemas/Identity"
+          },
+          "clientRequestToken": {
+            "type": "string",
+            "nullable": true
+          },
+          "request": {
+            "$ref": "#/components/schemas/CreateLodgementDto"
+          }
+        },
+        "additionalProperties": false
+      },
+      "LodgementStatus": {
+        "enum": [
+          "New",
+          "Complete",
+          "Superseded",
+          "Void"
+        ],
+        "type": "string"
+      },
+      "MatrixTypeDto": {
+        "type": "object",
+        "properties": {
+          "matrixType": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "MCSCertificateDto": {
+        "type": "object",
+        "properties": {
+          "certificateNumber": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "MCSCertificateRequestDto": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "string",
+            "nullable": true
+          },
+          "identity": {
+            "$ref": "#/components/schemas/Identity"
+          },
+          "clientRequestToken": {
+            "type": "string",
+            "nullable": true
+          },
+          "request": {
+            "$ref": "#/components/schemas/MCSCertificateDto"
+          }
+        },
+        "additionalProperties": false
+      },
+      "MeasureType": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "nullable": true
+          },
+          "workType": {
+            "type": "string",
+            "nullable": true
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "category": {
+            "type": "string",
+            "nullable": true
+          },
+          "pasAnnex": {
+            "type": "string",
+            "nullable": true
+          },
+          "ecoName": {
+            "type": "string",
+            "nullable": true
+          },
+          "eco4Name": {
+            "type": "string",
+            "nullable": true
+          },
+          "trustMarkTradeCode": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "trustMarkAltTradeCode": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "ecoCode": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "isGuaranteeMandatory": {
+            "type": "boolean"
+          },
+          "standard": {
+            "type": "string",
+            "nullable": true
+          },
+          "financialProtectionCategory": {
+            "type": "string",
+            "nullable": true
+          },
+          "tradeDescription": {
+            "type": "string",
+            "nullable": true
+          },
+          "ghgs": {
+            "type": "string",
+            "nullable": true
+          },
+          "ghgsName": {
+            "type": "string",
+            "nullable": true
+          },
+          "mcs": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "isGHGSV": {
+            "type": "boolean"
+          },
+          "isLADS": {
+            "type": "boolean"
+          },
+          "ladsName": {
+            "type": "string",
+            "nullable": true
+          },
+          "isP2P": {
+            "type": "boolean"
+          },
+          "isWHD": {
+            "type": "boolean"
+          },
+          "retrofitMeasureType": {
+            "type": "string",
+            "nullable": true
+          },
+          "inherentTechnicalRisk": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "lifetime": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "isCPS": {
+            "type": "boolean"
+          },
+          "measureCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "sapMeasureName": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "MediumTermImprovementPlanDto": {
+        "type": "object",
+        "properties": {
+          "reference": {
+            "type": "string",
+            "nullable": true
+          },
+          "savingsMoney": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "savingsSAPPoints": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "stages": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MediumTermImprovementPlanStageDto"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "MediumTermImprovementPlanStageDto": {
+        "type": "object",
+        "properties": {
+          "sequence": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "dependentStages": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "nullable": true
+          },
+          "savingsMoney": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "savingsSAPPoints": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "stageDurationInWeeks": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "keyEventComments": {
+            "type": "string",
+            "nullable": true
+          },
+          "inScopeCurrentProject": {
+            "type": "boolean"
+          },
+          "improvementOptionEvaluationMeasureReferences": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Use the ImprovementOptionEvaluationDto.MeasuresEvaluated.YourReference",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "PasMatrixTypeDto": {
+        "type": "object",
+        "properties": {
+          "matrixType": {
+            "type": "string",
+            "nullable": true
+          },
+          "pasVersion": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ProjectAmendDto": {
+        "type": "object",
+        "properties": {
+          "projectReference": {
+            "type": "string",
+            "nullable": true
+          },
+          "rdSAPFileContent": {
+            "type": "string",
+            "nullable": true
+          },
+          "acceptSamePrePostScores": {
+            "type": "boolean"
+          },
+          "acceptUprnCheck": {
+            "type": "boolean"
+          },
+          "acceptAddressCheck": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ProjectAmendRequestDto": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "string",
+            "nullable": true
+          },
+          "identity": {
+            "$ref": "#/components/schemas/Identity"
+          },
+          "request": {
+            "$ref": "#/components/schemas/ProjectAmendDto"
+          },
+          "clientRequestToken": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ProjectCompleteDto": {
+        "type": "object",
+        "properties": {
+          "projectReference": {
+            "type": "string",
+            "nullable": true
+          },
+          "rdSAPFileContent": {
+            "type": "string",
+            "nullable": true
+          },
+          "acceptSamePrePostScores": {
+            "type": "boolean"
+          },
+          "acceptUprnCheck": {
+            "type": "boolean"
+          },
+          "acceptAddressCheck": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ProjectCompleteRequestDto": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "string",
+            "nullable": true
+          },
+          "identity": {
+            "$ref": "#/components/schemas/Identity"
+          },
+          "request": {
+            "$ref": "#/components/schemas/ProjectCompleteDto"
+          },
+          "clientRequestToken": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ProjectDefectDto": {
+        "type": "object",
+        "properties": {
+          "yourReference": {
+            "type": "string",
+            "nullable": true
+          },
+          "defectType": {
+            "type": "string",
+            "nullable": true
+          },
+          "comment": {
+            "type": "string",
+            "nullable": true
+          },
+          "severity": {
+            "type": "string",
+            "nullable": true
+          },
+          "locations": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "repairCost": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "resolutionBeforeRetrofit": {
+            "type": "string",
+            "nullable": true
+          },
+          "hasEvidence": {
+            "type": "boolean"
+          },
+          "actualRepairCost": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "toBeAddressedInProject": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "evidenceImageUrl": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DefectEvidenceImageAttachmentDto"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ProjectStartDto": {
+        "type": "object",
+        "properties": {
+          "assessmentReference": {
+            "type": "string",
+            "nullable": true
+          },
+          "ownerTMLN": {
+            "type": "string",
+            "nullable": true
+          },
+          "schemeId": {
+            "type": "string",
+            "nullable": true
+          },
+          "fundingOrganisationName": {
+            "type": "string",
+            "nullable": true
+          },
+          "fundingComment": {
+            "type": "string",
+            "nullable": true
+          },
+          "projectType": {
+            "type": "string",
+            "nullable": true
+          },
+          "yourProjectReference": {
+            "type": "string",
+            "nullable": true
+          },
+          "tenure": {
+            "$ref": "#/components/schemas/PropertyTenureDto"
+          },
+          "propertyInformation": {
+            "$ref": "#/components/schemas/PropertyInformationDto"
+          },
+          "assessmentDefects": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AssessmentDefectAddressedDto"
+            },
+            "nullable": true
+          },
+          "projectDefects": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProjectDefectDto"
+            },
+            "nullable": true
+          },
+          "intendedOutcomes": {
+            "$ref": "#/components/schemas/IntendedOutcomesDto"
+          },
+          "improvementOptionEvaluations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ImprovementOptionEvaluationDto"
+            },
+            "nullable": true
+          },
+          "mediumTermImprovementPlan": {
+            "$ref": "#/components/schemas/MediumTermImprovementPlanDto"
+          },
+          "riskAssessment": {
+            "$ref": "#/components/schemas/RiskAssessmentDto"
+          },
+          "retrofitDesigns": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RetrofitDesignDto"
+            },
+            "nullable": true
+          },
+          "roles": {
+            "$ref": "#/components/schemas/RetrofitProjectRolesDto"
+          },
+          "supportingDocumentAttachments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SupportingDocumentAttachmentDto"
+            },
+            "nullable": true
+          },
+          "highRiskQuestions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/HighRiskQuestion"
+            },
+            "nullable": true
+          },
+          "notes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "localAuthorityProjectPhase": {
+            "type": "string",
+            "nullable": true
+          },
+          "localAuthorityProjectKey": {
+            "type": "string",
+            "nullable": true
+          },
+          "acceptUPRNCheck": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ProjectStartRequestDto": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "string",
+            "nullable": true
+          },
+          "identity": {
+            "$ref": "#/components/schemas/Identity"
+          },
+          "clientRequestToken": {
+            "type": "string",
+            "nullable": true
+          },
+          "request": {
+            "$ref": "#/components/schemas/ProjectStartDto"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ProjectUpdatePropertyInformationDto": {
+        "type": "object",
+        "properties": {
+          "projectReference": {
+            "type": "string",
+            "nullable": true
+          },
+          "propertyType": {
+            "type": "string",
+            "nullable": true
+          },
+          "propertyDetachment": {
+            "type": "string",
+            "nullable": true
+          },
+          "propertyAge": {
+            "type": "string",
+            "nullable": true
+          },
+          "propertyConstruction": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "propertyBedrooms": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ProjectUpdatePropertyInformationRequestDto": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "string",
+            "nullable": true
+          },
+          "identity": {
+            "$ref": "#/components/schemas/Identity"
+          },
+          "request": {
+            "$ref": "#/components/schemas/ProjectUpdatePropertyInformationDto"
+          },
+          "clientRequestToken": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ProjectUpdateTenureDto": {
+        "type": "object",
+        "properties": {
+          "projectReference": {
+            "type": "string",
+            "nullable": true
+          },
+          "premisesTenure": {
+            "type": "string",
+            "nullable": true
+          },
+          "residentName": {
+            "type": "string",
+            "nullable": true
+          },
+          "residentContactNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "residentAlternativeContactNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "ownerName": {
+            "type": "string",
+            "nullable": true
+          },
+          "ownerContactNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "ownerEmail": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ProjectUpdateTenureRequestDto": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "string",
+            "nullable": true
+          },
+          "identity": {
+            "$ref": "#/components/schemas/Identity"
+          },
+          "request": {
+            "$ref": "#/components/schemas/ProjectUpdateTenureDto"
+          },
+          "clientRequestToken": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ProjectUPRNStatusDto": {
+        "type": "object",
+        "properties": {
+          "ownerTMLN": {
+            "type": "string",
+            "nullable": true
+          },
+          "uprn": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ProjectUPRNStatusRequestDto": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "string",
+            "nullable": true
+          },
+          "identity": {
+            "$ref": "#/components/schemas/Identity"
+          },
+          "request": {
+            "$ref": "#/components/schemas/ProjectUPRNStatusDto"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ProjectVoidDto": {
+        "type": "object",
+        "properties": {
+          "projectReference": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ProjectVoidRequestDto": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "string",
+            "nullable": true
+          },
+          "identity": {
+            "$ref": "#/components/schemas/Identity"
+          },
+          "request": {
+            "$ref": "#/components/schemas/ProjectVoidDto"
+          },
+          "clientRequestToken": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "PropertyAddress": {
+        "type": "object",
+        "properties": {
+          "number": {
+            "type": "string",
+            "nullable": true
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "flatNameNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "postcode": {
+            "type": "string",
+            "nullable": true
+          },
+          "uprn": {
+            "type": "string",
+            "nullable": true
+          },
+          "address1": {
+            "type": "string",
+            "nullable": true
+          },
+          "address2": {
+            "type": "string",
+            "nullable": true
+          },
+          "address3": {
+            "type": "string",
+            "nullable": true
+          },
+          "city": {
+            "type": "string",
+            "nullable": true
+          },
+          "county": {
+            "type": "string",
+            "nullable": true
+          },
+          "country": {
+            "type": "string",
+            "nullable": true
+          },
+          "town": {
+            "type": "string",
+            "nullable": true
+          },
+          "dependantLocality": {
+            "type": "string",
+            "nullable": true
+          },
+          "doubleDependantLocality": {
+            "type": "string",
+            "nullable": true
+          },
+          "thoroughfare": {
+            "type": "string",
+            "nullable": true
+          },
+          "dependantThoroughfare": {
+            "type": "string",
+            "nullable": true
+          },
+          "buildingNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "buildingName": {
+            "type": "string",
+            "nullable": true
+          },
+          "subBuildingName": {
+            "type": "string",
+            "nullable": true
+          },
+          "poBox": {
+            "type": "string",
+            "nullable": true
+          },
+          "departmentName": {
+            "type": "string",
+            "nullable": true
+          },
+          "organisationName": {
+            "type": "string",
+            "nullable": true
+          },
+          "postcodeInward": {
+            "type": "string",
+            "nullable": true
+          },
+          "postcodeOutward": {
+            "type": "string",
+            "nullable": true
+          },
+          "premise": {
+            "type": "string",
+            "nullable": true
+          },
+          "longitude": {
+            "type": "number",
+            "format": "double"
+          },
+          "latitude": {
+            "type": "number",
+            "format": "double"
+          },
+          "traditionalCounty": {
+            "type": "string",
+            "nullable": true
+          },
+          "administrativeCounty": {
+            "type": "string",
+            "nullable": true
+          },
+          "district": {
+            "type": "string",
+            "nullable": true
+          },
+          "ladCode": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "PropertyAge": {
+        "type": "object",
+        "properties": {
+          "country": {
+            "type": "string",
+            "nullable": true
+          },
+          "band": {
+            "type": "string",
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "PropertyInformation": {
+        "type": "object",
+        "properties": {
+          "propertyType": {
+            "type": "string",
+            "nullable": true
+          },
+          "propertyDetachment": {
+            "type": "string",
+            "nullable": true
+          },
+          "propertyAge": {
+            "type": "string",
+            "nullable": true
+          },
+          "propertyConstruction": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "propertyBedrooms": {
+            "type": "string",
+            "nullable": true
+          },
+          "propertyTypeName": {
+            "type": "string",
+            "nullable": true
+          },
+          "floorAreaM2": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "PropertyInformationDto": {
+        "type": "object",
+        "properties": {
+          "propertyType": {
+            "type": "string",
+            "nullable": true
+          },
+          "propertyDetachment": {
+            "type": "string",
+            "nullable": true
+          },
+          "propertyAge": {
+            "type": "string",
+            "nullable": true
+          },
+          "propertyConstruction": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "propertyBedrooms": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "PropertyTenure": {
+        "type": "object",
+        "properties": {
+          "premisesTenure": {
+            "type": "string",
+            "nullable": true
+          },
+          "residentName": {
+            "type": "string",
+            "nullable": true
+          },
+          "residentContactNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "residentAlternativeContactNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "ownerName": {
+            "type": "string",
+            "nullable": true
+          },
+          "ownerContactNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "ownerAlternativeContactNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "ownerEmail": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "PropertyTenureDto": {
+        "type": "object",
+        "properties": {
+          "premisesTenure": {
+            "type": "string",
+            "nullable": true
+          },
+          "residentName": {
+            "type": "string",
+            "nullable": true
+          },
+          "residentContactNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "residentAlternativeContactNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "ownerName": {
+            "type": "string",
+            "nullable": true
+          },
+          "ownerContactNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "ownerAlternativeContactNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "ownerEmail": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "RequiredDocument": {
+        "type": "object",
+        "properties": {
+          "documentType": {
+            "type": "string",
+            "nullable": true
+          },
+          "isMandatory": {
+            "type": "boolean"
+          },
+          "isOptional": {
+            "type": "boolean"
+          },
+          "condition": {
+            "type": "string",
+            "nullable": true
+          },
+          "tag": {
+            "type": "string",
+            "nullable": true
+          },
+          "trustmarkTradeCodeMandatory": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "nullable": true
+          },
+          "xmlOnly": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "RetrofitAssessmentContextDto": {
+        "type": "object",
+        "properties": {
+          "buildingOrientation": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "statutoryLimitationsComment": {
+            "type": "string",
+            "nullable": true
+          },
+          "statutoryLimitations": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "siteAccessNotes": {
+            "type": "string",
+            "nullable": true
+          },
+          "propertyDetachment": {
+            "type": "string",
+            "nullable": true
+          },
+          "propertyConstruction": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "floorAreaM2": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "buildingServicesHeating": {
+            "type": "string",
+            "nullable": true
+          },
+          "buildingServicesHeatingControls": {
+            "type": "string",
+            "nullable": true
+          },
+          "buildingServicesHotWater": {
+            "type": "string",
+            "nullable": true
+          },
+          "buildingServicesVentilation": {
+            "type": "string",
+            "nullable": true
+          },
+          "buildingServicesElectricity": {
+            "type": "string",
+            "nullable": true
+          },
+          "buildingServicesGas": {
+            "type": "string",
+            "nullable": true
+          },
+          "planningComments": {
+            "type": "string",
+            "nullable": true
+          },
+          "planningConstraints": {
+            "type": "boolean"
+          },
+          "exposureZone": {
+            "type": "string",
+            "nullable": true
+          },
+          "combustionVentilationAcceptable": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "RetrofitAssessmentDefectDto": {
+        "type": "object",
+        "properties": {
+          "defectId": {
+            "type": "string",
+            "nullable": true
+          },
+          "defectType": {
+            "type": "string",
+            "nullable": true
+          },
+          "comment": {
+            "type": "string",
+            "nullable": true
+          },
+          "severity": {
+            "type": "string",
+            "nullable": true
+          },
+          "locations": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "repairCost": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "resolutionBeforeRetrofit": {
+            "type": "string",
+            "nullable": true
+          },
+          "destructiveTestsConducted": {
+            "type": "string",
+            "nullable": true
+          },
+          "hasEvidence": {
+            "type": "boolean"
+          },
+          "evidenceImageUrl": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "yourReference": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "RetrofitAssessmentEnergyPerformanceDto": {
+        "type": "object",
+        "properties": {
+          "currentSAPScore": {
+            "type": "number",
+            "format": "double"
+          },
+          "rrn": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "RetrofitAssessmentNewDefectDto": {
+        "type": "object",
+        "properties": {
+          "defectType": {
+            "type": "string",
+            "nullable": true
+          },
+          "comment": {
+            "type": "string",
+            "nullable": true
+          },
+          "severity": {
+            "type": "string",
+            "nullable": true
+          },
+          "locations": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "repairCost": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "resolutionBeforeRetrofit": {
+            "type": "string",
+            "nullable": true
+          },
+          "destructiveTestsConducted": {
+            "type": "string",
+            "nullable": true
+          },
+          "hasEvidence": {
+            "type": "boolean"
+          },
+          "evidenceImageFileUploadTokens": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "yourReference": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "RetrofitAssessmentOccupancy": {
+        "type": "object",
+        "properties": {
+          "typicalOccupancy": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "occupancyNotes": {
+            "type": "string",
+            "nullable": true
+          },
+          "numberOccupants": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "specialConsiderationsApplicable": {
+            "type": "boolean",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "RetrofitAssessmentOccupancyDto": {
+        "type": "object",
+        "properties": {
+          "typicalOccupancy": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "occupancyNotes": {
+            "type": "string",
+            "nullable": true
+          },
+          "numberOccupants": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "specialConsiderationsApplicable": {
+            "type": "boolean",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "RetrofitAssessmentSignificance": {
+        "type": "object",
+        "properties": {
+          "appraisalOfHeritage": {
+            "type": "string",
+            "nullable": true
+          },
+          "areaSignificanceIdentified": {
+            "type": "boolean",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "RetrofitAssessmentSignificanceDto": {
+        "type": "object",
+        "properties": {
+          "appraisalOfHeritage": {
+            "type": "string",
+            "nullable": true
+          },
+          "areaSignificanceIdentified": {
+            "type": "boolean",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "RetrofitAssessmentVentilation": {
+        "type": "object",
+        "properties": {
+          "existingVentilationProvided": {
+            "type": "string",
+            "nullable": true
+          },
+          "ventilationType": {
+            "type": "string",
+            "nullable": true
+          },
+          "ventilationNotes": {
+            "type": "string",
+            "nullable": true
+          },
+          "preRetrofitPulseAirTightnessTestRating": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "preRetrofitBlowerDoorAirTightnessTestRating": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "suitableBackgroundVentilationPresent": {
+            "type": "boolean",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "RetrofitAssessmentVentilationDto": {
+        "type": "object",
+        "properties": {
+          "existingVentilationProvided": {
+            "type": "string",
+            "nullable": true
+          },
+          "ventilationType": {
+            "type": "string",
+            "nullable": true
+          },
+          "ventilationNotes": {
+            "type": "string",
+            "nullable": true
+          },
+          "preRetrofitPulseAirTightnessTestRating": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "preRetrofitBlowerDoorAirTightnessTestRating": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "suitableBackgroundVentilationPresent": {
+            "type": "boolean",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "RetrofitDesignDto": {
+        "type": "object",
+        "properties": {
+          "isRegisteredWithTrustmark": {
+            "type": "boolean"
+          },
+          "designerTMLN": {
+            "type": "string",
+            "nullable": true
+          },
+          "designerName": {
+            "type": "string",
+            "nullable": true
+          },
+          "designerQualification": {
+            "type": "string",
+            "nullable": true
+          },
+          "improvementOptionEvaluationMeasureReferences": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Use the ImprovementOptionEvaluationDto.MeasuresEvaluated.YourReference",
+            "nullable": true
+          },
+          "ventilationTreatmentType": {
+            "type": "string",
+            "nullable": true
+          },
+          "thermalBridgeActionDescription": {
+            "type": "string",
+            "nullable": true
+          },
+          "thermalBridgeTreatment": {
+            "type": "string",
+            "nullable": true
+          },
+          "thermalBridgeRiskPresent": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "defectResolutions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DefectResolutionDto"
+            },
+            "nullable": true
+          },
+          "ventilationTreatmentStrategy": {
+            "type": "string",
+            "nullable": true
+          },
+          "ventilationStrategyNotes": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "RetrofitProjectCertificateDto": {
+        "type": "object",
+        "properties": {
+          "projectReference": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "RetrofitProjectCertificateRequestDto": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "string",
+            "nullable": true
+          },
+          "identity": {
+            "$ref": "#/components/schemas/Identity"
+          },
+          "clientRequestToken": {
+            "type": "string",
+            "nullable": true
+          },
+          "request": {
+            "$ref": "#/components/schemas/RetrofitProjectCertificateDto"
+          }
+        },
+        "additionalProperties": false
+      },
+      "RetrofitProjectDto": {
+        "type": "object",
+        "properties": {
+          "retrofitProjectId": {
+            "type": "string",
+            "nullable": true
+          },
+          "pasVersion": {
+            "type": "string",
+            "nullable": true
+          },
+          "projectReference": {
+            "type": "string",
+            "nullable": true
+          },
+          "retrofitAssessmentReference": {
+            "type": "string",
+            "nullable": true
+          },
+          "ownerRetrofitAccountId": {
+            "type": "string",
+            "nullable": true
+          },
+          "ownerName": {
+            "type": "string",
+            "nullable": true
+          },
+          "ownerTMLN": {
+            "type": "string",
+            "nullable": true
+          },
+          "creatorRetrofitAccountId": {
+            "type": "string",
+            "nullable": true
+          },
+          "creatorName": {
+            "type": "string",
+            "nullable": true
+          },
+          "creatorTMLN": {
+            "type": "string",
+            "nullable": true
+          },
+          "isThirdParty": {
+            "type": "boolean"
+          },
+          "projectType": {
+            "type": "string",
+            "nullable": true
+          },
+          "yourProjectReference": {
+            "type": "string",
+            "nullable": true
+          },
+          "localAuthorityProjectPhase": {
+            "type": "string",
+            "nullable": true
+          },
+          "localAuthorityProjectKey": {
+            "type": "string",
+            "nullable": true
+          },
+          "localAuthorityProjectReference": {
+            "type": "string",
+            "nullable": true
+          },
+          "highRiskQuestions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/HighRiskQuestion"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "RetrofitProjectDtoRetrofitProjectDtoMapperRetrofitProjectDtoResponse": {
+        "type": "object",
+        "properties": {
+          "model": {
+            "$ref": "#/components/schemas/RetrofitProjectDto"
+          },
+          "isSuccess": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "RetrofitProjectRolesDto": {
+        "type": "object",
+        "properties": {
+          "installerTMLNs": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "evaluatorTMLN": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "RiskAssessmentDto": {
+        "type": "object",
+        "properties": {
+          "declaredProjectRisk": {
+            "type": "string",
+            "nullable": true
+          },
+          "highestRiskCombination": {
+            "type": "string",
+            "nullable": true
+          },
+          "installerQualityAssuranceClaimed": {
+            "type": "boolean",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "SchemeDto": {
+        "type": "object",
+        "properties": {
+          "schemeId": {
+            "type": "string",
+            "nullable": true
+          },
+          "schemeName": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "StandaloneLodgementDto": {
+        "type": "object",
+        "properties": {
+          "yourProjectReference": {
+            "type": "string",
+            "nullable": true
+          },
+          "address": {
+            "$ref": "#/components/schemas/PropertyAddress"
+          },
+          "propertyInformation": {
+            "$ref": "#/components/schemas/PropertyInformation"
+          },
+          "tenure": {
+            "$ref": "#/components/schemas/PropertyTenure"
+          },
+          "propertyUPRN": {
+            "type": "string",
+            "nullable": true
+          },
+          "lodgementType": {
+            "type": "string",
+            "nullable": true
+          },
+          "workInvoiceTotal": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "customerContribution": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "schemeId": {
+            "type": "string",
+            "nullable": true
+          },
+          "schemeName": {
+            "type": "string",
+            "nullable": true
+          },
+          "ownerName": {
+            "type": "string",
+            "nullable": true
+          },
+          "ownerTMLN": {
+            "type": "string",
+            "nullable": true
+          },
+          "measures": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InstalledMeasure"
+            },
+            "nullable": true
+          },
+          "supportingDocumentAttachments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SupportingDocumentAttachmentDto"
+            },
+            "nullable": true
+          },
+          "startingRatingEPC": {
+            "type": "string",
+            "nullable": true
+          },
+          "startingRRNEPC": {
+            "type": "string",
+            "nullable": true
+          },
+          "completionRatingEPC": {
+            "type": "string",
+            "nullable": true
+          },
+          "completionRRNEPC": {
+            "type": "string",
+            "nullable": true
+          },
+          "localAuthorityProjectPhase": {
+            "type": "string",
+            "nullable": true
+          },
+          "localAuthorityProjectKey": {
+            "type": "string",
+            "nullable": true
+          },
+          "highRiskQuestions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/HighRiskQuestion"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "StandaloneLodgementDtoStandaloneLodgementDtoMapperLodgementDtoResponse": {
+        "type": "object",
+        "properties": {
+          "model": {
+            "$ref": "#/components/schemas/StandaloneLodgementDto"
+          },
+          "isSuccess": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "StandaloneLodgementRequestDto": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "string",
+            "nullable": true
+          },
+          "identity": {
+            "$ref": "#/components/schemas/Identity"
+          },
+          "clientRequestToken": {
+            "type": "string",
+            "nullable": true
+          },
+          "request": {
+            "$ref": "#/components/schemas/StandaloneLodgementDto"
+          }
+        },
+        "additionalProperties": false
+      },
+      "SupportingDocumentAttachmentDto": {
+        "type": "object",
+        "properties": {
+          "fileUploadToken": {
+            "type": "string",
+            "nullable": true
+          },
+          "filename": {
+            "type": "string",
+            "nullable": true
+          },
+          "documentType": {
+            "type": "string",
+            "nullable": true
+          },
+          "comments": {
+            "type": "string",
+            "nullable": true
+          },
+          "measureReference": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "UPRNCheckResponse": {
+        "type": "object",
+        "properties": {
+          "uprn": {
+            "type": "string",
+            "nullable": true
+          },
+          "checkedTMLN": {
+            "type": "string",
+            "nullable": true
+          },
+          "checkedFundType": {
+            "type": "string",
+            "nullable": true
+          },
+          "code": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "securitySchemes": {
+      "apiKey": {
+        "type": "apiKey",
+        "description": "Your x-api-key will be issued by TrustMark as part of onboarding",
+        "name": "X-API-KEY",
+        "in": "header"
+      },
+      "tmapikey": {
+        "type": "apiKey",
+        "description": "Yopu can access your tm-api-key using the API Keys screen in the Schemes Portal",
+        "name": "TM-API-KEY",
+        "in": "header"
+      }
+    }
+  },
+  "security": [
+    {
+      "apiKey": [ ]
+    },
+    {
+      "tmapikey": [ ]
+    }
+  ]
+}

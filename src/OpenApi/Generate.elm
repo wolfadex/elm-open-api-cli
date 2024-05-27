@@ -608,10 +608,10 @@ toRequestFunctions namespace method pathUrl operation =
                                             |> String.join "\n"
                                 )
 
-                    commands : String -> ContentSchema -> AuthorizationInfo -> Elm.Annotation.Annotation -> CliMonad (List Elm.Declaration)
-                    commands doc bodyContent auth successAnnotation =
-                        CliMonad.map3
-                            (\toBody paramType replaced ->
+                    commands : ContentSchema -> AuthorizationInfo -> Elm.Annotation.Annotation -> (Elm.Expression -> Elm.Expression) -> CliMonad (List Elm.Declaration)
+                    commands bodyContent auth successAnnotation toBody =
+                        CliMonad.map2
+                            (\paramType replaced ->
                                 let
                                     cmdArg : Elm.Expression -> Elm.Expression
                                     cmdArg config =
@@ -636,16 +636,13 @@ toRequestFunctions namespace method pathUrl operation =
                                     (\config -> Gen.Http.call_.request (cmdArg config))
                                     |> Elm.withType cmdAnnotation
                                     |> Elm.declaration functionName
-                                    |> Elm.withDocumentation doc
                                 , Elm.fn
                                     ( "config", Nothing )
                                     (\config -> Gen.Http.call_.riskyRequest (cmdArg config))
                                     |> Elm.withType cmdAnnotation
                                     |> Elm.declaration (functionName ++ "Risky")
-                                    |> Elm.withDocumentation doc
                                 ]
                             )
-                            (body bodyContent)
                             (CliMonad.andThen
                                 (\bp ->
                                     toConfigParamAnnotation namespace
@@ -662,10 +659,10 @@ toRequestFunctions namespace method pathUrl operation =
                             )
                             replacedUrl
 
-                    tasks : String -> ContentSchema -> AuthorizationInfo -> Elm.Annotation.Annotation -> CliMonad (List Elm.Declaration)
-                    tasks doc bodyContent auth successAnnotation =
-                        CliMonad.map3
-                            (\toBody paramType replaced ->
+                    tasks : ContentSchema -> AuthorizationInfo -> Elm.Annotation.Annotation -> (Elm.Expression -> Elm.Expression) -> CliMonad (List Elm.Declaration)
+                    tasks bodyContent auth successAnnotation toBody =
+                        CliMonad.map2
+                            (\paramType replaced ->
                                 let
                                     taskArg : Elm.Expression -> Elm.Expression
                                     taskArg config =
@@ -692,16 +689,13 @@ toRequestFunctions namespace method pathUrl operation =
                                     (\config -> Gen.Http.call_.task (taskArg config))
                                     |> Elm.withType taskAnnotation
                                     |> Elm.declaration (functionName ++ "Task")
-                                    |> Elm.withDocumentation doc
                                 , Elm.fn
                                     ( "config", Nothing )
                                     (\config -> Gen.Http.call_.riskyTask (taskArg config))
                                     |> Elm.withType taskAnnotation
                                     |> Elm.declaration (functionName ++ "TaskRisky")
-                                    |> Elm.withDocumentation doc
                                 ]
                             )
-                            (body bodyContent)
                             (CliMonad.andThen
                                 (\bp ->
                                     toConfigParamAnnotation namespace
@@ -720,19 +714,26 @@ toRequestFunctions namespace method pathUrl operation =
                 in
                 CliMonad.andThen4
                     (\contentSchema doc auth successAnnotation ->
-                        CliMonad.map2
-                            (\cmdDecls taskDecls ->
-                                List.map
-                                    (Elm.exposeWith
-                                        { exposeConstructor = False
-                                        , group = Just "Request functions"
-                                        }
+                        CliMonad.andThen
+                            (\toBody ->
+                                CliMonad.map2
+                                    (\cmdDecls taskDecls ->
+                                        List.map
+                                            (\decl ->
+                                                decl
+                                                    |> Elm.withDocumentation doc
+                                                    |> Elm.exposeWith
+                                                        { exposeConstructor = False
+                                                        , group = Just "Request functions"
+                                                        }
+                                            )
+                                            (cmdDecls ++ taskDecls)
+                                            ++ [ errorTypeDeclaration ]
                                     )
-                                    (cmdDecls ++ taskDecls)
-                                    ++ [ errorTypeDeclaration ]
+                                    (commands contentSchema auth successAnnotation toBody)
+                                    (tasks contentSchema auth successAnnotation toBody)
                             )
-                            (commands doc contentSchema auth successAnnotation)
-                            (tasks doc contentSchema auth successAnnotation)
+                            (body contentSchema)
                     )
                     (operationToContentSchema namespace operation)
                     documentation

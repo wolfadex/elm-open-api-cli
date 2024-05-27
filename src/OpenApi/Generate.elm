@@ -44,7 +44,6 @@ import OpenApi.Schema
 import OpenApi.SecurityRequirement
 import OpenApi.SecurityScheme
 import OpenApi.Server
-import OpenApi.Types
 import SchemaUtils
 import String.Extra
 import Util.List
@@ -859,23 +858,14 @@ operationToAuthorizationInfo operation =
                                                 }
 
                                     ( name, _ ) ->
-                                        case components of
-                                            Just c ->
-                                                let
-                                                    securitySchemas : Dict.Dict String (OpenApi.Types.ReferenceOr OpenApi.SecurityScheme.SecurityScheme)
-                                                    securitySchemas =
-                                                        OpenApi.Components.securitySchemes c
-                                                in
-                                                case Dict.get name securitySchemas of
+                                        case Maybe.map OpenApi.Components.securitySchemes components of
+                                            Just securitySchemas ->
+                                                case Maybe.andThen OpenApi.Reference.toConcrete <| Dict.get name securitySchemas of
                                                     Nothing ->
                                                         CliMonad.todoWithDefault acc
                                                             ("Unknown security requirement: " ++ name)
 
-                                                    Just (OpenApi.Types.Ref _) ->
-                                                        CliMonad.todoWithDefault acc
-                                                            "References not supported for security schemas yet"
-
-                                                    Just (OpenApi.Types.Other securitySchema) ->
+                                                    Just securitySchema ->
                                                         case OpenApi.SecurityScheme.type_ securitySchema of
                                                             OpenApi.SecurityScheme.ApiKey apiKey ->
                                                                 case apiKey.in_ of

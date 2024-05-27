@@ -3,7 +3,7 @@ module CliMonad exposing
     , run, stepOrFail
     , succeed, succeedWith, fail
     , map, map2, map3
-    , andThen, andThen2, combine, combineDict, combineMap
+    , andThen, andThen2, combine, combineDict, combineMap, foldl
     , errorToWarning, fromApiSpec
     , withPath, withWarning
     , todo, todoWithDefault
@@ -15,7 +15,7 @@ module CliMonad exposing
 @docs run, stepOrFail
 @docs succeed, succeedWith, fail
 @docs map, map2, map3
-@docs andThen, andThen2, combine, combineDict, combineMap
+@docs andThen, andThen2, combine, combineDict, combineMap, foldl
 @docs errorToWarning, fromApiSpec
 @docs withPath, withWarning
 @docs todo, todoWithDefault
@@ -249,3 +249,8 @@ combineDict dict =
             )
             (succeed [])
         |> map Dict.fromList
+
+
+foldl : (a -> b -> CliMonad b) -> CliMonad b -> List a -> CliMonad b
+foldl f init list =
+    List.foldl (\e acc -> andThen (f e) acc) init list

@@ -113,20 +113,17 @@ run =
                         { outputModuleName = cliOptions.outputModuleName
                         , generateTodos = cliOptions.generateTodos
                         }
-                        >> BackendTask.andThen
-                            (\( decls, warnings ) ->
-                                warnings
-                                    |> List.Extra.gatherEqualsBy .message
-                                    |> List.map logWarning
-                                    |> BackendTask.doEach
-                                    |> BackendTask.map (\_ -> decls)
-                            )
                     )
-                |> Pages.Script.Spinner.withStep "Format with elm-format" attemptToFormat
-                |> Pages.Script.Spinner.withStep "Write to disk" (writeSdkToDisk cliOptions.outputDirectory)
+                |> Pages.Script.Spinner.withStep "Format with elm-format" (onFirst attemptToFormat)
+                |> Pages.Script.Spinner.withStep "Write to disk" (onFirst (writeSdkToDisk cliOptions.outputDirectory))
                 |> Pages.Script.Spinner.runSteps
-                |> BackendTask.andThen printSuccessMessage
+                |> BackendTask.andThen printSuccessMessageAndWarnings
         )
+
+
+onFirst : (a -> BackendTask.BackendTask error c) -> ( a, b ) -> BackendTask.BackendTask error ( c, b )
+onFirst f ( a, b ) =
+    f a |> BackendTask.map (\c -> ( c, b ))
 
 
 decodeOpenApiSpecOrFail : { hasAttemptedToConvertFromSwagger : Bool } -> CliOptions -> String -> BackendTask.BackendTask FatalError.FatalError OpenApi.OpenApi
@@ -394,8 +391,8 @@ writeSdkToDisk outputDirectory =
         >> BackendTask.combine
 
 
-printSuccessMessage : List String -> BackendTask.BackendTask FatalError.FatalError ()
-printSuccessMessage outputPaths =
+printSuccessMessageAndWarnings : ( List String, List CliMonad.Message ) -> BackendTask.BackendTask FatalError.FatalError ()
+printSuccessMessageAndWarnings ( outputPaths, warnings ) =
     let
         indentBy : Int -> String -> String
         indentBy amount input =
@@ -417,29 +414,40 @@ printSuccessMessage outputPaths =
                 { text = dependency
                 , url = "https://package.elm-lang.org/packages/" ++ dependency ++ "/latest/"
                 }
+
+        warningTask : BackendTask.BackendTask FatalError.FatalError ()
+        warningTask =
+            warnings
+                |> List.Extra.gatherEqualsBy .message
+                |> List.map logWarning
+                |> BackendTask.doEach
+
+        successTask : BackendTask.BackendTask error ()
+        successTask =
+            [ [ ""
+              , "🎉 SDK generated:"
+              , ""
+              ]
+            , outputPaths
+                |> List.map (indentBy 4)
+            , [ ""
+              , ""
+              , "You'll also need " ++ String.Extra.toSentenceOxford requiredLinks ++ " installed. Try running:"
+              , ""
+              , indentBy 4 "elm install elm/http"
+              , indentBy 4 "elm install elm/json"
+              , ""
+              , ""
+              , "and possibly need " ++ String.Extra.toSentenceOxford optionalLinks ++ " installed. If that's the case, try running:"
+              , indentBy 4 "elm install elm/bytes"
+              , indentBy 4 "elm install elm/url"
+              ]
+            ]
+                |> List.concat
+                |> List.map Pages.Script.log
+                |> BackendTask.doEach
     in
-    [ [ ""
-      , "🎉 SDK generated:"
-      , ""
-      ]
-    , outputPaths
-        |> List.map (indentBy 4)
-    , [ ""
-      , ""
-      , "You'll also need " ++ String.Extra.toSentenceOxford requiredLinks ++ " installed. Try running:"
-      , ""
-      , indentBy 4 "elm install elm/http"
-      , indentBy 4 "elm install elm/json"
-      , ""
-      , ""
-      , "and possibly need " ++ String.Extra.toSentenceOxford optionalLinks ++ " installed. If that's the case, try running:"
-      , indentBy 4 "elm install elm/bytes"
-      , indentBy 4 "elm install elm/url"
-      ]
-    ]
-        |> List.concat
-        |> List.map Pages.Script.log
-        |> BackendTask.doEach
+    BackendTask.doEach [ successTask, warningTask ]
 
 
 messageToString : CliMonad.Message -> String

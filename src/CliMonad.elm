@@ -2,7 +2,7 @@ module CliMonad exposing
     ( CliMonad, Message, OneOfName, Path
     , run, stepOrFail
     , succeed, succeedWith, fail
-    , map, map2, map3
+    , map, map2, map3, map4
     , andThen, andThen2, combine, combineDict, combineMap, foldl
     , errorToWarning, fromApiSpec
     , withPath, withWarning
@@ -15,7 +15,7 @@ module CliMonad exposing
 @docs CliMonad, Message, OneOfName, Path
 @docs run, stepOrFail
 @docs succeed, succeedWith, fail
-@docs map, map2, map3
+@docs map, map2, map3, map4
 @docs andThen, andThen2, combine, combineDict, combineMap, foldl
 @docs errorToWarning, fromApiSpec
 @docs withPath, withWarning

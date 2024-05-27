@@ -608,135 +608,110 @@ toRequestFunctions namespace method pathUrl operation =
                                             |> String.join "\n"
                                 )
 
-                    commands : ContentSchema -> AuthorizationInfo -> Elm.Annotation.Annotation -> (Elm.Expression -> Elm.Expression) -> CliMonad (List Elm.Declaration)
-                    commands bodyContent auth successAnnotation toBody =
-                        CliMonad.map2
-                            (\paramType replaced ->
-                                let
-                                    cmdArg : Elm.Expression -> Elm.Expression
-                                    cmdArg config =
-                                        Elm.record
-                                            [ ( "url", replaced config )
-                                            , ( "method", Elm.string method )
-                                            , ( "headers", Elm.list <| auth.headers config )
-                                            , ( "expect", expect config )
-                                            , ( "body", toBody config )
-                                            , ( "timeout", Gen.Maybe.make_.nothing )
-                                            , ( "tracker", Gen.Maybe.make_.nothing )
-                                            ]
+                    commands : AuthorizationInfo -> Elm.Annotation.Annotation -> (Elm.Expression -> Elm.Expression) -> (Elm.Expression -> Elm.Expression) -> ({ requireToMsg : Bool } -> Elm.Annotation.Annotation) -> List Elm.Declaration
+                    commands auth successAnnotation toBody replaced paramType =
+                        let
+                            cmdArg : Elm.Expression -> Elm.Expression
+                            cmdArg config =
+                                Elm.record
+                                    [ ( "url", replaced config )
+                                    , ( "method", Elm.string method )
+                                    , ( "headers", Elm.list <| auth.headers config )
+                                    , ( "expect", expect config )
+                                    , ( "body", toBody config )
+                                    , ( "timeout", Gen.Maybe.make_.nothing )
+                                    , ( "tracker", Gen.Maybe.make_.nothing )
+                                    ]
 
-                                    cmdAnnotation : Elm.Annotation.Annotation
-                                    cmdAnnotation =
-                                        Elm.Annotation.function
-                                            [ paramType ]
-                                            (Elm.Annotation.cmd (Elm.Annotation.var "msg"))
-                                in
-                                [ Elm.fn
-                                    ( "config", Nothing )
-                                    (\config -> Gen.Http.call_.request (cmdArg config))
-                                    |> Elm.withType cmdAnnotation
-                                    |> Elm.declaration functionName
-                                , Elm.fn
-                                    ( "config", Nothing )
-                                    (\config -> Gen.Http.call_.riskyRequest (cmdArg config))
-                                    |> Elm.withType cmdAnnotation
-                                    |> Elm.declaration (functionName ++ "Risky")
-                                ]
-                            )
-                            (CliMonad.andThen
-                                (\bp ->
-                                    toConfigParamAnnotation namespace
-                                        { operation = operation
-                                        , requireToMsg = True
-                                        , successAnnotation = successAnnotation
-                                        , errorBodyAnnotation = bodyTypeAnnotation
-                                        , errorTypeAnnotation = errorTypeAnnotation
-                                        , authorizationInfo = auth
-                                        , bodyParams = bp
-                                        }
-                                )
-                                (bodyParams bodyContent)
-                            )
-                            replacedUrl
+                            cmdAnnotation : Elm.Annotation.Annotation
+                            cmdAnnotation =
+                                Elm.Annotation.function
+                                    [ paramType { requireToMsg = True } ]
+                                    (Elm.Annotation.cmd (Elm.Annotation.var "msg"))
+                        in
+                        [ Elm.fn
+                            ( "config", Nothing )
+                            (\config -> Gen.Http.call_.request (cmdArg config))
+                            |> Elm.withType cmdAnnotation
+                            |> Elm.declaration functionName
+                        , Elm.fn
+                            ( "config", Nothing )
+                            (\config -> Gen.Http.call_.riskyRequest (cmdArg config))
+                            |> Elm.withType cmdAnnotation
+                            |> Elm.declaration (functionName ++ "Risky")
+                        ]
 
-                    tasks : ContentSchema -> AuthorizationInfo -> Elm.Annotation.Annotation -> (Elm.Expression -> Elm.Expression) -> CliMonad (List Elm.Declaration)
-                    tasks bodyContent auth successAnnotation toBody =
-                        CliMonad.map2
-                            (\paramType replaced ->
-                                let
-                                    taskArg : Elm.Expression -> Elm.Expression
-                                    taskArg config =
-                                        Elm.record
-                                            [ ( "url", replaced config )
-                                            , ( "method", Elm.string method )
-                                            , ( "headers", Elm.list <| auth.headers config )
-                                            , ( "resolver", resolver )
-                                            , ( "body", toBody config )
-                                            , ( "timeout", Gen.Maybe.make_.nothing )
-                                            ]
+                    tasks : AuthorizationInfo -> Elm.Annotation.Annotation -> (Elm.Expression -> Elm.Expression) -> (Elm.Expression -> Elm.Expression) -> ({ requireToMsg : Bool } -> Elm.Annotation.Annotation) -> List Elm.Declaration
+                    tasks auth successAnnotation toBody replaced paramType =
+                        let
+                            taskArg : Elm.Expression -> Elm.Expression
+                            taskArg config =
+                                Elm.record
+                                    [ ( "url", replaced config )
+                                    , ( "method", Elm.string method )
+                                    , ( "headers", Elm.list <| auth.headers config )
+                                    , ( "resolver", resolver )
+                                    , ( "body", toBody config )
+                                    , ( "timeout", Gen.Maybe.make_.nothing )
+                                    ]
 
-                                    taskAnnotation : Elm.Annotation.Annotation
-                                    taskAnnotation =
-                                        Elm.Annotation.function
-                                            [ paramType ]
-                                            (Gen.Task.annotation_.task
-                                                (customErrorAnnotation namespace errorTypeAnnotation bodyTypeAnnotation)
-                                                successAnnotation
-                                            )
-                                in
-                                [ Elm.fn
-                                    ( "config", Nothing )
-                                    (\config -> Gen.Http.call_.task (taskArg config))
-                                    |> Elm.withType taskAnnotation
-                                    |> Elm.declaration (functionName ++ "Task")
-                                , Elm.fn
-                                    ( "config", Nothing )
-                                    (\config -> Gen.Http.call_.riskyTask (taskArg config))
-                                    |> Elm.withType taskAnnotation
-                                    |> Elm.declaration (functionName ++ "TaskRisky")
-                                ]
-                            )
-                            (CliMonad.andThen
-                                (\bp ->
-                                    toConfigParamAnnotation namespace
-                                        { operation = operation
-                                        , requireToMsg = False
-                                        , successAnnotation = successAnnotation
-                                        , errorBodyAnnotation = bodyTypeAnnotation
-                                        , errorTypeAnnotation = errorTypeAnnotation
-                                        , authorizationInfo = auth
-                                        , bodyParams = bp
-                                        }
-                                )
-                                (bodyParams bodyContent)
-                            )
-                            replacedUrl
-                in
-                CliMonad.andThen4
-                    (\contentSchema doc auth successAnnotation ->
-                        CliMonad.andThen
-                            (\toBody ->
-                                CliMonad.map2
-                                    (\cmdDecls taskDecls ->
-                                        List.map
-                                            (\decl ->
-                                                decl
-                                                    |> Elm.withDocumentation doc
-                                                    |> Elm.exposeWith
-                                                        { exposeConstructor = False
-                                                        , group = Just "Request functions"
-                                                        }
-                                            )
-                                            (cmdDecls ++ taskDecls)
-                                            ++ [ errorTypeDeclaration ]
+                            taskAnnotation : Elm.Annotation.Annotation
+                            taskAnnotation =
+                                Elm.Annotation.function
+                                    [ paramType { requireToMsg = False } ]
+                                    (Gen.Task.annotation_.task
+                                        (customErrorAnnotation namespace errorTypeAnnotation bodyTypeAnnotation)
+                                        successAnnotation
                                     )
-                                    (commands contentSchema auth successAnnotation toBody)
-                                    (tasks contentSchema auth successAnnotation toBody)
+                        in
+                        [ Elm.fn
+                            ( "config", Nothing )
+                            (\config -> Gen.Http.call_.task (taskArg config))
+                            |> Elm.withType taskAnnotation
+                            |> Elm.declaration (functionName ++ "Task")
+                        , Elm.fn
+                            ( "config", Nothing )
+                            (\config -> Gen.Http.call_.riskyTask (taskArg config))
+                            |> Elm.withType taskAnnotation
+                            |> Elm.declaration (functionName ++ "TaskRisky")
+                        ]
+                in
+                CliMonad.andThen3
+                    (\contentSchema auth successAnnotation ->
+                        CliMonad.map4
+                            (\toBody configAnnotation replaced doc ->
+                                List.map
+                                    (\decl ->
+                                        decl
+                                            |> Elm.withDocumentation doc
+                                            |> Elm.exposeWith
+                                                { exposeConstructor = False
+                                                , group = Just "Request functions"
+                                                }
+                                    )
+                                    (commands auth successAnnotation toBody replaced configAnnotation
+                                        ++ tasks auth successAnnotation toBody replaced configAnnotation
+                                    )
+                                    ++ [ errorTypeDeclaration ]
                             )
                             (body contentSchema)
+                            (bodyParams contentSchema
+                                |> CliMonad.andThen
+                                    (\params ->
+                                        toConfigParamAnnotation namespace
+                                            { operation = operation
+                                            , successAnnotation = successAnnotation
+                                            , errorBodyAnnotation = bodyTypeAnnotation
+                                            , errorTypeAnnotation = errorTypeAnnotation
+                                            , authorizationInfo = auth
+                                            , bodyParams = params
+                                            }
+                                    )
+                            )
+                            replacedUrl
+                            documentation
                     )
                     (operationToContentSchema namespace operation)
-                    documentation
                     authorizationInfo
                     (SchemaUtils.typeToAnnotation namespace successType)
             )
@@ -1032,19 +1007,18 @@ toConfigParamAnnotation :
     List String
     ->
         { operation : OpenApi.Operation.Operation
-        , requireToMsg : Bool
         , successAnnotation : Elm.Annotation.Annotation
         , errorBodyAnnotation : Elm.Annotation.Annotation
         , errorTypeAnnotation : Elm.Annotation.Annotation
         , authorizationInfo : AuthorizationInfo
         , bodyParams : List ( String, Elm.Annotation.Annotation )
         }
-    -> CliMonad Elm.Annotation.Annotation
+    -> CliMonad ({ requireToMsg : Bool } -> Elm.Annotation.Annotation)
 toConfigParamAnnotation namespace options =
     CliMonad.map
-        (\urlParams ->
+        (\urlParams { requireToMsg } ->
             (options.authorizationInfo.params
-                ++ (if options.requireToMsg then
+                ++ (if requireToMsg then
                         [ ( "toMsg"
                           , Elm.Annotation.function
                                 [ Gen.Result.annotation_.result

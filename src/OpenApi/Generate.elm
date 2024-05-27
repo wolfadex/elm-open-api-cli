@@ -875,7 +875,7 @@ operationToAuthorizationInfo operation =
                                                                     let
                                                                         cleanName : String
                                                                         cleanName =
-                                                                            Common.toValueName apiKey.name
+                                                                            Common.toValueName (String.replace "-" "_" <| String.toLower apiKey.name)
                                                                     in
                                                                     CliMonad.succeed
                                                                         { headers =

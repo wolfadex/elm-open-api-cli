@@ -583,36 +583,24 @@ toRequestFunctions namespace method pathUrl operation =
                                 (\auth ->
                                     CliMonad.map3
                                         (\toBody paramType replaced ->
+                                            let
+                                                arg config =
+                                                    Elm.record
+                                                        [ ( "method", Elm.string method )
+                                                        , ( "headers", Elm.list <| auth.headers config )
+                                                        , ( "expect", expect config )
+                                                        , ( "body", toBody config )
+                                                        , ( "timeout", Gen.Maybe.make_.nothing )
+                                                        , ( "tracker", Gen.Maybe.make_.nothing )
+                                                        , ( "url", replaced config )
+                                                        ]
+                                            in
                                             ( Elm.fn
                                                 ( "config", Nothing )
-                                                (\config ->
-                                                    Gen.Http.call_.request
-                                                        (Elm.record
-                                                            [ ( "method", Elm.string method )
-                                                            , ( "headers", Elm.list <| auth.headers config )
-                                                            , ( "expect", expect config )
-                                                            , ( "body", toBody config )
-                                                            , ( "timeout", Gen.Maybe.make_.nothing )
-                                                            , ( "tracker", Gen.Maybe.make_.nothing )
-                                                            , ( "url", replaced config )
-                                                            ]
-                                                        )
-                                                )
+                                                (\config -> Gen.Http.call_.request (arg config))
                                             , Elm.fn
                                                 ( "config", Nothing )
-                                                (\config ->
-                                                    Gen.Http.call_.riskyRequest
-                                                        (Elm.record
-                                                            [ ( "method", Elm.string method )
-                                                            , ( "headers", Elm.list <| auth.headers config )
-                                                            , ( "expect", expect config )
-                                                            , ( "body", toBody config )
-                                                            , ( "timeout", Gen.Maybe.make_.nothing )
-                                                            , ( "tracker", Gen.Maybe.make_.nothing )
-                                                            , ( "url", replaced config )
-                                                            ]
-                                                        )
-                                                )
+                                                (\config -> Gen.Http.call_.riskyRequest (arg config))
                                             , Elm.Annotation.function
                                                 [ paramType ]
                                                 (Elm.Annotation.cmd (Elm.Annotation.var "msg"))

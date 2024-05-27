@@ -556,10 +556,6 @@ toRequestFunctions namespace method pathUrl operation =
                             BytesContent mime ->
                                 CliMonad.succeed <| \config -> Gen.Http.bytesBody mime (Elm.get "body" config)
 
-                    expect : Elm.Expression -> Elm.Expression
-                    expect config =
-                        toExpect (Elm.get "toMsg" config)
-
                     bodyParams : ContentSchema -> CliMonad (List ( String, Elm.Annotation.Annotation ))
                     bodyParams contentSchema =
                         case contentSchema of
@@ -576,38 +572,6 @@ toRequestFunctions namespace method pathUrl operation =
                             BytesContent _ ->
                                 CliMonad.succeed [ ( "body", Gen.Bytes.annotation_.bytes ) ]
 
-                    authorizationInfo : CliMonad AuthorizationInfo
-                    authorizationInfo =
-                        operationToAuthorizationInfo operation
-
-                    documentation : CliMonad String
-                    documentation =
-                        authorizationInfo
-                            |> CliMonad.map
-                                (\{ scopes } ->
-                                    let
-                                        descriptionDoc : String
-                                        descriptionDoc =
-                                            OpenApi.Operation.description operation
-                                                |> Maybe.withDefault ""
-                                    in
-                                    if List.isEmpty scopes then
-                                        descriptionDoc
-
-                                    else
-                                        ([ descriptionDoc
-                                         , ""
-                                         , "This operations requires the following scopes:"
-                                         ]
-                                            ++ List.map
-                                                (\scope ->
-                                                    " - `" ++ scope ++ "`"
-                                                )
-                                                scopes
-                                        )
-                                            |> String.join "\n"
-                                )
-
                     commands : AuthorizationInfo -> Elm.Annotation.Annotation -> (Elm.Expression -> Elm.Expression) -> (Elm.Expression -> Elm.Expression) -> ({ requireToMsg : Bool } -> Elm.Annotation.Annotation) -> List Elm.Declaration
                     commands auth successAnnotation toBody replaced paramType =
                         let
@@ -617,7 +581,7 @@ toRequestFunctions namespace method pathUrl operation =
                                     [ ( "url", replaced config )
                                     , ( "method", Elm.string method )
                                     , ( "headers", Elm.list <| auth.headers config )
-                                    , ( "expect", expect config )
+                                    , ( "expect", toExpect <| Elm.get "toMsg" config )
                                     , ( "body", toBody config )
                                     , ( "timeout", Gen.Maybe.make_.nothing )
                                     , ( "tracker", Gen.Maybe.make_.nothing )
@@ -675,15 +639,39 @@ toRequestFunctions namespace method pathUrl operation =
                             |> Elm.withType taskAnnotation
                             |> Elm.declaration (functionName ++ "TaskRisky")
                         ]
+
+                    documentation : AuthorizationInfo -> String
+                    documentation { scopes } =
+                        let
+                            descriptionDoc : String
+                            descriptionDoc =
+                                OpenApi.Operation.description operation
+                                    |> Maybe.withDefault ""
+                        in
+                        if List.isEmpty scopes then
+                            descriptionDoc
+
+                        else
+                            ([ descriptionDoc
+                             , ""
+                             , "This operations requires the following scopes:"
+                             ]
+                                ++ List.map
+                                    (\scope ->
+                                        " - `" ++ scope ++ "`"
+                                    )
+                                    scopes
+                            )
+                                |> String.join "\n"
                 in
-                CliMonad.andThen3
-                    (\contentSchema auth successAnnotation ->
-                        CliMonad.map4
-                            (\toBody configAnnotation replaced doc ->
+                CliMonad.andThen4
+                    (\contentSchema auth successAnnotation replaced ->
+                        CliMonad.map2
+                            (\toBody configAnnotation ->
                                 List.map
                                     (\decl ->
                                         decl
-                                            |> Elm.withDocumentation doc
+                                            |> Elm.withDocumentation (documentation auth)
                                             |> Elm.exposeWith
                                                 { exposeConstructor = False
                                                 , group = Just "Request functions"
@@ -708,12 +696,11 @@ toRequestFunctions namespace method pathUrl operation =
                                             }
                                     )
                             )
-                            replacedUrl
-                            documentation
                     )
                     (operationToContentSchema namespace operation)
-                    authorizationInfo
+                    (operationToAuthorizationInfo operation)
                     (SchemaUtils.typeToAnnotation namespace successType)
+                    replacedUrl
             )
         |> CliMonad.withPath method
         |> CliMonad.withPath pathUrl

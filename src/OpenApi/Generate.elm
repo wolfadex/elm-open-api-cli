@@ -1596,7 +1596,7 @@ operationToTypesExpectAndResolver namespace functionName operation =
                                                         SchemaUtils.refToTypeName (String.split "/" inner)
                                                             |> CliMonad.map
                                                                 (\typeName ->
-                                                                    Elm.Annotation.named (namespace ++ [ Common.moduleToString Common.Types ]) typeName
+                                                                    Elm.Annotation.named [] typeName
                                                                 )
                                                     )
                                 )

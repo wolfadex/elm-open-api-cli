@@ -477,7 +477,14 @@ typeToAnnotationMaybe qualify namespace type_ =
             CliMonad.succeed Gen.Json.Encode.annotation_.value
 
         Common.Ref ref ->
-            CliMonad.map (Elm.Annotation.named []) (refToTypeName ref)
+            CliMonad.map
+                (if qualify then
+                    Elm.Annotation.named (namespace ++ [ Common.moduleToString Common.Types ])
+
+                 else
+                    Elm.Annotation.named []
+                )
+                (refToTypeName ref)
 
         Common.Bytes ->
             CliMonad.succeed Gen.Bytes.annotation_.bytes

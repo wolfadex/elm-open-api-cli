@@ -610,11 +610,12 @@ toRequestFunctions effectTypes namespace method pathUrl operation =
                         else
                             Nothing
 
+                    httpHeadersFromList : AuthorizationInfo -> Elm.Expression -> Elm.Expression
                     httpHeadersFromList auth config =
                         Elm.list <| List.map (\( k, v ) -> Gen.Http.call_.header k v) <| auth.headers config
 
                     commands : AuthorizationInfo -> Elm.Annotation.Annotation -> (Elm.Expression -> { core : Elm.Expression, elmPages : Elm.Expression }) -> (Elm.Expression -> Elm.Expression) -> ({ requireToMsg : Bool } -> Elm.Annotation.Annotation) -> List Elm.Declaration
-                    commands auth successAnnotation toBody replaced paramType =
+                    commands auth _ toBody replaced paramType =
                         let
                             cmdArg : Elm.Expression -> Elm.Expression
                             cmdArg config =

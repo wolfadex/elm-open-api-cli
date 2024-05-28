@@ -1,6 +1,7 @@
 module SchemaUtils exposing
     ( OneOfName
     , decodeOptionalField
+    , decodeOptionalFieldDocumentation
     , getAlias
     , oneOfDeclarations
     , recordType
@@ -812,3 +813,19 @@ decodeOptionalField =
                             (Gen.Json.Decode.succeed Gen.Maybe.make_.nothing)
                     )
                 |> Elm.withType resultAnnotation
+
+
+decodeOptionalFieldDocumentation : String
+decodeOptionalFieldDocumentation =
+    """{-| Decode an optional field
+
+    decodeString (decodeOptionalField "x" int) "{ "x": 3 }"
+    --> Ok (Just 3)
+
+    decodeString (decodeOptionalField "x" int) "{ "x": true }"
+    --> Err ...
+
+    decodeString (decodeOptionalField "x" int) "{ "y": 4 }"
+    --> Ok Nothing
+
+-}"""

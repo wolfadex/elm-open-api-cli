@@ -1570,7 +1570,7 @@ operationToTypesExpectAndResolver namespace functionName operation =
                                                     (\contentSchema ->
                                                         case contentSchema of
                                                             JsonContent type_ ->
-                                                                SchemaUtils.typeToAnnotation True namespace type_
+                                                                SchemaUtils.typeToAnnotation False namespace type_
 
                                                             StringContent _ ->
                                                                 CliMonad.succeed Elm.Annotation.string

@@ -162,7 +162,7 @@ schemaToType qualify namespace schema =
                 oneOfToType : List Json.Schema.Definitions.Schema -> CliMonad Common.Type
                 oneOfToType oneOf =
                     CliMonad.combineMap (schemaToType qualify namespace) oneOf
-                        |> CliMonad.andThen (oneOfType qualify namespace)
+                        |> CliMonad.andThen (oneOfType namespace)
             in
             case subSchema.type_ of
                 Json.Schema.Definitions.SingleType singleType ->
@@ -239,7 +239,7 @@ schemaToType qualify namespace schema =
                     in
                     nonNulls
                         |> CliMonad.combineMap singleTypeToType
-                        |> CliMonad.andThen (oneOfType qualify namespace)
+                        |> CliMonad.andThen (oneOfType namespace)
                         |> CliMonad.map
                             (\res ->
                                 if List.isEmpty nulls then
@@ -275,10 +275,10 @@ typeToOneOfVariant qualify namespace type_ =
             )
 
 
-oneOfType : Bool -> List String -> List Common.Type -> CliMonad Common.Type
-oneOfType qualify namespace types =
+oneOfType : List String -> List Common.Type -> CliMonad Common.Type
+oneOfType namespace types =
     types
-        |> CliMonad.combineMap (typeToOneOfVariant qualify namespace)
+        |> CliMonad.combineMap (typeToOneOfVariant False namespace)
         |> CliMonad.map
             (\maybeVariants ->
                 case Maybe.Extra.combine maybeVariants of

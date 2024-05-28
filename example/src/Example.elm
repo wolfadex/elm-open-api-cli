@@ -53,10 +53,10 @@ subscriptions _ =
 
 
 type Msg
-    = ConduitResponse (Result (RealworldConduitApi.Types.Error RealworldConduitApi.Types.GetArticle_Error String) RealworldConduitApi.Types.SingleArticleResponse)
-    | AmadeusResponse (Result (AirlineCodeLookupApi.Types.Error AirlineCodeLookupApi.Types.Getairlines_Error String) AirlineCodeLookupApi.Types.Airlines)
-      -- | BimResponse (Result (RealworldConduitApi.Types.Error BimcloudApi20232AlphaRelease.BlobStoreService10BeginBatchUpload_Error Bytes.Bytes) Bytes.Bytes)
-    | GithubResponse (Result (GithubV3RestApi.Types.Error () String) GithubV3RestApi.Types.Root)
+    = ConduitResponse (Result (RealworldConduitApi.Types.OAError RealworldConduitApi.Types.GetArticle_Error String) RealworldConduitApi.Types.SingleArticleResponse)
+    | AmadeusResponse (Result (AirlineCodeLookupApi.Types.OAError AirlineCodeLookupApi.Types.Getairlines_Error String) AirlineCodeLookupApi.Types.Airlines)
+      -- | BimResponse (Result (RealworldConduitApi.Types.OAError BimcloudApi20232AlphaRelease.BlobStoreService10BeginBatchUpload_Error Bytes.Bytes) Bytes.Bytes)
+    | GithubResponse (Result (GithubV3RestApi.Types.OAError () String) GithubV3RestApi.Types.Root)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )

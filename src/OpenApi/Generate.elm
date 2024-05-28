@@ -831,7 +831,7 @@ replacedUrl server namespace pathUrl operation =
 customErrorAnnotation : List String -> Elm.Annotation.Annotation -> Elm.Annotation.Annotation -> Elm.Annotation.Annotation
 customErrorAnnotation namespace errorTypeAnnotation bodyTypeAnnotation =
     Elm.Annotation.namedWith (namespace ++ [ Common.moduleToString Common.Types ])
-        "Error"
+        "OAError"
         [ errorTypeAnnotation
         , bodyTypeAnnotation
         ]
@@ -1957,7 +1957,7 @@ operationToTypesExpectAndResolver namespace functionName operation =
 
 customHttpError : Elm.Declaration
 customHttpError =
-    Elm.customType "Error"
+    Elm.customType "OAError"
         [ Elm.variantWith "BadUrl" [ Elm.Annotation.string ]
         , Elm.variant "Timeout"
         , Elm.variant "NetworkError"
@@ -1982,7 +1982,7 @@ expectJsonCustom namespace =
         , Just
             (Elm.Annotation.function
                 [ Gen.Result.annotation_.result
-                    (Elm.Annotation.namedWith (namespace ++ [ Common.moduleToString Common.Types ]) "Error" [ Elm.Annotation.var "err", Elm.Annotation.string ])
+                    (Elm.Annotation.namedWith (namespace ++ [ Common.moduleToString Common.Types ]) "OAError" [ Elm.Annotation.var "err", Elm.Annotation.string ])
                     (Elm.Annotation.var "success")
                 ]
                 (Elm.Annotation.var "msg")

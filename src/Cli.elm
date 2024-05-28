@@ -16,10 +16,11 @@ import Json.Decode
 import Json.Encode
 import List.Extra
 import OpenApi
-import OpenApi.Generate
+import OpenApi.Generate exposing (EffectType(..))
 import OpenApi.Info
 import Pages.Script
 import Pages.Script.Spinner
+import Result.Extra
 import String.Extra
 import Url
 import UrlPath
@@ -30,6 +31,7 @@ type alias CliOptions =
     { entryFilePath : String
     , outputDirectory : String
     , outputModuleName : Maybe String
+    , effectTypes : List EffectType
     , generateTodos : Maybe String
     , autoConvertSwagger : Bool
     , swaggerConversionUrl : String
@@ -52,6 +54,10 @@ program =
                 |> Cli.OptionsParser.with
                     (Cli.Option.optionalKeywordArg "module-name")
                 |> Cli.OptionsParser.with
+                    (Cli.Option.optionalKeywordArg "effect-types"
+                        |> Cli.Option.validateMap effectTypesValidation
+                    )
+                |> Cli.OptionsParser.with
                     (Cli.Option.optionalKeywordArg "generateTodos")
                 |> Cli.OptionsParser.with
                     (Cli.Option.flag "auto-convert-swagger")
@@ -70,7 +76,15 @@ program =
   --output-dir                       The directory to output to. Defaults to: generated/
 
   --module-name                      The Elm module name. Default to <OAS info.title>
-    
+
+  --effect-types                     Which kind of APIs to generate, the options are:
+                                      - cmd: input -> Cmd msg
+                                      - riskycmd: as above, but using Http.riskyRequest
+                                      - task: input -> Task Http.Error msg
+                                      - riskytask: as above, but using Http.riskyRequest
+                                      - backendtask: for dillonkearns/elm-pages
+                                      - concurrenttask: for andrewMacmurray/elm-concurrent-task
+
   --auto-convert-swagger             If passed in, and a Swagger doc is encountered,
                                      will attempt to convert it to an Open API file.
                                      If not passed in, and a Swagger doc is encountered,
@@ -93,6 +107,41 @@ program =
             )
 
 
+effectTypesValidation : Maybe String -> Result String (List EffectType)
+effectTypesValidation str =
+    case str of
+        Nothing ->
+            Ok [ Cmd, Task ]
+
+        Just v ->
+            v
+                |> String.split ","
+                |> List.map String.trim
+                |> Result.Extra.combineMap effectTypeValidation
+
+
+effectTypeValidation : String -> Result String EffectType
+effectTypeValidation effectType =
+    case effectType of
+        "cmd" ->
+            Ok Cmd
+
+        "cmdrisky" ->
+            Ok CmdRisky
+
+        "task" ->
+            Ok Task
+
+        "taskrisky" ->
+            Ok TaskRisky
+
+        "backendtask" ->
+            Ok BackendTask
+
+        _ ->
+            Err <| "Unexpected effect type: " ++ effectType
+
+
 run : Pages.Script.Script
 run =
     Pages.Script.withCliOptions program
@@ -112,6 +161,7 @@ run =
                     (generateFileFromOpenApiSpec
                         { outputModuleName = cliOptions.outputModuleName
                         , generateTodos = cliOptions.generateTodos
+                        , effectTypes = cliOptions.effectTypes
                         }
                     )
                 |> Pages.Script.Spinner.withStep "Format with elm-format" (onFirst attemptToFormat)
@@ -296,6 +346,7 @@ yamlToJsonDecoder =
 generateFileFromOpenApiSpec :
     { outputModuleName : Maybe String
     , generateTodos : Maybe String
+    , effectTypes : List EffectType
     }
     -> OpenApi.OpenApi
     -> BackendTask.BackendTask FatalError.FatalError ( List Elm.File, List CliMonad.Message )
@@ -324,6 +375,7 @@ generateFileFromOpenApiSpec config apiSpec =
     OpenApi.Generate.files
         { namespace = moduleName
         , generateTodos = generateTodos
+        , effectTypes = config.effectTypes
         }
         apiSpec
         |> Result.mapError (messageToString >> FatalError.fromString)

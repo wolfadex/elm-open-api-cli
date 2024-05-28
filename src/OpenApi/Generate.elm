@@ -398,145 +398,6 @@ toRequestFunctions effectTypes namespace method pathUrl operation =
         |> CliMonad.andThen
             (\{ successType, bodyTypeAnnotation, errorTypeDeclaration, errorTypeAnnotation, toExpect, resolver } ->
                 let
-                    replacedUrl : CliMonad (Elm.Expression -> Elm.Expression)
-                    replacedUrl =
-                        let
-                            params : List (OpenApi.Reference.ReferenceOr OpenApi.Parameter.Parameter)
-                            params =
-                                OpenApi.Operation.parameters operation
-                        in
-                        params
-                            |> CliMonad.combineMap
-                                (\param ->
-                                    toConcreteParam param
-                                        |> CliMonad.andThen
-                                            (\concreteParam ->
-                                                paramToType namespace concreteParam
-                                                    |> CliMonad.andThen
-                                                        (\( paramName, type_ ) ->
-                                                            paramToString namespace type_
-                                                                |> CliMonad.map
-                                                                    (\{ toString, alwaysJust } ->
-                                                                        { concreteParam = concreteParam
-                                                                        , paramName = paramName
-                                                                        , toString = toString
-                                                                        , alwaysJust = alwaysJust
-                                                                        }
-                                                                    )
-                                                        )
-                                            )
-                                        |> CliMonad.andThen
-                                            (\{ concreteParam, paramName, toString, alwaysJust } ->
-                                                case OpenApi.Parameter.in_ concreteParam of
-                                                    "path" ->
-                                                        if OpenApi.Parameter.required concreteParam && alwaysJust then
-                                                            CliMonad.succeed
-                                                                ( Just
-                                                                    ( -- This is used for the basic URL replacement in a static path
-                                                                      \config ->
-                                                                        Elm.get (Common.toValueName paramName) (Elm.get "params" config)
-                                                                            |> toString
-                                                                            |> Gen.String.call_.replace
-                                                                                (Elm.string <| "{" ++ paramName ++ "}")
-                                                                    , -- This is used for segment replacement when usig `Url.Builder.crossOrigin`
-                                                                      ( "{" ++ paramName ++ "}"
-                                                                      , \config ->
-                                                                            Elm.get (Common.toValueName paramName) (Elm.get "params" config)
-                                                                                |> toString
-                                                                      )
-                                                                    )
-                                                                , []
-                                                                )
-
-                                                        else
-                                                            CliMonad.fail "Optional parameters in path"
-
-                                                    "query" ->
-                                                        CliMonad.succeed ( Nothing, [ concreteParam ] )
-
-                                                    paramIn ->
-                                                        CliMonad.todoWithDefault ( Nothing, [] ) <| "Parameters in \"" ++ paramIn ++ "\""
-                                            )
-                                )
-                            |> CliMonad.andThen
-                                (\pairs ->
-                                    let
-                                        ( replacements, queryParams ) =
-                                            List.unzip pairs
-                                                |> Tuple.mapBoth (List.filterMap identity) List.concat
-                                    in
-                                    if List.isEmpty queryParams then
-                                        OpenApi.servers
-                                            |> CliMonad.fromApiSpec
-                                            |> CliMonad.map
-                                                (\servers ->
-                                                    \config ->
-                                                        let
-                                                            initialUrl : String
-                                                            initialUrl =
-                                                                case servers of
-                                                                    [] ->
-                                                                        pathUrl
-
-                                                                    firstServer :: _ ->
-                                                                        if String.startsWith "/" pathUrl then
-                                                                            OpenApi.Server.url firstServer ++ pathUrl
-
-                                                                        else
-                                                                            OpenApi.Server.url firstServer ++ "/" ++ pathUrl
-                                                        in
-                                                        List.foldl
-                                                            (\( replacement, _ ) -> replacement config)
-                                                            (Elm.string initialUrl)
-                                                            replacements
-                                                )
-
-                                    else
-                                        let
-                                            serverUrl : CliMonad String
-                                            serverUrl =
-                                                CliMonad.fromApiSpec OpenApi.servers
-                                                    |> CliMonad.map
-                                                        (\servers ->
-                                                            case servers of
-                                                                [] ->
-                                                                    ""
-
-                                                                firstServer :: _ ->
-                                                                    OpenApi.Server.url firstServer
-                                                        )
-                                        in
-                                        queryParams
-                                            |> CliMonad.combineMap (queryParameterToUrlBuilderArgument namespace)
-                                            |> CliMonad.map2
-                                                (\srvUrl queryArgs config ->
-                                                    queryArgs
-                                                        |> List.map (\arg -> arg config)
-                                                        |> Gen.List.filterMap Gen.Basics.identity
-                                                        |> Gen.Url.Builder.call_.crossOrigin
-                                                            (Elm.string srvUrl)
-                                                            (pathUrl
-                                                                |> String.split "/"
-                                                                |> List.filterMap
-                                                                    (\segment ->
-                                                                        if String.isEmpty segment then
-                                                                            Nothing
-
-                                                                        else
-                                                                            Just <|
-                                                                                case List.Extra.find (\( _, ( pattern, _ ) ) -> pattern == segment) replacements of
-                                                                                    Nothing ->
-                                                                                        Elm.string segment
-
-                                                                                    Just ( _, ( _, repl ) ) ->
-                                                                                        repl config
-                                                                    )
-                                                                |> Elm.list
-                                                            )
-                                                )
-                                                serverUrl
-                                )
-
                     body :
                         ContentSchema
                         ->
@@ -794,10 +655,150 @@ toRequestFunctions effectTypes namespace method pathUrl operation =
                     (operationToContentSchema namespace operation)
                     (operationToAuthorizationInfo operation)
                     (SchemaUtils.typeToAnnotation namespace successType)
-                    replacedUrl
+                    (replacedUrl namespace pathUrl operation)
             )
         |> CliMonad.withPath method
         |> CliMonad.withPath pathUrl
+
+
+replacedUrl : List String -> String -> OpenApi.Operation.Operation -> CliMonad (Elm.Expression -> Elm.Expression)
+replacedUrl namespace pathUrl operation =
+    let
+        params : List (OpenApi.Reference.ReferenceOr OpenApi.Parameter.Parameter)
+        params =
+            OpenApi.Operation.parameters operation
+    in
+    params
+        |> CliMonad.combineMap
+            (\param ->
+                toConcreteParam param
+                    |> CliMonad.andThen
+                        (\concreteParam ->
+                            paramToType namespace concreteParam
+                                |> CliMonad.andThen
+                                    (\( paramName, type_ ) ->
+                                        paramToString namespace type_
+                                            |> CliMonad.map
+                                                (\{ toString, alwaysJust } ->
+                                                    { concreteParam = concreteParam
+                                                    , paramName = paramName
+                                                    , toString = toString
+                                                    , alwaysJust = alwaysJust
+                                                    }
+                                                )
+                                    )
+                        )
+                    |> CliMonad.andThen
+                        (\{ concreteParam, paramName, toString, alwaysJust } ->
+                            case OpenApi.Parameter.in_ concreteParam of
+                                "path" ->
+                                    if OpenApi.Parameter.required concreteParam && alwaysJust then
+                                        CliMonad.succeed
+                                            ( Just
+                                                ( -- This is used for the basic URL replacement in a static path
+                                                  \config ->
+                                                    Elm.get (Common.toValueName paramName) (Elm.get "params" config)
+                                                        |> toString
+                                                        |> Gen.String.call_.replace
+                                                            (Elm.string <| "{" ++ paramName ++ "}")
+                                                , -- This is used for segment replacement when usig `Url.Builder.crossOrigin`
+                                                  ( "{" ++ paramName ++ "}"
+                                                  , \config ->
+                                                        Elm.get (Common.toValueName paramName) (Elm.get "params" config)
+                                                            |> toString
+                                                  )
+                                                )
+                                            , []
+                                            )
+
+                                    else
+                                        CliMonad.fail "Optional parameters in path"
+
+                                "query" ->
+                                    CliMonad.succeed ( Nothing, [ concreteParam ] )
+
+                                paramIn ->
+                                    CliMonad.todoWithDefault ( Nothing, [] ) <| "Parameters in \"" ++ paramIn ++ "\""
+                        )
+            )
+        |> CliMonad.andThen
+            (\pairs ->
+                let
+                    ( replacements, queryParams ) =
+                        List.unzip pairs
+                            |> Tuple.mapBoth (List.filterMap identity) List.concat
+                in
+                if List.isEmpty queryParams then
+                    OpenApi.servers
+                        |> CliMonad.fromApiSpec
+                        |> CliMonad.map
+                            (\servers ->
+                                \config ->
+                                    let
+                                        initialUrl : String
+                                        initialUrl =
+                                            case servers of
+                                                [] ->
+                                                    pathUrl
+
+                                                firstServer :: _ ->
+                                                    if String.startsWith "/" pathUrl then
+                                                        OpenApi.Server.url firstServer ++ pathUrl
+
+                                                    else
+                                                        OpenApi.Server.url firstServer ++ "/" ++ pathUrl
+                                    in
+                                    List.foldl
+                                        (\( replacement, _ ) -> replacement config)
+                                        (Elm.string initialUrl)
+                                        replacements
+                            )
+
+                else
+                    let
+                        serverUrl : CliMonad String
+                        serverUrl =
+                            CliMonad.fromApiSpec OpenApi.servers
+                                |> CliMonad.map
+                                    (\servers ->
+                                        case servers of
+                                            [] ->
+                                                ""
+
+                                            firstServer :: _ ->
+                                                OpenApi.Server.url firstServer
+                                    )
+                    in
+                    queryParams
+                        |> CliMonad.combineMap (queryParameterToUrlBuilderArgument namespace)
+                        |> CliMonad.map2
+                            (\srvUrl queryArgs config ->
+                                queryArgs
+                                    |> List.map (\arg -> arg config)
+                                    |> Gen.List.filterMap Gen.Basics.identity
+                                    |> Gen.Url.Builder.call_.crossOrigin
+                                        (Elm.string srvUrl)
+                                        (pathUrl
+                                            |> String.split "/"
+                                            |> List.filterMap
+                                                (\segment ->
+                                                    if String.isEmpty segment then
+                                                        Nothing
+
+                                                    else
+                                                        Just <|
+                                                            case List.Extra.find (\( _, ( pattern, _ ) ) -> pattern == segment) replacements of
+                                                                Nothing ->
+                                                                    Elm.string segment
+
+                                                                Just ( _, ( _, repl ) ) ->
+                                                                    repl config
+                                                )
+                                            |> Elm.list
+                                        )
+                            )
+                            serverUrl
+            )
 
 
 customErrorAnnotation : List String -> Elm.Annotation.Annotation -> Elm.Annotation.Annotation -> Elm.Annotation.Annotation

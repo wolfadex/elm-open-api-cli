@@ -70,6 +70,7 @@ suite =
                                 OpenApi.Generate.files
                                     { namespace = namespace
                                     , generateTodos = False
+                                    , effectTypes = [ OpenApi.Generate.Cmd, OpenApi.Generate.Task ]
                                     }
                                     oas
                         in

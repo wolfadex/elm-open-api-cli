@@ -2,14 +2,13 @@ module Example exposing (main)
 
 -- import BimcloudApi20232AlphaRelease
 
-import AirlineCodeLookupApi
+import AirlineCodeLookupApi.Api
+import AirlineCodeLookupApi.Types
 import Browser
-import Bytes
-import Bytes.Decode
-import GithubV3RestApi
-import Http
-import OpenApi
-import RealworldConduitApi
+import GithubV3RestApi.Api
+import GithubV3RestApi.Types
+import RealworldConduitApi.Api
+import RealworldConduitApi.Types
 
 
 main : Program () Model Msg
@@ -30,11 +29,11 @@ init : () -> ( Model, Cmd Msg )
 init () =
     ( {}
     , Cmd.batch
-        [ RealworldConduitApi.getArticle
+        [ RealworldConduitApi.Api.getArticle
             { toMsg = ConduitResponse
             , params = { slug = "" }
             }
-        , AirlineCodeLookupApi.getairlines
+        , AirlineCodeLookupApi.Api.getairlines
             { toMsg = AmadeusResponse
             , params = { airlineCodes = Nothing }
             }
@@ -43,7 +42,7 @@ init () =
         --     { toMsg = BimResponse
         --     , params = { sessionMinusid = Nothing, description = Nothing }
         --     }
-        , GithubV3RestApi.metaRoot { toMsg = GithubResponse }
+        , GithubV3RestApi.Api.metaRoot { toMsg = GithubResponse }
         ]
     )
 
@@ -54,10 +53,10 @@ subscriptions _ =
 
 
 type Msg
-    = ConduitResponse (Result (OpenApi.Error RealworldConduitApi.GetArticle_Error String) RealworldConduitApi.SingleArticleResponse)
-    | AmadeusResponse (Result (OpenApi.Error AirlineCodeLookupApi.Getairlines_Error String) AirlineCodeLookupApi.Airlines)
-      -- | BimResponse (Result (OpenApi.Error BimcloudApi20232AlphaRelease.BlobStoreService10BeginBatchUpload_Error Bytes.Bytes) Bytes.Bytes)
-    | GithubResponse (Result (OpenApi.Error () String) GithubV3RestApi.Root)
+    = ConduitResponse (Result (RealworldConduitApi.Types.Error RealworldConduitApi.Types.GetArticle_Error String) RealworldConduitApi.Types.SingleArticleResponse)
+    | AmadeusResponse (Result (AirlineCodeLookupApi.Types.Error AirlineCodeLookupApi.Types.Getairlines_Error String) AirlineCodeLookupApi.Types.Airlines)
+      -- | BimResponse (Result (RealworldConduitApi.Types.Error BimcloudApi20232AlphaRelease.BlobStoreService10BeginBatchUpload_Error Bytes.Bytes) Bytes.Bytes)
+    | GithubResponse (Result (GithubV3RestApi.Types.Error () String) GithubV3RestApi.Types.Root)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )

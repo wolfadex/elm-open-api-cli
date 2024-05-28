@@ -1982,7 +1982,7 @@ expectJsonCustom namespace =
         , Just
             (Elm.Annotation.function
                 [ Gen.Result.annotation_.result
-                    (Elm.Annotation.namedWith [] "Error" [ Elm.Annotation.var "err", Elm.Annotation.string ])
+                    (Elm.Annotation.namedWith (namespace ++ [ Common.moduleToString Common.Types ]) "Error" [ Elm.Annotation.var "err", Elm.Annotation.string ])
                     (Elm.Annotation.var "success")
                 ]
                 (Elm.Annotation.var "msg")

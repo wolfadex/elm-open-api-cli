@@ -83,7 +83,6 @@ program =
                                       - task: input -> Task Http.Error msg
                                       - riskytask: as above, but using Http.riskyRequest
                                       - backendtask: for dillonkearns/elm-pages
-                                      - concurrenttask: for andrewMacmurray/elm-concurrent-task
 
   --auto-convert-swagger             If passed in, and a Swagger doc is encountered,
                                      will attempt to convert it to an Open API file.

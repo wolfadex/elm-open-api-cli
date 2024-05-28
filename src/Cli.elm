@@ -16,7 +16,7 @@ import Json.Decode
 import Json.Encode
 import List.Extra
 import OpenApi
-import OpenApi.Generate exposing (EffectType(..))
+import OpenApi.Generate
 import OpenApi.Info
 import Pages.Script
 import Pages.Script.Spinner
@@ -31,7 +31,7 @@ type alias CliOptions =
     { entryFilePath : String
     , outputDirectory : String
     , outputModuleName : Maybe String
-    , effectTypes : List EffectType
+    , effectTypes : List OpenApi.Generate.EffectType
     , generateTodos : Maybe String
     , autoConvertSwagger : Bool
     , swaggerConversionUrl : String
@@ -106,11 +106,11 @@ program =
             )
 
 
-effectTypesValidation : Maybe String -> Result String (List EffectType)
+effectTypesValidation : Maybe String -> Result String (List OpenApi.Generate.EffectType)
 effectTypesValidation str =
     case str of
         Nothing ->
-            Ok [ Cmd, Task ]
+            Ok [ OpenApi.Generate.Cmd, OpenApi.Generate.Task ]
 
         Just v ->
             v
@@ -119,23 +119,23 @@ effectTypesValidation str =
                 |> Result.Extra.combineMap effectTypeValidation
 
 
-effectTypeValidation : String -> Result String EffectType
+effectTypeValidation : String -> Result String OpenApi.Generate.EffectType
 effectTypeValidation effectType =
     case effectType of
         "cmd" ->
-            Ok Cmd
+            Ok OpenApi.Generate.Cmd
 
         "cmdrisky" ->
-            Ok CmdRisky
+            Ok OpenApi.Generate.CmdRisky
 
         "task" ->
-            Ok Task
+            Ok OpenApi.Generate.Task
 
         "taskrisky" ->
-            Ok TaskRisky
+            Ok OpenApi.Generate.TaskRisky
 
         "backendtask" ->
-            Ok BackendTask
+            Ok OpenApi.Generate.BackendTask
 
         _ ->
             Err <| "Unexpected effect type: " ++ effectType
@@ -345,7 +345,7 @@ yamlToJsonDecoder =
 generateFileFromOpenApiSpec :
     { outputModuleName : Maybe String
     , generateTodos : Maybe String
-    , effectTypes : List EffectType
+    , effectTypes : List OpenApi.Generate.EffectType
     }
     -> OpenApi.OpenApi
     -> BackendTask.BackendTask FatalError.FatalError ( List Elm.File, List CliMonad.Message )

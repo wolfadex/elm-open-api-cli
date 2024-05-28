@@ -327,7 +327,7 @@ unitDeclarations namespace name =
                 ( Common.Json
                 , Elm.declaration ("decode" ++ typeName)
                     (schemaDecoder
-                        |> Elm.withType (Gen.Json.Decode.annotation_.decoder (Elm.Annotation.named [] typeName))
+                        |> Elm.withType (Gen.Json.Decode.annotation_.decoder (Elm.Annotation.named (namespace ++ [ Common.moduleToString Common.Types ]) typeName))
                     )
                     |> Elm.exposeWith
                         { exposeConstructor = False
@@ -341,7 +341,7 @@ unitDeclarations namespace name =
                 ( Common.Json
                 , Elm.declaration ("encode" ++ typeName)
                     (Elm.functionReduced "rec" encoder
-                        |> Elm.withType (Elm.Annotation.function [ Elm.Annotation.named [] typeName ] Gen.Json.Encode.annotation_.value)
+                        |> Elm.withType (Elm.Annotation.function [ Elm.Annotation.named (namespace ++ [ Common.moduleToString Common.Types ]) typeName ] Gen.Json.Encode.annotation_.value)
                     )
                     |> Elm.exposeWith
                         { exposeConstructor = False

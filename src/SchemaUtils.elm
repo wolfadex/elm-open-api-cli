@@ -424,7 +424,7 @@ typeToAnnotation qualify namespace type_ =
             CliMonad.map Elm.Annotation.list (typeToAnnotation qualify namespace t)
 
         Common.OneOf oneOfName oneOfData ->
-            oneOfAnnotation oneOfName oneOfData
+            oneOfAnnotation qualify namespace oneOfName oneOfData
 
         Common.Value ->
             CliMonad.succeed Gen.Json.Encode.annotation_.value
@@ -471,7 +471,7 @@ typeToAnnotationMaybe qualify namespace type_ =
             CliMonad.map Elm.Annotation.list (typeToAnnotationMaybe qualify namespace t)
 
         Common.OneOf oneOfName oneOfData ->
-            oneOfAnnotation oneOfName oneOfData
+            oneOfAnnotation qualify namespace oneOfName oneOfData
 
         Common.Value ->
             CliMonad.succeed Gen.Json.Encode.annotation_.value
@@ -660,9 +660,16 @@ typeToEncoder qualify namespace type_ =
             CliMonad.succeed (\_ -> Gen.Json.Encode.null)
 
 
-oneOfAnnotation : Common.TypeName -> Common.OneOfData -> CliMonad Elm.Annotation.Annotation
-oneOfAnnotation oneOfName oneOfData =
-    Elm.Annotation.named [] oneOfName
+oneOfAnnotation : Bool -> List String -> Common.TypeName -> Common.OneOfData -> CliMonad Elm.Annotation.Annotation
+oneOfAnnotation qualify namespace oneOfName oneOfData =
+    Elm.Annotation.named
+        (if qualify then
+            namespace ++ [ Common.moduleToString Common.Types ]
+
+         else
+            []
+        )
+        oneOfName
         |> CliMonad.succeedWith
             (FastDict.singleton oneOfName oneOfData)
 

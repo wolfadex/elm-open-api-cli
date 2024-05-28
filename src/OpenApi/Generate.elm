@@ -79,10 +79,17 @@ type alias AuthorizationInfo =
     }
 
 
-files : { namespace : List String, generateTodos : Bool, effectTypes : List EffectType } -> OpenApi.OpenApi -> Result CliMonad.Message ( List Elm.File, List CliMonad.Message )
-files { namespace, generateTodos, effectTypes } apiSpec =
+files :
+    { namespace : List String
+    , generateTodos : Bool
+    , effectTypes : List EffectType
+    , server : Maybe String
+    }
+    -> OpenApi.OpenApi
+    -> Result CliMonad.Message ( List Elm.File, List CliMonad.Message )
+files { namespace, generateTodos, effectTypes, server } apiSpec =
     CliMonad.combine
-        [ pathDeclarations effectTypes namespace
+        [ pathDeclarations server effectTypes namespace
         , componentDeclarations namespace
         , responsesDeclarations namespace
         , requestBodiesDeclarations namespace
@@ -213,8 +220,8 @@ formatModuleDocs =
         )
 
 
-pathDeclarations : List EffectType -> List String -> CliMonad (List Elm.Declaration)
-pathDeclarations effectTypes namespace =
+pathDeclarations : Maybe String -> List EffectType -> List String -> CliMonad (List Elm.Declaration)
+pathDeclarations server effectTypes namespace =
     CliMonad.fromApiSpec OpenApi.paths
         |> CliMonad.andThen
             (\paths ->
@@ -233,7 +240,7 @@ pathDeclarations effectTypes namespace =
                                 |> List.filterMap (\( method, getter ) -> Maybe.map (Tuple.pair method) (getter path))
                                 |> CliMonad.combineMap
                                     (\( method, operation ) ->
-                                        toRequestFunctions effectTypes namespace method url operation
+                                        toRequestFunctions server effectTypes namespace method url operation
                                             |> CliMonad.errorToWarning
                                     )
                                 |> CliMonad.map (List.filterMap identity >> List.concat)
@@ -383,8 +390,8 @@ requestBodyToDeclarations namespace name reference =
                 |> CliMonad.withPath name
 
 
-toRequestFunctions : List EffectType -> List String -> String -> String -> OpenApi.Operation.Operation -> CliMonad (List Elm.Declaration)
-toRequestFunctions effectTypes namespace method pathUrl operation =
+toRequestFunctions : Maybe String -> List EffectType -> List String -> String -> String -> OpenApi.Operation.Operation -> CliMonad (List Elm.Declaration)
+toRequestFunctions server effectTypes namespace method pathUrl operation =
     let
         functionName : String
         functionName =
@@ -655,14 +662,14 @@ toRequestFunctions effectTypes namespace method pathUrl operation =
                     (operationToContentSchema namespace operation)
                     (operationToAuthorizationInfo operation)
                     (SchemaUtils.typeToAnnotation namespace successType)
-                    (replacedUrl namespace pathUrl operation)
+                    (replacedUrl server namespace pathUrl operation)
             )
         |> CliMonad.withPath method
         |> CliMonad.withPath pathUrl
 
 
-replacedUrl : List String -> String -> OpenApi.Operation.Operation -> CliMonad (Elm.Expression -> Elm.Expression)
-replacedUrl namespace pathUrl operation =
+replacedUrl : Maybe String -> List String -> String -> OpenApi.Operation.Operation -> CliMonad (Elm.Expression -> Elm.Expression)
+replacedUrl server namespace pathUrl operation =
     let
         params : List (OpenApi.Reference.ReferenceOr OpenApi.Parameter.Parameter)
         params =
@@ -737,16 +744,25 @@ replacedUrl namespace pathUrl operation =
                                     let
                                         initialUrl : String
                                         initialUrl =
-                                            case servers of
-                                                [] ->
-                                                    pathUrl
-
-                                                firstServer :: _ ->
+                                            case server of
+                                                Just cliServer ->
                                                     if String.startsWith "/" pathUrl then
-                                                        OpenApi.Server.url firstServer ++ pathUrl
+                                                        cliServer ++ pathUrl
 
                                                     else
-                                                        OpenApi.Server.url firstServer ++ "/" ++ pathUrl
+                                                        cliServer ++ "/" ++ pathUrl
+
+                                                Nothing ->
+                                                    case servers of
+                                                        [] ->
+                                                            pathUrl
+
+                                                        firstServer :: _ ->
+                                                            if String.startsWith "/" pathUrl then
+                                                                OpenApi.Server.url firstServer ++ pathUrl
+
+                                                            else
+                                                                OpenApi.Server.url firstServer ++ "/" ++ pathUrl
                                     in
                                     List.foldl
                                         (\( replacement, _ ) -> replacement config)

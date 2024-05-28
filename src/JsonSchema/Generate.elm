@@ -11,9 +11,9 @@ import Json.Schema.Definitions
 import SchemaUtils
 
 
-schemaToDeclarations : List String -> String -> Json.Schema.Definitions.Schema -> CliMonad (List Elm.Declaration)
+schemaToDeclarations : List String -> String -> Json.Schema.Definitions.Schema -> CliMonad (List ( Common.Module, Elm.Declaration ))
 schemaToDeclarations namespace name schema =
-    schemaToAnnotation namespace schema
+    schemaToAnnotation False namespace schema
         |> CliMonad.andThen
             (\ann ->
                 let
@@ -25,53 +25,62 @@ schemaToDeclarations namespace name schema =
                     CliMonad.succeed []
 
                 else
-                    [ Elm.alias typeName ann
-                        |> Elm.exposeWith
-                            { exposeConstructor = False
-                            , group = Just "Types"
-                            }
+                    [ ( Common.Types
+                      , Elm.alias typeName ann
+                            |> Elm.exposeWith
+                                { exposeConstructor = False
+                                , group = Nothing
+                                }
+                      )
                         |> CliMonad.succeed
                     , CliMonad.map
                         (\schemaDecoder ->
-                            Elm.declaration ("decode" ++ typeName)
+                            ( Common.Json
+                            , Elm.declaration
+                                ("decode" ++ typeName)
                                 (schemaDecoder
-                                    |> Elm.withType (Gen.Json.Decode.annotation_.decoder (Elm.Annotation.named [] typeName))
+                                    |> Elm.withType (Gen.Json.Decode.annotation_.decoder (Elm.Annotation.named (namespace ++ [ Common.moduleToString Common.Types ]) typeName))
                                 )
                                 |> Elm.exposeWith
                                     { exposeConstructor = False
                                     , group = Just "Decoders"
                                     }
+                            )
                         )
-                        (schemaToDecoder namespace schema)
+                        (schemaToDecoder False namespace schema)
                     , CliMonad.map
                         (\encoder ->
-                            Elm.declaration ("encode" ++ typeName)
+                            ( Common.Json
+                            , Elm.declaration ("encode" ++ typeName)
                                 (Elm.functionReduced "rec" encoder
-                                    |> Elm.withType (Elm.Annotation.function [ Elm.Annotation.named [] typeName ] Gen.Json.Encode.annotation_.value)
+                                    |> Elm.withType (Elm.Annotation.function [ Elm.Annotation.named (namespace ++ [ Common.moduleToString Common.Types ]) typeName ] Gen.Json.Encode.annotation_.value)
                                 )
                                 |> Elm.exposeWith
                                     { exposeConstructor = False
                                     , group = Just "Encoders"
                                     }
+                            )
                         )
-                        (schemaToEncoder namespace schema)
+                        (schemaToEncoder False namespace schema)
                     ]
                         |> CliMonad.combine
             )
         |> CliMonad.withPath name
 
 
-schemaToAnnotation : List String -> Json.Schema.Definitions.Schema -> CliMonad Elm.Annotation.Annotation
-schemaToAnnotation namespace schema =
-    SchemaUtils.schemaToType namespace schema |> CliMonad.andThen (SchemaUtils.typeToAnnotation namespace)
+schemaToAnnotation : Bool -> List String -> Json.Schema.Definitions.Schema -> CliMonad Elm.Annotation.Annotation
+schemaToAnnotation qualify namespace schema =
+    SchemaUtils.schemaToType qualify namespace schema
+        |> CliMonad.andThen (SchemaUtils.typeToAnnotation qualify namespace)
 
 
-schemaToDecoder : List String -> Json.Schema.Definitions.Schema -> CliMonad Elm.Expression
-schemaToDecoder namespace schema =
-    SchemaUtils.schemaToType namespace schema
-        |> CliMonad.andThen (SchemaUtils.typeToDecoder namespace)
+schemaToDecoder : Bool -> List String -> Json.Schema.Definitions.Schema -> CliMonad Elm.Expression
+schemaToDecoder qualify namespace schema =
+    SchemaUtils.schemaToType True namespace schema
+        |> CliMonad.andThen (SchemaUtils.typeToDecoder qualify namespace)
 
 
-schemaToEncoder : List String -> Json.Schema.Definitions.Schema -> CliMonad (Elm.Expression -> Elm.Expression)
-schemaToEncoder namespace schema =
-    SchemaUtils.schemaToType namespace schema |> CliMonad.andThen (SchemaUtils.typeToEncoder namespace)
+schemaToEncoder : Bool -> List String -> Json.Schema.Definitions.Schema -> CliMonad (Elm.Expression -> Elm.Expression)
+schemaToEncoder qualify namespace schema =
+    SchemaUtils.schemaToType True namespace schema
+        |> CliMonad.andThen (SchemaUtils.typeToEncoder qualify namespace)

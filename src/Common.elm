@@ -1,11 +1,13 @@
 module Common exposing
     ( Field
     , FieldName
+    , Module(..)
     , Object
     , OneOfData
     , Type(..)
     , TypeName
     , VariantName
+    , moduleToString
     , ref
     , toValueName
     , typifyName
@@ -13,6 +15,25 @@ module Common exposing
 
 import FastDict
 import String.Extra
+
+
+type Module
+    = Json
+    | Types
+    | Api
+
+
+moduleToString : Module -> String
+moduleToString module_ =
+    case module_ of
+        Json ->
+            "Json"
+
+        Types ->
+            "Types"
+
+        Api ->
+            "Api"
 
 
 

@@ -177,10 +177,10 @@ Automatically appends the needed `enum` declarations.
 
 -}
 run :
-    (FastDict.Dict OneOfName Common.OneOfData -> CliMonad (List Elm.Declaration))
+    (FastDict.Dict OneOfName Common.OneOfData -> CliMonad (List ( Common.Module, Elm.Declaration )))
     -> { openApi : OpenApi, generateTodos : Bool }
-    -> CliMonad (List Elm.Declaration)
-    -> Result Message ( List Elm.Declaration, List Message )
+    -> CliMonad (List ( Common.Module, Elm.Declaration ))
+    -> Result Message ( List ( Common.Module, Elm.Declaration ), List Message )
 run oneOfDeclarations input (CliMonad x) =
     x input
         |> Result.andThen

@@ -1539,11 +1539,18 @@ operationToTypesExpectAndResolver namespace functionName operation =
                                                         SchemaUtils.refToTypeName (String.split "/" inner)
                                                             |> CliMonad.map
                                                                 (\typeName ->
-                                                                    Elm.val ("decode" ++ typeName)
+                                                                    Elm.value
+                                                                        { importFrom = namespace ++ [ Common.moduleToString Common.Json ]
+                                                                        , name = "decode" ++ typeName
+                                                                        , annotation = Nothing
+                                                                        }
                                                                 )
                                                             |> CliMonad.map
-                                                                (toErrorVariant statusCode
-                                                                    |> Elm.val
+                                                                (Elm.value
+                                                                    { importFrom = namespace ++ [ Common.moduleToString Common.Types ]
+                                                                    , name = toErrorVariant statusCode
+                                                                    , annotation = Nothing
+                                                                    }
                                                                     |> Gen.Json.Decode.call_.map
                                                                 )
                                                     )

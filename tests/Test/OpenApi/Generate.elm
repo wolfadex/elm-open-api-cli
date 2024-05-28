@@ -50,6 +50,12 @@ suite =
   "info": {
     "title":    \"""" ++ inputName ++ """",
     "version": "1.0.0"
+  },
+  "paths": {
+    "/": {
+      "get": {
+      }
+    }
   }
 }"""
                 in
@@ -82,34 +88,46 @@ suite =
                             Ok ( files, _ ) ->
                                 case files of
                                     [] ->
-                                        Expect.fail "Expected to generate 2 files but found none"
+                                        Expect.fail "Expected to generate 3 files but found none"
 
                                     [ file ] ->
-                                        Expect.fail ("Expected to generate 2 files but found 1: " ++ file.path)
+                                        Expect.fail ("Expected to generate 3 files but found 1: " ++ file.path)
 
-                                    [ apiFile, helperFile ] ->
+                                    [ file1, file2 ] ->
+                                        Expect.fail ("Expected to generate 3 files but found 2: " ++ file1.path ++ ", " ++ file2.path)
+
+                                    [ jsonFile, apiFile, helperFile ] ->
                                         let
-                                            apiPath : String
-                                            apiPath =
-                                                String.join "/" namespace ++ "/Api.elm"
+                                            jsonPath : String
+                                            jsonPath =
+                                                String.join "/" namespace ++ "/Json.elm"
                                         in
-                                        if apiFile.path == apiPath then
-                                            let
-                                                helperPath : String
-                                                helperPath =
-                                                    String.join "/" namespace ++ "/OpenApi.elm"
-                                            in
-                                            if helperFile.path == helperPath then
-                                                Expect.pass
-
-                                            else
-                                                Expect.fail ("Expected to generate a file with the path " ++ helperPath ++ " but I found " ++ helperFile.path)
+                                        if jsonFile.path /= jsonPath then
+                                            Expect.fail ("Expected to generate a file with the path " ++ jsonPath ++ " but I found " ++ jsonFile.path)
 
                                         else
-                                            Expect.fail ("Expected to generate a file with the path " ++ apiPath ++ " but I found " ++ apiFile.path)
+                                            let
+                                                apiPath : String
+                                                apiPath =
+                                                    String.join "/" namespace ++ "/Api.elm"
+                                            in
+                                            if apiFile.path /= apiPath then
+                                                Expect.fail ("Expected to generate a file with the path " ++ apiPath ++ " but I found " ++ apiFile.path)
 
-                                    _ :: _ :: extraFiles ->
-                                        Expect.fail ("Expected to generate 2 files but found extra: " ++ String.Extra.toSentenceOxford (List.map .path extraFiles))
+                                            else
+                                                let
+                                                    helperPath : String
+                                                    helperPath =
+                                                        String.join "/" namespace ++ "/OpenApi.elm"
+                                                in
+                                                if helperFile.path /= helperPath then
+                                                    Expect.fail ("Expected to generate a file with the path " ++ helperPath ++ " but I found " ++ helperFile.path)
+
+                                                else
+                                                    Expect.pass
+
+                                    _ :: _ :: _ :: extraFiles ->
+                                        Expect.fail ("Expected to generate 3 files but found extra: " ++ String.Extra.toSentenceOxford (List.map .path extraFiles))
 
         -- Known bug: https://github.com/wolfadex/elm-open-api-cli/issues/48
         , Test.test "The OAS title: service API (params in:body)" <|

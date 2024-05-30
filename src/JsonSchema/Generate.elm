@@ -39,7 +39,7 @@ schemaToDeclarations namespace name schema =
                             , Elm.declaration
                                 ("decode" ++ typeName)
                                 (schemaDecoder
-                                    |> Elm.withType (Gen.Json.Decode.annotation_.decoder (Elm.Annotation.named (namespace ++ [ Common.moduleToString Common.Types ]) typeName))
+                                    |> Elm.withType (Gen.Json.Decode.annotation_.decoder (Elm.Annotation.named (Common.moduleToNamespace namespace Common.Types) typeName))
                                 )
                                 |> Elm.exposeWith
                                     { exposeConstructor = False
@@ -53,7 +53,7 @@ schemaToDeclarations namespace name schema =
                             ( Common.Json
                             , Elm.declaration ("encode" ++ typeName)
                                 (Elm.functionReduced "rec" encoder
-                                    |> Elm.withType (Elm.Annotation.function [ Elm.Annotation.named (namespace ++ [ Common.moduleToString Common.Types ]) typeName ] Gen.Json.Encode.annotation_.value)
+                                    |> Elm.withType (Elm.Annotation.function [ Elm.Annotation.named (Common.moduleToNamespace namespace Common.Types) typeName ] Gen.Json.Encode.annotation_.value)
                                 )
                                 |> Elm.exposeWith
                                     { exposeConstructor = False

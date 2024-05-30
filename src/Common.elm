@@ -7,7 +7,7 @@ module Common exposing
     , Type(..)
     , TypeName
     , VariantName
-    , moduleToString
+    , moduleToNamespace
     , ref
     , toValueName
     , typifyName
@@ -21,6 +21,11 @@ type Module
     = Json
     | Types
     | Api
+
+
+moduleToNamespace : List String -> Module -> List String
+moduleToNamespace namespace module_ =
+    namespace ++ [ moduleToString module_ ]
 
 
 moduleToString : Module -> String

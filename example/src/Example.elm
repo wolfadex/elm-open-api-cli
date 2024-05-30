@@ -7,6 +7,7 @@ import AirlineCodeLookupApi.Types
 import Browser
 import GithubV3RestApi.Api
 import GithubV3RestApi.Types
+import OpenApi.Common
 import RealworldConduitApi.Api
 import RealworldConduitApi.Types
 
@@ -53,10 +54,10 @@ subscriptions _ =
 
 
 type Msg
-    = ConduitResponse (Result (RealworldConduitApi.Types.OAError RealworldConduitApi.Types.GetArticle_Error String) RealworldConduitApi.Types.SingleArticleResponse)
-    | AmadeusResponse (Result (AirlineCodeLookupApi.Types.OAError AirlineCodeLookupApi.Types.Getairlines_Error String) AirlineCodeLookupApi.Types.Airlines)
-      -- | BimResponse (Result (RealworldConduitApi.Types.OAError BimcloudApi20232AlphaRelease.BlobStoreService10BeginBatchUpload_Error Bytes.Bytes) Bytes.Bytes)
-    | GithubResponse (Result (GithubV3RestApi.Types.OAError () String) GithubV3RestApi.Types.Root)
+    = ConduitResponse (Result (OpenApi.Common.Error RealworldConduitApi.Types.GetArticle_Error String) RealworldConduitApi.Types.SingleArticleResponse)
+    | AmadeusResponse (Result (OpenApi.Common.Error AirlineCodeLookupApi.Types.Getairlines_Error String) AirlineCodeLookupApi.Types.Airlines)
+      -- | BimResponse (Result (OpenApi.Common.Error BimcloudApi20232AlphaRelease.BlobStoreService10BeginBatchUpload_Error Bytes.Bytes) Bytes.Bytes)
+    | GithubResponse (Result (OpenApi.Common.Error () String) GithubV3RestApi.Types.Root)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )

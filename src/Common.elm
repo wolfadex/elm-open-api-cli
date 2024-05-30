@@ -21,24 +21,23 @@ type Module
     = Json
     | Types
     | Api
+    | Common
 
 
 moduleToNamespace : List String -> Module -> List String
 moduleToNamespace namespace module_ =
-    namespace ++ [ moduleToString module_ ]
-
-
-moduleToString : Module -> String
-moduleToString module_ =
     case module_ of
         Json ->
-            "Json"
+            namespace ++ [ "Json" ]
 
         Types ->
-            "Types"
+            namespace ++ [ "Types" ]
 
         Api ->
-            "Api"
+            namespace ++ [ "Api" ]
+
+        Common ->
+            [ "OpenApi", "Common" ]
 
 
 

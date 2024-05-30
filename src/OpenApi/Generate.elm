@@ -136,18 +136,18 @@ files { namespace, generateTodos, effectTypes, server } apiSpec =
                                         , group = Just "Decoders"
                                         }
                                  )
-                               , ( Common.Types
+                               , ( Common.Common
                                  , customHttpError
                                     |> Elm.exposeWith
                                         { exposeConstructor = True
-                                        , group = Just "Open API"
+                                        , group = Nothing
                                         }
                                  )
-                               , ( Common.Types
+                               , ( Common.Common
                                  , nullableType
                                     |> Elm.exposeWith
                                         { exposeConstructor = True
-                                        , group = Just "Open API"
+                                        , group = Nothing
                                         }
                                  )
                                ]
@@ -830,8 +830,8 @@ replacedUrl server namespace pathUrl operation =
 
 customErrorAnnotation : List String -> Elm.Annotation.Annotation -> Elm.Annotation.Annotation -> Elm.Annotation.Annotation
 customErrorAnnotation namespace errorTypeAnnotation bodyTypeAnnotation =
-    Elm.Annotation.namedWith (Common.moduleToNamespace namespace Common.Types)
-        "OAError"
+    Elm.Annotation.namedWith (Common.moduleToNamespace namespace Common.Common)
+        "Error"
         [ errorTypeAnnotation
         , bodyTypeAnnotation
         ]
@@ -1678,7 +1678,7 @@ operationToTypesExpectAndResolver namespace functionName operation =
                                                                             Gen.Result.make_.err
                                                                                 (Elm.apply
                                                                                     (Elm.value
-                                                                                        { importFrom = Common.moduleToNamespace namespace Common.Types
+                                                                                        { importFrom = Common.moduleToNamespace namespace Common.Common
                                                                                         , name = "BadUrl"
                                                                                         , annotation = Nothing
                                                                                         }
@@ -1690,7 +1690,7 @@ operationToTypesExpectAndResolver namespace functionName operation =
                                                                         "Timeout_"
                                                                         (Gen.Result.make_.err
                                                                             (Elm.value
-                                                                                { importFrom = Common.moduleToNamespace namespace Common.Types
+                                                                                { importFrom = Common.moduleToNamespace namespace Common.Common
                                                                                 , name = "Timeout"
                                                                                 , annotation = Nothing
                                                                                 }
@@ -1700,7 +1700,7 @@ operationToTypesExpectAndResolver namespace functionName operation =
                                                                         "NetworkError_"
                                                                         (Gen.Result.make_.err
                                                                             (Elm.value
-                                                                                { importFrom = Common.moduleToNamespace namespace Common.Types
+                                                                                { importFrom = Common.moduleToNamespace namespace Common.Common
                                                                                 , name = "NetworkError"
                                                                                 , annotation = Nothing
                                                                                 }
@@ -1716,7 +1716,7 @@ operationToTypesExpectAndResolver namespace functionName operation =
                                                                                     Gen.Result.make_.err
                                                                                         (Elm.apply
                                                                                             (Elm.value
-                                                                                                { importFrom = Common.moduleToNamespace namespace Common.Types
+                                                                                                { importFrom = Common.moduleToNamespace namespace Common.Common
                                                                                                 , name = "UnknownBadStatus"
                                                                                                 , annotation = Nothing
                                                                                                 }
@@ -1732,7 +1732,7 @@ operationToTypesExpectAndResolver namespace functionName operation =
                                                                                                     Gen.Result.make_.err
                                                                                                         (Elm.apply
                                                                                                             (Elm.value
-                                                                                                                { importFrom = Common.moduleToNamespace namespace Common.Types
+                                                                                                                { importFrom = Common.moduleToNamespace namespace Common.Common
                                                                                                                 , name = "KnownBadStatus"
                                                                                                                 , annotation = Nothing
                                                                                                                 }
@@ -1744,7 +1744,7 @@ operationToTypesExpectAndResolver namespace functionName operation =
                                                                                                     Gen.Result.make_.err
                                                                                                         (Elm.apply
                                                                                                             (Elm.value
-                                                                                                                { importFrom = Common.moduleToNamespace namespace Common.Types
+                                                                                                                { importFrom = Common.moduleToNamespace namespace Common.Common
                                                                                                                 , name = "BadErrorBody"
                                                                                                                 , annotation = Nothing
                                                                                                                 }
@@ -1765,7 +1765,7 @@ operationToTypesExpectAndResolver namespace functionName operation =
                                                                                         Gen.Result.make_.err
                                                                                             (Elm.apply
                                                                                                 (Elm.value
-                                                                                                    { importFrom = Common.moduleToNamespace namespace Common.Types
+                                                                                                    { importFrom = Common.moduleToNamespace namespace Common.Common
                                                                                                     , name = "BadBody"
                                                                                                     , annotation = Nothing
                                                                                                     }
@@ -1807,7 +1807,7 @@ operationToTypesExpectAndResolver namespace functionName operation =
                                                                             Gen.Result.make_.err
                                                                                 (Elm.apply
                                                                                     (Elm.value
-                                                                                        { importFrom = Common.moduleToNamespace namespace Common.Types
+                                                                                        { importFrom = Common.moduleToNamespace namespace Common.Common
                                                                                         , name = "BadUrl"
                                                                                         , annotation = Nothing
                                                                                         }
@@ -1819,7 +1819,7 @@ operationToTypesExpectAndResolver namespace functionName operation =
                                                                         "Timeout_"
                                                                         (Gen.Result.make_.err
                                                                             (Elm.value
-                                                                                { importFrom = Common.moduleToNamespace namespace Common.Types
+                                                                                { importFrom = Common.moduleToNamespace namespace Common.Common
                                                                                 , name = "Timeout"
                                                                                 , annotation = Nothing
                                                                                 }
@@ -1829,7 +1829,7 @@ operationToTypesExpectAndResolver namespace functionName operation =
                                                                         "NetworkError_"
                                                                         (Gen.Result.make_.err
                                                                             (Elm.value
-                                                                                { importFrom = Common.moduleToNamespace namespace Common.Types
+                                                                                { importFrom = Common.moduleToNamespace namespace Common.Common
                                                                                 , name = "NetworkError"
                                                                                 , annotation = Nothing
                                                                                 }
@@ -1845,7 +1845,7 @@ operationToTypesExpectAndResolver namespace functionName operation =
                                                                                     Gen.Result.make_.err
                                                                                         (Elm.apply
                                                                                             (Elm.value
-                                                                                                { importFrom = Common.moduleToNamespace namespace Common.Types
+                                                                                                { importFrom = Common.moduleToNamespace namespace Common.Common
                                                                                                 , name = "UnknownBadStatus"
                                                                                                 , annotation = Nothing
                                                                                                 }
@@ -1861,7 +1861,7 @@ operationToTypesExpectAndResolver namespace functionName operation =
                                                                                                     Gen.Result.make_.err
                                                                                                         (Elm.apply
                                                                                                             (Elm.value
-                                                                                                                { importFrom = Common.moduleToNamespace namespace Common.Types
+                                                                                                                { importFrom = Common.moduleToNamespace namespace Common.Common
                                                                                                                 , name = "KnownBadStatus"
                                                                                                                 , annotation = Nothing
                                                                                                                 }
@@ -1873,7 +1873,7 @@ operationToTypesExpectAndResolver namespace functionName operation =
                                                                                                     Gen.Result.make_.err
                                                                                                         (Elm.apply
                                                                                                             (Elm.value
-                                                                                                                { importFrom = Common.moduleToNamespace namespace Common.Types
+                                                                                                                { importFrom = Common.moduleToNamespace namespace Common.Common
                                                                                                                 , name = "BadErrorBody"
                                                                                                                 , annotation = Nothing
                                                                                                                 }
@@ -1957,7 +1957,7 @@ operationToTypesExpectAndResolver namespace functionName operation =
 
 customHttpError : Elm.Declaration
 customHttpError =
-    Elm.customType "OAError"
+    Elm.customType "Error"
         [ Elm.variantWith "BadUrl" [ Elm.Annotation.string ]
         , Elm.variant "Timeout"
         , Elm.variant "NetworkError"
@@ -1982,7 +1982,7 @@ expectJsonCustom namespace =
         , Just
             (Elm.Annotation.function
                 [ Gen.Result.annotation_.result
-                    (Elm.Annotation.namedWith (Common.moduleToNamespace namespace Common.Types) "OAError" [ Elm.Annotation.var "err", Elm.Annotation.string ])
+                    (Elm.Annotation.namedWith (Common.moduleToNamespace namespace Common.Common) "Error" [ Elm.Annotation.var "err", Elm.Annotation.string ])
                     (Elm.Annotation.var "success")
                 ]
                 (Elm.Annotation.var "msg")
@@ -2008,7 +2008,7 @@ expectJsonCustom namespace =
                                 Gen.Result.make_.err
                                     (Elm.apply
                                         (Elm.value
-                                            { importFrom = Common.moduleToNamespace namespace Common.Types
+                                            { importFrom = Common.moduleToNamespace namespace Common.Common
                                             , name = "BadUrl"
                                             , annotation = Nothing
                                             }
@@ -2018,7 +2018,7 @@ expectJsonCustom namespace =
                         , timeout_ =
                             Gen.Result.make_.err
                                 (Elm.value
-                                    { importFrom = Common.moduleToNamespace namespace Common.Types
+                                    { importFrom = Common.moduleToNamespace namespace Common.Common
                                     , name = "Timeout"
                                     , annotation = Nothing
                                     }
@@ -2026,7 +2026,7 @@ expectJsonCustom namespace =
                         , networkError_ =
                             Gen.Result.make_.err
                                 (Elm.value
-                                    { importFrom = Common.moduleToNamespace namespace Common.Types
+                                    { importFrom = Common.moduleToNamespace namespace Common.Common
                                     , name = "NetworkError"
                                     , annotation = Nothing
                                     }
@@ -2039,7 +2039,7 @@ expectJsonCustom namespace =
                                         Gen.Result.make_.err
                                             (Elm.apply
                                                 (Elm.value
-                                                    { importFrom = Common.moduleToNamespace namespace Common.Types
+                                                    { importFrom = Common.moduleToNamespace namespace Common.Common
                                                     , name = "UnknownBadStatus"
                                                     , annotation = Nothing
                                                     }
@@ -2055,7 +2055,7 @@ expectJsonCustom namespace =
                                                         Gen.Result.make_.err
                                                             (Elm.apply
                                                                 (Elm.value
-                                                                    { importFrom = Common.moduleToNamespace namespace Common.Types
+                                                                    { importFrom = Common.moduleToNamespace namespace Common.Common
                                                                     , name = "KnownBadStatus"
                                                                     , annotation = Nothing
                                                                     }
@@ -2067,7 +2067,7 @@ expectJsonCustom namespace =
                                                         Gen.Result.make_.err
                                                             (Elm.apply
                                                                 (Elm.value
-                                                                    { importFrom = Common.moduleToNamespace namespace Common.Types
+                                                                    { importFrom = Common.moduleToNamespace namespace Common.Common
                                                                     , name = "BadErrorBody"
                                                                     , annotation = Nothing
                                                                     }
@@ -2085,7 +2085,7 @@ expectJsonCustom namespace =
                                             Gen.Result.make_.err
                                                 (Elm.apply
                                                     (Elm.value
-                                                        { importFrom = Common.moduleToNamespace namespace Common.Types
+                                                        { importFrom = Common.moduleToNamespace namespace Common.Common
                                                         , name = "BadBody"
                                                         , annotation = Nothing
                                                         }
@@ -2131,7 +2131,7 @@ jsonResolverCustom namespace =
                                 Gen.Result.make_.err
                                     (Elm.apply
                                         (Elm.value
-                                            { importFrom = Common.moduleToNamespace namespace Common.Types
+                                            { importFrom = Common.moduleToNamespace namespace Common.Common
                                             , name = "BadUrl"
                                             , annotation = Nothing
                                             }
@@ -2142,7 +2142,7 @@ jsonResolverCustom namespace =
                         , Elm.Case.branch0 "Timeout_"
                             (Gen.Result.make_.err
                                 (Elm.value
-                                    { importFrom = Common.moduleToNamespace namespace Common.Types
+                                    { importFrom = Common.moduleToNamespace namespace Common.Common
                                     , name = "Timeout"
                                     , annotation = Nothing
                                     }
@@ -2151,7 +2151,7 @@ jsonResolverCustom namespace =
                         , Elm.Case.branch0 "NetworkError_"
                             (Gen.Result.make_.err
                                 (Elm.value
-                                    { importFrom = Common.moduleToNamespace namespace Common.Types
+                                    { importFrom = Common.moduleToNamespace namespace Common.Common
                                     , name = "NetworkError"
                                     , annotation = Nothing
                                     }
@@ -2167,7 +2167,7 @@ jsonResolverCustom namespace =
                                         Gen.Result.make_.err
                                             (Elm.apply
                                                 (Elm.value
-                                                    { importFrom = Common.moduleToNamespace namespace Common.Types
+                                                    { importFrom = Common.moduleToNamespace namespace Common.Common
                                                     , name = "UnknownBadStatus"
                                                     , annotation = Nothing
                                                     }
@@ -2183,7 +2183,7 @@ jsonResolverCustom namespace =
                                                         Gen.Result.make_.err
                                                             (Elm.apply
                                                                 (Elm.value
-                                                                    { importFrom = Common.moduleToNamespace namespace Common.Types
+                                                                    { importFrom = Common.moduleToNamespace namespace Common.Common
                                                                     , name = "KnownBadStatus"
                                                                     , annotation = Nothing
                                                                     }
@@ -2195,7 +2195,7 @@ jsonResolverCustom namespace =
                                                         Gen.Result.make_.err
                                                             (Elm.apply
                                                                 (Elm.value
-                                                                    { importFrom = Common.moduleToNamespace namespace Common.Types
+                                                                    { importFrom = Common.moduleToNamespace namespace Common.Common
                                                                     , name = "BadErrorBody"
                                                                     , annotation = Nothing
                                                                     }
@@ -2215,7 +2215,7 @@ jsonResolverCustom namespace =
                                         \_ ->
                                             Gen.Result.make_.err
                                                 (Elm.apply
-                                                    (Elm.value { importFrom = Common.moduleToNamespace namespace Common.Types, name = "BadBody", annotation = Nothing })
+                                                    (Elm.value { importFrom = Common.moduleToNamespace namespace Common.Common, name = "BadBody", annotation = Nothing })
                                                     [ metadata, body ]
                                                 )
                                     , ok = \a -> Gen.Result.make_.ok a

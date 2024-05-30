@@ -697,17 +697,17 @@ replacedUrl server namespace pathUrl operation =
                                     (\( paramName, type_ ) ->
                                         paramToString True namespace type_
                                             |> CliMonad.map
-                                                (\{ toString, alwaysJust } ->
+                                                (\{ inputToString, alwaysJust } ->
                                                     { concreteParam = concreteParam
                                                     , paramName = paramName
-                                                    , toString = toString
+                                                    , inputToString = inputToString
                                                     , alwaysJust = alwaysJust
                                                     }
                                                 )
                                     )
                         )
                     |> CliMonad.andThen
-                        (\{ concreteParam, paramName, toString, alwaysJust } ->
+                        (\{ concreteParam, paramName, inputToString, alwaysJust } ->
                             case OpenApi.Parameter.in_ concreteParam of
                                 "path" ->
                                     if OpenApi.Parameter.required concreteParam && alwaysJust then
@@ -716,14 +716,14 @@ replacedUrl server namespace pathUrl operation =
                                                 ( -- This is used for the basic URL replacement in a static path
                                                   \config ->
                                                     Elm.get (Common.toValueName paramName) (Elm.get "params" config)
-                                                        |> toString
+                                                        |> inputToString
                                                         |> Gen.String.call_.replace
                                                             (Elm.string <| "{" ++ paramName ++ "}")
                                                 , -- This is used for segment replacement when usig `Url.Builder.crossOrigin`
                                                   ( "{" ++ paramName ++ "}"
                                                   , \config ->
                                                         Elm.get (Common.toValueName paramName) (Elm.get "params" config)
-                                                            |> toString
+                                                            |> inputToString
                                                   )
                                                 )
                                             , []
@@ -1177,7 +1177,7 @@ queryParameterToUrlBuilderArgument qualify namespace param =
             (\( paramName, type_ ) ->
                 paramToString qualify namespace type_
                     |> CliMonad.map
-                        (\{ toString, alwaysJust } config ->
+                        (\{ inputToString, alwaysJust } config ->
                             let
                                 name : Elm.Expression
                                 name =
@@ -1186,7 +1186,7 @@ queryParameterToUrlBuilderArgument qualify namespace param =
                                 value : Elm.Expression
                                 value =
                                     Elm.get (Common.toValueName paramName) (Elm.get "params" config)
-                                        |> toString
+                                        |> inputToString
 
                                 build : Elm.Expression -> Elm.Expression
                                 build =
@@ -1201,27 +1201,27 @@ queryParameterToUrlBuilderArgument qualify namespace param =
             )
 
 
-paramToString : Bool -> List String -> Common.Type -> CliMonad { toString : Elm.Expression -> Elm.Expression, alwaysJust : Bool }
+paramToString : Bool -> List String -> Common.Type -> CliMonad { inputToString : Elm.Expression -> Elm.Expression, alwaysJust : Bool }
 paramToString qualify namespace type_ =
     let
         basic :
             (Elm.Expression -> Elm.Expression)
-            -> CliMonad { toString : Elm.Expression -> Elm.Expression, alwaysJust : Bool }
+            -> CliMonad { inputToString : Elm.Expression -> Elm.Expression, alwaysJust : Bool }
         basic f =
-            CliMonad.succeed { toString = f, alwaysJust = True }
+            CliMonad.succeed { inputToString = f, alwaysJust = True }
 
         recursive :
             Common.Type
-            -> ({ toString : Elm.Expression, alwaysJust : Bool } -> Elm.Expression -> Elm.Expression)
-            -> CliMonad { toString : Elm.Expression -> Elm.Expression, alwaysJust : Bool }
+            -> ({ inputToString : Elm.Expression, alwaysJust : Bool } -> Elm.Expression -> Elm.Expression)
+            -> CliMonad { inputToString : Elm.Expression -> Elm.Expression, alwaysJust : Bool }
         recursive p f =
             paramToString qualify namespace p
                 |> CliMonad.map
-                    (\{ toString, alwaysJust } ->
-                        { toString =
+                    (\{ inputToString, alwaysJust } ->
+                        { inputToString =
                             f
                                 { alwaysJust = alwaysJust
-                                , toString = Elm.functionReduced "toStringArg" toString
+                                , inputToString = Elm.functionReduced "toStringArg" inputToString
                                 }
                         , alwaysJust = False
                         }
@@ -1246,22 +1246,22 @@ paramToString qualify namespace type_ =
                 |> basic
 
         Common.Nullable Common.String ->
-            { toString = identity
+            { inputToString = identity
             , alwaysJust = False
             }
                 |> CliMonad.succeed
 
         Common.Nullable p ->
             recursive p <|
-                \{ toString, alwaysJust } val ->
+                \{ inputToString, alwaysJust } val ->
                     if alwaysJust then
-                        Gen.Maybe.call_.map toString val
+                        Gen.Maybe.call_.map inputToString val
 
                     else
-                        Gen.Maybe.call_.andThen toString val
+                        Gen.Maybe.call_.andThen inputToString val
 
         Common.List Common.String ->
-            { toString =
+            { inputToString =
                 \val ->
                     Elm.ifThen (Gen.List.call_.isEmpty val)
                         Gen.Maybe.make_.nothing
@@ -1275,7 +1275,7 @@ paramToString qualify namespace type_ =
 
         Common.List p ->
             recursive p <|
-                \{ toString, alwaysJust } val ->
+                \{ inputToString, alwaysJust } val ->
                     let
                         map : Elm.Expression -> Elm.Expression -> Elm.Expression
                         map =
@@ -1288,7 +1288,7 @@ paramToString qualify namespace type_ =
                     Elm.ifThen (Gen.List.call_.isEmpty val)
                         Gen.Maybe.make_.nothing
                         (val
-                            |> map toString
+                            |> map inputToString
                             |> Gen.String.call_.join (Elm.string ",")
                             |> Gen.Maybe.make_.just
                         )
@@ -1302,7 +1302,7 @@ paramToString qualify namespace type_ =
         Common.OneOf name data ->
             CliMonad.map2
                 (\valType branches ->
-                    { toString =
+                    { inputToString =
                         \val -> Elm.Case.custom val valType branches
                     , alwaysJust = True
                     }
@@ -1311,12 +1311,12 @@ paramToString qualify namespace type_ =
                 (CliMonad.combineMap
                     (\alternative ->
                         CliMonad.andThen2
-                            (\{ toString, alwaysJust } annotation ->
+                            (\{ inputToString, alwaysJust } annotation ->
                                 if not alwaysJust then
                                     CliMonad.fail "Nullable alternative"
 
                                 else
-                                    Elm.Case.branch1 (SchemaUtils.toVariantName name alternative.name) ( "alternative", annotation ) toString
+                                    Elm.Case.branch1 (SchemaUtils.toVariantName name alternative.name) ( "alternative", annotation ) inputToString
                                         |> CliMonad.succeed
                             )
                             (paramToString qualify namespace alternative.type_)
@@ -1335,7 +1335,7 @@ paramToString qualify namespace type_ =
                                 "Params of type \"" ++ Elm.Annotation.toString annotation ++ "\""
                         in
                         CliMonad.todoWithDefault
-                            { toString = \_ -> Gen.Debug.todo msg
+                            { inputToString = \_ -> Gen.Debug.todo msg
                             , alwaysJust = True
                             }
                             msg

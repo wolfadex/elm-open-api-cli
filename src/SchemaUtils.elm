@@ -394,15 +394,9 @@ typeToAnnotation qualify namespace type_ =
             typeToAnnotation qualify namespace t
                 |> CliMonad.map
                     (\ann ->
-                        if qualify then
-                            Elm.Annotation.namedWith (namespace ++ [ Common.moduleToString Common.Types ])
-                                "Nullable"
-                                [ ann ]
-
-                        else
-                            Elm.Annotation.namedWith []
-                                "Nullable"
-                                [ ann ]
+                        Elm.Annotation.namedWith (Common.moduleToNamespace namespace Common.Common)
+                            "Nullable"
+                            [ ann ]
                     )
 
         Common.Object fields ->
@@ -432,7 +426,7 @@ typeToAnnotation qualify namespace type_ =
         Common.Ref ref ->
             CliMonad.map
                 (if qualify then
-                    Elm.Annotation.named (namespace ++ [ Common.moduleToString Common.Types ])
+                    Elm.Annotation.named (Common.moduleToNamespace namespace Common.Types)
 
                  else
                     Elm.Annotation.named []
@@ -479,7 +473,7 @@ typeToAnnotationMaybe qualify namespace type_ =
         Common.Ref ref ->
             CliMonad.map
                 (if qualify then
-                    Elm.Annotation.named (namespace ++ [ Common.moduleToString Common.Types ])
+                    Elm.Annotation.named (Common.moduleToNamespace namespace Common.Types)
 
                  else
                     Elm.Annotation.named []
@@ -602,7 +596,7 @@ typeToEncoder qualify namespace type_ =
                     (\encoder nullableValue ->
                         Elm.Case.custom
                             nullableValue
-                            (Elm.Annotation.namedWith (namespace ++ [ Common.moduleToString Common.Types ]) "Nullable" [ Elm.Annotation.var "value" ])
+                            (Elm.Annotation.namedWith (Common.moduleToNamespace namespace Common.Common) "Nullable" [ Elm.Annotation.var "value" ])
                             [ Elm.Case.branch0 "Null" Gen.Json.Encode.null
                             , Elm.Case.branch1 "Present"
                                 ( "value", Elm.Annotation.var "value" )
@@ -620,7 +614,7 @@ typeToEncoder qualify namespace type_ =
                         (Elm.value
                             { importFrom =
                                 if qualify then
-                                    namespace ++ [ Common.moduleToString Common.Json ]
+                                    Common.moduleToNamespace namespace Common.Json
 
                                 else
                                     []
@@ -648,7 +642,7 @@ typeToEncoder qualify namespace type_ =
                 |> CliMonad.map
                     (\branches rec ->
                         Elm.Case.custom rec
-                            (Elm.Annotation.named (namespace ++ [ Common.moduleToString Common.Types ]) oneOfName)
+                            (Elm.Annotation.named (Common.moduleToNamespace namespace Common.Types) oneOfName)
                             branches
                     )
 
@@ -664,7 +658,7 @@ oneOfAnnotation : Bool -> List String -> Common.TypeName -> Common.OneOfData -> 
 oneOfAnnotation qualify namespace oneOfName oneOfData =
     Elm.Annotation.named
         (if qualify then
-            namespace ++ [ Common.moduleToString Common.Types ]
+            Common.moduleToNamespace namespace Common.Types
 
          else
             []
@@ -700,12 +694,7 @@ typeToDecoder qualify namespace type_ =
                             Elm.Op.pipe
                                 (Elm.apply
                                     (Elm.value
-                                        { importFrom =
-                                            if qualify then
-                                                namespace ++ [ Common.moduleToString Common.Json ]
-
-                                            else
-                                                []
+                                        { importFrom = Common.moduleToNamespace namespace Common.Common
                                         , name = "jsonDecodeAndMap"
                                         , annotation = Nothing
                                         }
@@ -715,12 +704,7 @@ typeToDecoder qualify namespace type_ =
 
                                       else
                                         decodeOptionalField.callFrom
-                                            (if qualify then
-                                                namespace ++ [ Common.moduleToString Common.Json ]
-
-                                             else
-                                                []
-                                            )
+                                            (Common.moduleToNamespace namespace Common.Common)
                                             (Elm.string key)
                                             internalDecoder
                                     ]
@@ -775,7 +759,7 @@ typeToDecoder qualify namespace type_ =
                     Gen.Json.Decode.oneOf
                         [ Gen.Json.Decode.call_.map
                             (Elm.value
-                                { importFrom = namespace ++ [ Common.moduleToString Common.Types ]
+                                { importFrom = Common.moduleToNamespace namespace Common.Common
                                 , name = "Present"
                                 , annotation = Nothing
                                 }
@@ -783,7 +767,7 @@ typeToDecoder qualify namespace type_ =
                             decoder
                         , Gen.Json.Decode.null
                             (Elm.value
-                                { importFrom = namespace ++ [ Common.moduleToString Common.Types ]
+                                { importFrom = Common.moduleToNamespace namespace Common.Common
                                 , name = "Null"
                                 , annotation = Nothing
                                 }
@@ -798,7 +782,7 @@ typeToDecoder qualify namespace type_ =
                     Elm.value
                         { importFrom =
                             if qualify then
-                                namespace ++ [ Common.moduleToString Common.Json ]
+                                Common.moduleToNamespace namespace Common.Json
 
                             else
                                 []
@@ -816,7 +800,7 @@ typeToDecoder qualify namespace type_ =
                             |> CliMonad.map
                                 (Gen.Json.Decode.call_.map
                                     (Elm.value
-                                        { importFrom = namespace ++ [ Common.moduleToString Common.Types ]
+                                        { importFrom = Common.moduleToNamespace namespace Common.Types
                                         , name = toVariantName oneOfName variant.name
                                         , annotation = Nothing
                                         }
@@ -827,7 +811,7 @@ typeToDecoder qualify namespace type_ =
                     (\decoders ->
                         decoders
                             |> Gen.Json.Decode.oneOf
-                            |> Elm.withType (Elm.Annotation.named (namespace ++ [ Common.moduleToString Common.Types ]) oneOfName)
+                            |> Elm.withType (Elm.Annotation.named (Common.moduleToNamespace namespace Common.Types) oneOfName)
                     )
 
         Common.Bytes ->

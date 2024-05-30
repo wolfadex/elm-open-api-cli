@@ -7,7 +7,7 @@ module Common exposing
     , Type(..)
     , TypeName
     , VariantName
-    , moduleToString
+    , moduleToNamespace
     , ref
     , toValueName
     , typifyName
@@ -21,19 +21,23 @@ type Module
     = Json
     | Types
     | Api
+    | Common
 
 
-moduleToString : Module -> String
-moduleToString module_ =
+moduleToNamespace : List String -> Module -> List String
+moduleToNamespace namespace module_ =
     case module_ of
         Json ->
-            "Json"
+            namespace ++ [ "Json" ]
 
         Types ->
-            "Types"
+            namespace ++ [ "Types" ]
 
         Api ->
-            "Api"
+            namespace ++ [ "Api" ]
+
+        Common ->
+            [ "OpenApi", "Common" ]
 
 
 

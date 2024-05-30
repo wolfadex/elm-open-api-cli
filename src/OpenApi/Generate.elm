@@ -106,21 +106,21 @@ files { namespace, generateTodos, effectTypes, server } apiSpec =
                     allDecls : List ( Common.Module, Elm.Declaration )
                     allDecls =
                         decls
-                            ++ [ ( Common.Json
-                                 , (expectJsonCustom namespace).declaration
+                            ++ [ ( Common.Common
+                                 , expectJsonCustom.declaration
                                     |> Elm.exposeWith
                                         { exposeConstructor = False
                                         , group = Just "Http"
                                         }
                                  )
-                               , ( Common.Json
-                                 , (jsonResolverCustom namespace).declaration
+                               , ( Common.Common
+                                 , jsonResolverCustom.declaration
                                     |> Elm.exposeWith
                                         { exposeConstructor = False
                                         , group = Just "Http"
                                         }
                                  )
-                               , ( Common.Json
+                               , ( Common.Common
                                  , SchemaUtils.decodeOptionalField.declaration
                                     |> Elm.withDocumentation SchemaUtils.decodeOptionalFieldDocumentation
                                     |> Elm.exposeWith
@@ -128,7 +128,7 @@ files { namespace, generateTodos, effectTypes, server } apiSpec =
                                         , group = Just "Decoders"
                                         }
                                  )
-                               , ( Common.Json
+                               , ( Common.Common
                                  , jsonDecodeAndMap
                                     |> Elm.withDocumentation "Chain JSON decoders, when `Json.Decode.map8` isn't enough."
                                     |> Elm.exposeWith
@@ -136,18 +136,18 @@ files { namespace, generateTodos, effectTypes, server } apiSpec =
                                         , group = Just "Decoders"
                                         }
                                  )
-                               , ( Common.Types
+                               , ( Common.Common
                                  , customHttpError
                                     |> Elm.exposeWith
                                         { exposeConstructor = True
-                                        , group = Just "Open API"
+                                        , group = Nothing
                                         }
                                  )
-                               , ( Common.Types
+                               , ( Common.Common
                                  , nullableType
                                     |> Elm.exposeWith
                                         { exposeConstructor = True
-                                        , group = Just "Open API"
+                                        , group = Nothing
                                         }
                                  )
                                ]
@@ -156,7 +156,7 @@ files { namespace, generateTodos, effectTypes, server } apiSpec =
                     |> List.Extra.gatherEqualsBy Tuple.first
                     |> List.map
                         (\( ( module_, head ), tail ) ->
-                            Elm.fileWith (namespace ++ [ Common.moduleToString module_ ])
+                            Elm.fileWith (Common.moduleToNamespace namespace module_)
                                 { docs =
                                     \docs ->
                                         docs
@@ -327,7 +327,7 @@ unitDeclarations namespace name =
                 ( Common.Json
                 , Elm.declaration ("decode" ++ typeName)
                     (schemaDecoder
-                        |> Elm.withType (Gen.Json.Decode.annotation_.decoder (Elm.Annotation.named (namespace ++ [ Common.moduleToString Common.Types ]) typeName))
+                        |> Elm.withType (Gen.Json.Decode.annotation_.decoder (Elm.Annotation.named (Common.moduleToNamespace namespace Common.Types) typeName))
                     )
                     |> Elm.exposeWith
                         { exposeConstructor = False
@@ -341,7 +341,7 @@ unitDeclarations namespace name =
                 ( Common.Json
                 , Elm.declaration ("encode" ++ typeName)
                     (Elm.functionReduced "rec" encoder
-                        |> Elm.withType (Elm.Annotation.function [ Elm.Annotation.named (namespace ++ [ Common.moduleToString Common.Types ]) typeName ] Gen.Json.Encode.annotation_.value)
+                        |> Elm.withType (Elm.Annotation.function [ Elm.Annotation.named (Common.moduleToNamespace namespace Common.Types) typeName ] Gen.Json.Encode.annotation_.value)
                     )
                     |> Elm.exposeWith
                         { exposeConstructor = False
@@ -697,17 +697,17 @@ replacedUrl server namespace pathUrl operation =
                                     (\( paramName, type_ ) ->
                                         paramToString True namespace type_
                                             |> CliMonad.map
-                                                (\{ toString, alwaysJust } ->
+                                                (\{ inputToString, alwaysJust } ->
                                                     { concreteParam = concreteParam
                                                     , paramName = paramName
-                                                    , toString = toString
+                                                    , inputToString = inputToString
                                                     , alwaysJust = alwaysJust
                                                     }
                                                 )
                                     )
                         )
                     |> CliMonad.andThen
-                        (\{ concreteParam, paramName, toString, alwaysJust } ->
+                        (\{ concreteParam, paramName, inputToString, alwaysJust } ->
                             case OpenApi.Parameter.in_ concreteParam of
                                 "path" ->
                                     if OpenApi.Parameter.required concreteParam && alwaysJust then
@@ -716,14 +716,14 @@ replacedUrl server namespace pathUrl operation =
                                                 ( -- This is used for the basic URL replacement in a static path
                                                   \config ->
                                                     Elm.get (Common.toValueName paramName) (Elm.get "params" config)
-                                                        |> toString
+                                                        |> inputToString
                                                         |> Gen.String.call_.replace
                                                             (Elm.string <| "{" ++ paramName ++ "}")
                                                 , -- This is used for segment replacement when usig `Url.Builder.crossOrigin`
                                                   ( "{" ++ paramName ++ "}"
                                                   , \config ->
                                                         Elm.get (Common.toValueName paramName) (Elm.get "params" config)
-                                                            |> toString
+                                                            |> inputToString
                                                   )
                                                 )
                                             , []
@@ -830,7 +830,7 @@ replacedUrl server namespace pathUrl operation =
 
 customErrorAnnotation : List String -> Elm.Annotation.Annotation -> Elm.Annotation.Annotation -> Elm.Annotation.Annotation
 customErrorAnnotation namespace errorTypeAnnotation bodyTypeAnnotation =
-    Elm.Annotation.namedWith (namespace ++ [ Common.moduleToString Common.Types ])
+    Elm.Annotation.namedWith (Common.moduleToNamespace namespace Common.Common)
         "Error"
         [ errorTypeAnnotation
         , bodyTypeAnnotation
@@ -1177,7 +1177,7 @@ queryParameterToUrlBuilderArgument qualify namespace param =
             (\( paramName, type_ ) ->
                 paramToString qualify namespace type_
                     |> CliMonad.map
-                        (\{ toString, alwaysJust } config ->
+                        (\{ inputToString, alwaysJust } config ->
                             let
                                 name : Elm.Expression
                                 name =
@@ -1186,7 +1186,7 @@ queryParameterToUrlBuilderArgument qualify namespace param =
                                 value : Elm.Expression
                                 value =
                                     Elm.get (Common.toValueName paramName) (Elm.get "params" config)
-                                        |> toString
+                                        |> inputToString
 
                                 build : Elm.Expression -> Elm.Expression
                                 build =
@@ -1201,27 +1201,27 @@ queryParameterToUrlBuilderArgument qualify namespace param =
             )
 
 
-paramToString : Bool -> List String -> Common.Type -> CliMonad { toString : Elm.Expression -> Elm.Expression, alwaysJust : Bool }
+paramToString : Bool -> List String -> Common.Type -> CliMonad { inputToString : Elm.Expression -> Elm.Expression, alwaysJust : Bool }
 paramToString qualify namespace type_ =
     let
         basic :
             (Elm.Expression -> Elm.Expression)
-            -> CliMonad { toString : Elm.Expression -> Elm.Expression, alwaysJust : Bool }
+            -> CliMonad { inputToString : Elm.Expression -> Elm.Expression, alwaysJust : Bool }
         basic f =
-            CliMonad.succeed { toString = f, alwaysJust = True }
+            CliMonad.succeed { inputToString = f, alwaysJust = True }
 
         recursive :
             Common.Type
-            -> ({ toString : Elm.Expression, alwaysJust : Bool } -> Elm.Expression -> Elm.Expression)
-            -> CliMonad { toString : Elm.Expression -> Elm.Expression, alwaysJust : Bool }
+            -> ({ inputToString : Elm.Expression, alwaysJust : Bool } -> Elm.Expression -> Elm.Expression)
+            -> CliMonad { inputToString : Elm.Expression -> Elm.Expression, alwaysJust : Bool }
         recursive p f =
             paramToString qualify namespace p
                 |> CliMonad.map
-                    (\{ toString, alwaysJust } ->
-                        { toString =
+                    (\{ inputToString, alwaysJust } ->
+                        { inputToString =
                             f
                                 { alwaysJust = alwaysJust
-                                , toString = Elm.functionReduced "toStringArg" toString
+                                , inputToString = Elm.functionReduced "toStringArg" inputToString
                                 }
                         , alwaysJust = False
                         }
@@ -1246,22 +1246,22 @@ paramToString qualify namespace type_ =
                 |> basic
 
         Common.Nullable Common.String ->
-            { toString = identity
+            { inputToString = identity
             , alwaysJust = False
             }
                 |> CliMonad.succeed
 
         Common.Nullable p ->
             recursive p <|
-                \{ toString, alwaysJust } val ->
+                \{ inputToString, alwaysJust } val ->
                     if alwaysJust then
-                        Gen.Maybe.call_.map toString val
+                        Gen.Maybe.call_.map inputToString val
 
                     else
-                        Gen.Maybe.call_.andThen toString val
+                        Gen.Maybe.call_.andThen inputToString val
 
         Common.List Common.String ->
-            { toString =
+            { inputToString =
                 \val ->
                     Elm.ifThen (Gen.List.call_.isEmpty val)
                         Gen.Maybe.make_.nothing
@@ -1275,7 +1275,7 @@ paramToString qualify namespace type_ =
 
         Common.List p ->
             recursive p <|
-                \{ toString, alwaysJust } val ->
+                \{ inputToString, alwaysJust } val ->
                     let
                         map : Elm.Expression -> Elm.Expression -> Elm.Expression
                         map =
@@ -1288,7 +1288,7 @@ paramToString qualify namespace type_ =
                     Elm.ifThen (Gen.List.call_.isEmpty val)
                         Gen.Maybe.make_.nothing
                         (val
-                            |> map toString
+                            |> map inputToString
                             |> Gen.String.call_.join (Elm.string ",")
                             |> Gen.Maybe.make_.just
                         )
@@ -1302,7 +1302,7 @@ paramToString qualify namespace type_ =
         Common.OneOf name data ->
             CliMonad.map2
                 (\valType branches ->
-                    { toString =
+                    { inputToString =
                         \val -> Elm.Case.custom val valType branches
                     , alwaysJust = True
                     }
@@ -1311,12 +1311,12 @@ paramToString qualify namespace type_ =
                 (CliMonad.combineMap
                     (\alternative ->
                         CliMonad.andThen2
-                            (\{ toString, alwaysJust } annotation ->
+                            (\{ inputToString, alwaysJust } annotation ->
                                 if not alwaysJust then
                                     CliMonad.fail "Nullable alternative"
 
                                 else
-                                    Elm.Case.branch1 (SchemaUtils.toVariantName name alternative.name) ( "alternative", annotation ) toString
+                                    Elm.Case.branch1 (SchemaUtils.toVariantName name alternative.name) ( "alternative", annotation ) inputToString
                                         |> CliMonad.succeed
                             )
                             (paramToString qualify namespace alternative.type_)
@@ -1335,7 +1335,7 @@ paramToString qualify namespace type_ =
                                 "Params of type \"" ++ Elm.Annotation.toString annotation ++ "\""
                         in
                         CliMonad.todoWithDefault
-                            { toString = \_ -> Gen.Debug.todo msg
+                            { inputToString = \_ -> Gen.Debug.todo msg
                             , alwaysJust = True
                             }
                             msg
@@ -1446,7 +1446,7 @@ operationToTypesExpectAndResolver namespace functionName operation =
 
         expectJsonBetter : Elm.Expression -> Elm.Expression -> Elm.Expression -> { core : Elm.Expression, elmPages : Elm.Expression }
         expectJsonBetter errorDecoders successDecoder toMsg =
-            { core = (expectJsonCustom namespace).callFrom (namespace ++ [ Common.moduleToString Common.Json ]) toMsg errorDecoders successDecoder
+            { core = expectJsonCustom.callFrom (Common.moduleToNamespace namespace Common.Common) toMsg errorDecoders successDecoder
             , elmPages = Gen.BackendTask.Http.expectJson successDecoder
             }
     in
@@ -1484,7 +1484,7 @@ operationToTypesExpectAndResolver namespace functionName operation =
                                                                 SchemaUtils.typeToDecoder True namespace type_
                                                                     |> CliMonad.map
                                                                         (Elm.value
-                                                                            { importFrom = namespace ++ [ Common.moduleToString Common.Types ]
+                                                                            { importFrom = Common.moduleToNamespace namespace Common.Types
                                                                             , name = toErrorVariant statusCode
                                                                             , annotation = Nothing
                                                                             }
@@ -1495,7 +1495,7 @@ operationToTypesExpectAndResolver namespace functionName operation =
                                                                 CliMonad.succeed Gen.Json.Decode.string
                                                                     |> CliMonad.map
                                                                         (Elm.value
-                                                                            { importFrom = namespace ++ [ Common.moduleToString Common.Types ]
+                                                                            { importFrom = Common.moduleToNamespace namespace Common.Types
                                                                             , name = toErrorVariant statusCode
                                                                             , annotation = Nothing
                                                                             }
@@ -1506,7 +1506,7 @@ operationToTypesExpectAndResolver namespace functionName operation =
                                                                 CliMonad.succeed (Gen.Debug.todo "decode bytes err?")
                                                                     |> CliMonad.map
                                                                         (Elm.value
-                                                                            { importFrom = namespace ++ [ Common.moduleToString Common.Types ]
+                                                                            { importFrom = Common.moduleToNamespace namespace Common.Types
                                                                             , name = toErrorVariant statusCode
                                                                             , annotation = Nothing
                                                                             }
@@ -1517,7 +1517,7 @@ operationToTypesExpectAndResolver namespace functionName operation =
                                                                 CliMonad.succeed (Gen.Json.Decode.succeed Elm.unit)
                                                                     |> CliMonad.map
                                                                         (Elm.value
-                                                                            { importFrom = namespace ++ [ Common.moduleToString Common.Types ]
+                                                                            { importFrom = Common.moduleToNamespace namespace Common.Types
                                                                             , name = toErrorVariant statusCode
                                                                             , annotation = Nothing
                                                                             }
@@ -1540,14 +1540,14 @@ operationToTypesExpectAndResolver namespace functionName operation =
                                                             |> CliMonad.map
                                                                 (\typeName ->
                                                                     Elm.value
-                                                                        { importFrom = namespace ++ [ Common.moduleToString Common.Json ]
+                                                                        { importFrom = Common.moduleToNamespace namespace Common.Json
                                                                         , name = "decode" ++ typeName
                                                                         , annotation = Nothing
                                                                         }
                                                                 )
                                                             |> CliMonad.map
                                                                 (Elm.value
-                                                                    { importFrom = namespace ++ [ Common.moduleToString Common.Types ]
+                                                                    { importFrom = Common.moduleToNamespace namespace Common.Types
                                                                     , name = toErrorVariant statusCode
                                                                     , annotation = Nothing
                                                                     }
@@ -1631,7 +1631,7 @@ operationToTypesExpectAndResolver namespace functionName operation =
                                                 { exposeConstructor = True
                                                 , group = Nothing
                                                 }
-                                    , Elm.Annotation.named (namespace ++ [ Common.moduleToString Common.Types ]) errorName
+                                    , Elm.Annotation.named (Common.moduleToNamespace namespace Common.Types) errorName
                                     )
                                 )
                 in
@@ -1650,7 +1650,7 @@ operationToTypesExpectAndResolver namespace functionName operation =
                                                     , errorTypeDeclaration = errorTypeDeclaration_
                                                     , errorTypeAnnotation = errorTypeAnnotation
                                                     , toExpect = expectJsonBetter errorDecoders_ successDecoder
-                                                    , resolver = (jsonResolverCustom namespace).callFrom (namespace ++ [ Common.moduleToString Common.Json ]) errorDecoders_ successDecoder
+                                                    , resolver = jsonResolverCustom.callFrom (Common.moduleToNamespace namespace Common.Common) errorDecoders_ successDecoder
                                                     }
                                                 )
                                                 (SchemaUtils.typeToDecoder True namespace type_)
@@ -1678,7 +1678,7 @@ operationToTypesExpectAndResolver namespace functionName operation =
                                                                             Gen.Result.make_.err
                                                                                 (Elm.apply
                                                                                     (Elm.value
-                                                                                        { importFrom = namespace ++ [ Common.moduleToString Common.Types ]
+                                                                                        { importFrom = Common.moduleToNamespace namespace Common.Common
                                                                                         , name = "BadUrl"
                                                                                         , annotation = Nothing
                                                                                         }
@@ -1690,7 +1690,7 @@ operationToTypesExpectAndResolver namespace functionName operation =
                                                                         "Timeout_"
                                                                         (Gen.Result.make_.err
                                                                             (Elm.value
-                                                                                { importFrom = namespace ++ [ Common.moduleToString Common.Types ]
+                                                                                { importFrom = Common.moduleToNamespace namespace Common.Common
                                                                                 , name = "Timeout"
                                                                                 , annotation = Nothing
                                                                                 }
@@ -1700,7 +1700,7 @@ operationToTypesExpectAndResolver namespace functionName operation =
                                                                         "NetworkError_"
                                                                         (Gen.Result.make_.err
                                                                             (Elm.value
-                                                                                { importFrom = namespace ++ [ Common.moduleToString Common.Types ]
+                                                                                { importFrom = Common.moduleToNamespace namespace Common.Common
                                                                                 , name = "NetworkError"
                                                                                 , annotation = Nothing
                                                                                 }
@@ -1716,7 +1716,7 @@ operationToTypesExpectAndResolver namespace functionName operation =
                                                                                     Gen.Result.make_.err
                                                                                         (Elm.apply
                                                                                             (Elm.value
-                                                                                                { importFrom = namespace ++ [ Common.moduleToString Common.Types ]
+                                                                                                { importFrom = Common.moduleToNamespace namespace Common.Common
                                                                                                 , name = "UnknownBadStatus"
                                                                                                 , annotation = Nothing
                                                                                                 }
@@ -1732,7 +1732,7 @@ operationToTypesExpectAndResolver namespace functionName operation =
                                                                                                     Gen.Result.make_.err
                                                                                                         (Elm.apply
                                                                                                             (Elm.value
-                                                                                                                { importFrom = namespace ++ [ Common.moduleToString Common.Types ]
+                                                                                                                { importFrom = Common.moduleToNamespace namespace Common.Common
                                                                                                                 , name = "KnownBadStatus"
                                                                                                                 , annotation = Nothing
                                                                                                                 }
@@ -1744,7 +1744,7 @@ operationToTypesExpectAndResolver namespace functionName operation =
                                                                                                     Gen.Result.make_.err
                                                                                                         (Elm.apply
                                                                                                             (Elm.value
-                                                                                                                { importFrom = namespace ++ [ Common.moduleToString Common.Types ]
+                                                                                                                { importFrom = Common.moduleToNamespace namespace Common.Common
                                                                                                                 , name = "BadErrorBody"
                                                                                                                 , annotation = Nothing
                                                                                                                 }
@@ -1765,7 +1765,7 @@ operationToTypesExpectAndResolver namespace functionName operation =
                                                                                         Gen.Result.make_.err
                                                                                             (Elm.apply
                                                                                                 (Elm.value
-                                                                                                    { importFrom = namespace ++ [ Common.moduleToString Common.Types ]
+                                                                                                    { importFrom = Common.moduleToNamespace namespace Common.Common
                                                                                                     , name = "BadBody"
                                                                                                     , annotation = Nothing
                                                                                                     }
@@ -1807,7 +1807,7 @@ operationToTypesExpectAndResolver namespace functionName operation =
                                                                             Gen.Result.make_.err
                                                                                 (Elm.apply
                                                                                     (Elm.value
-                                                                                        { importFrom = namespace ++ [ Common.moduleToString Common.Types ]
+                                                                                        { importFrom = Common.moduleToNamespace namespace Common.Common
                                                                                         , name = "BadUrl"
                                                                                         , annotation = Nothing
                                                                                         }
@@ -1819,7 +1819,7 @@ operationToTypesExpectAndResolver namespace functionName operation =
                                                                         "Timeout_"
                                                                         (Gen.Result.make_.err
                                                                             (Elm.value
-                                                                                { importFrom = namespace ++ [ Common.moduleToString Common.Types ]
+                                                                                { importFrom = Common.moduleToNamespace namespace Common.Common
                                                                                 , name = "Timeout"
                                                                                 , annotation = Nothing
                                                                                 }
@@ -1829,7 +1829,7 @@ operationToTypesExpectAndResolver namespace functionName operation =
                                                                         "NetworkError_"
                                                                         (Gen.Result.make_.err
                                                                             (Elm.value
-                                                                                { importFrom = namespace ++ [ Common.moduleToString Common.Types ]
+                                                                                { importFrom = Common.moduleToNamespace namespace Common.Common
                                                                                 , name = "NetworkError"
                                                                                 , annotation = Nothing
                                                                                 }
@@ -1845,7 +1845,7 @@ operationToTypesExpectAndResolver namespace functionName operation =
                                                                                     Gen.Result.make_.err
                                                                                         (Elm.apply
                                                                                             (Elm.value
-                                                                                                { importFrom = namespace ++ [ Common.moduleToString Common.Types ]
+                                                                                                { importFrom = Common.moduleToNamespace namespace Common.Common
                                                                                                 , name = "UnknownBadStatus"
                                                                                                 , annotation = Nothing
                                                                                                 }
@@ -1861,7 +1861,7 @@ operationToTypesExpectAndResolver namespace functionName operation =
                                                                                                     Gen.Result.make_.err
                                                                                                         (Elm.apply
                                                                                                             (Elm.value
-                                                                                                                { importFrom = namespace ++ [ Common.moduleToString Common.Types ]
+                                                                                                                { importFrom = Common.moduleToNamespace namespace Common.Common
                                                                                                                 , name = "KnownBadStatus"
                                                                                                                 , annotation = Nothing
                                                                                                                 }
@@ -1873,7 +1873,7 @@ operationToTypesExpectAndResolver namespace functionName operation =
                                                                                                     Gen.Result.make_.err
                                                                                                         (Elm.apply
                                                                                                             (Elm.value
-                                                                                                                { importFrom = namespace ++ [ Common.moduleToString Common.Types ]
+                                                                                                                { importFrom = Common.moduleToNamespace namespace Common.Common
                                                                                                                 , name = "BadErrorBody"
                                                                                                                 , annotation = Nothing
                                                                                                                 }
@@ -1904,7 +1904,7 @@ operationToTypesExpectAndResolver namespace functionName operation =
                                                     , errorTypeDeclaration = errorTypeDeclaration_
                                                     , errorTypeAnnotation = errorTypeAnnotation
                                                     , toExpect = expectJsonBetter errorDecoders_ (Gen.Json.Decode.succeed Elm.unit)
-                                                    , resolver = (jsonResolverCustom namespace).callFrom (namespace ++ [ Common.moduleToString Common.Json ]) errorDecoders_ (Gen.Json.Decode.succeed Elm.unit)
+                                                    , resolver = jsonResolverCustom.callFrom (Common.moduleToNamespace namespace Common.Common) errorDecoders_ (Gen.Json.Decode.succeed Elm.unit)
                                                     }
                                                 )
                                                 errorDecoders
@@ -1925,28 +1925,25 @@ operationToTypesExpectAndResolver namespace functionName operation =
                                     SchemaUtils.refToTypeName (String.split "/" inner)
                                         |> CliMonad.map3
                                             (\errorDecoders_ ( errorTypeDeclaration_, errorTypeAnnotation ) typeName ->
+                                                let
+                                                    decoder : Elm.Expression
+                                                    decoder =
+                                                        Elm.value
+                                                            { importFrom = Common.moduleToNamespace namespace Common.Json
+                                                            , name = "decode" ++ typeName
+                                                            , annotation = Nothing
+                                                            }
+                                                in
                                                 { successType = Common.ref inner
                                                 , bodyTypeAnnotation = Elm.Annotation.string
                                                 , errorTypeDeclaration = errorTypeDeclaration_
                                                 , errorTypeAnnotation = errorTypeAnnotation
-                                                , toExpect =
-                                                    expectJsonBetter errorDecoders_
-                                                        (Elm.value
-                                                            { importFrom = namespace ++ [ Common.moduleToString Common.Json ]
-                                                            , name = "decode" ++ typeName
-                                                            , annotation = Nothing
-                                                            }
-                                                        )
+                                                , toExpect = expectJsonBetter errorDecoders_ decoder
                                                 , resolver =
-                                                    (jsonResolverCustom namespace).callFrom
-                                                        (namespace ++ [ Common.moduleToString Common.Json ])
+                                                    jsonResolverCustom.callFrom
+                                                        (Common.moduleToNamespace namespace Common.Common)
                                                         errorDecoders_
-                                                    <|
-                                                        Elm.value
-                                                            { importFrom = namespace ++ [ Common.moduleToString Common.Json ]
-                                                            , name = "decode" ++ typeName
-                                                            , annotation = Nothing
-                                                            }
+                                                        decoder
                                                 }
                                             )
                                             errorDecoders
@@ -1969,20 +1966,18 @@ customHttpError =
 
 
 expectJsonCustom :
-    List String
-    ->
-        { declaration : Elm.Declaration
-        , call : Elm.Expression -> Elm.Expression -> Elm.Expression -> Elm.Expression
-        , callFrom : List String -> Elm.Expression -> Elm.Expression -> Elm.Expression -> Elm.Expression
-        , value : List String -> Elm.Expression
-        }
-expectJsonCustom namespace =
+    { declaration : Elm.Declaration
+    , call : Elm.Expression -> Elm.Expression -> Elm.Expression -> Elm.Expression
+    , callFrom : List String -> Elm.Expression -> Elm.Expression -> Elm.Expression -> Elm.Expression
+    , value : List String -> Elm.Expression
+    }
+expectJsonCustom =
     Elm.Declare.fn3 "expectJsonCustom"
         ( "toMsg"
         , Just
             (Elm.Annotation.function
                 [ Gen.Result.annotation_.result
-                    (Elm.Annotation.namedWith (namespace ++ [ Common.moduleToString Common.Types ]) "Error" [ Elm.Annotation.var "err", Elm.Annotation.string ])
+                    (Elm.Annotation.namedWith [] "Error" [ Elm.Annotation.var "err", Elm.Annotation.string ])
                     (Elm.Annotation.var "success")
                 ]
                 (Elm.Annotation.var "msg")
@@ -2000,52 +1995,20 @@ expectJsonCustom namespace =
             (Gen.Json.Decode.annotation_.decoder (Elm.Annotation.var "success"))
         )
         (\toMsg errorDecoders successDecoder ->
-            Gen.Http.expectStringResponse (\result -> Elm.apply toMsg [ result ]) <|
-                \response ->
+            let
+                toResult : Elm.Expression -> Elm.Expression
+                toResult response =
                     Gen.Http.caseOf_.response response
-                        { badUrl_ =
-                            \url ->
-                                Gen.Result.make_.err
-                                    (Elm.apply
-                                        (Elm.value
-                                            { importFrom = namespace ++ [ Common.moduleToString Common.Types ]
-                                            , name = "BadUrl"
-                                            , annotation = Nothing
-                                            }
-                                        )
-                                        [ url ]
-                                    )
-                        , timeout_ =
-                            Gen.Result.make_.err
-                                (Elm.value
-                                    { importFrom = namespace ++ [ Common.moduleToString Common.Types ]
-                                    , name = "Timeout"
-                                    , annotation = Nothing
-                                    }
-                                )
-                        , networkError_ =
-                            Gen.Result.make_.err
-                                (Elm.value
-                                    { importFrom = namespace ++ [ Common.moduleToString Common.Types ]
-                                    , name = "NetworkError"
-                                    , annotation = Nothing
-                                    }
-                                )
+                        { badUrl_ = \url -> Gen.Result.make_.err (Elm.apply (Elm.val "BadUrl") [ url ])
+                        , timeout_ = Gen.Result.make_.err (Elm.val "Timeout")
+                        , networkError_ = Gen.Result.make_.err (Elm.val "NetworkError")
                         , badStatus_ =
                             \metadata body ->
                                 Gen.Maybe.caseOf_.maybe
                                     (Gen.Dict.call_.get (Gen.String.call_.fromInt (Elm.get "statusCode" metadata)) errorDecoders)
                                     { nothing =
                                         Gen.Result.make_.err
-                                            (Elm.apply
-                                                (Elm.value
-                                                    { importFrom = namespace ++ [ Common.moduleToString Common.Types ]
-                                                    , name = "UnknownBadStatus"
-                                                    , annotation = Nothing
-                                                    }
-                                                )
-                                                [ metadata, body ]
-                                            )
+                                            (Elm.apply (Elm.val "UnknownBadStatus") [ metadata, body ])
                                     , just =
                                         \errorDecoder ->
                                             Gen.Result.caseOf_.result
@@ -2053,27 +2016,11 @@ expectJsonCustom namespace =
                                                 { ok =
                                                     \x ->
                                                         Gen.Result.make_.err
-                                                            (Elm.apply
-                                                                (Elm.value
-                                                                    { importFrom = namespace ++ [ Common.moduleToString Common.Types ]
-                                                                    , name = "KnownBadStatus"
-                                                                    , annotation = Nothing
-                                                                    }
-                                                                )
-                                                                [ Elm.get "statusCode" metadata, x ]
-                                                            )
+                                                            (Elm.apply (Elm.val "KnownBadStatus") [ Elm.get "statusCode" metadata, x ])
                                                 , err =
                                                     \_ ->
                                                         Gen.Result.make_.err
-                                                            (Elm.apply
-                                                                (Elm.value
-                                                                    { importFrom = namespace ++ [ Common.moduleToString Common.Types ]
-                                                                    , name = "BadErrorBody"
-                                                                    , annotation = Nothing
-                                                                    }
-                                                                )
-                                                                [ metadata, body ]
-                                                            )
+                                                            (Elm.apply (Elm.val "BadErrorBody") [ metadata, body ])
                                                 }
                                     }
                         , goodStatus_ =
@@ -2084,29 +2031,25 @@ expectJsonCustom namespace =
                                         \_ ->
                                             Gen.Result.make_.err
                                                 (Elm.apply
-                                                    (Elm.value
-                                                        { importFrom = namespace ++ [ Common.moduleToString Common.Types ]
-                                                        , name = "BadBody"
-                                                        , annotation = Nothing
-                                                        }
-                                                    )
+                                                    (Elm.val "BadBody")
                                                     [ metadata, body ]
                                                 )
                                     , ok = \a -> Gen.Result.make_.ok a
                                     }
                         }
+            in
+            Gen.Http.expectStringResponse (\result -> Elm.apply toMsg [ result ]) toResult
+                |> Elm.withType (Gen.Http.annotation_.expect (Elm.Annotation.var "msg"))
         )
 
 
 jsonResolverCustom :
-    List String
-    ->
-        { declaration : Elm.Declaration
-        , call : Elm.Expression -> Elm.Expression -> Elm.Expression
-        , callFrom : List String -> Elm.Expression -> Elm.Expression -> Elm.Expression
-        , value : List String -> Elm.Expression
-        }
-jsonResolverCustom namespace =
+    { declaration : Elm.Declaration
+    , call : Elm.Expression -> Elm.Expression -> Elm.Expression
+    , callFrom : List String -> Elm.Expression -> Elm.Expression -> Elm.Expression
+    , value : List String -> Elm.Expression
+    }
+jsonResolverCustom =
     Elm.Declare.fn2 "jsonResolverCustom"
         ( "errorDecoders"
         , Just
@@ -2121,42 +2064,20 @@ jsonResolverCustom namespace =
         )
     <|
         \errorDecoders successDecoder ->
-            Gen.Http.stringResolver
-                (\response ->
+            let
+                toResult : Elm.Expression -> Elm.Expression
+                toResult response =
                     Elm.Case.custom response
                         (Gen.Http.annotation_.response Elm.Annotation.string)
                         [ Elm.Case.branch1 "BadUrl_"
                             ( "url", Elm.Annotation.string )
                             (\url ->
-                                Gen.Result.make_.err
-                                    (Elm.apply
-                                        (Elm.value
-                                            { importFrom = namespace ++ [ Common.moduleToString Common.Types ]
-                                            , name = "BadUrl"
-                                            , annotation = Nothing
-                                            }
-                                        )
-                                        [ url ]
-                                    )
+                                Gen.Result.make_.err (Elm.apply (Elm.val "BadUrl") [ url ])
                             )
                         , Elm.Case.branch0 "Timeout_"
-                            (Gen.Result.make_.err
-                                (Elm.value
-                                    { importFrom = namespace ++ [ Common.moduleToString Common.Types ]
-                                    , name = "Timeout"
-                                    , annotation = Nothing
-                                    }
-                                )
-                            )
+                            (Gen.Result.make_.err (Elm.val "Timeout"))
                         , Elm.Case.branch0 "NetworkError_"
-                            (Gen.Result.make_.err
-                                (Elm.value
-                                    { importFrom = namespace ++ [ Common.moduleToString Common.Types ]
-                                    , name = "NetworkError"
-                                    , annotation = Nothing
-                                    }
-                                )
-                            )
+                            (Gen.Result.make_.err (Elm.val "NetworkError"))
                         , Elm.Case.branch2 "BadStatus_"
                             ( "metadata", Gen.Http.annotation_.metadata )
                             ( "body", Elm.Annotation.string )
@@ -2166,12 +2087,7 @@ jsonResolverCustom namespace =
                                     { nothing =
                                         Gen.Result.make_.err
                                             (Elm.apply
-                                                (Elm.value
-                                                    { importFrom = namespace ++ [ Common.moduleToString Common.Types ]
-                                                    , name = "UnknownBadStatus"
-                                                    , annotation = Nothing
-                                                    }
-                                                )
+                                                (Elm.val "UnknownBadStatus")
                                                 [ metadata, body ]
                                             )
                                     , just =
@@ -2181,27 +2097,11 @@ jsonResolverCustom namespace =
                                                 { ok =
                                                     \x ->
                                                         Gen.Result.make_.err
-                                                            (Elm.apply
-                                                                (Elm.value
-                                                                    { importFrom = namespace ++ [ Common.moduleToString Common.Types ]
-                                                                    , name = "KnownBadStatus"
-                                                                    , annotation = Nothing
-                                                                    }
-                                                                )
-                                                                [ Elm.get "statusCode" metadata, x ]
-                                                            )
+                                                            (Elm.apply (Elm.val "KnownBadStatus") [ Elm.get "statusCode" metadata, x ])
                                                 , err =
                                                     \_ ->
                                                         Gen.Result.make_.err
-                                                            (Elm.apply
-                                                                (Elm.value
-                                                                    { importFrom = namespace ++ [ Common.moduleToString Common.Types ]
-                                                                    , name = "BadErrorBody"
-                                                                    , annotation = Nothing
-                                                                    }
-                                                                )
-                                                                [ metadata, body ]
-                                                            )
+                                                            (Elm.apply (Elm.val "BadErrorBody") [ metadata, body ])
                                                 }
                                     }
                             )
@@ -2214,15 +2114,14 @@ jsonResolverCustom namespace =
                                     { err =
                                         \_ ->
                                             Gen.Result.make_.err
-                                                (Elm.apply
-                                                    (Elm.value { importFrom = namespace ++ [ Common.moduleToString Common.Types ], name = "BadBody", annotation = Nothing })
-                                                    [ metadata, body ]
-                                                )
+                                                (Elm.apply (Elm.val "BadBody") [ metadata, body ])
                                     , ok = \a -> Gen.Result.make_.ok a
                                     }
                             )
                         ]
-                )
+            in
+            Gen.Http.stringResolver toResult
+                |> Elm.withType (Gen.Http.annotation_.resolver (Elm.Annotation.namedWith [] "Error" [ Elm.Annotation.var "err", Elm.Annotation.string ]) (Elm.Annotation.var "success"))
 
 
 

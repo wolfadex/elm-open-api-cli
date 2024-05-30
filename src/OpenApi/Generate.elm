@@ -106,21 +106,21 @@ files { namespace, generateTodos, effectTypes, server } apiSpec =
                     allDecls : List ( Common.Module, Elm.Declaration )
                     allDecls =
                         decls
-                            ++ [ ( Common.Json
+                            ++ [ ( Common.Common
                                  , (expectJsonCustom namespace).declaration
                                     |> Elm.exposeWith
                                         { exposeConstructor = False
                                         , group = Just "Http"
                                         }
                                  )
-                               , ( Common.Json
+                               , ( Common.Common
                                  , (jsonResolverCustom namespace).declaration
                                     |> Elm.exposeWith
                                         { exposeConstructor = False
                                         , group = Just "Http"
                                         }
                                  )
-                               , ( Common.Json
+                               , ( Common.Common
                                  , SchemaUtils.decodeOptionalField.declaration
                                     |> Elm.withDocumentation SchemaUtils.decodeOptionalFieldDocumentation
                                     |> Elm.exposeWith
@@ -128,7 +128,7 @@ files { namespace, generateTodos, effectTypes, server } apiSpec =
                                         , group = Just "Decoders"
                                         }
                                  )
-                               , ( Common.Json
+                               , ( Common.Common
                                  , jsonDecodeAndMap
                                     |> Elm.withDocumentation "Chain JSON decoders, when `Json.Decode.map8` isn't enough."
                                     |> Elm.exposeWith
@@ -1446,7 +1446,7 @@ operationToTypesExpectAndResolver namespace functionName operation =
 
         expectJsonBetter : Elm.Expression -> Elm.Expression -> Elm.Expression -> { core : Elm.Expression, elmPages : Elm.Expression }
         expectJsonBetter errorDecoders successDecoder toMsg =
-            { core = (expectJsonCustom namespace).callFrom (Common.moduleToNamespace namespace Common.Json) toMsg errorDecoders successDecoder
+            { core = (expectJsonCustom namespace).callFrom (Common.moduleToNamespace namespace Common.Common) toMsg errorDecoders successDecoder
             , elmPages = Gen.BackendTask.Http.expectJson successDecoder
             }
     in
@@ -1650,7 +1650,7 @@ operationToTypesExpectAndResolver namespace functionName operation =
                                                     , errorTypeDeclaration = errorTypeDeclaration_
                                                     , errorTypeAnnotation = errorTypeAnnotation
                                                     , toExpect = expectJsonBetter errorDecoders_ successDecoder
-                                                    , resolver = (jsonResolverCustom namespace).callFrom (Common.moduleToNamespace namespace Common.Json) errorDecoders_ successDecoder
+                                                    , resolver = (jsonResolverCustom namespace).callFrom (Common.moduleToNamespace namespace Common.Common) errorDecoders_ successDecoder
                                                     }
                                                 )
                                                 (SchemaUtils.typeToDecoder True namespace type_)
@@ -1904,7 +1904,7 @@ operationToTypesExpectAndResolver namespace functionName operation =
                                                     , errorTypeDeclaration = errorTypeDeclaration_
                                                     , errorTypeAnnotation = errorTypeAnnotation
                                                     , toExpect = expectJsonBetter errorDecoders_ (Gen.Json.Decode.succeed Elm.unit)
-                                                    , resolver = (jsonResolverCustom namespace).callFrom (Common.moduleToNamespace namespace Common.Json) errorDecoders_ (Gen.Json.Decode.succeed Elm.unit)
+                                                    , resolver = (jsonResolverCustom namespace).callFrom (Common.moduleToNamespace namespace Common.Common) errorDecoders_ (Gen.Json.Decode.succeed Elm.unit)
                                                     }
                                                 )
                                                 errorDecoders
@@ -1925,28 +1925,25 @@ operationToTypesExpectAndResolver namespace functionName operation =
                                     SchemaUtils.refToTypeName (String.split "/" inner)
                                         |> CliMonad.map3
                                             (\errorDecoders_ ( errorTypeDeclaration_, errorTypeAnnotation ) typeName ->
-                                                { successType = Common.ref inner
-                                                , bodyTypeAnnotation = Elm.Annotation.string
-                                                , errorTypeDeclaration = errorTypeDeclaration_
-                                                , errorTypeAnnotation = errorTypeAnnotation
-                                                , toExpect =
-                                                    expectJsonBetter errorDecoders_
-                                                        (Elm.value
-                                                            { importFrom = Common.moduleToNamespace namespace Common.Json
-                                                            , name = "decode" ++ typeName
-                                                            , annotation = Nothing
-                                                            }
-                                                        )
-                                                , resolver =
-                                                    (jsonResolverCustom namespace).callFrom
-                                                        (Common.moduleToNamespace namespace Common.Json)
-                                                        errorDecoders_
-                                                    <|
+                                                let
+                                                    decoder : Elm.Expression
+                                                    decoder =
                                                         Elm.value
                                                             { importFrom = Common.moduleToNamespace namespace Common.Json
                                                             , name = "decode" ++ typeName
                                                             , annotation = Nothing
                                                             }
+                                                in
+                                                { successType = Common.ref inner
+                                                , bodyTypeAnnotation = Elm.Annotation.string
+                                                , errorTypeDeclaration = errorTypeDeclaration_
+                                                , errorTypeAnnotation = errorTypeAnnotation
+                                                , toExpect = expectJsonBetter errorDecoders_ decoder
+                                                , resolver =
+                                                    (jsonResolverCustom namespace).callFrom
+                                                        (Common.moduleToNamespace namespace Common.Common)
+                                                        errorDecoders_
+                                                        decoder
                                                 }
                                             )
                                             errorDecoders

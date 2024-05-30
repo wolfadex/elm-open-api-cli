@@ -694,12 +694,7 @@ typeToDecoder qualify namespace type_ =
                             Elm.Op.pipe
                                 (Elm.apply
                                     (Elm.value
-                                        { importFrom =
-                                            if qualify then
-                                                Common.moduleToNamespace namespace Common.Json
-
-                                            else
-                                                []
+                                        { importFrom = Common.moduleToNamespace namespace Common.Common
                                         , name = "jsonDecodeAndMap"
                                         , annotation = Nothing
                                         }
@@ -709,12 +704,7 @@ typeToDecoder qualify namespace type_ =
 
                                       else
                                         decodeOptionalField.callFrom
-                                            (if qualify then
-                                                Common.moduleToNamespace namespace Common.Json
-
-                                             else
-                                                []
-                                            )
+                                            (Common.moduleToNamespace namespace Common.Common)
                                             (Elm.string key)
                                             internalDecoder
                                     ]

@@ -107,14 +107,14 @@ files { namespace, generateTodos, effectTypes, server } apiSpec =
                     allDecls =
                         decls
                             ++ [ ( Common.Common
-                                 , (expectJsonCustom namespace).declaration
+                                 , expectJsonCustom.declaration
                                     |> Elm.exposeWith
                                         { exposeConstructor = False
                                         , group = Just "Http"
                                         }
                                  )
                                , ( Common.Common
-                                 , (jsonResolverCustom namespace).declaration
+                                 , jsonResolverCustom.declaration
                                     |> Elm.exposeWith
                                         { exposeConstructor = False
                                         , group = Just "Http"
@@ -1446,7 +1446,7 @@ operationToTypesExpectAndResolver namespace functionName operation =
 
         expectJsonBetter : Elm.Expression -> Elm.Expression -> Elm.Expression -> { core : Elm.Expression, elmPages : Elm.Expression }
         expectJsonBetter errorDecoders successDecoder toMsg =
-            { core = (expectJsonCustom namespace).callFrom (Common.moduleToNamespace namespace Common.Common) toMsg errorDecoders successDecoder
+            { core = expectJsonCustom.callFrom (Common.moduleToNamespace namespace Common.Common) toMsg errorDecoders successDecoder
             , elmPages = Gen.BackendTask.Http.expectJson successDecoder
             }
     in
@@ -1650,7 +1650,7 @@ operationToTypesExpectAndResolver namespace functionName operation =
                                                     , errorTypeDeclaration = errorTypeDeclaration_
                                                     , errorTypeAnnotation = errorTypeAnnotation
                                                     , toExpect = expectJsonBetter errorDecoders_ successDecoder
-                                                    , resolver = (jsonResolverCustom namespace).callFrom (Common.moduleToNamespace namespace Common.Common) errorDecoders_ successDecoder
+                                                    , resolver = jsonResolverCustom.callFrom (Common.moduleToNamespace namespace Common.Common) errorDecoders_ successDecoder
                                                     }
                                                 )
                                                 (SchemaUtils.typeToDecoder True namespace type_)
@@ -1904,7 +1904,7 @@ operationToTypesExpectAndResolver namespace functionName operation =
                                                     , errorTypeDeclaration = errorTypeDeclaration_
                                                     , errorTypeAnnotation = errorTypeAnnotation
                                                     , toExpect = expectJsonBetter errorDecoders_ (Gen.Json.Decode.succeed Elm.unit)
-                                                    , resolver = (jsonResolverCustom namespace).callFrom (Common.moduleToNamespace namespace Common.Common) errorDecoders_ (Gen.Json.Decode.succeed Elm.unit)
+                                                    , resolver = jsonResolverCustom.callFrom (Common.moduleToNamespace namespace Common.Common) errorDecoders_ (Gen.Json.Decode.succeed Elm.unit)
                                                     }
                                                 )
                                                 errorDecoders
@@ -1940,7 +1940,7 @@ operationToTypesExpectAndResolver namespace functionName operation =
                                                 , errorTypeAnnotation = errorTypeAnnotation
                                                 , toExpect = expectJsonBetter errorDecoders_ decoder
                                                 , resolver =
-                                                    (jsonResolverCustom namespace).callFrom
+                                                    jsonResolverCustom.callFrom
                                                         (Common.moduleToNamespace namespace Common.Common)
                                                         errorDecoders_
                                                         decoder
@@ -1966,20 +1966,18 @@ customHttpError =
 
 
 expectJsonCustom :
-    List String
-    ->
-        { declaration : Elm.Declaration
-        , call : Elm.Expression -> Elm.Expression -> Elm.Expression -> Elm.Expression
-        , callFrom : List String -> Elm.Expression -> Elm.Expression -> Elm.Expression -> Elm.Expression
-        , value : List String -> Elm.Expression
-        }
-expectJsonCustom namespace =
+    { declaration : Elm.Declaration
+    , call : Elm.Expression -> Elm.Expression -> Elm.Expression -> Elm.Expression
+    , callFrom : List String -> Elm.Expression -> Elm.Expression -> Elm.Expression -> Elm.Expression
+    , value : List String -> Elm.Expression
+    }
+expectJsonCustom =
     Elm.Declare.fn3 "expectJsonCustom"
         ( "toMsg"
         , Just
             (Elm.Annotation.function
                 [ Gen.Result.annotation_.result
-                    (Elm.Annotation.namedWith (Common.moduleToNamespace namespace Common.Common) "Error" [ Elm.Annotation.var "err", Elm.Annotation.string ])
+                    (Elm.Annotation.namedWith [] "Error" [ Elm.Annotation.var "err", Elm.Annotation.string ])
                     (Elm.Annotation.var "success")
                 ]
                 (Elm.Annotation.var "msg")
@@ -1997,52 +1995,20 @@ expectJsonCustom namespace =
             (Gen.Json.Decode.annotation_.decoder (Elm.Annotation.var "success"))
         )
         (\toMsg errorDecoders successDecoder ->
-            Gen.Http.expectStringResponse (\result -> Elm.apply toMsg [ result ]) <|
-                \response ->
+            let
+                toResult : Elm.Expression -> Elm.Expression
+                toResult response =
                     Gen.Http.caseOf_.response response
-                        { badUrl_ =
-                            \url ->
-                                Gen.Result.make_.err
-                                    (Elm.apply
-                                        (Elm.value
-                                            { importFrom = Common.moduleToNamespace namespace Common.Common
-                                            , name = "BadUrl"
-                                            , annotation = Nothing
-                                            }
-                                        )
-                                        [ url ]
-                                    )
-                        , timeout_ =
-                            Gen.Result.make_.err
-                                (Elm.value
-                                    { importFrom = Common.moduleToNamespace namespace Common.Common
-                                    , name = "Timeout"
-                                    , annotation = Nothing
-                                    }
-                                )
-                        , networkError_ =
-                            Gen.Result.make_.err
-                                (Elm.value
-                                    { importFrom = Common.moduleToNamespace namespace Common.Common
-                                    , name = "NetworkError"
-                                    , annotation = Nothing
-                                    }
-                                )
+                        { badUrl_ = \url -> Gen.Result.make_.err (Elm.apply (Elm.val "BadUrl") [ url ])
+                        , timeout_ = Gen.Result.make_.err (Elm.val "Timeout")
+                        , networkError_ = Gen.Result.make_.err (Elm.val "NetworkError")
                         , badStatus_ =
                             \metadata body ->
                                 Gen.Maybe.caseOf_.maybe
                                     (Gen.Dict.call_.get (Gen.String.call_.fromInt (Elm.get "statusCode" metadata)) errorDecoders)
                                     { nothing =
                                         Gen.Result.make_.err
-                                            (Elm.apply
-                                                (Elm.value
-                                                    { importFrom = Common.moduleToNamespace namespace Common.Common
-                                                    , name = "UnknownBadStatus"
-                                                    , annotation = Nothing
-                                                    }
-                                                )
-                                                [ metadata, body ]
-                                            )
+                                            (Elm.apply (Elm.val "UnknownBadStatus") [ metadata, body ])
                                     , just =
                                         \errorDecoder ->
                                             Gen.Result.caseOf_.result
@@ -2050,27 +2016,11 @@ expectJsonCustom namespace =
                                                 { ok =
                                                     \x ->
                                                         Gen.Result.make_.err
-                                                            (Elm.apply
-                                                                (Elm.value
-                                                                    { importFrom = Common.moduleToNamespace namespace Common.Common
-                                                                    , name = "KnownBadStatus"
-                                                                    , annotation = Nothing
-                                                                    }
-                                                                )
-                                                                [ Elm.get "statusCode" metadata, x ]
-                                                            )
+                                                            (Elm.apply (Elm.val "KnownBadStatus") [ Elm.get "statusCode" metadata, x ])
                                                 , err =
                                                     \_ ->
                                                         Gen.Result.make_.err
-                                                            (Elm.apply
-                                                                (Elm.value
-                                                                    { importFrom = Common.moduleToNamespace namespace Common.Common
-                                                                    , name = "BadErrorBody"
-                                                                    , annotation = Nothing
-                                                                    }
-                                                                )
-                                                                [ metadata, body ]
-                                                            )
+                                                            (Elm.apply (Elm.val "BadErrorBody") [ metadata, body ])
                                                 }
                                     }
                         , goodStatus_ =
@@ -2081,29 +2031,25 @@ expectJsonCustom namespace =
                                         \_ ->
                                             Gen.Result.make_.err
                                                 (Elm.apply
-                                                    (Elm.value
-                                                        { importFrom = Common.moduleToNamespace namespace Common.Common
-                                                        , name = "BadBody"
-                                                        , annotation = Nothing
-                                                        }
-                                                    )
+                                                    (Elm.val "BadBody")
                                                     [ metadata, body ]
                                                 )
                                     , ok = \a -> Gen.Result.make_.ok a
                                     }
                         }
+            in
+            Gen.Http.expectStringResponse (\result -> Elm.apply toMsg [ result ]) toResult
+                |> Elm.withType (Gen.Http.annotation_.expect (Elm.Annotation.var "msg"))
         )
 
 
 jsonResolverCustom :
-    List String
-    ->
-        { declaration : Elm.Declaration
-        , call : Elm.Expression -> Elm.Expression -> Elm.Expression
-        , callFrom : List String -> Elm.Expression -> Elm.Expression -> Elm.Expression
-        , value : List String -> Elm.Expression
-        }
-jsonResolverCustom namespace =
+    { declaration : Elm.Declaration
+    , call : Elm.Expression -> Elm.Expression -> Elm.Expression
+    , callFrom : List String -> Elm.Expression -> Elm.Expression -> Elm.Expression
+    , value : List String -> Elm.Expression
+    }
+jsonResolverCustom =
     Elm.Declare.fn2 "jsonResolverCustom"
         ( "errorDecoders"
         , Just
@@ -2118,42 +2064,20 @@ jsonResolverCustom namespace =
         )
     <|
         \errorDecoders successDecoder ->
-            Gen.Http.stringResolver
-                (\response ->
+            let
+                toResult : Elm.Expression -> Elm.Expression
+                toResult response =
                     Elm.Case.custom response
                         (Gen.Http.annotation_.response Elm.Annotation.string)
                         [ Elm.Case.branch1 "BadUrl_"
                             ( "url", Elm.Annotation.string )
                             (\url ->
-                                Gen.Result.make_.err
-                                    (Elm.apply
-                                        (Elm.value
-                                            { importFrom = Common.moduleToNamespace namespace Common.Common
-                                            , name = "BadUrl"
-                                            , annotation = Nothing
-                                            }
-                                        )
-                                        [ url ]
-                                    )
+                                Gen.Result.make_.err (Elm.apply (Elm.val "BadUrl") [ url ])
                             )
                         , Elm.Case.branch0 "Timeout_"
-                            (Gen.Result.make_.err
-                                (Elm.value
-                                    { importFrom = Common.moduleToNamespace namespace Common.Common
-                                    , name = "Timeout"
-                                    , annotation = Nothing
-                                    }
-                                )
-                            )
+                            (Gen.Result.make_.err (Elm.val "Timeout"))
                         , Elm.Case.branch0 "NetworkError_"
-                            (Gen.Result.make_.err
-                                (Elm.value
-                                    { importFrom = Common.moduleToNamespace namespace Common.Common
-                                    , name = "NetworkError"
-                                    , annotation = Nothing
-                                    }
-                                )
-                            )
+                            (Gen.Result.make_.err (Elm.val "NetworkError"))
                         , Elm.Case.branch2 "BadStatus_"
                             ( "metadata", Gen.Http.annotation_.metadata )
                             ( "body", Elm.Annotation.string )
@@ -2163,12 +2087,7 @@ jsonResolverCustom namespace =
                                     { nothing =
                                         Gen.Result.make_.err
                                             (Elm.apply
-                                                (Elm.value
-                                                    { importFrom = Common.moduleToNamespace namespace Common.Common
-                                                    , name = "UnknownBadStatus"
-                                                    , annotation = Nothing
-                                                    }
-                                                )
+                                                (Elm.val "UnknownBadStatus")
                                                 [ metadata, body ]
                                             )
                                     , just =
@@ -2178,27 +2097,11 @@ jsonResolverCustom namespace =
                                                 { ok =
                                                     \x ->
                                                         Gen.Result.make_.err
-                                                            (Elm.apply
-                                                                (Elm.value
-                                                                    { importFrom = Common.moduleToNamespace namespace Common.Common
-                                                                    , name = "KnownBadStatus"
-                                                                    , annotation = Nothing
-                                                                    }
-                                                                )
-                                                                [ Elm.get "statusCode" metadata, x ]
-                                                            )
+                                                            (Elm.apply (Elm.val "KnownBadStatus") [ Elm.get "statusCode" metadata, x ])
                                                 , err =
                                                     \_ ->
                                                         Gen.Result.make_.err
-                                                            (Elm.apply
-                                                                (Elm.value
-                                                                    { importFrom = Common.moduleToNamespace namespace Common.Common
-                                                                    , name = "BadErrorBody"
-                                                                    , annotation = Nothing
-                                                                    }
-                                                                )
-                                                                [ metadata, body ]
-                                                            )
+                                                            (Elm.apply (Elm.val "BadErrorBody") [ metadata, body ])
                                                 }
                                     }
                             )
@@ -2211,15 +2114,14 @@ jsonResolverCustom namespace =
                                     { err =
                                         \_ ->
                                             Gen.Result.make_.err
-                                                (Elm.apply
-                                                    (Elm.value { importFrom = Common.moduleToNamespace namespace Common.Common, name = "BadBody", annotation = Nothing })
-                                                    [ metadata, body ]
-                                                )
+                                                (Elm.apply (Elm.val "BadBody") [ metadata, body ])
                                     , ok = \a -> Gen.Result.make_.ok a
                                     }
                             )
                         ]
-                )
+            in
+            Gen.Http.stringResolver toResult
+                |> Elm.withType (Gen.Http.annotation_.resolver (Elm.Annotation.namedWith [] "Error" [ Elm.Annotation.var "err", Elm.Annotation.string ]) (Elm.Annotation.var "success"))
 
 
 

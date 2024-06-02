@@ -34,7 +34,9 @@ then we'll output like
 🎉 SDK generated:
 
     generated/MyCooolCompany/Api.elm
-    generated/MyCooolCompany/OpenApi.elm
+    generated/MyCooolCompany/Json.elm
+    generated/MyCooolCompany/Types.elm
+    generated/OpenApi/Common.elm
 
 
 You'll also need elm/http and elm/json installed. Try running:
@@ -60,7 +62,9 @@ which would result in
 🎉 SDK generated:
 
     generated/My/Comp/Api.elm
-    generated/My/Comp/OpenApi.elm
+    generated/My/Comp/Json.elm
+    generated/My/Comp/Types.elm
+    generated/OpenApi/Common.elm
 
 
 You'll also need elm/http and elm/json installed. Try running:
@@ -74,7 +78,7 @@ and possibly need elm/bytes and elm/url installed. If that's the case, try runni
     elm install elm/url
 ```
 
-Notice the new path (and Elm module name) for the `Api.elm` and `OpenApi.elm` files.
+Notice the new path (and Elm module name) for the files.
 
 Alternatively, maybe we have a different directory naming scheme for our project. We could do
 
@@ -88,7 +92,9 @@ which gives us
 🎉 SDK generated:
 
     src/MyCooolCompany/Api.elm
-    src/MyCooolCompany/OpenApi.elm
+    src/MyCooolCompany/Json.elm
+    src/MyCooolCompany/Types.elm
+    src/OpenApi/Common.elm
 
 
 You'll also need elm/http and elm/json installed. Try running:

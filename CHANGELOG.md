@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unreleased]
 
+## [0.5.0] - 2024-06-02
+
+### Added
+
+- Support for API Keys in auth
+- The new option `--effect-types` for determining which http effect types are generated
+  - Support for generating elm-pages [BackendTask.Http](https://package.elm-lang.org/packages/dillonkearns/elm-pages/latest/BackendTask-Http) requests
+- The new option `--server` for being able to pass in a server URL to be used in the generated requests
+
+### Changed
+- Now generates 4 files instead of 2:
+  - `<namespace>/Api.elm`, `<namespace>/Json.elm`, and `<namespace>/Types.elm` which correspond to the OAS directly
+  - `OpenApi/Common.elm` which can be shared across all generated SDKs
+
 ## [0.4.1] - 2024-04-28
 
 ### Added

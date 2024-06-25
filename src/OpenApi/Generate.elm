@@ -147,14 +147,14 @@ files { namespace, generateTodos, effectTypes, server } apiSpec =
                                  , customHttpError
                                     |> Elm.exposeWith
                                         { exposeConstructor = True
-                                        , group = Nothing
+                                        , group = Just "Http"
                                         }
                                  )
                                , ( Common.Common
                                  , nullableType
                                     |> Elm.exposeWith
                                         { exposeConstructor = True
-                                        , group = Nothing
+                                        , group = Just "Types"
                                         }
                                  )
                                ]
@@ -344,7 +344,7 @@ unitDeclarations namespace name =
           , Elm.alias typeName Elm.Annotation.unit
                 |> Elm.exposeWith
                     { exposeConstructor = False
-                    , group = Nothing
+                    , group = Just "Aliases"
                     }
           )
             |> CliMonad.succeed
@@ -638,26 +638,36 @@ toRequestFunctions server effectTypes namespace method pathUrl operation =
                     documentation : AuthorizationInfo -> String
                     documentation { scopes } =
                         let
-                            descriptionDoc : String
+                            summaryDoc : Maybe String
+                            summaryDoc =
+                                OpenApi.Operation.summary operation
+
+                            descriptionDoc : Maybe String
                             descriptionDoc =
                                 OpenApi.Operation.description operation
-                                    |> Maybe.withDefault ""
-                        in
-                        if List.isEmpty scopes then
-                            descriptionDoc
 
-                        else
-                            ([ descriptionDoc
-                             , ""
-                             , "This operations requires the following scopes:"
-                             ]
-                                ++ List.map
-                                    (\scope ->
-                                        " - `" ++ scope ++ "`"
+                            scopesDoc : Maybe String
+                            scopesDoc =
+                                if List.isEmpty scopes then
+                                    Nothing
+
+                                else
+                                    ("This operations requires the following scopes:"
+                                        :: List.map
+                                            (\scope ->
+                                                " - `" ++ scope ++ "`"
+                                            )
+                                            scopes
                                     )
-                                    scopes
-                            )
-                                |> String.join "\n"
+                                        |> String.join "\n"
+                                        |> Just
+                        in
+                        [ summaryDoc
+                        , descriptionDoc
+                        , scopesDoc
+                        ]
+                            |> List.filterMap identity
+                            |> String.join "\n\n"
                 in
                 CliMonad.andThen4
                     (\contentSchema auth successAnnotation replaced ->
@@ -673,7 +683,10 @@ toRequestFunctions server effectTypes namespace method pathUrl operation =
                                                         |> Elm.withDocumentation (documentation auth)
                                                         |> Elm.exposeWith
                                                             { exposeConstructor = False
-                                                            , group = Nothing
+                                                            , group =
+                                                                operation
+                                                                    |> operationToGroup
+                                                                    |> Just
                                                             }
                                                     )
                                                 )
@@ -704,6 +717,16 @@ toRequestFunctions server effectTypes namespace method pathUrl operation =
             )
         |> CliMonad.withPath method
         |> CliMonad.withPath pathUrl
+
+
+operationToGroup : OpenApi.Operation.Operation -> String
+operationToGroup operation =
+    case OpenApi.Operation.tags operation of
+        [ tag ] ->
+            tag
+
+        _ ->
+            "Operations"
 
 
 replacedUrl : Server -> List String -> String -> OpenApi.Operation.Operation -> CliMonad (Elm.Expression -> Elm.Expression)
@@ -1659,7 +1682,7 @@ operationToTypesExpectAndResolver namespace functionName operation =
                                         Elm.alias errorName Elm.Annotation.unit
                                             |> Elm.exposeWith
                                                 { exposeConstructor = True
-                                                , group = Nothing
+                                                , group = Just "Errors"
                                                 }
 
                                       else
@@ -1669,7 +1692,7 @@ operationToTypesExpectAndResolver namespace functionName operation =
                                             |> Elm.customType errorName
                                             |> Elm.exposeWith
                                                 { exposeConstructor = True
-                                                , group = Nothing
+                                                , group = Just "Errors"
                                                 }
                                     , Elm.Annotation.named (Common.moduleToNamespace namespace Common.Types) errorName
                                     )

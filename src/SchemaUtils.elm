@@ -366,7 +366,7 @@ oneOfDeclaration namespace ( oneOfName, variants ) =
                     |> Elm.customType oneOfName
                     |> Elm.exposeWith
                         { exposeConstructor = True
-                        , group = Nothing
+                        , group = Just "One of"
                         }
                 )
             )

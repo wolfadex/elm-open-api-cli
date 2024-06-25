@@ -77,7 +77,7 @@ suite =
                                     { namespace = namespace
                                     , generateTodos = False
                                     , effectTypes = [ OpenApi.Generate.Cmd, OpenApi.Generate.Task ]
-                                    , server = Nothing
+                                    , server = OpenApi.Generate.Default
                                     }
                                     oas
                         in

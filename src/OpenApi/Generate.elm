@@ -2,6 +2,7 @@ module OpenApi.Generate exposing
     ( ContentSchema(..)
     , EffectType(..)
     , Mime
+    , Server(..)
     , files
     , sanitizeModuleName
     )
@@ -72,6 +73,12 @@ type ContentSchema
     | BytesContent Mime
 
 
+type Server
+    = Default
+    | Single String
+    | Multiple (Dict.Dict String String)
+
+
 type alias AuthorizationInfo =
     { headers : Elm.Expression -> List ( Elm.Expression, Elm.Expression )
     , params : List ( String, Elm.Annotation.Annotation )
@@ -83,7 +90,7 @@ files :
     { namespace : List String
     , generateTodos : Bool
     , effectTypes : List EffectType
-    , server : Maybe String
+    , server : Server
     }
     -> OpenApi.OpenApi
     -> Result CliMonad.Message ( List Elm.File, List CliMonad.Message )
@@ -151,6 +158,25 @@ files { namespace, generateTodos, effectTypes, server } apiSpec =
                                         }
                                  )
                                ]
+                            ++ (case server of
+                                    Multiple servers ->
+                                        servers
+                                            |> Dict.toList
+                                            |> List.map
+                                                (\( key, value ) ->
+                                                    ( Common.Servers
+                                                    , Elm.string value
+                                                        |> Elm.declaration key
+                                                        |> Elm.exposeWith
+                                                            { exposeConstructor = True
+                                                            , group = Just "Servers"
+                                                            }
+                                                    )
+                                                )
+
+                                    _ ->
+                                        []
+                               )
                 in
                 ( allDecls
                     |> List.Extra.gatherEqualsBy Tuple.first
@@ -223,7 +249,7 @@ formatModuleDocs =
         )
 
 
-pathDeclarations : Maybe String -> List EffectType -> List String -> CliMonad (List ( Common.Module, Elm.Declaration ))
+pathDeclarations : Server -> List EffectType -> List String -> CliMonad (List ( Common.Module, Elm.Declaration ))
 pathDeclarations server effectTypes namespace =
     CliMonad.fromApiSpec OpenApi.paths
         |> CliMonad.andThen
@@ -399,7 +425,7 @@ requestBodyToDeclarations namespace name reference =
                 |> CliMonad.withPath name
 
 
-toRequestFunctions : Maybe String -> List EffectType -> List String -> String -> String -> OpenApi.Operation.Operation -> CliMonad (List ( Common.Module, Elm.Declaration ))
+toRequestFunctions : Server -> List EffectType -> List String -> String -> String -> OpenApi.Operation.Operation -> CliMonad (List ( Common.Module, Elm.Declaration ))
 toRequestFunctions server effectTypes namespace method pathUrl operation =
     let
         functionName : String
@@ -666,6 +692,7 @@ toRequestFunctions server effectTypes namespace method pathUrl operation =
                                             , errorTypeAnnotation = errorTypeAnnotation
                                             , authorizationInfo = auth
                                             , bodyParams = params
+                                            , server = server
                                             }
                                     )
                             )
@@ -679,7 +706,7 @@ toRequestFunctions server effectTypes namespace method pathUrl operation =
         |> CliMonad.withPath pathUrl
 
 
-replacedUrl : Maybe String -> List String -> String -> OpenApi.Operation.Operation -> CliMonad (Elm.Expression -> Elm.Expression)
+replacedUrl : Server -> List String -> String -> OpenApi.Operation.Operation -> CliMonad (Elm.Expression -> Elm.Expression)
 replacedUrl server namespace pathUrl operation =
     let
         params : List (OpenApi.Reference.ReferenceOr OpenApi.Parameter.Parameter)
@@ -750,35 +777,40 @@ replacedUrl server namespace pathUrl operation =
                     OpenApi.servers
                         |> CliMonad.fromApiSpec
                         |> CliMonad.map
-                            (\servers ->
-                                \config ->
-                                    let
-                                        initialUrl : String
-                                        initialUrl =
-                                            case server of
-                                                Just cliServer ->
-                                                    if String.startsWith "/" pathUrl then
-                                                        cliServer ++ pathUrl
+                            (\servers config ->
+                                let
+                                    initialUrl : Elm.Expression
+                                    initialUrl =
+                                        let
+                                            appendPath : String -> Elm.Expression
+                                            appendPath resolvedServer =
+                                                if String.startsWith "/" pathUrl then
+                                                    Elm.string <| resolvedServer ++ pathUrl
 
-                                                    else
-                                                        cliServer ++ "/" ++ pathUrl
+                                                else
+                                                    Elm.string <| resolvedServer ++ "/" ++ pathUrl
+                                        in
+                                        case server of
+                                            Single cliServer ->
+                                                cliServer |> appendPath
 
-                                                Nothing ->
-                                                    case servers of
-                                                        [] ->
-                                                            pathUrl
+                                            Default ->
+                                                case servers of
+                                                    [] ->
+                                                        "" |> appendPath
 
-                                                        firstServer :: _ ->
-                                                            if String.startsWith "/" pathUrl then
-                                                                OpenApi.Server.url firstServer ++ pathUrl
+                                                    firstServer :: _ ->
+                                                        OpenApi.Server.url firstServer |> appendPath
 
-                                                            else
-                                                                OpenApi.Server.url firstServer ++ "/" ++ pathUrl
-                                    in
-                                    List.foldl
-                                        (\( replacement, _ ) -> replacement config)
-                                        (Elm.string initialUrl)
-                                        replacements
+                                            Multiple _ ->
+                                                Elm.Op.append
+                                                    (Elm.get "server" config)
+                                                    (appendPath "")
+                                in
+                                List.foldl
+                                    (\( replacement, _ ) -> replacement config)
+                                    initialUrl
+                                    replacements
                             )
 
                 else
@@ -1121,12 +1153,20 @@ toConfigParamAnnotation :
         , errorTypeAnnotation : Elm.Annotation.Annotation
         , authorizationInfo : AuthorizationInfo
         , bodyParams : List ( String, Elm.Annotation.Annotation )
+        , server : Server
         }
     -> CliMonad ({ requireToMsg : Bool } -> Elm.Annotation.Annotation)
 toConfigParamAnnotation namespace options =
     CliMonad.map
         (\urlParams { requireToMsg } ->
-            (options.authorizationInfo.params
+            ((case options.server of
+                Multiple _ ->
+                    [ ( "server", Elm.Annotation.string ) ]
+
+                _ ->
+                    []
+             )
+                ++ options.authorizationInfo.params
                 ++ (if requireToMsg then
                         [ ( "toMsg"
                           , Elm.Annotation.function

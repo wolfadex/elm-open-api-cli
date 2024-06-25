@@ -37,7 +37,7 @@ type alias CliOptions =
     , swaggerConversionUrl : String
     , swaggerConversionCommand : Maybe String
     , swaggerConversionCommandArgs : List String
-    , server : Maybe String
+    , server : OpenApi.Generate.Server
     }
 
 
@@ -71,7 +71,9 @@ program =
                 |> Cli.OptionsParser.with
                     (Cli.Option.keywordArgList "swagger-conversion-command-args")
                 |> Cli.OptionsParser.with
-                    (Cli.Option.optionalKeywordArg "server")
+                    (Cli.Option.optionalKeywordArg "server"
+                        |> Cli.Option.validateMap serverValidation
+                    )
                 |> Cli.OptionsParser.withDoc """
 
   options:
@@ -90,6 +92,13 @@ program =
   --server                           The base URL for the OpenAPI server.
                                      If not specified this will be extracted from the OAS
                                      or default to root of the web application.
+
+                                     You can pass in an object to define multiple servers, like
+                                     {"dev": "http://localhost", "prod": "https://example.com"}.
+
+                                     This will add a `server` parameter to functions and define
+                                     a `Servers` module with your servers. You can pass in an
+                                     empty object if you have fully dynamic servers.
 
   --auto-convert-swagger             If passed in, and a Swagger doc is encountered,
                                      will attempt to convert it to an Open API file.
@@ -146,6 +155,25 @@ effectTypeValidation effectType =
 
         _ ->
             Err <| "Unexpected effect type: " ++ effectType
+
+
+serverValidation : Maybe String -> Result String OpenApi.Generate.Server
+serverValidation server =
+    case Maybe.withDefault "" server of
+        "" ->
+            Ok OpenApi.Generate.Default
+
+        input ->
+            case Json.Decode.decodeString (Json.Decode.dict Json.Decode.string) input of
+                Ok servers ->
+                    Ok <| OpenApi.Generate.Multiple servers
+
+                Err _ ->
+                    if String.startsWith "{" input then
+                        Err <| "Invalid JSON: " ++ input
+
+                    else
+                        Ok <| OpenApi.Generate.Single input
 
 
 run : Pages.Script.Script
@@ -354,7 +382,7 @@ generateFileFromOpenApiSpec :
     { outputModuleName : Maybe String
     , generateTodos : Maybe String
     , effectTypes : List OpenApi.Generate.EffectType
-    , server : Maybe String
+    , server : OpenApi.Generate.Server
     }
     -> OpenApi.OpenApi
     -> BackendTask.BackendTask FatalError.FatalError ( List Elm.File, List CliMonad.Message )

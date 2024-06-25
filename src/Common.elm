@@ -22,6 +22,7 @@ type Module
     | Types
     | Api
     | Common
+    | Servers
 
 
 moduleToNamespace : List String -> Module -> List String
@@ -35,6 +36,9 @@ moduleToNamespace namespace module_ =
 
         Api ->
             namespace ++ [ "Api" ]
+
+        Servers ->
+            namespace ++ [ "Servers" ]
 
         Common ->
             [ "OpenApi", "Common" ]

@@ -29,7 +29,7 @@ schemaToDeclarations namespace name schema =
                       , Elm.alias typeName ann
                             |> Elm.exposeWith
                                 { exposeConstructor = False
-                                , group = Nothing
+                                , group = Just "Aliases"
                                 }
                       )
                         |> CliMonad.succeed

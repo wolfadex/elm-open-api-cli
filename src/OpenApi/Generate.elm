@@ -147,14 +147,14 @@ files { namespace, generateTodos, effectTypes, server } apiSpec =
                                  , customHttpError
                                     |> Elm.exposeWith
                                         { exposeConstructor = True
-                                        , group = Nothing
+                                        , group = Just "Http"
                                         }
                                  )
                                , ( Common.Common
                                  , nullableType
                                     |> Elm.exposeWith
                                         { exposeConstructor = True
-                                        , group = Nothing
+                                        , group = Just "Types"
                                         }
                                  )
                                ]
@@ -344,7 +344,7 @@ unitDeclarations namespace name =
           , Elm.alias typeName Elm.Annotation.unit
                 |> Elm.exposeWith
                     { exposeConstructor = False
-                    , group = Nothing
+                    , group = Just "Aliases"
                     }
           )
             |> CliMonad.succeed
@@ -673,7 +673,7 @@ toRequestFunctions server effectTypes namespace method pathUrl operation =
                                                         |> Elm.withDocumentation (documentation auth)
                                                         |> Elm.exposeWith
                                                             { exposeConstructor = False
-                                                            , group = Nothing
+                                                            , group = Just "Operations"
                                                             }
                                                     )
                                                 )
@@ -1659,7 +1659,7 @@ operationToTypesExpectAndResolver namespace functionName operation =
                                         Elm.alias errorName Elm.Annotation.unit
                                             |> Elm.exposeWith
                                                 { exposeConstructor = True
-                                                , group = Nothing
+                                                , group = Just "Errors"
                                                 }
 
                                       else
@@ -1669,7 +1669,7 @@ operationToTypesExpectAndResolver namespace functionName operation =
                                             |> Elm.customType errorName
                                             |> Elm.exposeWith
                                                 { exposeConstructor = True
-                                                , group = Nothing
+                                                , group = Just "Errors"
                                                 }
                                     , Elm.Annotation.named (Common.moduleToNamespace namespace Common.Types) errorName
                                     )

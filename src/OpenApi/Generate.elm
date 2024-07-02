@@ -519,121 +519,131 @@ toRequestFunctions server effectTypes namespace method pathUrl operation =
 
                     commands : AuthorizationInfo -> Elm.Annotation.Annotation -> (Elm.Expression -> { core : Elm.Expression, elmPages : Elm.Expression }) -> (Elm.Expression -> Elm.Expression) -> ({ requireToMsg : Bool } -> Elm.Annotation.Annotation) -> List Elm.Declaration
                     commands auth _ toBody replaced paramType =
-                        let
-                            cmdArg : Elm.Expression -> Elm.Expression
-                            cmdArg config =
-                                Elm.record
-                                    [ ( "url", replaced config )
-                                    , ( "method", Elm.string method )
-                                    , ( "headers", httpHeadersFromList auth config )
-                                    , ( "expect", (toExpect <| Elm.get "toMsg" config).core )
-                                    , ( "body", (toBody config).core )
-                                    , ( "timeout", Gen.Maybe.make_.nothing )
-                                    , ( "tracker", Gen.Maybe.make_.nothing )
-                                    ]
+                        if List.member Cmd effectTypes || List.member CmdRisky effectTypes then
+                            let
+                                cmdArg : Elm.Expression -> Elm.Expression
+                                cmdArg config =
+                                    Elm.record
+                                        [ ( "url", replaced config )
+                                        , ( "method", Elm.string method )
+                                        , ( "headers", httpHeadersFromList auth config )
+                                        , ( "expect", (toExpect <| Elm.get "toMsg" config).core )
+                                        , ( "body", (toBody config).core )
+                                        , ( "timeout", Gen.Maybe.make_.nothing )
+                                        , ( "tracker", Gen.Maybe.make_.nothing )
+                                        ]
 
-                            cmdAnnotation : Elm.Annotation.Annotation
-                            cmdAnnotation =
-                                Elm.Annotation.function
-                                    [ paramType { requireToMsg = True } ]
-                                    (Elm.Annotation.cmd (Elm.Annotation.var "msg"))
-                        in
-                        [ Elm.fn
-                            ( "config", Nothing )
-                            (\config -> Gen.Http.call_.request (cmdArg config))
-                            |> Elm.withType cmdAnnotation
-                            |> Elm.declaration functionName
-                            |> justIf Cmd
-                        , Elm.fn
-                            ( "config", Nothing )
-                            (\config -> Gen.Http.call_.riskyRequest (cmdArg config))
-                            |> Elm.withType cmdAnnotation
-                            |> Elm.declaration (functionName ++ "Risky")
-                            |> justIf CmdRisky
-                        ]
-                            |> List.filterMap identity
+                                cmdAnnotation : Elm.Annotation.Annotation
+                                cmdAnnotation =
+                                    Elm.Annotation.function
+                                        [ paramType { requireToMsg = True } ]
+                                        (Elm.Annotation.cmd (Elm.Annotation.var "msg"))
+                            in
+                            [ Elm.fn
+                                ( "config", Nothing )
+                                (\config -> Gen.Http.call_.request (cmdArg config))
+                                |> Elm.withType cmdAnnotation
+                                |> Elm.declaration functionName
+                                |> justIf Cmd
+                            , Elm.fn
+                                ( "config", Nothing )
+                                (\config -> Gen.Http.call_.riskyRequest (cmdArg config))
+                                |> Elm.withType cmdAnnotation
+                                |> Elm.declaration (functionName ++ "Risky")
+                                |> justIf CmdRisky
+                            ]
+                                |> List.filterMap identity
+
+                        else
+                            []
 
                     tasks : AuthorizationInfo -> Elm.Annotation.Annotation -> (Elm.Expression -> { core : Elm.Expression, elmPages : Elm.Expression }) -> (Elm.Expression -> Elm.Expression) -> ({ requireToMsg : Bool } -> Elm.Annotation.Annotation) -> List Elm.Declaration
                     tasks auth successAnnotation toBody replaced paramType =
-                        let
-                            taskArg : Elm.Expression -> Elm.Expression
-                            taskArg config =
-                                Elm.record
-                                    [ ( "url", replaced config )
-                                    , ( "method", Elm.string method )
-                                    , ( "headers", httpHeadersFromList auth config )
-                                    , ( "resolver", resolver )
-                                    , ( "body", (toBody config).core )
-                                    , ( "timeout", Gen.Maybe.make_.nothing )
-                                    ]
+                        if List.member Task effectTypes || List.member TaskRisky effectTypes then
+                            let
+                                taskArg : Elm.Expression -> Elm.Expression
+                                taskArg config =
+                                    Elm.record
+                                        [ ( "url", replaced config )
+                                        , ( "method", Elm.string method )
+                                        , ( "headers", httpHeadersFromList auth config )
+                                        , ( "resolver", resolver )
+                                        , ( "body", (toBody config).core )
+                                        , ( "timeout", Gen.Maybe.make_.nothing )
+                                        ]
 
-                            taskAnnotation : Elm.Annotation.Annotation
-                            taskAnnotation =
-                                Elm.Annotation.function
-                                    [ paramType { requireToMsg = False } ]
-                                    (Gen.Task.annotation_.task
-                                        (customErrorAnnotation namespace errorTypeAnnotation bodyTypeAnnotation)
-                                        successAnnotation
-                                    )
-                        in
-                        [ Elm.fn
-                            ( "config", Nothing )
-                            (\config -> Gen.Http.call_.task (taskArg config))
-                            |> Elm.withType taskAnnotation
-                            |> Elm.declaration (functionName ++ "Task")
-                            |> justIf Task
-                        , Elm.fn
-                            ( "config", Nothing )
-                            (\config -> Gen.Http.call_.riskyTask (taskArg config))
-                            |> Elm.withType taskAnnotation
-                            |> Elm.declaration (functionName ++ "TaskRisky")
-                            |> justIf TaskRisky
-                        ]
-                            |> List.filterMap identity
+                                taskAnnotation : Elm.Annotation.Annotation
+                                taskAnnotation =
+                                    Elm.Annotation.function
+                                        [ paramType { requireToMsg = False } ]
+                                        (Gen.Task.annotation_.task
+                                            (customErrorAnnotation namespace errorTypeAnnotation bodyTypeAnnotation)
+                                            successAnnotation
+                                        )
+                            in
+                            [ Elm.fn
+                                ( "config", Nothing )
+                                (\config -> Gen.Http.call_.task (taskArg config))
+                                |> Elm.withType taskAnnotation
+                                |> Elm.declaration (functionName ++ "Task")
+                                |> justIf Task
+                            , Elm.fn
+                                ( "config", Nothing )
+                                (\config -> Gen.Http.call_.riskyTask (taskArg config))
+                                |> Elm.withType taskAnnotation
+                                |> Elm.declaration (functionName ++ "TaskRisky")
+                                |> justIf TaskRisky
+                            ]
+                                |> List.filterMap identity
+
+                        else
+                            []
 
                     backendTask : AuthorizationInfo -> Elm.Annotation.Annotation -> (Elm.Expression -> { core : Elm.Expression, elmPages : Elm.Expression }) -> (Elm.Expression -> Elm.Expression) -> ({ requireToMsg : Bool } -> Elm.Annotation.Annotation) -> List Elm.Declaration
                     backendTask auth successAnnotation toBody replaced paramType =
-                        let
-                            backendTaskHeaders : Elm.Expression -> Elm.Expression
-                            backendTaskHeaders config =
-                                Elm.list <| List.map (\( k, v ) -> Elm.tuple k v) <| auth.headers config
+                        if List.member BackendTask effectTypes then
+                            [ let
+                                backendTaskHeaders : Elm.Expression -> Elm.Expression
+                                backendTaskHeaders config =
+                                    Elm.list <| List.map (\( k, v ) -> Elm.tuple k v) <| auth.headers config
 
-                            taskArg : Elm.Expression -> Elm.Expression
-                            taskArg config =
-                                Elm.record
-                                    [ ( "url", replaced config )
-                                    , ( "method", Elm.string method )
-                                    , ( "headers", backendTaskHeaders config )
-                                    , ( "body", (toBody config).elmPages )
-                                    , ( "retries", Gen.Maybe.make_.nothing )
-                                    , ( "timeoutInMs", Gen.Maybe.make_.nothing )
-                                    ]
+                                taskArg : Elm.Expression -> Elm.Expression
+                                taskArg config =
+                                    Elm.record
+                                        [ ( "url", replaced config )
+                                        , ( "method", Elm.string method )
+                                        , ( "headers", backendTaskHeaders config )
+                                        , ( "body", (toBody config).elmPages )
+                                        , ( "retries", Gen.Maybe.make_.nothing )
+                                        , ( "timeoutInMs", Gen.Maybe.make_.nothing )
+                                        ]
 
-                            taskAnnotation : Elm.Annotation.Annotation
-                            taskAnnotation =
-                                Elm.Annotation.function
-                                    [ paramType { requireToMsg = False } ]
-                                    (Gen.BackendTask.annotation_.backendTask
-                                        (Elm.Annotation.record
-                                            [ ( "fatal", Gen.FatalError.annotation_.fatalError )
-                                            , ( "recoverable", Gen.BackendTask.Http.annotation_.error )
-                                            ]
+                                taskAnnotation : Elm.Annotation.Annotation
+                                taskAnnotation =
+                                    Elm.Annotation.function
+                                        [ paramType { requireToMsg = False } ]
+                                        (Gen.BackendTask.annotation_.backendTask
+                                            (Elm.Annotation.record
+                                                [ ( "fatal", Gen.FatalError.annotation_.fatalError )
+                                                , ( "recoverable", Gen.BackendTask.Http.annotation_.error )
+                                                ]
+                                            )
+                                            successAnnotation
                                         )
-                                        successAnnotation
-                                    )
 
-                            expect : Elm.Expression -> Elm.Expression
-                            expect config =
-                                (toExpect <| Elm.get "toMsg" config).elmPages
-                        in
-                        [ Elm.fn
-                            ( "config", Nothing )
-                            (\config -> Gen.BackendTask.Http.call_.request (taskArg config) (expect config))
-                            |> Elm.withType taskAnnotation
-                            |> Elm.declaration (functionName ++ "BackendTask")
-                            |> justIf BackendTask
-                        ]
-                            |> List.filterMap identity
+                                expect : Elm.Expression -> Elm.Expression
+                                expect config =
+                                    (toExpect <| Elm.get "toMsg" config).elmPages
+                              in
+                              Elm.fn
+                                ( "config", Nothing )
+                                (\config -> Gen.BackendTask.Http.call_.request (taskArg config) (expect config))
+                                |> Elm.withType taskAnnotation
+                                |> Elm.declaration (functionName ++ "BackendTask")
+                            ]
+
+                        else
+                            []
 
                     documentation : AuthorizationInfo -> String
                     documentation { scopes } =

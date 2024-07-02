@@ -517,7 +517,13 @@ toRequestFunctions server effectTypes namespace method pathUrl operation =
                     httpHeadersFromList auth config =
                         Elm.list <| List.map (\( k, v ) -> Gen.Http.call_.header k v) <| auth.headers config
 
-                    commands : AuthorizationInfo -> Elm.Annotation.Annotation -> (Elm.Expression -> PerPackage Elm.Expression) -> (Elm.Expression -> Elm.Expression) -> ({ requireToMsg : Bool } -> Elm.Annotation.Annotation) -> List Elm.Declaration
+                    commands :
+                        AuthorizationInfo
+                        -> Elm.Annotation.Annotation
+                        -> (Elm.Expression -> PerPackage Elm.Expression)
+                        -> (Elm.Expression -> Elm.Expression)
+                        -> ({ requireToMsg : Bool } -> Elm.Annotation.Annotation)
+                        -> List Elm.Declaration
                     commands auth _ toBody replaced paramType =
                         if List.member Cmd effectTypes || List.member CmdRisky effectTypes then
                             let
@@ -557,7 +563,13 @@ toRequestFunctions server effectTypes namespace method pathUrl operation =
                         else
                             []
 
-                    tasks : AuthorizationInfo -> Elm.Annotation.Annotation -> (Elm.Expression -> PerPackage Elm.Expression) -> (Elm.Expression -> Elm.Expression) -> ({ requireToMsg : Bool } -> Elm.Annotation.Annotation) -> List Elm.Declaration
+                    tasks :
+                        AuthorizationInfo
+                        -> Elm.Annotation.Annotation
+                        -> (Elm.Expression -> PerPackage Elm.Expression)
+                        -> (Elm.Expression -> Elm.Expression)
+                        -> ({ requireToMsg : Bool } -> Elm.Annotation.Annotation)
+                        -> List Elm.Declaration
                     tasks auth successAnnotation toBody replaced paramType =
                         if List.member Task effectTypes || List.member TaskRisky effectTypes then
                             let
@@ -599,7 +611,13 @@ toRequestFunctions server effectTypes namespace method pathUrl operation =
                         else
                             []
 
-                    backendTask : AuthorizationInfo -> Elm.Annotation.Annotation -> (Elm.Expression -> PerPackage Elm.Expression) -> (Elm.Expression -> Elm.Expression) -> ({ requireToMsg : Bool } -> Elm.Annotation.Annotation) -> List Elm.Declaration
+                    backendTask :
+                        AuthorizationInfo
+                        -> Elm.Annotation.Annotation
+                        -> (Elm.Expression -> PerPackage Elm.Expression)
+                        -> (Elm.Expression -> Elm.Expression)
+                        -> ({ requireToMsg : Bool } -> Elm.Annotation.Annotation)
+                        -> List Elm.Declaration
                     backendTask auth successAnnotation toBody replaced paramType =
                         if List.member BackendTask effectTypes then
                             [ let

@@ -87,6 +87,12 @@ type alias AuthorizationInfo =
     }
 
 
+type alias PerPackage a =
+    { core : a
+    , elmPages : a
+    }
+
+
 files :
     { namespace : List String
     , generateTodos : Bool
@@ -443,14 +449,7 @@ toRequestFunctions server effectTypes namespace method pathUrl operation =
                 let
                     body :
                         ContentSchema
-                        ->
-                            CliMonad
-                                (Elm.Expression
-                                 ->
-                                    { core : Elm.Expression
-                                    , elmPages : Elm.Expression
-                                    }
-                                )
+                        -> CliMonad (Elm.Expression -> PerPackage Elm.Expression)
                     body bodyContent =
                         case bodyContent of
                             EmptyContent ->
@@ -518,7 +517,7 @@ toRequestFunctions server effectTypes namespace method pathUrl operation =
                     httpHeadersFromList auth config =
                         Elm.list <| List.map (\( k, v ) -> Gen.Http.call_.header k v) <| auth.headers config
 
-                    commands : AuthorizationInfo -> Elm.Annotation.Annotation -> (Elm.Expression -> { core : Elm.Expression, elmPages : Elm.Expression }) -> (Elm.Expression -> Elm.Expression) -> ({ requireToMsg : Bool } -> Elm.Annotation.Annotation) -> List Elm.Declaration
+                    commands : AuthorizationInfo -> Elm.Annotation.Annotation -> (Elm.Expression -> PerPackage Elm.Expression) -> (Elm.Expression -> Elm.Expression) -> ({ requireToMsg : Bool } -> Elm.Annotation.Annotation) -> List Elm.Declaration
                     commands auth _ toBody replaced paramType =
                         if List.member Cmd effectTypes || List.member CmdRisky effectTypes then
                             let
@@ -558,7 +557,7 @@ toRequestFunctions server effectTypes namespace method pathUrl operation =
                         else
                             []
 
-                    tasks : AuthorizationInfo -> Elm.Annotation.Annotation -> (Elm.Expression -> { core : Elm.Expression, elmPages : Elm.Expression }) -> (Elm.Expression -> Elm.Expression) -> ({ requireToMsg : Bool } -> Elm.Annotation.Annotation) -> List Elm.Declaration
+                    tasks : AuthorizationInfo -> Elm.Annotation.Annotation -> (Elm.Expression -> PerPackage Elm.Expression) -> (Elm.Expression -> Elm.Expression) -> ({ requireToMsg : Bool } -> Elm.Annotation.Annotation) -> List Elm.Declaration
                     tasks auth successAnnotation toBody replaced paramType =
                         if List.member Task effectTypes || List.member TaskRisky effectTypes then
                             let
@@ -600,7 +599,7 @@ toRequestFunctions server effectTypes namespace method pathUrl operation =
                         else
                             []
 
-                    backendTask : AuthorizationInfo -> Elm.Annotation.Annotation -> (Elm.Expression -> { core : Elm.Expression, elmPages : Elm.Expression }) -> (Elm.Expression -> Elm.Expression) -> ({ requireToMsg : Bool } -> Elm.Annotation.Annotation) -> List Elm.Declaration
+                    backendTask : AuthorizationInfo -> Elm.Annotation.Annotation -> (Elm.Expression -> PerPackage Elm.Expression) -> (Elm.Expression -> Elm.Expression) -> ({ requireToMsg : Bool } -> Elm.Annotation.Annotation) -> List Elm.Declaration
                     backendTask auth successAnnotation toBody replaced paramType =
                         if List.member BackendTask effectTypes then
                             [ let
@@ -1500,7 +1499,7 @@ operationToTypesExpectAndResolver :
             , bodyTypeAnnotation : Elm.Annotation.Annotation
             , errorTypeDeclaration : Elm.Declaration
             , errorTypeAnnotation : Elm.Annotation.Annotation
-            , toExpect : (Elm.Expression -> Elm.Expression) -> { core : Elm.Expression, elmPages : Elm.Expression }
+            , toExpect : (Elm.Expression -> Elm.Expression) -> PerPackage Elm.Expression
             , resolver : Elm.Expression
             }
 operationToTypesExpectAndResolver namespace functionName operation =
@@ -1509,7 +1508,7 @@ operationToTypesExpectAndResolver namespace functionName operation =
         responses =
             OpenApi.Operation.responses operation
 
-        expectJsonBetter : Elm.Expression -> Elm.Expression -> (Elm.Expression -> Elm.Expression) -> { core : Elm.Expression, elmPages : Elm.Expression }
+        expectJsonBetter : Elm.Expression -> Elm.Expression -> (Elm.Expression -> Elm.Expression) -> PerPackage Elm.Expression
         expectJsonBetter errorDecoders successDecoder toMsg =
             { core = Gen.OpenApi.Common.expectJsonCustom toMsg errorDecoders successDecoder
             , elmPages = Gen.BackendTask.Http.expectJson successDecoder

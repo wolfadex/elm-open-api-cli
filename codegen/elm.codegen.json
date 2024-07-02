@@ -10,6 +10,6 @@
             "elm/url": "1.0.0",
             "dillonkearns/elm-pages": "10.1.0"
         },
-        "local": []
+        "local": ["helpers"]
     }
 }

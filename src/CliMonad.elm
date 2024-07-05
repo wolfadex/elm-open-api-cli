@@ -3,7 +3,7 @@ module CliMonad exposing
     , run, stepOrFail
     , succeed, succeedWith, fail
     , map, map2, map3
-    , andThen, andThen2, andThen4, combine, combineDict, combineMap, foldl
+    , andThen, andThen2, andThen3, andThen4, combine, combineDict, combineMap, foldl
     , errorToWarning, fromApiSpec
     , withPath, withWarning
     , todo, todoWithDefault
@@ -15,7 +15,7 @@ module CliMonad exposing
 @docs run, stepOrFail
 @docs succeed, succeedWith, fail
 @docs map, map2, map3
-@docs andThen, andThen2, andThen4, combine, combineDict, combineMap, foldl
+@docs andThen, andThen2, andThen3, andThen4, combine, combineDict, combineMap, foldl
 @docs errorToWarning, fromApiSpec
 @docs withPath, withWarning
 @docs todo, todoWithDefault
@@ -162,6 +162,12 @@ andThen f (CliMonad x) =
 andThen2 : (a -> b -> CliMonad c) -> CliMonad a -> CliMonad b -> CliMonad c
 andThen2 f x y =
     map2 f x y
+        |> andThen identity
+
+
+andThen3 : (a -> b -> c -> CliMonad d) -> CliMonad a -> CliMonad b -> CliMonad c -> CliMonad d
+andThen3 f x y z =
+    map3 f x y z
         |> andThen identity
 
 

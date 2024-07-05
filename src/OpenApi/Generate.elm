@@ -892,9 +892,9 @@ replacedUrl server authinfo namespace pathUrl operation =
                                                     |> Gen.Maybe.make_.just
                                             )
                             in
-                            queryArgs
-                                |> List.map (\arg -> arg config)
-                                |> (++) authArgs
+                            (List.map (\arg -> arg config) queryArgs
+                                ++ authArgs
+                            )
                                 |> Gen.List.filterMap Gen.Basics.identity
                                 |> Gen.Url.Builder.call_.crossOrigin
                                     (Elm.string srvUrl)

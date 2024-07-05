@@ -5,6 +5,8 @@ module Example exposing (main)
 import AirlineCodeLookupApi.Api
 import AirlineCodeLookupApi.Types
 import Browser
+import DbFahrplanApi.Api
+import DbFahrplanApi.Types
 import GithubV3RestApi.Api
 import GithubV3RestApi.Types
 import OpenApi.Common
@@ -44,6 +46,15 @@ init () =
         --     , params = { sessionMinusid = Nothing, description = Nothing }
         --     }
         , GithubV3RestApi.Api.metaRoot { toMsg = GithubResponse }
+        , DbFahrplanApi.Api.locationName
+            { toMsg = DbFahrplanResponse
+            , authorization = { authkey = "?" }
+            , params =
+                { format = "json"
+                , lang = Nothing
+                , input = "München"
+                }
+            }
         ]
     )
 
@@ -58,6 +69,7 @@ type Msg
     | AmadeusResponse (Result (OpenApi.Common.Error AirlineCodeLookupApi.Types.Getairlines_Error String) AirlineCodeLookupApi.Types.Airlines)
       -- | BimResponse (Result (OpenApi.Common.Error BimcloudApi20232AlphaRelease.BlobStoreService10BeginBatchUpload_Error Bytes.Bytes) Bytes.Bytes)
     | GithubResponse (Result (OpenApi.Common.Error () String) GithubV3RestApi.Types.Root)
+    | DbFahrplanResponse (Result (OpenApi.Common.Error DbFahrplanApi.Types.LocationName_Error String) DbFahrplanApi.Types.LocationResponse)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -72,6 +84,9 @@ update msg model =
         -- BimResponse response ->
         --     ( model, Cmd.none )
         GithubResponse response ->
+            ( model, Cmd.none )
+
+        DbFahrplanResponse _ ->
             ( model, Cmd.none )
 
 

@@ -3,7 +3,7 @@ module CliMonad exposing
     , run, stepOrFail
     , succeed, succeedWith, fail
     , map, map2, map3
-    , andThen, andThen2, andThen4, combine, combineDict, combineMap, foldl
+    , andThen, andThen2, andThen3, combine, combineDict, combineMap, foldl
     , errorToWarning, fromApiSpec
     , withPath, withWarning
     , todo, todoWithDefault
@@ -15,7 +15,7 @@ module CliMonad exposing
 @docs run, stepOrFail
 @docs succeed, succeedWith, fail
 @docs map, map2, map3
-@docs andThen, andThen2, andThen4, combine, combineDict, combineMap, foldl
+@docs andThen, andThen2, andThen3, combine, combineDict, combineMap, foldl
 @docs errorToWarning, fromApiSpec
 @docs withPath, withWarning
 @docs todo, todoWithDefault
@@ -137,11 +137,6 @@ map3 f (CliMonad x) (CliMonad y) (CliMonad z) =
     CliMonad (\input -> Result.map3 (\( xr, xw, xm ) ( yr, yw, ym ) ( zr, zw, zm ) -> ( f xr yr zr, xw ++ yw ++ zw, FastDict.union (FastDict.union xm ym) zm )) (x input) (y input) (z input))
 
 
-map4 : (a -> b -> c -> d -> e) -> CliMonad a -> CliMonad b -> CliMonad c -> CliMonad d -> CliMonad e
-map4 f (CliMonad x) (CliMonad y) (CliMonad z) (CliMonad w) =
-    CliMonad (\input -> Result.map4 (\( xr, xw, xm ) ( yr, yw, ym ) ( zr, zw, zm ) ( wr, ww, wm ) -> ( f xr yr zr wr, xw ++ yw ++ zw ++ ww, FastDict.union (FastDict.union xm ym) (FastDict.union zm wm) )) (x input) (y input) (z input) (w input))
-
-
 andThen : (a -> CliMonad b) -> CliMonad a -> CliMonad b
 andThen f (CliMonad x) =
     CliMonad
@@ -165,9 +160,9 @@ andThen2 f x y =
         |> andThen identity
 
 
-andThen4 : (a -> b -> c -> d -> CliMonad e) -> CliMonad a -> CliMonad b -> CliMonad c -> CliMonad d -> CliMonad e
-andThen4 f x y z w =
-    map4 f x y z w
+andThen3 : (a -> b -> c -> CliMonad d) -> CliMonad a -> CliMonad b -> CliMonad c -> CliMonad d
+andThen3 f x y z =
+    map3 f x y z
         |> andThen identity
 
 

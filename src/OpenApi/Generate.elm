@@ -1580,7 +1580,7 @@ operationToTypesExpectAndResolver namespace functionName operation =
         |> CliMonad.stepOrFail
             ("Among the "
                 ++ String.fromInt (Dict.size responses)
-                ++ " possible responses, there was no successfull one."
+                ++ " possible responses, there was no successful one."
             )
             getFirstSuccessResponse
         |> CliMonad.andThen

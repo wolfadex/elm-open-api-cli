@@ -748,15 +748,22 @@ toRequestFunctions server effectTypes namespace method pathUrl operation =
                                                 , ( "tracker", Gen.Maybe.make_.nothing )
                                                 ]
 
+                                        cmdParam : Elm.Annotation.Annotation
+                                        cmdParam =
+                                            (paramType { requireToMsg = True }).lamderaProgramTest
+
+                                        cmdResult : Elm.Annotation.Annotation
+                                        cmdResult =
+                                            Gen.Effect.Command.annotation_.command
+                                                (Elm.Annotation.var "restriction")
+                                                (Elm.Annotation.var "toFrontend")
+                                                (Elm.Annotation.var "msg")
+
                                         cmdAnnotation : Elm.Annotation.Annotation
                                         cmdAnnotation =
                                             Elm.Annotation.function
-                                                [ (paramType { requireToMsg = True }).lamderaProgramTest ]
-                                                (Gen.Effect.Command.annotation_.command
-                                                    (Elm.Annotation.var "restriction")
-                                                    (Elm.Annotation.var "toMsg")
-                                                    (Elm.Annotation.var "msg")
-                                                )
+                                                [ cmdParam ]
+                                                cmdResult
 
                                         taskArg : Elm.Expression -> Elm.Expression
                                         taskArg config =
@@ -780,9 +787,8 @@ toRequestFunctions server effectTypes namespace method pathUrl operation =
                                                 )
                                     in
                                     [ Elm.fn
-                                        ( "config", Nothing )
+                                        ( "config", Just cmdParam )
                                         (\config -> Gen.Effect.Http.call_.request (cmdArg config))
-                                        |> Elm.withType cmdAnnotation
                                         |> Elm.declaration (functionName ++ "Effect")
                                         |> justIf ProgramTest
                                     , Elm.fn
@@ -1411,7 +1417,7 @@ toConfigParamAnnotation namespace options =
                 toMsgLamderaProgramTest =
                     Elm.Annotation.function
                         [ Gen.Result.annotation_.result
-                            Gen.Effect.Http.annotation_.error
+                            (Gen.OpenApi.Common.annotation_.error options.errorTypeAnnotation options.errorBodyAnnotation)
                             options.successAnnotation
                         ]
                         (Elm.Annotation.var "msg")

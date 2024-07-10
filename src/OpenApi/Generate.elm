@@ -144,6 +144,13 @@ files { namespace, generateTodos, effectTypes, server } apiSpec =
                                ]
                             ++ (if List.member ProgramTest effectTypes || List.member ProgramTestTask effectTypes then
                                     [ ( Common.Common
+                                      , expectJsonCustomEffect.declaration
+                                            |> Elm.exposeWith
+                                                { exposeConstructor = False
+                                                , group = Just "Http"
+                                                }
+                                      )
+                                    , ( Common.Common
                                       , jsonResolverCustomEffect.declaration
                                             |> Elm.exposeWith
                                                 { exposeConstructor = False
@@ -1737,14 +1744,14 @@ operationToTypesExpectAndResolver namespace functionName operation =
                 \toMsg ->
                     { core = Gen.OpenApi.Common.expectJsonCustom toMsg errorDecoders successDecoder
                     , elmPages = Gen.BackendTask.Http.expectJson successDecoder
-                    , lamderaProgramTest = Gen.Effect.Http.expectJson toMsg successDecoder
+                    , lamderaProgramTest = Gen.OpenApi.Common.expectJsonCustomEffect toMsg errorDecoders successDecoder
                     }
     in
     CliMonad.succeed responses
         |> CliMonad.stepOrFail
             ("Among the "
                 ++ String.fromInt (Dict.size responses)
-                ++ " possible responses, there was no successful one."
+             -- ++ " possible responses, there was no successful one."
             )
             getFirstSuccessResponse
         |> CliMonad.andThen
@@ -2224,6 +2231,84 @@ expectJsonCustom =
             in
             Gen.Http.expectStringResponse (\result -> Elm.apply toMsg [ result ]) toResult
                 |> Elm.withType (Gen.Http.annotation_.expect (Elm.Annotation.var "msg"))
+        )
+
+
+expectJsonCustomEffect :
+    { declaration : Elm.Declaration
+    , call : Elm.Expression -> Elm.Expression -> Elm.Expression -> Elm.Expression
+    , callFrom : List String -> Elm.Expression -> Elm.Expression -> Elm.Expression -> Elm.Expression
+    , value : List String -> Elm.Expression
+    }
+expectJsonCustomEffect =
+    Elm.Declare.fn3 "expectJsonCustomEffect"
+        ( "toMsg"
+        , Just
+            (Elm.Annotation.function
+                [ Gen.Result.annotation_.result
+                    (Elm.Annotation.namedWith [] "Error" [ Elm.Annotation.var "err", Elm.Annotation.string ])
+                    (Elm.Annotation.var "success")
+                ]
+                (Elm.Annotation.var "msg")
+            )
+        )
+        ( "errorDecoders"
+        , Just
+            (Gen.Dict.annotation_.dict
+                Gen.String.annotation_.string
+                (Gen.Json.Decode.annotation_.decoder (Elm.Annotation.var "err"))
+            )
+        )
+        ( "successDecoder"
+        , Just
+            (Gen.Json.Decode.annotation_.decoder (Elm.Annotation.var "success"))
+        )
+        (\toMsg errorDecoders successDecoder ->
+            let
+                toResult : Elm.Expression -> Elm.Expression
+                toResult response =
+                    Gen.Effect.Http.caseOf_.response response
+                        { badUrl_ = \url -> Gen.Result.make_.err (Elm.apply (Elm.val "BadUrl") [ url ])
+                        , timeout_ = Gen.Result.make_.err (Elm.val "Timeout")
+                        , networkError_ = Gen.Result.make_.err (Elm.val "NetworkError")
+                        , badStatus_ =
+                            \metadata body ->
+                                Gen.Maybe.caseOf_.maybe
+                                    (Gen.Dict.call_.get (Gen.String.call_.fromInt (Elm.get "statusCode" metadata)) errorDecoders)
+                                    { nothing =
+                                        Gen.Result.make_.err
+                                            (Elm.apply (Elm.val "UnknownBadStatus") [ metadata, body ])
+                                    , just =
+                                        \errorDecoder ->
+                                            Gen.Result.caseOf_.result
+                                                (Gen.Json.Decode.call_.decodeString errorDecoder body)
+                                                { ok =
+                                                    \x ->
+                                                        Gen.Result.make_.err
+                                                            (Elm.apply (Elm.val "KnownBadStatus") [ Elm.get "statusCode" metadata, x ])
+                                                , err =
+                                                    \_ ->
+                                                        Gen.Result.make_.err
+                                                            (Elm.apply (Elm.val "BadErrorBody") [ metadata, body ])
+                                                }
+                                    }
+                        , goodStatus_ =
+                            \metadata body ->
+                                Gen.Result.caseOf_.result
+                                    (Gen.Json.Decode.call_.decodeString successDecoder body)
+                                    { err =
+                                        \_ ->
+                                            Gen.Result.make_.err
+                                                (Elm.apply
+                                                    (Elm.val "BadBody")
+                                                    [ metadata, body ]
+                                                )
+                                    , ok = \a -> Gen.Result.make_.ok a
+                                    }
+                        }
+            in
+            Gen.Effect.Http.expectStringResponse (\result -> Elm.apply toMsg [ result ]) toResult
+                |> Elm.withType (Gen.Effect.Http.annotation_.expect (Elm.Annotation.var "msg"))
         )
 
 

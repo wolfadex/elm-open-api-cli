@@ -1,7 +1,7 @@
 module OpenApi.Common exposing
     ( Nullable(..)
     , decodeOptionalField, jsonDecodeAndMap
-    , Error(..), expectJsonCustom, jsonResolverCustom, jsonResolverCustomEffect
+    , Error(..), expectJsonCustom, expectJsonCustomEffect, jsonResolverCustom, jsonResolverCustomEffect
     )
 
 {-|
@@ -19,7 +19,7 @@ module OpenApi.Common exposing
 
 ## Http
 
-@docs Error, expectJsonCustom, jsonResolverCustom, jsonResolverCustomEffect
+@docs Error, expectJsonCustom, expectJsonCustomEffect, jsonResolverCustom, jsonResolverCustomEffect
 
 -}
 
@@ -124,6 +124,58 @@ jsonResolverCustom errorDecoders successDecoder =
 
                         Result.Err error ->
                             Result.Err (BadBody httpMetadata body)
+        )
+
+
+expectJsonCustomEffect :
+    (Result (Error err String) success -> msg)
+    -> Dict.Dict String (Json.Decode.Decoder err)
+    -> Json.Decode.Decoder success
+    -> Effect.Http.Expect msg
+expectJsonCustomEffect toMsg errorDecoders successDecoder =
+    Effect.Http.expectStringResponse
+        toMsg
+        (\expectStringResponseUnpack ->
+            case expectStringResponseUnpack of
+                Effect.Http.BadUrl_ stringString ->
+                    Result.Err (BadUrl stringString)
+
+                Effect.Http.Timeout_ ->
+                    Result.Err Timeout
+
+                Effect.Http.NetworkError_ ->
+                    Result.Err NetworkError
+
+                Effect.Http.BadStatus_ effectHttpMetadata body ->
+                    case
+                        Dict.get
+                            (String.fromInt effectHttpMetadata.statusCode)
+                            errorDecoders
+                    of
+                        Maybe.Just a ->
+                            case Json.Decode.decodeString a body of
+                                Result.Ok value ->
+                                    Result.Err
+                                        (KnownBadStatus
+                                            effectHttpMetadata.statusCode
+                                            value
+                                        )
+
+                                Result.Err error ->
+                                    Result.Err
+                                        (BadErrorBody effectHttpMetadata body)
+
+                        Maybe.Nothing ->
+                            Result.Err
+                                (UnknownBadStatus effectHttpMetadata body)
+
+                Effect.Http.GoodStatus_ effectHttpMetadata body ->
+                    case Json.Decode.decodeString successDecoder body of
+                        Result.Ok value ->
+                            Result.Ok value
+
+                        Result.Err error ->
+                            Result.Err (BadBody effectHttpMetadata body)
         )
 
 

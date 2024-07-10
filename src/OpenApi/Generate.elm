@@ -1742,7 +1742,7 @@ operationToTypesExpectAndResolver namespace functionName operation =
                                             String.Extra.toSentenceCase functionName ++ "_Error"
                                     in
                                     ( if Dict.isEmpty dict then
-                                        Elm.alias errorName Elm.Annotation.unit
+                                        Elm.alias errorName Gen.Basics.annotation_.never
                                             |> Elm.exposeWith
                                                 { exposeConstructor = True
                                                 , group = Just "Errors"

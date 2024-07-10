@@ -153,6 +153,12 @@ effectTypeValidation effectType =
         "backendtask" ->
             Ok OpenApi.Generate.BackendTask
 
+        "programtest" ->
+            Ok OpenApi.Generate.ProgramTest
+
+        "programtesttask" ->
+            Ok OpenApi.Generate.ProgramTestTask
+
         _ ->
             Err <| "Unexpected effect type: " ++ effectType
 

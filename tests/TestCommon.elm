@@ -16,6 +16,7 @@ suite =
         , toValueNameTest "$___" "empty__"
         , toValueNameTest "X-API-KEY" "x_API_KEY"
         , toValueNameTest "PASVersion" "pasVersion"
+        , toValueNameTest "MACOS" "macos"
         ]
 
 

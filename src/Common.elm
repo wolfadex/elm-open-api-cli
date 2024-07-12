@@ -141,7 +141,7 @@ toValueName name =
                     removeInitialUppercaseWord first next acc =
                         case next of
                             [] ->
-                                String.fromList (List.reverse acc)
+                                String.toLower deSymbolified
 
                             second :: rest ->
                                 if Char.isUpper second then

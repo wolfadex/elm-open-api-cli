@@ -23,7 +23,6 @@ import Gen.Basics
 import Gen.Bytes
 import Gen.Debug
 import Gen.Dict
-import Gen.Effect.Command
 import Gen.Effect.Http
 import Gen.Effect.Task
 import Gen.FatalError
@@ -897,6 +896,19 @@ operationToGroup operation =
 replacedUrl : Server -> AuthorizationInfo -> List String -> String -> OpenApi.Operation.Operation -> CliMonad (Elm.Expression -> Elm.Expression)
 replacedUrl server authinfo namespace pathUrl operation =
     let
+        pathSegments : List String
+        pathSegments =
+            pathUrl
+                |> String.split "/"
+                |> List.filterMap
+                    (\segment ->
+                        if String.isEmpty segment then
+                            Nothing
+
+                        else
+                            Just segment
+                    )
+
         params : List (OpenApi.Reference.ReferenceOr OpenApi.Parameter.Parameter)
         params =
             OpenApi.Operation.parameters operation
@@ -908,70 +920,83 @@ replacedUrl server authinfo namespace pathUrl operation =
                 |> CliMonad.map
                     (\servers config ->
                         let
-                            appendPath : Result String Elm.Expression -> Elm.Expression
-                            appendPath resolvedServer =
-                                (case resolvedServer of
-                                    Err "" ->
-                                        Gen.Url.Builder.call_.absolute
+                            authArgs : List Elm.Expression
+                            authArgs =
+                                authinfo.query config
+                                    |> List.map
+                                        (\( k, v ) ->
+                                            Gen.Url.Builder.call_.string k v
+                                        )
 
-                                    Err s ->
-                                        Gen.Url.Builder.call_.crossOrigin (Elm.string s)
+                            resolvedServer : Result String Elm.Expression
+                            resolvedServer =
+                                case server of
+                                    Single cliServer ->
+                                        Err cliServer
 
-                                    Ok s ->
-                                        Gen.Url.Builder.call_.crossOrigin s
-                                )
-                                    (pathUrl
-                                        |> String.split "/"
-                                        |> List.filterMap
+                                    Default ->
+                                        case servers of
+                                            [] ->
+                                                Err ""
+
+                                            firstServer :: _ ->
+                                                -- TODO: possibly switch to config.server and generate the server list file?
+                                                Err (OpenApi.Server.url firstServer)
+
+                                    Multiple _ ->
+                                        Ok (Elm.get "server" config)
+                        in
+                        if List.isEmpty pathSegments && List.isEmpty queryParams && List.isEmpty authArgs then
+                            case resolvedServer of
+                                Err "" ->
+                                    Elm.string "/"
+
+                                Err s ->
+                                    Elm.string s
+
+                                Ok s ->
+                                    s
+
+                        else
+                            let
+                                replacedSegments : List Elm.Expression
+                                replacedSegments =
+                                    pathSegments
+                                        |> List.map
                                             (\segment ->
-                                                if String.isEmpty segment then
-                                                    Nothing
+                                                case List.Extra.find (\( pattern, _ ) -> pattern == segment) replacements of
+                                                    Nothing ->
+                                                        Elm.string segment
 
-                                                else
-                                                    Just <|
-                                                        case List.Extra.find (\( pattern, _ ) -> pattern == segment) replacements of
-                                                            Nothing ->
-                                                                Elm.string segment
-
-                                                            Just ( _, repl ) ->
-                                                                repl config
+                                                    Just ( _, repl ) ->
+                                                        repl config
                                             )
-                                        |> Elm.list
-                                    )
-                                    (let
-                                        authArgs : List Elm.Expression
-                                        authArgs =
-                                            authinfo.query config
-                                                |> List.map
-                                                    (\( k, v ) ->
-                                                        Gen.Url.Builder.call_.string k v
-                                                    )
-                                     in
-                                     if List.isEmpty queryParams then
+
+                                replacedQueryParams : List Elm.Expression
+                                replacedQueryParams =
+                                    List.map (\arg -> arg config) queryParams
+
+                                allQueryParams : Elm.Expression
+                                allQueryParams =
+                                    if List.isEmpty replacedQueryParams then
                                         authArgs
                                             |> Elm.list
 
-                                     else
-                                        (List.map (\arg -> arg config) queryParams
+                                    else
+                                        (replacedQueryParams
                                             ++ List.map (\arg -> Gen.Maybe.make_.just arg) authArgs
                                         )
                                             |> Gen.List.filterMap Gen.Basics.identity
-                                    )
-                        in
-                        case server of
-                            Single cliServer ->
-                                appendPath (Err cliServer)
+                            in
+                            case resolvedServer of
+                                Err "" ->
+                                    Gen.Url.Builder.call_.absolute (Elm.list replacedSegments) allQueryParams
 
-                            Default ->
-                                case servers of
-                                    [] ->
-                                        appendPath (Err "")
+                                Err s ->
+                                    Gen.Url.Builder.call_.crossOrigin (Elm.string s) (Elm.list replacedSegments) allQueryParams
 
-                                    firstServer :: _ ->
-                                        appendPath (Err (OpenApi.Server.url firstServer))
-
-                            Multiple _ ->
-                                appendPath (Ok (Elm.get "server" config))
+                                Ok s ->
+                                    Gen.Url.Builder.call_.crossOrigin s (Elm.list replacedSegments) allQueryParams
                     )
     in
     params

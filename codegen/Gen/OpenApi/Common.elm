@@ -1,7 +1,7 @@
-module Gen.OpenApi.Common exposing (annotation_, call_, caseOf_, decodeOptionalField, expectJsonCustom, jsonDecodeAndMap, jsonResolverCustom, make_, moduleName_, values_)
+module Gen.OpenApi.Common exposing (annotation_, call_, caseOf_, decodeOptionalField, expectJsonCustom, expectJsonCustomEffect, jsonDecodeAndMap, jsonResolverCustom, jsonResolverCustomEffect, make_, moduleName_, values_)
 
 {-| 
-@docs moduleName_, jsonDecodeAndMap, decodeOptionalField, jsonResolverCustom, expectJsonCustom, annotation_, make_, caseOf_, call_, values_
+@docs moduleName_, jsonDecodeAndMap, decodeOptionalField, jsonResolverCustomEffect, expectJsonCustomEffect, jsonResolverCustom, expectJsonCustom, annotation_, make_, caseOf_, call_, values_
 -}
 
 
@@ -56,7 +56,7 @@ jsonDecodeAndMap jsonDecodeAndMapArg jsonDecodeAndMapArg0 =
         [ jsonDecodeAndMapArg, jsonDecodeAndMapArg0 ]
 
 
-{-| {-| {-| Decode an optional field
+{-| {-| Decode an optional field
 
     decodeString (decodeOptionalField "x" int) "{ "x": 3 }"
     --> Ok (Just 3)
@@ -66,8 +66,6 @@ jsonDecodeAndMap jsonDecodeAndMapArg jsonDecodeAndMapArg0 =
 
     decodeString (decodeOptionalField "x" int) "{ "y": 4 }"
     --> Ok Nothing
-
--}
 
 -}
 
@@ -97,6 +95,112 @@ decodeOptionalField decodeOptionalFieldArg decodeOptionalFieldArg0 =
              }
         )
         [ Elm.string decodeOptionalFieldArg, decodeOptionalFieldArg0 ]
+
+
+{-| jsonResolverCustomEffect: 
+    Dict.Dict String (Json.Decode.Decoder err)
+    -> Json.Decode.Decoder success
+    -> Effect.Http.Resolver restrictions (OpenApi.Common.Error err String) success
+-}
+jsonResolverCustomEffect : Elm.Expression -> Elm.Expression -> Elm.Expression
+jsonResolverCustomEffect jsonResolverCustomEffectArg jsonResolverCustomEffectArg0 =
+    Elm.apply
+        (Elm.value
+             { importFrom = [ "OpenApi", "Common" ]
+             , name = "jsonResolverCustomEffect"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.namedWith
+                              [ "Dict" ]
+                              "Dict"
+                              [ Type.string
+                              , Type.namedWith
+                                    [ "Json", "Decode" ]
+                                    "Decoder"
+                                    [ Type.var "err" ]
+                              ]
+                          , Type.namedWith
+                              [ "Json", "Decode" ]
+                              "Decoder"
+                              [ Type.var "success" ]
+                          ]
+                          (Type.namedWith
+                               [ "Effect", "Http" ]
+                               "Resolver"
+                               [ Type.var "restrictions"
+                               , Type.namedWith
+                                   [ "OpenApi", "Common" ]
+                                   "Error"
+                                   [ Type.var "err", Type.string ]
+                               , Type.var "success"
+                               ]
+                          )
+                     )
+             }
+        )
+        [ jsonResolverCustomEffectArg, jsonResolverCustomEffectArg0 ]
+
+
+{-| expectJsonCustomEffect: 
+    (Result.Result (OpenApi.Common.Error err String) success -> msg)
+    -> Dict.Dict String (Json.Decode.Decoder err)
+    -> Json.Decode.Decoder success
+    -> Effect.Http.Expect msg
+-}
+expectJsonCustomEffect :
+    (Elm.Expression -> Elm.Expression)
+    -> Elm.Expression
+    -> Elm.Expression
+    -> Elm.Expression
+expectJsonCustomEffect expectJsonCustomEffectArg expectJsonCustomEffectArg0 expectJsonCustomEffectArg1 =
+    Elm.apply
+        (Elm.value
+             { importFrom = [ "OpenApi", "Common" ]
+             , name = "expectJsonCustomEffect"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.function
+                              [ Type.namedWith
+                                    [ "Result" ]
+                                    "Result"
+                                    [ Type.namedWith
+                                        [ "OpenApi", "Common" ]
+                                        "Error"
+                                        [ Type.var "err", Type.string ]
+                                    , Type.var "success"
+                                    ]
+                              ]
+                              (Type.var "msg")
+                          , Type.namedWith
+                              [ "Dict" ]
+                              "Dict"
+                              [ Type.string
+                              , Type.namedWith
+                                    [ "Json", "Decode" ]
+                                    "Decoder"
+                                    [ Type.var "err" ]
+                              ]
+                          , Type.namedWith
+                              [ "Json", "Decode" ]
+                              "Decoder"
+                              [ Type.var "success" ]
+                          ]
+                          (Type.namedWith
+                               [ "Effect", "Http" ]
+                               "Expect"
+                               [ Type.var "msg" ]
+                          )
+                     )
+             }
+        )
+        [ Elm.functionReduced
+            "expectJsonCustomEffectUnpack"
+            expectJsonCustomEffectArg
+        , expectJsonCustomEffectArg0
+        , expectJsonCustomEffectArg1
+        ]
 
 
 {-| jsonResolverCustom: 
@@ -435,6 +539,10 @@ caseOf_ =
 call_ :
     { jsonDecodeAndMap : Elm.Expression -> Elm.Expression -> Elm.Expression
     , decodeOptionalField : Elm.Expression -> Elm.Expression -> Elm.Expression
+    , jsonResolverCustomEffect :
+        Elm.Expression -> Elm.Expression -> Elm.Expression
+    , expectJsonCustomEffect :
+        Elm.Expression -> Elm.Expression -> Elm.Expression -> Elm.Expression
     , jsonResolverCustom : Elm.Expression -> Elm.Expression -> Elm.Expression
     , expectJsonCustom :
         Elm.Expression -> Elm.Expression -> Elm.Expression -> Elm.Expression
@@ -494,6 +602,91 @@ call_ =
                      }
                 )
                 [ decodeOptionalFieldArg, decodeOptionalFieldArg0 ]
+    , jsonResolverCustomEffect =
+        \jsonResolverCustomEffectArg jsonResolverCustomEffectArg0 ->
+            Elm.apply
+                (Elm.value
+                     { importFrom = [ "OpenApi", "Common" ]
+                     , name = "jsonResolverCustomEffect"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.namedWith
+                                      [ "Dict" ]
+                                      "Dict"
+                                      [ Type.string
+                                      , Type.namedWith
+                                            [ "Json", "Decode" ]
+                                            "Decoder"
+                                            [ Type.var "err" ]
+                                      ]
+                                  , Type.namedWith
+                                      [ "Json", "Decode" ]
+                                      "Decoder"
+                                      [ Type.var "success" ]
+                                  ]
+                                  (Type.namedWith
+                                       [ "Effect", "Http" ]
+                                       "Resolver"
+                                       [ Type.var "restrictions"
+                                       , Type.namedWith
+                                           [ "OpenApi", "Common" ]
+                                           "Error"
+                                           [ Type.var "err", Type.string ]
+                                       , Type.var "success"
+                                       ]
+                                  )
+                             )
+                     }
+                )
+                [ jsonResolverCustomEffectArg, jsonResolverCustomEffectArg0 ]
+    , expectJsonCustomEffect =
+        \expectJsonCustomEffectArg expectJsonCustomEffectArg0 expectJsonCustomEffectArg1 ->
+            Elm.apply
+                (Elm.value
+                     { importFrom = [ "OpenApi", "Common" ]
+                     , name = "expectJsonCustomEffect"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.function
+                                      [ Type.namedWith
+                                            [ "Result" ]
+                                            "Result"
+                                            [ Type.namedWith
+                                                [ "OpenApi", "Common" ]
+                                                "Error"
+                                                [ Type.var "err", Type.string ]
+                                            , Type.var "success"
+                                            ]
+                                      ]
+                                      (Type.var "msg")
+                                  , Type.namedWith
+                                      [ "Dict" ]
+                                      "Dict"
+                                      [ Type.string
+                                      , Type.namedWith
+                                            [ "Json", "Decode" ]
+                                            "Decoder"
+                                            [ Type.var "err" ]
+                                      ]
+                                  , Type.namedWith
+                                      [ "Json", "Decode" ]
+                                      "Decoder"
+                                      [ Type.var "success" ]
+                                  ]
+                                  (Type.namedWith
+                                       [ "Effect", "Http" ]
+                                       "Expect"
+                                       [ Type.var "msg" ]
+                                  )
+                             )
+                     }
+                )
+                [ expectJsonCustomEffectArg
+                , expectJsonCustomEffectArg0
+                , expectJsonCustomEffectArg1
+                ]
     , jsonResolverCustom =
         \jsonResolverCustomArg jsonResolverCustomArg0 ->
             Elm.apply
@@ -584,6 +777,8 @@ call_ =
 values_ :
     { jsonDecodeAndMap : Elm.Expression
     , decodeOptionalField : Elm.Expression
+    , jsonResolverCustomEffect : Elm.Expression
+    , expectJsonCustomEffect : Elm.Expression
     , jsonResolverCustom : Elm.Expression
     , expectJsonCustom : Elm.Expression
     }
@@ -629,6 +824,80 @@ values_ =
                               [ "Json", "Decode" ]
                               "Decoder"
                               [ Type.maybe (Type.var "t") ]
+                         )
+                    )
+            }
+    , jsonResolverCustomEffect =
+        Elm.value
+            { importFrom = [ "OpenApi", "Common" ]
+            , name = "jsonResolverCustomEffect"
+            , annotation =
+                Just
+                    (Type.function
+                         [ Type.namedWith
+                             [ "Dict" ]
+                             "Dict"
+                             [ Type.string
+                             , Type.namedWith
+                                   [ "Json", "Decode" ]
+                                   "Decoder"
+                                   [ Type.var "err" ]
+                             ]
+                         , Type.namedWith
+                             [ "Json", "Decode" ]
+                             "Decoder"
+                             [ Type.var "success" ]
+                         ]
+                         (Type.namedWith
+                              [ "Effect", "Http" ]
+                              "Resolver"
+                              [ Type.var "restrictions"
+                              , Type.namedWith
+                                  [ "OpenApi", "Common" ]
+                                  "Error"
+                                  [ Type.var "err", Type.string ]
+                              , Type.var "success"
+                              ]
+                         )
+                    )
+            }
+    , expectJsonCustomEffect =
+        Elm.value
+            { importFrom = [ "OpenApi", "Common" ]
+            , name = "expectJsonCustomEffect"
+            , annotation =
+                Just
+                    (Type.function
+                         [ Type.function
+                             [ Type.namedWith
+                                   [ "Result" ]
+                                   "Result"
+                                   [ Type.namedWith
+                                       [ "OpenApi", "Common" ]
+                                       "Error"
+                                       [ Type.var "err", Type.string ]
+                                   , Type.var "success"
+                                   ]
+                             ]
+                             (Type.var "msg")
+                         , Type.namedWith
+                             [ "Dict" ]
+                             "Dict"
+                             [ Type.string
+                             , Type.namedWith
+                                   [ "Json", "Decode" ]
+                                   "Decoder"
+                                   [ Type.var "err" ]
+                             ]
+                         , Type.namedWith
+                             [ "Json", "Decode" ]
+                             "Decoder"
+                             [ Type.var "success" ]
+                         ]
+                         (Type.namedWith
+                              [ "Effect", "Http" ]
+                              "Expect"
+                              [ Type.var "msg" ]
                          )
                     )
             }

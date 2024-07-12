@@ -57,4 +57,4 @@ config =
     , Simplify.rule Simplify.defaults
     , Review.ImportSimple.rule
     ]
-        |> List.map (Rule.ignoreErrorsForDirectories [ "codegen" ])
+        |> List.map (Rule.ignoreErrorsForDirectories [ "codegen", "src/Gen" ])

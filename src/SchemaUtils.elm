@@ -879,7 +879,7 @@ decodeOptionalField =
 
 decodeOptionalFieldDocumentation : String
 decodeOptionalFieldDocumentation =
-    """{-| Decode an optional field
+    """Decode an optional field
 
     decodeString (decodeOptionalField "x" int) "{ "x": 3 }"
     --> Ok (Just 3)
@@ -888,6 +888,4 @@ decodeOptionalFieldDocumentation =
     --> Err ...
 
     decodeString (decodeOptionalField "x" int) "{ "y": 4 }"
-    --> Ok Nothing
-
--}"""
+    --> Ok Nothing"""

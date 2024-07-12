@@ -148,9 +148,9 @@ toValueName name =
                                     removeInitialUppercaseWord second rest (Char.toLower first :: acc)
 
                                 else
-                                    String.fromList (List.reverse acc ++ Char.toLower first :: next)
+                                    String.fromList (List.reverse acc ++ first :: next)
                 in
-                removeInitialUppercaseWord head tail []
+                removeInitialUppercaseWord (Char.toLower head) tail []
 
             else
                 deSymbolified

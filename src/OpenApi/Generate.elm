@@ -1028,7 +1028,9 @@ replacedUrl server authinfo namespace pathUrl operation =
                                             ( Just
                                                 ( "{" ++ paramName ++ "}"
                                                 , \config ->
-                                                    Elm.get (Common.toValueName paramName) (Elm.get "params" config)
+                                                    config
+                                                        |> Elm.get "params"
+                                                        |> Elm.get (Common.toValueName paramName)
                                                         |> inputToString
                                                 )
                                             , []
@@ -1137,7 +1139,7 @@ operationToAuthorizationInfo operation =
                                                         let
                                                             cleanName : String
                                                             cleanName =
-                                                                Common.toValueName (String.replace "-" "_" <| String.toLower apiKey.name)
+                                                                Common.toValueName (String.toLower apiKey.name)
                                                         in
                                                         case apiKey.in_ of
                                                             OpenApi.SecurityScheme.Header ->
@@ -1468,7 +1470,9 @@ queryParameterToUrlBuilderArgument qualify namespace param =
 
                                 value : Elm.Expression
                                 value =
-                                    Elm.get (Common.toValueName paramName) (Elm.get "params" config)
+                                    config
+                                        |> Elm.get "params"
+                                        |> Elm.get (Common.toValueName paramName)
                                         |> inputToString
 
                                 build : Elm.Expression -> Elm.Expression

@@ -17,6 +17,8 @@ suite =
         , toValueNameTest "X-API-KEY" "x_API_KEY"
         , toValueNameTest "PASVersion" "pasVersion"
         , toValueNameTest "MACOS" "macos"
+        , toValueNameTest "SHA256" "sha256"
+        , toValueNameTest "SHA256-DSA" "sha256_DSA"
         ]
 
 

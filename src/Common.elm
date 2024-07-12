@@ -148,8 +148,11 @@ initialUppercaseWordToLowercase input =
                                 if Char.isUpper second then
                                     go second rest (Char.toLower first :: acc)
 
-                                else
+                                else if Char.isLower second then
                                     String.fromList (List.reverse acc ++ first :: next)
+
+                                else
+                                    String.fromList (List.reverse acc ++ Char.toLower first :: next)
                 in
                 go (Char.toLower head) tail []
 

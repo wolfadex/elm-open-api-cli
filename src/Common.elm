@@ -14,6 +14,7 @@ module Common exposing
     )
 
 import FastDict
+import List.Extra
 import String.Extra
 
 
@@ -129,13 +130,27 @@ toValueName name =
         deSymbolified =
             deSymbolify name
     in
-    case String.split "_" deSymbolified of
+    case String.toList deSymbolified of
         [] ->
             ""
 
         head :: tail ->
-            if head == String.toUpper head then
-                String.join "_" (String.toLower head :: tail)
+            if Char.isUpper head then
+                let
+                    removeInitialUppercaseWord : Char -> List Char -> List Char -> String
+                    removeInitialUppercaseWord first next acc =
+                        case next of
+                            [] ->
+                                String.fromList (List.reverse acc)
+
+                            second :: rest ->
+                                if Char.isUpper second then
+                                    removeInitialUppercaseWord second rest (Char.toLower first :: acc)
+
+                                else
+                                    String.fromList (List.reverse acc ++ Char.toLower first :: next)
+                in
+                removeInitialUppercaseWord head tail []
 
             else
                 deSymbolified

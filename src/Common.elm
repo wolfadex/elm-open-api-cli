@@ -88,36 +88,57 @@ deSymbolify str =
     if str == "$" then
         "dollar__"
 
+    else if String.startsWith "-" str || String.startsWith "+" str then
+        -- These were first identified in the GitHub OAS, for the names of emojis
+        deSymbolify
+            (str
+                |> String.replace "-" "Minus"
+                |> String.replace "+" "Plus"
+            )
+
+    else if String.startsWith "$" str then
+        -- This was first identified in the BIMcloud OAS, the fields of `Resource` were prefixed with `$`
+        deSymbolify (String.dropLeft 1 str)
+
     else
+        let
+            removeLeadingUnderscores : String -> String
+            removeLeadingUnderscores acc =
+                if String.isEmpty acc then
+                    "empty__"
+
+                else if String.startsWith "_" acc then
+                    removeLeadingUnderscores (String.dropLeft 1 acc)
+
+                else
+                    acc
+        in
         str
-            -- These were first identified in the GitHub OAS, for the names of emojis
-            |> String.replace "+" "Plus"
-            |> String.replace "-" "Minus"
-            -- This was first identified in the BIMcloud OAS, the fields of `Resource` were prefixed with `$`
-            |> String.replace "$" ""
+            |> String.replace "-" "_"
+            |> String.replace "+" "_"
+            |> String.replace "$" "_"
+            |> removeLeadingUnderscores
 
 
 {-| Convert into a name suitable to be used in Elm as a variable.
 -}
 toValueName : String -> String
 toValueName name =
-    name
-        |> deSymbolify
-        |> String.uncons
-        |> Maybe.map
-            (\( first, rest ) ->
-                let
-                    replaced : String
-                    replaced =
-                        String.replace "-" "_" rest
-                in
-                if first == '_' then
-                    replaced
+    let
+        deSymbolified : String
+        deSymbolified =
+            deSymbolify name
+    in
+    case String.split "_" deSymbolified of
+        [] ->
+            ""
 
-                else
-                    String.cons (Char.toLower first) replaced
-            )
-        |> Maybe.withDefault ""
+        head :: tail ->
+            if head == String.toUpper head then
+                String.join "_" (String.toLower head :: tail)
+
+            else
+                deSymbolified
 
 
 type Type

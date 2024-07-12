@@ -1,15 +1,17 @@
-module Gen.Effect.Task exposing (andThen, annotation_, attempt, call_, fail, map, map2, map3, map4, map5, mapError, moduleName_, onError, perform, sequence, succeed, values_)
+module Gen.Effect.Task exposing (moduleName_, onError, sequence, mapError, map5, map4, map3, map2, map, fail, succeed, andThen, attempt, perform, annotation_, call_, values_)
 
-{-| 
+{-|
+
 @docs moduleName_, onError, sequence, mapError, map5, map4, map3, map2, map, fail, succeed, andThen, attempt, perform, annotation_, call_, values_
--}
 
+-}
 
 import Elm
 import Elm.Annotation as Type
 
 
-{-| The name of this module. -}
+{-| The name of this module.
+-}
 moduleName_ : List String
 moduleName_ =
     [ "Effect", "Task" ]
@@ -28,48 +30,49 @@ callback to recover.
 
 -}
 
-onError: 
-    (x -> Effect.Internal.Task restriction y a)
-    -> Effect.Internal.Task restriction x a
-    -> Effect.Internal.Task restriction y a
+onError:
+(x -> Effect.Internal.Task restriction y a)
+-> Effect.Internal.Task restriction x a
+-> Effect.Internal.Task restriction y a
+
 -}
 onError : (Elm.Expression -> Elm.Expression) -> Elm.Expression -> Elm.Expression
 onError onErrorArg onErrorArg0 =
     Elm.apply
         (Elm.value
-             { importFrom = [ "Effect", "Task" ]
-             , name = "onError"
-             , annotation =
-                 Just
-                     (Type.function
-                          [ Type.function
-                              [ Type.var "x" ]
-                              (Type.namedWith
-                                 [ "Effect", "Internal" ]
-                                 "Task"
-                                 [ Type.var "restriction"
-                                 , Type.var "y"
-                                 , Type.var "a"
-                                 ]
-                              )
-                          , Type.namedWith
-                              [ "Effect", "Internal" ]
-                              "Task"
-                              [ Type.var "restriction"
-                              , Type.var "x"
-                              , Type.var "a"
-                              ]
-                          ]
-                          (Type.namedWith
-                               [ "Effect", "Internal" ]
-                               "Task"
-                               [ Type.var "restriction"
-                               , Type.var "y"
-                               , Type.var "a"
-                               ]
-                          )
-                     )
-             }
+            { importFrom = [ "Effect", "Task" ]
+            , name = "onError"
+            , annotation =
+                Just
+                    (Type.function
+                        [ Type.function
+                            [ Type.var "x" ]
+                            (Type.namedWith
+                                [ "Effect", "Internal" ]
+                                "Task"
+                                [ Type.var "restriction"
+                                , Type.var "y"
+                                , Type.var "a"
+                                ]
+                            )
+                        , Type.namedWith
+                            [ "Effect", "Internal" ]
+                            "Task"
+                            [ Type.var "restriction"
+                            , Type.var "x"
+                            , Type.var "a"
+                            ]
+                        ]
+                        (Type.namedWith
+                            [ "Effect", "Internal" ]
+                            "Task"
+                            [ Type.var "restriction"
+                            , Type.var "y"
+                            , Type.var "a"
+                            ]
+                        )
+                    )
+            }
         )
         [ Elm.functionReduced "onErrorUnpack" onErrorArg, onErrorArg0 ]
 
@@ -82,39 +85,40 @@ sequence fails.
 
 -}
 
-sequence: 
-    List (Effect.Internal.Task restriction x a)
-    -> Effect.Internal.Task restriction x (List a)
+sequence:
+List (Effect.Internal.Task restriction x a)
+-> Effect.Internal.Task restriction x (List a)
+
 -}
 sequence : List Elm.Expression -> Elm.Expression
 sequence sequenceArg =
     Elm.apply
         (Elm.value
-             { importFrom = [ "Effect", "Task" ]
-             , name = "sequence"
-             , annotation =
-                 Just
-                     (Type.function
-                          [ Type.list
-                              (Type.namedWith
-                                 [ "Effect", "Internal" ]
-                                 "Task"
-                                 [ Type.var "restriction"
-                                 , Type.var "x"
-                                 , Type.var "a"
-                                 ]
-                              )
-                          ]
-                          (Type.namedWith
-                               [ "Effect", "Internal" ]
-                               "Task"
-                               [ Type.var "restriction"
-                               , Type.var "x"
-                               , Type.list (Type.var "a")
-                               ]
-                          )
-                     )
-             }
+            { importFrom = [ "Effect", "Task" ]
+            , name = "sequence"
+            , annotation =
+                Just
+                    (Type.function
+                        [ Type.list
+                            (Type.namedWith
+                                [ "Effect", "Internal" ]
+                                "Task"
+                                [ Type.var "restriction"
+                                , Type.var "x"
+                                , Type.var "a"
+                                ]
+                            )
+                        ]
+                        (Type.namedWith
+                            [ "Effect", "Internal" ]
+                            "Task"
+                            [ Type.var "restriction"
+                            , Type.var "x"
+                            , Type.list (Type.var "a")
+                            ]
+                        )
+                    )
+            }
         )
         [ Elm.list sequenceArg ]
 
@@ -135,62 +139,64 @@ types to match up.
 
 -}
 
-mapError: 
-    (x -> y)
-    -> Effect.Internal.Task restriction x a
-    -> Effect.Internal.Task restriction y a
+mapError:
+(x -> y)
+-> Effect.Internal.Task restriction x a
+-> Effect.Internal.Task restriction y a
+
 -}
-mapError :
-    (Elm.Expression -> Elm.Expression) -> Elm.Expression -> Elm.Expression
+mapError : (Elm.Expression -> Elm.Expression) -> Elm.Expression -> Elm.Expression
 mapError mapErrorArg mapErrorArg0 =
     Elm.apply
         (Elm.value
-             { importFrom = [ "Effect", "Task" ]
-             , name = "mapError"
-             , annotation =
-                 Just
-                     (Type.function
-                          [ Type.function [ Type.var "x" ] (Type.var "y")
-                          , Type.namedWith
-                              [ "Effect", "Internal" ]
-                              "Task"
-                              [ Type.var "restriction"
-                              , Type.var "x"
-                              , Type.var "a"
-                              ]
-                          ]
-                          (Type.namedWith
-                               [ "Effect", "Internal" ]
-                               "Task"
-                               [ Type.var "restriction"
-                               , Type.var "y"
-                               , Type.var "a"
-                               ]
-                          )
-                     )
-             }
+            { importFrom = [ "Effect", "Task" ]
+            , name = "mapError"
+            , annotation =
+                Just
+                    (Type.function
+                        [ Type.function [ Type.var "x" ] (Type.var "y")
+                        , Type.namedWith
+                            [ "Effect", "Internal" ]
+                            "Task"
+                            [ Type.var "restriction"
+                            , Type.var "x"
+                            , Type.var "a"
+                            ]
+                        ]
+                        (Type.namedWith
+                            [ "Effect", "Internal" ]
+                            "Task"
+                            [ Type.var "restriction"
+                            , Type.var "y"
+                            , Type.var "a"
+                            ]
+                        )
+                    )
+            }
         )
         [ Elm.functionReduced "mapErrorUnpack" mapErrorArg, mapErrorArg0 ]
 
 
 {-| {-| -}
 
-map5: 
-    (a -> b -> c -> d -> e -> result)
-    -> Effect.Internal.Task restriction x a
-    -> Effect.Internal.Task restriction x b
-    -> Effect.Internal.Task restriction x c
-    -> Effect.Internal.Task restriction x d
-    -> Effect.Internal.Task restriction x e
-    -> Effect.Internal.Task restriction x result
+map5:
+(a -> b -> c -> d -> e -> result)
+-> Effect.Internal.Task restriction x a
+-> Effect.Internal.Task restriction x b
+-> Effect.Internal.Task restriction x c
+-> Effect.Internal.Task restriction x d
+-> Effect.Internal.Task restriction x e
+-> Effect.Internal.Task restriction x result
+
 -}
 map5 :
     (Elm.Expression
-    -> Elm.Expression
-    -> Elm.Expression
-    -> Elm.Expression
-    -> Elm.Expression
-    -> Elm.Expression)
+     -> Elm.Expression
+     -> Elm.Expression
+     -> Elm.Expression
+     -> Elm.Expression
+     -> Elm.Expression
+    )
     -> Elm.Expression
     -> Elm.Expression
     -> Elm.Expression
@@ -200,90 +206,88 @@ map5 :
 map5 map5Arg map5Arg0 map5Arg1 map5Arg2 map5Arg3 map5Arg4 =
     Elm.apply
         (Elm.value
-             { importFrom = [ "Effect", "Task" ]
-             , name = "map5"
-             , annotation =
-                 Just
-                     (Type.function
-                          [ Type.function
-                              [ Type.var "a"
-                              , Type.var "b"
-                              , Type.var "c"
-                              , Type.var "d"
-                              , Type.var "e"
-                              ]
-                              (Type.var "result")
-                          , Type.namedWith
-                              [ "Effect", "Internal" ]
-                              "Task"
-                              [ Type.var "restriction"
-                              , Type.var "x"
-                              , Type.var "a"
-                              ]
-                          , Type.namedWith
-                              [ "Effect", "Internal" ]
-                              "Task"
-                              [ Type.var "restriction"
-                              , Type.var "x"
-                              , Type.var "b"
-                              ]
-                          , Type.namedWith
-                              [ "Effect", "Internal" ]
-                              "Task"
-                              [ Type.var "restriction"
-                              , Type.var "x"
-                              , Type.var "c"
-                              ]
-                          , Type.namedWith
-                              [ "Effect", "Internal" ]
-                              "Task"
-                              [ Type.var "restriction"
-                              , Type.var "x"
-                              , Type.var "d"
-                              ]
-                          , Type.namedWith
-                              [ "Effect", "Internal" ]
-                              "Task"
-                              [ Type.var "restriction"
-                              , Type.var "x"
-                              , Type.var "e"
-                              ]
-                          ]
-                          (Type.namedWith
-                               [ "Effect", "Internal" ]
-                               "Task"
-                               [ Type.var "restriction"
-                               , Type.var "x"
-                               , Type.var "result"
-                               ]
-                          )
-                     )
-             }
+            { importFrom = [ "Effect", "Task" ]
+            , name = "map5"
+            , annotation =
+                Just
+                    (Type.function
+                        [ Type.function
+                            [ Type.var "a"
+                            , Type.var "b"
+                            , Type.var "c"
+                            , Type.var "d"
+                            , Type.var "e"
+                            ]
+                            (Type.var "result")
+                        , Type.namedWith
+                            [ "Effect", "Internal" ]
+                            "Task"
+                            [ Type.var "restriction"
+                            , Type.var "x"
+                            , Type.var "a"
+                            ]
+                        , Type.namedWith
+                            [ "Effect", "Internal" ]
+                            "Task"
+                            [ Type.var "restriction"
+                            , Type.var "x"
+                            , Type.var "b"
+                            ]
+                        , Type.namedWith
+                            [ "Effect", "Internal" ]
+                            "Task"
+                            [ Type.var "restriction"
+                            , Type.var "x"
+                            , Type.var "c"
+                            ]
+                        , Type.namedWith
+                            [ "Effect", "Internal" ]
+                            "Task"
+                            [ Type.var "restriction"
+                            , Type.var "x"
+                            , Type.var "d"
+                            ]
+                        , Type.namedWith
+                            [ "Effect", "Internal" ]
+                            "Task"
+                            [ Type.var "restriction"
+                            , Type.var "x"
+                            , Type.var "e"
+                            ]
+                        ]
+                        (Type.namedWith
+                            [ "Effect", "Internal" ]
+                            "Task"
+                            [ Type.var "restriction"
+                            , Type.var "x"
+                            , Type.var "result"
+                            ]
+                        )
+                    )
+            }
         )
         [ Elm.functionReduced
             "map5Unpack"
             (\functionReducedUnpack ->
-               Elm.functionReduced
-                   "unpack"
-                   (\functionReducedUnpack0 ->
+                Elm.functionReduced
+                    "unpack"
+                    (\functionReducedUnpack0 ->
                         Elm.functionReduced
                             "unpack"
                             (\functionReducedUnpack_2_1_2_0_2_0_2_0_0 ->
-                                 Elm.functionReduced
-                                     "unpack"
-                                     (\functionReducedUnpack_2_1_2_1_2_0_2_0_2_0_0 ->
-                                          Elm.functionReduced
-                                              "unpack"
-                                              ((((map5Arg functionReducedUnpack)
-                                                     functionReducedUnpack0
-                                                )
-                                                    functionReducedUnpack_2_1_2_0_2_0_2_0_0
-                                               )
-                                                   functionReducedUnpack_2_1_2_1_2_0_2_0_2_0_0
-                                              )
-                                     )
+                                Elm.functionReduced
+                                    "unpack"
+                                    (\functionReducedUnpack_2_1_2_1_2_0_2_0_2_0_0 ->
+                                        Elm.functionReduced
+                                            "unpack"
+                                            (map5Arg functionReducedUnpack
+                                                functionReducedUnpack0
+                                                functionReducedUnpack_2_1_2_0_2_0_2_0_0
+                                                functionReducedUnpack_2_1_2_1_2_0_2_0_2_0_0
+                                            )
+                                    )
                             )
-                   )
+                    )
             )
         , map5Arg0
         , map5Arg1
@@ -295,20 +299,22 @@ map5 map5Arg map5Arg0 map5Arg1 map5Arg2 map5Arg3 map5Arg4 =
 
 {-| {-| -}
 
-map4: 
-    (a -> b -> c -> d -> result)
-    -> Effect.Internal.Task restriction x a
-    -> Effect.Internal.Task restriction x b
-    -> Effect.Internal.Task restriction x c
-    -> Effect.Internal.Task restriction x d
-    -> Effect.Internal.Task restriction x result
+map4:
+(a -> b -> c -> d -> result)
+-> Effect.Internal.Task restriction x a
+-> Effect.Internal.Task restriction x b
+-> Effect.Internal.Task restriction x c
+-> Effect.Internal.Task restriction x d
+-> Effect.Internal.Task restriction x result
+
 -}
 map4 :
     (Elm.Expression
-    -> Elm.Expression
-    -> Elm.Expression
-    -> Elm.Expression
-    -> Elm.Expression)
+     -> Elm.Expression
+     -> Elm.Expression
+     -> Elm.Expression
+     -> Elm.Expression
+    )
     -> Elm.Expression
     -> Elm.Expression
     -> Elm.Expression
@@ -317,76 +323,75 @@ map4 :
 map4 map4Arg map4Arg0 map4Arg1 map4Arg2 map4Arg3 =
     Elm.apply
         (Elm.value
-             { importFrom = [ "Effect", "Task" ]
-             , name = "map4"
-             , annotation =
-                 Just
-                     (Type.function
-                          [ Type.function
-                              [ Type.var "a"
-                              , Type.var "b"
-                              , Type.var "c"
-                              , Type.var "d"
-                              ]
-                              (Type.var "result")
-                          , Type.namedWith
-                              [ "Effect", "Internal" ]
-                              "Task"
-                              [ Type.var "restriction"
-                              , Type.var "x"
-                              , Type.var "a"
-                              ]
-                          , Type.namedWith
-                              [ "Effect", "Internal" ]
-                              "Task"
-                              [ Type.var "restriction"
-                              , Type.var "x"
-                              , Type.var "b"
-                              ]
-                          , Type.namedWith
-                              [ "Effect", "Internal" ]
-                              "Task"
-                              [ Type.var "restriction"
-                              , Type.var "x"
-                              , Type.var "c"
-                              ]
-                          , Type.namedWith
-                              [ "Effect", "Internal" ]
-                              "Task"
-                              [ Type.var "restriction"
-                              , Type.var "x"
-                              , Type.var "d"
-                              ]
-                          ]
-                          (Type.namedWith
-                               [ "Effect", "Internal" ]
-                               "Task"
-                               [ Type.var "restriction"
-                               , Type.var "x"
-                               , Type.var "result"
-                               ]
-                          )
-                     )
-             }
+            { importFrom = [ "Effect", "Task" ]
+            , name = "map4"
+            , annotation =
+                Just
+                    (Type.function
+                        [ Type.function
+                            [ Type.var "a"
+                            , Type.var "b"
+                            , Type.var "c"
+                            , Type.var "d"
+                            ]
+                            (Type.var "result")
+                        , Type.namedWith
+                            [ "Effect", "Internal" ]
+                            "Task"
+                            [ Type.var "restriction"
+                            , Type.var "x"
+                            , Type.var "a"
+                            ]
+                        , Type.namedWith
+                            [ "Effect", "Internal" ]
+                            "Task"
+                            [ Type.var "restriction"
+                            , Type.var "x"
+                            , Type.var "b"
+                            ]
+                        , Type.namedWith
+                            [ "Effect", "Internal" ]
+                            "Task"
+                            [ Type.var "restriction"
+                            , Type.var "x"
+                            , Type.var "c"
+                            ]
+                        , Type.namedWith
+                            [ "Effect", "Internal" ]
+                            "Task"
+                            [ Type.var "restriction"
+                            , Type.var "x"
+                            , Type.var "d"
+                            ]
+                        ]
+                        (Type.namedWith
+                            [ "Effect", "Internal" ]
+                            "Task"
+                            [ Type.var "restriction"
+                            , Type.var "x"
+                            , Type.var "result"
+                            ]
+                        )
+                    )
+            }
         )
         [ Elm.functionReduced
             "map4Unpack"
             (\functionReducedUnpack ->
-               Elm.functionReduced
-                   "unpack"
-                   (\functionReducedUnpack0 ->
+                Elm.functionReduced
+                    "unpack"
+                    (\functionReducedUnpack0 ->
                         Elm.functionReduced
                             "unpack"
                             (\functionReducedUnpack_2_1_2_0_2_0_2_0_0 ->
-                                 Elm.functionReduced
-                                     "unpack"
-                                     (((map4Arg functionReducedUnpack)
-                                           functionReducedUnpack0
-                                      )
-                                          functionReducedUnpack_2_1_2_0_2_0_2_0_0
-                                     )
+                                Elm.functionReduced
+                                    "unpack"
+                                    (map4Arg functionReducedUnpack
+                                        functionReducedUnpack0
+                                        functionReducedUnpack_2_1_2_0_2_0_2_0_0
+                                    )
                             )
-                   )
+                    )
             )
         , map4Arg0
         , map4Arg1
@@ -397,12 +402,13 @@ map4 map4Arg map4Arg0 map4Arg1 map4Arg2 map4Arg3 =
 
 {-| {-| -}
 
-map3: 
-    (a -> b -> c -> result)
-    -> Effect.Internal.Task restriction x a
-    -> Effect.Internal.Task restriction x b
-    -> Effect.Internal.Task restriction x c
-    -> Effect.Internal.Task restriction x result
+map3:
+(a -> b -> c -> result)
+-> Effect.Internal.Task restriction x a
+-> Effect.Internal.Task restriction x b
+-> Effect.Internal.Task restriction x c
+-> Effect.Internal.Task restriction x result
+
 -}
 map3 :
     (Elm.Expression -> Elm.Expression -> Elm.Expression -> Elm.Expression)
@@ -413,59 +419,59 @@ map3 :
 map3 map3Arg map3Arg0 map3Arg1 map3Arg2 =
     Elm.apply
         (Elm.value
-             { importFrom = [ "Effect", "Task" ]
-             , name = "map3"
-             , annotation =
-                 Just
-                     (Type.function
-                          [ Type.function
-                              [ Type.var "a", Type.var "b", Type.var "c" ]
-                              (Type.var "result")
-                          , Type.namedWith
-                              [ "Effect", "Internal" ]
-                              "Task"
-                              [ Type.var "restriction"
-                              , Type.var "x"
-                              , Type.var "a"
-                              ]
-                          , Type.namedWith
-                              [ "Effect", "Internal" ]
-                              "Task"
-                              [ Type.var "restriction"
-                              , Type.var "x"
-                              , Type.var "b"
-                              ]
-                          , Type.namedWith
-                              [ "Effect", "Internal" ]
-                              "Task"
-                              [ Type.var "restriction"
-                              , Type.var "x"
-                              , Type.var "c"
-                              ]
-                          ]
-                          (Type.namedWith
-                               [ "Effect", "Internal" ]
-                               "Task"
-                               [ Type.var "restriction"
-                               , Type.var "x"
-                               , Type.var "result"
-                               ]
-                          )
-                     )
-             }
+            { importFrom = [ "Effect", "Task" ]
+            , name = "map3"
+            , annotation =
+                Just
+                    (Type.function
+                        [ Type.function
+                            [ Type.var "a", Type.var "b", Type.var "c" ]
+                            (Type.var "result")
+                        , Type.namedWith
+                            [ "Effect", "Internal" ]
+                            "Task"
+                            [ Type.var "restriction"
+                            , Type.var "x"
+                            , Type.var "a"
+                            ]
+                        , Type.namedWith
+                            [ "Effect", "Internal" ]
+                            "Task"
+                            [ Type.var "restriction"
+                            , Type.var "x"
+                            , Type.var "b"
+                            ]
+                        , Type.namedWith
+                            [ "Effect", "Internal" ]
+                            "Task"
+                            [ Type.var "restriction"
+                            , Type.var "x"
+                            , Type.var "c"
+                            ]
+                        ]
+                        (Type.namedWith
+                            [ "Effect", "Internal" ]
+                            "Task"
+                            [ Type.var "restriction"
+                            , Type.var "x"
+                            , Type.var "result"
+                            ]
+                        )
+                    )
+            }
         )
         [ Elm.functionReduced
             "map3Unpack"
             (\functionReducedUnpack ->
-               Elm.functionReduced
-                   "unpack"
-                   (\functionReducedUnpack0 ->
+                Elm.functionReduced
+                    "unpack"
+                    (\functionReducedUnpack0 ->
                         Elm.functionReduced
                             "unpack"
-                            ((map3Arg functionReducedUnpack)
-                                 functionReducedUnpack0
+                            (map3Arg functionReducedUnpack
+                                functionReducedUnpack0
                             )
-                   )
+                    )
             )
         , map3Arg0
         , map3Arg1
@@ -493,11 +499,12 @@ If it fails, the whole thing fails!
 
 -}
 
-map2: 
-    (a -> b -> result)
-    -> Effect.Internal.Task restriction x a
-    -> Effect.Internal.Task restriction x b
-    -> Effect.Internal.Task restriction x result
+map2:
+(a -> b -> result)
+-> Effect.Internal.Task restriction x a
+-> Effect.Internal.Task restriction x b
+-> Effect.Internal.Task restriction x result
+
 -}
 map2 :
     (Elm.Expression -> Elm.Expression -> Elm.Expression)
@@ -507,44 +514,44 @@ map2 :
 map2 map2Arg map2Arg0 map2Arg1 =
     Elm.apply
         (Elm.value
-             { importFrom = [ "Effect", "Task" ]
-             , name = "map2"
-             , annotation =
-                 Just
-                     (Type.function
-                          [ Type.function
-                              [ Type.var "a", Type.var "b" ]
-                              (Type.var "result")
-                          , Type.namedWith
-                              [ "Effect", "Internal" ]
-                              "Task"
-                              [ Type.var "restriction"
-                              , Type.var "x"
-                              , Type.var "a"
-                              ]
-                          , Type.namedWith
-                              [ "Effect", "Internal" ]
-                              "Task"
-                              [ Type.var "restriction"
-                              , Type.var "x"
-                              , Type.var "b"
-                              ]
-                          ]
-                          (Type.namedWith
-                               [ "Effect", "Internal" ]
-                               "Task"
-                               [ Type.var "restriction"
-                               , Type.var "x"
-                               , Type.var "result"
-                               ]
-                          )
-                     )
-             }
+            { importFrom = [ "Effect", "Task" ]
+            , name = "map2"
+            , annotation =
+                Just
+                    (Type.function
+                        [ Type.function
+                            [ Type.var "a", Type.var "b" ]
+                            (Type.var "result")
+                        , Type.namedWith
+                            [ "Effect", "Internal" ]
+                            "Task"
+                            [ Type.var "restriction"
+                            , Type.var "x"
+                            , Type.var "a"
+                            ]
+                        , Type.namedWith
+                            [ "Effect", "Internal" ]
+                            "Task"
+                            [ Type.var "restriction"
+                            , Type.var "x"
+                            , Type.var "b"
+                            ]
+                        ]
+                        (Type.namedWith
+                            [ "Effect", "Internal" ]
+                            "Task"
+                            [ Type.var "restriction"
+                            , Type.var "x"
+                            , Type.var "result"
+                            ]
+                        )
+                    )
+            }
         )
         [ Elm.functionReduced
             "map2Unpack"
             (\functionReducedUnpack ->
-               Elm.functionReduced "unpack" (map2Arg functionReducedUnpack)
+                Elm.functionReduced "unpack" (map2Arg functionReducedUnpack)
             )
         , map2Arg0
         , map2Arg1
@@ -571,39 +578,40 @@ out what time it will be in one hour:
 
 -}
 
-map: 
-    (a -> b)
-    -> Effect.Internal.Task restriction x a
-    -> Effect.Internal.Task restriction x b
+map:
+(a -> b)
+-> Effect.Internal.Task restriction x a
+-> Effect.Internal.Task restriction x b
+
 -}
 map : (Elm.Expression -> Elm.Expression) -> Elm.Expression -> Elm.Expression
 map mapArg mapArg0 =
     Elm.apply
         (Elm.value
-             { importFrom = [ "Effect", "Task" ]
-             , name = "map"
-             , annotation =
-                 Just
-                     (Type.function
-                          [ Type.function [ Type.var "a" ] (Type.var "b")
-                          , Type.namedWith
-                              [ "Effect", "Internal" ]
-                              "Task"
-                              [ Type.var "restriction"
-                              , Type.var "x"
-                              , Type.var "a"
-                              ]
-                          ]
-                          (Type.namedWith
-                               [ "Effect", "Internal" ]
-                               "Task"
-                               [ Type.var "restriction"
-                               , Type.var "x"
-                               , Type.var "b"
-                               ]
-                          )
-                     )
-             }
+            { importFrom = [ "Effect", "Task" ]
+            , name = "map"
+            , annotation =
+                Just
+                    (Type.function
+                        [ Type.function [ Type.var "a" ] (Type.var "b")
+                        , Type.namedWith
+                            [ "Effect", "Internal" ]
+                            "Task"
+                            [ Type.var "restriction"
+                            , Type.var "x"
+                            , Type.var "a"
+                            ]
+                        ]
+                        (Type.namedWith
+                            [ "Effect", "Internal" ]
+                            "Task"
+                            [ Type.var "restriction"
+                            , Type.var "x"
+                            , Type.var "b"
+                            ]
+                        )
+                    )
+            }
         )
         [ Elm.functionReduced "mapUnpack" mapArg, mapArg0 ]
 
@@ -621,27 +629,28 @@ used with `andThen` to check on the outcome of another task.
 -}
 
 fail: x -> Effect.Internal.Task restriction x a
+
 -}
 fail : Elm.Expression -> Elm.Expression
 fail failArg =
     Elm.apply
         (Elm.value
-             { importFrom = [ "Effect", "Task" ]
-             , name = "fail"
-             , annotation =
-                 Just
-                     (Type.function
-                          [ Type.var "x" ]
-                          (Type.namedWith
-                               [ "Effect", "Internal" ]
-                               "Task"
-                               [ Type.var "restriction"
-                               , Type.var "x"
-                               , Type.var "a"
-                               ]
-                          )
-                     )
-             }
+            { importFrom = [ "Effect", "Task" ]
+            , name = "fail"
+            , annotation =
+                Just
+                    (Type.function
+                        [ Type.var "x" ]
+                        (Type.namedWith
+                            [ "Effect", "Internal" ]
+                            "Task"
+                            [ Type.var "restriction"
+                            , Type.var "x"
+                            , Type.var "a"
+                            ]
+                        )
+                    )
+            }
         )
         [ failArg ]
 
@@ -661,27 +670,28 @@ fail failArg =
 -}
 
 succeed: a -> Effect.Internal.Task restriction x a
+
 -}
 succeed : Elm.Expression -> Elm.Expression
 succeed succeedArg =
     Elm.apply
         (Elm.value
-             { importFrom = [ "Effect", "Task" ]
-             , name = "succeed"
-             , annotation =
-                 Just
-                     (Type.function
-                          [ Type.var "a" ]
-                          (Type.namedWith
-                               [ "Effect", "Internal" ]
-                               "Task"
-                               [ Type.var "restriction"
-                               , Type.var "x"
-                               , Type.var "a"
-                               ]
-                          )
-                     )
-             }
+            { importFrom = [ "Effect", "Task" ]
+            , name = "succeed"
+            , annotation =
+                Just
+                    (Type.function
+                        [ Type.var "a" ]
+                        (Type.namedWith
+                            [ "Effect", "Internal" ]
+                            "Task"
+                            [ Type.var "restriction"
+                            , Type.var "x"
+                            , Type.var "a"
+                            ]
+                        )
+                    )
+            }
         )
         [ succeedArg ]
 
@@ -706,48 +716,49 @@ First the process sleeps for an hour **and then** it tells us what time it is.
 
 -}
 
-andThen: 
-    (a -> Effect.Internal.Task restriction x b)
-    -> Effect.Internal.Task restriction x a
-    -> Effect.Internal.Task restriction x b
+andThen:
+(a -> Effect.Internal.Task restriction x b)
+-> Effect.Internal.Task restriction x a
+-> Effect.Internal.Task restriction x b
+
 -}
 andThen : (Elm.Expression -> Elm.Expression) -> Elm.Expression -> Elm.Expression
 andThen andThenArg andThenArg0 =
     Elm.apply
         (Elm.value
-             { importFrom = [ "Effect", "Task" ]
-             , name = "andThen"
-             , annotation =
-                 Just
-                     (Type.function
-                          [ Type.function
-                              [ Type.var "a" ]
-                              (Type.namedWith
-                                 [ "Effect", "Internal" ]
-                                 "Task"
-                                 [ Type.var "restriction"
-                                 , Type.var "x"
-                                 , Type.var "b"
-                                 ]
-                              )
-                          , Type.namedWith
-                              [ "Effect", "Internal" ]
-                              "Task"
-                              [ Type.var "restriction"
-                              , Type.var "x"
-                              , Type.var "a"
-                              ]
-                          ]
-                          (Type.namedWith
-                               [ "Effect", "Internal" ]
-                               "Task"
-                               [ Type.var "restriction"
-                               , Type.var "x"
-                               , Type.var "b"
-                               ]
-                          )
-                     )
-             }
+            { importFrom = [ "Effect", "Task" ]
+            , name = "andThen"
+            , annotation =
+                Just
+                    (Type.function
+                        [ Type.function
+                            [ Type.var "a" ]
+                            (Type.namedWith
+                                [ "Effect", "Internal" ]
+                                "Task"
+                                [ Type.var "restriction"
+                                , Type.var "x"
+                                , Type.var "b"
+                                ]
+                            )
+                        , Type.namedWith
+                            [ "Effect", "Internal" ]
+                            "Task"
+                            [ Type.var "restriction"
+                            , Type.var "x"
+                            , Type.var "a"
+                            ]
+                        ]
+                        (Type.namedWith
+                            [ "Effect", "Internal" ]
+                            "Task"
+                            [ Type.var "restriction"
+                            , Type.var "x"
+                            , Type.var "b"
+                            ]
+                        )
+                    )
+            }
         )
         [ Elm.functionReduced "andThenUnpack" andThenArg, andThenArg0 ]
 
@@ -781,45 +792,46 @@ feeling for how commands fit into The Elm Architecture.
 
 -}
 
-attempt: 
-    (Result.Result x a -> msg)
-    -> Effect.Internal.Task restriction x a
-    -> Effect.Internal.Command restriction toMsg msg
+attempt:
+(Result.Result x a -> msg)
+-> Effect.Internal.Task restriction x a
+-> Effect.Internal.Command restriction toMsg msg
+
 -}
 attempt : (Elm.Expression -> Elm.Expression) -> Elm.Expression -> Elm.Expression
 attempt attemptArg attemptArg0 =
     Elm.apply
         (Elm.value
-             { importFrom = [ "Effect", "Task" ]
-             , name = "attempt"
-             , annotation =
-                 Just
-                     (Type.function
-                          [ Type.function
-                              [ Type.namedWith
-                                    [ "Result" ]
-                                    "Result"
-                                    [ Type.var "x", Type.var "a" ]
-                              ]
-                              (Type.var "msg")
-                          , Type.namedWith
-                              [ "Effect", "Internal" ]
-                              "Task"
-                              [ Type.var "restriction"
-                              , Type.var "x"
-                              , Type.var "a"
-                              ]
-                          ]
-                          (Type.namedWith
-                               [ "Effect", "Internal" ]
-                               "Command"
-                               [ Type.var "restriction"
-                               , Type.var "toMsg"
-                               , Type.var "msg"
-                               ]
-                          )
-                     )
-             }
+            { importFrom = [ "Effect", "Task" ]
+            , name = "attempt"
+            , annotation =
+                Just
+                    (Type.function
+                        [ Type.function
+                            [ Type.namedWith
+                                [ "Result" ]
+                                "Result"
+                                [ Type.var "x", Type.var "a" ]
+                            ]
+                            (Type.var "msg")
+                        , Type.namedWith
+                            [ "Effect", "Internal" ]
+                            "Task"
+                            [ Type.var "restriction"
+                            , Type.var "x"
+                            , Type.var "a"
+                            ]
+                        ]
+                        (Type.namedWith
+                            [ "Effect", "Internal" ]
+                            "Command"
+                            [ Type.var "restriction"
+                            , Type.var "toMsg"
+                            , Type.var "msg"
+                            ]
+                        )
+                    )
+            }
         )
         [ Elm.functionReduced "attemptUnpack" attemptArg, attemptArg0 ]
 
@@ -851,39 +863,40 @@ delicious lasagna and give it to my `update` function as a `Msg` value."
 
 -}
 
-perform: 
-    (a -> msg)
-    -> Effect.Internal.Task restriction Basics.Never a
-    -> Effect.Internal.Command restriction toMsg msg
+perform:
+(a -> msg)
+-> Effect.Internal.Task restriction Basics.Never a
+-> Effect.Internal.Command restriction toMsg msg
+
 -}
 perform : (Elm.Expression -> Elm.Expression) -> Elm.Expression -> Elm.Expression
 perform performArg performArg0 =
     Elm.apply
         (Elm.value
-             { importFrom = [ "Effect", "Task" ]
-             , name = "perform"
-             , annotation =
-                 Just
-                     (Type.function
-                          [ Type.function [ Type.var "a" ] (Type.var "msg")
-                          , Type.namedWith
-                              [ "Effect", "Internal" ]
-                              "Task"
-                              [ Type.var "restriction"
-                              , Type.namedWith [ "Basics" ] "Never" []
-                              , Type.var "a"
-                              ]
-                          ]
-                          (Type.namedWith
-                               [ "Effect", "Internal" ]
-                               "Command"
-                               [ Type.var "restriction"
-                               , Type.var "toMsg"
-                               , Type.var "msg"
-                               ]
-                          )
-                     )
-             }
+            { importFrom = [ "Effect", "Task" ]
+            , name = "perform"
+            , annotation =
+                Just
+                    (Type.function
+                        [ Type.function [ Type.var "a" ] (Type.var "msg")
+                        , Type.namedWith
+                            [ "Effect", "Internal" ]
+                            "Task"
+                            [ Type.var "restriction"
+                            , Type.namedWith [ "Basics" ] "Never" []
+                            , Type.var "a"
+                            ]
+                        ]
+                        (Type.namedWith
+                            [ "Effect", "Internal" ]
+                            "Command"
+                            [ Type.var "restriction"
+                            , Type.var "toMsg"
+                            , Type.var "msg"
+                            ]
+                        )
+                    )
+            }
         )
         [ Elm.functionReduced "performUnpack" performArg, performArg0 ]
 
@@ -900,9 +913,9 @@ annotation_ =
                 "Task"
                 [ taskArg0, taskArg1, taskArg2 ]
                 (Type.namedWith
-                     [ "Effect", "Internal" ]
-                     "Task"
-                     [ Type.var "restriction", Type.var "x", Type.var "a" ]
+                    [ "Effect", "Internal" ]
+                    "Task"
+                    [ Type.var "restriction", Type.var "x", Type.var "a" ]
                 )
     }
 
@@ -946,495 +959,495 @@ call_ =
         \onErrorArg onErrorArg0 ->
             Elm.apply
                 (Elm.value
-                     { importFrom = [ "Effect", "Task" ]
-                     , name = "onError"
-                     , annotation =
-                         Just
-                             (Type.function
-                                  [ Type.function
-                                      [ Type.var "x" ]
-                                      (Type.namedWith
-                                         [ "Effect", "Internal" ]
-                                         "Task"
-                                         [ Type.var "restriction"
-                                         , Type.var "y"
-                                         , Type.var "a"
-                                         ]
-                                      )
-                                  , Type.namedWith
-                                      [ "Effect", "Internal" ]
-                                      "Task"
-                                      [ Type.var "restriction"
-                                      , Type.var "x"
-                                      , Type.var "a"
-                                      ]
-                                  ]
-                                  (Type.namedWith
-                                       [ "Effect", "Internal" ]
-                                       "Task"
-                                       [ Type.var "restriction"
-                                       , Type.var "y"
-                                       , Type.var "a"
-                                       ]
-                                  )
-                             )
-                     }
+                    { importFrom = [ "Effect", "Task" ]
+                    , name = "onError"
+                    , annotation =
+                        Just
+                            (Type.function
+                                [ Type.function
+                                    [ Type.var "x" ]
+                                    (Type.namedWith
+                                        [ "Effect", "Internal" ]
+                                        "Task"
+                                        [ Type.var "restriction"
+                                        , Type.var "y"
+                                        , Type.var "a"
+                                        ]
+                                    )
+                                , Type.namedWith
+                                    [ "Effect", "Internal" ]
+                                    "Task"
+                                    [ Type.var "restriction"
+                                    , Type.var "x"
+                                    , Type.var "a"
+                                    ]
+                                ]
+                                (Type.namedWith
+                                    [ "Effect", "Internal" ]
+                                    "Task"
+                                    [ Type.var "restriction"
+                                    , Type.var "y"
+                                    , Type.var "a"
+                                    ]
+                                )
+                            )
+                    }
                 )
                 [ onErrorArg, onErrorArg0 ]
     , sequence =
         \sequenceArg ->
             Elm.apply
                 (Elm.value
-                     { importFrom = [ "Effect", "Task" ]
-                     , name = "sequence"
-                     , annotation =
-                         Just
-                             (Type.function
-                                  [ Type.list
-                                      (Type.namedWith
-                                         [ "Effect", "Internal" ]
-                                         "Task"
-                                         [ Type.var "restriction"
-                                         , Type.var "x"
-                                         , Type.var "a"
-                                         ]
-                                      )
-                                  ]
-                                  (Type.namedWith
-                                       [ "Effect", "Internal" ]
-                                       "Task"
-                                       [ Type.var "restriction"
-                                       , Type.var "x"
-                                       , Type.list (Type.var "a")
-                                       ]
-                                  )
-                             )
-                     }
+                    { importFrom = [ "Effect", "Task" ]
+                    , name = "sequence"
+                    , annotation =
+                        Just
+                            (Type.function
+                                [ Type.list
+                                    (Type.namedWith
+                                        [ "Effect", "Internal" ]
+                                        "Task"
+                                        [ Type.var "restriction"
+                                        , Type.var "x"
+                                        , Type.var "a"
+                                        ]
+                                    )
+                                ]
+                                (Type.namedWith
+                                    [ "Effect", "Internal" ]
+                                    "Task"
+                                    [ Type.var "restriction"
+                                    , Type.var "x"
+                                    , Type.list (Type.var "a")
+                                    ]
+                                )
+                            )
+                    }
                 )
                 [ sequenceArg ]
     , mapError =
         \mapErrorArg mapErrorArg0 ->
             Elm.apply
                 (Elm.value
-                     { importFrom = [ "Effect", "Task" ]
-                     , name = "mapError"
-                     , annotation =
-                         Just
-                             (Type.function
-                                  [ Type.function
-                                      [ Type.var "x" ]
-                                      (Type.var "y")
-                                  , Type.namedWith
-                                      [ "Effect", "Internal" ]
-                                      "Task"
-                                      [ Type.var "restriction"
-                                      , Type.var "x"
-                                      , Type.var "a"
-                                      ]
-                                  ]
-                                  (Type.namedWith
-                                       [ "Effect", "Internal" ]
-                                       "Task"
-                                       [ Type.var "restriction"
-                                       , Type.var "y"
-                                       , Type.var "a"
-                                       ]
-                                  )
-                             )
-                     }
+                    { importFrom = [ "Effect", "Task" ]
+                    , name = "mapError"
+                    , annotation =
+                        Just
+                            (Type.function
+                                [ Type.function
+                                    [ Type.var "x" ]
+                                    (Type.var "y")
+                                , Type.namedWith
+                                    [ "Effect", "Internal" ]
+                                    "Task"
+                                    [ Type.var "restriction"
+                                    , Type.var "x"
+                                    , Type.var "a"
+                                    ]
+                                ]
+                                (Type.namedWith
+                                    [ "Effect", "Internal" ]
+                                    "Task"
+                                    [ Type.var "restriction"
+                                    , Type.var "y"
+                                    , Type.var "a"
+                                    ]
+                                )
+                            )
+                    }
                 )
                 [ mapErrorArg, mapErrorArg0 ]
     , map5 =
         \map5Arg map5Arg0 map5Arg1 map5Arg2 map5Arg3 map5Arg4 ->
             Elm.apply
                 (Elm.value
-                     { importFrom = [ "Effect", "Task" ]
-                     , name = "map5"
-                     , annotation =
-                         Just
-                             (Type.function
-                                  [ Type.function
-                                      [ Type.var "a"
-                                      , Type.var "b"
-                                      , Type.var "c"
-                                      , Type.var "d"
-                                      , Type.var "e"
-                                      ]
-                                      (Type.var "result")
-                                  , Type.namedWith
-                                      [ "Effect", "Internal" ]
-                                      "Task"
-                                      [ Type.var "restriction"
-                                      , Type.var "x"
-                                      , Type.var "a"
-                                      ]
-                                  , Type.namedWith
-                                      [ "Effect", "Internal" ]
-                                      "Task"
-                                      [ Type.var "restriction"
-                                      , Type.var "x"
-                                      , Type.var "b"
-                                      ]
-                                  , Type.namedWith
-                                      [ "Effect", "Internal" ]
-                                      "Task"
-                                      [ Type.var "restriction"
-                                      , Type.var "x"
-                                      , Type.var "c"
-                                      ]
-                                  , Type.namedWith
-                                      [ "Effect", "Internal" ]
-                                      "Task"
-                                      [ Type.var "restriction"
-                                      , Type.var "x"
-                                      , Type.var "d"
-                                      ]
-                                  , Type.namedWith
-                                      [ "Effect", "Internal" ]
-                                      "Task"
-                                      [ Type.var "restriction"
-                                      , Type.var "x"
-                                      , Type.var "e"
-                                      ]
-                                  ]
-                                  (Type.namedWith
-                                       [ "Effect", "Internal" ]
-                                       "Task"
-                                       [ Type.var "restriction"
-                                       , Type.var "x"
-                                       , Type.var "result"
-                                       ]
-                                  )
-                             )
-                     }
+                    { importFrom = [ "Effect", "Task" ]
+                    , name = "map5"
+                    , annotation =
+                        Just
+                            (Type.function
+                                [ Type.function
+                                    [ Type.var "a"
+                                    , Type.var "b"
+                                    , Type.var "c"
+                                    , Type.var "d"
+                                    , Type.var "e"
+                                    ]
+                                    (Type.var "result")
+                                , Type.namedWith
+                                    [ "Effect", "Internal" ]
+                                    "Task"
+                                    [ Type.var "restriction"
+                                    , Type.var "x"
+                                    , Type.var "a"
+                                    ]
+                                , Type.namedWith
+                                    [ "Effect", "Internal" ]
+                                    "Task"
+                                    [ Type.var "restriction"
+                                    , Type.var "x"
+                                    , Type.var "b"
+                                    ]
+                                , Type.namedWith
+                                    [ "Effect", "Internal" ]
+                                    "Task"
+                                    [ Type.var "restriction"
+                                    , Type.var "x"
+                                    , Type.var "c"
+                                    ]
+                                , Type.namedWith
+                                    [ "Effect", "Internal" ]
+                                    "Task"
+                                    [ Type.var "restriction"
+                                    , Type.var "x"
+                                    , Type.var "d"
+                                    ]
+                                , Type.namedWith
+                                    [ "Effect", "Internal" ]
+                                    "Task"
+                                    [ Type.var "restriction"
+                                    , Type.var "x"
+                                    , Type.var "e"
+                                    ]
+                                ]
+                                (Type.namedWith
+                                    [ "Effect", "Internal" ]
+                                    "Task"
+                                    [ Type.var "restriction"
+                                    , Type.var "x"
+                                    , Type.var "result"
+                                    ]
+                                )
+                            )
+                    }
                 )
                 [ map5Arg, map5Arg0, map5Arg1, map5Arg2, map5Arg3, map5Arg4 ]
     , map4 =
         \map4Arg map4Arg0 map4Arg1 map4Arg2 map4Arg3 ->
             Elm.apply
                 (Elm.value
-                     { importFrom = [ "Effect", "Task" ]
-                     , name = "map4"
-                     , annotation =
-                         Just
-                             (Type.function
-                                  [ Type.function
-                                      [ Type.var "a"
-                                      , Type.var "b"
-                                      , Type.var "c"
-                                      , Type.var "d"
-                                      ]
-                                      (Type.var "result")
-                                  , Type.namedWith
-                                      [ "Effect", "Internal" ]
-                                      "Task"
-                                      [ Type.var "restriction"
-                                      , Type.var "x"
-                                      , Type.var "a"
-                                      ]
-                                  , Type.namedWith
-                                      [ "Effect", "Internal" ]
-                                      "Task"
-                                      [ Type.var "restriction"
-                                      , Type.var "x"
-                                      , Type.var "b"
-                                      ]
-                                  , Type.namedWith
-                                      [ "Effect", "Internal" ]
-                                      "Task"
-                                      [ Type.var "restriction"
-                                      , Type.var "x"
-                                      , Type.var "c"
-                                      ]
-                                  , Type.namedWith
-                                      [ "Effect", "Internal" ]
-                                      "Task"
-                                      [ Type.var "restriction"
-                                      , Type.var "x"
-                                      , Type.var "d"
-                                      ]
-                                  ]
-                                  (Type.namedWith
-                                       [ "Effect", "Internal" ]
-                                       "Task"
-                                       [ Type.var "restriction"
-                                       , Type.var "x"
-                                       , Type.var "result"
-                                       ]
-                                  )
-                             )
-                     }
+                    { importFrom = [ "Effect", "Task" ]
+                    , name = "map4"
+                    , annotation =
+                        Just
+                            (Type.function
+                                [ Type.function
+                                    [ Type.var "a"
+                                    , Type.var "b"
+                                    , Type.var "c"
+                                    , Type.var "d"
+                                    ]
+                                    (Type.var "result")
+                                , Type.namedWith
+                                    [ "Effect", "Internal" ]
+                                    "Task"
+                                    [ Type.var "restriction"
+                                    , Type.var "x"
+                                    , Type.var "a"
+                                    ]
+                                , Type.namedWith
+                                    [ "Effect", "Internal" ]
+                                    "Task"
+                                    [ Type.var "restriction"
+                                    , Type.var "x"
+                                    , Type.var "b"
+                                    ]
+                                , Type.namedWith
+                                    [ "Effect", "Internal" ]
+                                    "Task"
+                                    [ Type.var "restriction"
+                                    , Type.var "x"
+                                    , Type.var "c"
+                                    ]
+                                , Type.namedWith
+                                    [ "Effect", "Internal" ]
+                                    "Task"
+                                    [ Type.var "restriction"
+                                    , Type.var "x"
+                                    , Type.var "d"
+                                    ]
+                                ]
+                                (Type.namedWith
+                                    [ "Effect", "Internal" ]
+                                    "Task"
+                                    [ Type.var "restriction"
+                                    , Type.var "x"
+                                    , Type.var "result"
+                                    ]
+                                )
+                            )
+                    }
                 )
                 [ map4Arg, map4Arg0, map4Arg1, map4Arg2, map4Arg3 ]
     , map3 =
         \map3Arg map3Arg0 map3Arg1 map3Arg2 ->
             Elm.apply
                 (Elm.value
-                     { importFrom = [ "Effect", "Task" ]
-                     , name = "map3"
-                     , annotation =
-                         Just
-                             (Type.function
-                                  [ Type.function
-                                      [ Type.var "a"
-                                      , Type.var "b"
-                                      , Type.var "c"
-                                      ]
-                                      (Type.var "result")
-                                  , Type.namedWith
-                                      [ "Effect", "Internal" ]
-                                      "Task"
-                                      [ Type.var "restriction"
-                                      , Type.var "x"
-                                      , Type.var "a"
-                                      ]
-                                  , Type.namedWith
-                                      [ "Effect", "Internal" ]
-                                      "Task"
-                                      [ Type.var "restriction"
-                                      , Type.var "x"
-                                      , Type.var "b"
-                                      ]
-                                  , Type.namedWith
-                                      [ "Effect", "Internal" ]
-                                      "Task"
-                                      [ Type.var "restriction"
-                                      , Type.var "x"
-                                      , Type.var "c"
-                                      ]
-                                  ]
-                                  (Type.namedWith
-                                       [ "Effect", "Internal" ]
-                                       "Task"
-                                       [ Type.var "restriction"
-                                       , Type.var "x"
-                                       , Type.var "result"
-                                       ]
-                                  )
-                             )
-                     }
+                    { importFrom = [ "Effect", "Task" ]
+                    , name = "map3"
+                    , annotation =
+                        Just
+                            (Type.function
+                                [ Type.function
+                                    [ Type.var "a"
+                                    , Type.var "b"
+                                    , Type.var "c"
+                                    ]
+                                    (Type.var "result")
+                                , Type.namedWith
+                                    [ "Effect", "Internal" ]
+                                    "Task"
+                                    [ Type.var "restriction"
+                                    , Type.var "x"
+                                    , Type.var "a"
+                                    ]
+                                , Type.namedWith
+                                    [ "Effect", "Internal" ]
+                                    "Task"
+                                    [ Type.var "restriction"
+                                    , Type.var "x"
+                                    , Type.var "b"
+                                    ]
+                                , Type.namedWith
+                                    [ "Effect", "Internal" ]
+                                    "Task"
+                                    [ Type.var "restriction"
+                                    , Type.var "x"
+                                    , Type.var "c"
+                                    ]
+                                ]
+                                (Type.namedWith
+                                    [ "Effect", "Internal" ]
+                                    "Task"
+                                    [ Type.var "restriction"
+                                    , Type.var "x"
+                                    , Type.var "result"
+                                    ]
+                                )
+                            )
+                    }
                 )
                 [ map3Arg, map3Arg0, map3Arg1, map3Arg2 ]
     , map2 =
         \map2Arg map2Arg0 map2Arg1 ->
             Elm.apply
                 (Elm.value
-                     { importFrom = [ "Effect", "Task" ]
-                     , name = "map2"
-                     , annotation =
-                         Just
-                             (Type.function
-                                  [ Type.function
-                                      [ Type.var "a", Type.var "b" ]
-                                      (Type.var "result")
-                                  , Type.namedWith
-                                      [ "Effect", "Internal" ]
-                                      "Task"
-                                      [ Type.var "restriction"
-                                      , Type.var "x"
-                                      , Type.var "a"
-                                      ]
-                                  , Type.namedWith
-                                      [ "Effect", "Internal" ]
-                                      "Task"
-                                      [ Type.var "restriction"
-                                      , Type.var "x"
-                                      , Type.var "b"
-                                      ]
-                                  ]
-                                  (Type.namedWith
-                                       [ "Effect", "Internal" ]
-                                       "Task"
-                                       [ Type.var "restriction"
-                                       , Type.var "x"
-                                       , Type.var "result"
-                                       ]
-                                  )
-                             )
-                     }
+                    { importFrom = [ "Effect", "Task" ]
+                    , name = "map2"
+                    , annotation =
+                        Just
+                            (Type.function
+                                [ Type.function
+                                    [ Type.var "a", Type.var "b" ]
+                                    (Type.var "result")
+                                , Type.namedWith
+                                    [ "Effect", "Internal" ]
+                                    "Task"
+                                    [ Type.var "restriction"
+                                    , Type.var "x"
+                                    , Type.var "a"
+                                    ]
+                                , Type.namedWith
+                                    [ "Effect", "Internal" ]
+                                    "Task"
+                                    [ Type.var "restriction"
+                                    , Type.var "x"
+                                    , Type.var "b"
+                                    ]
+                                ]
+                                (Type.namedWith
+                                    [ "Effect", "Internal" ]
+                                    "Task"
+                                    [ Type.var "restriction"
+                                    , Type.var "x"
+                                    , Type.var "result"
+                                    ]
+                                )
+                            )
+                    }
                 )
                 [ map2Arg, map2Arg0, map2Arg1 ]
     , map =
         \mapArg mapArg0 ->
             Elm.apply
                 (Elm.value
-                     { importFrom = [ "Effect", "Task" ]
-                     , name = "map"
-                     , annotation =
-                         Just
-                             (Type.function
-                                  [ Type.function
-                                      [ Type.var "a" ]
-                                      (Type.var "b")
-                                  , Type.namedWith
-                                      [ "Effect", "Internal" ]
-                                      "Task"
-                                      [ Type.var "restriction"
-                                      , Type.var "x"
-                                      , Type.var "a"
-                                      ]
-                                  ]
-                                  (Type.namedWith
-                                       [ "Effect", "Internal" ]
-                                       "Task"
-                                       [ Type.var "restriction"
-                                       , Type.var "x"
-                                       , Type.var "b"
-                                       ]
-                                  )
-                             )
-                     }
+                    { importFrom = [ "Effect", "Task" ]
+                    , name = "map"
+                    , annotation =
+                        Just
+                            (Type.function
+                                [ Type.function
+                                    [ Type.var "a" ]
+                                    (Type.var "b")
+                                , Type.namedWith
+                                    [ "Effect", "Internal" ]
+                                    "Task"
+                                    [ Type.var "restriction"
+                                    , Type.var "x"
+                                    , Type.var "a"
+                                    ]
+                                ]
+                                (Type.namedWith
+                                    [ "Effect", "Internal" ]
+                                    "Task"
+                                    [ Type.var "restriction"
+                                    , Type.var "x"
+                                    , Type.var "b"
+                                    ]
+                                )
+                            )
+                    }
                 )
                 [ mapArg, mapArg0 ]
     , fail =
         \failArg ->
             Elm.apply
                 (Elm.value
-                     { importFrom = [ "Effect", "Task" ]
-                     , name = "fail"
-                     , annotation =
-                         Just
-                             (Type.function
-                                  [ Type.var "x" ]
-                                  (Type.namedWith
-                                       [ "Effect", "Internal" ]
-                                       "Task"
-                                       [ Type.var "restriction"
-                                       , Type.var "x"
-                                       , Type.var "a"
-                                       ]
-                                  )
-                             )
-                     }
+                    { importFrom = [ "Effect", "Task" ]
+                    , name = "fail"
+                    , annotation =
+                        Just
+                            (Type.function
+                                [ Type.var "x" ]
+                                (Type.namedWith
+                                    [ "Effect", "Internal" ]
+                                    "Task"
+                                    [ Type.var "restriction"
+                                    , Type.var "x"
+                                    , Type.var "a"
+                                    ]
+                                )
+                            )
+                    }
                 )
                 [ failArg ]
     , succeed =
         \succeedArg ->
             Elm.apply
                 (Elm.value
-                     { importFrom = [ "Effect", "Task" ]
-                     , name = "succeed"
-                     , annotation =
-                         Just
-                             (Type.function
-                                  [ Type.var "a" ]
-                                  (Type.namedWith
-                                       [ "Effect", "Internal" ]
-                                       "Task"
-                                       [ Type.var "restriction"
-                                       , Type.var "x"
-                                       , Type.var "a"
-                                       ]
-                                  )
-                             )
-                     }
+                    { importFrom = [ "Effect", "Task" ]
+                    , name = "succeed"
+                    , annotation =
+                        Just
+                            (Type.function
+                                [ Type.var "a" ]
+                                (Type.namedWith
+                                    [ "Effect", "Internal" ]
+                                    "Task"
+                                    [ Type.var "restriction"
+                                    , Type.var "x"
+                                    , Type.var "a"
+                                    ]
+                                )
+                            )
+                    }
                 )
                 [ succeedArg ]
     , andThen =
         \andThenArg andThenArg0 ->
             Elm.apply
                 (Elm.value
-                     { importFrom = [ "Effect", "Task" ]
-                     , name = "andThen"
-                     , annotation =
-                         Just
-                             (Type.function
-                                  [ Type.function
-                                      [ Type.var "a" ]
-                                      (Type.namedWith
-                                         [ "Effect", "Internal" ]
-                                         "Task"
-                                         [ Type.var "restriction"
-                                         , Type.var "x"
-                                         , Type.var "b"
-                                         ]
-                                      )
-                                  , Type.namedWith
-                                      [ "Effect", "Internal" ]
-                                      "Task"
-                                      [ Type.var "restriction"
-                                      , Type.var "x"
-                                      , Type.var "a"
-                                      ]
-                                  ]
-                                  (Type.namedWith
-                                       [ "Effect", "Internal" ]
-                                       "Task"
-                                       [ Type.var "restriction"
-                                       , Type.var "x"
-                                       , Type.var "b"
-                                       ]
-                                  )
-                             )
-                     }
+                    { importFrom = [ "Effect", "Task" ]
+                    , name = "andThen"
+                    , annotation =
+                        Just
+                            (Type.function
+                                [ Type.function
+                                    [ Type.var "a" ]
+                                    (Type.namedWith
+                                        [ "Effect", "Internal" ]
+                                        "Task"
+                                        [ Type.var "restriction"
+                                        , Type.var "x"
+                                        , Type.var "b"
+                                        ]
+                                    )
+                                , Type.namedWith
+                                    [ "Effect", "Internal" ]
+                                    "Task"
+                                    [ Type.var "restriction"
+                                    , Type.var "x"
+                                    , Type.var "a"
+                                    ]
+                                ]
+                                (Type.namedWith
+                                    [ "Effect", "Internal" ]
+                                    "Task"
+                                    [ Type.var "restriction"
+                                    , Type.var "x"
+                                    , Type.var "b"
+                                    ]
+                                )
+                            )
+                    }
                 )
                 [ andThenArg, andThenArg0 ]
     , attempt =
         \attemptArg attemptArg0 ->
             Elm.apply
                 (Elm.value
-                     { importFrom = [ "Effect", "Task" ]
-                     , name = "attempt"
-                     , annotation =
-                         Just
-                             (Type.function
-                                  [ Type.function
-                                      [ Type.namedWith
-                                            [ "Result" ]
-                                            "Result"
-                                            [ Type.var "x", Type.var "a" ]
-                                      ]
-                                      (Type.var "msg")
-                                  , Type.namedWith
-                                      [ "Effect", "Internal" ]
-                                      "Task"
-                                      [ Type.var "restriction"
-                                      , Type.var "x"
-                                      , Type.var "a"
-                                      ]
-                                  ]
-                                  (Type.namedWith
-                                       [ "Effect", "Internal" ]
-                                       "Command"
-                                       [ Type.var "restriction"
-                                       , Type.var "toMsg"
-                                       , Type.var "msg"
-                                       ]
-                                  )
-                             )
-                     }
+                    { importFrom = [ "Effect", "Task" ]
+                    , name = "attempt"
+                    , annotation =
+                        Just
+                            (Type.function
+                                [ Type.function
+                                    [ Type.namedWith
+                                        [ "Result" ]
+                                        "Result"
+                                        [ Type.var "x", Type.var "a" ]
+                                    ]
+                                    (Type.var "msg")
+                                , Type.namedWith
+                                    [ "Effect", "Internal" ]
+                                    "Task"
+                                    [ Type.var "restriction"
+                                    , Type.var "x"
+                                    , Type.var "a"
+                                    ]
+                                ]
+                                (Type.namedWith
+                                    [ "Effect", "Internal" ]
+                                    "Command"
+                                    [ Type.var "restriction"
+                                    , Type.var "toMsg"
+                                    , Type.var "msg"
+                                    ]
+                                )
+                            )
+                    }
                 )
                 [ attemptArg, attemptArg0 ]
     , perform =
         \performArg performArg0 ->
             Elm.apply
                 (Elm.value
-                     { importFrom = [ "Effect", "Task" ]
-                     , name = "perform"
-                     , annotation =
-                         Just
-                             (Type.function
-                                  [ Type.function
-                                      [ Type.var "a" ]
-                                      (Type.var "msg")
-                                  , Type.namedWith
-                                      [ "Effect", "Internal" ]
-                                      "Task"
-                                      [ Type.var "restriction"
-                                      , Type.namedWith [ "Basics" ] "Never" []
-                                      , Type.var "a"
-                                      ]
-                                  ]
-                                  (Type.namedWith
-                                       [ "Effect", "Internal" ]
-                                       "Command"
-                                       [ Type.var "restriction"
-                                       , Type.var "toMsg"
-                                       , Type.var "msg"
-                                       ]
-                                  )
-                             )
-                     }
+                    { importFrom = [ "Effect", "Task" ]
+                    , name = "perform"
+                    , annotation =
+                        Just
+                            (Type.function
+                                [ Type.function
+                                    [ Type.var "a" ]
+                                    (Type.var "msg")
+                                , Type.namedWith
+                                    [ "Effect", "Internal" ]
+                                    "Task"
+                                    [ Type.var "restriction"
+                                    , Type.namedWith [ "Basics" ] "Never" []
+                                    , Type.var "a"
+                                    ]
+                                ]
+                                (Type.namedWith
+                                    [ "Effect", "Internal" ]
+                                    "Command"
+                                    [ Type.var "restriction"
+                                    , Type.var "toMsg"
+                                    , Type.var "msg"
+                                    ]
+                                )
+                            )
+                    }
                 )
                 [ performArg, performArg0 ]
     }
@@ -1463,32 +1476,32 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                         [ Type.function
-                             [ Type.var "x" ]
-                             (Type.namedWith
+                        [ Type.function
+                            [ Type.var "x" ]
+                            (Type.namedWith
                                 [ "Effect", "Internal" ]
                                 "Task"
                                 [ Type.var "restriction"
                                 , Type.var "y"
                                 , Type.var "a"
                                 ]
-                             )
-                         , Type.namedWith
-                             [ "Effect", "Internal" ]
-                             "Task"
-                             [ Type.var "restriction"
-                             , Type.var "x"
-                             , Type.var "a"
-                             ]
-                         ]
-                         (Type.namedWith
-                              [ "Effect", "Internal" ]
-                              "Task"
-                              [ Type.var "restriction"
-                              , Type.var "y"
-                              , Type.var "a"
-                              ]
-                         )
+                            )
+                        , Type.namedWith
+                            [ "Effect", "Internal" ]
+                            "Task"
+                            [ Type.var "restriction"
+                            , Type.var "x"
+                            , Type.var "a"
+                            ]
+                        ]
+                        (Type.namedWith
+                            [ "Effect", "Internal" ]
+                            "Task"
+                            [ Type.var "restriction"
+                            , Type.var "y"
+                            , Type.var "a"
+                            ]
+                        )
                     )
             }
     , sequence =
@@ -1498,24 +1511,24 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                         [ Type.list
-                             (Type.namedWith
+                        [ Type.list
+                            (Type.namedWith
                                 [ "Effect", "Internal" ]
                                 "Task"
                                 [ Type.var "restriction"
                                 , Type.var "x"
                                 , Type.var "a"
                                 ]
-                             )
-                         ]
-                         (Type.namedWith
-                              [ "Effect", "Internal" ]
-                              "Task"
-                              [ Type.var "restriction"
-                              , Type.var "x"
-                              , Type.list (Type.var "a")
-                              ]
-                         )
+                            )
+                        ]
+                        (Type.namedWith
+                            [ "Effect", "Internal" ]
+                            "Task"
+                            [ Type.var "restriction"
+                            , Type.var "x"
+                            , Type.list (Type.var "a")
+                            ]
+                        )
                     )
             }
     , mapError =
@@ -1525,23 +1538,23 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                         [ Type.function [ Type.var "x" ] (Type.var "y")
-                         , Type.namedWith
-                             [ "Effect", "Internal" ]
-                             "Task"
-                             [ Type.var "restriction"
-                             , Type.var "x"
-                             , Type.var "a"
-                             ]
-                         ]
-                         (Type.namedWith
-                              [ "Effect", "Internal" ]
-                              "Task"
-                              [ Type.var "restriction"
-                              , Type.var "y"
-                              , Type.var "a"
-                              ]
-                         )
+                        [ Type.function [ Type.var "x" ] (Type.var "y")
+                        , Type.namedWith
+                            [ "Effect", "Internal" ]
+                            "Task"
+                            [ Type.var "restriction"
+                            , Type.var "x"
+                            , Type.var "a"
+                            ]
+                        ]
+                        (Type.namedWith
+                            [ "Effect", "Internal" ]
+                            "Task"
+                            [ Type.var "restriction"
+                            , Type.var "y"
+                            , Type.var "a"
+                            ]
+                        )
                     )
             }
     , map5 =
@@ -1551,58 +1564,58 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                         [ Type.function
-                             [ Type.var "a"
-                             , Type.var "b"
-                             , Type.var "c"
-                             , Type.var "d"
-                             , Type.var "e"
-                             ]
-                             (Type.var "result")
-                         , Type.namedWith
-                             [ "Effect", "Internal" ]
-                             "Task"
-                             [ Type.var "restriction"
-                             , Type.var "x"
-                             , Type.var "a"
-                             ]
-                         , Type.namedWith
-                             [ "Effect", "Internal" ]
-                             "Task"
-                             [ Type.var "restriction"
-                             , Type.var "x"
-                             , Type.var "b"
-                             ]
-                         , Type.namedWith
-                             [ "Effect", "Internal" ]
-                             "Task"
-                             [ Type.var "restriction"
-                             , Type.var "x"
-                             , Type.var "c"
-                             ]
-                         , Type.namedWith
-                             [ "Effect", "Internal" ]
-                             "Task"
-                             [ Type.var "restriction"
-                             , Type.var "x"
-                             , Type.var "d"
-                             ]
-                         , Type.namedWith
-                             [ "Effect", "Internal" ]
-                             "Task"
-                             [ Type.var "restriction"
-                             , Type.var "x"
-                             , Type.var "e"
-                             ]
-                         ]
-                         (Type.namedWith
-                              [ "Effect", "Internal" ]
-                              "Task"
-                              [ Type.var "restriction"
-                              , Type.var "x"
-                              , Type.var "result"
-                              ]
-                         )
+                        [ Type.function
+                            [ Type.var "a"
+                            , Type.var "b"
+                            , Type.var "c"
+                            , Type.var "d"
+                            , Type.var "e"
+                            ]
+                            (Type.var "result")
+                        , Type.namedWith
+                            [ "Effect", "Internal" ]
+                            "Task"
+                            [ Type.var "restriction"
+                            , Type.var "x"
+                            , Type.var "a"
+                            ]
+                        , Type.namedWith
+                            [ "Effect", "Internal" ]
+                            "Task"
+                            [ Type.var "restriction"
+                            , Type.var "x"
+                            , Type.var "b"
+                            ]
+                        , Type.namedWith
+                            [ "Effect", "Internal" ]
+                            "Task"
+                            [ Type.var "restriction"
+                            , Type.var "x"
+                            , Type.var "c"
+                            ]
+                        , Type.namedWith
+                            [ "Effect", "Internal" ]
+                            "Task"
+                            [ Type.var "restriction"
+                            , Type.var "x"
+                            , Type.var "d"
+                            ]
+                        , Type.namedWith
+                            [ "Effect", "Internal" ]
+                            "Task"
+                            [ Type.var "restriction"
+                            , Type.var "x"
+                            , Type.var "e"
+                            ]
+                        ]
+                        (Type.namedWith
+                            [ "Effect", "Internal" ]
+                            "Task"
+                            [ Type.var "restriction"
+                            , Type.var "x"
+                            , Type.var "result"
+                            ]
+                        )
                     )
             }
     , map4 =
@@ -1612,50 +1625,50 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                         [ Type.function
-                             [ Type.var "a"
-                             , Type.var "b"
-                             , Type.var "c"
-                             , Type.var "d"
-                             ]
-                             (Type.var "result")
-                         , Type.namedWith
-                             [ "Effect", "Internal" ]
-                             "Task"
-                             [ Type.var "restriction"
-                             , Type.var "x"
-                             , Type.var "a"
-                             ]
-                         , Type.namedWith
-                             [ "Effect", "Internal" ]
-                             "Task"
-                             [ Type.var "restriction"
-                             , Type.var "x"
-                             , Type.var "b"
-                             ]
-                         , Type.namedWith
-                             [ "Effect", "Internal" ]
-                             "Task"
-                             [ Type.var "restriction"
-                             , Type.var "x"
-                             , Type.var "c"
-                             ]
-                         , Type.namedWith
-                             [ "Effect", "Internal" ]
-                             "Task"
-                             [ Type.var "restriction"
-                             , Type.var "x"
-                             , Type.var "d"
-                             ]
-                         ]
-                         (Type.namedWith
-                              [ "Effect", "Internal" ]
-                              "Task"
-                              [ Type.var "restriction"
-                              , Type.var "x"
-                              , Type.var "result"
-                              ]
-                         )
+                        [ Type.function
+                            [ Type.var "a"
+                            , Type.var "b"
+                            , Type.var "c"
+                            , Type.var "d"
+                            ]
+                            (Type.var "result")
+                        , Type.namedWith
+                            [ "Effect", "Internal" ]
+                            "Task"
+                            [ Type.var "restriction"
+                            , Type.var "x"
+                            , Type.var "a"
+                            ]
+                        , Type.namedWith
+                            [ "Effect", "Internal" ]
+                            "Task"
+                            [ Type.var "restriction"
+                            , Type.var "x"
+                            , Type.var "b"
+                            ]
+                        , Type.namedWith
+                            [ "Effect", "Internal" ]
+                            "Task"
+                            [ Type.var "restriction"
+                            , Type.var "x"
+                            , Type.var "c"
+                            ]
+                        , Type.namedWith
+                            [ "Effect", "Internal" ]
+                            "Task"
+                            [ Type.var "restriction"
+                            , Type.var "x"
+                            , Type.var "d"
+                            ]
+                        ]
+                        (Type.namedWith
+                            [ "Effect", "Internal" ]
+                            "Task"
+                            [ Type.var "restriction"
+                            , Type.var "x"
+                            , Type.var "result"
+                            ]
+                        )
                     )
             }
     , map3 =
@@ -1665,39 +1678,39 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                         [ Type.function
-                             [ Type.var "a", Type.var "b", Type.var "c" ]
-                             (Type.var "result")
-                         , Type.namedWith
-                             [ "Effect", "Internal" ]
-                             "Task"
-                             [ Type.var "restriction"
-                             , Type.var "x"
-                             , Type.var "a"
-                             ]
-                         , Type.namedWith
-                             [ "Effect", "Internal" ]
-                             "Task"
-                             [ Type.var "restriction"
-                             , Type.var "x"
-                             , Type.var "b"
-                             ]
-                         , Type.namedWith
-                             [ "Effect", "Internal" ]
-                             "Task"
-                             [ Type.var "restriction"
-                             , Type.var "x"
-                             , Type.var "c"
-                             ]
-                         ]
-                         (Type.namedWith
-                              [ "Effect", "Internal" ]
-                              "Task"
-                              [ Type.var "restriction"
-                              , Type.var "x"
-                              , Type.var "result"
-                              ]
-                         )
+                        [ Type.function
+                            [ Type.var "a", Type.var "b", Type.var "c" ]
+                            (Type.var "result")
+                        , Type.namedWith
+                            [ "Effect", "Internal" ]
+                            "Task"
+                            [ Type.var "restriction"
+                            , Type.var "x"
+                            , Type.var "a"
+                            ]
+                        , Type.namedWith
+                            [ "Effect", "Internal" ]
+                            "Task"
+                            [ Type.var "restriction"
+                            , Type.var "x"
+                            , Type.var "b"
+                            ]
+                        , Type.namedWith
+                            [ "Effect", "Internal" ]
+                            "Task"
+                            [ Type.var "restriction"
+                            , Type.var "x"
+                            , Type.var "c"
+                            ]
+                        ]
+                        (Type.namedWith
+                            [ "Effect", "Internal" ]
+                            "Task"
+                            [ Type.var "restriction"
+                            , Type.var "x"
+                            , Type.var "result"
+                            ]
+                        )
                     )
             }
     , map2 =
@@ -1707,32 +1720,32 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                         [ Type.function
-                             [ Type.var "a", Type.var "b" ]
-                             (Type.var "result")
-                         , Type.namedWith
-                             [ "Effect", "Internal" ]
-                             "Task"
-                             [ Type.var "restriction"
-                             , Type.var "x"
-                             , Type.var "a"
-                             ]
-                         , Type.namedWith
-                             [ "Effect", "Internal" ]
-                             "Task"
-                             [ Type.var "restriction"
-                             , Type.var "x"
-                             , Type.var "b"
-                             ]
-                         ]
-                         (Type.namedWith
-                              [ "Effect", "Internal" ]
-                              "Task"
-                              [ Type.var "restriction"
-                              , Type.var "x"
-                              , Type.var "result"
-                              ]
-                         )
+                        [ Type.function
+                            [ Type.var "a", Type.var "b" ]
+                            (Type.var "result")
+                        , Type.namedWith
+                            [ "Effect", "Internal" ]
+                            "Task"
+                            [ Type.var "restriction"
+                            , Type.var "x"
+                            , Type.var "a"
+                            ]
+                        , Type.namedWith
+                            [ "Effect", "Internal" ]
+                            "Task"
+                            [ Type.var "restriction"
+                            , Type.var "x"
+                            , Type.var "b"
+                            ]
+                        ]
+                        (Type.namedWith
+                            [ "Effect", "Internal" ]
+                            "Task"
+                            [ Type.var "restriction"
+                            , Type.var "x"
+                            , Type.var "result"
+                            ]
+                        )
                     )
             }
     , map =
@@ -1742,23 +1755,23 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                         [ Type.function [ Type.var "a" ] (Type.var "b")
-                         , Type.namedWith
-                             [ "Effect", "Internal" ]
-                             "Task"
-                             [ Type.var "restriction"
-                             , Type.var "x"
-                             , Type.var "a"
-                             ]
-                         ]
-                         (Type.namedWith
-                              [ "Effect", "Internal" ]
-                              "Task"
-                              [ Type.var "restriction"
-                              , Type.var "x"
-                              , Type.var "b"
-                              ]
-                         )
+                        [ Type.function [ Type.var "a" ] (Type.var "b")
+                        , Type.namedWith
+                            [ "Effect", "Internal" ]
+                            "Task"
+                            [ Type.var "restriction"
+                            , Type.var "x"
+                            , Type.var "a"
+                            ]
+                        ]
+                        (Type.namedWith
+                            [ "Effect", "Internal" ]
+                            "Task"
+                            [ Type.var "restriction"
+                            , Type.var "x"
+                            , Type.var "b"
+                            ]
+                        )
                     )
             }
     , fail =
@@ -1768,15 +1781,15 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                         [ Type.var "x" ]
-                         (Type.namedWith
-                              [ "Effect", "Internal" ]
-                              "Task"
-                              [ Type.var "restriction"
-                              , Type.var "x"
-                              , Type.var "a"
-                              ]
-                         )
+                        [ Type.var "x" ]
+                        (Type.namedWith
+                            [ "Effect", "Internal" ]
+                            "Task"
+                            [ Type.var "restriction"
+                            , Type.var "x"
+                            , Type.var "a"
+                            ]
+                        )
                     )
             }
     , succeed =
@@ -1786,15 +1799,15 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                         [ Type.var "a" ]
-                         (Type.namedWith
-                              [ "Effect", "Internal" ]
-                              "Task"
-                              [ Type.var "restriction"
-                              , Type.var "x"
-                              , Type.var "a"
-                              ]
-                         )
+                        [ Type.var "a" ]
+                        (Type.namedWith
+                            [ "Effect", "Internal" ]
+                            "Task"
+                            [ Type.var "restriction"
+                            , Type.var "x"
+                            , Type.var "a"
+                            ]
+                        )
                     )
             }
     , andThen =
@@ -1804,32 +1817,32 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                         [ Type.function
-                             [ Type.var "a" ]
-                             (Type.namedWith
+                        [ Type.function
+                            [ Type.var "a" ]
+                            (Type.namedWith
                                 [ "Effect", "Internal" ]
                                 "Task"
                                 [ Type.var "restriction"
                                 , Type.var "x"
                                 , Type.var "b"
                                 ]
-                             )
-                         , Type.namedWith
-                             [ "Effect", "Internal" ]
-                             "Task"
-                             [ Type.var "restriction"
-                             , Type.var "x"
-                             , Type.var "a"
-                             ]
-                         ]
-                         (Type.namedWith
-                              [ "Effect", "Internal" ]
-                              "Task"
-                              [ Type.var "restriction"
-                              , Type.var "x"
-                              , Type.var "b"
-                              ]
-                         )
+                            )
+                        , Type.namedWith
+                            [ "Effect", "Internal" ]
+                            "Task"
+                            [ Type.var "restriction"
+                            , Type.var "x"
+                            , Type.var "a"
+                            ]
+                        ]
+                        (Type.namedWith
+                            [ "Effect", "Internal" ]
+                            "Task"
+                            [ Type.var "restriction"
+                            , Type.var "x"
+                            , Type.var "b"
+                            ]
+                        )
                     )
             }
     , attempt =
@@ -1839,29 +1852,29 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                         [ Type.function
-                             [ Type.namedWith
-                                   [ "Result" ]
-                                   "Result"
-                                   [ Type.var "x", Type.var "a" ]
-                             ]
-                             (Type.var "msg")
-                         , Type.namedWith
-                             [ "Effect", "Internal" ]
-                             "Task"
-                             [ Type.var "restriction"
-                             , Type.var "x"
-                             , Type.var "a"
-                             ]
-                         ]
-                         (Type.namedWith
-                              [ "Effect", "Internal" ]
-                              "Command"
-                              [ Type.var "restriction"
-                              , Type.var "toMsg"
-                              , Type.var "msg"
-                              ]
-                         )
+                        [ Type.function
+                            [ Type.namedWith
+                                [ "Result" ]
+                                "Result"
+                                [ Type.var "x", Type.var "a" ]
+                            ]
+                            (Type.var "msg")
+                        , Type.namedWith
+                            [ "Effect", "Internal" ]
+                            "Task"
+                            [ Type.var "restriction"
+                            , Type.var "x"
+                            , Type.var "a"
+                            ]
+                        ]
+                        (Type.namedWith
+                            [ "Effect", "Internal" ]
+                            "Command"
+                            [ Type.var "restriction"
+                            , Type.var "toMsg"
+                            , Type.var "msg"
+                            ]
+                        )
                     )
             }
     , perform =
@@ -1871,23 +1884,23 @@ values_ =
             , annotation =
                 Just
                     (Type.function
-                         [ Type.function [ Type.var "a" ] (Type.var "msg")
-                         , Type.namedWith
-                             [ "Effect", "Internal" ]
-                             "Task"
-                             [ Type.var "restriction"
-                             , Type.namedWith [ "Basics" ] "Never" []
-                             , Type.var "a"
-                             ]
-                         ]
-                         (Type.namedWith
-                              [ "Effect", "Internal" ]
-                              "Command"
-                              [ Type.var "restriction"
-                              , Type.var "toMsg"
-                              , Type.var "msg"
-                              ]
-                         )
+                        [ Type.function [ Type.var "a" ] (Type.var "msg")
+                        , Type.namedWith
+                            [ "Effect", "Internal" ]
+                            "Task"
+                            [ Type.var "restriction"
+                            , Type.namedWith [ "Basics" ] "Never" []
+                            , Type.var "a"
+                            ]
+                        ]
+                        (Type.namedWith
+                            [ "Effect", "Internal" ]
+                            "Command"
+                            [ Type.var "restriction"
+                            , Type.var "toMsg"
+                            , Type.var "msg"
+                            ]
+                        )
                     )
             }
     }

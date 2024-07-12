@@ -1137,7 +1137,7 @@ operationToAuthorizationInfo operation =
                                                         let
                                                             cleanName : String
                                                             cleanName =
-                                                                Common.toValueName (String.replace "-" "_" <| String.toLower apiKey.name)
+                                                                Common.toValueName (String.toLower apiKey.name)
                                                         in
                                                         case apiKey.in_ of
                                                             OpenApi.SecurityScheme.Header ->

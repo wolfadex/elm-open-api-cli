@@ -78,16 +78,28 @@ program =
 
   options:
 
-  --output-dir                       The directory to output to. Defaults to: generated/
+  --output-dir                       The directory to output to. Defaults to `generated/`.
 
-  --module-name                      The Elm module name. Default to <OAS info.title>
+  --module-name                      The Elm module name. Defaults to `OAS info.title`.
 
-  --effect-types                     Which kind of APIs to generate, the options are:
-                                      - cmd: input -> Cmd msg
+  --effect-types                     A list of which kind of APIs to generate.
+                                     Each item should be of the form `package.type`.
+                                     If `package` is omitted it defaults to `elm/http`.
+                                     If `type` is omitted it defaults to `cmd,task`.
+                                     If not specified, defaults to `cmd,task` (for elm/http).
+                                     The options for package are:
+                                      - elm/http
+                                      - dillonkearns/elm-pages
+                                      - lamdera/program-test
+                                     The options for type are:
+                                      - cmd: input -> Cmd for elm/http,
+                                             input -> Effect.Command for lamdera/program-test
                                       - riskycmd: as above, but using Http.riskyRequest
-                                      - task: input -> Task Http.Error msg
+                                      - task: input -> Task for elm/http
+                                              input -> Effect.Task for lamdera/program-test
+                                              input -> BackendTask for dillonkearns/elm-pages
                                       - riskytask: as above, but using Http.riskyRequest
-                                      - backendtask: for dillonkearns/elm-pages
+                                                   cannot be used for dillonkearns/elm-pages
 
   --server                           The base URL for the OpenAPI server.
                                      If not specified this will be extracted from the OAS
@@ -103,21 +115,21 @@ program =
   --auto-convert-swagger             If passed in, and a Swagger doc is encountered,
                                      will attempt to convert it to an Open API file.
                                      If not passed in, and a Swagger doc is encountered,
-                                     the user will be manually prompted to convert
+                                     the user will be manually prompted to convert.
 
   --swagger-conversion-url           The URL to use to convert a Swagger doc to an Open API
-                                     file. Defaults to https://converter.swagger.io/api/convert
+                                     file. Defaults to `https://converter.swagger.io/api/convert`.
 
   --swagger-conversion-command       Instead of making an HTTP request to convert
-                                     from Swagger to Open API, use this command
+                                     from Swagger to Open API, use this command.
 
   --swagger-conversion-command-args  Additional arguments to pass to the Swagger conversion command,
-                                     before the contents of the Swagger file are passed in
+                                     before the contents of the Swagger file are passed in.
 
   --generateTodos                    Whether to generate TODOs for unimplemented endpoints,
                                      or fail when something unexpected is encountered.
                                      Defaults to `no`. To generate `Debug.todo ""`
-                                     instead of failing use one of: `yes`, `y`, `true`
+                                     instead of failing use one of: `yes`, `y`, `true`.
 """
             )
 
@@ -126,38 +138,66 @@ effectTypesValidation : Maybe String -> Result String (List OpenApi.Generate.Eff
 effectTypesValidation str =
     case str of
         Nothing ->
-            Ok [ OpenApi.Generate.Cmd, OpenApi.Generate.Task ]
+            Ok [ OpenApi.Generate.ElmHttpCmd, OpenApi.Generate.ElmHttpTask ]
 
         Just v ->
             v
                 |> String.split ","
                 |> List.map String.trim
                 |> Result.Extra.combineMap effectTypeValidation
+                |> Result.map List.concat
 
 
-effectTypeValidation : String -> Result String OpenApi.Generate.EffectType
+effectTypeValidation : String -> Result String (List OpenApi.Generate.EffectType)
 effectTypeValidation effectType =
     case effectType of
         "cmd" ->
-            Ok OpenApi.Generate.Cmd
+            Ok [ OpenApi.Generate.ElmHttpCmd ]
 
         "cmdrisky" ->
-            Ok OpenApi.Generate.CmdRisky
+            Ok [ OpenApi.Generate.ElmHttpCmdRisky ]
 
         "task" ->
-            Ok OpenApi.Generate.Task
+            Ok [ OpenApi.Generate.ElmHttpTask ]
 
         "taskrisky" ->
-            Ok OpenApi.Generate.TaskRisky
+            Ok [ OpenApi.Generate.ElmHttpTaskRisky ]
 
-        "backendtask" ->
-            Ok OpenApi.Generate.BackendTask
+        "elm/http" ->
+            Ok [ OpenApi.Generate.ElmHttpCmd, OpenApi.Generate.ElmHttpTask ]
 
-        "programtest" ->
-            Ok OpenApi.Generate.ProgramTest
+        "elm/http.cmd" ->
+            Ok [ OpenApi.Generate.ElmHttpCmd ]
 
-        "programtesttask" ->
-            Ok OpenApi.Generate.ProgramTestTask
+        "elm/http.cmdrisky" ->
+            Ok [ OpenApi.Generate.ElmHttpCmdRisky ]
+
+        "elm/http.task" ->
+            Ok [ OpenApi.Generate.ElmHttpTask ]
+
+        "elm/http.taskrisky" ->
+            Ok [ OpenApi.Generate.ElmHttpTaskRisky ]
+
+        "dillonkearns/elm-pages" ->
+            Ok [ OpenApi.Generate.DillonkearnsElmPagesTask ]
+
+        "dillonkearns/elm-pages.task" ->
+            Ok [ OpenApi.Generate.DillonkearnsElmPagesTask ]
+
+        "lamdera/program-test" ->
+            Ok [ OpenApi.Generate.LamderaProgramTestCmd, OpenApi.Generate.LamderaProgramTestTask ]
+
+        "lamdera/program-test.cmd" ->
+            Ok [ OpenApi.Generate.LamderaProgramTestCmd ]
+
+        "lamdera/program-test.cmdrisky" ->
+            Ok [ OpenApi.Generate.LamderaProgramTestCmdRisky ]
+
+        "lamdera/program-test.task" ->
+            Ok [ OpenApi.Generate.LamderaProgramTestTask ]
+
+        "lamdera/program-test.taskrisky" ->
+            Ok [ OpenApi.Generate.LamderaProgramTestTaskRisky ]
 
         _ ->
             Err <| "Unexpected effect type: " ++ effectType
@@ -431,8 +471,8 @@ attemptToFormat : List Elm.File -> BackendTask.BackendTask FatalError.FatalError
 attemptToFormat files =
     Pages.Script.which "elm-format"
         |> BackendTask.andThen
-            (\mayebFound ->
-                case mayebFound of
+            (\maybeFound ->
+                case maybeFound of
                     Just _ ->
                         files
                             |> List.map

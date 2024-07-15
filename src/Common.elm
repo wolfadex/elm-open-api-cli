@@ -63,7 +63,7 @@ typifyName name =
         |> deSymbolify
 
 
-{-| Some OAS have reponse refs that are just the status code.
+{-| Some OAS have response refs that are just the status code.
 We need to convert them to a valid Elm name.
 -}
 nameFromStatusCode : String -> String

@@ -76,7 +76,7 @@ suite =
                                 OpenApi.Generate.files
                                     { namespace = namespace
                                     , generateTodos = False
-                                    , effectTypes = [ OpenApi.Generate.Cmd, OpenApi.Generate.Task ]
+                                    , effectTypes = [ OpenApi.Generate.ElmHttpCmd, OpenApi.Generate.ElmHttpTask ]
                                     , server = OpenApi.Generate.Default
                                     }
                                     oas

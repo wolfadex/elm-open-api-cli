@@ -39,6 +39,7 @@ import Gen.Url.Builder
 import Json.Schema.Definitions
 import JsonSchema.Generate
 import List.Extra
+import List.NonEmpty
 import OpenApi
 import OpenApi.Components
 import OpenApi.MediaType
@@ -1750,7 +1751,7 @@ operationToTypesExpectAndResolver namespace functionName operation =
             )
             getFirstSuccessResponse
         |> CliMonad.andThen
-            (\( _, responseOrRef ) ->
+            (\( ( _, responseOrRef ), _ ) ->
                 let
                     errorResponses : Dict.Dict String (OpenApi.Reference.ReferenceOr OpenApi.Response.Response)
                     errorResponses =
@@ -2484,12 +2485,12 @@ isSuccessResponseStatus status =
     String.startsWith "2" status || String.startsWith "3" status
 
 
-getFirstSuccessResponse : Dict.Dict String (OpenApi.Reference.ReferenceOr OpenApi.Response.Response) -> Maybe ( String, OpenApi.Reference.ReferenceOr OpenApi.Response.Response )
+getFirstSuccessResponse : Dict.Dict String (OpenApi.Reference.ReferenceOr OpenApi.Response.Response) -> Maybe (List.NonEmpty.NonEmpty ( String, OpenApi.Reference.ReferenceOr OpenApi.Response.Response ))
 getFirstSuccessResponse responses =
     responses
         |> Dict.toList
         |> List.filter (Tuple.first >> isSuccessResponseStatus)
-        |> List.head
+        |> List.Extra.uncons
 
 
 getErrorResponses : Dict.Dict String (OpenApi.Reference.ReferenceOr OpenApi.Response.Response) -> Dict.Dict String (OpenApi.Reference.ReferenceOr OpenApi.Response.Response)

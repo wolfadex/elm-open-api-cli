@@ -895,7 +895,7 @@ operationToGroup operation =
 
 
 replacedUrl : Server -> AuthorizationInfo -> List String -> String -> OpenApi.Operation.Operation -> CliMonad (Elm.Expression -> Elm.Expression)
-replacedUrl server authinfo namespace pathUrl operation =
+replacedUrl server authInfo namespace pathUrl operation =
     let
         pathSegments : List String
         pathSegments =
@@ -923,7 +923,7 @@ replacedUrl server authinfo namespace pathUrl operation =
                         let
                             authArgs : List Elm.Expression
                             authArgs =
-                                authinfo.query config
+                                authInfo.query config
                                     |> List.map
                                         (\( k, v ) ->
                                             Gen.Url.Builder.call_.string k v
@@ -1259,7 +1259,7 @@ operationToContentSchema qualify namespace operation =
 
                 Nothing ->
                     CliMonad.succeed requestOrRef
-                        |> CliMonad.stepOrFail "I found a successfull response, but I couldn't convert it to a concrete one"
+                        |> CliMonad.stepOrFail "I found a successful response, but I couldn't convert it to a concrete one"
                             OpenApi.Reference.toReference
                         |> CliMonad.map (\ref -> JsonContent (Common.Ref <| String.split "/" <| OpenApi.Reference.ref ref))
 
@@ -1634,22 +1634,22 @@ paramToAnnotation : Bool -> List String -> OpenApi.Parameter.Parameter -> CliMon
 paramToAnnotation qualify namespace concreteParam =
     paramToType qualify namespace concreteParam
         |> CliMonad.andThen
-            (\( pname, type_ ) ->
+            (\( paramName, type_ ) ->
                 SchemaUtils.typeToAnnotationMaybe qualify namespace type_
                     |> CliMonad.map
-                        (\annotation -> ( pname, annotation ))
+                        (\annotation -> ( paramName, annotation ))
             )
 
 
 paramToType : Bool -> List String -> OpenApi.Parameter.Parameter -> CliMonad ( String, Common.Type )
 paramToType qualify namespace concreteParam =
     let
-        pname : String
-        pname =
+        paramName : String
+        paramName =
             OpenApi.Parameter.name concreteParam
     in
     CliMonad.succeed concreteParam
-        |> CliMonad.stepOrFail ("Could not get schema for parameter " ++ pname)
+        |> CliMonad.stepOrFail ("Could not get schema for parameter " ++ paramName)
             (OpenApi.Parameter.schema >> Maybe.map OpenApi.Schema.get)
         |> CliMonad.andThen (SchemaUtils.schemaToType qualify namespace)
         |> CliMonad.andThen
@@ -1681,7 +1681,7 @@ paramToType qualify namespace concreteParam =
                         else
                             CliMonad.succeed <| Common.Nullable type_
             )
-        |> CliMonad.map (Tuple.pair pname)
+        |> CliMonad.map (Tuple.pair paramName)
 
 
 toConcreteParam : OpenApi.Reference.ReferenceOr OpenApi.Parameter.Parameter -> CliMonad OpenApi.Parameter.Parameter
@@ -1765,10 +1765,10 @@ operationToTypesExpectAndResolver namespace functionName operation =
                     errorDecoders =
                         errorResponses
                             |> Dict.map
-                                (\statusCode errRespOrRef ->
-                                    case OpenApi.Reference.toConcrete errRespOrRef of
-                                        Just errResp ->
-                                            OpenApi.Response.content errResp
+                                (\statusCode errResponseOrRef ->
+                                    case OpenApi.Reference.toConcrete errResponseOrRef of
+                                        Just errResponse ->
+                                            OpenApi.Response.content errResponse
                                                 |> contentToContentSchema True namespace
                                                 |> CliMonad.andThen
                                                     (\contentSchema ->
@@ -1819,7 +1819,7 @@ operationToTypesExpectAndResolver namespace functionName operation =
                                                     )
 
                                         Nothing ->
-                                            CliMonad.succeed errRespOrRef
+                                            CliMonad.succeed errResponseOrRef
                                                 |> CliMonad.stepOrFail "I found an error response, but I couldn't convert it to a concrete decoder"
                                                     OpenApi.Reference.toReference
                                                 |> CliMonad.andThen
@@ -1861,10 +1861,10 @@ operationToTypesExpectAndResolver namespace functionName operation =
                     errorTypeDeclaration =
                         errorResponses
                             |> Dict.map
-                                (\_ errRespOrRef ->
-                                    case OpenApi.Reference.toConcrete errRespOrRef of
-                                        Just errResp ->
-                                            OpenApi.Response.content errResp
+                                (\_ errResponseOrRef ->
+                                    case OpenApi.Reference.toConcrete errResponseOrRef of
+                                        Just errResponse ->
+                                            OpenApi.Response.content errResponse
                                                 |> contentToContentSchema True namespace
                                                 |> CliMonad.andThen
                                                     (\contentSchema ->
@@ -1883,7 +1883,7 @@ operationToTypesExpectAndResolver namespace functionName operation =
                                                     )
 
                                         Nothing ->
-                                            CliMonad.succeed errRespOrRef
+                                            CliMonad.succeed errResponseOrRef
                                                 |> CliMonad.stepOrFail "I found an error response, but I couldn't convert it to a concrete annotation"
                                                     OpenApi.Reference.toReference
                                                 |> CliMonad.andThen
@@ -2100,7 +2100,7 @@ operationToTypesExpectAndResolver namespace functionName operation =
 
                     Nothing ->
                         CliMonad.succeed responseOrRef
-                            |> CliMonad.stepOrFail "I found a successfull response, but I couldn't convert it to a concrete one"
+                            |> CliMonad.stepOrFail "I found a successful response, but I couldn't convert it to a concrete one"
                                 OpenApi.Reference.toReference
                             |> CliMonad.andThen
                                 (\ref ->

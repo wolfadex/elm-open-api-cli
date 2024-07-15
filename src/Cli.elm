@@ -431,8 +431,8 @@ attemptToFormat : List Elm.File -> BackendTask.BackendTask FatalError.FatalError
 attemptToFormat files =
     Pages.Script.which "elm-format"
         |> BackendTask.andThen
-            (\mayebFound ->
-                case mayebFound of
+            (\maybeFound ->
+                case maybeFound of
                     Just _ ->
                         files
                             |> List.map

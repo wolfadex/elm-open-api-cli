@@ -4,6 +4,7 @@ module Common exposing
     , Module(..)
     , Object
     , OneOfData
+    , Package(..)
     , Type(..)
     , TypeName
     , VariantName
@@ -20,9 +21,16 @@ import String.Extra
 type Module
     = Json
     | Types
-    | Api
+      -- Nothing if we are only generating effects for a single package
+    | Api (Maybe Package)
     | Common
     | Servers
+
+
+type Package
+    = ElmHttp
+    | DillonkearnsElmPages
+    | LamderaProgramTest
 
 
 moduleToNamespace : List String -> Module -> List String
@@ -34,8 +42,19 @@ moduleToNamespace namespace module_ =
         Types ->
             namespace ++ [ "Types" ]
 
-        Api ->
-            namespace ++ [ "Api" ]
+        Api package ->
+            case package of
+                Just ElmHttp ->
+                    namespace ++ [ "Api", "ElmHttp" ]
+
+                Just DillonkearnsElmPages ->
+                    namespace ++ [ "Api", "DillonkearnsElmPages" ]
+
+                Just LamderaProgramTest ->
+                    namespace ++ [ "Api", "LamderaProgramTest" ]
+
+                Nothing ->
+                    namespace ++ [ "Api" ]
 
         Servers ->
             namespace ++ [ "Servers" ]

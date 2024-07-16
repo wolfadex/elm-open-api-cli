@@ -75,7 +75,7 @@ program =
                         |> Cli.Option.validateMap serverValidation
                     )
                 |> Cli.OptionsParser.withDoc """
-version: 0.5.0
+version: 0.6.0
 
 options:
 

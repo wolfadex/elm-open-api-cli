@@ -7,17 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unreleased]
 
+## [0.6.0] - 2024-07-16
+
 ### Added
 
+-   Support for multiple servers. ✨ [Leonardo Taglialegne](https://github.com/miniBill)
+-   Support for query based API keys. ✨ [Leonardo Taglialegne](https://github.com/miniBill)
 -   Support for generating `lamdera/program-test` `Effect.Http` requests. ✨ [Leonardo Taglialegne](https://github.com/miniBill)
+-   Support for enums.
 
 ### Changed
 
 -   How the various effect types are generated. ✨ [Leonardo Taglialegne](https://github.com/miniBill)
+-   Now generates multiple `Api.*` modules when generating effects for multiple packages. ✨ [Leonardo Taglialegne](https://github.com/miniBill)
+    -   This is to prevent with name collisions as well as horrible naming.
 
 ### Fixed
 
--   Support for enums.
+-   Fix for URL builder generation. ✨ [Leonardo Taglialegne](https://github.com/miniBill)
+-   Fixed the CLI help doc for effect types, a couple values were reversed.
 
 ## [0.5.0] - 2024-06-02
 

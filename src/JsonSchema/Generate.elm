@@ -13,7 +13,7 @@ import SchemaUtils
 
 schemaToDeclarations : List String -> String -> Json.Schema.Definitions.Schema -> CliMonad (List ( Common.Module, Elm.Declaration ))
 schemaToDeclarations namespace name schema =
-    schemaToAnnotation False namespace schema
+    schemaToAnnotations False namespace schema
         |> CliMonad.andThen
             (\ann ->
                 let
@@ -68,19 +68,20 @@ schemaToDeclarations namespace name schema =
         |> CliMonad.withPath name
 
 
-schemaToAnnotation : Bool -> List String -> Json.Schema.Definitions.Schema -> CliMonad Elm.Annotation.Annotation
-schemaToAnnotation qualify namespace schema =
-    SchemaUtils.schemaToType qualify namespace schema
+schemaToAnnotations : Bool -> List String -> Json.Schema.Definitions.Schema -> CliMonad (List Elm.Annotation.Annotation)
+schemaToAnnotations qualify namespace schema =
+    SchemaUtils.schemaToType { qualify = qualify, namespace = namespace, parentNames = [] } schema
         |> CliMonad.andThen (SchemaUtils.typeToAnnotation qualify namespace)
+        |> CliMonad.map (\{ annotation, enumAnnotations } -> annotation :: enumAnnotations)
 
 
 schemaToDecoder : Bool -> List String -> Json.Schema.Definitions.Schema -> CliMonad Elm.Expression
 schemaToDecoder qualify namespace schema =
-    SchemaUtils.schemaToType True namespace schema
+    SchemaUtils.schemaToType { qualify = True, namespace = namespace, parentNames = [] } schema
         |> CliMonad.andThen (SchemaUtils.typeToDecoder qualify namespace)
 
 
 schemaToEncoder : Bool -> List String -> Json.Schema.Definitions.Schema -> CliMonad (Elm.Expression -> Elm.Expression)
 schemaToEncoder qualify namespace schema =
-    SchemaUtils.schemaToType True namespace schema
+    SchemaUtils.schemaToType { qualify = True, namespace = namespace, parentNames = [] } schema
         |> CliMonad.andThen (SchemaUtils.typeToEncoder qualify namespace)

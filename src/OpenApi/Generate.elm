@@ -1040,7 +1040,8 @@ contentToContentSchema qualify namespace content =
                     CliMonad.succeed jsonSchema
                         |> CliMonad.stepOrFail "The request's application/json content option doesn't have a schema"
                             (OpenApi.MediaType.schema >> Maybe.map OpenApi.Schema.get)
-                        |> CliMonad.andThen (SchemaUtils.schemaToType qualify namespace)
+                        |> CliMonad.andThen
+                            (SchemaUtils.schemaToType { qualify = qualify, namespace = namespace, parentNames = [] })
                         |> CliMonad.map JsonContent
 
                 Nothing ->
@@ -1067,7 +1068,7 @@ contentToContentSchema qualify namespace content =
             CliMonad.succeed htmlSchema
                 |> CliMonad.stepOrFail ("The request's " ++ mime ++ " content option doesn't have a schema")
                     (OpenApi.MediaType.schema >> Maybe.map OpenApi.Schema.get)
-                |> CliMonad.andThen (SchemaUtils.schemaToType True namespace)
+                |> CliMonad.andThen (SchemaUtils.schemaToType { qualify = True, namespace = namespace, parentNames = [] })
                 |> CliMonad.andThen
                     (\type_ ->
                         if type_ == Common.String then
@@ -1296,7 +1297,8 @@ paramToString qualify namespace type_ =
         Common.Ref ref ->
             --  These are mostly aliases
             SchemaUtils.getAlias ref
-                |> CliMonad.andThen (SchemaUtils.schemaToType qualify namespace)
+                |> CliMonad.andThen
+                    (SchemaUtils.schemaToType { qualify = qualify, namespace = namespace, parentNames = [] })
                 |> CliMonad.andThen (paramToString qualify namespace)
 
         Common.OneOf name data ->
@@ -1363,14 +1365,16 @@ paramToType qualify namespace concreteParam =
     CliMonad.succeed concreteParam
         |> CliMonad.stepOrFail ("Could not get schema for parameter " ++ pname)
             (OpenApi.Parameter.schema >> Maybe.map OpenApi.Schema.get)
-        |> CliMonad.andThen (SchemaUtils.schemaToType qualify namespace)
+        |> CliMonad.andThen
+            (SchemaUtils.schemaToType { qualify = qualify, namespace = namespace, parentNames = [] })
         |> CliMonad.andThen
             (\type_ ->
                 case type_ of
                     Common.Ref ref ->
                         ref
                             |> SchemaUtils.getAlias
-                            |> CliMonad.andThen (SchemaUtils.schemaToType qualify namespace)
+                            |> CliMonad.andThen
+                                (SchemaUtils.schemaToType { qualify = qualify, namespace = namespace, parentNames = [] })
                             |> CliMonad.map
                                 (\inner ->
                                     case inner of

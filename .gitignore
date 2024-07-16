@@ -1,5 +1,13 @@
+# Elm
 elm-stuff
+
+# JavaScript
 node_modules
+
+# Mac
+.DS_Store
+
+# Other
 .direnv
 dist
 generated

@@ -74,7 +74,9 @@ program =
                     (Cli.Option.optionalKeywordArg "server")
                 |> Cli.OptionsParser.withDoc """
 
-  options:
+Version: 0.5.0
+
+Options:
 
   --output-dir                       The directory to output to. Defaults to: generated/
 

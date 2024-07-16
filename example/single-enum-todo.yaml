@@ -1,0 +1,26 @@
+openapi: 3.0.0
+info:
+    title: Basic Router
+    version: 1.0.0
+paths:
+    "/":
+        summary: Does stuff
+        responses:
+            200:
+                description: Ok
+                schema:
+                    "#ref": "#/components/schemas/ValuePropositionSummary"
+components:
+    schemas:
+        ValuePropositionSummary:
+            title: ValuePropositionSummary
+            type: object
+            properties:
+                type:
+                    enum:
+                        - ValuePropositionSummary
+                one_sentence_summary:
+                    type: string
+            required:
+                - type
+                - one_sentence_summary

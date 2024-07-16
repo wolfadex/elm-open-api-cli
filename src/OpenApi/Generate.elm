@@ -482,6 +482,10 @@ toRequestFunctions server effectTypes namespace method pathUrl operation =
         |> CliMonad.andThen
             (\{ successType, bodyTypeAnnotation, errorTypeDeclaration, errorTypeAnnotation, toExpect, resolver } ->
                 let
+                    isSinglePackage : Bool
+                    isSinglePackage =
+                        List.length (effectTypes |> List.map effectTypeToPackage |> List.Extra.unique) == 1
+
                     toMsg : Elm.Expression -> Elm.Expression -> Elm.Expression
                     toMsg config msg =
                         Elm.apply (Elm.get "toMsg" config) [ msg ]
@@ -575,7 +579,7 @@ toRequestFunctions server effectTypes namespace method pathUrl operation =
                         -> (Elm.Expression -> PerPackage Elm.Expression)
                         -> (Elm.Expression -> Elm.Expression)
                         -> ({ requireToMsg : Bool } -> PerPackage Elm.Annotation.Annotation)
-                        -> CliMonad (List Elm.Declaration)
+                        -> CliMonad (List ( Common.Package, Elm.Declaration ))
                     elmHttpCommands auth _ toBody replaced paramType =
                         if List.member ElmHttpCmd effectTypes || List.member ElmHttpCmdRisky effectTypes then
                             toExpect
@@ -605,12 +609,14 @@ toRequestFunctions server effectTypes namespace method pathUrl operation =
                                             (\config -> Gen.Http.call_.request (cmdArg config))
                                             |> Elm.withType cmdAnnotation
                                             |> Elm.declaration functionName
+                                            |> Tuple.pair Common.ElmHttp
                                             |> justIf ElmHttpCmd
                                         , Elm.fn
                                             ( "config", Nothing )
                                             (\config -> Gen.Http.call_.riskyRequest (cmdArg config))
                                             |> Elm.withType cmdAnnotation
                                             |> Elm.declaration (functionName ++ "Risky")
+                                            |> Tuple.pair Common.ElmHttp
                                             |> justIf ElmHttpCmdRisky
                                         ]
                                             |> List.filterMap identity
@@ -625,7 +631,7 @@ toRequestFunctions server effectTypes namespace method pathUrl operation =
                         -> (Elm.Expression -> PerPackage Elm.Expression)
                         -> (Elm.Expression -> Elm.Expression)
                         -> ({ requireToMsg : Bool } -> PerPackage Elm.Annotation.Annotation)
-                        -> CliMonad (List Elm.Declaration)
+                        -> CliMonad (List ( Common.Package, Elm.Declaration ))
                     elmHttpTasks auth successAnnotation toBody replaced paramType =
                         if List.member ElmHttpTask effectTypes || List.member ElmHttpTaskRisky effectTypes then
                             resolver.core
@@ -657,12 +663,14 @@ toRequestFunctions server effectTypes namespace method pathUrl operation =
                                             (\config -> Gen.Http.call_.task (taskArg config))
                                             |> Elm.withType taskAnnotation
                                             |> Elm.declaration (functionName ++ "Task")
+                                            |> Tuple.pair Common.ElmHttp
                                             |> justIf ElmHttpTask
                                         , Elm.fn
                                             ( "config", Nothing )
                                             (\config -> Gen.Http.call_.riskyTask (taskArg config))
                                             |> Elm.withType taskAnnotation
                                             |> Elm.declaration (functionName ++ "TaskRisky")
+                                            |> Tuple.pair Common.ElmHttp
                                             |> justIf ElmHttpTaskRisky
                                         ]
                                             |> List.filterMap identity
@@ -677,7 +685,7 @@ toRequestFunctions server effectTypes namespace method pathUrl operation =
                         -> (Elm.Expression -> PerPackage Elm.Expression)
                         -> (Elm.Expression -> Elm.Expression)
                         -> ({ requireToMsg : Bool } -> PerPackage Elm.Annotation.Annotation)
-                        -> CliMonad (List Elm.Declaration)
+                        -> CliMonad (List ( Common.Package, Elm.Declaration ))
                     dillonkearnsElmPagesBackendTask auth successAnnotation toBody replaced paramType =
                         if List.member DillonkearnsElmPagesTask effectTypes then
                             toExpect
@@ -716,11 +724,13 @@ toRequestFunctions server effectTypes namespace method pathUrl operation =
                                             expect config =
                                                 (innerExpect <| toMsg config).elmPages
                                         in
-                                        [ Elm.fn
-                                            ( "config", Nothing )
-                                            (\config -> Gen.BackendTask.Http.call_.request (taskArg config) (expect config))
-                                            |> Elm.withType taskAnnotation
-                                            |> Elm.declaration (functionName ++ "BackendTask")
+                                        [ ( Common.DillonkearnsElmPages
+                                          , Elm.fn
+                                                ( "config", Nothing )
+                                                (\config -> Gen.BackendTask.Http.call_.request (taskArg config) (expect config))
+                                                |> Elm.withType taskAnnotation
+                                                |> Elm.declaration functionName
+                                          )
                                         ]
                                     )
 
@@ -733,7 +743,7 @@ toRequestFunctions server effectTypes namespace method pathUrl operation =
                         -> (Elm.Expression -> PerPackage Elm.Expression)
                         -> (Elm.Expression -> Elm.Expression)
                         -> ({ requireToMsg : Bool } -> PerPackage Elm.Annotation.Annotation)
-                        -> CliMonad (List Elm.Declaration)
+                        -> CliMonad (List ( Common.Package, Elm.Declaration ))
                     lamderaProgramTestCommands auth _ toBody replaced paramType =
                         if List.member LamderaProgramTestCmd effectTypes || List.member LamderaProgramTestCmdRisky effectTypes then
                             CliMonad.map
@@ -762,12 +772,14 @@ toRequestFunctions server effectTypes namespace method pathUrl operation =
                                     [ Elm.fn
                                         ( "config", Just cmdParam )
                                         (\config -> Gen.Effect.Http.call_.request (cmdArg config))
-                                        |> Elm.declaration (functionName ++ "Effect")
+                                        |> Elm.declaration functionName
+                                        |> Tuple.pair Common.LamderaProgramTest
                                         |> justIf LamderaProgramTestCmd
                                     , Elm.fn
                                         ( "config", Just cmdParam )
                                         (\config -> Gen.Effect.Http.call_.riskyRequest (cmdArg config))
-                                        |> Elm.declaration (functionName ++ "EffectRisky")
+                                        |> Elm.declaration (functionName ++ "Risky")
+                                        |> Tuple.pair Common.LamderaProgramTest
                                         |> justIf LamderaProgramTestCmdRisky
                                     ]
                                         |> List.filterMap identity
@@ -783,7 +795,7 @@ toRequestFunctions server effectTypes namespace method pathUrl operation =
                         -> (Elm.Expression -> PerPackage Elm.Expression)
                         -> (Elm.Expression -> Elm.Expression)
                         -> ({ requireToMsg : Bool } -> PerPackage Elm.Annotation.Annotation)
-                        -> CliMonad (List Elm.Declaration)
+                        -> CliMonad (List ( Common.Package, Elm.Declaration ))
                     lamderaProgramTestTasks auth successAnnotation toBody replaced paramType =
                         if List.member LamderaProgramTestTask effectTypes || List.member LamderaProgramTestTaskRisky effectTypes then
                             CliMonad.map
@@ -818,13 +830,15 @@ toRequestFunctions server effectTypes namespace method pathUrl operation =
                                         ( "config", Nothing )
                                         (\config -> Gen.Effect.Http.call_.task (taskArg config))
                                         |> Elm.withType taskAnnotation
-                                        |> Elm.declaration (functionName ++ "EffectTask")
+                                        |> Elm.declaration (functionName ++ "Task")
+                                        |> Tuple.pair Common.LamderaProgramTest
                                         |> justIf LamderaProgramTestTask
                                     , Elm.fn
                                         ( "config", Nothing )
                                         (\config -> Gen.Effect.Http.call_.riskyTask (taskArg config))
                                         |> Elm.withType taskAnnotation
-                                        |> Elm.declaration (functionName ++ "EffectTaskRisky")
+                                        |> Elm.declaration (functionName ++ "TaskRisky")
+                                        |> Tuple.pair Common.LamderaProgramTest
                                         |> justIf LamderaProgramTestTaskRisky
                                     ]
                                         |> List.filterMap identity
@@ -882,8 +896,12 @@ toRequestFunctions server effectTypes namespace method pathUrl operation =
                                             (decls
                                                 |> List.concatMap
                                                     (List.map
-                                                        (\decl ->
-                                                            ( Common.Api
+                                                        (\( package, decl ) ->
+                                                            ( if isSinglePackage then
+                                                                Common.Api Nothing
+
+                                                              else
+                                                                Common.Api (Just package)
                                                             , decl
                                                                 |> Elm.withDocumentation (documentation auth)
                                                                 |> Elm.exposeWith
@@ -923,6 +941,37 @@ toRequestFunctions server effectTypes namespace method pathUrl operation =
             )
         |> CliMonad.withPath method
         |> CliMonad.withPath pathUrl
+
+
+effectTypeToPackage : EffectType -> Common.Package
+effectTypeToPackage effectType =
+    case effectType of
+        ElmHttpCmd ->
+            Common.ElmHttp
+
+        ElmHttpCmdRisky ->
+            Common.ElmHttp
+
+        ElmHttpTask ->
+            Common.ElmHttp
+
+        ElmHttpTaskRisky ->
+            Common.ElmHttp
+
+        DillonkearnsElmPagesTask ->
+            Common.DillonkearnsElmPages
+
+        LamderaProgramTestCmd ->
+            Common.LamderaProgramTest
+
+        LamderaProgramTestCmdRisky ->
+            Common.LamderaProgramTest
+
+        LamderaProgramTestTask ->
+            Common.LamderaProgramTest
+
+        LamderaProgramTestTaskRisky ->
+            Common.LamderaProgramTest
 
 
 operationToGroup : OpenApi.Operation.Operation -> String

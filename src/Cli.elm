@@ -75,8 +75,9 @@ program =
                         |> Cli.Option.validateMap serverValidation
                     )
                 |> Cli.OptionsParser.withDoc """
+version: 0.5.0
 
-  options:
+options:
 
   --output-dir                       The directory to output to. Defaults to `generated/`.
 

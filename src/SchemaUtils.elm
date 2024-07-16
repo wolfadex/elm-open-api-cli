@@ -227,7 +227,6 @@ schemaToType qualify namespace schema =
                                                     oneOfToType oneOfs
 
                                                 Nothing ->
-                                                    -- CliMonad.succeed Common.Value
                                                     case subSchema.enum of
                                                         Nothing ->
                                                             CliMonad.succeed Common.Value

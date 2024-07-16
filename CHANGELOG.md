@@ -7,98 +7,109 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unreleased]
 
-- Support for generating `lamdera/program-test` `Effect.Http` requests.
+### Added
+
+-   Support for generating `lamdera/program-test` `Effect.Http` requests. ✨ [Leonardo Taglialegne](https://github.com/miniBill)
+
+### Changed
+
+-   How the various effect types are generated. ✨ [Leonardo Taglialegne](https://github.com/miniBill)
+
+### Fixed
+
+-   Support for enums.
 
 ## [0.5.0] - 2024-06-02
 
 ### Added
 
-- Support for API Keys in auth
-- The new option `--effect-types` for determining which http effect types are generated
-  - Support for generating elm-pages [BackendTask.Http](https://package.elm-lang.org/packages/dillonkearns/elm-pages/latest/BackendTask-Http) requests
-- The new option `--server` for being able to pass in a server URL to be used in the generated requests
+-   Support for API Keys in auth
+-   The new option `--effect-types` for determining which http effect types are generated
+    -   Support for generating elm-pages [BackendTask.Http](https://package.elm-lang.org/packages/dillonkearns/elm-pages/latest/BackendTask-Http) requests
+-   The new option `--server` for being able to pass in a server URL to be used in the generated requests
 
 ### Changed
-- Now generates 4 files instead of 2:
-  - `<namespace>/Api.elm`, `<namespace>/Json.elm`, and `<namespace>/Types.elm` which correspond to the OAS directly
-  - `OpenApi/Common.elm` which can be shared across all generated SDKs
+
+-   Now generates 4 files instead of 2:
+    -   `<namespace>/Api.elm`, `<namespace>/Json.elm`, and `<namespace>/Types.elm` which correspond to the OAS directly
+    -   `OpenApi/Common.elm` which can be shared across all generated SDKs
 
 ## [0.4.1] - 2024-04-28
 
 ### Added
 
-- Support for converting Swagger docs to Open API files, resolves [issue #47](https://github.com/wolfadex/elm-open-api-cli/issues/47)
-- Print status of various steps of the process
-  ```sh
-  ✓ Read OAS from ./example/realworld-conduit.yaml
-  ✓ Parse OAS
-  ✓ Generate Elm modules
-  ✓ Format with elm-format
-  ✓ Write to disk
-  ```
+-   Support for converting Swagger docs to Open API files, resolves [issue #47](https://github.com/wolfadex/elm-open-api-cli/issues/47)
+-   Print status of various steps of the process
+    ```sh
+    ✓ Read OAS from ./example/realworld-conduit.yaml
+    ✓ Parse OAS
+    ✓ Generate Elm modules
+    ✓ Format with elm-format
+    ✓ Write to disk
+    ```
 
 ### Fixed
 
-- [Issue #86](https://github.com/wolfadex/elm-open-api-cli/issues/86), some response names start with the status code
+-   [Issue #86](https://github.com/wolfadex/elm-open-api-cli/issues/86), some response names start with the status code
 
 ## [0.4.0] - 2024-04-23
 
 ### Added
 
-- Included `elm/url` in the possible dependencies list. ✨ [James Robb](https://github.com/jamesrweb)
+-   Included `elm/url` in the possible dependencies list. ✨ [James Robb](https://github.com/jamesrweb)
 
 ### Changed
 
-- Now generates 2 files: `<namespace>/Api.elm` and `<namespace>/OpenApi.elm`, which resolves [issue #81](https://github.com/wolfadex/elm-open-api-cli/issues/81)
+-   Now generates 2 files: `<namespace>/Api.elm` and `<namespace>/OpenApi.elm`, which resolves [issue #81](https://github.com/wolfadex/elm-open-api-cli/issues/81)
 
 ## [0.3.0] - 2024-04-21
 
 ### Added
 
-- The risky version of requests, to resolve [issue #71](https://github.com/wolfadex/elm-open-api-cli/issues/71)
+-   The risky version of requests, to resolve [issue #71](https://github.com/wolfadex/elm-open-api-cli/issues/71)
 
 ### Changed
 
-- Improved the success message to use links to the generated files &necessary Elm dependencies, and list elm/bytes as a possible dependency
+-   Improved the success message to use links to the generated files &necessary Elm dependencies, and list elm/bytes as a possible dependency
 
 ### Fixed
 
-- Some resopnse names could be status codes, they now generate as `statusCode<number>`
-- [Issue #72](https://github.com/wolfadex/elm-open-api-cli/issues/72), where URLs would end with a trailing `/` when they shouldn't
-- Names (like this in the BIMcloud API) can start with a `$` prefix, make them Elm compliant
-- [Issue #65](https://github.com/wolfadex/elm-open-api-cli/issues/65), not all paths define error responses
+-   Some resopnse names could be status codes, they now generate as `statusCode<number>`
+-   [Issue #72](https://github.com/wolfadex/elm-open-api-cli/issues/72), where URLs would end with a trailing `/` when they shouldn't
+-   Names (like this in the BIMcloud API) can start with a `$` prefix, make them Elm compliant
+-   [Issue #65](https://github.com/wolfadex/elm-open-api-cli/issues/65), not all paths define error responses
 
 ## [0.2.3] - 2024-04-19
 
 ### Changed
 
-- Improved accesing JSON content to included vendored JSON. ✨ [James Robb](https://github.com/jamesrweb)
+-   Improved accesing JSON content to included vendored JSON. ✨ [James Robb](https://github.com/jamesrweb)
 
 ## [0.2.2] - 2024-04-14
 
 ### Added
 
-- Custom error handling: now generates a custom error type for each endpoint that has a non-2xx responses.
-- Post generation notes: after generating the SDK, a message will be displayed with additional dependencies to install. ✨ [James Robb](https://github.com/jamesrweb)
+-   Custom error handling: now generates a custom error type for each endpoint that has a non-2xx responses.
+-   Post generation notes: after generating the SDK, a message will be displayed with additional dependencies to install. ✨ [James Robb](https://github.com/jamesrweb)
 
 ### Changed
 
-- Warnings are now grouped instead of duplicated ✨ [Leonardo Taglialegne](https://github.com/miniBill)
+-   Warnings are now grouped instead of duplicated ✨ [Leonardo Taglialegne](https://github.com/miniBill)
 
 ### Removed
 
-- [elm-community/json-extra](https://package.elm-lang.org/packages/elm-community/json-extra/latest/) is no loonger required as a dependency
+-   [elm-community/json-extra](https://package.elm-lang.org/packages/elm-community/json-extra/latest/) is no loonger required as a dependency
 
 ## [0.2.1] - 2024-04-14
 
-- A duplicate release of 0.2.0
+-   A duplicate release of 0.2.0
 
 ## [0.2.0] - 2024-01-16
 
 ### Added
 
-- Custom error handling:
-  - Now generates a custom error type for each endpoint that has a non-2xx responses.
+-   Custom error handling:
+    -   Now generates a custom error type for each endpoint that has a non-2xx responses.
 
 ## [0.1.3-beta.1] - 2023-11-17
 
@@ -106,15 +117,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- I published the wrong build for 0.1.1, this published the correct build. See 0.1.1 for changes.
+-   I published the wrong build for 0.1.1, this published the correct build. See 0.1.1 for changes.
 
 ## [0.1.1] - 2023-11-01
 
 ### Fixed
 
-- [incorrect parsing of JSON files](https://github.com/wolfadex/elm-open-api-cli/issues/53)
+-   [incorrect parsing of JSON files](https://github.com/wolfadex/elm-open-api-cli/issues/53)
 
-  - Resolved by https://github.com/wolfadex/elm-open-api-cli/pull/54/ ✨ [Lars Wikman](https://github.com/lawik)
+    -   Resolved by https://github.com/wolfadex/elm-open-api-cli/pull/54/ ✨ [Lars Wikman](https://github.com/lawik)
 
 ## [0.1.0] - 2023-10-06
 

@@ -30,11 +30,13 @@ import Gen.Json.Decode
 import Gen.Json.Encode
 import Gen.List
 import Gen.Maybe
+import Json.Decode
 import Json.Schema.Definitions
 import Maybe.Extra
 import OpenApi
 import OpenApi.Components
 import OpenApi.Schema
+import Result.Extra
 import Set exposing (Set)
 
 
@@ -225,7 +227,17 @@ schemaToType qualify namespace schema =
                                                     oneOfToType oneOfs
 
                                                 Nothing ->
-                                                    CliMonad.succeed Common.Value
+                                                    case subSchema.enum of
+                                                        Nothing ->
+                                                            CliMonad.succeed Common.Value
+
+                                                        Just enums ->
+                                                            case Result.Extra.combineMap (Json.Decode.decodeValue Json.Decode.string) enums of
+                                                                Err _ ->
+                                                                    CliMonad.fail "Attempted to parse an enum as a string and failed"
+
+                                                                Ok decodedEnums ->
+                                                                    CliMonad.succeed (Common.Enum decodedEnums)
 
                 Json.Schema.Definitions.NullableType singleType ->
                     nullable (singleTypeToType singleType)
@@ -417,6 +429,9 @@ typeToAnnotation qualify namespace type_ =
         Common.List t ->
             CliMonad.map Elm.Annotation.list (typeToAnnotation qualify namespace t)
 
+        Common.Enum _ ->
+            CliMonad.succeed Elm.Annotation.string
+
         Common.OneOf oneOfName oneOfData ->
             oneOfAnnotation qualify namespace oneOfName oneOfData
 
@@ -463,6 +478,9 @@ typeToAnnotationMaybe qualify namespace type_ =
 
         Common.List t ->
             CliMonad.map Elm.Annotation.list (typeToAnnotationMaybe qualify namespace t)
+
+        Common.Enum _ ->
+            CliMonad.succeed Elm.Annotation.string
 
         Common.OneOf oneOfName oneOfData ->
             oneOfAnnotation qualify namespace oneOfName oneOfData
@@ -533,6 +551,9 @@ typeToEncoder qualify namespace type_ =
 
         Common.Bool ->
             CliMonad.succeed Gen.Json.Encode.call_.bool
+
+        Common.Enum _ ->
+            CliMonad.succeed Gen.Json.Encode.call_.string
 
         Common.Object properties ->
             let
@@ -749,6 +770,23 @@ typeToDecoder qualify namespace type_ =
         Common.List t ->
             CliMonad.map Gen.Json.Decode.list
                 (typeToDecoder qualify namespace t)
+
+        Common.Enum constructors ->
+            CliMonad.succeed
+                (Gen.Json.Decode.andThen
+                    (\enumStr ->
+                        Elm.Case.string enumStr
+                            { cases =
+                                List.map
+                                    (\constructor ->
+                                        ( constructor, Gen.Json.Decode.succeed enumStr )
+                                    )
+                                    constructors
+                            , otherwise = Gen.Json.Decode.fail "Unknown enum"
+                            }
+                    )
+                    Gen.Json.Decode.string
+                )
 
         Common.Value ->
             CliMonad.succeed Gen.Json.Decode.value

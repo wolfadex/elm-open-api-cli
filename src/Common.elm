@@ -188,6 +188,7 @@ type Type
     | Bool
     | List Type
     | OneOf TypeName OneOfData
+    | Enum (List String)
     | Value
     | Ref (List String)
     | Bytes

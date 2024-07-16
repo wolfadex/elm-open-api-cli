@@ -5,7 +5,8 @@ module Example exposing (main)
 import AirlineCodeLookupApi.Api
 import AirlineCodeLookupApi.Types
 import Browser
-import BasicRoute.Types
+import BasicRouter.Types
+import BasicRouter.Json
 import DbFahrplanApi.Api
 import DbFahrplanApi.Types
 import GithubV3RestApi.Api

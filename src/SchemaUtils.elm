@@ -232,11 +232,7 @@ schemaToType qualify namespace schema =
                                                             CliMonad.succeed Common.Value
 
                                                         Just enums ->
-                                                            case
-                                                                enums
-                                                                    |> List.map (Json.Decode.decodeValue Json.Decode.string)
-                                                                    |> Result.Extra.combine
-                                                            of
+                                                            case Result.Extra.combineMap (Json.Decode.decodeValue Json.Decode.string) enums of
                                                                 Err _ ->
                                                                     CliMonad.fail "Attempted to parse an enum as a string and failed"
 
@@ -557,19 +553,7 @@ typeToEncoder qualify namespace type_ =
             CliMonad.succeed Gen.Json.Encode.call_.bool
 
         Common.Enum constructors ->
-            CliMonad.succeed
-                (\expr ->
-                    Elm.Case.string
-                        expr
-                        { cases =
-                            List.map
-                                (\constructor ->
-                                    ( constructor, Gen.Json.Encode.values_.string )
-                                )
-                                constructors
-                        , otherwise = Gen.Json.Encode.call_.string expr
-                        }
-                )
+            CliMonad.succeed Gen.Json.Encode.call_.string
 
         Common.Object properties ->
             let

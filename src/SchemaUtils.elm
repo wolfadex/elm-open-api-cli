@@ -552,7 +552,7 @@ typeToEncoder qualify namespace type_ =
         Common.Bool ->
             CliMonad.succeed Gen.Json.Encode.call_.bool
 
-        Common.Enum constructors ->
+        Common.Enum _ ->
             CliMonad.succeed Gen.Json.Encode.call_.string
 
         Common.Object properties ->

@@ -729,7 +729,7 @@ toRequestFunctions server effectTypes namespace method pathUrl operation =
                                                 ( "config", Nothing )
                                                 (\config -> Gen.BackendTask.Http.call_.request (taskArg config) (expect config))
                                                 |> Elm.withType taskAnnotation
-                                                |> Elm.declaration (functionName ++ "BackendTask")
+                                                |> Elm.declaration functionName
                                           )
                                         ]
                                     )
@@ -772,13 +772,13 @@ toRequestFunctions server effectTypes namespace method pathUrl operation =
                                     [ Elm.fn
                                         ( "config", Just cmdParam )
                                         (\config -> Gen.Effect.Http.call_.request (cmdArg config))
-                                        |> Elm.declaration (functionName ++ "Effect")
+                                        |> Elm.declaration functionName
                                         |> Tuple.pair Common.LamderaProgramTest
                                         |> justIf LamderaProgramTestCmd
                                     , Elm.fn
                                         ( "config", Just cmdParam )
                                         (\config -> Gen.Effect.Http.call_.riskyRequest (cmdArg config))
-                                        |> Elm.declaration (functionName ++ "EffectRisky")
+                                        |> Elm.declaration (functionName ++ "Risky")
                                         |> Tuple.pair Common.LamderaProgramTest
                                         |> justIf LamderaProgramTestCmdRisky
                                     ]
@@ -830,14 +830,14 @@ toRequestFunctions server effectTypes namespace method pathUrl operation =
                                         ( "config", Nothing )
                                         (\config -> Gen.Effect.Http.call_.task (taskArg config))
                                         |> Elm.withType taskAnnotation
-                                        |> Elm.declaration (functionName ++ "EffectTask")
+                                        |> Elm.declaration (functionName ++ "Task")
                                         |> Tuple.pair Common.LamderaProgramTest
                                         |> justIf LamderaProgramTestTask
                                     , Elm.fn
                                         ( "config", Nothing )
                                         (\config -> Gen.Effect.Http.call_.riskyTask (taskArg config))
                                         |> Elm.withType taskAnnotation
-                                        |> Elm.declaration (functionName ++ "EffectTaskRisky")
+                                        |> Elm.declaration (functionName ++ "TaskRisky")
                                         |> Tuple.pair Common.LamderaProgramTest
                                         |> justIf LamderaProgramTestTaskRisky
                                     ]

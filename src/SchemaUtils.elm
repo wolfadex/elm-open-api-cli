@@ -237,8 +237,8 @@ schemaToType qualify namespace schema =
                                                                     |> List.map (Json.Decode.decodeValue Json.Decode.string)
                                                                     |> Result.Extra.combine
                                                             of
-                                                                Err enumDecodeErr ->
-                                                                    Debug.todo ""
+                                                                Err _ ->
+                                                                    CliMonad.fail "Attempted to parse an enum as a string and failed"
 
                                                                 Ok decodedEnums ->
                                                                     CliMonad.succeed (Common.Enum decodedEnums)

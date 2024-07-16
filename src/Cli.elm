@@ -94,11 +94,11 @@ program =
                                      The options for type are:
                                       - cmd: input -> Cmd for elm/http,
                                              input -> Effect.Command for lamdera/program-test
-                                      - riskycmd: as above, but using Http.riskyRequest
+                                      - cmdrisky: as above, but using Http.riskyRequest
                                       - task: input -> Task for elm/http
                                               input -> Effect.Task for lamdera/program-test
                                               input -> BackendTask for dillonkearns/elm-pages
-                                      - riskytask: as above, but using Http.riskyRequest
+                                      - taskrisky: as above, but using Http.riskyRequest
                                                    cannot be used for dillonkearns/elm-pages
 
   --server                           The base URL for the OpenAPI server.

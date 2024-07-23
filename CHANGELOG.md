@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unreleased]
 
+## [0.6.1] - 2024-07-23
+
+### Fixed
+
+-   Decoding a `String` as a `String` and not as JSON. ✨ [Leonardo Taglialegne](https://github.com/miniBill)
+
+
 ## [0.6.0] - 2024-07-16
 
 ### Added

@@ -1832,6 +1832,15 @@ operationToTypesExpectAndResolver namespace functionName operation =
                     , elmPages = Gen.BackendTask.Http.expectJson successDecoder
                     , lamderaProgramTest = Gen.OpenApi.Common.expectJsonCustomEffect toMsg errorDecoders successDecoder
                     }
+
+        expectStringBetter : CliMonad ((Elm.Expression -> Elm.Expression) -> PerPackage Elm.Expression)
+        expectStringBetter =
+            CliMonad.succeed <|
+                \toMsg ->
+                    { core = Gen.Http.expectString toMsg
+                    , elmPages = Gen.BackendTask.Http.expectString
+                    , lamderaProgramTest = Gen.Effect.Http.expectString toMsg
+                    }
     in
     CliMonad.succeed responses
         |> CliMonad.stepOrFail
@@ -2051,7 +2060,7 @@ operationToTypesExpectAndResolver namespace functionName operation =
                                                     , bodyTypeAnnotation = Elm.Annotation.string
                                                     , errorTypeDeclaration = errorTypeDeclaration_
                                                     , errorTypeAnnotation = errorTypeAnnotation
-                                                    , toExpect = expectJsonBetter errorDecoders_ Gen.Json.Decode.string
+                                                    , toExpect = expectStringBetter
                                                     , resolver =
                                                         { core =
                                                             Gen.Http.stringResolver

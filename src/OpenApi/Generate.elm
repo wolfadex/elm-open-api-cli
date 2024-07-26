@@ -801,7 +801,11 @@ toRequestFunctions server effectTypes namespace method pathUrl operation =
                                         , ( "headers", Gen.Http.annotation_.header )
                                         , ( "url", Elm.Annotation.string )
                                         , ( "body", Gen.Http.annotation_.body )
-                                        , ( "resolver", Gen.Http.annotation_.resolver (Elm.Annotation.var "x") (Elm.Annotation.var "a") )
+                                        , ( "resolver"
+                                          , Gen.Http.annotation_.resolver
+                                                (Gen.OpenApi.Common.annotation_.error errorTypeAnnotation bodyTypeAnnotation)
+                                                successAnnotation
+                                          )
                                         , ( "timeout", Elm.Annotation.maybe Elm.Annotation.float )
                                         ]
                                     )
@@ -982,7 +986,12 @@ toRequestFunctions server effectTypes namespace method pathUrl operation =
                                         , ( "headers", Elm.Annotation.list Gen.Effect.Http.annotation_.header )
                                         , ( "url", Elm.Annotation.string )
                                         , ( "body", Gen.Effect.Http.annotation_.body )
-                                        , ( "resolver", Gen.Effect.Http.annotation_.resolver (Elm.Annotation.var "restriction") (Elm.Annotation.var "x") (Elm.Annotation.var "a") )
+                                        , ( "resolver"
+                                          , Gen.Effect.Http.annotation_.resolver
+                                                (Elm.Annotation.var "restriction")
+                                                (Gen.OpenApi.Common.annotation_.error errorTypeAnnotation bodyTypeAnnotation)
+                                                successAnnotation
+                                          )
                                         , ( "timeout", Elm.Annotation.maybe (Elm.Annotation.namedWith [ "Duration" ] "Duration" []) )
                                         ]
                                     )

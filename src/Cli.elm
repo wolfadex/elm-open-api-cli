@@ -96,11 +96,13 @@ options:
                                       - cmd: Cmd for elm/http,
                                              Effect.Command for lamdera/program-test
                                       - cmdrisky: as above, but using Http.riskyRequest
+                                      - cmdrecord: the input to Http.request
                                       - task: Task for elm/http
                                               Effect.Task for lamdera/program-test
                                               BackendTask for dillonkearns/elm-pages
                                       - taskrisky: as above, but using Http.riskyTask
                                                    cannot be used for dillonkearns/elm-pages
+                                      - taskrecord: the input to Http.task
 
   --server                           The base URL for the OpenAPI server.
                                      If not specified this will be extracted from the OAS
@@ -158,11 +160,17 @@ effectTypeValidation effectType =
         "cmdrisky" ->
             Ok [ OpenApi.Generate.ElmHttpCmdRisky ]
 
+        "cmdrecord" ->
+            Ok [ OpenApi.Generate.ElmHttpCmdRecord ]
+
         "task" ->
             Ok [ OpenApi.Generate.ElmHttpTask ]
 
         "taskrisky" ->
             Ok [ OpenApi.Generate.ElmHttpTaskRisky ]
+
+        "taskrecord" ->
+            Ok [ OpenApi.Generate.ElmHttpTaskRecord ]
 
         "elm/http" ->
             Ok [ OpenApi.Generate.ElmHttpCmd, OpenApi.Generate.ElmHttpTask ]
@@ -173,17 +181,26 @@ effectTypeValidation effectType =
         "elm/http.cmdrisky" ->
             Ok [ OpenApi.Generate.ElmHttpCmdRisky ]
 
+        "elm/http.cmdrecord" ->
+            Ok [ OpenApi.Generate.ElmHttpCmdRecord ]
+
         "elm/http.task" ->
             Ok [ OpenApi.Generate.ElmHttpTask ]
 
         "elm/http.taskrisky" ->
             Ok [ OpenApi.Generate.ElmHttpTaskRisky ]
 
+        "elm/http.taskrecord" ->
+            Ok [ OpenApi.Generate.ElmHttpTaskRecord ]
+
         "dillonkearns/elm-pages" ->
             Ok [ OpenApi.Generate.DillonkearnsElmPagesTask ]
 
         "dillonkearns/elm-pages.task" ->
             Ok [ OpenApi.Generate.DillonkearnsElmPagesTask ]
+
+        "dillonkearns/elm-pages.taskrecord" ->
+            Ok [ OpenApi.Generate.DillonkearnsElmPagesTaskRecord ]
 
         "lamdera/program-test" ->
             Ok [ OpenApi.Generate.LamderaProgramTestCmd, OpenApi.Generate.LamderaProgramTestTask ]
@@ -194,11 +211,17 @@ effectTypeValidation effectType =
         "lamdera/program-test.cmdrisky" ->
             Ok [ OpenApi.Generate.LamderaProgramTestCmdRisky ]
 
+        "lamdera/program-test.cmdrecord" ->
+            Ok [ OpenApi.Generate.LamderaProgramTestCmdRecord ]
+
         "lamdera/program-test.task" ->
             Ok [ OpenApi.Generate.LamderaProgramTestTask ]
 
         "lamdera/program-test.taskrisky" ->
             Ok [ OpenApi.Generate.LamderaProgramTestTaskRisky ]
+
+        "lamdera/program-test.taskrecord" ->
+            Ok [ OpenApi.Generate.LamderaProgramTestTaskRecord ]
 
         _ ->
             Err <| "Unexpected effect type: " ++ effectType

@@ -64,14 +64,19 @@ type alias Mime =
 
 type EffectType
     = ElmHttpCmd
+    | ElmHttpCmdRecord
     | ElmHttpCmdRisky
     | ElmHttpTask
+    | ElmHttpTaskRecord
     | ElmHttpTaskRisky
     | DillonkearnsElmPagesTask
+    | DillonkearnsElmPagesTaskRecord
     | LamderaProgramTestCmd
     | LamderaProgramTestCmdRisky
+    | LamderaProgramTestCmdRecord
     | LamderaProgramTestTask
     | LamderaProgramTestTaskRisky
+    | LamderaProgramTestTaskRecord
 
 
 type ContentSchema
@@ -665,6 +670,19 @@ toRequestFunctions server effectTypes namespace method pathUrl operation =
                                         Elm.Annotation.function
                                             [ (paramType { requireToMsg = True }).core ]
                                             (Elm.Annotation.cmd (Elm.Annotation.var "msg"))
+                                    , recordAnnotation =
+                                        Elm.Annotation.function
+                                            [ (paramType { requireToMsg = True }).core ]
+                                            (Elm.Annotation.record
+                                                [ ( "method", Elm.Annotation.string )
+                                                , ( "headers", Elm.Annotation.list Gen.Http.annotation_.header )
+                                                , ( "url", Elm.Annotation.string )
+                                                , ( "body", Gen.Http.annotation_.header )
+                                                , ( "expect", Gen.Http.annotation_.expect (Elm.Annotation.var "msg") )
+                                                , ( "timeout", Elm.Annotation.maybe Elm.Annotation.float )
+                                                , ( "tracker", Elm.Annotation.maybe Elm.Annotation.string )
+                                                ]
+                                            )
                                     }
                                 )
                                 [ ( ElmHttpCmd
@@ -682,6 +700,14 @@ toRequestFunctions server effectTypes namespace method pathUrl operation =
                                             (\config -> Gen.Http.call_.riskyRequest (cmdArg config))
                                             |> Elm.withType cmdAnnotation
                                             |> Elm.declaration (functionName ++ "Risky")
+                                  )
+                                , ( ElmHttpCmdRecord
+                                  , \{ cmdArg, recordAnnotation } ->
+                                        Elm.fn
+                                            ( "config", Nothing )
+                                            cmdArg
+                                            |> Elm.withType recordAnnotation
+                                            |> Elm.declaration (functionName ++ "Record")
                                   )
                                 ]
 
@@ -712,6 +738,18 @@ toRequestFunctions server effectTypes namespace method pathUrl operation =
                                                 (Gen.OpenApi.Common.annotation_.error errorTypeAnnotation bodyTypeAnnotation)
                                                 successAnnotation
                                             )
+                                    , recordAnnotation =
+                                        Elm.Annotation.function
+                                            [ (paramType { requireToMsg = False }).core ]
+                                            (Elm.Annotation.record
+                                                [ ( "method", Elm.Annotation.string )
+                                                , ( "headers", Gen.Http.annotation_.header )
+                                                , ( "url", Elm.Annotation.string )
+                                                , ( "body", Gen.Http.annotation_.body )
+                                                , ( "resolver", Gen.Http.annotation_.resolver (Elm.Annotation.var "x") (Elm.Annotation.var "a") )
+                                                , ( "timeout", Elm.Annotation.maybe Elm.Annotation.float )
+                                                ]
+                                            )
                                     }
                                 )
                                 [ ( ElmHttpTask
@@ -729,6 +767,14 @@ toRequestFunctions server effectTypes namespace method pathUrl operation =
                                             (\config -> Gen.Http.call_.riskyTask (taskArg config))
                                             |> Elm.withType taskAnnotation
                                             |> Elm.declaration (functionName ++ "TaskRisky")
+                                  )
+                                , ( ElmHttpTaskRecord
+                                  , \{ taskArg, recordAnnotation } ->
+                                        Elm.fn
+                                            ( "config", Nothing )
+                                            taskArg
+                                            |> Elm.withType recordAnnotation
+                                            |> Elm.declaration (functionName ++ "TaskRecord")
                                   )
                                 ]
 
@@ -763,6 +809,21 @@ toRequestFunctions server effectTypes namespace method pathUrl operation =
                                                 )
                                                 successAnnotation
                                             )
+                                    , recordAnnotation =
+                                        Elm.Annotation.function
+                                            [ (paramType { requireToMsg = False }).elmPages ]
+                                            (Elm.Annotation.tuple
+                                                (Elm.Annotation.record
+                                                    [ ( "url", Elm.Annotation.string )
+                                                    , ( "method", Elm.Annotation.string )
+                                                    , ( "headers", Elm.Annotation.list (Elm.Annotation.tuple Elm.Annotation.string Elm.Annotation.string) )
+                                                    , ( "body", Gen.BackendTask.Http.annotation_.body )
+                                                    , ( "retries", Elm.Annotation.maybe Elm.Annotation.int )
+                                                    , ( "timeoutInMs", Elm.Annotation.maybe Elm.Annotation.int )
+                                                    ]
+                                                )
+                                                (Gen.BackendTask.Http.annotation_.expect (Elm.Annotation.var "a"))
+                                            )
                                     }
                                 )
                                 [ ( DillonkearnsElmPagesTask
@@ -771,6 +832,14 @@ toRequestFunctions server effectTypes namespace method pathUrl operation =
                                             ( "config", Nothing )
                                             (\config -> Gen.BackendTask.Http.call_.request (taskArg config) (expect <| toMsg config).elmPages)
                                             |> Elm.withType taskAnnotation
+                                            |> Elm.declaration functionName
+                                  )
+                                , ( DillonkearnsElmPagesTaskRecord
+                                  , \{ taskArg, recordAnnotation } ->
+                                        Elm.fn
+                                            ( "config", Nothing )
+                                            (\config -> Elm.tuple (taskArg config) (expect <| toMsg config).elmPages)
+                                            |> Elm.withType recordAnnotation
                                             |> Elm.declaration functionName
                                   )
                                 ]
@@ -813,6 +882,13 @@ toRequestFunctions server effectTypes namespace method pathUrl operation =
                                             (\config -> Gen.Effect.Http.call_.riskyRequest (cmdArg config))
                                             |> Elm.declaration (functionName ++ "Risky")
                                   )
+                                , ( LamderaProgramTestCmdRecord
+                                  , \{ cmdArg, cmdParam } ->
+                                        Elm.fn
+                                            ( "config", Just cmdParam )
+                                            cmdArg
+                                            |> Elm.declaration (functionName ++ "Record")
+                                  )
                                 ]
 
                         lamderaProgramTestTasks :
@@ -843,6 +919,18 @@ toRequestFunctions server effectTypes namespace method pathUrl operation =
                                                 (Gen.OpenApi.Common.annotation_.error errorTypeAnnotation bodyTypeAnnotation)
                                                 successAnnotation
                                             )
+                                    , recordAnnotation =
+                                        Elm.Annotation.function
+                                            [ (paramType { requireToMsg = False }).lamderaProgramTest ]
+                                            (Elm.Annotation.record
+                                                [ ( "method", Elm.Annotation.string )
+                                                , ( "headers", Elm.Annotation.list Gen.Effect.Http.annotation_.header )
+                                                , ( "url", Elm.Annotation.string )
+                                                , ( "body", Gen.Effect.Http.annotation_.body )
+                                                , ( "resolver", Gen.Effect.Http.annotation_.resolver (Elm.Annotation.var "restriction") (Elm.Annotation.var "x") (Elm.Annotation.var "a") )
+                                                , ( "timeout", Elm.Annotation.maybe (Elm.Annotation.namedWith [ "Duration" ] "Duration" []) )
+                                                ]
+                                            )
                                     }
                                 )
                                 [ ( LamderaProgramTestTask
@@ -860,6 +948,14 @@ toRequestFunctions server effectTypes namespace method pathUrl operation =
                                             (\config -> Gen.Effect.Http.call_.riskyTask (taskArg config))
                                             |> Elm.withType taskAnnotation
                                             |> Elm.declaration (functionName ++ "TaskRisky")
+                                  )
+                                , ( LamderaProgramTestTaskRecord
+                                  , \{ taskArg, recordAnnotation } ->
+                                        Elm.fn
+                                            ( "config", Nothing )
+                                            taskArg
+                                            |> Elm.withType recordAnnotation
+                                            |> Elm.declaration (functionName ++ "TaskRecord")
                                   )
                                 ]
                     in
@@ -913,10 +1009,19 @@ effectTypeToPackage effectType =
         ElmHttpCmdRisky ->
             Common.ElmHttp
 
+        ElmHttpCmdRecord ->
+            Common.ElmHttp
+
         ElmHttpTask ->
             Common.ElmHttp
 
         ElmHttpTaskRisky ->
+            Common.ElmHttp
+
+        ElmHttpTaskRecord ->
+            Common.ElmHttp
+
+        DillonkearnsElmPagesTaskRecord ->
             Common.ElmHttp
 
         DillonkearnsElmPagesTask ->
@@ -928,10 +1033,16 @@ effectTypeToPackage effectType =
         LamderaProgramTestCmdRisky ->
             Common.LamderaProgramTest
 
+        LamderaProgramTestCmdRecord ->
+            Common.LamderaProgramTest
+
         LamderaProgramTestTask ->
             Common.LamderaProgramTest
 
         LamderaProgramTestTaskRisky ->
+            Common.LamderaProgramTest
+
+        LamderaProgramTestTaskRecord ->
             Common.LamderaProgramTest
 
 

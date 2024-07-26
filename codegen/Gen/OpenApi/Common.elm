@@ -1,7 +1,7 @@
-module Gen.OpenApi.Common exposing (annotation_, bytesResolverCustom, bytesResolverCustomEffect, call_, caseOf_, decodeOptionalField, expectBytesCustom, expectBytesCustomEffect, expectJsonCustom, expectJsonCustomEffect, jsonDecodeAndMap, jsonResolverCustom, jsonResolverCustomEffect, make_, moduleName_, values_)
+module Gen.OpenApi.Common exposing (annotation_, bytesResolverCustom, bytesResolverCustomEffect, call_, caseOf_, decodeOptionalField, expectBytesCustom, expectBytesCustomEffect, expectJsonCustom, expectJsonCustomEffect, expectStringCustom, expectStringCustomEffect, jsonDecodeAndMap, jsonResolverCustom, jsonResolverCustomEffect, make_, moduleName_, stringResolverCustom, stringResolverCustomEffect, values_)
 
 {-| 
-@docs moduleName_, jsonDecodeAndMap, decodeOptionalField, bytesResolverCustomEffect, expectBytesCustomEffect, jsonResolverCustomEffect, expectJsonCustomEffect, bytesResolverCustom, expectBytesCustom, jsonResolverCustom, expectJsonCustom, annotation_, make_, caseOf_, call_, values_
+@docs moduleName_, jsonDecodeAndMap, decodeOptionalField, bytesResolverCustomEffect, expectBytesCustomEffect, stringResolverCustomEffect, expectStringCustomEffect, jsonResolverCustomEffect, expectJsonCustomEffect, bytesResolverCustom, expectBytesCustom, stringResolverCustom, expectStringCustom, jsonResolverCustom, expectJsonCustom, annotation_, make_, caseOf_, call_, values_
 -}
 
 
@@ -99,7 +99,7 @@ decodeOptionalField decodeOptionalFieldArg decodeOptionalFieldArg0 =
 
 {-| bytesResolverCustomEffect: 
     Dict.Dict String (Json.Decode.Decoder err)
-    -> Effect.Http.Resolver restrictions (OpenApi.Common.Error err String) success
+    -> Effect.Http.Resolver restrictions (OpenApi.Common.Error err Bytes.Bytes) Bytes.Bytes
 -}
 bytesResolverCustomEffect : Elm.Expression -> Elm.Expression
 bytesResolverCustomEffect bytesResolverCustomEffectArg =
@@ -127,8 +127,10 @@ bytesResolverCustomEffect bytesResolverCustomEffectArg =
                                , Type.namedWith
                                    [ "OpenApi", "Common" ]
                                    "Error"
-                                   [ Type.var "err", Type.string ]
-                               , Type.var "success"
+                                   [ Type.var "err"
+                                   , Type.namedWith [ "Bytes" ] "Bytes" []
+                                   ]
+                               , Type.namedWith [ "Bytes" ] "Bytes" []
                                ]
                           )
                      )
@@ -138,7 +140,7 @@ bytesResolverCustomEffect bytesResolverCustomEffectArg =
 
 
 {-| expectBytesCustomEffect: 
-    (Result.Result (OpenApi.Common.Error err String) success -> msg)
+    (Result.Result (OpenApi.Common.Error err Bytes.Bytes) Bytes.Bytes -> msg)
     -> Dict.Dict String (Json.Decode.Decoder err)
     -> Effect.Http.Expect msg
 -}
@@ -159,8 +161,10 @@ expectBytesCustomEffect expectBytesCustomEffectArg expectBytesCustomEffectArg0 =
                                     [ Type.namedWith
                                         [ "OpenApi", "Common" ]
                                         "Error"
-                                        [ Type.var "err", Type.string ]
-                                    , Type.var "success"
+                                        [ Type.var "err"
+                                        , Type.namedWith [ "Bytes" ] "Bytes" []
+                                        ]
+                                    , Type.namedWith [ "Bytes" ] "Bytes" []
                                     ]
                               ]
                               (Type.var "msg")
@@ -186,6 +190,98 @@ expectBytesCustomEffect expectBytesCustomEffectArg expectBytesCustomEffectArg0 =
             "expectBytesCustomEffectUnpack"
             expectBytesCustomEffectArg
         , expectBytesCustomEffectArg0
+        ]
+
+
+{-| stringResolverCustomEffect: 
+    Dict.Dict String (Json.Decode.Decoder err)
+    -> Effect.Http.Resolver restrictions (OpenApi.Common.Error err String) String
+-}
+stringResolverCustomEffect : Elm.Expression -> Elm.Expression
+stringResolverCustomEffect stringResolverCustomEffectArg =
+    Elm.apply
+        (Elm.value
+             { importFrom = [ "OpenApi", "Common" ]
+             , name = "stringResolverCustomEffect"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.namedWith
+                              [ "Dict" ]
+                              "Dict"
+                              [ Type.string
+                              , Type.namedWith
+                                    [ "Json", "Decode" ]
+                                    "Decoder"
+                                    [ Type.var "err" ]
+                              ]
+                          ]
+                          (Type.namedWith
+                               [ "Effect", "Http" ]
+                               "Resolver"
+                               [ Type.var "restrictions"
+                               , Type.namedWith
+                                   [ "OpenApi", "Common" ]
+                                   "Error"
+                                   [ Type.var "err", Type.string ]
+                               , Type.string
+                               ]
+                          )
+                     )
+             }
+        )
+        [ stringResolverCustomEffectArg ]
+
+
+{-| expectStringCustomEffect: 
+    (Result.Result (OpenApi.Common.Error err String) String -> msg)
+    -> Dict.Dict String (Json.Decode.Decoder err)
+    -> Effect.Http.Expect msg
+-}
+expectStringCustomEffect :
+    (Elm.Expression -> Elm.Expression) -> Elm.Expression -> Elm.Expression
+expectStringCustomEffect expectStringCustomEffectArg expectStringCustomEffectArg0 =
+    Elm.apply
+        (Elm.value
+             { importFrom = [ "OpenApi", "Common" ]
+             , name = "expectStringCustomEffect"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.function
+                              [ Type.namedWith
+                                    [ "Result" ]
+                                    "Result"
+                                    [ Type.namedWith
+                                        [ "OpenApi", "Common" ]
+                                        "Error"
+                                        [ Type.var "err", Type.string ]
+                                    , Type.string
+                                    ]
+                              ]
+                              (Type.var "msg")
+                          , Type.namedWith
+                              [ "Dict" ]
+                              "Dict"
+                              [ Type.string
+                              , Type.namedWith
+                                    [ "Json", "Decode" ]
+                                    "Decoder"
+                                    [ Type.var "err" ]
+                              ]
+                          ]
+                          (Type.namedWith
+                               [ "Effect", "Http" ]
+                               "Expect"
+                               [ Type.var "msg" ]
+                          )
+                     )
+             }
+        )
+        [ Elm.functionReduced
+            "expectStringCustomEffectUnpack"
+            expectStringCustomEffectArg
+        , expectStringCustomEffectArg0
         ]
 
 
@@ -297,7 +393,7 @@ expectJsonCustomEffect expectJsonCustomEffectArg expectJsonCustomEffectArg0 expe
 
 {-| bytesResolverCustom: 
     Dict.Dict String (Json.Decode.Decoder err)
-    -> Http.Resolver (OpenApi.Common.Error err String) success
+    -> Http.Resolver (OpenApi.Common.Error err Bytes.Bytes) Bytes.Bytes
 -}
 bytesResolverCustom : Elm.Expression -> Elm.Expression
 bytesResolverCustom bytesResolverCustomArg =
@@ -324,8 +420,10 @@ bytesResolverCustom bytesResolverCustomArg =
                                [ Type.namedWith
                                    [ "OpenApi", "Common" ]
                                    "Error"
-                                   [ Type.var "err", Type.string ]
-                               , Type.var "success"
+                                   [ Type.var "err"
+                                   , Type.namedWith [ "Bytes" ] "Bytes" []
+                                   ]
+                               , Type.namedWith [ "Bytes" ] "Bytes" []
                                ]
                           )
                      )
@@ -335,7 +433,7 @@ bytesResolverCustom bytesResolverCustomArg =
 
 
 {-| expectBytesCustom: 
-    (Result.Result (OpenApi.Common.Error err String) success -> msg)
+    (Result.Result (OpenApi.Common.Error err Bytes.Bytes) Bytes.Bytes -> msg)
     -> Dict.Dict String (Json.Decode.Decoder err)
     -> Http.Expect msg
 -}
@@ -356,8 +454,10 @@ expectBytesCustom expectBytesCustomArg expectBytesCustomArg0 =
                                     [ Type.namedWith
                                         [ "OpenApi", "Common" ]
                                         "Error"
-                                        [ Type.var "err", Type.string ]
-                                    , Type.var "success"
+                                        [ Type.var "err"
+                                        , Type.namedWith [ "Bytes" ] "Bytes" []
+                                        ]
+                                    , Type.namedWith [ "Bytes" ] "Bytes" []
                                     ]
                               ]
                               (Type.var "msg")
@@ -378,6 +478,92 @@ expectBytesCustom expectBytesCustomArg expectBytesCustomArg0 =
         )
         [ Elm.functionReduced "expectBytesCustomUnpack" expectBytesCustomArg
         , expectBytesCustomArg0
+        ]
+
+
+{-| stringResolverCustom: 
+    Dict.Dict String (Json.Decode.Decoder err)
+    -> Http.Resolver (OpenApi.Common.Error err String) String
+-}
+stringResolverCustom : Elm.Expression -> Elm.Expression
+stringResolverCustom stringResolverCustomArg =
+    Elm.apply
+        (Elm.value
+             { importFrom = [ "OpenApi", "Common" ]
+             , name = "stringResolverCustom"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.namedWith
+                              [ "Dict" ]
+                              "Dict"
+                              [ Type.string
+                              , Type.namedWith
+                                    [ "Json", "Decode" ]
+                                    "Decoder"
+                                    [ Type.var "err" ]
+                              ]
+                          ]
+                          (Type.namedWith
+                               [ "Http" ]
+                               "Resolver"
+                               [ Type.namedWith
+                                   [ "OpenApi", "Common" ]
+                                   "Error"
+                                   [ Type.var "err", Type.string ]
+                               , Type.string
+                               ]
+                          )
+                     )
+             }
+        )
+        [ stringResolverCustomArg ]
+
+
+{-| expectStringCustom: 
+    (Result.Result (OpenApi.Common.Error err String) String -> msg)
+    -> Dict.Dict String (Json.Decode.Decoder err)
+    -> Http.Expect msg
+-}
+expectStringCustom :
+    (Elm.Expression -> Elm.Expression) -> Elm.Expression -> Elm.Expression
+expectStringCustom expectStringCustomArg expectStringCustomArg0 =
+    Elm.apply
+        (Elm.value
+             { importFrom = [ "OpenApi", "Common" ]
+             , name = "expectStringCustom"
+             , annotation =
+                 Just
+                     (Type.function
+                          [ Type.function
+                              [ Type.namedWith
+                                    [ "Result" ]
+                                    "Result"
+                                    [ Type.namedWith
+                                        [ "OpenApi", "Common" ]
+                                        "Error"
+                                        [ Type.var "err", Type.string ]
+                                    , Type.string
+                                    ]
+                              ]
+                              (Type.var "msg")
+                          , Type.namedWith
+                              [ "Dict" ]
+                              "Dict"
+                              [ Type.string
+                              , Type.namedWith
+                                    [ "Json", "Decode" ]
+                                    "Decoder"
+                                    [ Type.var "err" ]
+                              ]
+                          ]
+                          (Type.namedWith [ "Http" ] "Expect" [ Type.var "msg" ]
+                          )
+                     )
+             }
+        )
+        [ Elm.functionReduced "expectStringCustomUnpack" expectStringCustomArg
+        , expectStringCustomArg0
         ]
 
 
@@ -720,12 +906,17 @@ call_ :
     , bytesResolverCustomEffect : Elm.Expression -> Elm.Expression
     , expectBytesCustomEffect :
         Elm.Expression -> Elm.Expression -> Elm.Expression
+    , stringResolverCustomEffect : Elm.Expression -> Elm.Expression
+    , expectStringCustomEffect :
+        Elm.Expression -> Elm.Expression -> Elm.Expression
     , jsonResolverCustomEffect :
         Elm.Expression -> Elm.Expression -> Elm.Expression
     , expectJsonCustomEffect :
         Elm.Expression -> Elm.Expression -> Elm.Expression -> Elm.Expression
     , bytesResolverCustom : Elm.Expression -> Elm.Expression
     , expectBytesCustom : Elm.Expression -> Elm.Expression -> Elm.Expression
+    , stringResolverCustom : Elm.Expression -> Elm.Expression
+    , expectStringCustom : Elm.Expression -> Elm.Expression -> Elm.Expression
     , jsonResolverCustom : Elm.Expression -> Elm.Expression -> Elm.Expression
     , expectJsonCustom :
         Elm.Expression -> Elm.Expression -> Elm.Expression -> Elm.Expression
@@ -811,8 +1002,13 @@ call_ =
                                        , Type.namedWith
                                            [ "OpenApi", "Common" ]
                                            "Error"
-                                           [ Type.var "err", Type.string ]
-                                       , Type.var "success"
+                                           [ Type.var "err"
+                                           , Type.namedWith
+                                                 [ "Bytes" ]
+                                                 "Bytes"
+                                                 []
+                                           ]
+                                       , Type.namedWith [ "Bytes" ] "Bytes" []
                                        ]
                                   )
                              )
@@ -835,8 +1031,16 @@ call_ =
                                             [ Type.namedWith
                                                 [ "OpenApi", "Common" ]
                                                 "Error"
-                                                [ Type.var "err", Type.string ]
-                                            , Type.var "success"
+                                                [ Type.var "err"
+                                                , Type.namedWith
+                                                      [ "Bytes" ]
+                                                      "Bytes"
+                                                      []
+                                                ]
+                                            , Type.namedWith
+                                                [ "Bytes" ]
+                                                "Bytes"
+                                                []
                                             ]
                                       ]
                                       (Type.var "msg")
@@ -859,6 +1063,80 @@ call_ =
                      }
                 )
                 [ expectBytesCustomEffectArg, expectBytesCustomEffectArg0 ]
+    , stringResolverCustomEffect =
+        \stringResolverCustomEffectArg ->
+            Elm.apply
+                (Elm.value
+                     { importFrom = [ "OpenApi", "Common" ]
+                     , name = "stringResolverCustomEffect"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.namedWith
+                                      [ "Dict" ]
+                                      "Dict"
+                                      [ Type.string
+                                      , Type.namedWith
+                                            [ "Json", "Decode" ]
+                                            "Decoder"
+                                            [ Type.var "err" ]
+                                      ]
+                                  ]
+                                  (Type.namedWith
+                                       [ "Effect", "Http" ]
+                                       "Resolver"
+                                       [ Type.var "restrictions"
+                                       , Type.namedWith
+                                           [ "OpenApi", "Common" ]
+                                           "Error"
+                                           [ Type.var "err", Type.string ]
+                                       , Type.string
+                                       ]
+                                  )
+                             )
+                     }
+                )
+                [ stringResolverCustomEffectArg ]
+    , expectStringCustomEffect =
+        \expectStringCustomEffectArg expectStringCustomEffectArg0 ->
+            Elm.apply
+                (Elm.value
+                     { importFrom = [ "OpenApi", "Common" ]
+                     , name = "expectStringCustomEffect"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.function
+                                      [ Type.namedWith
+                                            [ "Result" ]
+                                            "Result"
+                                            [ Type.namedWith
+                                                [ "OpenApi", "Common" ]
+                                                "Error"
+                                                [ Type.var "err", Type.string ]
+                                            , Type.string
+                                            ]
+                                      ]
+                                      (Type.var "msg")
+                                  , Type.namedWith
+                                      [ "Dict" ]
+                                      "Dict"
+                                      [ Type.string
+                                      , Type.namedWith
+                                            [ "Json", "Decode" ]
+                                            "Decoder"
+                                            [ Type.var "err" ]
+                                      ]
+                                  ]
+                                  (Type.namedWith
+                                       [ "Effect", "Http" ]
+                                       "Expect"
+                                       [ Type.var "msg" ]
+                                  )
+                             )
+                     }
+                )
+                [ expectStringCustomEffectArg, expectStringCustomEffectArg0 ]
     , jsonResolverCustomEffect =
         \jsonResolverCustomEffectArg jsonResolverCustomEffectArg0 ->
             Elm.apply
@@ -969,8 +1247,13 @@ call_ =
                                        [ Type.namedWith
                                            [ "OpenApi", "Common" ]
                                            "Error"
-                                           [ Type.var "err", Type.string ]
-                                       , Type.var "success"
+                                           [ Type.var "err"
+                                           , Type.namedWith
+                                                 [ "Bytes" ]
+                                                 "Bytes"
+                                                 []
+                                           ]
+                                       , Type.namedWith [ "Bytes" ] "Bytes" []
                                        ]
                                   )
                              )
@@ -993,8 +1276,16 @@ call_ =
                                             [ Type.namedWith
                                                 [ "OpenApi", "Common" ]
                                                 "Error"
-                                                [ Type.var "err", Type.string ]
-                                            , Type.var "success"
+                                                [ Type.var "err"
+                                                , Type.namedWith
+                                                      [ "Bytes" ]
+                                                      "Bytes"
+                                                      []
+                                                ]
+                                            , Type.namedWith
+                                                [ "Bytes" ]
+                                                "Bytes"
+                                                []
                                             ]
                                       ]
                                       (Type.var "msg")
@@ -1017,6 +1308,79 @@ call_ =
                      }
                 )
                 [ expectBytesCustomArg, expectBytesCustomArg0 ]
+    , stringResolverCustom =
+        \stringResolverCustomArg ->
+            Elm.apply
+                (Elm.value
+                     { importFrom = [ "OpenApi", "Common" ]
+                     , name = "stringResolverCustom"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.namedWith
+                                      [ "Dict" ]
+                                      "Dict"
+                                      [ Type.string
+                                      , Type.namedWith
+                                            [ "Json", "Decode" ]
+                                            "Decoder"
+                                            [ Type.var "err" ]
+                                      ]
+                                  ]
+                                  (Type.namedWith
+                                       [ "Http" ]
+                                       "Resolver"
+                                       [ Type.namedWith
+                                           [ "OpenApi", "Common" ]
+                                           "Error"
+                                           [ Type.var "err", Type.string ]
+                                       , Type.string
+                                       ]
+                                  )
+                             )
+                     }
+                )
+                [ stringResolverCustomArg ]
+    , expectStringCustom =
+        \expectStringCustomArg expectStringCustomArg0 ->
+            Elm.apply
+                (Elm.value
+                     { importFrom = [ "OpenApi", "Common" ]
+                     , name = "expectStringCustom"
+                     , annotation =
+                         Just
+                             (Type.function
+                                  [ Type.function
+                                      [ Type.namedWith
+                                            [ "Result" ]
+                                            "Result"
+                                            [ Type.namedWith
+                                                [ "OpenApi", "Common" ]
+                                                "Error"
+                                                [ Type.var "err", Type.string ]
+                                            , Type.string
+                                            ]
+                                      ]
+                                      (Type.var "msg")
+                                  , Type.namedWith
+                                      [ "Dict" ]
+                                      "Dict"
+                                      [ Type.string
+                                      , Type.namedWith
+                                            [ "Json", "Decode" ]
+                                            "Decoder"
+                                            [ Type.var "err" ]
+                                      ]
+                                  ]
+                                  (Type.namedWith
+                                       [ "Http" ]
+                                       "Expect"
+                                       [ Type.var "msg" ]
+                                  )
+                             )
+                     }
+                )
+                [ expectStringCustomArg, expectStringCustomArg0 ]
     , jsonResolverCustom =
         \jsonResolverCustomArg jsonResolverCustomArg0 ->
             Elm.apply
@@ -1109,10 +1473,14 @@ values_ :
     , decodeOptionalField : Elm.Expression
     , bytesResolverCustomEffect : Elm.Expression
     , expectBytesCustomEffect : Elm.Expression
+    , stringResolverCustomEffect : Elm.Expression
+    , expectStringCustomEffect : Elm.Expression
     , jsonResolverCustomEffect : Elm.Expression
     , expectJsonCustomEffect : Elm.Expression
     , bytesResolverCustom : Elm.Expression
     , expectBytesCustom : Elm.Expression
+    , stringResolverCustom : Elm.Expression
+    , expectStringCustom : Elm.Expression
     , jsonResolverCustom : Elm.Expression
     , expectJsonCustom : Elm.Expression
     }
@@ -1185,8 +1553,10 @@ values_ =
                               , Type.namedWith
                                   [ "OpenApi", "Common" ]
                                   "Error"
-                                  [ Type.var "err", Type.string ]
-                              , Type.var "success"
+                                  [ Type.var "err"
+                                  , Type.namedWith [ "Bytes" ] "Bytes" []
+                                  ]
+                              , Type.namedWith [ "Bytes" ] "Bytes" []
                               ]
                          )
                     )
@@ -1205,8 +1575,76 @@ values_ =
                                    [ Type.namedWith
                                        [ "OpenApi", "Common" ]
                                        "Error"
+                                       [ Type.var "err"
+                                       , Type.namedWith [ "Bytes" ] "Bytes" []
+                                       ]
+                                   , Type.namedWith [ "Bytes" ] "Bytes" []
+                                   ]
+                             ]
+                             (Type.var "msg")
+                         , Type.namedWith
+                             [ "Dict" ]
+                             "Dict"
+                             [ Type.string
+                             , Type.namedWith
+                                   [ "Json", "Decode" ]
+                                   "Decoder"
+                                   [ Type.var "err" ]
+                             ]
+                         ]
+                         (Type.namedWith
+                              [ "Effect", "Http" ]
+                              "Expect"
+                              [ Type.var "msg" ]
+                         )
+                    )
+            }
+    , stringResolverCustomEffect =
+        Elm.value
+            { importFrom = [ "OpenApi", "Common" ]
+            , name = "stringResolverCustomEffect"
+            , annotation =
+                Just
+                    (Type.function
+                         [ Type.namedWith
+                             [ "Dict" ]
+                             "Dict"
+                             [ Type.string
+                             , Type.namedWith
+                                   [ "Json", "Decode" ]
+                                   "Decoder"
+                                   [ Type.var "err" ]
+                             ]
+                         ]
+                         (Type.namedWith
+                              [ "Effect", "Http" ]
+                              "Resolver"
+                              [ Type.var "restrictions"
+                              , Type.namedWith
+                                  [ "OpenApi", "Common" ]
+                                  "Error"
+                                  [ Type.var "err", Type.string ]
+                              , Type.string
+                              ]
+                         )
+                    )
+            }
+    , expectStringCustomEffect =
+        Elm.value
+            { importFrom = [ "OpenApi", "Common" ]
+            , name = "expectStringCustomEffect"
+            , annotation =
+                Just
+                    (Type.function
+                         [ Type.function
+                             [ Type.namedWith
+                                   [ "Result" ]
+                                   "Result"
+                                   [ Type.namedWith
+                                       [ "OpenApi", "Common" ]
+                                       "Error"
                                        [ Type.var "err", Type.string ]
-                                   , Type.var "success"
+                                   , Type.string
                                    ]
                              ]
                              (Type.var "msg")
@@ -1324,8 +1762,10 @@ values_ =
                               [ Type.namedWith
                                   [ "OpenApi", "Common" ]
                                   "Error"
-                                  [ Type.var "err", Type.string ]
-                              , Type.var "success"
+                                  [ Type.var "err"
+                                  , Type.namedWith [ "Bytes" ] "Bytes" []
+                                  ]
+                              , Type.namedWith [ "Bytes" ] "Bytes" []
                               ]
                          )
                     )
@@ -1344,8 +1784,71 @@ values_ =
                                    [ Type.namedWith
                                        [ "OpenApi", "Common" ]
                                        "Error"
+                                       [ Type.var "err"
+                                       , Type.namedWith [ "Bytes" ] "Bytes" []
+                                       ]
+                                   , Type.namedWith [ "Bytes" ] "Bytes" []
+                                   ]
+                             ]
+                             (Type.var "msg")
+                         , Type.namedWith
+                             [ "Dict" ]
+                             "Dict"
+                             [ Type.string
+                             , Type.namedWith
+                                   [ "Json", "Decode" ]
+                                   "Decoder"
+                                   [ Type.var "err" ]
+                             ]
+                         ]
+                         (Type.namedWith [ "Http" ] "Expect" [ Type.var "msg" ])
+                    )
+            }
+    , stringResolverCustom =
+        Elm.value
+            { importFrom = [ "OpenApi", "Common" ]
+            , name = "stringResolverCustom"
+            , annotation =
+                Just
+                    (Type.function
+                         [ Type.namedWith
+                             [ "Dict" ]
+                             "Dict"
+                             [ Type.string
+                             , Type.namedWith
+                                   [ "Json", "Decode" ]
+                                   "Decoder"
+                                   [ Type.var "err" ]
+                             ]
+                         ]
+                         (Type.namedWith
+                              [ "Http" ]
+                              "Resolver"
+                              [ Type.namedWith
+                                  [ "OpenApi", "Common" ]
+                                  "Error"
+                                  [ Type.var "err", Type.string ]
+                              , Type.string
+                              ]
+                         )
+                    )
+            }
+    , expectStringCustom =
+        Elm.value
+            { importFrom = [ "OpenApi", "Common" ]
+            , name = "expectStringCustom"
+            , annotation =
+                Just
+                    (Type.function
+                         [ Type.function
+                             [ Type.namedWith
+                                   [ "Result" ]
+                                   "Result"
+                                   [ Type.namedWith
+                                       [ "OpenApi", "Common" ]
+                                       "Error"
                                        [ Type.var "err", Type.string ]
-                                   , Type.var "success"
+                                   , Type.string
                                    ]
                              ]
                              (Type.var "msg")

@@ -1998,15 +1998,7 @@ operationToTypesExpectAndResolver namespace functionName operation =
                                                                         )
 
                                                             BytesContent _ ->
-                                                                CliMonad.todo "decode bytes err?"
-                                                                    |> CliMonad.map
-                                                                        (Elm.value
-                                                                            { importFrom = Common.moduleToNamespace namespace Common.Types
-                                                                            , name = toErrorVariant statusCode
-                                                                            , annotation = Nothing
-                                                                            }
-                                                                            |> Gen.Json.Decode.call_.map
-                                                                        )
+                                                                CliMonad.todo "Bytes errors are not supported yet"
 
                                                             EmptyContent ->
                                                                 CliMonad.succeed (Gen.Json.Decode.succeed Elm.unit)

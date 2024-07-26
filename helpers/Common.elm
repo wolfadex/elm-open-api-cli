@@ -1,7 +1,8 @@
 module OpenApi.Common exposing
     ( Nullable(..)
     , decodeOptionalField, jsonDecodeAndMap
-    , Error(..), expectJsonCustom, expectJsonCustomEffect, jsonResolverCustom, jsonResolverCustomEffect
+    , Error(..), bytesResolverCustom, bytesResolverCustomEffect, expectBytesCustom, expectBytesCustomEffect
+    , expectJsonCustom, expectJsonCustomEffect, jsonResolverCustom, jsonResolverCustomEffect
     )
 
 {-|
@@ -19,10 +20,12 @@ module OpenApi.Common exposing
 
 ## Http
 
-@docs Error, expectJsonCustom, expectJsonCustomEffect, jsonResolverCustom, jsonResolverCustomEffect
+@docs Error, bytesResolverCustom, bytesResolverCustomEffect, expectBytesCustom, expectBytesCustomEffect
+@docs expectJsonCustom, expectJsonCustomEffect, jsonResolverCustom, jsonResolverCustomEffect
 
 -}
 
+import Bytes
 import Dict
 import Effect.Http
 import Http
@@ -127,6 +130,92 @@ jsonResolverCustom errorDecoders successDecoder =
         )
 
 
+expectBytesCustom :
+    (Result (Error err String) success -> msg)
+    -> Dict.Dict String (Json.Decode.Decoder err)
+    -> Http.Expect msg
+expectBytesCustom toMsg errorDecoders =
+    Http.expectBytesResponse
+        toMsg
+        (\expectBytesResponseUnpack ->
+            case expectBytesResponseUnpack of
+                Http.BadUrl_ stringString ->
+                    Result.Err (BadUrl stringString)
+
+                Http.Timeout_ ->
+                    Result.Err Timeout
+
+                Http.NetworkError_ ->
+                    Result.Err NetworkError
+
+                Http.BadStatus_ httpMetadata body ->
+                    case
+                        Dict.get
+                            (String.fromInt httpMetadata.statusCode)
+                            errorDecoders
+                    of
+                        Maybe.Just a ->
+                            case Json.Decode.decodeString a body of
+                                Result.Ok value ->
+                                    Result.Err
+                                        (KnownBadStatus
+                                            httpMetadata.statusCode
+                                            value
+                                        )
+
+                                Result.Err error ->
+                                    Result.Err (BadErrorBody httpMetadata body)
+
+                        Maybe.Nothing ->
+                            Result.Err (UnknownBadStatus httpMetadata body)
+
+                Http.GoodStatus_ httpMetadata body ->
+                    Result.Ok body
+        )
+
+
+bytesResolverCustom :
+    Dict.Dict String (Json.Decode.Decoder err)
+    -> Http.Resolver (Error err String) success
+bytesResolverCustom errorDecoders =
+    Http.stringResolver
+        (\stringResolverUnpack ->
+            case stringResolverUnpack of
+                Http.BadUrl_ stringString ->
+                    Result.Err (BadUrl stringString)
+
+                Http.Timeout_ ->
+                    Result.Err Timeout
+
+                Http.NetworkError_ ->
+                    Result.Err NetworkError
+
+                Http.BadStatus_ httpMetadata body ->
+                    case
+                        Dict.get
+                            (String.fromInt httpMetadata.statusCode)
+                            errorDecoders
+                    of
+                        Maybe.Just a ->
+                            case Json.Decode.decodeString a body of
+                                Result.Ok value ->
+                                    Result.Err
+                                        (KnownBadStatus
+                                            httpMetadata.statusCode
+                                            value
+                                        )
+
+                                Result.Err error ->
+                                    Result.Err (BadErrorBody httpMetadata body)
+
+                        Maybe.Nothing ->
+                            Result.Err (UnknownBadStatus httpMetadata body)
+
+                Http.GoodStatus_ httpMetadata body ->
+                    Result.Ok body
+        )
+
+
 expectJsonCustomEffect :
     (Result (Error err String) success -> msg)
     -> Dict.Dict String (Json.Decode.Decoder err)
@@ -226,6 +315,96 @@ jsonResolverCustomEffect errorDecoders successDecoder =
 
                         Result.Err error ->
                             Result.Err (BadBody effectHttpMetadata body)
+        )
+
+
+expectBytesCustomEffect :
+    (Result (Error err String) success -> msg)
+    -> Dict.Dict String (Json.Decode.Decoder err)
+    -> Effect.Http.Expect msg
+expectBytesCustomEffect toMsg errorDecoders =
+    Effect.Http.expectBytesResponse
+        toMsg
+        (\expectBytesResponseUnpack ->
+            case expectBytesResponseUnpack of
+                Effect.Http.BadUrl_ stringString ->
+                    Result.Err (BadUrl stringString)
+
+                Effect.Http.Timeout_ ->
+                    Result.Err Timeout
+
+                Effect.Http.NetworkError_ ->
+                    Result.Err NetworkError
+
+                Effect.Http.BadStatus_ effectHttpMetadata body ->
+                    case
+                        Dict.get
+                            (String.fromInt effectHttpMetadata.statusCode)
+                            errorDecoders
+                    of
+                        Maybe.Just a ->
+                            case Json.Decode.decodeString a body of
+                                Result.Ok value ->
+                                    Result.Err
+                                        (KnownBadStatus
+                                            effectHttpMetadata.statusCode
+                                            value
+                                        )
+
+                                Result.Err error ->
+                                    Result.Err
+                                        (BadErrorBody effectHttpMetadata body)
+
+                        Maybe.Nothing ->
+                            Result.Err
+                                (UnknownBadStatus effectHttpMetadata body)
+
+                Effect.Http.GoodStatus_ effectHttpMetadata body ->
+                    Result.Ok body
+        )
+
+
+bytesResolverCustomEffect :
+    Dict.Dict String (Json.Decode.Decoder err)
+    -> Effect.Http.Resolver restrictions (Error err String) success
+bytesResolverCustomEffect errorDecoders =
+    Effect.Http.stringResolver
+        (\stringResolverUnpack ->
+            case stringResolverUnpack of
+                Effect.Http.BadUrl_ stringString ->
+                    Result.Err (BadUrl stringString)
+
+                Effect.Http.Timeout_ ->
+                    Result.Err Timeout
+
+                Effect.Http.NetworkError_ ->
+                    Result.Err NetworkError
+
+                Effect.Http.BadStatus_ effectHttpMetadata body ->
+                    case
+                        Dict.get
+                            (String.fromInt effectHttpMetadata.statusCode)
+                            errorDecoders
+                    of
+                        Maybe.Just a ->
+                            case Json.Decode.decodeString a body of
+                                Result.Ok value ->
+                                    Result.Err
+                                        (KnownBadStatus
+                                            effectHttpMetadata.statusCode
+                                            value
+                                        )
+
+                                Result.Err error ->
+                                    Result.Err
+                                        (BadErrorBody effectHttpMetadata body)
+
+                        Maybe.Nothing ->
+                            Result.Err
+                                (UnknownBadStatus effectHttpMetadata body)
+
+                Effect.Http.GoodStatus_ effectHttpMetadata body ->
+                    Result.Ok body
         )
 
 

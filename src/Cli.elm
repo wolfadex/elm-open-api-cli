@@ -93,13 +93,13 @@ options:
                                       - dillonkearns/elm-pages
                                       - lamdera/program-test
                                      The options for type are:
-                                      - cmd: input -> Cmd for elm/http,
-                                             input -> Effect.Command for lamdera/program-test
+                                      - cmd: Cmd for elm/http,
+                                             Effect.Command for lamdera/program-test
                                       - cmdrisky: as above, but using Http.riskyRequest
-                                      - task: input -> Task for elm/http
-                                              input -> Effect.Task for lamdera/program-test
-                                              input -> BackendTask for dillonkearns/elm-pages
-                                      - taskrisky: as above, but using Http.riskyRequest
+                                      - task: Task for elm/http
+                                              Effect.Task for lamdera/program-test
+                                              BackendTask for dillonkearns/elm-pages
+                                      - taskrisky: as above, but using Http.riskyTask
                                                    cannot be used for dillonkearns/elm-pages
 
   --server                           The base URL for the OpenAPI server.

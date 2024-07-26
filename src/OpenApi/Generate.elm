@@ -21,6 +21,7 @@ import Gen.BackendTask
 import Gen.BackendTask.Http
 import Gen.Basics
 import Gen.Bytes
+import Gen.Bytes.Decode
 import Gen.Debug
 import Gen.Dict
 import Gen.Effect.Http
@@ -134,27 +135,55 @@ files { namespace, generateTodos, effectTypes, server } apiSpec =
                     allDecls : List ( Common.Module, Elm.Declaration )
                     allDecls =
                         decls
-                            ++ [ ( Common.Common
-                                 , expectJsonCustom.declaration
-                                    |> Elm.exposeWith
-                                        { exposeConstructor = False
-                                        , group = Just "Http"
-                                        }
-                                 )
-                               , ( Common.Common
-                                 , jsonResolverCustom.declaration
-                                    |> Elm.exposeWith
-                                        { exposeConstructor = False
-                                        , group = Just "Http"
-                                        }
-                                 )
-                               ]
-                            ++ (if
-                                    List.member LamderaProgramTestCmd effectTypes
-                                        || List.member LamderaProgramTestCmdRisky effectTypes
-                                        || List.member LamderaProgramTestTask effectTypes
-                                        || List.member LamderaProgramTestTaskRisky effectTypes
-                                then
+                            ++ (if List.any (\effectType -> effectTypeToPackage effectType == Common.ElmHttp) effectTypes then
+                                    [ ( Common.Common
+                                      , expectJsonCustom.declaration
+                                            |> Elm.exposeWith
+                                                { exposeConstructor = False
+                                                , group = Just "Http"
+                                                }
+                                      )
+                                    , ( Common.Common
+                                      , jsonResolverCustom.declaration
+                                            |> Elm.exposeWith
+                                                { exposeConstructor = False
+                                                , group = Just "Http"
+                                                }
+                                      )
+                                    , ( Common.Common
+                                      , expectStringCustom.declaration
+                                            |> Elm.exposeWith
+                                                { exposeConstructor = False
+                                                , group = Just "Http"
+                                                }
+                                      )
+                                    , ( Common.Common
+                                      , stringResolverCustom.declaration
+                                            |> Elm.exposeWith
+                                                { exposeConstructor = False
+                                                , group = Just "Http"
+                                                }
+                                      )
+                                    , ( Common.Common
+                                      , expectBytesCustom.declaration
+                                            |> Elm.exposeWith
+                                                { exposeConstructor = False
+                                                , group = Just "Http"
+                                                }
+                                      )
+                                    , ( Common.Common
+                                      , bytesResolverCustom.declaration
+                                            |> Elm.exposeWith
+                                                { exposeConstructor = False
+                                                , group = Just "Http"
+                                                }
+                                      )
+                                    ]
+
+                                else
+                                    []
+                               )
+                            ++ (if List.any (\effectType -> effectTypeToPackage effectType == Common.LamderaProgramTest) effectTypes then
                                     [ ( Common.Common
                                       , expectJsonCustomEffect.declaration
                                             |> Elm.exposeWith
@@ -164,6 +193,34 @@ files { namespace, generateTodos, effectTypes, server } apiSpec =
                                       )
                                     , ( Common.Common
                                       , jsonResolverCustomEffect.declaration
+                                            |> Elm.exposeWith
+                                                { exposeConstructor = False
+                                                , group = Just "Http"
+                                                }
+                                      )
+                                    , ( Common.Common
+                                      , expectStringCustomEffect.declaration
+                                            |> Elm.exposeWith
+                                                { exposeConstructor = False
+                                                , group = Just "Http"
+                                                }
+                                      )
+                                    , ( Common.Common
+                                      , stringResolverCustomEffect.declaration
+                                            |> Elm.exposeWith
+                                                { exposeConstructor = False
+                                                , group = Just "Http"
+                                                }
+                                      )
+                                    , ( Common.Common
+                                      , expectBytesCustomEffect.declaration
+                                            |> Elm.exposeWith
+                                                { exposeConstructor = False
+                                                , group = Just "Http"
+                                                }
+                                      )
+                                    , ( Common.Common
+                                      , bytesResolverCustomEffect.declaration
                                             |> Elm.exposeWith
                                                 { exposeConstructor = False
                                                 , group = Just "Http"
@@ -601,398 +658,403 @@ toRequestFunctions server effectTypes namespace method pathUrl operation =
                 |> String.join "\n\n"
 
         step : OperationUtils -> CliMonad (List ( Common.Module, Elm.Declaration ))
-        step { successType, bodyTypeAnnotation, errorTypeDeclaration, errorTypeAnnotation, toExpect, resolver } =
-            CliMonad.andThen
-                (\expect ->
-                    let
-                        declarationGroup :
-                            AuthorizationInfo
-                            -> (() -> a)
-                            -> List ( EffectType, a -> Elm.Declaration )
-                            -> List ( Common.Module, Elm.Declaration )
-                        declarationGroup auth sharedData list =
-                            if List.any (\( effectType, _ ) -> List.member effectType effectTypes) list then
-                                let
-                                    shared : a
-                                    shared =
-                                        sharedData ()
-                                in
-                                List.filterMap
-                                    (\( effectType, toDeclaration ) ->
-                                        if List.member effectType effectTypes then
-                                            ( if isSinglePackage then
-                                                Common.Api Nothing
+        step { successType, bodyTypeAnnotation, errorTypeDeclaration, errorTypeAnnotation, expect, resolver } =
+            let
+                declarationGroup :
+                    AuthorizationInfo
+                    -> (() -> a)
+                    -> List ( EffectType, a -> Elm.Declaration )
+                    -> List ( Common.Module, Elm.Declaration )
+                declarationGroup auth sharedData list =
+                    if List.any (\( effectType, _ ) -> List.member effectType effectTypes) list then
+                        let
+                            shared : a
+                            shared =
+                                sharedData ()
+                        in
+                        List.filterMap
+                            (\( effectType, toDeclaration ) ->
+                                if List.member effectType effectTypes then
+                                    ( if isSinglePackage then
+                                        Common.Api Nothing
 
-                                              else
-                                                Common.Api (Just (effectTypeToPackage effectType))
-                                            , toDeclaration shared
-                                                |> Elm.withDocumentation (documentation auth)
-                                                |> Elm.exposeWith
-                                                    { exposeConstructor = False
-                                                    , group =
-                                                        operation
-                                                            |> operationToGroup
-                                                            |> Just
-                                                    }
-                                            )
-                                                |> Just
-
-                                        else
-                                            Nothing
+                                      else
+                                        Common.Api (Just (effectTypeToPackage effectType))
+                                    , toDeclaration shared
+                                        |> Elm.withDocumentation (documentation auth)
+                                        |> Elm.exposeWith
+                                            { exposeConstructor = False
+                                            , group =
+                                                operation
+                                                    |> operationToGroup
+                                                    |> Just
+                                            }
                                     )
-                                    list
+                                        |> Just
 
-                            else
-                                []
+                                else
+                                    Nothing
+                            )
+                            list
 
-                        elmHttpCommands :
-                            AuthorizationInfo
-                            -> Elm.Annotation.Annotation
-                            -> (Elm.Expression -> PerPackage Elm.Expression)
-                            -> (Elm.Expression -> Elm.Expression)
-                            -> ({ requireToMsg : Bool } -> PerPackage Elm.Annotation.Annotation)
-                            -> List ( Common.Module, Elm.Declaration )
-                        elmHttpCommands auth _ toBody replaced paramType =
-                            declarationGroup auth
-                                (\_ ->
-                                    { cmdArg =
-                                        \config ->
-                                            Elm.record
-                                                [ ( "url", replaced config )
-                                                , ( "method", Elm.string method )
-                                                , ( "headers", headersFromList Gen.Http.call_.header auth config )
-                                                , ( "expect", (expect <| toMsg config).core )
-                                                , ( "body", (toBody config).core )
-                                                , ( "timeout", Gen.Maybe.make_.nothing )
-                                                , ( "tracker", Gen.Maybe.make_.nothing )
-                                                ]
-                                    , cmdAnnotation =
-                                        Elm.Annotation.function
-                                            [ (paramType { requireToMsg = True }).core ]
-                                            (Elm.Annotation.cmd (Elm.Annotation.var "msg"))
-                                    , recordAnnotation =
-                                        Elm.Annotation.function
-                                            [ (paramType { requireToMsg = True }).core ]
-                                            (Elm.Annotation.record
-                                                [ ( "method", Elm.Annotation.string )
-                                                , ( "headers", Elm.Annotation.list Gen.Http.annotation_.header )
-                                                , ( "url", Elm.Annotation.string )
-                                                , ( "body", Gen.Http.annotation_.header )
-                                                , ( "expect", Gen.Http.annotation_.expect (Elm.Annotation.var "msg") )
-                                                , ( "timeout", Elm.Annotation.maybe Elm.Annotation.float )
-                                                , ( "tracker", Elm.Annotation.maybe Elm.Annotation.string )
-                                                ]
-                                            )
-                                    }
-                                )
-                                [ ( ElmHttpCmd
-                                  , \{ cmdArg, cmdAnnotation } ->
-                                        Elm.fn
-                                            ( "config", Nothing )
-                                            (\config -> Gen.Http.call_.request (cmdArg config))
-                                            |> Elm.withType cmdAnnotation
-                                            |> Elm.declaration functionName
-                                  )
-                                , ( ElmHttpCmdRisky
-                                  , \{ cmdArg, cmdAnnotation } ->
-                                        Elm.fn
-                                            ( "config", Nothing )
-                                            (\config -> Gen.Http.call_.riskyRequest (cmdArg config))
-                                            |> Elm.withType cmdAnnotation
-                                            |> Elm.declaration (functionName ++ "Risky")
-                                  )
-                                , ( ElmHttpCmdRecord
-                                  , \{ cmdArg, recordAnnotation } ->
-                                        Elm.fn
-                                            ( "config", Nothing )
-                                            cmdArg
-                                            |> Elm.withType recordAnnotation
-                                            |> Elm.declaration (functionName ++ "Record")
-                                  )
-                                ]
+                    else
+                        []
 
-                        elmHttpTasks :
-                            AuthorizationInfo
-                            -> Elm.Annotation.Annotation
-                            -> (Elm.Expression -> PerPackage Elm.Expression)
-                            -> (Elm.Expression -> Elm.Expression)
-                            -> ({ requireToMsg : Bool } -> PerPackage Elm.Annotation.Annotation)
-                            -> List ( Common.Module, Elm.Declaration )
-                        elmHttpTasks auth successAnnotation toBody replaced paramType =
-                            declarationGroup auth
-                                (\_ ->
-                                    { taskArg =
-                                        \config ->
-                                            Elm.record
-                                                [ ( "url", replaced config )
-                                                , ( "method", Elm.string method )
-                                                , ( "headers", headersFromList Gen.Http.call_.header auth config )
-                                                , ( "resolver", resolver.core )
-                                                , ( "body", (toBody config).core )
-                                                , ( "timeout", Gen.Maybe.make_.nothing )
-                                                ]
-                                    , taskAnnotation =
-                                        Elm.Annotation.function
-                                            [ (paramType { requireToMsg = False }).core ]
-                                            (Gen.Task.annotation_.task
+                elmHttpCommands :
+                    AuthorizationInfo
+                    -> Elm.Annotation.Annotation
+                    -> (Elm.Expression -> PerPackage Elm.Expression)
+                    -> (Elm.Expression -> Elm.Expression)
+                    -> ({ requireToMsg : Bool } -> PerPackage Elm.Annotation.Annotation)
+                    -> List ( Common.Module, Elm.Declaration )
+                elmHttpCommands auth _ toBody replaced paramType =
+                    declarationGroup auth
+                        (\_ ->
+                            { cmdArg =
+                                \config ->
+                                    Elm.record
+                                        [ ( "url", replaced config )
+                                        , ( "method", Elm.string method )
+                                        , ( "headers", headersFromList Gen.Http.call_.header auth config )
+                                        , ( "expect", (expect <| toMsg config).core )
+                                        , ( "body", (toBody config).core )
+                                        , ( "timeout", Gen.Maybe.make_.nothing )
+                                        , ( "tracker", Gen.Maybe.make_.nothing )
+                                        ]
+                            , cmdAnnotation =
+                                Elm.Annotation.function
+                                    [ (paramType { requireToMsg = True }).core ]
+                                    (Elm.Annotation.cmd (Elm.Annotation.var "msg"))
+                            , recordAnnotation =
+                                Elm.Annotation.function
+                                    [ (paramType { requireToMsg = True }).core ]
+                                    (Elm.Annotation.record
+                                        [ ( "method", Elm.Annotation.string )
+                                        , ( "headers", Elm.Annotation.list Gen.Http.annotation_.header )
+                                        , ( "url", Elm.Annotation.string )
+                                        , ( "body", Gen.Http.annotation_.header )
+                                        , ( "expect", Gen.Http.annotation_.expect (Elm.Annotation.var "msg") )
+                                        , ( "timeout", Elm.Annotation.maybe Elm.Annotation.float )
+                                        , ( "tracker", Elm.Annotation.maybe Elm.Annotation.string )
+                                        ]
+                                    )
+                            }
+                        )
+                        [ ( ElmHttpCmd
+                          , \{ cmdArg, cmdAnnotation } ->
+                                Elm.fn
+                                    ( "config", Nothing )
+                                    (\config -> Gen.Http.call_.request (cmdArg config))
+                                    |> Elm.withType cmdAnnotation
+                                    |> Elm.declaration functionName
+                          )
+                        , ( ElmHttpCmdRisky
+                          , \{ cmdArg, cmdAnnotation } ->
+                                Elm.fn
+                                    ( "config", Nothing )
+                                    (\config -> Gen.Http.call_.riskyRequest (cmdArg config))
+                                    |> Elm.withType cmdAnnotation
+                                    |> Elm.declaration (functionName ++ "Risky")
+                          )
+                        , ( ElmHttpCmdRecord
+                          , \{ cmdArg, recordAnnotation } ->
+                                Elm.fn
+                                    ( "config", Nothing )
+                                    cmdArg
+                                    |> Elm.withType recordAnnotation
+                                    |> Elm.declaration (functionName ++ "Record")
+                          )
+                        ]
+
+                elmHttpTasks :
+                    AuthorizationInfo
+                    -> Elm.Annotation.Annotation
+                    -> (Elm.Expression -> PerPackage Elm.Expression)
+                    -> (Elm.Expression -> Elm.Expression)
+                    -> ({ requireToMsg : Bool } -> PerPackage Elm.Annotation.Annotation)
+                    -> List ( Common.Module, Elm.Declaration )
+                elmHttpTasks auth successAnnotation toBody replaced paramType =
+                    declarationGroup auth
+                        (\_ ->
+                            { taskArg =
+                                \config ->
+                                    Elm.record
+                                        [ ( "url", replaced config )
+                                        , ( "method", Elm.string method )
+                                        , ( "headers", headersFromList Gen.Http.call_.header auth config )
+                                        , ( "resolver", resolver.core )
+                                        , ( "body", (toBody config).core )
+                                        , ( "timeout", Gen.Maybe.make_.nothing )
+                                        ]
+                            , taskAnnotation =
+                                Elm.Annotation.function
+                                    [ (paramType { requireToMsg = False }).core ]
+                                    (Gen.Task.annotation_.task
+                                        (Gen.OpenApi.Common.annotation_.error errorTypeAnnotation bodyTypeAnnotation)
+                                        successAnnotation
+                                    )
+                            , recordAnnotation =
+                                Elm.Annotation.function
+                                    [ (paramType { requireToMsg = False }).core ]
+                                    (Elm.Annotation.record
+                                        [ ( "method", Elm.Annotation.string )
+                                        , ( "headers", Gen.Http.annotation_.header )
+                                        , ( "url", Elm.Annotation.string )
+                                        , ( "body", Gen.Http.annotation_.body )
+                                        , ( "resolver"
+                                          , Gen.Http.annotation_.resolver
                                                 (Gen.OpenApi.Common.annotation_.error errorTypeAnnotation bodyTypeAnnotation)
                                                 successAnnotation
-                                            )
-                                    , recordAnnotation =
-                                        Elm.Annotation.function
-                                            [ (paramType { requireToMsg = False }).core ]
-                                            (Elm.Annotation.record
-                                                [ ( "method", Elm.Annotation.string )
-                                                , ( "headers", Gen.Http.annotation_.header )
-                                                , ( "url", Elm.Annotation.string )
-                                                , ( "body", Gen.Http.annotation_.body )
-                                                , ( "resolver", Gen.Http.annotation_.resolver (Elm.Annotation.var "x") (Elm.Annotation.var "a") )
-                                                , ( "timeout", Elm.Annotation.maybe Elm.Annotation.float )
-                                                ]
-                                            )
-                                    }
-                                )
-                                [ ( ElmHttpTask
-                                  , \{ taskArg, taskAnnotation } ->
-                                        Elm.fn
-                                            ( "config", Nothing )
-                                            (\config -> Gen.Http.call_.task (taskArg config))
-                                            |> Elm.withType taskAnnotation
-                                            |> Elm.declaration (functionName ++ "Task")
-                                  )
-                                , ( ElmHttpTaskRisky
-                                  , \{ taskArg, taskAnnotation } ->
-                                        Elm.fn
-                                            ( "config", Nothing )
-                                            (\config -> Gen.Http.call_.riskyTask (taskArg config))
-                                            |> Elm.withType taskAnnotation
-                                            |> Elm.declaration (functionName ++ "TaskRisky")
-                                  )
-                                , ( ElmHttpTaskRecord
-                                  , \{ taskArg, recordAnnotation } ->
-                                        Elm.fn
-                                            ( "config", Nothing )
-                                            taskArg
-                                            |> Elm.withType recordAnnotation
-                                            |> Elm.declaration (functionName ++ "TaskRecord")
-                                  )
-                                ]
+                                          )
+                                        , ( "timeout", Elm.Annotation.maybe Elm.Annotation.float )
+                                        ]
+                                    )
+                            }
+                        )
+                        [ ( ElmHttpTask
+                          , \{ taskArg, taskAnnotation } ->
+                                Elm.fn
+                                    ( "config", Nothing )
+                                    (\config -> Gen.Http.call_.task (taskArg config))
+                                    |> Elm.withType taskAnnotation
+                                    |> Elm.declaration (functionName ++ "Task")
+                          )
+                        , ( ElmHttpTaskRisky
+                          , \{ taskArg, taskAnnotation } ->
+                                Elm.fn
+                                    ( "config", Nothing )
+                                    (\config -> Gen.Http.call_.riskyTask (taskArg config))
+                                    |> Elm.withType taskAnnotation
+                                    |> Elm.declaration (functionName ++ "TaskRisky")
+                          )
+                        , ( ElmHttpTaskRecord
+                          , \{ taskArg, recordAnnotation } ->
+                                Elm.fn
+                                    ( "config", Nothing )
+                                    taskArg
+                                    |> Elm.withType recordAnnotation
+                                    |> Elm.declaration (functionName ++ "TaskRecord")
+                          )
+                        ]
 
-                        dillonkearnsElmPagesBackendTask :
-                            AuthorizationInfo
-                            -> Elm.Annotation.Annotation
-                            -> (Elm.Expression -> PerPackage Elm.Expression)
-                            -> (Elm.Expression -> Elm.Expression)
-                            -> ({ requireToMsg : Bool } -> PerPackage Elm.Annotation.Annotation)
-                            -> List ( Common.Module, Elm.Declaration )
-                        dillonkearnsElmPagesBackendTask auth successAnnotation toBody replaced paramType =
-                            declarationGroup auth
-                                (\_ ->
-                                    { taskArg =
-                                        \config ->
-                                            Elm.record
-                                                [ ( "url", replaced config )
-                                                , ( "method", Elm.string method )
-                                                , ( "headers", headersFromList Elm.tuple auth config )
-                                                , ( "body", (toBody config).elmPages )
-                                                , ( "retries", Gen.Maybe.make_.nothing )
-                                                , ( "timeoutInMs", Gen.Maybe.make_.nothing )
-                                                ]
-                                    , taskAnnotation =
-                                        Elm.Annotation.function
-                                            [ (paramType { requireToMsg = False }).elmPages ]
-                                            (Gen.BackendTask.annotation_.backendTask
-                                                (Elm.Annotation.record
-                                                    [ ( "fatal", Gen.FatalError.annotation_.fatalError )
-                                                    , ( "recoverable", Gen.BackendTask.Http.annotation_.error )
-                                                    ]
-                                                )
-                                                successAnnotation
-                                            )
-                                    , recordAnnotation =
-                                        Elm.Annotation.function
-                                            [ (paramType { requireToMsg = False }).elmPages ]
-                                            (Elm.Annotation.tuple
-                                                (Elm.Annotation.record
-                                                    [ ( "url", Elm.Annotation.string )
-                                                    , ( "method", Elm.Annotation.string )
-                                                    , ( "headers", Elm.Annotation.list (Elm.Annotation.tuple Elm.Annotation.string Elm.Annotation.string) )
-                                                    , ( "body", Gen.BackendTask.Http.annotation_.body )
-                                                    , ( "retries", Elm.Annotation.maybe Elm.Annotation.int )
-                                                    , ( "timeoutInMs", Elm.Annotation.maybe Elm.Annotation.int )
-                                                    ]
-                                                )
-                                                (Gen.BackendTask.Http.annotation_.expect (Elm.Annotation.var "a"))
-                                            )
-                                    }
-                                )
-                                [ ( DillonkearnsElmPagesTask
-                                  , \{ taskArg, taskAnnotation } ->
-                                        Elm.fn
-                                            ( "config", Nothing )
-                                            (\config -> Gen.BackendTask.Http.call_.request (taskArg config) (expect <| toMsg config).elmPages)
-                                            |> Elm.withType taskAnnotation
-                                            |> Elm.declaration functionName
-                                  )
-                                , ( DillonkearnsElmPagesTaskRecord
-                                  , \{ taskArg, recordAnnotation } ->
-                                        Elm.fn
-                                            ( "config", Nothing )
-                                            (\config -> Elm.tuple (taskArg config) (expect <| toMsg config).elmPages)
-                                            |> Elm.withType recordAnnotation
-                                            |> Elm.declaration functionName
-                                  )
-                                ]
+                dillonkearnsElmPagesBackendTask :
+                    AuthorizationInfo
+                    -> Elm.Annotation.Annotation
+                    -> (Elm.Expression -> PerPackage Elm.Expression)
+                    -> (Elm.Expression -> Elm.Expression)
+                    -> ({ requireToMsg : Bool } -> PerPackage Elm.Annotation.Annotation)
+                    -> List ( Common.Module, Elm.Declaration )
+                dillonkearnsElmPagesBackendTask auth successAnnotation toBody replaced paramType =
+                    declarationGroup auth
+                        (\_ ->
+                            { taskArg =
+                                \config ->
+                                    Elm.record
+                                        [ ( "url", replaced config )
+                                        , ( "method", Elm.string method )
+                                        , ( "headers", headersFromList Elm.tuple auth config )
+                                        , ( "body", (toBody config).elmPages )
+                                        , ( "retries", Gen.Maybe.make_.nothing )
+                                        , ( "timeoutInMs", Gen.Maybe.make_.nothing )
+                                        ]
+                            , taskAnnotation =
+                                Elm.Annotation.function
+                                    [ (paramType { requireToMsg = False }).elmPages ]
+                                    (Gen.BackendTask.annotation_.backendTask
+                                        (Elm.Annotation.record
+                                            [ ( "fatal", Gen.FatalError.annotation_.fatalError )
+                                            , ( "recoverable", Gen.BackendTask.Http.annotation_.error )
+                                            ]
+                                        )
+                                        successAnnotation
+                                    )
+                            , recordAnnotation =
+                                Elm.Annotation.function
+                                    [ (paramType { requireToMsg = False }).elmPages ]
+                                    (Elm.Annotation.tuple
+                                        (Elm.Annotation.record
+                                            [ ( "url", Elm.Annotation.string )
+                                            , ( "method", Elm.Annotation.string )
+                                            , ( "headers", Elm.Annotation.list (Elm.Annotation.tuple Elm.Annotation.string Elm.Annotation.string) )
+                                            , ( "body", Gen.BackendTask.Http.annotation_.body )
+                                            , ( "retries", Elm.Annotation.maybe Elm.Annotation.int )
+                                            , ( "timeoutInMs", Elm.Annotation.maybe Elm.Annotation.int )
+                                            ]
+                                        )
+                                        (Gen.BackendTask.Http.annotation_.expect (Elm.Annotation.var "a"))
+                                    )
+                            }
+                        )
+                        [ ( DillonkearnsElmPagesTask
+                          , \{ taskArg, taskAnnotation } ->
+                                Elm.fn
+                                    ( "config", Nothing )
+                                    (\config -> Gen.BackendTask.Http.call_.request (taskArg config) (expect <| toMsg config).elmPages)
+                                    |> Elm.withType taskAnnotation
+                                    |> Elm.declaration functionName
+                          )
+                        , ( DillonkearnsElmPagesTaskRecord
+                          , \{ taskArg, recordAnnotation } ->
+                                Elm.fn
+                                    ( "config", Nothing )
+                                    (\config -> Elm.tuple (taskArg config) (expect <| toMsg config).elmPages)
+                                    |> Elm.withType recordAnnotation
+                                    |> Elm.declaration functionName
+                          )
+                        ]
 
-                        lamderaProgramTestCommands :
-                            AuthorizationInfo
-                            -> Elm.Annotation.Annotation
-                            -> (Elm.Expression -> PerPackage Elm.Expression)
-                            -> (Elm.Expression -> Elm.Expression)
-                            -> ({ requireToMsg : Bool } -> PerPackage Elm.Annotation.Annotation)
-                            -> List ( Common.Module, Elm.Declaration )
-                        lamderaProgramTestCommands auth _ toBody replaced paramType =
-                            declarationGroup auth
-                                (\_ ->
-                                    { cmdArg =
-                                        \config ->
-                                            Elm.record
-                                                [ ( "url", replaced config )
-                                                , ( "method", Elm.string method )
-                                                , ( "headers", headersFromList Gen.Effect.Http.call_.header auth config )
-                                                , ( "expect", (expect <| toMsg config).lamderaProgramTest )
-                                                , ( "body", (toBody config).lamderaProgramTest )
-                                                , ( "timeout", Gen.Maybe.make_.nothing )
-                                                , ( "tracker", Gen.Maybe.make_.nothing )
-                                                ]
-                                    , cmdParam = (paramType { requireToMsg = True }).lamderaProgramTest
-                                    }
-                                )
-                                [ ( LamderaProgramTestCmd
-                                  , \{ cmdArg, cmdParam } ->
-                                        Elm.fn
-                                            ( "config", Just cmdParam )
-                                            (\config -> Gen.Effect.Http.call_.request (cmdArg config))
-                                            |> Elm.declaration functionName
-                                  )
-                                , ( LamderaProgramTestCmdRisky
-                                  , \{ cmdArg, cmdParam } ->
-                                        Elm.fn
-                                            ( "config", Just cmdParam )
-                                            (\config -> Gen.Effect.Http.call_.riskyRequest (cmdArg config))
-                                            |> Elm.declaration (functionName ++ "Risky")
-                                  )
-                                , ( LamderaProgramTestCmdRecord
-                                  , \{ cmdArg, cmdParam } ->
-                                        Elm.fn
-                                            ( "config", Just cmdParam )
-                                            cmdArg
-                                            |> Elm.declaration (functionName ++ "Record")
-                                  )
-                                ]
+                lamderaProgramTestCommands :
+                    AuthorizationInfo
+                    -> Elm.Annotation.Annotation
+                    -> (Elm.Expression -> PerPackage Elm.Expression)
+                    -> (Elm.Expression -> Elm.Expression)
+                    -> ({ requireToMsg : Bool } -> PerPackage Elm.Annotation.Annotation)
+                    -> List ( Common.Module, Elm.Declaration )
+                lamderaProgramTestCommands auth _ toBody replaced paramType =
+                    declarationGroup auth
+                        (\_ ->
+                            { cmdArg =
+                                \config ->
+                                    Elm.record
+                                        [ ( "url", replaced config )
+                                        , ( "method", Elm.string method )
+                                        , ( "headers", headersFromList Gen.Effect.Http.call_.header auth config )
+                                        , ( "expect", (expect <| toMsg config).lamderaProgramTest )
+                                        , ( "body", (toBody config).lamderaProgramTest )
+                                        , ( "timeout", Gen.Maybe.make_.nothing )
+                                        , ( "tracker", Gen.Maybe.make_.nothing )
+                                        ]
+                            , cmdParam = (paramType { requireToMsg = True }).lamderaProgramTest
+                            }
+                        )
+                        [ ( LamderaProgramTestCmd
+                          , \{ cmdArg, cmdParam } ->
+                                Elm.fn
+                                    ( "config", Just cmdParam )
+                                    (\config -> Gen.Effect.Http.call_.request (cmdArg config))
+                                    |> Elm.declaration functionName
+                          )
+                        , ( LamderaProgramTestCmdRisky
+                          , \{ cmdArg, cmdParam } ->
+                                Elm.fn
+                                    ( "config", Just cmdParam )
+                                    (\config -> Gen.Effect.Http.call_.riskyRequest (cmdArg config))
+                                    |> Elm.declaration (functionName ++ "Risky")
+                          )
+                        , ( LamderaProgramTestCmdRecord
+                          , \{ cmdArg, cmdParam } ->
+                                Elm.fn
+                                    ( "config", Just cmdParam )
+                                    cmdArg
+                                    |> Elm.declaration (functionName ++ "Record")
+                          )
+                        ]
 
-                        lamderaProgramTestTasks :
-                            AuthorizationInfo
-                            -> Elm.Annotation.Annotation
-                            -> (Elm.Expression -> PerPackage Elm.Expression)
-                            -> (Elm.Expression -> Elm.Expression)
-                            -> ({ requireToMsg : Bool } -> PerPackage Elm.Annotation.Annotation)
-                            -> List ( Common.Module, Elm.Declaration )
-                        lamderaProgramTestTasks auth successAnnotation toBody replaced paramType =
-                            declarationGroup auth
-                                (\_ ->
-                                    { taskArg =
-                                        \config ->
-                                            Elm.record
-                                                [ ( "url", replaced config )
-                                                , ( "method", Elm.string method )
-                                                , ( "headers", headersFromList Gen.Effect.Http.call_.header auth config )
-                                                , ( "resolver", resolver.lamderaProgramTest )
-                                                , ( "body", (toBody config).lamderaProgramTest )
-                                                , ( "timeout", Gen.Maybe.make_.nothing )
-                                                ]
-                                    , taskAnnotation =
-                                        Elm.Annotation.function
-                                            [ (paramType { requireToMsg = False }).lamderaProgramTest ]
-                                            (Gen.Effect.Task.annotation_.task
+                lamderaProgramTestTasks :
+                    AuthorizationInfo
+                    -> Elm.Annotation.Annotation
+                    -> (Elm.Expression -> PerPackage Elm.Expression)
+                    -> (Elm.Expression -> Elm.Expression)
+                    -> ({ requireToMsg : Bool } -> PerPackage Elm.Annotation.Annotation)
+                    -> List ( Common.Module, Elm.Declaration )
+                lamderaProgramTestTasks auth successAnnotation toBody replaced paramType =
+                    declarationGroup auth
+                        (\_ ->
+                            { taskArg =
+                                \config ->
+                                    Elm.record
+                                        [ ( "url", replaced config )
+                                        , ( "method", Elm.string method )
+                                        , ( "headers", headersFromList Gen.Effect.Http.call_.header auth config )
+                                        , ( "resolver", resolver.lamderaProgramTest )
+                                        , ( "body", (toBody config).lamderaProgramTest )
+                                        , ( "timeout", Gen.Maybe.make_.nothing )
+                                        ]
+                            , taskAnnotation =
+                                Elm.Annotation.function
+                                    [ (paramType { requireToMsg = False }).lamderaProgramTest ]
+                                    (Gen.Effect.Task.annotation_.task
+                                        (Elm.Annotation.var "restriction")
+                                        (Gen.OpenApi.Common.annotation_.error errorTypeAnnotation bodyTypeAnnotation)
+                                        successAnnotation
+                                    )
+                            , recordAnnotation =
+                                Elm.Annotation.function
+                                    [ (paramType { requireToMsg = False }).lamderaProgramTest ]
+                                    (Elm.Annotation.record
+                                        [ ( "method", Elm.Annotation.string )
+                                        , ( "headers", Elm.Annotation.list Gen.Effect.Http.annotation_.header )
+                                        , ( "url", Elm.Annotation.string )
+                                        , ( "body", Gen.Effect.Http.annotation_.body )
+                                        , ( "resolver"
+                                          , Gen.Effect.Http.annotation_.resolver
                                                 (Elm.Annotation.var "restriction")
                                                 (Gen.OpenApi.Common.annotation_.error errorTypeAnnotation bodyTypeAnnotation)
                                                 successAnnotation
-                                            )
-                                    , recordAnnotation =
-                                        Elm.Annotation.function
-                                            [ (paramType { requireToMsg = False }).lamderaProgramTest ]
-                                            (Elm.Annotation.record
-                                                [ ( "method", Elm.Annotation.string )
-                                                , ( "headers", Elm.Annotation.list Gen.Effect.Http.annotation_.header )
-                                                , ( "url", Elm.Annotation.string )
-                                                , ( "body", Gen.Effect.Http.annotation_.body )
-                                                , ( "resolver", Gen.Effect.Http.annotation_.resolver (Elm.Annotation.var "restriction") (Elm.Annotation.var "x") (Elm.Annotation.var "a") )
-                                                , ( "timeout", Elm.Annotation.maybe (Elm.Annotation.namedWith [ "Duration" ] "Duration" []) )
-                                                ]
-                                            )
-                                    }
-                                )
-                                [ ( LamderaProgramTestTask
-                                  , \{ taskArg, taskAnnotation } ->
-                                        Elm.fn
-                                            ( "config", Nothing )
-                                            (\config -> Gen.Effect.Http.call_.task (taskArg config))
-                                            |> Elm.withType taskAnnotation
-                                            |> Elm.declaration (functionName ++ "Task")
-                                  )
-                                , ( LamderaProgramTestTaskRisky
-                                  , \{ taskArg, taskAnnotation } ->
-                                        Elm.fn
-                                            ( "config", Nothing )
-                                            (\config -> Gen.Effect.Http.call_.riskyTask (taskArg config))
-                                            |> Elm.withType taskAnnotation
-                                            |> Elm.declaration (functionName ++ "TaskRisky")
-                                  )
-                                , ( LamderaProgramTestTaskRecord
-                                  , \{ taskArg, recordAnnotation } ->
-                                        Elm.fn
-                                            ( "config", Nothing )
-                                            taskArg
-                                            |> Elm.withType recordAnnotation
-                                            |> Elm.declaration (functionName ++ "TaskRecord")
-                                  )
-                                ]
-                    in
-                    CliMonad.andThen3
-                        (\contentSchema auth successAnnotation ->
-                            CliMonad.map3
-                                (\toBody configAnnotation replaced ->
-                                    ([ elmHttpCommands, elmHttpTasks, dillonkearnsElmPagesBackendTask, lamderaProgramTestCommands, lamderaProgramTestTasks ]
-                                        |> List.concatMap
-                                            (\toDecls ->
-                                                toDecls auth successAnnotation toBody replaced configAnnotation
-                                            )
+                                          )
+                                        , ( "timeout", Elm.Annotation.maybe (Elm.Annotation.namedWith [ "Duration" ] "Duration" []) )
+                                        ]
                                     )
-                                        ++ [ ( Common.Types, errorTypeDeclaration ) ]
-                                )
-                                (body contentSchema)
-                                (bodyParams contentSchema
-                                    |> CliMonad.andThen
-                                        (\params ->
-                                            toConfigParamAnnotation namespace
-                                                { operation = operation
-                                                , successAnnotation = successAnnotation
-                                                , errorBodyAnnotation = bodyTypeAnnotation
-                                                , errorTypeAnnotation = errorTypeAnnotation
-                                                , authorizationInfo = auth
-                                                , bodyParams = params
-                                                , server = server
-                                                }
-                                        )
-                                )
-                                (replacedUrl server auth namespace pathUrl operation)
+                            }
                         )
-                        (operationToContentSchema True namespace operation)
-                        (operationToAuthorizationInfo operation)
-                        (SchemaUtils.typeToAnnotation True namespace successType)
+                        [ ( LamderaProgramTestTask
+                          , \{ taskArg, taskAnnotation } ->
+                                Elm.fn
+                                    ( "config", Nothing )
+                                    (\config -> Gen.Effect.Http.call_.task (taskArg config))
+                                    |> Elm.withType taskAnnotation
+                                    |> Elm.declaration (functionName ++ "Task")
+                          )
+                        , ( LamderaProgramTestTaskRisky
+                          , \{ taskArg, taskAnnotation } ->
+                                Elm.fn
+                                    ( "config", Nothing )
+                                    (\config -> Gen.Effect.Http.call_.riskyTask (taskArg config))
+                                    |> Elm.withType taskAnnotation
+                                    |> Elm.declaration (functionName ++ "TaskRisky")
+                          )
+                        , ( LamderaProgramTestTaskRecord
+                          , \{ taskArg, recordAnnotation } ->
+                                Elm.fn
+                                    ( "config", Nothing )
+                                    taskArg
+                                    |> Elm.withType recordAnnotation
+                                    |> Elm.declaration (functionName ++ "TaskRecord")
+                          )
+                        ]
+            in
+            CliMonad.andThen3
+                (\contentSchema auth successAnnotation ->
+                    CliMonad.map3
+                        (\toBody configAnnotation replaced ->
+                            ([ elmHttpCommands, elmHttpTasks, dillonkearnsElmPagesBackendTask, lamderaProgramTestCommands, lamderaProgramTestTasks ]
+                                |> List.concatMap
+                                    (\toDecls ->
+                                        toDecls auth successAnnotation toBody replaced configAnnotation
+                                    )
+                            )
+                                ++ [ ( Common.Types, errorTypeDeclaration ) ]
+                        )
+                        (body contentSchema)
+                        (bodyParams contentSchema
+                            |> CliMonad.andThen
+                                (\params ->
+                                    toConfigParamAnnotation namespace
+                                        { operation = operation
+                                        , successAnnotation = successAnnotation
+                                        , errorBodyAnnotation = bodyTypeAnnotation
+                                        , errorTypeAnnotation = errorTypeAnnotation
+                                        , authorizationInfo = auth
+                                        , bodyParams = params
+                                        , server = server
+                                        }
+                                )
+                        )
+                        (replacedUrl server auth namespace pathUrl operation)
                 )
-                toExpect
+                (operationToContentSchema True namespace operation)
+                (operationToAuthorizationInfo operation)
+                (SchemaUtils.typeToAnnotation True namespace successType)
     in
     operationToTypesExpectAndResolver namespace functionName operation
         |> CliMonad.andThen step
@@ -1880,7 +1942,7 @@ type alias OperationUtils =
     , bodyTypeAnnotation : Elm.Annotation.Annotation
     , errorTypeDeclaration : Elm.Declaration
     , errorTypeAnnotation : Elm.Annotation.Annotation
-    , toExpect : CliMonad ((Elm.Expression -> Elm.Expression) -> PerPackage Elm.Expression)
+    , expect : (Elm.Expression -> Elm.Expression) -> PerPackage Elm.Expression
     , resolver :
         { core : Elm.Expression
         , lamderaProgramTest : Elm.Expression
@@ -1899,23 +1961,26 @@ operationToTypesExpectAndResolver namespace functionName operation =
         responses =
             OpenApi.Operation.responses operation
 
-        expectJsonBetter : Elm.Expression -> Elm.Expression -> CliMonad ((Elm.Expression -> Elm.Expression) -> PerPackage Elm.Expression)
-        expectJsonBetter errorDecoders successDecoder =
-            CliMonad.succeed <|
-                \toMsg ->
-                    { core = Gen.OpenApi.Common.expectJsonCustom toMsg errorDecoders successDecoder
-                    , elmPages = Gen.BackendTask.Http.expectJson successDecoder
-                    , lamderaProgramTest = Gen.OpenApi.Common.expectJsonCustomEffect toMsg errorDecoders successDecoder
-                    }
+        expectJsonBetter : Elm.Expression -> Elm.Expression -> ((Elm.Expression -> Elm.Expression) -> PerPackage Elm.Expression)
+        expectJsonBetter errorDecoders successDecoder toMsg =
+            { core = Gen.OpenApi.Common.expectJsonCustom toMsg errorDecoders successDecoder
+            , elmPages = Gen.BackendTask.Http.expectJson successDecoder
+            , lamderaProgramTest = Gen.OpenApi.Common.expectJsonCustomEffect toMsg errorDecoders successDecoder
+            }
 
-        expectStringBetter : CliMonad ((Elm.Expression -> Elm.Expression) -> PerPackage Elm.Expression)
-        expectStringBetter =
-            CliMonad.succeed <|
-                \toMsg ->
-                    { core = Gen.Http.expectString toMsg
-                    , elmPages = Gen.BackendTask.Http.expectString
-                    , lamderaProgramTest = Gen.Effect.Http.expectString toMsg
-                    }
+        expectStringBetter : Elm.Expression -> (Elm.Expression -> Elm.Expression) -> PerPackage Elm.Expression
+        expectStringBetter errorDecoders toMsg =
+            { core = Gen.OpenApi.Common.expectStringCustom toMsg errorDecoders
+            , elmPages = Gen.BackendTask.Http.expectString
+            , lamderaProgramTest = Gen.OpenApi.Common.expectStringCustomEffect toMsg errorDecoders
+            }
+
+        expectBytesBetter : Elm.Expression -> (Elm.Expression -> Elm.Expression) -> PerPackage Elm.Expression
+        expectBytesBetter errorDecoders toMsg =
+            { core = Gen.OpenApi.Common.expectBytesCustom toMsg errorDecoders
+            , elmPages = Gen.BackendTask.Http.expectBytes Gen.Bytes.Decode.values_.bytes
+            , lamderaProgramTest = Gen.OpenApi.Common.expectBytesCustomEffect toMsg errorDecoders
+            }
     in
     CliMonad.succeed responses
         |> CliMonad.stepOrFail
@@ -1970,15 +2035,7 @@ operationToTypesExpectAndResolver namespace functionName operation =
                                                                         )
 
                                                             BytesContent _ ->
-                                                                CliMonad.todo "decode bytes err?"
-                                                                    |> CliMonad.map
-                                                                        (Elm.value
-                                                                            { importFrom = Common.moduleToNamespace namespace Common.Types
-                                                                            , name = toErrorVariant statusCode
-                                                                            , annotation = Nothing
-                                                                            }
-                                                                            |> Gen.Json.Decode.call_.map
-                                                                        )
+                                                                CliMonad.todo "Bytes errors are not supported yet"
 
                                                             EmptyContent ->
                                                                 CliMonad.succeed (Gen.Json.Decode.succeed Elm.unit)
@@ -2116,7 +2173,7 @@ operationToTypesExpectAndResolver namespace functionName operation =
                                                     , bodyTypeAnnotation = Elm.Annotation.string
                                                     , errorTypeDeclaration = errorTypeDeclaration_
                                                     , errorTypeAnnotation = errorTypeAnnotation
-                                                    , toExpect = expectJsonBetter errorDecoders_ successDecoder
+                                                    , expect = expectJsonBetter errorDecoders_ successDecoder
                                                     , resolver =
                                                         { core = Gen.OpenApi.Common.jsonResolverCustom errorDecoders_ successDecoder
                                                         , lamderaProgramTest = Gen.OpenApi.Common.jsonResolverCustomEffect errorDecoders_ successDecoder
@@ -2134,92 +2191,10 @@ operationToTypesExpectAndResolver namespace functionName operation =
                                                     , bodyTypeAnnotation = Elm.Annotation.string
                                                     , errorTypeDeclaration = errorTypeDeclaration_
                                                     , errorTypeAnnotation = errorTypeAnnotation
-                                                    , toExpect = expectStringBetter
+                                                    , expect = expectStringBetter errorDecoders_
                                                     , resolver =
-                                                        { core =
-                                                            Gen.Http.stringResolver
-                                                                (\resp ->
-                                                                    Gen.Http.caseOf_.response resp
-                                                                        { badUrl_ =
-                                                                            \url ->
-                                                                                Gen.Result.make_.err (Gen.OpenApi.Common.make_.badUrl url)
-                                                                        , timeout_ =
-                                                                            Gen.Result.make_.err Gen.OpenApi.Common.make_.timeout
-                                                                        , networkError_ = Gen.Result.make_.err Gen.OpenApi.Common.make_.networkError
-                                                                        , badStatus_ =
-                                                                            \metadata body ->
-                                                                                Gen.Maybe.caseOf_.maybe
-                                                                                    (Gen.Dict.call_.get (Gen.String.call_.fromInt (Elm.get "statusCode" metadata)) errorDecoders_)
-                                                                                    { nothing =
-                                                                                        Gen.Result.make_.err
-                                                                                            (Gen.OpenApi.Common.make_.unknownBadStatus metadata body)
-                                                                                    , just =
-                                                                                        \errorDecoder ->
-                                                                                            Gen.Result.caseOf_.result
-                                                                                                (Gen.Json.Decode.call_.decodeString errorDecoder body)
-                                                                                                { ok =
-                                                                                                    \x ->
-                                                                                                        Gen.Result.make_.err
-                                                                                                            (Gen.OpenApi.Common.make_.knownBadStatus (Elm.get "statusCode" metadata) x)
-                                                                                                , err =
-                                                                                                    \_ ->
-                                                                                                        Gen.Result.make_.err
-                                                                                                            (Gen.OpenApi.Common.make_.badErrorBody metadata body)
-                                                                                                }
-                                                                                    }
-                                                                        , goodStatus_ =
-                                                                            \metadata body ->
-                                                                                Gen.Result.caseOf_.result
-                                                                                    (Gen.Json.Decode.call_.decodeString Gen.Json.Decode.string body)
-                                                                                    { err =
-                                                                                        \_ ->
-                                                                                            Gen.Result.make_.err (Gen.OpenApi.Common.make_.badBody metadata body)
-                                                                                    , ok = \a -> Gen.Result.make_.ok a
-                                                                                    }
-                                                                        }
-                                                                )
-                                                        , lamderaProgramTest =
-                                                            Gen.Effect.Http.stringResolver
-                                                                (\resp ->
-                                                                    Gen.Effect.Http.caseOf_.response resp
-                                                                        { badUrl_ =
-                                                                            \url ->
-                                                                                Gen.Result.make_.err (Gen.OpenApi.Common.make_.badUrl url)
-                                                                        , timeout_ =
-                                                                            Gen.Result.make_.err Gen.OpenApi.Common.make_.timeout
-                                                                        , networkError_ = Gen.Result.make_.err Gen.OpenApi.Common.make_.networkError
-                                                                        , badStatus_ =
-                                                                            \metadata body ->
-                                                                                Gen.Maybe.caseOf_.maybe
-                                                                                    (Gen.Dict.call_.get (Gen.String.call_.fromInt (Elm.get "statusCode" metadata)) errorDecoders_)
-                                                                                    { nothing =
-                                                                                        Gen.Result.make_.err
-                                                                                            (Gen.OpenApi.Common.make_.unknownBadStatus metadata body)
-                                                                                    , just =
-                                                                                        \errorDecoder ->
-                                                                                            Gen.Result.caseOf_.result
-                                                                                                (Gen.Json.Decode.call_.decodeString errorDecoder body)
-                                                                                                { ok =
-                                                                                                    \x ->
-                                                                                                        Gen.Result.make_.err
-                                                                                                            (Gen.OpenApi.Common.make_.knownBadStatus (Elm.get "statusCode" metadata) x)
-                                                                                                , err =
-                                                                                                    \_ ->
-                                                                                                        Gen.Result.make_.err
-                                                                                                            (Gen.OpenApi.Common.make_.badErrorBody metadata body)
-                                                                                                }
-                                                                                    }
-                                                                        , goodStatus_ =
-                                                                            \metadata body ->
-                                                                                Gen.Result.caseOf_.result
-                                                                                    (Gen.Json.Decode.call_.decodeString Gen.Json.Decode.string body)
-                                                                                    { err =
-                                                                                        \_ ->
-                                                                                            Gen.Result.make_.err (Gen.OpenApi.Common.make_.badBody metadata body)
-                                                                                    , ok = \a -> Gen.Result.make_.ok a
-                                                                                    }
-                                                                        }
-                                                                )
+                                                        { core = Gen.OpenApi.Common.stringResolverCustom errorDecoders_
+                                                        , lamderaProgramTest = Gen.OpenApi.Common.stringResolverCustomEffect errorDecoders_
                                                         }
                                                     }
                                                 )
@@ -2229,94 +2204,14 @@ operationToTypesExpectAndResolver namespace functionName operation =
                                         BytesContent _ ->
                                             CliMonad.map2
                                                 (\errorDecoders_ ( errorTypeDeclaration_, errorTypeAnnotation ) ->
-                                                    let
-                                                        toExpect : CliMonad ((Elm.Expression -> Elm.Expression) -> PerPackage Elm.Expression)
-                                                        toExpect =
-                                                            CliMonad.map
-                                                                (\todo _ ->
-                                                                    { core = todo
-                                                                    , elmPages = todo
-                                                                    , lamderaProgramTest = todo
-                                                                    }
-                                                                )
-                                                                (CliMonad.todo "bytes decoder")
-                                                    in
                                                     { successType = Common.Bytes
                                                     , bodyTypeAnnotation = Gen.Bytes.annotation_.bytes
                                                     , errorTypeDeclaration = errorTypeDeclaration_
                                                     , errorTypeAnnotation = errorTypeAnnotation
-                                                    , toExpect = toExpect
+                                                    , expect = expectBytesBetter errorDecoders_
                                                     , resolver =
-                                                        { core =
-                                                            Gen.Http.bytesResolver
-                                                                (\resp ->
-                                                                    Gen.Http.caseOf_.response resp
-                                                                        { badUrl_ =
-                                                                            \url ->
-                                                                                Gen.Result.make_.err (Gen.OpenApi.Common.make_.badUrl url)
-                                                                        , timeout_ = Gen.Result.make_.err Gen.OpenApi.Common.make_.timeout
-                                                                        , networkError_ = Gen.Result.make_.err Gen.OpenApi.Common.make_.networkError
-                                                                        , badStatus_ =
-                                                                            \metadata body ->
-                                                                                Gen.Maybe.caseOf_.maybe
-                                                                                    (Gen.Dict.call_.get (Gen.String.call_.fromInt (Elm.get "statusCode" metadata)) errorDecoders_)
-                                                                                    { nothing =
-                                                                                        Gen.Result.make_.err
-                                                                                            (Gen.OpenApi.Common.make_.unknownBadStatus metadata body)
-                                                                                    , just =
-                                                                                        \errorDecoder ->
-                                                                                            Gen.Result.caseOf_.result
-                                                                                                (Gen.Json.Decode.call_.decodeString errorDecoder body)
-                                                                                                { ok =
-                                                                                                    \x ->
-                                                                                                        Gen.Result.make_.err
-                                                                                                            (Gen.OpenApi.Common.make_.knownBadStatus (Elm.get "statusCode" metadata) x)
-                                                                                                , err =
-                                                                                                    \_ ->
-                                                                                                        Gen.Result.make_.err
-                                                                                                            (Gen.OpenApi.Common.make_.badErrorBody metadata body)
-                                                                                                }
-                                                                                    }
-                                                                        , goodStatus_ =
-                                                                            \_ body ->
-                                                                                Gen.Result.make_.ok body
-                                                                        }
-                                                                )
-                                                        , lamderaProgramTest =
-                                                            Gen.Effect.Http.bytesResolver
-                                                                (\resp ->
-                                                                    Gen.Effect.Http.caseOf_.response resp
-                                                                        { badUrl_ =
-                                                                            \url ->
-                                                                                Gen.Result.make_.err (Gen.OpenApi.Common.make_.badUrl url)
-                                                                        , timeout_ = Gen.Result.make_.err Gen.OpenApi.Common.make_.timeout
-                                                                        , networkError_ = Gen.Result.make_.err Gen.OpenApi.Common.make_.networkError
-                                                                        , badStatus_ =
-                                                                            \metadata body ->
-                                                                                Gen.Maybe.caseOf_.maybe
-                                                                                    (Gen.Dict.call_.get (Gen.String.call_.fromInt (Elm.get "statusCode" metadata)) errorDecoders_)
-                                                                                    { nothing =
-                                                                                        Gen.Result.make_.err
-                                                                                            (Gen.OpenApi.Common.make_.unknownBadStatus metadata body)
-                                                                                    , just =
-                                                                                        \errorDecoder ->
-                                                                                            Gen.Result.caseOf_.result
-                                                                                                (Gen.Json.Decode.call_.decodeString errorDecoder body)
-                                                                                                { ok =
-                                                                                                    \x ->
-                                                                                                        Gen.Result.make_.err
-                                                                                                            (Gen.OpenApi.Common.make_.knownBadStatus (Elm.get "statusCode" metadata) x)
-                                                                                                , err =
-                                                                                                    \_ ->
-                                                                                                        Gen.Result.make_.err
-                                                                                                            (Gen.OpenApi.Common.make_.badErrorBody metadata body)
-                                                                                                }
-                                                                                    }
-                                                                        , goodStatus_ =
-                                                                            \_ body ->
-                                                                                Gen.Result.make_.ok body
-                                                                        }
-                                                                )
+                                                        { core = Gen.OpenApi.Common.bytesResolverCustom errorDecoders_
+                                                        , lamderaProgramTest = Gen.OpenApi.Common.bytesResolverCustomEffect errorDecoders_
                                                         }
                                                     }
                                                 )
@@ -2330,7 +2225,7 @@ operationToTypesExpectAndResolver namespace functionName operation =
                                                     , bodyTypeAnnotation = Elm.Annotation.string
                                                     , errorTypeDeclaration = errorTypeDeclaration_
                                                     , errorTypeAnnotation = errorTypeAnnotation
-                                                    , toExpect = expectJsonBetter errorDecoders_ (Gen.Json.Decode.succeed Elm.unit)
+                                                    , expect = expectJsonBetter errorDecoders_ (Gen.Json.Decode.succeed Elm.unit)
                                                     , resolver =
                                                         { core = Gen.OpenApi.Common.jsonResolverCustom errorDecoders_ (Gen.Json.Decode.succeed Elm.unit)
                                                         , lamderaProgramTest = Gen.OpenApi.Common.jsonResolverCustomEffect errorDecoders_ (Gen.Json.Decode.succeed Elm.unit)
@@ -2368,7 +2263,7 @@ operationToTypesExpectAndResolver namespace functionName operation =
                                                 , bodyTypeAnnotation = Elm.Annotation.string
                                                 , errorTypeDeclaration = errorTypeDeclaration_
                                                 , errorTypeAnnotation = errorTypeAnnotation
-                                                , toExpect = expectJsonBetter errorDecoders_ decoder
+                                                , expect = expectJsonBetter errorDecoders_ decoder
                                                 , resolver =
                                                     { core = Gen.OpenApi.Common.jsonResolverCustom errorDecoders_ decoder
                                                     , lamderaProgramTest = Gen.OpenApi.Common.jsonResolverCustomEffect errorDecoders_ decoder
@@ -2394,14 +2289,17 @@ customHttpError =
         ]
 
 
-expectJsonCustom :
-    { declaration : Elm.Declaration
-    , call : Elm.Expression -> Elm.Expression -> Elm.Expression -> Elm.Expression
-    , callFrom : List String -> Elm.Expression -> Elm.Expression -> Elm.Expression -> Elm.Expression
-    , value : List String -> Elm.Expression
-    }
-expectJsonCustom =
-    Elm.Declare.fn3 "expectJsonCustom"
+outerExpectJsonCustom :
+    String
+    -> (Elm.Expression -> Elm.Expression -> Elm.Expression -> Elm.Expression)
+    ->
+        { declaration : Elm.Declaration
+        , call : Elm.Expression -> Elm.Expression -> Elm.Expression -> Elm.Expression
+        , callFrom : List String -> Elm.Expression -> Elm.Expression -> Elm.Expression -> Elm.Expression
+        , value : List String -> Elm.Expression
+        }
+outerExpectJsonCustom name f =
+    Elm.Declare.fn3 name
         ( "toMsg"
         , Just
             (Elm.Annotation.function
@@ -2420,52 +2318,132 @@ expectJsonCustom =
             )
         )
         ( "successDecoder"
+        , Just (Gen.Json.Decode.annotation_.decoder (Elm.Annotation.var "success"))
+        )
+        f
+
+
+outerExpectStringCustom :
+    String
+    -> (Elm.Expression -> Elm.Expression -> Elm.Expression)
+    ->
+        { declaration : Elm.Declaration
+        , call : Elm.Expression -> Elm.Expression -> Elm.Expression
+        , callFrom : List String -> Elm.Expression -> Elm.Expression -> Elm.Expression
+        , value : List String -> Elm.Expression
+        }
+outerExpectStringCustom name f =
+    Elm.Declare.fn2 name
+        ( "toMsg"
+        , Just
+            (Elm.Annotation.function
+                [ Gen.Result.annotation_.result
+                    (Elm.Annotation.namedWith [] "Error" [ Elm.Annotation.var "err", Elm.Annotation.string ])
+                    Elm.Annotation.string
+                ]
+                (Elm.Annotation.var "msg")
+            )
+        )
+        ( "errorDecoders"
+        , Just
+            (Gen.Dict.annotation_.dict
+                Gen.String.annotation_.string
+                (Gen.Json.Decode.annotation_.decoder (Elm.Annotation.var "err"))
+            )
+        )
+        f
+
+
+outerExpectBytesCustom :
+    String
+    -> (Elm.Expression -> Elm.Expression -> Elm.Expression)
+    ->
+        { declaration : Elm.Declaration
+        , call : Elm.Expression -> Elm.Expression -> Elm.Expression
+        , callFrom : List String -> Elm.Expression -> Elm.Expression -> Elm.Expression
+        , value : List String -> Elm.Expression
+        }
+outerExpectBytesCustom name f =
+    Elm.Declare.fn2 name
+        ( "toMsg"
+        , Just
+            (Elm.Annotation.function
+                [ Gen.Result.annotation_.result
+                    (Elm.Annotation.namedWith [] "Error" [ Elm.Annotation.var "err", Gen.Bytes.annotation_.bytes ])
+                    Gen.Bytes.annotation_.bytes
+                ]
+                (Elm.Annotation.var "msg")
+            )
+        )
+        ( "errorDecoders"
+        , Just
+            (Gen.Dict.annotation_.dict
+                Gen.String.annotation_.string
+                (Gen.Json.Decode.annotation_.decoder (Elm.Annotation.var "err"))
+            )
+        )
+        f
+
+
+outerJsonResolverCustom :
+    String
+    -> (Elm.Expression -> Elm.Expression -> Elm.Expression)
+    ->
+        { declaration : Elm.Declaration
+        , call : Elm.Expression -> Elm.Expression -> Elm.Expression
+        , callFrom : List String -> Elm.Expression -> Elm.Expression -> Elm.Expression
+        , value : List String -> Elm.Expression
+        }
+outerJsonResolverCustom name f =
+    Elm.Declare.fn2 name
+        ( "errorDecoders"
+        , Just
+            (Gen.Dict.annotation_.dict
+                Gen.String.annotation_.string
+                (Gen.Json.Decode.annotation_.decoder (Elm.Annotation.var "err"))
+            )
+        )
+        ( "successDecoder"
         , Just
             (Gen.Json.Decode.annotation_.decoder (Elm.Annotation.var "success"))
         )
+        f
+
+
+outerRawResolverCustom :
+    String
+    -> (Elm.Expression -> Elm.Expression)
+    ->
+        { declaration : Elm.Declaration
+        , call : Elm.Expression -> Elm.Expression
+        , callFrom : List String -> Elm.Expression -> Elm.Expression
+        , value : List String -> Elm.Expression
+        }
+outerRawResolverCustom name f =
+    Elm.Declare.fn name
+        ( "errorDecoders"
+        , Just
+            (Gen.Dict.annotation_.dict
+                Gen.String.annotation_.string
+                (Gen.Json.Decode.annotation_.decoder (Elm.Annotation.var "err"))
+            )
+        )
+        f
+
+
+expectJsonCustom :
+    { declaration : Elm.Declaration
+    , call : Elm.Expression -> Elm.Expression -> Elm.Expression -> Elm.Expression
+    , callFrom : List String -> Elm.Expression -> Elm.Expression -> Elm.Expression -> Elm.Expression
+    , value : List String -> Elm.Expression
+    }
+expectJsonCustom =
+    outerExpectJsonCustom "expectJsonCustom"
         (\toMsg errorDecoders successDecoder ->
             let
                 toResult : Elm.Expression -> Elm.Expression
                 toResult response =
-                    Gen.Http.caseOf_.response response
-                        { badUrl_ = \url -> Gen.Result.make_.err (Elm.apply (Elm.val "BadUrl") [ url ])
-                        , timeout_ = Gen.Result.make_.err (Elm.val "Timeout")
-                        , networkError_ = Gen.Result.make_.err (Elm.val "NetworkError")
-                        , badStatus_ =
-                            \metadata body ->
-                                Gen.Maybe.caseOf_.maybe
-                                    (Gen.Dict.call_.get (Gen.String.call_.fromInt (Elm.get "statusCode" metadata)) errorDecoders)
-                                    { nothing =
-                                        Gen.Result.make_.err
-                                            (Elm.apply (Elm.val "UnknownBadStatus") [ metadata, body ])
-                                    , just =
-                                        \errorDecoder ->
-                                            Gen.Result.caseOf_.result
-                                                (Gen.Json.Decode.call_.decodeString errorDecoder body)
-                                                { ok =
-                                                    \x ->
-                                                        Gen.Result.make_.err
-                                                            (Elm.apply (Elm.val "KnownBadStatus") [ Elm.get "statusCode" metadata, x ])
-                                                , err =
-                                                    \_ ->
-                                                        Gen.Result.make_.err
-                                                            (Elm.apply (Elm.val "BadErrorBody") [ metadata, body ])
-                                                }
-                                    }
-                        , goodStatus_ =
-                            \metadata body ->
-                                Gen.Result.caseOf_.result
-                                    (Gen.Json.Decode.call_.decodeString successDecoder body)
-                                    { err =
-                                        \_ ->
-                                            Gen.Result.make_.err
-                                                (Elm.apply
-                                                    (Elm.val "BadBody")
-                                                    [ metadata, body ]
-                                                )
-                                    , ok = \a -> Gen.Result.make_.ok a
-                                    }
-                        }
+                    Gen.Http.caseOf_.response response (innerExpectJsonCustom errorDecoders successDecoder)
             in
             Gen.Http.expectStringResponse (\result -> Elm.apply toMsg [ result ]) toResult
                 |> Elm.withType (Gen.Http.annotation_.expect (Elm.Annotation.var "msg"))
@@ -2479,71 +2457,88 @@ expectJsonCustomEffect :
     , value : List String -> Elm.Expression
     }
 expectJsonCustomEffect =
-    Elm.Declare.fn3 "expectJsonCustomEffect"
-        ( "toMsg"
-        , Just
-            (Elm.Annotation.function
-                [ Gen.Result.annotation_.result
-                    (Elm.Annotation.namedWith [] "Error" [ Elm.Annotation.var "err", Elm.Annotation.string ])
-                    (Elm.Annotation.var "success")
-                ]
-                (Elm.Annotation.var "msg")
-            )
-        )
-        ( "errorDecoders"
-        , Just
-            (Gen.Dict.annotation_.dict
-                Gen.String.annotation_.string
-                (Gen.Json.Decode.annotation_.decoder (Elm.Annotation.var "err"))
-            )
-        )
-        ( "successDecoder"
-        , Just
-            (Gen.Json.Decode.annotation_.decoder (Elm.Annotation.var "success"))
-        )
+    outerExpectJsonCustom "expectJsonCustomEffect"
         (\toMsg errorDecoders successDecoder ->
             let
                 toResult : Elm.Expression -> Elm.Expression
                 toResult response =
-                    Gen.Effect.Http.caseOf_.response response
-                        { badUrl_ = \url -> Gen.Result.make_.err (Elm.apply (Elm.val "BadUrl") [ url ])
-                        , timeout_ = Gen.Result.make_.err (Elm.val "Timeout")
-                        , networkError_ = Gen.Result.make_.err (Elm.val "NetworkError")
-                        , badStatus_ =
-                            \metadata body ->
-                                Gen.Maybe.caseOf_.maybe
-                                    (Gen.Dict.call_.get (Gen.String.call_.fromInt (Elm.get "statusCode" metadata)) errorDecoders)
-                                    { nothing =
-                                        Gen.Result.make_.err
-                                            (Elm.apply (Elm.val "UnknownBadStatus") [ metadata, body ])
-                                    , just =
-                                        \errorDecoder ->
-                                            Gen.Result.caseOf_.result
-                                                (Gen.Json.Decode.call_.decodeString errorDecoder body)
-                                                { ok =
-                                                    \x ->
-                                                        Gen.Result.make_.err
-                                                            (Elm.apply (Elm.val "KnownBadStatus") [ Elm.get "statusCode" metadata, x ])
-                                                , err =
-                                                    \_ ->
-                                                        Gen.Result.make_.err
-                                                            (Elm.apply (Elm.val "BadErrorBody") [ metadata, body ])
-                                                }
-                                    }
-                        , goodStatus_ =
-                            \metadata body ->
-                                Gen.Result.caseOf_.result
-                                    (Gen.Json.Decode.call_.decodeString successDecoder body)
-                                    { err =
-                                        \_ ->
-                                            Gen.Result.make_.err
-                                                (Elm.apply
-                                                    (Elm.val "BadBody")
-                                                    [ metadata, body ]
-                                                )
-                                    , ok = \a -> Gen.Result.make_.ok a
-                                    }
-                        }
+                    Gen.Effect.Http.caseOf_.response response (innerExpectJsonCustom errorDecoders successDecoder)
+            in
+            Gen.Effect.Http.expectStringResponse (\result -> Elm.apply toMsg [ result ]) toResult
+                |> Elm.withType (Gen.Effect.Http.annotation_.expect (Elm.Annotation.var "msg"))
+        )
+
+
+expectBytesCustom :
+    { declaration : Elm.Declaration
+    , call : Elm.Expression -> Elm.Expression -> Elm.Expression
+    , callFrom : List String -> Elm.Expression -> Elm.Expression -> Elm.Expression
+    , value : List String -> Elm.Expression
+    }
+expectBytesCustom =
+    outerExpectBytesCustom "expectBytesCustom"
+        (\toMsg errorDecoders ->
+            let
+                toResult : Elm.Expression -> Elm.Expression
+                toResult response =
+                    Gen.Http.caseOf_.response response (innerExpectRawCustom bytesToString errorDecoders)
+            in
+            Gen.Http.expectBytesResponse (\result -> Elm.apply toMsg [ result ]) toResult
+                |> Elm.withType (Gen.Http.annotation_.expect (Elm.Annotation.var "msg"))
+        )
+
+
+expectBytesCustomEffect :
+    { declaration : Elm.Declaration
+    , call : Elm.Expression -> Elm.Expression -> Elm.Expression
+    , callFrom : List String -> Elm.Expression -> Elm.Expression -> Elm.Expression
+    , value : List String -> Elm.Expression
+    }
+expectBytesCustomEffect =
+    outerExpectBytesCustom "expectBytesCustomEffect"
+        (\toMsg errorDecoders ->
+            let
+                toResult : Elm.Expression -> Elm.Expression
+                toResult response =
+                    Gen.Effect.Http.caseOf_.response response (innerExpectRawCustom bytesToString errorDecoders)
+            in
+            Gen.Effect.Http.expectBytesResponse (\result -> Elm.apply toMsg [ result ]) toResult
+                |> Elm.withType (Gen.Effect.Http.annotation_.expect (Elm.Annotation.var "msg"))
+        )
+
+
+expectStringCustom :
+    { declaration : Elm.Declaration
+    , call : Elm.Expression -> Elm.Expression -> Elm.Expression
+    , callFrom : List String -> Elm.Expression -> Elm.Expression -> Elm.Expression
+    , value : List String -> Elm.Expression
+    }
+expectStringCustom =
+    outerExpectStringCustom "expectStringCustom"
+        (\toMsg errorDecoders ->
+            let
+                toResult : Elm.Expression -> Elm.Expression
+                toResult response =
+                    Gen.Http.caseOf_.response response (innerExpectRawCustom identity errorDecoders)
+            in
+            Gen.Http.expectStringResponse (\result -> Elm.apply toMsg [ result ]) toResult
+                |> Elm.withType (Gen.Http.annotation_.expect (Elm.Annotation.var "msg"))
+        )
+
+
+expectStringCustomEffect :
+    { declaration : Elm.Declaration
+    , call : Elm.Expression -> Elm.Expression -> Elm.Expression
+    , callFrom : List String -> Elm.Expression -> Elm.Expression -> Elm.Expression
+    , value : List String -> Elm.Expression
+    }
+expectStringCustomEffect =
+    outerExpectStringCustom "expectStringCustomEffect"
+        (\toMsg errorDecoders ->
+            let
+                toResult : Elm.Expression -> Elm.Expression
+                toResult response =
+                    Gen.Effect.Http.caseOf_.response response (innerExpectRawCustom identity errorDecoders)
             in
             Gen.Effect.Http.expectStringResponse (\result -> Elm.apply toMsg [ result ]) toResult
                 |> Elm.withType (Gen.Effect.Http.annotation_.expect (Elm.Annotation.var "msg"))
@@ -2557,66 +2552,13 @@ jsonResolverCustom :
     , value : List String -> Elm.Expression
     }
 jsonResolverCustom =
-    Elm.Declare.fn2 "jsonResolverCustom"
-        ( "errorDecoders"
-        , Just
-            (Gen.Dict.annotation_.dict
-                Gen.String.annotation_.string
-                (Gen.Json.Decode.annotation_.decoder (Elm.Annotation.var "err"))
-            )
-        )
-        ( "successDecoder"
-        , Just
-            (Gen.Json.Decode.annotation_.decoder (Elm.Annotation.var "success"))
-        )
-    <|
+    outerJsonResolverCustom "jsonResolverCustom" <|
         \errorDecoders successDecoder ->
             let
                 toResult : Elm.Expression -> Elm.Expression
                 toResult response =
                     Gen.Http.caseOf_.response response
-                        { badUrl_ =
-                            \url ->
-                                Gen.Result.make_.err (Elm.apply (Elm.val "BadUrl") [ url ])
-                        , timeout_ =
-                            Gen.Result.make_.err (Elm.val "Timeout")
-                        , networkError_ =
-                            Gen.Result.make_.err (Elm.val "NetworkError")
-                        , badStatus_ =
-                            \metadata body ->
-                                Gen.Maybe.caseOf_.maybe
-                                    (Gen.Dict.call_.get (Gen.String.call_.fromInt (Elm.get "statusCode" metadata)) errorDecoders)
-                                    { nothing =
-                                        Gen.Result.make_.err
-                                            (Elm.apply
-                                                (Elm.val "UnknownBadStatus")
-                                                [ metadata, body ]
-                                            )
-                                    , just =
-                                        \errorDecoder ->
-                                            Gen.Result.caseOf_.result
-                                                (Gen.Json.Decode.call_.decodeString errorDecoder body)
-                                                { ok =
-                                                    \x ->
-                                                        Gen.Result.make_.err
-                                                            (Elm.apply (Elm.val "KnownBadStatus") [ Elm.get "statusCode" metadata, x ])
-                                                , err =
-                                                    \_ ->
-                                                        Gen.Result.make_.err
-                                                            (Elm.apply (Elm.val "BadErrorBody") [ metadata, body ])
-                                                }
-                                    }
-                        , goodStatus_ =
-                            \metadata body ->
-                                Gen.Result.caseOf_.result
-                                    (Gen.Json.Decode.call_.decodeString successDecoder body)
-                                    { err =
-                                        \_ ->
-                                            Gen.Result.make_.err
-                                                (Elm.apply (Elm.val "BadBody") [ metadata, body ])
-                                    , ok = \a -> Gen.Result.make_.ok a
-                                    }
-                        }
+                        (innerExpectJsonCustom errorDecoders successDecoder)
             in
             Gen.Http.stringResolver toResult
                 |> Elm.withType (Gen.Http.annotation_.resolver (Elm.Annotation.namedWith [] "Error" [ Elm.Annotation.var "err", Elm.Annotation.string ]) (Elm.Annotation.var "success"))
@@ -2629,69 +2571,177 @@ jsonResolverCustomEffect :
     , value : List String -> Elm.Expression
     }
 jsonResolverCustomEffect =
-    Elm.Declare.fn2 "jsonResolverCustomEffect"
-        ( "errorDecoders"
-        , Just
-            (Gen.Dict.annotation_.dict
-                Gen.String.annotation_.string
-                (Gen.Json.Decode.annotation_.decoder (Elm.Annotation.var "err"))
-            )
-        )
-        ( "successDecoder"
-        , Just
-            (Gen.Json.Decode.annotation_.decoder (Elm.Annotation.var "success"))
-        )
-    <|
+    outerJsonResolverCustom "jsonResolverCustomEffect" <|
         \errorDecoders successDecoder ->
             let
                 toResult : Elm.Expression -> Elm.Expression
                 toResult response =
                     Gen.Effect.Http.caseOf_.response response
-                        { badUrl_ =
-                            \url ->
-                                Gen.Result.make_.err (Elm.apply (Elm.val "BadUrl") [ url ])
-                        , timeout_ =
-                            Gen.Result.make_.err (Elm.val "Timeout")
-                        , networkError_ =
-                            Gen.Result.make_.err (Elm.val "NetworkError")
-                        , badStatus_ =
-                            \metadata body ->
-                                Gen.Maybe.caseOf_.maybe
-                                    (Gen.Dict.call_.get (Gen.String.call_.fromInt (Elm.get "statusCode" metadata)) errorDecoders)
-                                    { nothing =
-                                        Gen.Result.make_.err
-                                            (Elm.apply
-                                                (Elm.val "UnknownBadStatus")
-                                                [ metadata, body ]
-                                            )
-                                    , just =
-                                        \errorDecoder ->
-                                            Gen.Result.caseOf_.result
-                                                (Gen.Json.Decode.call_.decodeString errorDecoder body)
-                                                { ok =
-                                                    \x ->
-                                                        Gen.Result.make_.err
-                                                            (Elm.apply (Elm.val "KnownBadStatus") [ Elm.get "statusCode" metadata, x ])
-                                                , err =
-                                                    \_ ->
-                                                        Gen.Result.make_.err
-                                                            (Elm.apply (Elm.val "BadErrorBody") [ metadata, body ])
-                                                }
-                                    }
-                        , goodStatus_ =
-                            \metadata body ->
-                                Gen.Result.caseOf_.result
-                                    (Gen.Json.Decode.call_.decodeString successDecoder body)
-                                    { err =
-                                        \_ ->
-                                            Gen.Result.make_.err
-                                                (Elm.apply (Elm.val "BadBody") [ metadata, body ])
-                                    , ok = \a -> Gen.Result.make_.ok a
-                                    }
-                        }
+                        (innerExpectJsonCustom errorDecoders successDecoder)
             in
             Gen.Effect.Http.stringResolver toResult
                 |> Elm.withType (Gen.Effect.Http.annotation_.resolver (Elm.Annotation.var "restrictions") (Elm.Annotation.namedWith [] "Error" [ Elm.Annotation.var "err", Elm.Annotation.string ]) (Elm.Annotation.var "success"))
+
+
+bytesResolverCustom :
+    { declaration : Elm.Declaration
+    , call : Elm.Expression -> Elm.Expression
+    , callFrom : List String -> Elm.Expression -> Elm.Expression
+    , value : List String -> Elm.Expression
+    }
+bytesResolverCustom =
+    outerRawResolverCustom "bytesResolverCustom" <|
+        \errorDecoders ->
+            let
+                toResult : Elm.Expression -> Elm.Expression
+                toResult response =
+                    Gen.Http.caseOf_.response response
+                        (innerExpectRawCustom bytesToString errorDecoders)
+            in
+            Gen.Http.bytesResolver toResult
+                |> Elm.withType (Gen.Http.annotation_.resolver (Elm.Annotation.namedWith [] "Error" [ Elm.Annotation.var "err", Gen.Bytes.annotation_.bytes ]) Gen.Bytes.annotation_.bytes)
+
+
+bytesResolverCustomEffect :
+    { declaration : Elm.Declaration
+    , call : Elm.Expression -> Elm.Expression
+    , callFrom : List String -> Elm.Expression -> Elm.Expression
+    , value : List String -> Elm.Expression
+    }
+bytesResolverCustomEffect =
+    outerRawResolverCustom "bytesResolverCustomEffect" <|
+        \errorDecoders ->
+            let
+                toResult : Elm.Expression -> Elm.Expression
+                toResult response =
+                    Gen.Effect.Http.caseOf_.response response
+                        (innerExpectRawCustom bytesToString errorDecoders)
+            in
+            Gen.Effect.Http.bytesResolver toResult
+                |> Elm.withType (Gen.Effect.Http.annotation_.resolver (Elm.Annotation.var "restrictions") (Elm.Annotation.namedWith [] "Error" [ Elm.Annotation.var "err", Gen.Bytes.annotation_.bytes ]) Gen.Bytes.annotation_.bytes)
+
+
+stringResolverCustom :
+    { declaration : Elm.Declaration
+    , call : Elm.Expression -> Elm.Expression
+    , callFrom : List String -> Elm.Expression -> Elm.Expression
+    , value : List String -> Elm.Expression
+    }
+stringResolverCustom =
+    outerRawResolverCustom "stringResolverCustom" <|
+        \errorDecoders ->
+            let
+                toResult : Elm.Expression -> Elm.Expression
+                toResult response =
+                    Gen.Http.caseOf_.response response
+                        (innerExpectRawCustom identity errorDecoders)
+            in
+            Gen.Http.stringResolver toResult
+                |> Elm.withType (Gen.Http.annotation_.resolver (Elm.Annotation.namedWith [] "Error" [ Elm.Annotation.var "err", Elm.Annotation.string ]) Elm.Annotation.string)
+
+
+stringResolverCustomEffect :
+    { declaration : Elm.Declaration
+    , call : Elm.Expression -> Elm.Expression
+    , callFrom : List String -> Elm.Expression -> Elm.Expression
+    , value : List String -> Elm.Expression
+    }
+stringResolverCustomEffect =
+    outerRawResolverCustom "stringResolverCustomEffect" <|
+        \errorDecoders ->
+            let
+                toResult : Elm.Expression -> Elm.Expression
+                toResult response =
+                    Gen.Effect.Http.caseOf_.response response
+                        (innerExpectRawCustom identity errorDecoders)
+            in
+            Gen.Effect.Http.stringResolver toResult
+                |> Elm.withType (Gen.Effect.Http.annotation_.resolver (Elm.Annotation.var "restrictions") (Elm.Annotation.namedWith [] "Error" [ Elm.Annotation.var "err", Elm.Annotation.string ]) Elm.Annotation.string)
+
+
+bytesToString : Elm.Expression -> Elm.Expression
+bytesToString bytes =
+    Gen.Bytes.Decode.decode (Gen.Bytes.Decode.call_.string (Gen.Bytes.width bytes)) bytes
+        |> Gen.Maybe.withDefault (Elm.string "")
+
+
+innerExpectJsonCustom :
+    Elm.Expression
+    -> Elm.Expression
+    ->
+        { badUrl_ : Elm.Expression -> Elm.Expression
+        , timeout_ : Elm.Expression
+        , networkError_ : Elm.Expression
+        , badStatus_ : Elm.Expression -> Elm.Expression -> Elm.Expression
+        , goodStatus_ : Elm.Expression -> Elm.Expression -> Elm.Expression
+        }
+innerExpectJsonCustom errorDecoders successDecoder =
+    innerExpect identity
+        errorDecoders
+        (\metadata body ->
+            Gen.Result.caseOf_.result
+                (Gen.Json.Decode.call_.decodeString successDecoder body)
+                { err =
+                    \_ ->
+                        Gen.Result.make_.err
+                            (Elm.apply (Elm.val "BadBody") [ metadata, body ])
+                , ok = \a -> Gen.Result.make_.ok a
+                }
+        )
+
+
+innerExpectRawCustom :
+    (Elm.Expression -> Elm.Expression)
+    -> Elm.Expression
+    ->
+        { badUrl_ : Elm.Expression -> Elm.Expression
+        , timeout_ : Elm.Expression
+        , networkError_ : Elm.Expression
+        , badStatus_ : Elm.Expression -> Elm.Expression -> Elm.Expression
+        , goodStatus_ : Elm.Expression -> Elm.Expression -> Elm.Expression
+        }
+innerExpectRawCustom bodyToString errorDecoders =
+    innerExpect bodyToString errorDecoders <| \_ body -> Gen.Result.make_.ok body
+
+
+innerExpect :
+    (Elm.Expression -> Elm.Expression)
+    -> Elm.Expression
+    -> (Elm.Expression -> Elm.Expression -> Elm.Expression)
+    ->
+        { badUrl_ : Elm.Expression -> Elm.Expression
+        , timeout_ : Elm.Expression
+        , networkError_ : Elm.Expression
+        , badStatus_ : Elm.Expression -> Elm.Expression -> Elm.Expression
+        , goodStatus_ : Elm.Expression -> Elm.Expression -> Elm.Expression
+        }
+innerExpect bodyToString errorDecoders goodStatus =
+    { badUrl_ = \url -> Gen.Result.make_.err (Elm.apply (Elm.val "BadUrl") [ url ])
+    , timeout_ = Gen.Result.make_.err (Elm.val "Timeout")
+    , networkError_ = Gen.Result.make_.err (Elm.val "NetworkError")
+    , badStatus_ =
+        \metadata body ->
+            Gen.Maybe.caseOf_.maybe
+                (Gen.Dict.call_.get (Gen.String.call_.fromInt (Elm.get "statusCode" metadata)) errorDecoders)
+                { nothing =
+                    Gen.Result.make_.err
+                        (Elm.apply (Elm.val "UnknownBadStatus") [ metadata, body ])
+                , just =
+                    \errorDecoder ->
+                        Gen.Result.caseOf_.result
+                            (Gen.Json.Decode.call_.decodeString errorDecoder (bodyToString body))
+                            { ok =
+                                \x ->
+                                    Gen.Result.make_.err
+                                        (Elm.apply (Elm.val "KnownBadStatus") [ Elm.get "statusCode" metadata, x ])
+                            , err =
+                                \_ ->
+                                    Gen.Result.make_.err
+                                        (Elm.apply (Elm.val "BadErrorBody") [ metadata, body ])
+                            }
+                }
+    , goodStatus_ = goodStatus
+    }
 
 
 

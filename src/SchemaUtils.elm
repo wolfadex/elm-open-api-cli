@@ -668,7 +668,7 @@ typeToEncoder qualify namespace type_ =
                     )
 
         Common.Bytes ->
-            CliMonad.todo "encoder for bytes not implemented"
+            CliMonad.todo "Encoder for bytes not implemented"
                 |> CliMonad.map (\encoder _ -> encoder)
 
         Common.Unit ->

@@ -1959,11 +1959,11 @@ operationToTypesExpectAndResolver namespace functionName operation =
             , lamderaProgramTest = Gen.OpenApi.Common.expectJsonCustomEffect toMsg errorDecoders successDecoder
             }
 
-        expectStringBetter : (Elm.Expression -> Elm.Expression) -> PerPackage Elm.Expression
-        expectStringBetter toMsg =
-            { core = Gen.Http.expectString toMsg
+        expectStringBetter : Elm.Expression -> (Elm.Expression -> Elm.Expression) -> PerPackage Elm.Expression
+        expectStringBetter errorDecoders toMsg =
+            { core = Gen.OpenApi.Common.expectStringCustom toMsg errorDecoders
             , elmPages = Gen.BackendTask.Http.expectString
-            , lamderaProgramTest = Gen.Effect.Http.expectString toMsg
+            , lamderaProgramTest = Gen.OpenApi.Common.expectStringCustomEffect toMsg errorDecoders
             }
 
         expectBytesBetter : Elm.Expression -> (Elm.Expression -> Elm.Expression) -> PerPackage Elm.Expression
@@ -2182,7 +2182,7 @@ operationToTypesExpectAndResolver namespace functionName operation =
                                                     , bodyTypeAnnotation = Elm.Annotation.string
                                                     , errorTypeDeclaration = errorTypeDeclaration_
                                                     , errorTypeAnnotation = errorTypeAnnotation
-                                                    , expect = expectStringBetter
+                                                    , expect = expectStringBetter errorDecoders_
                                                     , resolver =
                                                         { core = Gen.OpenApi.Common.stringResolverCustom errorDecoders_
                                                         , lamderaProgramTest = Gen.OpenApi.Common.stringResolverCustomEffect errorDecoders_

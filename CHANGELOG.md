@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unreleased]
 
+### Added
+-   Add documentation for generated types. [Leonardo Taglialegne](https://github.com/miniBill)
+
 ## [0.6.1] - 2024-07-23
 
 ### Fixed

@@ -1520,7 +1520,7 @@ contentToContentSchema qualify namespace content =
                         |> CliMonad.stepOrFail "The request's application/json content option doesn't have a schema"
                             (OpenApi.MediaType.schema >> Maybe.map OpenApi.Schema.get)
                         |> CliMonad.andThen (SchemaUtils.schemaToType qualify namespace)
-                        |> CliMonad.map JsonContent
+                        |> CliMonad.map (\{ type_ } -> JsonContent type_)
 
                 Nothing ->
                     case Dict.get "text/html" content of
@@ -1548,7 +1548,7 @@ contentToContentSchema qualify namespace content =
                     (OpenApi.MediaType.schema >> Maybe.map OpenApi.Schema.get)
                 |> CliMonad.andThen (SchemaUtils.schemaToType True namespace)
                 |> CliMonad.andThen
-                    (\type_ ->
+                    (\{ type_ } ->
                         if type_ == Common.String then
                             CliMonad.succeed (StringContent mime)
 
@@ -1809,7 +1809,7 @@ paramToString qualify namespace type_ =
             --  These are mostly aliases
             SchemaUtils.getAlias ref
                 |> CliMonad.andThen (SchemaUtils.schemaToType qualify namespace)
-                |> CliMonad.andThen (paramToString qualify namespace)
+                |> CliMonad.andThen (\param -> paramToString qualify namespace param.type_)
 
         Common.OneOf name data ->
             CliMonad.map2
@@ -1877,7 +1877,7 @@ paramToType qualify namespace concreteParam =
             (OpenApi.Parameter.schema >> Maybe.map OpenApi.Schema.get)
         |> CliMonad.andThen (SchemaUtils.schemaToType qualify namespace)
         |> CliMonad.andThen
-            (\type_ ->
+            (\{ type_ } ->
                 case type_ of
                     Common.Ref ref ->
                         ref
@@ -1885,10 +1885,10 @@ paramToType qualify namespace concreteParam =
                             |> CliMonad.andThen (SchemaUtils.schemaToType qualify namespace)
                             |> CliMonad.map
                                 (\inner ->
-                                    case inner of
+                                    case inner.type_ of
                                         Common.Nullable _ ->
                                             -- If it's a ref to a nullable type, we don't want another layer of nullable
-                                            inner
+                                            inner.type_
 
                                         _ ->
                                             if OpenApi.Parameter.required concreteParam then

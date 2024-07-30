@@ -203,6 +203,7 @@ type alias OneOfData =
     List
         { name : VariantName
         , type_ : Type
+        , documentation : Maybe String
         }
 
 
@@ -221,6 +222,7 @@ type alias FieldName =
 type alias Field =
     { type_ : Type
     , required : Bool
+    , documentation : Maybe String
     }
 
 

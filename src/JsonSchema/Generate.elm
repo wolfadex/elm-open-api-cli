@@ -15,18 +15,25 @@ schemaToDeclarations : List String -> String -> Json.Schema.Definitions.Schema -
 schemaToDeclarations namespace name schema =
     schemaToAnnotation False namespace schema
         |> CliMonad.andThen
-            (\ann ->
+            (\{ annotation, documentation } ->
                 let
                     typeName : Common.TypeName
                     typeName =
                         Common.typifyName name
                 in
-                if (Elm.ToString.annotation ann).signature == typeName then
+                if (Elm.ToString.annotation annotation).signature == typeName then
                     CliMonad.succeed []
 
                 else
                     [ ( Common.Types
-                      , Elm.alias typeName ann
+                      , Elm.alias typeName annotation
+                            |> (case documentation of
+                                    Nothing ->
+                                        identity
+
+                                    Just doc ->
+                                        Elm.withDocumentation doc
+                               )
                             |> Elm.exposeWith
                                 { exposeConstructor = False
                                 , group = Just "Aliases"
@@ -68,19 +75,29 @@ schemaToDeclarations namespace name schema =
         |> CliMonad.withPath name
 
 
-schemaToAnnotation : Bool -> List String -> Json.Schema.Definitions.Schema -> CliMonad Elm.Annotation.Annotation
+schemaToAnnotation : Bool -> List String -> Json.Schema.Definitions.Schema -> CliMonad { annotation : Elm.Annotation.Annotation, documentation : Maybe String }
 schemaToAnnotation qualify namespace schema =
     SchemaUtils.schemaToType qualify namespace schema
-        |> CliMonad.andThen (SchemaUtils.typeToAnnotation qualify namespace)
+        |> CliMonad.andThen
+            (\{ type_, documentation } ->
+                type_
+                    |> SchemaUtils.typeToAnnotation qualify namespace
+                    |> CliMonad.map
+                        (\annotation ->
+                            { annotation = annotation
+                            , documentation = documentation
+                            }
+                        )
+            )
 
 
 schemaToDecoder : Bool -> List String -> Json.Schema.Definitions.Schema -> CliMonad Elm.Expression
 schemaToDecoder qualify namespace schema =
     SchemaUtils.schemaToType True namespace schema
-        |> CliMonad.andThen (SchemaUtils.typeToDecoder qualify namespace)
+        |> CliMonad.andThen (\{ type_ } -> SchemaUtils.typeToDecoder qualify namespace type_)
 
 
 schemaToEncoder : Bool -> List String -> Json.Schema.Definitions.Schema -> CliMonad (Elm.Expression -> Elm.Expression)
 schemaToEncoder qualify namespace schema =
     SchemaUtils.schemaToType True namespace schema
-        |> CliMonad.andThen (SchemaUtils.typeToEncoder qualify namespace)
+        |> CliMonad.andThen (\{ type_ } -> SchemaUtils.typeToEncoder qualify namespace type_)

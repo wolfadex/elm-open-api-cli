@@ -278,8 +278,47 @@ files { namespace, generateTodos, effectTypes, server } apiSpec =
                                                     )
                                                 )
 
-                                    _ ->
+                                    Single _ ->
                                         []
+
+                                    Default ->
+                                        case OpenApi.servers apiSpec of
+                                            [] ->
+                                                []
+
+                                            [ _ ] ->
+                                                []
+
+                                            servers ->
+                                                servers
+                                                    |> List.indexedMap
+                                                        (\i value ->
+                                                            let
+                                                                key : String
+                                                                key =
+                                                                    case OpenApi.Server.description value of
+                                                                        Nothing ->
+                                                                            "server" ++ String.fromInt i
+
+                                                                        Just description ->
+                                                                            description
+                                                            in
+                                                            ( Common.Servers
+                                                            , Elm.string (OpenApi.Server.url value)
+                                                                |> Elm.declaration key
+                                                                |> (case OpenApi.Server.description value of
+                                                                        Nothing ->
+                                                                            identity
+
+                                                                        Just description ->
+                                                                            Elm.withDocumentation description
+                                                                   )
+                                                                |> Elm.exposeWith
+                                                                    { exposeConstructor = True
+                                                                    , group = Just "Servers"
+                                                                    }
+                                                            )
+                                                        )
                                )
                 in
                 ( allDecls
@@ -1164,9 +1203,11 @@ replacedUrl server authInfo namespace pathUrl operation =
                                             [] ->
                                                 Err ""
 
-                                            firstServer :: _ ->
-                                                -- TODO: possibly switch to config.server and generate the server list file?
-                                                Err (OpenApi.Server.url firstServer)
+                                            [ oneServer ] ->
+                                                Err (OpenApi.Server.url oneServer)
+
+                                            _ ->
+                                                Ok (Elm.get "server" config)
 
                                     Multiple _ ->
                                         Ok (Elm.get "server" config)
@@ -1604,18 +1645,9 @@ toConfigParamAnnotation :
         }
     -> CliMonad ({ requireToMsg : Bool } -> PerPackage Elm.Annotation.Annotation)
 toConfigParamAnnotation namespace options =
-    CliMonad.map
-        (\urlParams { requireToMsg } ->
+    CliMonad.map2
+        (\urlParams maybeServer { requireToMsg } ->
             let
-                maybeServer : List ( String, Elm.Annotation.Annotation )
-                maybeServer =
-                    case options.server of
-                        Multiple _ ->
-                            [ ( "server", Elm.Annotation.string ) ]
-
-                        _ ->
-                            []
-
                 toMsgCore : Elm.Annotation.Annotation
                 toMsgCore =
                     Elm.Annotation.function
@@ -1657,6 +1689,30 @@ toConfigParamAnnotation namespace options =
             }
         )
         (operationToUrlParams namespace options.operation)
+        (case options.server of
+            Multiple _ ->
+                [ ( "server", Elm.Annotation.string ) ]
+                    |> CliMonad.succeed
+
+            Single _ ->
+                CliMonad.succeed []
+
+            Default ->
+                OpenApi.servers
+                    |> CliMonad.fromApiSpec
+                    |> CliMonad.map
+                        (\servers ->
+                            case servers of
+                                [] ->
+                                    []
+
+                                [ _ ] ->
+                                    []
+
+                                _ ->
+                                    [ ( "server", Elm.Annotation.string ) ]
+                        )
+        )
 
 
 operationToUrlParams : List String -> OpenApi.Operation.Operation -> CliMonad (List ( String, Elm.Annotation.Annotation ))

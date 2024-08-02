@@ -1072,7 +1072,13 @@ toRequestFunctions server effectTypes namespace method pathUrl operation =
                                         toDecls auth successAnnotation toBody replaced configAnnotation
                                     )
                             )
-                                ++ [ ( Common.Types, errorTypeDeclaration ) ]
+                                ++ (case errorTypeDeclaration of
+                                        Just decl ->
+                                            [ ( Common.Types, decl ) ]
+
+                                        Nothing ->
+                                            []
+                                   )
                         )
                         (body contentSchema)
                         (bodyParams contentSchema
@@ -1996,7 +2002,7 @@ toConcreteParam param =
 type alias OperationUtils =
     { successType : Common.Type
     , bodyTypeAnnotation : Elm.Annotation.Annotation
-    , errorTypeDeclaration : Elm.Declaration
+    , errorTypeDeclaration : Maybe Elm.Declaration
     , errorTypeAnnotation : Elm.Annotation.Annotation
     , expect : (Elm.Expression -> Elm.Expression) -> PerPackage Elm.Expression
     , resolver :
@@ -2144,7 +2150,7 @@ operationToTypesExpectAndResolver namespace functionName operation =
                                         |> Gen.Dict.call_.fromList
                                 )
 
-                    errorTypeDeclaration : CliMonad ( Elm.Declaration, Elm.Annotation.Annotation )
+                    errorTypeDeclaration : CliMonad ( Maybe Elm.Declaration, Elm.Annotation.Annotation )
                     errorTypeDeclaration =
                         errorResponses
                             |> Dict.map
@@ -2190,20 +2196,18 @@ operationToTypesExpectAndResolver namespace functionName operation =
                             |> CliMonad.combineDict
                             |> CliMonad.map
                                 (\dict ->
-                                    let
-                                        errorName : String
-                                        errorName =
-                                            String.Extra.toSentenceCase functionName ++ "_Error"
-                                    in
-                                    ( if Dict.isEmpty dict then
-                                        Elm.alias errorName Gen.Basics.annotation_.never
-                                            |> Elm.exposeWith
-                                                { exposeConstructor = True
-                                                , group = Just "Errors"
-                                                }
+                                    if Dict.isEmpty dict then
+                                        ( Nothing
+                                        , Elm.Annotation.var "e"
+                                        )
 
-                                      else
-                                        dict
+                                    else
+                                        let
+                                            errorName : String
+                                            errorName =
+                                                String.Extra.toSentenceCase functionName ++ "_Error"
+                                        in
+                                        ( dict
                                             |> Dict.toList
                                             |> List.map (\( statusCode, annotation ) -> Elm.variantWith (toErrorVariant statusCode) [ annotation ])
                                             |> Elm.customType errorName
@@ -2211,8 +2215,9 @@ operationToTypesExpectAndResolver namespace functionName operation =
                                                 { exposeConstructor = True
                                                 , group = Just "Errors"
                                                 }
-                                    , Elm.Annotation.named (Common.moduleToNamespace namespace Common.Types) errorName
-                                    )
+                                            |> Just
+                                        , Elm.Annotation.named (Common.moduleToNamespace namespace Common.Types) errorName
+                                        )
                                 )
                 in
                 case OpenApi.Reference.toConcrete responseOrRef of

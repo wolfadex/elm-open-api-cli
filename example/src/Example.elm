@@ -4,9 +4,9 @@ module Example exposing (main)
 
 import AirlineCodeLookupApi.Api
 import AirlineCodeLookupApi.Types
-import Browser
-import BasicRouter.Types
 import BasicRouter.Json
+import BasicRouter.Types
+import Browser
 import DbFahrplanApi.Api
 import DbFahrplanApi.Types
 import GithubV3RestApi.Api
@@ -67,7 +67,7 @@ subscriptions _ =
 
 
 type Msg
-    = ConduitResponse (Result (OpenApi.Common.Error RealworldConduitApi.Types.GetArticle_Error String) RealworldConduitApi.Types.SingleArticleResponse)
+    = ConduitResponse (Result (OpenApi.Common.Error RealworldConduitApi.Types.GenericError String) RealworldConduitApi.Types.SingleArticleResponse)
     | AmadeusResponse (Result (OpenApi.Common.Error AirlineCodeLookupApi.Types.Getairlines_Error String) AirlineCodeLookupApi.Types.Airlines)
       -- | BimResponse (Result (OpenApi.Common.Error BimcloudApi20232AlphaRelease.BlobStoreService10BeginBatchUpload_Error Bytes.Bytes) Bytes.Bytes)
     | GithubResponse (Result (OpenApi.Common.Error () String) GithubV3RestApi.Types.Root)

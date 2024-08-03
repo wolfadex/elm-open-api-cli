@@ -123,7 +123,7 @@ jobs:
         run: |
           echo '```diff' > diff.md
           diff -w -d -r main/generated branch/generated | dd bs=1024 count=30 >> diff.md || true # We ignore diff exiting with a 1 on diff
-          echo '```' >> diff.md
+          echo -e '\n```' >> diff.md
 
       - name: Post a comment with the diff
         uses: JoseThen/comment-pr@v1.2.0

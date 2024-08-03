@@ -76,7 +76,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: branch/node_modules
-          key: node_modules-${{ hashFiles('package-lock.json') }}
+          key: node_modules-${{ hashFiles('branch/package-lock.json') }}
 
       # Re-use node_modules between runs until package-lock.json changes.
       - name: Cache node_modules (main)
@@ -84,7 +84,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: main/node_modules
-          key: node_modules-${{ hashFiles('package-lock.json') }}
+          key: node_modules-${{ hashFiles('main/package-lock.json') }}
 
       # Re-use ~/.elm between runs until elm.json or review/elm.json changes.
       # The Elm compiler saves downloaded Elm packages to ~/.elm saves

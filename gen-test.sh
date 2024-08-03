@@ -10,6 +10,7 @@ npm run dev ./example/amadeus-airline-lookup.json
 npm run dev ./example/github-spec.json
 npm run dev -- ./example/db-fahrplan-api-specification.yaml --auto-convert-swagger
 npm run dev ./example/single-enum.yaml
+npm run dev ./example/viaggiatreno.yaml
 
 # Compile example Elm
 

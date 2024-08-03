@@ -8,6 +8,7 @@ jobs:
   lint-and-test:
     permissions:
       checks: write
+      pull-requests: write
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -46,5 +47,86 @@ jobs:
         run: npm run review
       - name: Test
         run: npm run test
-      # - name: Generation Test
-      #   run: npm run test:gen
+
+  diff-generation:
+    permissions:
+      checks: write
+      pull-requests: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Use Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Checkout branch
+        uses: actions/checkout@v4
+        with:
+          path: branch
+      
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          path: main
+
+      # Re-use node_modules between runs until package-lock.json changes.
+      - name: Cache node_modules (branch)
+        id: cache-node_modules-branch
+        uses: actions/cache@v4
+        with:
+          path: branch/node_modules
+          key: node_modules-${{ hashFiles('package-lock.json') }}
+
+      # Re-use node_modules between runs until package-lock.json changes.
+      - name: Cache node_modules (main)
+        id: cache-node_modules-main
+        uses: actions/cache@v4
+        with:
+          path: main/node_modules
+          key: node_modules-${{ hashFiles('package-lock.json') }}
+
+      # Re-use ~/.elm between runs until elm.json or review/elm.json changes.
+      # The Elm compiler saves downloaded Elm packages to ~/.elm saves
+      # downloaded tool executables there.
+      - name: Cache ~/.elm (both)
+        uses: actions/cache@v4
+        with:
+          path: ~/.elm
+          key: elm-${{ hashFiles('main/elm.json', 'main/review/elm.json', 'branch/elm.json', 'branch/review/elm.json') }}
+
+      # Install npm packages, unless we restored them from cache.
+      # Since `npm ci` removes the node_modules folder before running it’s
+      # important to skip this step if cache was restored.
+      - name: npm ci (branch)
+        if: steps.cache-node_modules-branch.outputs.cache-hit != 'true'
+        working-directory: branch
+        run: npm ci
+
+      # Install npm packages, unless we restored them from cache.
+      # Since `npm ci` removes the node_modules folder before running it’s
+      # important to skip this step if cache was restored.
+      - name: npm ci (main)
+        if: steps.cache-node_modules-main.outputs.cache-hit != 'true'
+        working-directory: main
+        run: npm ci
+  
+      - name: Generate (branch)
+        working-directory: branch
+        run: npm run test:gen
+  
+      - name: Generate (main)
+        working-directory: main
+        run: npm run test:gen || true # We don't want to block on main failing to generate
+
+      - name: Diff the outputs
+        run: |
+          echo '```diff' > diff.md
+          diff -w -d -r main/generated branch/generated >> diff.md || true # We ignore diff exiting with a 1 on diff
+          echo '```' >> diff.md
+
+      - name: Post a comment with the diff
+        uses: JoseThen/comment-pr@v1.2.0
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          file_path: './diff.md'

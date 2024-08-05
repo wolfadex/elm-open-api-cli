@@ -168,7 +168,11 @@ schemaToType qualify namespace schema =
                                                 [ subSchema.description
                                                 , Maybe.map
                                                     (\doc ->
-                                                        "This is a list of items. The documentation for an item follows.\n\n" ++ doc
+                                                        if String.contains "\n" doc then
+                                                            "A list of:\n" ++ doc
+
+                                                        else
+                                                            "A list of: " ++ doc
                                                     )
                                                     documentation
                                                 ]
@@ -391,7 +395,7 @@ objectSchemaToType qualify namespace subSchema =
                                 , field.documentation
                                     |> Maybe.map
                                         (\doc ->
-                                            " - " ++ name ++ ": " ++ doc
+                                            " - " ++ name ++ ": " ++ String.join "\n      " (String.split "\n" doc)
                                         )
                                 )
                             )

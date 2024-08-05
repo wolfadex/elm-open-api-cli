@@ -14,6 +14,7 @@
             "elm/url": "1.0.0",
             "elmcraft/core-extra": "2.0.0",
             "json-tools/json-schema": "1.0.2",
+            "json-tools/json-value": "1.0.1",
             "mdgriffith/elm-codegen": "4.2.1",
             "miniBill/elm-fast-dict": "1.1.0",
             "myrho/yaml": "1.0.0",

@@ -4,9 +4,10 @@ module CliMonad exposing
     , succeed, succeedWith, fail
     , map, map2, map3
     , andThen, andThen2, andThen3, combine, combineDict, combineMap, foldl
-    , errorToWarning, fromApiSpec, enums
+    , errorToWarning, fromApiSpec, enums, namespace
     , withPath, withWarning
     , todo, todoWithDefault
+    , moduleToNamespace
     )
 
 {-|
@@ -16,7 +17,7 @@ module CliMonad exposing
 @docs succeed, succeedWith, fail
 @docs map, map2, map3
 @docs andThen, andThen2, andThen3, combine, combineDict, combineMap, foldl
-@docs errorToWarning, fromApiSpec, enums
+@docs errorToWarning, fromApiSpec, enums, namespace
 @docs withPath, withWarning
 @docs todo, todoWithDefault
 
@@ -225,6 +226,11 @@ enums =
     CliMonad (\input -> Ok ( input.enums, [], FastDict.empty ))
 
 
+namespace : CliMonad (List String)
+namespace =
+    CliMonad (\input -> Ok ( input.namespace, [], FastDict.empty ))
+
+
 errorToWarning : CliMonad a -> CliMonad (Maybe a)
 errorToWarning (CliMonad f) =
     CliMonad
@@ -270,3 +276,8 @@ combineDict dict =
 foldl : (a -> b -> CliMonad b) -> CliMonad b -> List a -> CliMonad b
 foldl f init list =
     List.foldl (\e acc -> andThen (f e) acc) init list
+
+
+moduleToNamespace : Common.Module -> CliMonad (List String)
+moduleToNamespace mod =
+    CliMonad (\input -> Ok ( Common.moduleToNamespace input.namespace mod, [], FastDict.empty ))

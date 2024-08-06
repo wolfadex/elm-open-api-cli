@@ -129,15 +129,15 @@ files { namespace, generateTodos, effectTypes, server } apiSpec =
 
         Ok enums ->
             CliMonad.combine
-                [ pathDeclarations server effectTypes namespace
-                , schemasDeclarations namespace
-                , responsesDeclarations namespace
-                , requestBodiesDeclarations namespace
+                [ pathDeclarations server effectTypes
+                , schemasDeclarations
+                , responsesDeclarations
+                , requestBodiesDeclarations
                 , SchemaUtils.enumDeclarations
                 ]
                 |> CliMonad.map List.concat
                 |> CliMonad.run
-                    (SchemaUtils.oneOfDeclarations namespace)
+                    SchemaUtils.oneOfDeclarations
                     { openApi = apiSpec
                     , generateTodos = generateTodos
                     , enums = enums
@@ -333,11 +333,7 @@ extractEnums openApi =
                             Json.Schema.Definitions.ObjectSchema subSchema ->
                                 case subSchema.enum of
                                     Nothing ->
-                                        if name == "DefectLocationTypes" then
-                                            Err (Debug.toString { name = name, schema = schema })
-
-                                        else
-                                            Ok acc
+                                        Ok acc
 
                                     Just enums ->
                                         case Result.Extra.combineMap (Json.Decode.decodeValue Json.Decode.string) enums of
@@ -458,8 +454,8 @@ formatModuleDocs =
         )
 
 
-pathDeclarations : Server -> List EffectType -> List String -> CliMonad (List ( Common.Module, Elm.Declaration ))
-pathDeclarations server effectTypes namespace =
+pathDeclarations : Server -> List EffectType -> CliMonad (List ( Common.Module, Elm.Declaration ))
+pathDeclarations server effectTypes =
     CliMonad.fromApiSpec OpenApi.paths
         |> CliMonad.andThen
             (\paths ->
@@ -478,7 +474,7 @@ pathDeclarations server effectTypes namespace =
                                 |> List.filterMap (\( method, getter ) -> Maybe.map (Tuple.pair method) (getter path))
                                 |> CliMonad.combineMap
                                     (\( method, operation ) ->
-                                        toRequestFunctions server effectTypes namespace method url operation
+                                        toRequestFunctions server effectTypes method url operation
                                             |> CliMonad.errorToWarning
                                     )
                                 |> CliMonad.map (List.filterMap identity >> List.concat)
@@ -487,8 +483,8 @@ pathDeclarations server effectTypes namespace =
             )
 
 
-responsesDeclarations : List String -> CliMonad (List ( Common.Module, Elm.Declaration ))
-responsesDeclarations namespace =
+responsesDeclarations : CliMonad (List ( Common.Module, Elm.Declaration ))
+responsesDeclarations =
     CliMonad.fromApiSpec
         (OpenApi.components
             >> Maybe.map OpenApi.Components.responses
@@ -498,15 +494,15 @@ responsesDeclarations namespace =
             (Dict.foldl
                 (\name schema ->
                     CliMonad.map2 (::)
-                        (responseToDeclarations namespace (Common.typifyName name) schema)
+                        (responseToDeclarations (Common.typifyName name) schema)
                 )
                 (CliMonad.succeed [])
             )
         |> CliMonad.map List.concat
 
 
-requestBodiesDeclarations : List String -> CliMonad (List ( Common.Module, Elm.Declaration ))
-requestBodiesDeclarations namespace =
+requestBodiesDeclarations : CliMonad (List ( Common.Module, Elm.Declaration ))
+requestBodiesDeclarations =
     CliMonad.fromApiSpec
         (OpenApi.components
             >> Maybe.map OpenApi.Components.requestBodies
@@ -516,15 +512,15 @@ requestBodiesDeclarations namespace =
             (Dict.foldl
                 (\name schema ->
                     CliMonad.map2 (::)
-                        (requestBodyToDeclarations namespace name schema)
+                        (requestBodyToDeclarations name schema)
                 )
                 (CliMonad.succeed [])
             )
         |> CliMonad.map List.concat
 
 
-schemasDeclarations : List String -> CliMonad (List ( Common.Module, Elm.Declaration ))
-schemasDeclarations namespace =
+schemasDeclarations : CliMonad (List ( Common.Module, Elm.Declaration ))
+schemasDeclarations =
     CliMonad.fromApiSpec
         (OpenApi.components
             >> Maybe.map OpenApi.Components.schemas
@@ -535,14 +531,14 @@ schemasDeclarations namespace =
                 (\name schema ->
                     CliMonad.map2
                         (\decls declAcc -> decls ++ declAcc)
-                        (JsonSchema.Generate.schemaToDeclarations namespace name (OpenApi.Schema.get schema))
+                        (JsonSchema.Generate.schemaToDeclarations name (OpenApi.Schema.get schema))
                 )
                 (CliMonad.succeed [])
             )
 
 
-unitDeclarations : List String -> String -> CliMonad (List ( Common.Module, Elm.Declaration ))
-unitDeclarations namespace name =
+unitDeclarations : String -> CliMonad (List ( Common.Module, Elm.Declaration ))
+unitDeclarations name =
     let
         typeName : Common.TypeName
         typeName =
@@ -557,8 +553,8 @@ unitDeclarations namespace name =
                     }
           )
             |> CliMonad.succeed
-        , CliMonad.map
-            (\schemaDecoder ->
+        , CliMonad.map2
+            (\namespace schemaDecoder ->
                 ( Common.Json
                 , Elm.declaration ("decode" ++ typeName)
                     (schemaDecoder
@@ -570,9 +566,10 @@ unitDeclarations namespace name =
                         }
                 )
             )
-            (SchemaUtils.typeToDecoder False namespace Common.Unit)
-        , CliMonad.map
-            (\encoder ->
+            CliMonad.namespace
+            (SchemaUtils.typeToDecoder False Common.Unit)
+        , CliMonad.map2
+            (\namespace encoder ->
                 ( Common.Json
                 , Elm.declaration ("encode" ++ typeName)
                     (Elm.functionReduced "rec" encoder
@@ -584,12 +581,13 @@ unitDeclarations namespace name =
                         }
                 )
             )
-            (SchemaUtils.typeToEncoder False namespace Common.Unit)
+            CliMonad.namespace
+            (SchemaUtils.typeToEncoder False Common.Unit)
         ]
 
 
-responseToDeclarations : List String -> String -> OpenApi.Reference.ReferenceOr OpenApi.Response.Response -> CliMonad (List ( Common.Module, Elm.Declaration ))
-responseToDeclarations namespace name reference =
+responseToDeclarations : String -> OpenApi.Reference.ReferenceOr OpenApi.Response.Response -> CliMonad (List ( Common.Module, Elm.Declaration ))
+responseToDeclarations name reference =
     case OpenApi.Reference.toConcrete reference of
         Just response ->
             let
@@ -599,20 +597,20 @@ responseToDeclarations namespace name reference =
             in
             if Dict.isEmpty content then
                 -- If there is no content then we go with the unit value, `()` as the response type
-                unitDeclarations namespace name
+                unitDeclarations name
 
             else
                 responseToSchema response
                     |> CliMonad.withPath name
-                    |> CliMonad.andThen (JsonSchema.Generate.schemaToDeclarations namespace name)
+                    |> CliMonad.andThen (JsonSchema.Generate.schemaToDeclarations name)
 
         Nothing ->
             CliMonad.fail "Could not convert reference to concrete value"
                 |> CliMonad.withPath name
 
 
-requestBodyToDeclarations : List String -> String -> OpenApi.Reference.ReferenceOr OpenApi.RequestBody.RequestBody -> CliMonad (List ( Common.Module, Elm.Declaration ))
-requestBodyToDeclarations namespace name reference =
+requestBodyToDeclarations : String -> OpenApi.Reference.ReferenceOr OpenApi.RequestBody.RequestBody -> CliMonad (List ( Common.Module, Elm.Declaration ))
+requestBodyToDeclarations name reference =
     case OpenApi.Reference.toConcrete reference of
         Just requestBody ->
             let
@@ -622,20 +620,20 @@ requestBodyToDeclarations namespace name reference =
             in
             if Dict.isEmpty content then
                 -- If there is no content then we go with the unit value, `()` as the requestBody type
-                unitDeclarations namespace name
+                unitDeclarations name
 
             else
                 requestBodyToSchema requestBody
                     |> CliMonad.withPath name
-                    |> CliMonad.andThen (JsonSchema.Generate.schemaToDeclarations namespace name)
+                    |> CliMonad.andThen (JsonSchema.Generate.schemaToDeclarations name)
 
         Nothing ->
             CliMonad.fail "Could not convert reference to concrete value"
                 |> CliMonad.withPath name
 
 
-toRequestFunctions : Server -> List EffectType -> List String -> String -> String -> OpenApi.Operation.Operation -> CliMonad (List ( Common.Module, Elm.Declaration ))
-toRequestFunctions server effectTypes namespace method pathUrl operation =
+toRequestFunctions : Server -> List EffectType -> String -> String -> OpenApi.Operation.Operation -> CliMonad (List ( Common.Module, Elm.Declaration ))
+toRequestFunctions server effectTypes method pathUrl operation =
     let
         functionName : String
         functionName =
@@ -668,7 +666,7 @@ toRequestFunctions server effectTypes namespace method pathUrl operation =
                         )
 
                 JsonContent type_ ->
-                    SchemaUtils.typeToEncoder True namespace type_
+                    SchemaUtils.typeToEncoder True type_
                         |> CliMonad.map
                             (\encoder config ->
                                 let
@@ -715,7 +713,7 @@ toRequestFunctions server effectTypes namespace method pathUrl operation =
                     CliMonad.succeed []
 
                 JsonContent type_ ->
-                    SchemaUtils.typeToAnnotation True namespace type_
+                    SchemaUtils.typeToAnnotation True type_
                         |> CliMonad.map (\annotation -> [ ( "body", annotation ) ])
 
                 StringContent _ ->
@@ -1150,7 +1148,7 @@ toRequestFunctions server effectTypes namespace method pathUrl operation =
                         (bodyParams contentSchema
                             |> CliMonad.andThen
                                 (\params ->
-                                    toConfigParamAnnotation namespace
+                                    toConfigParamAnnotation
                                         { operation = operation
                                         , successAnnotation = successAnnotation
                                         , errorBodyAnnotation = bodyTypeAnnotation
@@ -1161,13 +1159,13 @@ toRequestFunctions server effectTypes namespace method pathUrl operation =
                                         }
                                 )
                         )
-                        (replacedUrl server auth namespace pathUrl operation)
+                        (replacedUrl server auth pathUrl operation)
                 )
-                (operationToContentSchema True namespace operation)
+                (operationToContentSchema True operation)
                 (operationToAuthorizationInfo operation)
-                (SchemaUtils.typeToAnnotation True namespace successType)
+                (SchemaUtils.typeToAnnotation True successType)
     in
-    operationToTypesExpectAndResolver namespace functionName operation
+    operationToTypesExpectAndResolver functionName operation
         |> CliMonad.andThen step
         |> CliMonad.withPath method
         |> CliMonad.withPath pathUrl
@@ -1229,8 +1227,8 @@ operationToGroup operation =
             "Operations"
 
 
-replacedUrl : Server -> AuthorizationInfo -> List String -> String -> OpenApi.Operation.Operation -> CliMonad (Elm.Expression -> Elm.Expression)
-replacedUrl server authInfo namespace pathUrl operation =
+replacedUrl : Server -> AuthorizationInfo -> String -> OpenApi.Operation.Operation -> CliMonad (Elm.Expression -> Elm.Expression)
+replacedUrl server authInfo pathUrl operation =
     let
         pathSegments : List String
         pathSegments =
@@ -1343,10 +1341,10 @@ replacedUrl server authInfo namespace pathUrl operation =
                 toConcreteParam param
                     |> CliMonad.andThen
                         (\concreteParam ->
-                            paramToType True namespace concreteParam
+                            paramToType True concreteParam
                                 |> CliMonad.andThen
                                     (\( paramName, type_ ) ->
-                                        paramToString True namespace type_
+                                        paramToString True type_
                                             |> CliMonad.map
                                                 (\{ inputToString, alwaysJust } ->
                                                     { concreteParam = concreteParam
@@ -1392,7 +1390,7 @@ replacedUrl server authInfo namespace pathUrl operation =
                             |> Tuple.mapBoth (List.filterMap identity) List.concat
                 in
                 (queryParams
-                    |> CliMonad.combineMap (queryParameterToUrlBuilderArgument True namespace)
+                    |> CliMonad.combineMap (queryParameterToUrlBuilderArgument True)
                 )
                     |> CliMonad.andThen (initialUrl replacements)
             )
@@ -1582,8 +1580,8 @@ operationToAuthorizationInfo operation =
         (CliMonad.fromApiSpec OpenApi.components)
 
 
-operationToContentSchema : Bool -> List String -> OpenApi.Operation.Operation -> CliMonad ContentSchema
-operationToContentSchema qualify namespace operation =
+operationToContentSchema : Bool -> OpenApi.Operation.Operation -> CliMonad ContentSchema
+operationToContentSchema qualify operation =
     case OpenApi.Operation.requestBody operation of
         Nothing ->
             CliMonad.succeed EmptyContent
@@ -1592,7 +1590,7 @@ operationToContentSchema qualify namespace operation =
             case OpenApi.Reference.toConcrete requestOrRef of
                 Just request ->
                     OpenApi.RequestBody.content request
-                        |> contentToContentSchema qualify namespace
+                        |> contentToContentSchema qualify
 
                 Nothing ->
                     CliMonad.succeed requestOrRef
@@ -1616,8 +1614,8 @@ searchForJsonMediaType mediaType _ =
             False
 
 
-contentToContentSchema : Bool -> List String -> Dict.Dict String OpenApi.MediaType.MediaType -> CliMonad ContentSchema
-contentToContentSchema qualify namespace content =
+contentToContentSchema : Bool -> Dict.Dict String OpenApi.MediaType.MediaType -> CliMonad ContentSchema
+contentToContentSchema qualify content =
     let
         default : Maybe (CliMonad ContentSchema) -> CliMonad ContentSchema
         default fallback =
@@ -1632,7 +1630,7 @@ contentToContentSchema qualify namespace content =
                     CliMonad.succeed jsonSchema
                         |> CliMonad.stepOrFail "The request's application/json content option doesn't have a schema"
                             (OpenApi.MediaType.schema >> Maybe.map OpenApi.Schema.get)
-                        |> CliMonad.andThen (SchemaUtils.schemaToType qualify namespace)
+                        |> CliMonad.andThen (SchemaUtils.schemaToType qualify)
                         |> CliMonad.map (\{ type_ } -> JsonContent type_)
 
                 Nothing ->
@@ -1659,7 +1657,7 @@ contentToContentSchema qualify namespace content =
             CliMonad.succeed htmlSchema
                 |> CliMonad.stepOrFail ("The request's " ++ mime ++ " content option doesn't have a schema")
                     (OpenApi.MediaType.schema >> Maybe.map OpenApi.Schema.get)
-                |> CliMonad.andThen (SchemaUtils.schemaToType True namespace)
+                |> CliMonad.andThen (SchemaUtils.schemaToType True)
                 |> CliMonad.andThen
                     (\{ type_ } ->
                         if type_ == Common.String then
@@ -1705,18 +1703,16 @@ contentToContentSchema qualify namespace content =
 
 
 toConfigParamAnnotation :
-    List String
-    ->
-        { operation : OpenApi.Operation.Operation
-        , successAnnotation : Elm.Annotation.Annotation
-        , errorBodyAnnotation : Elm.Annotation.Annotation
-        , errorTypeAnnotation : Elm.Annotation.Annotation
-        , authorizationInfo : AuthorizationInfo
-        , bodyParams : List ( String, Elm.Annotation.Annotation )
-        , server : Server
-        }
+    { operation : OpenApi.Operation.Operation
+    , successAnnotation : Elm.Annotation.Annotation
+    , errorBodyAnnotation : Elm.Annotation.Annotation
+    , errorTypeAnnotation : Elm.Annotation.Annotation
+    , authorizationInfo : AuthorizationInfo
+    , bodyParams : List ( String, Elm.Annotation.Annotation )
+    , server : Server
+    }
     -> CliMonad ({ requireToMsg : Bool } -> PerPackage Elm.Annotation.Annotation)
-toConfigParamAnnotation namespace options =
+toConfigParamAnnotation options =
     CliMonad.map2
         (\urlParams maybeServer { requireToMsg } ->
             let
@@ -1760,7 +1756,7 @@ toConfigParamAnnotation namespace options =
             , lamderaProgramTest = toAnnotation toMsgLamderaProgramTest
             }
         )
-        (operationToUrlParams namespace options.operation)
+        (operationToUrlParams options.operation)
         (case options.server of
             Multiple _ ->
                 [ ( "server", Elm.Annotation.string ) ]
@@ -1787,8 +1783,8 @@ toConfigParamAnnotation namespace options =
         )
 
 
-operationToUrlParams : List String -> OpenApi.Operation.Operation -> CliMonad (List ( String, Elm.Annotation.Annotation ))
-operationToUrlParams namespace operation =
+operationToUrlParams : OpenApi.Operation.Operation -> CliMonad (List ( String, Elm.Annotation.Annotation ))
+operationToUrlParams operation =
     let
         params : List (OpenApi.Reference.ReferenceOr OpenApi.Parameter.Parameter)
         params =
@@ -1802,18 +1798,18 @@ operationToUrlParams namespace operation =
             |> CliMonad.combineMap
                 (\param ->
                     toConcreteParam param
-                        |> CliMonad.andThen (paramToAnnotation True namespace)
+                        |> CliMonad.andThen (paramToAnnotation True)
                 )
             |> CliMonad.map
                 (\types -> [ ( "params", SchemaUtils.recordType types ) ])
 
 
-queryParameterToUrlBuilderArgument : Bool -> List String -> OpenApi.Parameter.Parameter -> CliMonad (Elm.Expression -> Elm.Expression)
-queryParameterToUrlBuilderArgument qualify namespace param =
-    paramToType qualify namespace param
+queryParameterToUrlBuilderArgument : Bool -> OpenApi.Parameter.Parameter -> CliMonad (Elm.Expression -> Elm.Expression)
+queryParameterToUrlBuilderArgument qualify param =
+    paramToType qualify param
         |> CliMonad.andThen
             (\( paramName, type_ ) ->
-                paramToString qualify namespace type_
+                paramToString qualify type_
                     |> CliMonad.map
                         (\{ inputToString, alwaysJust } config ->
                             let
@@ -1841,8 +1837,8 @@ queryParameterToUrlBuilderArgument qualify namespace param =
             )
 
 
-paramToString : Bool -> List String -> Common.Type -> CliMonad { inputToString : Elm.Expression -> Elm.Expression, alwaysJust : Bool }
-paramToString qualify namespace type_ =
+paramToString : Bool -> Common.Type -> CliMonad { inputToString : Elm.Expression -> Elm.Expression, alwaysJust : Bool }
+paramToString qualify type_ =
     let
         basic :
             (Elm.Expression -> Elm.Expression)
@@ -1855,7 +1851,7 @@ paramToString qualify namespace type_ =
             -> ({ inputToString : Elm.Expression, alwaysJust : Bool } -> Elm.Expression -> Elm.Expression)
             -> CliMonad { inputToString : Elm.Expression -> Elm.Expression, alwaysJust : Bool }
         recursive p f =
-            paramToString qualify namespace p
+            paramToString qualify p
                 |> CliMonad.map
                     (\{ inputToString, alwaysJust } ->
                         { inputToString =
@@ -1936,8 +1932,8 @@ paramToString qualify namespace type_ =
         Common.Ref ref ->
             --  These are mostly aliases
             SchemaUtils.getAlias ref
-                |> CliMonad.andThen (SchemaUtils.schemaToType qualify namespace)
-                |> CliMonad.andThen (\param -> paramToString qualify namespace param.type_)
+                |> CliMonad.andThen (SchemaUtils.schemaToType qualify)
+                |> CliMonad.andThen (\param -> paramToString qualify param.type_)
 
         Common.OneOf name data ->
             CliMonad.map2
@@ -1947,7 +1943,7 @@ paramToString qualify namespace type_ =
                     , alwaysJust = True
                     }
                 )
-                (SchemaUtils.typeToAnnotation qualify namespace type_)
+                (SchemaUtils.typeToAnnotation qualify type_)
                 (CliMonad.combineMap
                     (\alternative ->
                         CliMonad.andThen2
@@ -1959,14 +1955,14 @@ paramToString qualify namespace type_ =
                                     Elm.Case.branch1 (SchemaUtils.toVariantName name alternative.name) ( "alternative", annotation ) inputToString
                                         |> CliMonad.succeed
                             )
-                            (paramToString qualify namespace alternative.type_)
-                            (SchemaUtils.typeToAnnotation qualify namespace alternative.type_)
+                            (paramToString qualify alternative.type_)
+                            (SchemaUtils.typeToAnnotation qualify alternative.type_)
                     )
                     data
                 )
 
         _ ->
-            SchemaUtils.typeToAnnotation qualify namespace type_
+            SchemaUtils.typeToAnnotation qualify type_
                 |> CliMonad.andThen
                     (\annotation ->
                         let
@@ -1982,19 +1978,19 @@ paramToString qualify namespace type_ =
                     )
 
 
-paramToAnnotation : Bool -> List String -> OpenApi.Parameter.Parameter -> CliMonad ( String, Elm.Annotation.Annotation )
-paramToAnnotation qualify namespace concreteParam =
-    paramToType qualify namespace concreteParam
+paramToAnnotation : Bool -> OpenApi.Parameter.Parameter -> CliMonad ( String, Elm.Annotation.Annotation )
+paramToAnnotation qualify concreteParam =
+    paramToType qualify concreteParam
         |> CliMonad.andThen
             (\( paramName, type_ ) ->
-                SchemaUtils.typeToAnnotationMaybe qualify namespace type_
+                SchemaUtils.typeToAnnotationMaybe qualify type_
                     |> CliMonad.map
                         (\annotation -> ( paramName, annotation ))
             )
 
 
-paramToType : Bool -> List String -> OpenApi.Parameter.Parameter -> CliMonad ( String, Common.Type )
-paramToType qualify namespace concreteParam =
+paramToType : Bool -> OpenApi.Parameter.Parameter -> CliMonad ( String, Common.Type )
+paramToType qualify concreteParam =
     let
         paramName : String
         paramName =
@@ -2003,14 +1999,14 @@ paramToType qualify namespace concreteParam =
     CliMonad.succeed concreteParam
         |> CliMonad.stepOrFail ("Could not get schema for parameter " ++ paramName)
             (OpenApi.Parameter.schema >> Maybe.map OpenApi.Schema.get)
-        |> CliMonad.andThen (SchemaUtils.schemaToType qualify namespace)
+        |> CliMonad.andThen (SchemaUtils.schemaToType qualify)
         |> CliMonad.andThen
             (\{ type_ } ->
                 case type_ of
                     Common.Ref ref ->
                         ref
                             |> SchemaUtils.getAlias
-                            |> CliMonad.andThen (SchemaUtils.schemaToType qualify namespace)
+                            |> CliMonad.andThen (SchemaUtils.schemaToType qualify)
                             |> CliMonad.map
                                 (\inner ->
                                     case inner.type_ of
@@ -2079,11 +2075,10 @@ type alias OperationUtils =
 
 
 operationToTypesExpectAndResolver :
-    List String
-    -> String
+    String
     -> OpenApi.Operation.Operation
     -> CliMonad OperationUtils
-operationToTypesExpectAndResolver namespace functionName operation =
+operationToTypesExpectAndResolver functionName operation =
     let
         responses : Dict.Dict String (OpenApi.Reference.ReferenceOr OpenApi.Response.Response)
         responses =
@@ -2117,8 +2112,8 @@ operationToTypesExpectAndResolver namespace functionName operation =
                 ++ " possible responses, there was no successful one."
             )
             getFirstSuccessResponse
-        |> CliMonad.andThen
-            (\( ( _, responseOrRef ), _ ) ->
+        |> CliMonad.andThen2
+            (\namespace ( ( _, responseOrRef ), _ ) ->
                 let
                     errorResponses : Dict.Dict String (OpenApi.Reference.ReferenceOr OpenApi.Response.Response)
                     errorResponses =
@@ -2171,12 +2166,12 @@ operationToTypesExpectAndResolver namespace functionName operation =
                                             case OpenApi.Reference.toConcrete errResponseOrRef of
                                                 Just errResponse ->
                                                     OpenApi.Response.content errResponse
-                                                        |> contentToContentSchema True namespace
+                                                        |> contentToContentSchema True
                                                         |> CliMonad.andThen
                                                             (\contentSchema ->
                                                                 case contentSchema of
                                                                     JsonContent type_ ->
-                                                                        SchemaUtils.typeToDecoder True namespace type_
+                                                                        SchemaUtils.typeToDecoder True type_
                                                                             |> CliMonad.map common
 
                                                                     StringContent _ ->
@@ -2229,14 +2224,14 @@ operationToTypesExpectAndResolver namespace functionName operation =
                                     case OpenApi.Reference.toConcrete errResponseOrRef of
                                         Just errResponse ->
                                             OpenApi.Response.content errResponse
-                                                |> contentToContentSchema True namespace
+                                                |> contentToContentSchema True
                                                 |> CliMonad.andThen
                                                     (\contentSchema ->
                                                         case contentSchema of
                                                             JsonContent type_ ->
                                                                 CliMonad.map2 Tuple.pair
-                                                                    (SchemaUtils.typeToAnnotation False namespace type_)
-                                                                    (SchemaUtils.typeToAnnotation True namespace type_)
+                                                                    (SchemaUtils.typeToAnnotation False type_)
+                                                                    (SchemaUtils.typeToAnnotation True type_)
 
                                                             StringContent _ ->
                                                                 CliMonad.succeed
@@ -2310,7 +2305,7 @@ operationToTypesExpectAndResolver namespace functionName operation =
                 case OpenApi.Reference.toConcrete responseOrRef of
                     Just response ->
                         OpenApi.Response.content response
-                            |> contentToContentSchema True namespace
+                            |> contentToContentSchema True
                             |> CliMonad.andThen
                                 (\contentSchema ->
                                     case contentSchema of
@@ -2328,7 +2323,7 @@ operationToTypesExpectAndResolver namespace functionName operation =
                                                         }
                                                     }
                                                 )
-                                                (SchemaUtils.typeToDecoder True namespace type_)
+                                                (SchemaUtils.typeToDecoder True type_)
                                                 errorDecoders
                                                 errorTypeDeclaration
 
@@ -2422,6 +2417,7 @@ operationToTypesExpectAndResolver namespace functionName operation =
                                             errorTypeDeclaration
                                 )
             )
+            CliMonad.namespace
 
 
 customHttpError : Elm.Declaration

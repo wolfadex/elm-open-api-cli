@@ -17,6 +17,7 @@ import Elm.Annotation
 import Elm.Case
 import Elm.Declare
 import Elm.Op
+import FastDict
 import Gen.BackendTask
 import Gen.BackendTask.Http
 import Gen.Basics
@@ -37,6 +38,7 @@ import Gen.Result
 import Gen.String
 import Gen.Task
 import Gen.Url.Builder
+import Json.Decode
 import Json.Schema.Definitions
 import JsonSchema.Generate
 import List.Extra
@@ -54,6 +56,7 @@ import OpenApi.Schema
 import OpenApi.SecurityRequirement
 import OpenApi.SecurityScheme
 import OpenApi.Server
+import Result.Extra
 import SchemaUtils
 import String.Extra
 import Util.List
@@ -96,7 +99,7 @@ type Server
 type alias AuthorizationInfo =
     { headers : Elm.Expression -> List ( Elm.Expression, Elm.Expression )
     , query : Elm.Expression -> List ( Elm.Expression, Elm.Expression )
-    , params : List ( String, Elm.Annotation.Annotation )
+    , params : List ( Common.UnsafeName, Elm.Annotation.Annotation )
     , scopes : List String
     }
 
@@ -117,244 +120,320 @@ files :
     -> OpenApi.OpenApi
     -> Result CliMonad.Message ( List Elm.File, List CliMonad.Message )
 files { namespace, generateTodos, effectTypes, server } apiSpec =
-    CliMonad.combine
-        [ pathDeclarations server effectTypes namespace
-        , componentDeclarations namespace
-        , responsesDeclarations namespace
-        , requestBodiesDeclarations namespace
+    case extractEnums apiSpec of
+        Err e ->
+            Err e
+
+        Ok enums ->
+            CliMonad.combine
+                [ pathDeclarations server effectTypes
+                , schemasDeclarations
+                , responsesDeclarations
+                , requestBodiesDeclarations
+                ]
+                |> CliMonad.map List.concat
+                |> CliMonad.run
+                    SchemaUtils.oneOfDeclarations
+                    { openApi = apiSpec
+                    , generateTodos = generateTodos
+                    , enums = enums
+                    , namespace = namespace
+                    }
+                |> Result.map
+                    (\( decls, warnings ) ->
+                        let
+                            allDecls : List ( Common.Module, Elm.Declaration )
+                            allDecls =
+                                decls
+                                    ++ elmHttpCommonDeclarations effectTypes
+                                    ++ lamderaProgramTestCommonDeclarations effectTypes
+                                    ++ [ ( Common.Common
+                                         , SchemaUtils.decodeOptionalField.declaration
+                                            |> Elm.withDocumentation SchemaUtils.decodeOptionalFieldDocumentation
+                                            |> Elm.exposeWith
+                                                { exposeConstructor = False
+                                                , group = Just "Decoders"
+                                                }
+                                         )
+                                       , ( Common.Common
+                                         , jsonDecodeAndMap
+                                            |> Elm.withDocumentation "Chain JSON decoders, when `Json.Decode.map8` isn't enough."
+                                            |> Elm.exposeWith
+                                                { exposeConstructor = False
+                                                , group = Just "Decoders"
+                                                }
+                                         )
+                                       , ( Common.Common
+                                         , customHttpError
+                                            |> Elm.exposeWith
+                                                { exposeConstructor = True
+                                                , group = Just "Http"
+                                                }
+                                         )
+                                       , ( Common.Common
+                                         , nullableType
+                                            |> Elm.exposeWith
+                                                { exposeConstructor = True
+                                                , group = Just "Types"
+                                                }
+                                         )
+                                       ]
+                                    ++ serverDecls apiSpec server
+                        in
+                        ( allDecls
+                            |> List.Extra.gatherEqualsBy Tuple.first
+                            |> List.map
+                                (\( ( module_, head ), tail ) ->
+                                    Elm.fileWith (Common.moduleToNamespace namespace module_)
+                                        { docs =
+                                            \docs ->
+                                                docs
+                                                    |> List.sortBy
+                                                        (\{ group } ->
+                                                            case group of
+                                                                Just "Request functions" ->
+                                                                    1
+
+                                                                Just "Types" ->
+                                                                    2
+
+                                                                Just "Encoders" ->
+                                                                    3
+
+                                                                Just "Decoders" ->
+                                                                    4
+
+                                                                _ ->
+                                                                    5
+                                                        )
+                                                    |> formatModuleDocs
+                                        , aliases = []
+                                        }
+                                        (head :: List.map Tuple.second tail)
+                                )
+                        , warnings
+                        )
+                    )
+
+
+elmHttpCommonDeclarations : List EffectType -> List ( Common.Module, Elm.Declaration )
+elmHttpCommonDeclarations effectTypes =
+    if List.any (\effectType -> effectTypeToPackage effectType == Common.ElmHttp) effectTypes then
+        [ ( Common.Common
+          , expectJsonCustom.declaration
+                |> Elm.exposeWith
+                    { exposeConstructor = False
+                    , group = Just "Http"
+                    }
+          )
+        , ( Common.Common
+          , jsonResolverCustom.declaration
+                |> Elm.exposeWith
+                    { exposeConstructor = False
+                    , group = Just "Http"
+                    }
+          )
+        , ( Common.Common
+          , expectStringCustom.declaration
+                |> Elm.exposeWith
+                    { exposeConstructor = False
+                    , group = Just "Http"
+                    }
+          )
+        , ( Common.Common
+          , stringResolverCustom.declaration
+                |> Elm.exposeWith
+                    { exposeConstructor = False
+                    , group = Just "Http"
+                    }
+          )
+        , ( Common.Common
+          , expectBytesCustom.declaration
+                |> Elm.exposeWith
+                    { exposeConstructor = False
+                    , group = Just "Http"
+                    }
+          )
+        , ( Common.Common
+          , bytesResolverCustom.declaration
+                |> Elm.exposeWith
+                    { exposeConstructor = False
+                    , group = Just "Http"
+                    }
+          )
         ]
-        |> CliMonad.map List.concat
-        |> CliMonad.run
-            (SchemaUtils.oneOfDeclarations namespace)
-            { openApi = apiSpec
-            , generateTodos = generateTodos
-            }
-        |> Result.map
-            (\( decls, warnings ) ->
-                let
-                    allDecls : List ( Common.Module, Elm.Declaration )
-                    allDecls =
-                        decls
-                            ++ (if List.any (\effectType -> effectTypeToPackage effectType == Common.ElmHttp) effectTypes then
-                                    [ ( Common.Common
-                                      , expectJsonCustom.declaration
-                                            |> Elm.exposeWith
-                                                { exposeConstructor = False
-                                                , group = Just "Http"
-                                                }
-                                      )
-                                    , ( Common.Common
-                                      , jsonResolverCustom.declaration
-                                            |> Elm.exposeWith
-                                                { exposeConstructor = False
-                                                , group = Just "Http"
-                                                }
-                                      )
-                                    , ( Common.Common
-                                      , expectStringCustom.declaration
-                                            |> Elm.exposeWith
-                                                { exposeConstructor = False
-                                                , group = Just "Http"
-                                                }
-                                      )
-                                    , ( Common.Common
-                                      , stringResolverCustom.declaration
-                                            |> Elm.exposeWith
-                                                { exposeConstructor = False
-                                                , group = Just "Http"
-                                                }
-                                      )
-                                    , ( Common.Common
-                                      , expectBytesCustom.declaration
-                                            |> Elm.exposeWith
-                                                { exposeConstructor = False
-                                                , group = Just "Http"
-                                                }
-                                      )
-                                    , ( Common.Common
-                                      , bytesResolverCustom.declaration
-                                            |> Elm.exposeWith
-                                                { exposeConstructor = False
-                                                , group = Just "Http"
-                                                }
-                                      )
-                                    ]
 
-                                else
-                                    []
-                               )
-                            ++ (if List.any (\effectType -> effectTypeToPackage effectType == Common.LamderaProgramTest) effectTypes then
-                                    [ ( Common.Common
-                                      , expectJsonCustomEffect.declaration
-                                            |> Elm.exposeWith
-                                                { exposeConstructor = False
-                                                , group = Just "Http"
-                                                }
-                                      )
-                                    , ( Common.Common
-                                      , jsonResolverCustomEffect.declaration
-                                            |> Elm.exposeWith
-                                                { exposeConstructor = False
-                                                , group = Just "Http"
-                                                }
-                                      )
-                                    , ( Common.Common
-                                      , expectStringCustomEffect.declaration
-                                            |> Elm.exposeWith
-                                                { exposeConstructor = False
-                                                , group = Just "Http"
-                                                }
-                                      )
-                                    , ( Common.Common
-                                      , stringResolverCustomEffect.declaration
-                                            |> Elm.exposeWith
-                                                { exposeConstructor = False
-                                                , group = Just "Http"
-                                                }
-                                      )
-                                    , ( Common.Common
-                                      , expectBytesCustomEffect.declaration
-                                            |> Elm.exposeWith
-                                                { exposeConstructor = False
-                                                , group = Just "Http"
-                                                }
-                                      )
-                                    , ( Common.Common
-                                      , bytesResolverCustomEffect.declaration
-                                            |> Elm.exposeWith
-                                                { exposeConstructor = False
-                                                , group = Just "Http"
-                                                }
-                                      )
-                                    ]
+    else
+        []
 
-                                else
-                                    []
-                               )
-                            ++ [ ( Common.Common
-                                 , SchemaUtils.decodeOptionalField.declaration
-                                    |> Elm.withDocumentation SchemaUtils.decodeOptionalFieldDocumentation
-                                    |> Elm.exposeWith
-                                        { exposeConstructor = False
-                                        , group = Just "Decoders"
-                                        }
-                                 )
-                               , ( Common.Common
-                                 , jsonDecodeAndMap
-                                    |> Elm.withDocumentation "Chain JSON decoders, when `Json.Decode.map8` isn't enough."
-                                    |> Elm.exposeWith
-                                        { exposeConstructor = False
-                                        , group = Just "Decoders"
-                                        }
-                                 )
-                               , ( Common.Common
-                                 , customHttpError
-                                    |> Elm.exposeWith
-                                        { exposeConstructor = True
-                                        , group = Just "Http"
-                                        }
-                                 )
-                               , ( Common.Common
-                                 , nullableType
-                                    |> Elm.exposeWith
-                                        { exposeConstructor = True
-                                        , group = Just "Types"
-                                        }
-                                 )
-                               ]
-                            ++ (case server of
-                                    Multiple servers ->
-                                        servers
-                                            |> Dict.toList
-                                            |> List.map
-                                                (\( key, value ) ->
-                                                    ( Common.Servers
-                                                    , Elm.string value
-                                                        |> Elm.declaration key
-                                                        |> Elm.exposeWith
-                                                            { exposeConstructor = True
-                                                            , group = Just "Servers"
-                                                            }
+
+lamderaProgramTestCommonDeclarations : List EffectType -> List ( Common.Module, Elm.Declaration )
+lamderaProgramTestCommonDeclarations effectTypes =
+    if List.any (\effectType -> effectTypeToPackage effectType == Common.LamderaProgramTest) effectTypes then
+        [ ( Common.Common
+          , expectJsonCustomEffect.declaration
+                |> Elm.exposeWith
+                    { exposeConstructor = False
+                    , group = Just "Http"
+                    }
+          )
+        , ( Common.Common
+          , jsonResolverCustomEffect.declaration
+                |> Elm.exposeWith
+                    { exposeConstructor = False
+                    , group = Just "Http"
+                    }
+          )
+        , ( Common.Common
+          , expectStringCustomEffect.declaration
+                |> Elm.exposeWith
+                    { exposeConstructor = False
+                    , group = Just "Http"
+                    }
+          )
+        , ( Common.Common
+          , stringResolverCustomEffect.declaration
+                |> Elm.exposeWith
+                    { exposeConstructor = False
+                    , group = Just "Http"
+                    }
+          )
+        , ( Common.Common
+          , expectBytesCustomEffect.declaration
+                |> Elm.exposeWith
+                    { exposeConstructor = False
+                    , group = Just "Http"
+                    }
+          )
+        , ( Common.Common
+          , bytesResolverCustomEffect.declaration
+                |> Elm.exposeWith
+                    { exposeConstructor = False
+                    , group = Just "Http"
+                    }
+          )
+        ]
+
+    else
+        []
+
+
+extractEnums :
+    OpenApi.OpenApi
+    ->
+        Result
+            CliMonad.Message
+            (FastDict.Dict (List String) { name : Common.UnsafeName, documentation : Maybe String })
+extractEnums openApi =
+    openApi
+        |> OpenApi.components
+        |> Maybe.map OpenApi.Components.schemas
+        |> Maybe.withDefault Dict.empty
+        |> Dict.foldl
+            (\name schema q ->
+                Result.andThen
+                    (\acc ->
+                        case OpenApi.Schema.get schema of
+                            Json.Schema.Definitions.ObjectSchema subSchema ->
+                                case subSchema.enum of
+                                    Nothing ->
+                                        Ok acc
+
+                                    Just enums ->
+                                        case
+                                            Result.Extra.combineMap
+                                                (Json.Decode.decodeValue
+                                                    (Json.Decode.oneOf
+                                                        [ Json.Decode.map Just Json.Decode.string
+                                                        , Json.Decode.null Nothing
+                                                        ]
                                                     )
                                                 )
+                                                enums
+                                        of
+                                            Err _ ->
+                                                Err
+                                                    { message = "Attempted to parse an enum as a string and failed"
+                                                    , path = [ name, "Extracting enums" ]
+                                                    }
 
-                                    Single _ ->
-                                        []
+                                            Ok decodedEnums ->
+                                                Ok
+                                                    (FastDict.insert
+                                                        (List.sort (List.filterMap identity decodedEnums))
+                                                        { name = Common.UnsafeName name
+                                                        , documentation = subSchema.description
+                                                        }
+                                                        acc
+                                                    )
 
-                                    Default ->
-                                        case OpenApi.servers apiSpec of
-                                            [] ->
-                                                []
-
-                                            [ _ ] ->
-                                                []
-
-                                            servers ->
-                                                servers
-                                                    |> List.indexedMap
-                                                        (\i value ->
-                                                            let
-                                                                key : String
-                                                                key =
-                                                                    case OpenApi.Server.description value of
-                                                                        Nothing ->
-                                                                            "server" ++ String.fromInt i
-
-                                                                        Just description ->
-                                                                            description
-                                                            in
-                                                            ( Common.Servers
-                                                            , Elm.string (OpenApi.Server.url value)
-                                                                |> Elm.declaration key
-                                                                |> (case OpenApi.Server.description value of
-                                                                        Nothing ->
-                                                                            identity
-
-                                                                        Just description ->
-                                                                            Elm.withDocumentation description
-                                                                   )
-                                                                |> Elm.exposeWith
-                                                                    { exposeConstructor = True
-                                                                    , group = Just "Servers"
-                                                                    }
-                                                            )
-                                                        )
-                               )
-                in
-                ( allDecls
-                    |> List.Extra.gatherEqualsBy Tuple.first
-                    |> List.map
-                        (\( ( module_, head ), tail ) ->
-                            Elm.fileWith (Common.moduleToNamespace namespace module_)
-                                { docs =
-                                    \docs ->
-                                        docs
-                                            |> List.sortBy
-                                                (\{ group } ->
-                                                    case group of
-                                                        Just "Request functions" ->
-                                                            1
-
-                                                        Just "Types" ->
-                                                            2
-
-                                                        Just "Encoders" ->
-                                                            3
-
-                                                        Just "Decoders" ->
-                                                            4
-
-                                                        _ ->
-                                                            5
-                                                )
-                                            |> formatModuleDocs
-                                , aliases = []
-                                }
-                                (head :: List.map Tuple.second tail)
-                        )
-                , warnings
-                )
+                            _ ->
+                                Ok acc
+                    )
+                    q
             )
+            (Ok FastDict.empty)
+
+
+serverDecls : OpenApi.OpenApi -> Server -> List ( Common.Module, Elm.Declaration )
+serverDecls apiSpec server =
+    case server of
+        Multiple servers ->
+            servers
+                |> Dict.toList
+                |> List.map
+                    (\( key, value ) ->
+                        ( Common.Servers
+                        , Elm.string value
+                            |> Elm.declaration key
+                            |> Elm.exposeWith
+                                { exposeConstructor = True
+                                , group = Just "Servers"
+                                }
+                        )
+                    )
+
+        Single _ ->
+            []
+
+        Default ->
+            case OpenApi.servers apiSpec of
+                [] ->
+                    []
+
+                [ _ ] ->
+                    []
+
+                servers ->
+                    servers
+                        |> List.indexedMap
+                            (\i value ->
+                                let
+                                    key : String
+                                    key =
+                                        case OpenApi.Server.description value of
+                                            Nothing ->
+                                                "server" ++ String.fromInt i
+
+                                            Just description ->
+                                                description
+                                in
+                                ( Common.Servers
+                                , Elm.string (OpenApi.Server.url value)
+                                    |> Elm.declaration key
+                                    |> (case OpenApi.Server.description value of
+                                            Nothing ->
+                                                identity
+
+                                            Just description ->
+                                                Elm.withDocumentation description
+                                       )
+                                    |> Elm.exposeWith
+                                        { exposeConstructor = True
+                                        , group = Just "Servers"
+                                        }
+                                )
+                            )
 
 
 formatModuleDocs : List { group : Maybe String, members : List String } -> List String
@@ -392,8 +471,8 @@ formatModuleDocs =
         )
 
 
-pathDeclarations : Server -> List EffectType -> List String -> CliMonad (List ( Common.Module, Elm.Declaration ))
-pathDeclarations server effectTypes namespace =
+pathDeclarations : Server -> List EffectType -> CliMonad (List ( Common.Module, Elm.Declaration ))
+pathDeclarations server effectTypes =
     CliMonad.fromApiSpec OpenApi.paths
         |> CliMonad.andThen
             (\paths ->
@@ -412,7 +491,7 @@ pathDeclarations server effectTypes namespace =
                                 |> List.filterMap (\( method, getter ) -> Maybe.map (Tuple.pair method) (getter path))
                                 |> CliMonad.combineMap
                                     (\( method, operation ) ->
-                                        toRequestFunctions server effectTypes namespace method url operation
+                                        toRequestFunctions server effectTypes method url operation
                                             |> CliMonad.errorToWarning
                                     )
                                 |> CliMonad.map (List.filterMap identity >> List.concat)
@@ -421,8 +500,8 @@ pathDeclarations server effectTypes namespace =
             )
 
 
-responsesDeclarations : List String -> CliMonad (List ( Common.Module, Elm.Declaration ))
-responsesDeclarations namespace =
+responsesDeclarations : CliMonad (List ( Common.Module, Elm.Declaration ))
+responsesDeclarations =
     CliMonad.fromApiSpec
         (OpenApi.components
             >> Maybe.map OpenApi.Components.responses
@@ -432,15 +511,15 @@ responsesDeclarations namespace =
             (Dict.foldl
                 (\name schema ->
                     CliMonad.map2 (::)
-                        (responseToDeclarations namespace (Common.typifyName name) schema)
+                        (responseToDeclarations (Common.UnsafeName name) schema)
                 )
                 (CliMonad.succeed [])
             )
         |> CliMonad.map List.concat
 
 
-requestBodiesDeclarations : List String -> CliMonad (List ( Common.Module, Elm.Declaration ))
-requestBodiesDeclarations namespace =
+requestBodiesDeclarations : CliMonad (List ( Common.Module, Elm.Declaration ))
+requestBodiesDeclarations =
     CliMonad.fromApiSpec
         (OpenApi.components
             >> Maybe.map OpenApi.Components.requestBodies
@@ -450,15 +529,15 @@ requestBodiesDeclarations namespace =
             (Dict.foldl
                 (\name schema ->
                     CliMonad.map2 (::)
-                        (requestBodyToDeclarations namespace name schema)
+                        (requestBodyToDeclarations (Common.UnsafeName name) schema)
                 )
                 (CliMonad.succeed [])
             )
         |> CliMonad.map List.concat
 
 
-componentDeclarations : List String -> CliMonad (List ( Common.Module, Elm.Declaration ))
-componentDeclarations namespace =
+schemasDeclarations : CliMonad (List ( Common.Module, Elm.Declaration ))
+schemasDeclarations =
     CliMonad.fromApiSpec
         (OpenApi.components
             >> Maybe.map OpenApi.Components.schemas
@@ -467,20 +546,20 @@ componentDeclarations namespace =
         |> CliMonad.andThen
             (Dict.foldl
                 (\name schema ->
-                    CliMonad.map2 (::)
-                        (JsonSchema.Generate.schemaToDeclarations namespace name (OpenApi.Schema.get schema))
+                    CliMonad.map2
+                        (\decls declAcc -> decls ++ declAcc)
+                        (JsonSchema.Generate.schemaToDeclarations (Common.UnsafeName name) (OpenApi.Schema.get schema))
                 )
                 (CliMonad.succeed [])
             )
-        |> CliMonad.map List.concat
 
 
-unitDeclarations : List String -> String -> CliMonad (List ( Common.Module, Elm.Declaration ))
-unitDeclarations namespace name =
+unitDeclarations : Common.UnsafeName -> CliMonad (List ( Common.Module, Elm.Declaration ))
+unitDeclarations name =
     let
         typeName : Common.TypeName
         typeName =
-            Common.typifyName name
+            Common.toTypeName name
     in
     CliMonad.combine
         [ ( Common.Types
@@ -491,12 +570,12 @@ unitDeclarations namespace name =
                     }
           )
             |> CliMonad.succeed
-        , CliMonad.map
-            (\schemaDecoder ->
+        , CliMonad.map2
+            (\typesNamespace schemaDecoder ->
                 ( Common.Json
                 , Elm.declaration ("decode" ++ typeName)
                     (schemaDecoder
-                        |> Elm.withType (Gen.Json.Decode.annotation_.decoder (Elm.Annotation.named (Common.moduleToNamespace namespace Common.Types) typeName))
+                        |> Elm.withType (Gen.Json.Decode.annotation_.decoder (Elm.Annotation.named typesNamespace typeName))
                     )
                     |> Elm.exposeWith
                         { exposeConstructor = False
@@ -504,13 +583,14 @@ unitDeclarations namespace name =
                         }
                 )
             )
-            (SchemaUtils.typeToDecoder False namespace Common.Unit)
-        , CliMonad.map
-            (\encoder ->
+            (CliMonad.moduleToNamespace Common.Types)
+            (SchemaUtils.typeToDecoder False Common.Unit)
+        , CliMonad.map2
+            (\typesNamespace encoder ->
                 ( Common.Json
                 , Elm.declaration ("encode" ++ typeName)
                     (Elm.functionReduced "rec" encoder
-                        |> Elm.withType (Elm.Annotation.function [ Elm.Annotation.named (Common.moduleToNamespace namespace Common.Types) typeName ] Gen.Json.Encode.annotation_.value)
+                        |> Elm.withType (Elm.Annotation.function [ Elm.Annotation.named typesNamespace typeName ] Gen.Json.Encode.annotation_.value)
                     )
                     |> Elm.exposeWith
                         { exposeConstructor = False
@@ -518,12 +598,13 @@ unitDeclarations namespace name =
                         }
                 )
             )
-            (SchemaUtils.typeToEncoder False namespace Common.Unit)
+            (CliMonad.moduleToNamespace Common.Types)
+            (SchemaUtils.typeToEncoder False Common.Unit)
         ]
 
 
-responseToDeclarations : List String -> String -> OpenApi.Reference.ReferenceOr OpenApi.Response.Response -> CliMonad (List ( Common.Module, Elm.Declaration ))
-responseToDeclarations namespace name reference =
+responseToDeclarations : Common.UnsafeName -> OpenApi.Reference.ReferenceOr OpenApi.Response.Response -> CliMonad (List ( Common.Module, Elm.Declaration ))
+responseToDeclarations name reference =
     case OpenApi.Reference.toConcrete reference of
         Just response ->
             let
@@ -533,20 +614,20 @@ responseToDeclarations namespace name reference =
             in
             if Dict.isEmpty content then
                 -- If there is no content then we go with the unit value, `()` as the response type
-                unitDeclarations namespace name
+                unitDeclarations name
 
             else
                 responseToSchema response
                     |> CliMonad.withPath name
-                    |> CliMonad.andThen (JsonSchema.Generate.schemaToDeclarations namespace name)
+                    |> CliMonad.andThen (JsonSchema.Generate.schemaToDeclarations name)
 
         Nothing ->
             CliMonad.fail "Could not convert reference to concrete value"
                 |> CliMonad.withPath name
 
 
-requestBodyToDeclarations : List String -> String -> OpenApi.Reference.ReferenceOr OpenApi.RequestBody.RequestBody -> CliMonad (List ( Common.Module, Elm.Declaration ))
-requestBodyToDeclarations namespace name reference =
+requestBodyToDeclarations : Common.UnsafeName -> OpenApi.Reference.ReferenceOr OpenApi.RequestBody.RequestBody -> CliMonad (List ( Common.Module, Elm.Declaration ))
+requestBodyToDeclarations name reference =
     case OpenApi.Reference.toConcrete reference of
         Just requestBody ->
             let
@@ -556,20 +637,20 @@ requestBodyToDeclarations namespace name reference =
             in
             if Dict.isEmpty content then
                 -- If there is no content then we go with the unit value, `()` as the requestBody type
-                unitDeclarations namespace name
+                unitDeclarations name
 
             else
                 requestBodyToSchema requestBody
                     |> CliMonad.withPath name
-                    |> CliMonad.andThen (JsonSchema.Generate.schemaToDeclarations namespace name)
+                    |> CliMonad.andThen (JsonSchema.Generate.schemaToDeclarations name)
 
         Nothing ->
             CliMonad.fail "Could not convert reference to concrete value"
                 |> CliMonad.withPath name
 
 
-toRequestFunctions : Server -> List EffectType -> List String -> String -> String -> OpenApi.Operation.Operation -> CliMonad (List ( Common.Module, Elm.Declaration ))
-toRequestFunctions server effectTypes namespace method pathUrl operation =
+toRequestFunctions : Server -> List EffectType -> String -> String -> OpenApi.Operation.Operation -> CliMonad (List ( Common.Module, Elm.Declaration ))
+toRequestFunctions server effectTypes method pathUrl operation =
     let
         functionName : String
         functionName =
@@ -602,7 +683,7 @@ toRequestFunctions server effectTypes namespace method pathUrl operation =
                         )
 
                 JsonContent type_ ->
-                    SchemaUtils.typeToEncoder True namespace type_
+                    SchemaUtils.typeToEncoder True type_
                         |> CliMonad.map
                             (\encoder config ->
                                 let
@@ -642,21 +723,21 @@ toRequestFunctions server effectTypes namespace method pathUrl operation =
                             , lamderaProgramTest = toBody Gen.Effect.Http.bytesBody
                             }
 
-        bodyParams : ContentSchema -> CliMonad (List ( String, Elm.Annotation.Annotation ))
+        bodyParams : ContentSchema -> CliMonad (List ( Common.UnsafeName, Elm.Annotation.Annotation ))
         bodyParams contentSchema =
             case contentSchema of
                 EmptyContent ->
                     CliMonad.succeed []
 
                 JsonContent type_ ->
-                    SchemaUtils.typeToAnnotation True namespace type_
-                        |> CliMonad.map (\annotation -> [ ( "body", annotation ) ])
+                    SchemaUtils.typeToAnnotation True type_
+                        |> CliMonad.map (\annotation -> [ ( Common.UnsafeName "body", annotation ) ])
 
                 StringContent _ ->
-                    CliMonad.succeed [ ( "body", Elm.Annotation.string ) ]
+                    CliMonad.succeed [ ( Common.UnsafeName "body", Elm.Annotation.string ) ]
 
                 BytesContent _ ->
-                    CliMonad.succeed [ ( "body", Gen.Bytes.annotation_.bytes ) ]
+                    CliMonad.succeed [ ( Common.UnsafeName "body", Gen.Bytes.annotation_.bytes ) ]
 
         headersFromList : (Elm.Expression -> Elm.Expression -> Elm.Expression) -> AuthorizationInfo -> Elm.Expression -> Elm.Expression
         headersFromList f auth config =
@@ -1084,7 +1165,7 @@ toRequestFunctions server effectTypes namespace method pathUrl operation =
                         (bodyParams contentSchema
                             |> CliMonad.andThen
                                 (\params ->
-                                    toConfigParamAnnotation namespace
+                                    toConfigParamAnnotation
                                         { operation = operation
                                         , successAnnotation = successAnnotation
                                         , errorBodyAnnotation = bodyTypeAnnotation
@@ -1095,16 +1176,16 @@ toRequestFunctions server effectTypes namespace method pathUrl operation =
                                         }
                                 )
                         )
-                        (replacedUrl server auth namespace pathUrl operation)
+                        (replacedUrl server auth pathUrl operation)
                 )
-                (operationToContentSchema True namespace operation)
+                (operationToContentSchema True operation)
                 (operationToAuthorizationInfo operation)
-                (SchemaUtils.typeToAnnotation True namespace successType)
+                (SchemaUtils.typeToAnnotation True successType)
     in
-    operationToTypesExpectAndResolver namespace functionName operation
+    operationToTypesExpectAndResolver functionName operation
         |> CliMonad.andThen step
-        |> CliMonad.withPath method
-        |> CliMonad.withPath pathUrl
+        |> CliMonad.withPath (Common.UnsafeName method)
+        |> CliMonad.withPath (Common.UnsafeName pathUrl)
 
 
 effectTypeToPackage : EffectType -> Common.Package
@@ -1163,8 +1244,8 @@ operationToGroup operation =
             "Operations"
 
 
-replacedUrl : Server -> AuthorizationInfo -> List String -> String -> OpenApi.Operation.Operation -> CliMonad (Elm.Expression -> Elm.Expression)
-replacedUrl server authInfo namespace pathUrl operation =
+replacedUrl : Server -> AuthorizationInfo -> String -> OpenApi.Operation.Operation -> CliMonad (Elm.Expression -> Elm.Expression)
+replacedUrl server authInfo pathUrl operation =
     let
         pathSegments : List String
         pathSegments =
@@ -1277,10 +1358,10 @@ replacedUrl server authInfo namespace pathUrl operation =
                 toConcreteParam param
                     |> CliMonad.andThen
                         (\concreteParam ->
-                            paramToType True namespace concreteParam
+                            paramToType True concreteParam
                                 |> CliMonad.andThen
                                     (\( paramName, type_ ) ->
-                                        paramToString True namespace type_
+                                        paramToString True type_
                                             |> CliMonad.map
                                                 (\{ inputToString, alwaysJust } ->
                                                     { concreteParam = concreteParam
@@ -1298,7 +1379,7 @@ replacedUrl server authInfo namespace pathUrl operation =
                                     if OpenApi.Parameter.required concreteParam && alwaysJust then
                                         CliMonad.succeed
                                             ( Just
-                                                ( "{" ++ paramName ++ "}"
+                                                ( "{" ++ Common.toValueName paramName ++ "}"
                                                 , \config ->
                                                     config
                                                         |> Elm.get "params"
@@ -1326,7 +1407,7 @@ replacedUrl server authInfo namespace pathUrl operation =
                             |> Tuple.mapBoth (List.filterMap identity) List.concat
                 in
                 (queryParams
-                    |> CliMonad.combineMap (queryParameterToUrlBuilderArgument True namespace)
+                    |> CliMonad.combineMap (queryParameterToUrlBuilderArgument True)
                 )
                     |> CliMonad.andThen (initialUrl replacements)
             )
@@ -1409,9 +1490,13 @@ operationToAuthorizationInfo operation =
                                                 case OpenApi.SecurityScheme.type_ securitySchema of
                                                     OpenApi.SecurityScheme.ApiKey apiKey ->
                                                         let
+                                                            unsafeName : Common.UnsafeName
+                                                            unsafeName =
+                                                                Common.UnsafeName (String.toLower apiKey.name)
+
                                                             cleanName : String
                                                             cleanName =
-                                                                Common.toValueName (String.toLower apiKey.name)
+                                                                Common.toValueName unsafeName
                                                         in
                                                         case apiKey.in_ of
                                                             OpenApi.SecurityScheme.Header ->
@@ -1503,6 +1588,7 @@ operationToAuthorizationInfo operation =
                                                 Elm.Annotation.record list
                                     )
                                 |> Dict.toList
+                                |> List.map (Tuple.mapFirst Common.UnsafeName)
                         , query =
                             \config ->
                                 query
@@ -1516,8 +1602,8 @@ operationToAuthorizationInfo operation =
         (CliMonad.fromApiSpec OpenApi.components)
 
 
-operationToContentSchema : Bool -> List String -> OpenApi.Operation.Operation -> CliMonad ContentSchema
-operationToContentSchema qualify namespace operation =
+operationToContentSchema : Bool -> OpenApi.Operation.Operation -> CliMonad ContentSchema
+operationToContentSchema qualify operation =
     case OpenApi.Operation.requestBody operation of
         Nothing ->
             CliMonad.succeed EmptyContent
@@ -1526,7 +1612,7 @@ operationToContentSchema qualify namespace operation =
             case OpenApi.Reference.toConcrete requestOrRef of
                 Just request ->
                     OpenApi.RequestBody.content request
-                        |> contentToContentSchema qualify namespace
+                        |> contentToContentSchema qualify
 
                 Nothing ->
                     CliMonad.succeed requestOrRef
@@ -1550,8 +1636,8 @@ searchForJsonMediaType mediaType _ =
             False
 
 
-contentToContentSchema : Bool -> List String -> Dict.Dict String OpenApi.MediaType.MediaType -> CliMonad ContentSchema
-contentToContentSchema qualify namespace content =
+contentToContentSchema : Bool -> Dict.Dict String OpenApi.MediaType.MediaType -> CliMonad ContentSchema
+contentToContentSchema qualify content =
     let
         default : Maybe (CliMonad ContentSchema) -> CliMonad ContentSchema
         default fallback =
@@ -1566,7 +1652,7 @@ contentToContentSchema qualify namespace content =
                     CliMonad.succeed jsonSchema
                         |> CliMonad.stepOrFail "The request's application/json content option doesn't have a schema"
                             (OpenApi.MediaType.schema >> Maybe.map OpenApi.Schema.get)
-                        |> CliMonad.andThen (SchemaUtils.schemaToType qualify namespace)
+                        |> CliMonad.andThen (SchemaUtils.schemaToType qualify)
                         |> CliMonad.map (\{ type_ } -> JsonContent type_)
 
                 Nothing ->
@@ -1593,7 +1679,7 @@ contentToContentSchema qualify namespace content =
             CliMonad.succeed htmlSchema
                 |> CliMonad.stepOrFail ("The request's " ++ mime ++ " content option doesn't have a schema")
                     (OpenApi.MediaType.schema >> Maybe.map OpenApi.Schema.get)
-                |> CliMonad.andThen (SchemaUtils.schemaToType True namespace)
+                |> CliMonad.andThen (SchemaUtils.schemaToType True)
                 |> CliMonad.andThen
                     (\{ type_ } ->
                         if type_ == Common.String then
@@ -1639,18 +1725,16 @@ contentToContentSchema qualify namespace content =
 
 
 toConfigParamAnnotation :
-    List String
-    ->
-        { operation : OpenApi.Operation.Operation
-        , successAnnotation : Elm.Annotation.Annotation
-        , errorBodyAnnotation : Elm.Annotation.Annotation
-        , errorTypeAnnotation : Elm.Annotation.Annotation
-        , authorizationInfo : AuthorizationInfo
-        , bodyParams : List ( String, Elm.Annotation.Annotation )
-        , server : Server
-        }
+    { operation : OpenApi.Operation.Operation
+    , successAnnotation : Elm.Annotation.Annotation
+    , errorBodyAnnotation : Elm.Annotation.Annotation
+    , errorTypeAnnotation : Elm.Annotation.Annotation
+    , authorizationInfo : AuthorizationInfo
+    , bodyParams : List ( Common.UnsafeName, Elm.Annotation.Annotation )
+    , server : Server
+    }
     -> CliMonad ({ requireToMsg : Bool } -> PerPackage Elm.Annotation.Annotation)
-toConfigParamAnnotation namespace options =
+toConfigParamAnnotation options =
     CliMonad.map2
         (\urlParams maybeServer { requireToMsg } ->
             let
@@ -1677,7 +1761,7 @@ toConfigParamAnnotation namespace options =
                     (maybeServer
                         ++ options.authorizationInfo.params
                         ++ (if requireToMsg then
-                                [ ( "toMsg", toMsg ) ]
+                                [ ( Common.UnsafeName "toMsg", toMsg ) ]
 
                             else
                                 []
@@ -1694,10 +1778,10 @@ toConfigParamAnnotation namespace options =
             , lamderaProgramTest = toAnnotation toMsgLamderaProgramTest
             }
         )
-        (operationToUrlParams namespace options.operation)
+        (operationToUrlParams options.operation)
         (case options.server of
             Multiple _ ->
-                [ ( "server", Elm.Annotation.string ) ]
+                [ ( Common.UnsafeName "server", Elm.Annotation.string ) ]
                     |> CliMonad.succeed
 
             Single _ ->
@@ -1716,13 +1800,13 @@ toConfigParamAnnotation namespace options =
                                     []
 
                                 _ ->
-                                    [ ( "server", Elm.Annotation.string ) ]
+                                    [ ( Common.UnsafeName "server", Elm.Annotation.string ) ]
                         )
         )
 
 
-operationToUrlParams : List String -> OpenApi.Operation.Operation -> CliMonad (List ( String, Elm.Annotation.Annotation ))
-operationToUrlParams namespace operation =
+operationToUrlParams : OpenApi.Operation.Operation -> CliMonad (List ( Common.UnsafeName, Elm.Annotation.Annotation ))
+operationToUrlParams operation =
     let
         params : List (OpenApi.Reference.ReferenceOr OpenApi.Parameter.Parameter)
         params =
@@ -1736,24 +1820,24 @@ operationToUrlParams namespace operation =
             |> CliMonad.combineMap
                 (\param ->
                     toConcreteParam param
-                        |> CliMonad.andThen (paramToAnnotation True namespace)
+                        |> CliMonad.andThen (paramToAnnotation True)
                 )
             |> CliMonad.map
-                (\types -> [ ( "params", SchemaUtils.recordType types ) ])
+                (\types -> [ ( Common.UnsafeName "params", SchemaUtils.recordType types ) ])
 
 
-queryParameterToUrlBuilderArgument : Bool -> List String -> OpenApi.Parameter.Parameter -> CliMonad (Elm.Expression -> Elm.Expression)
-queryParameterToUrlBuilderArgument qualify namespace param =
-    paramToType qualify namespace param
+queryParameterToUrlBuilderArgument : Bool -> OpenApi.Parameter.Parameter -> CliMonad (Elm.Expression -> Elm.Expression)
+queryParameterToUrlBuilderArgument qualify param =
+    paramToType qualify param
         |> CliMonad.andThen
             (\( paramName, type_ ) ->
-                paramToString qualify namespace type_
+                paramToString qualify type_
                     |> CliMonad.map
                         (\{ inputToString, alwaysJust } config ->
                             let
                                 name : Elm.Expression
                                 name =
-                                    Elm.string paramName
+                                    Elm.string (Common.unwrapUnsafe paramName)
 
                                 value : Elm.Expression
                                 value =
@@ -1775,8 +1859,8 @@ queryParameterToUrlBuilderArgument qualify namespace param =
             )
 
 
-paramToString : Bool -> List String -> Common.Type -> CliMonad { inputToString : Elm.Expression -> Elm.Expression, alwaysJust : Bool }
-paramToString qualify namespace type_ =
+paramToString : Bool -> Common.Type -> CliMonad { inputToString : Elm.Expression -> Elm.Expression, alwaysJust : Bool }
+paramToString qualify type_ =
     let
         basic :
             (Elm.Expression -> Elm.Expression)
@@ -1789,7 +1873,7 @@ paramToString qualify namespace type_ =
             -> ({ inputToString : Elm.Expression, alwaysJust : Bool } -> Elm.Expression -> Elm.Expression)
             -> CliMonad { inputToString : Elm.Expression -> Elm.Expression, alwaysJust : Bool }
         recursive p f =
-            paramToString qualify namespace p
+            paramToString qualify p
                 |> CliMonad.map
                     (\{ inputToString, alwaysJust } ->
                         { inputToString =
@@ -1870,8 +1954,8 @@ paramToString qualify namespace type_ =
         Common.Ref ref ->
             --  These are mostly aliases
             SchemaUtils.getAlias ref
-                |> CliMonad.andThen (SchemaUtils.schemaToType qualify namespace)
-                |> CliMonad.andThen (\param -> paramToString qualify namespace param.type_)
+                |> CliMonad.andThen (SchemaUtils.schemaToType qualify)
+                |> CliMonad.andThen (\param -> paramToString qualify param.type_)
 
         Common.OneOf name data ->
             CliMonad.map2
@@ -1881,7 +1965,7 @@ paramToString qualify namespace type_ =
                     , alwaysJust = True
                     }
                 )
-                (SchemaUtils.typeToAnnotation qualify namespace type_)
+                (SchemaUtils.typeToAnnotation qualify type_)
                 (CliMonad.combineMap
                     (\alternative ->
                         CliMonad.andThen2
@@ -1893,14 +1977,41 @@ paramToString qualify namespace type_ =
                                     Elm.Case.branch1 (SchemaUtils.toVariantName name alternative.name) ( "alternative", annotation ) inputToString
                                         |> CliMonad.succeed
                             )
-                            (paramToString qualify namespace alternative.type_)
-                            (SchemaUtils.typeToAnnotation qualify namespace alternative.type_)
+                            (paramToString qualify alternative.type_)
+                            (SchemaUtils.typeToAnnotation qualify alternative.type_)
                     )
                     data
                 )
 
+        Common.Enum variants ->
+            CliMonad.enumName variants
+                |> CliMonad.andThen
+                    (\maybeName ->
+                        case maybeName of
+                            Nothing ->
+                                basic identity
+
+                            Just name ->
+                                CliMonad.map
+                                    (\typesNamespace ->
+                                        { inputToString =
+                                            \val ->
+                                                Elm.apply
+                                                    (Elm.value
+                                                        { importFrom = typesNamespace
+                                                        , name = Common.toValueName name ++ "ToString"
+                                                        , annotation = Nothing
+                                                        }
+                                                    )
+                                                    [ val ]
+                                        , alwaysJust = True
+                                        }
+                                    )
+                                    (CliMonad.moduleToNamespace Common.Types)
+                    )
+
         _ ->
-            SchemaUtils.typeToAnnotation qualify namespace type_
+            SchemaUtils.typeToAnnotation qualify type_
                 |> CliMonad.andThen
                     (\annotation ->
                         let
@@ -1916,19 +2027,19 @@ paramToString qualify namespace type_ =
                     )
 
 
-paramToAnnotation : Bool -> List String -> OpenApi.Parameter.Parameter -> CliMonad ( String, Elm.Annotation.Annotation )
-paramToAnnotation qualify namespace concreteParam =
-    paramToType qualify namespace concreteParam
+paramToAnnotation : Bool -> OpenApi.Parameter.Parameter -> CliMonad ( Common.UnsafeName, Elm.Annotation.Annotation )
+paramToAnnotation qualify concreteParam =
+    paramToType qualify concreteParam
         |> CliMonad.andThen
             (\( paramName, type_ ) ->
-                SchemaUtils.typeToAnnotationMaybe qualify namespace type_
+                SchemaUtils.typeToAnnotationMaybe qualify type_
                     |> CliMonad.map
                         (\annotation -> ( paramName, annotation ))
             )
 
 
-paramToType : Bool -> List String -> OpenApi.Parameter.Parameter -> CliMonad ( String, Common.Type )
-paramToType qualify namespace concreteParam =
+paramToType : Bool -> OpenApi.Parameter.Parameter -> CliMonad ( Common.UnsafeName, Common.Type )
+paramToType qualify concreteParam =
     let
         paramName : String
         paramName =
@@ -1937,14 +2048,14 @@ paramToType qualify namespace concreteParam =
     CliMonad.succeed concreteParam
         |> CliMonad.stepOrFail ("Could not get schema for parameter " ++ paramName)
             (OpenApi.Parameter.schema >> Maybe.map OpenApi.Schema.get)
-        |> CliMonad.andThen (SchemaUtils.schemaToType qualify namespace)
+        |> CliMonad.andThen (SchemaUtils.schemaToType qualify)
         |> CliMonad.andThen
             (\{ type_ } ->
                 case type_ of
                     Common.Ref ref ->
                         ref
                             |> SchemaUtils.getAlias
-                            |> CliMonad.andThen (SchemaUtils.schemaToType qualify namespace)
+                            |> CliMonad.andThen (SchemaUtils.schemaToType qualify)
                             |> CliMonad.map
                                 (\inner ->
                                     case inner.type_ of
@@ -1967,7 +2078,7 @@ paramToType qualify namespace concreteParam =
                         else
                             CliMonad.succeed <| Common.Nullable type_
             )
-        |> CliMonad.map (Tuple.pair paramName)
+        |> CliMonad.map (Tuple.pair (Common.UnsafeName paramName))
 
 
 toConcreteParam : OpenApi.Reference.ReferenceOr OpenApi.Parameter.Parameter -> CliMonad OpenApi.Parameter.Parameter
@@ -2013,11 +2124,10 @@ type alias OperationUtils =
 
 
 operationToTypesExpectAndResolver :
-    List String
-    -> String
+    String
     -> OpenApi.Operation.Operation
     -> CliMonad OperationUtils
-operationToTypesExpectAndResolver namespace functionName operation =
+operationToTypesExpectAndResolver functionName operation =
     let
         responses : Dict.Dict String (OpenApi.Reference.ReferenceOr OpenApi.Response.Response)
         responses =
@@ -2084,45 +2194,49 @@ operationToTypesExpectAndResolver namespace functionName operation =
                                                         _ ->
                                                             False
 
-                                                common : Elm.Expression -> Elm.Expression
+                                                common : Elm.Expression -> CliMonad Elm.Expression
                                                 common decoder =
-                                                    Elm.tuple
-                                                        (Elm.string statusCode)
-                                                        (if single then
-                                                            decoder
+                                                    CliMonad.map
+                                                        (\typesNamespace ->
+                                                            Elm.tuple
+                                                                (Elm.string statusCode)
+                                                                (if single then
+                                                                    decoder
 
-                                                         else
-                                                            Gen.Json.Decode.call_.map
-                                                                (Elm.value
-                                                                    { importFrom = Common.moduleToNamespace namespace Common.Types
-                                                                    , name = toErrorVariant statusCode
-                                                                    , annotation = Nothing
-                                                                    }
+                                                                 else
+                                                                    Gen.Json.Decode.call_.map
+                                                                        (Elm.value
+                                                                            { importFrom = typesNamespace
+                                                                            , name = toErrorVariant statusCode
+                                                                            , annotation = Nothing
+                                                                            }
+                                                                        )
+                                                                        decoder
                                                                 )
-                                                                decoder
                                                         )
+                                                        (CliMonad.moduleToNamespace Common.Types)
                                             in
                                             case OpenApi.Reference.toConcrete errResponseOrRef of
                                                 Just errResponse ->
                                                     OpenApi.Response.content errResponse
-                                                        |> contentToContentSchema True namespace
+                                                        |> contentToContentSchema True
                                                         |> CliMonad.andThen
                                                             (\contentSchema ->
                                                                 case contentSchema of
                                                                     JsonContent type_ ->
-                                                                        SchemaUtils.typeToDecoder True namespace type_
-                                                                            |> CliMonad.map common
+                                                                        SchemaUtils.typeToDecoder True type_
+                                                                            |> CliMonad.andThen common
 
                                                                     StringContent _ ->
                                                                         CliMonad.succeed Gen.Json.Decode.string
-                                                                            |> CliMonad.map common
+                                                                            |> CliMonad.andThen common
 
                                                                     BytesContent _ ->
                                                                         CliMonad.todo "Bytes errors are not supported yet"
 
                                                                     EmptyContent ->
                                                                         CliMonad.succeed (Gen.Json.Decode.succeed Elm.unit)
-                                                                            |> CliMonad.map common
+                                                                            |> CliMonad.andThen common
                                                             )
 
                                                 Nothing ->
@@ -2137,15 +2251,16 @@ operationToTypesExpectAndResolver namespace functionName operation =
                                                                         OpenApi.Reference.ref ref
                                                                 in
                                                                 SchemaUtils.refToTypeName (String.split "/" inner)
-                                                                    |> CliMonad.map
-                                                                        (\typeName ->
+                                                                    |> CliMonad.map2
+                                                                        (\jsonNamespace typeName ->
                                                                             Elm.value
-                                                                                { importFrom = Common.moduleToNamespace namespace Common.Json
-                                                                                , name = "decode" ++ typeName
+                                                                                { importFrom = jsonNamespace
+                                                                                , name = "decode" ++ Common.toTypeName typeName
                                                                                 , annotation = Nothing
                                                                                 }
                                                                         )
-                                                                    |> CliMonad.map common
+                                                                        (CliMonad.moduleToNamespace Common.Json)
+                                                                    |> CliMonad.andThen common
                                                             )
                                         )
                                     |> CliMonad.map
@@ -2163,14 +2278,14 @@ operationToTypesExpectAndResolver namespace functionName operation =
                                     case OpenApi.Reference.toConcrete errResponseOrRef of
                                         Just errResponse ->
                                             OpenApi.Response.content errResponse
-                                                |> contentToContentSchema True namespace
+                                                |> contentToContentSchema True
                                                 |> CliMonad.andThen
                                                     (\contentSchema ->
                                                         case contentSchema of
                                                             JsonContent type_ ->
                                                                 CliMonad.map2 Tuple.pair
-                                                                    (SchemaUtils.typeToAnnotation False namespace type_)
-                                                                    (SchemaUtils.typeToAnnotation True namespace type_)
+                                                                    (SchemaUtils.typeToAnnotation False type_)
+                                                                    (SchemaUtils.typeToAnnotation True type_)
 
                                                             StringContent _ ->
                                                                 CliMonad.succeed
@@ -2203,17 +2318,18 @@ operationToTypesExpectAndResolver namespace functionName operation =
                                                                 OpenApi.Reference.ref ref
                                                         in
                                                         SchemaUtils.refToTypeName (String.split "/" inner)
-                                                            |> CliMonad.map
-                                                                (\typeName ->
-                                                                    ( Elm.Annotation.named [] typeName
-                                                                    , Elm.Annotation.named (Common.moduleToNamespace namespace Common.Types) typeName
+                                                            |> CliMonad.map2
+                                                                (\typesNamespace typeName ->
+                                                                    ( Elm.Annotation.named [] (Common.toTypeName typeName)
+                                                                    , Elm.Annotation.named typesNamespace (Common.toTypeName typeName)
                                                                     )
                                                                 )
+                                                                (CliMonad.moduleToNamespace Common.Types)
                                                     )
                                 )
                             |> CliMonad.combineDict
-                            |> CliMonad.map
-                                (\dict ->
+                            |> CliMonad.map2
+                                (\typesNamespace dict ->
                                     case Dict.toList dict of
                                         [] ->
                                             ( Nothing
@@ -2237,14 +2353,15 @@ operationToTypesExpectAndResolver namespace functionName operation =
                                                     , group = Just "Errors"
                                                     }
                                                 |> Just
-                                            , Elm.Annotation.named (Common.moduleToNamespace namespace Common.Types) errorName
+                                            , Elm.Annotation.named typesNamespace errorName
                                             )
                                 )
+                                (CliMonad.moduleToNamespace Common.Types)
                 in
                 case OpenApi.Reference.toConcrete responseOrRef of
                     Just response ->
                         OpenApi.Response.content response
-                            |> contentToContentSchema True namespace
+                            |> contentToContentSchema True
                             |> CliMonad.andThen
                                 (\contentSchema ->
                                     case contentSchema of
@@ -2262,7 +2379,7 @@ operationToTypesExpectAndResolver namespace functionName operation =
                                                         }
                                                     }
                                                 )
-                                                (SchemaUtils.typeToDecoder True namespace type_)
+                                                (SchemaUtils.typeToDecoder True type_)
                                                 errorDecoders
                                                 errorTypeDeclaration
 
@@ -2330,14 +2447,14 @@ operationToTypesExpectAndResolver namespace functionName operation =
                                             OpenApi.Reference.ref ref
                                     in
                                     SchemaUtils.refToTypeName (String.split "/" inner)
-                                        |> CliMonad.map3
-                                            (\errorDecoders_ ( errorTypeDeclaration_, errorTypeAnnotation ) typeName ->
+                                        |> CliMonad.map4
+                                            (\jsonNamespace errorDecoders_ ( errorTypeDeclaration_, errorTypeAnnotation ) typeName ->
                                                 let
                                                     decoder : Elm.Expression
                                                     decoder =
                                                         Elm.value
-                                                            { importFrom = Common.moduleToNamespace namespace Common.Json
-                                                            , name = "decode" ++ typeName
+                                                            { importFrom = jsonNamespace
+                                                            , name = "decode" ++ Common.toTypeName typeName
                                                             , annotation = Nothing
                                                             }
                                                 in
@@ -2352,6 +2469,7 @@ operationToTypesExpectAndResolver namespace functionName operation =
                                                     }
                                                 }
                                             )
+                                            (CliMonad.moduleToNamespace Common.Json)
                                             errorDecoders
                                             errorTypeDeclaration
                                 )

@@ -1,20 +1,21 @@
 module Common exposing
     ( Field
-    , FieldName
     , Module(..)
     , Object
     , OneOfData
     , Package(..)
     , Type(..)
     , TypeName
+    , UnsafeName(..)
     , VariantName
+    , enum
     , moduleToNamespace
     , ref
+    , toTypeName
     , toValueName
-    , typifyName
+    , unwrapUnsafe
     )
 
-import FastDict
 import String.Extra
 
 
@@ -31,6 +32,12 @@ type Package
     = ElmHttp
     | DillonkearnsElmPages
     | LamderaProgramTest
+
+
+{-| An unsanitized name
+-}
+type UnsafeName
+    = UnsafeName String
 
 
 moduleToNamespace : List String -> Module -> List String
@@ -67,19 +74,29 @@ moduleToNamespace namespace module_ =
 -- Names adaptation --
 
 
-typifyName : String -> TypeName
-typifyName name =
+toTypeName : UnsafeName -> TypeName
+toTypeName (UnsafeName name) =
     name
         |> nameFromStatusCode
         |> String.uncons
         |> Maybe.map (\( first, rest ) -> String.cons first (String.replace "-" " " rest))
         |> Maybe.withDefault ""
         |> String.replace "_" " "
-        |> String.replace "(" " "
-        |> String.replace ")" " "
+        |> String.trim
         |> String.Extra.toTitleCase
+        |> deSymbolify " "
         |> String.replace " " ""
-        |> deSymbolify
+        |> String.Extra.toTitleCase
+
+
+{-| Convert into a name suitable to be used in Elm as a variable.
+-}
+toValueName : UnsafeName -> String
+toValueName (UnsafeName name) =
+    name
+        |> String.replace " " "_"
+        |> deSymbolify "_"
+        |> initialUppercaseWordToLowercase
 
 
 {-| Some OAS have response refs that are just the status code.
@@ -102,14 +119,14 @@ nameFromStatusCode name =
 {-| Sometimes a word in the schema contains invalid characers for an Elm name.
 We don't want to completely remove them though.
 -}
-deSymbolify : String -> String
-deSymbolify str =
+deSymbolify : String -> String -> String
+deSymbolify replacement str =
     if str == "$" then
         "dollar__"
 
     else if String.startsWith "-" str || String.startsWith "+" str then
         -- These were first identified in the GitHub OAS, for the names of emojis
-        deSymbolify
+        deSymbolify replacement
             (str
                 |> String.replace "-" "Minus"
                 |> String.replace "+" "Plus"
@@ -117,7 +134,7 @@ deSymbolify str =
 
     else if String.startsWith "$" str then
         -- This was first identified in the BIMcloud OAS, the fields of `Resource` were prefixed with `$`
-        deSymbolify (String.dropLeft 1 str)
+        deSymbolify replacement (String.dropLeft 1 str)
 
     else
         let
@@ -133,19 +150,20 @@ deSymbolify str =
                     acc
         in
         str
-            |> String.replace "-" "_"
-            |> String.replace "+" "_"
-            |> String.replace "$" "_"
+            |> replaceSymbolsWith replacement
             |> removeLeadingUnderscores
 
 
-{-| Convert into a name suitable to be used in Elm as a variable.
--}
-toValueName : String -> String
-toValueName name =
-    name
-        |> deSymbolify
-        |> initialUppercaseWordToLowercase
+replaceSymbolsWith : String -> String -> String
+replaceSymbolsWith replacement input =
+    input
+        |> String.replace "-" replacement
+        |> String.replace "+" replacement
+        |> String.replace "$" replacement
+        |> String.replace "(" replacement
+        |> String.replace ")" replacement
+        |> String.replace "/" replacement
+        |> String.replace "," replacement
 
 
 initialUppercaseWordToLowercase : String -> String
@@ -188,7 +206,7 @@ type Type
     | Bool
     | List Type
     | OneOf TypeName OneOfData
-    | Enum (List String)
+    | Enum (List UnsafeName)
     | Value
     | Ref (List String)
     | Bytes
@@ -196,12 +214,12 @@ type Type
 
 
 type alias Object =
-    FastDict.Dict FieldName Field
+    List ( UnsafeName, Field )
 
 
 type alias OneOfData =
     List
-        { name : VariantName
+        { name : UnsafeName
         , type_ : Type
         , documentation : Maybe String
         }
@@ -215,10 +233,6 @@ type alias VariantName =
     TypeName
 
 
-type alias FieldName =
-    String
-
-
 type alias Field =
     { type_ : Type
     , required : Bool
@@ -229,3 +243,16 @@ type alias Field =
 ref : String -> Type
 ref str =
     Ref (String.split "/" str)
+
+
+unwrapUnsafe : UnsafeName -> String
+unwrapUnsafe (UnsafeName name) =
+    name
+
+
+enum : List String -> Type
+enum variants =
+    variants
+        |> List.sort
+        |> List.map UnsafeName
+        |> Enum

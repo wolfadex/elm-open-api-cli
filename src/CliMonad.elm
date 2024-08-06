@@ -2,9 +2,9 @@ module CliMonad exposing
     ( CliMonad, Message, OneOfName, Path
     , run, stepOrFail
     , succeed, succeedWith, fail
-    , map, map2, map3
+    , map, map2, map3, map4
     , andThen, andThen2, andThen3, combine, combineDict, combineMap, foldl
-    , errorToWarning, fromApiSpec
+    , errorToWarning, fromApiSpec, enumName, moduleToNamespace
     , withPath, withWarning
     , todo, todoWithDefault
     )
@@ -14,9 +14,9 @@ module CliMonad exposing
 @docs CliMonad, Message, OneOfName, Path
 @docs run, stepOrFail
 @docs succeed, succeedWith, fail
-@docs map, map2, map3
+@docs map, map2, map3, map4
 @docs andThen, andThen2, andThen3, combine, combineDict, combineMap, foldl
-@docs errorToWarning, fromApiSpec
+@docs errorToWarning, fromApiSpec, enumName, moduleToNamespace
 @docs withPath, withWarning
 @docs todo, todoWithDefault
 
@@ -46,7 +46,11 @@ type alias OneOfName =
 
 type CliMonad a
     = CliMonad
-        ({ openApi : OpenApi, generateTodos : Bool }
+        ({ openApi : OpenApi
+         , generateTodos : Bool
+         , enums : FastDict.Dict (List String) { name : Common.UnsafeName, documentation : Maybe String }
+         , namespace : List String
+         }
          ->
             Result
                 Message
@@ -57,7 +61,7 @@ type CliMonad a
         )
 
 
-withPath : String -> CliMonad a -> CliMonad a
+withPath : Common.UnsafeName -> CliMonad a -> CliMonad a
 withPath segment (CliMonad f) =
     CliMonad
         (\inputs ->
@@ -65,13 +69,13 @@ withPath segment (CliMonad f) =
                 Err message ->
                     Err (addPath segment message)
 
-                Ok ( res, warns, enums ) ->
-                    Ok ( res, List.map (addPath segment) warns, enums )
+                Ok ( res, warns, oneOfs ) ->
+                    Ok ( res, List.map (addPath segment) warns, oneOfs )
         )
 
 
-addPath : String -> Message -> Message
-addPath segment { path, message } =
+addPath : Common.UnsafeName -> Message -> Message
+addPath (Common.UnsafeName segment) { path, message } =
     { path = segment :: path
     , message = message
     }
@@ -82,7 +86,7 @@ withWarning message (CliMonad f) =
     CliMonad
         (\inputs ->
             Result.map
-                (\( res, warnings, enums ) -> ( res, { path = [], message = message } :: warnings, enums ))
+                (\( res, warnings, oneOfs ) -> ( res, { path = [], message = message } :: warnings, oneOfs ))
                 (f inputs)
         )
 
@@ -137,6 +141,11 @@ map3 f (CliMonad x) (CliMonad y) (CliMonad z) =
     CliMonad (\input -> Result.map3 (\( xr, xw, xm ) ( yr, yw, ym ) ( zr, zw, zm ) -> ( f xr yr zr, xw ++ yw ++ zw, FastDict.union (FastDict.union xm ym) zm )) (x input) (y input) (z input))
 
 
+map4 : (a -> b -> c -> d -> e) -> CliMonad a -> CliMonad b -> CliMonad c -> CliMonad d -> CliMonad e
+map4 f (CliMonad x) (CliMonad y) (CliMonad z) (CliMonad w) =
+    CliMonad (\input -> Result.map4 (\( xr, xw, xm ) ( yr, yw, ym ) ( zr, zw, zm ) ( wr, ww, wm ) -> ( f xr yr zr wr, xw ++ yw ++ zw ++ ww, FastDict.union (FastDict.union xm ym) (FastDict.union zm wm) )) (x input) (y input) (z input) (w input))
+
+
 andThen : (a -> CliMonad b) -> CliMonad a -> CliMonad b
 andThen f (CliMonad x) =
     CliMonad
@@ -168,12 +177,17 @@ andThen3 f x y z =
 
 {-| Runs the transformation from OpenApi to declaration.
 
-Automatically appends the needed `enum` declarations.
+Automatically appends the needed `oneOf` declarations.
 
 -}
 run :
     (FastDict.Dict OneOfName Common.OneOfData -> CliMonad (List ( Common.Module, Elm.Declaration )))
-    -> { openApi : OpenApi, generateTodos : Bool }
+    ->
+        { openApi : OpenApi
+        , generateTodos : Bool
+        , enums : FastDict.Dict (List String) { name : Common.UnsafeName, documentation : Maybe String }
+        , namespace : List String
+        }
     -> CliMonad (List ( Common.Module, Elm.Declaration ))
     -> Result Message ( List ( Common.Module, Elm.Declaration ), List Message )
 run oneOfDeclarations input (CliMonad x) =
@@ -183,13 +197,13 @@ run oneOfDeclarations input (CliMonad x) =
                 let
                     (CliMonad h) =
                         oneOfDeclarations oneOfs
-                            |> withPath "While generating `oneOf`s"
+                            |> withPath (Common.UnsafeName "While generating `oneOf`s")
                 in
                 h input
                     |> Result.map
-                        (\( enumDecls, enumWarnings, _ ) ->
-                            ( decls ++ enumDecls
-                            , (enumWarnings ++ warnings)
+                        (\( oneOfDecls, oneOfWarnings, _ ) ->
+                            ( decls ++ oneOfDecls
+                            , (oneOfWarnings ++ warnings)
                                 |> List.reverse
                             )
                         )
@@ -211,13 +225,18 @@ fromApiSpec f =
     CliMonad (\input -> Ok ( f input.openApi, [], FastDict.empty ))
 
 
+enums : CliMonad (FastDict.Dict (List String) { name : Common.UnsafeName, documentation : Maybe String })
+enums =
+    CliMonad (\input -> Ok ( input.enums, [], FastDict.empty ))
+
+
 errorToWarning : CliMonad a -> CliMonad (Maybe a)
 errorToWarning (CliMonad f) =
     CliMonad
         (\input ->
             case f input of
-                Ok ( res, warns, enums ) ->
-                    Ok ( Just res, warns, enums )
+                Ok ( res, warns, oneOfs ) ->
+                    Ok ( Just res, warns, oneOfs )
 
                 Err { path, message } ->
                     Ok ( Nothing, [ { path = path, message = message } ], FastDict.empty )
@@ -241,13 +260,13 @@ combineDict : Dict.Dict comparable (CliMonad a) -> CliMonad (Dict.Dict comparabl
 combineDict dict =
     dict
         |> Dict.foldr
-            (\k vcm rescm ->
+            (\k vcm acc ->
                 map2
                     (\v res ->
                         ( k, v ) :: res
                     )
                     vcm
-                    rescm
+                    acc
             )
             (succeed [])
         |> map Dict.fromList
@@ -256,3 +275,18 @@ combineDict dict =
 foldl : (a -> b -> CliMonad b) -> CliMonad b -> List a -> CliMonad b
 foldl f init list =
     List.foldl (\e acc -> andThen (f e) acc) init list
+
+
+moduleToNamespace : Common.Module -> CliMonad (List String)
+moduleToNamespace mod =
+    CliMonad (\input -> Ok ( Common.moduleToNamespace input.namespace mod, [], FastDict.empty ))
+
+
+enumName : List Common.UnsafeName -> CliMonad (Maybe Common.UnsafeName)
+enumName variants =
+    map
+        (\e ->
+            FastDict.get (List.map Common.unwrapUnsafe variants) e
+                |> Maybe.map .name
+        )
+        enums

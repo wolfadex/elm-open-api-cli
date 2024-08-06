@@ -67,7 +67,13 @@ schemaToDeclarations name schema =
                                                 |> List.map
                                                     (\variant ->
                                                         ( SchemaUtils.toVariantName name variant
-                                                        , Gen.Maybe.make_.just (Elm.val (SchemaUtils.toVariantName name variant))
+                                                        , Gen.Maybe.make_.just
+                                                            (Elm.value
+                                                                { name = SchemaUtils.toVariantName name variant
+                                                                , importFrom = []
+                                                                , annotation = Just (Elm.Annotation.named [] name)
+                                                                }
+                                                            )
                                                         )
                                                     )
                                         , otherwise = Gen.Maybe.make_.nothing
@@ -82,7 +88,14 @@ schemaToDeclarations name schema =
                             |> CliMonad.succeed
                         , ( Common.Types
                           , enumVariants
-                                |> List.map Elm.string
+                                |> List.map
+                                    (\variant ->
+                                        Elm.value
+                                            { name = SchemaUtils.toVariantName name variant
+                                            , importFrom = []
+                                            , annotation = Just (Elm.Annotation.named [] name)
+                                            }
+                                    )
                                 |> Elm.list
                                 |> Elm.declaration (name ++ "Variants")
                                 |> Elm.exposeWith

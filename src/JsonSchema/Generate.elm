@@ -44,7 +44,7 @@ schemaToDeclarations name schema =
                           )
                             |> CliMonad.succeed
                         , ( Common.Types
-                          , Elm.fn ( "value", Just (Elm.Annotation.named [] typeName) )
+                          , Elm.fn ( "value", Nothing )
                                 (\value ->
                                     enumVariants
                                         |> List.map
@@ -55,6 +55,7 @@ schemaToDeclarations name schema =
                                             )
                                         |> Elm.Case.custom value (Elm.Annotation.named [] typeName)
                                 )
+                                |> Elm.withType (Elm.Annotation.function [ Elm.Annotation.named [] typeName ] Elm.Annotation.string)
                                 |> Elm.declaration (Common.toValueName name ++ "ToString")
                                 |> Elm.exposeWith
                                     { exposeConstructor = False
@@ -83,6 +84,7 @@ schemaToDeclarations name schema =
                                         , otherwise = Gen.Maybe.make_.nothing
                                         }
                                 )
+                                |> Elm.withType (Elm.Annotation.function [ Elm.Annotation.string ] (Elm.Annotation.maybe (Elm.Annotation.named [] typeName)))
                                 |> Elm.declaration (Common.toValueName name ++ "FromString")
                                 |> Elm.exposeWith
                                     { exposeConstructor = False

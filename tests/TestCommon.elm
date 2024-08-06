@@ -21,6 +21,7 @@ toValueName =
         , toValueNameTest "SHA256-DSA" "sha256_DSA"
         , toValueNameTest "decode-not-found" "decode_not_found"
         , toValueNameTest "not_found" "not_found"
+        , toValueNameTest "PAS (2013)" "pas__2013_"
         ]
 
 
@@ -29,10 +30,10 @@ toTypeName =
     Test.describe "toTypeName"
         [ toTypeNameTest "-1" "Minus1"
         , toTypeNameTest "+1" "Plus1"
-        , toTypeNameTest "$" "Dollar"
+        , toTypeNameTest "$" "Dollar__"
         , toTypeNameTest "$res" "Res"
-        , toTypeNameTest "" "Empty"
-        , toTypeNameTest "$___" "Empty"
+        , toTypeNameTest "" "Empty__"
+        , toTypeNameTest "$___" "Dollar__"
         , toTypeNameTest "X-API-KEY" "XAPIKEY"
         , toTypeNameTest "PASVersion" "PASVersion"
         , toTypeNameTest "MACOS" "MACOS"
@@ -40,6 +41,7 @@ toTypeName =
         , toTypeNameTest "SHA256-DSA" "SHA256DSA"
         , toTypeNameTest "not-found" "NotFound"
         , toTypeNameTest "not_found" "NotFound"
+        , toTypeNameTest "PAS (2013)" "PAS2013"
         ]
 
 

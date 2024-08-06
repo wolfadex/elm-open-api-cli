@@ -81,11 +81,22 @@ toTypeName (UnsafeName name) =
         |> String.uncons
         |> Maybe.map (\( first, rest ) -> String.cons first (String.replace "-" " " rest))
         |> Maybe.withDefault ""
+        |> String.replace "_" " "
+        |> String.trim
         |> String.Extra.toTitleCase
+        |> deSymbolify " "
         |> String.replace " " ""
-        |> deSymbolify
-        |> String.replace "_" ""
         |> String.Extra.toTitleCase
+
+
+{-| Convert into a name suitable to be used in Elm as a variable.
+-}
+toValueName : UnsafeName -> String
+toValueName (UnsafeName name) =
+    name
+        |> String.replace " " "_"
+        |> deSymbolify "_"
+        |> initialUppercaseWordToLowercase
 
 
 {-| Some OAS have response refs that are just the status code.
@@ -108,14 +119,14 @@ nameFromStatusCode name =
 {-| Sometimes a word in the schema contains invalid characers for an Elm name.
 We don't want to completely remove them though.
 -}
-deSymbolify : String -> String
-deSymbolify str =
+deSymbolify : String -> String -> String
+deSymbolify replacement str =
     if str == "$" then
         "dollar__"
 
     else if String.startsWith "-" str || String.startsWith "+" str then
         -- These were first identified in the GitHub OAS, for the names of emojis
-        deSymbolify
+        deSymbolify replacement
             (str
                 |> String.replace "-" "Minus"
                 |> String.replace "+" "Plus"
@@ -123,7 +134,7 @@ deSymbolify str =
 
     else if String.startsWith "$" str then
         -- This was first identified in the BIMcloud OAS, the fields of `Resource` were prefixed with `$`
-        deSymbolify (String.dropLeft 1 str)
+        deSymbolify replacement (String.dropLeft 1 str)
 
     else
         let
@@ -139,29 +150,20 @@ deSymbolify str =
                     acc
         in
         str
-            |> String.replace "-" "_"
-            |> replaceSymbolsWith "_"
+            |> replaceSymbolsWith replacement
             |> removeLeadingUnderscores
 
 
 replaceSymbolsWith : String -> String -> String
 replaceSymbolsWith replacement input =
     input
+        |> String.replace "-" replacement
         |> String.replace "+" replacement
         |> String.replace "$" replacement
         |> String.replace "(" replacement
         |> String.replace ")" replacement
         |> String.replace "/" replacement
         |> String.replace "," replacement
-
-
-{-| Convert into a name suitable to be used in Elm as a variable.
--}
-toValueName : UnsafeName -> String
-toValueName (UnsafeName name) =
-    name
-        |> deSymbolify
-        |> initialUppercaseWordToLowercase
 
 
 initialUppercaseWordToLowercase : String -> String

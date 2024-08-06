@@ -1983,6 +1983,33 @@ paramToString qualify type_ =
                     data
                 )
 
+        Common.Enum variants ->
+            CliMonad.enumName variants
+                |> CliMonad.andThen
+                    (\maybeName ->
+                        case maybeName of
+                            Nothing ->
+                                basic identity
+
+                            Just name ->
+                                CliMonad.map
+                                    (\typesNamespace ->
+                                        { inputToString =
+                                            \val ->
+                                                Elm.apply
+                                                    (Elm.value
+                                                        { importFrom = typesNamespace
+                                                        , name = Common.toValueName name ++ "ToString"
+                                                        , annotation = Nothing
+                                                        }
+                                                    )
+                                                    [ val ]
+                                        , alwaysJust = True
+                                        }
+                                    )
+                                    (CliMonad.moduleToNamespace Common.Types)
+                    )
+
         _ ->
             SchemaUtils.typeToAnnotation qualify type_
                 |> CliMonad.andThen

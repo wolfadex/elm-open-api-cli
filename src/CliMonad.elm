@@ -4,7 +4,7 @@ module CliMonad exposing
     , succeed, succeedWith, fail
     , map, map2, map3
     , andThen, andThen2, andThen3, combine, combineDict, combineMap, foldl
-    , errorToWarning, fromApiSpec
+    , errorToWarning, fromApiSpec, enums
     , withPath, withWarning
     , todo, todoWithDefault
     )
@@ -16,7 +16,7 @@ module CliMonad exposing
 @docs succeed, succeedWith, fail
 @docs map, map2, map3
 @docs andThen, andThen2, andThen3, combine, combineDict, combineMap, foldl
-@docs errorToWarning, fromApiSpec
+@docs errorToWarning, fromApiSpec, enums
 @docs withPath, withWarning
 @docs todo, todoWithDefault
 
@@ -46,7 +46,11 @@ type alias OneOfName =
 
 type CliMonad a
     = CliMonad
-        ({ openApi : OpenApi, generateTodos : Bool }
+        ({ openApi : OpenApi
+         , generateTodos : Bool
+         , enums : FastDict.Dict (List String) { name : String, documentation : Maybe String }
+         , namespace : List String
+         }
          ->
             Result
                 Message
@@ -65,8 +69,8 @@ withPath segment (CliMonad f) =
                 Err message ->
                     Err (addPath segment message)
 
-                Ok ( res, warns, enums ) ->
-                    Ok ( res, List.map (addPath segment) warns, enums )
+                Ok ( res, warns, oneOfs ) ->
+                    Ok ( res, List.map (addPath segment) warns, oneOfs )
         )
 
 
@@ -82,7 +86,7 @@ withWarning message (CliMonad f) =
     CliMonad
         (\inputs ->
             Result.map
-                (\( res, warnings, enums ) -> ( res, { path = [], message = message } :: warnings, enums ))
+                (\( res, warnings, oneOfs ) -> ( res, { path = [], message = message } :: warnings, oneOfs ))
                 (f inputs)
         )
 
@@ -173,7 +177,12 @@ Automatically appends the needed `enum` declarations.
 -}
 run :
     (FastDict.Dict OneOfName Common.OneOfData -> CliMonad (List ( Common.Module, Elm.Declaration )))
-    -> { openApi : OpenApi, generateTodos : Bool }
+    ->
+        { openApi : OpenApi
+        , generateTodos : Bool
+        , enums : FastDict.Dict (List String) { name : String, documentation : Maybe String }
+        , namespace : List String
+        }
     -> CliMonad (List ( Common.Module, Elm.Declaration ))
     -> Result Message ( List ( Common.Module, Elm.Declaration ), List Message )
 run oneOfDeclarations input (CliMonad x) =
@@ -211,13 +220,18 @@ fromApiSpec f =
     CliMonad (\input -> Ok ( f input.openApi, [], FastDict.empty ))
 
 
+enums : CliMonad (FastDict.Dict (List String) { name : String, documentation : Maybe String })
+enums =
+    CliMonad (\input -> Ok ( input.enums, [], FastDict.empty ))
+
+
 errorToWarning : CliMonad a -> CliMonad (Maybe a)
 errorToWarning (CliMonad f) =
     CliMonad
         (\input ->
             case f input of
-                Ok ( res, warns, enums ) ->
-                    Ok ( Just res, warns, enums )
+                Ok ( res, warns, oneOfs ) ->
+                    Ok ( Just res, warns, oneOfs )
 
                 Err { path, message } ->
                     Ok ( Nothing, [ { path = path, message = message } ], FastDict.empty )

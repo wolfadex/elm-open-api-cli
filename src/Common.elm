@@ -77,6 +77,8 @@ typifyName name =
         |> String.replace "_" " "
         |> String.replace "(" " "
         |> String.replace ")" " "
+        |> String.replace "/" " "
+        |> String.replace "," " "
         |> String.Extra.toTitleCase
         |> String.replace " " ""
         |> deSymbolify

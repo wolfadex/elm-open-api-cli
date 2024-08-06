@@ -2,6 +2,7 @@ module SchemaUtils exposing
     ( OneOfName
     , decodeOptionalField
     , decodeOptionalFieldDocumentation
+    , enumDeclarations
     , getAlias
     , oneOfDeclarations
     , recordType
@@ -201,6 +202,19 @@ schemaToType qualify namespace schema =
                             )
             in
             case subSchema.type_ of
+                Json.Schema.Definitions.SingleType Json.Schema.Definitions.StringType ->
+                    case subSchema.enum of
+                        Nothing ->
+                            singleTypeToType Json.Schema.Definitions.StringType
+
+                        Just enums ->
+                            case Result.Extra.combineMap (Json.Decode.decodeValue Json.Decode.string) enums of
+                                Err _ ->
+                                    CliMonad.fail "Attempted to parse an enum as a string and failed"
+
+                                Ok decodedEnums ->
+                                    CliMonad.succeed { type_ = Common.Enum decodedEnums, documentation = subSchema.description }
+
                 Json.Schema.Definitions.SingleType singleType ->
                     singleTypeToType singleType
 
@@ -485,6 +499,37 @@ oneOfDeclaration namespace ( oneOfName, variants ) =
             )
 
 
+enumDeclarations : CliMonad (List ( Common.Module, Elm.Declaration ))
+enumDeclarations =
+    CliMonad.enums
+        |> CliMonad.map
+            (\enums ->
+                enums
+                    |> FastDict.toList
+                    |> List.map enumDeclaration
+            )
+
+
+enumDeclaration : ( List String, { name : String, documentation : Maybe String } ) -> ( Common.Module, Elm.Declaration )
+enumDeclaration ( enumVariants, enum ) =
+    ( Common.Types
+    , enumVariants
+        |> List.map (\variantName -> Elm.variant (toVariantName enum.name variantName))
+        |> Elm.customType enum.name
+        |> (case enum.documentation of
+                Nothing ->
+                    identity
+
+                Just doc ->
+                    Elm.withDocumentation doc
+           )
+        |> Elm.exposeWith
+            { exposeConstructor = True
+            , group = Just "Enum"
+            }
+    )
+
+
 toVariantName : String -> String -> String
 toVariantName oneOfName variantName =
     oneOfName ++ "__" ++ fixOneOfName variantName
@@ -498,6 +543,7 @@ fixOneOfName name =
     name
         |> String.replace "OpenApi.Nullable" "Nullable"
         |> String.replace "." ""
+        |> Common.typifyName
 
 
 typeToAnnotation : Bool -> List String -> Common.Type -> CliMonad Elm.Annotation.Annotation

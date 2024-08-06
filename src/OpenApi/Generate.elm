@@ -17,6 +17,7 @@ import Elm.Annotation
 import Elm.Case
 import Elm.Declare
 import Elm.Op
+import FastDict
 import Gen.BackendTask
 import Gen.BackendTask.Http
 import Gen.Basics
@@ -37,6 +38,7 @@ import Gen.Result
 import Gen.String
 import Gen.Task
 import Gen.Url.Builder
+import Json.Decode
 import Json.Schema.Definitions
 import JsonSchema.Generate
 import List.Extra
@@ -54,6 +56,7 @@ import OpenApi.Schema
 import OpenApi.SecurityRequirement
 import OpenApi.SecurityScheme
 import OpenApi.Server
+import Result.Extra
 import SchemaUtils
 import String.Extra
 import Util.List
@@ -117,244 +120,307 @@ files :
     -> OpenApi.OpenApi
     -> Result CliMonad.Message ( List Elm.File, List CliMonad.Message )
 files { namespace, generateTodos, effectTypes, server } apiSpec =
-    CliMonad.combine
-        [ pathDeclarations server effectTypes namespace
-        , componentDeclarations namespace
-        , responsesDeclarations namespace
-        , requestBodiesDeclarations namespace
-        ]
-        |> CliMonad.map List.concat
-        |> CliMonad.run
-            (SchemaUtils.oneOfDeclarations namespace)
-            { openApi = apiSpec
-            , generateTodos = generateTodos
-            }
-        |> Result.map
-            (\( decls, warnings ) ->
-                let
-                    allDecls : List ( Common.Module, Elm.Declaration )
-                    allDecls =
-                        decls
-                            ++ (if List.any (\effectType -> effectTypeToPackage effectType == Common.ElmHttp) effectTypes then
-                                    [ ( Common.Common
-                                      , expectJsonCustom.declaration
-                                            |> Elm.exposeWith
-                                                { exposeConstructor = False
-                                                , group = Just "Http"
-                                                }
-                                      )
-                                    , ( Common.Common
-                                      , jsonResolverCustom.declaration
-                                            |> Elm.exposeWith
-                                                { exposeConstructor = False
-                                                , group = Just "Http"
-                                                }
-                                      )
-                                    , ( Common.Common
-                                      , expectStringCustom.declaration
-                                            |> Elm.exposeWith
-                                                { exposeConstructor = False
-                                                , group = Just "Http"
-                                                }
-                                      )
-                                    , ( Common.Common
-                                      , stringResolverCustom.declaration
-                                            |> Elm.exposeWith
-                                                { exposeConstructor = False
-                                                , group = Just "Http"
-                                                }
-                                      )
-                                    , ( Common.Common
-                                      , expectBytesCustom.declaration
-                                            |> Elm.exposeWith
-                                                { exposeConstructor = False
-                                                , group = Just "Http"
-                                                }
-                                      )
-                                    , ( Common.Common
-                                      , bytesResolverCustom.declaration
-                                            |> Elm.exposeWith
-                                                { exposeConstructor = False
-                                                , group = Just "Http"
-                                                }
-                                      )
-                                    ]
+    case extractEnums apiSpec of
+        Err e ->
+            Err
+                { message = e
+                , path = [ "Extracting enums" ]
+                }
 
-                                else
-                                    []
-                               )
-                            ++ (if List.any (\effectType -> effectTypeToPackage effectType == Common.LamderaProgramTest) effectTypes then
-                                    [ ( Common.Common
-                                      , expectJsonCustomEffect.declaration
+        Ok enums ->
+            CliMonad.combine
+                [ pathDeclarations server effectTypes namespace
+                , schemasDeclarations namespace
+                , responsesDeclarations namespace
+                , requestBodiesDeclarations namespace
+                , SchemaUtils.enumDeclarations
+                ]
+                |> CliMonad.map List.concat
+                |> CliMonad.run
+                    (SchemaUtils.oneOfDeclarations namespace)
+                    { openApi = apiSpec
+                    , generateTodos = generateTodos
+                    , enums = enums
+                    , namespace = namespace
+                    }
+                |> Result.map
+                    (\( decls, warnings ) ->
+                        let
+                            allDecls : List ( Common.Module, Elm.Declaration )
+                            allDecls =
+                                decls
+                                    ++ (if List.any (\effectType -> effectTypeToPackage effectType == Common.ElmHttp) effectTypes then
+                                            [ ( Common.Common
+                                              , expectJsonCustom.declaration
+                                                    |> Elm.exposeWith
+                                                        { exposeConstructor = False
+                                                        , group = Just "Http"
+                                                        }
+                                              )
+                                            , ( Common.Common
+                                              , jsonResolverCustom.declaration
+                                                    |> Elm.exposeWith
+                                                        { exposeConstructor = False
+                                                        , group = Just "Http"
+                                                        }
+                                              )
+                                            , ( Common.Common
+                                              , expectStringCustom.declaration
+                                                    |> Elm.exposeWith
+                                                        { exposeConstructor = False
+                                                        , group = Just "Http"
+                                                        }
+                                              )
+                                            , ( Common.Common
+                                              , stringResolverCustom.declaration
+                                                    |> Elm.exposeWith
+                                                        { exposeConstructor = False
+                                                        , group = Just "Http"
+                                                        }
+                                              )
+                                            , ( Common.Common
+                                              , expectBytesCustom.declaration
+                                                    |> Elm.exposeWith
+                                                        { exposeConstructor = False
+                                                        , group = Just "Http"
+                                                        }
+                                              )
+                                            , ( Common.Common
+                                              , bytesResolverCustom.declaration
+                                                    |> Elm.exposeWith
+                                                        { exposeConstructor = False
+                                                        , group = Just "Http"
+                                                        }
+                                              )
+                                            ]
+
+                                        else
+                                            []
+                                       )
+                                    ++ (if List.any (\effectType -> effectTypeToPackage effectType == Common.LamderaProgramTest) effectTypes then
+                                            [ ( Common.Common
+                                              , expectJsonCustomEffect.declaration
+                                                    |> Elm.exposeWith
+                                                        { exposeConstructor = False
+                                                        , group = Just "Http"
+                                                        }
+                                              )
+                                            , ( Common.Common
+                                              , jsonResolverCustomEffect.declaration
+                                                    |> Elm.exposeWith
+                                                        { exposeConstructor = False
+                                                        , group = Just "Http"
+                                                        }
+                                              )
+                                            , ( Common.Common
+                                              , expectStringCustomEffect.declaration
+                                                    |> Elm.exposeWith
+                                                        { exposeConstructor = False
+                                                        , group = Just "Http"
+                                                        }
+                                              )
+                                            , ( Common.Common
+                                              , stringResolverCustomEffect.declaration
+                                                    |> Elm.exposeWith
+                                                        { exposeConstructor = False
+                                                        , group = Just "Http"
+                                                        }
+                                              )
+                                            , ( Common.Common
+                                              , expectBytesCustomEffect.declaration
+                                                    |> Elm.exposeWith
+                                                        { exposeConstructor = False
+                                                        , group = Just "Http"
+                                                        }
+                                              )
+                                            , ( Common.Common
+                                              , bytesResolverCustomEffect.declaration
+                                                    |> Elm.exposeWith
+                                                        { exposeConstructor = False
+                                                        , group = Just "Http"
+                                                        }
+                                              )
+                                            ]
+
+                                        else
+                                            []
+                                       )
+                                    ++ [ ( Common.Common
+                                         , SchemaUtils.decodeOptionalField.declaration
+                                            |> Elm.withDocumentation SchemaUtils.decodeOptionalFieldDocumentation
                                             |> Elm.exposeWith
                                                 { exposeConstructor = False
-                                                , group = Just "Http"
+                                                , group = Just "Decoders"
                                                 }
-                                      )
-                                    , ( Common.Common
-                                      , jsonResolverCustomEffect.declaration
+                                         )
+                                       , ( Common.Common
+                                         , jsonDecodeAndMap
+                                            |> Elm.withDocumentation "Chain JSON decoders, when `Json.Decode.map8` isn't enough."
                                             |> Elm.exposeWith
                                                 { exposeConstructor = False
-                                                , group = Just "Http"
+                                                , group = Just "Decoders"
                                                 }
-                                      )
-                                    , ( Common.Common
-                                      , expectStringCustomEffect.declaration
+                                         )
+                                       , ( Common.Common
+                                         , customHttpError
                                             |> Elm.exposeWith
-                                                { exposeConstructor = False
+                                                { exposeConstructor = True
                                                 , group = Just "Http"
                                                 }
-                                      )
-                                    , ( Common.Common
-                                      , stringResolverCustomEffect.declaration
+                                         )
+                                       , ( Common.Common
+                                         , nullableType
                                             |> Elm.exposeWith
-                                                { exposeConstructor = False
-                                                , group = Just "Http"
+                                                { exposeConstructor = True
+                                                , group = Just "Types"
                                                 }
-                                      )
-                                    , ( Common.Common
-                                      , expectBytesCustomEffect.declaration
-                                            |> Elm.exposeWith
-                                                { exposeConstructor = False
-                                                , group = Just "Http"
-                                                }
-                                      )
-                                    , ( Common.Common
-                                      , bytesResolverCustomEffect.declaration
-                                            |> Elm.exposeWith
-                                                { exposeConstructor = False
-                                                , group = Just "Http"
-                                                }
-                                      )
-                                    ]
+                                         )
+                                       ]
+                                    ++ serverDecls apiSpec server
+                        in
+                        ( allDecls
+                            |> List.Extra.gatherEqualsBy Tuple.first
+                            |> List.map
+                                (\( ( module_, head ), tail ) ->
+                                    Elm.fileWith (Common.moduleToNamespace namespace module_)
+                                        { docs =
+                                            \docs ->
+                                                docs
+                                                    |> List.sortBy
+                                                        (\{ group } ->
+                                                            case group of
+                                                                Just "Request functions" ->
+                                                                    1
 
-                                else
-                                    []
-                               )
-                            ++ [ ( Common.Common
-                                 , SchemaUtils.decodeOptionalField.declaration
-                                    |> Elm.withDocumentation SchemaUtils.decodeOptionalFieldDocumentation
-                                    |> Elm.exposeWith
-                                        { exposeConstructor = False
-                                        , group = Just "Decoders"
-                                        }
-                                 )
-                               , ( Common.Common
-                                 , jsonDecodeAndMap
-                                    |> Elm.withDocumentation "Chain JSON decoders, when `Json.Decode.map8` isn't enough."
-                                    |> Elm.exposeWith
-                                        { exposeConstructor = False
-                                        , group = Just "Decoders"
-                                        }
-                                 )
-                               , ( Common.Common
-                                 , customHttpError
-                                    |> Elm.exposeWith
-                                        { exposeConstructor = True
-                                        , group = Just "Http"
-                                        }
-                                 )
-                               , ( Common.Common
-                                 , nullableType
-                                    |> Elm.exposeWith
-                                        { exposeConstructor = True
-                                        , group = Just "Types"
-                                        }
-                                 )
-                               ]
-                            ++ (case server of
-                                    Multiple servers ->
-                                        servers
-                                            |> Dict.toList
-                                            |> List.map
-                                                (\( key, value ) ->
-                                                    ( Common.Servers
-                                                    , Elm.string value
-                                                        |> Elm.declaration key
-                                                        |> Elm.exposeWith
-                                                            { exposeConstructor = True
-                                                            , group = Just "Servers"
-                                                            }
-                                                    )
-                                                )
+                                                                Just "Types" ->
+                                                                    2
 
-                                    Single _ ->
-                                        []
+                                                                Just "Encoders" ->
+                                                                    3
 
-                                    Default ->
-                                        case OpenApi.servers apiSpec of
-                                            [] ->
-                                                []
+                                                                Just "Decoders" ->
+                                                                    4
 
-                                            [ _ ] ->
-                                                []
-
-                                            servers ->
-                                                servers
-                                                    |> List.indexedMap
-                                                        (\i value ->
-                                                            let
-                                                                key : String
-                                                                key =
-                                                                    case OpenApi.Server.description value of
-                                                                        Nothing ->
-                                                                            "server" ++ String.fromInt i
-
-                                                                        Just description ->
-                                                                            description
-                                                            in
-                                                            ( Common.Servers
-                                                            , Elm.string (OpenApi.Server.url value)
-                                                                |> Elm.declaration key
-                                                                |> (case OpenApi.Server.description value of
-                                                                        Nothing ->
-                                                                            identity
-
-                                                                        Just description ->
-                                                                            Elm.withDocumentation description
-                                                                   )
-                                                                |> Elm.exposeWith
-                                                                    { exposeConstructor = True
-                                                                    , group = Just "Servers"
-                                                                    }
-                                                            )
+                                                                _ ->
+                                                                    5
                                                         )
-                               )
-                in
-                ( allDecls
-                    |> List.Extra.gatherEqualsBy Tuple.first
-                    |> List.map
-                        (\( ( module_, head ), tail ) ->
-                            Elm.fileWith (Common.moduleToNamespace namespace module_)
-                                { docs =
-                                    \docs ->
-                                        docs
-                                            |> List.sortBy
-                                                (\{ group } ->
-                                                    case group of
-                                                        Just "Request functions" ->
-                                                            1
-
-                                                        Just "Types" ->
-                                                            2
-
-                                                        Just "Encoders" ->
-                                                            3
-
-                                                        Just "Decoders" ->
-                                                            4
-
-                                                        _ ->
-                                                            5
-                                                )
-                                            |> formatModuleDocs
-                                , aliases = []
-                                }
-                                (head :: List.map Tuple.second tail)
+                                                    |> formatModuleDocs
+                                        , aliases = []
+                                        }
+                                        (head :: List.map Tuple.second tail)
+                                )
+                        , warnings
                         )
-                , warnings
-                )
+                    )
+
+
+extractEnums :
+    OpenApi.OpenApi
+    ->
+        Result
+            String
+            (FastDict.Dict (List String) { name : String, documentation : Maybe String })
+extractEnums openApi =
+    openApi
+        |> OpenApi.components
+        |> Maybe.map OpenApi.Components.schemas
+        |> Maybe.withDefault Dict.empty
+        |> Dict.foldl
+            (\name schema q ->
+                Result.andThen
+                    (\acc ->
+                        case OpenApi.Schema.get schema of
+                            Json.Schema.Definitions.ObjectSchema subSchema ->
+                                case subSchema.enum of
+                                    Nothing ->
+                                        if name == "DefectLocationTypes" then
+                                            Err (Debug.toString { name = name, schema = schema })
+
+                                        else
+                                            Ok acc
+
+                                    Just enums ->
+                                        case Result.Extra.combineMap (Json.Decode.decodeValue Json.Decode.string) enums of
+                                            Err _ ->
+                                                Err "Attempted to parse an enum as a string and failed"
+
+                                            Ok decodedEnums ->
+                                                Ok
+                                                    (FastDict.insert
+                                                        decodedEnums
+                                                        { name = name
+                                                        , documentation = subSchema.description
+                                                        }
+                                                        acc
+                                                    )
+
+                            _ ->
+                                Ok acc
+                    )
+                    q
             )
+            (Ok FastDict.empty)
+
+
+serverDecls : OpenApi.OpenApi -> Server -> List ( Common.Module, Elm.Declaration )
+serverDecls apiSpec server =
+    case server of
+        Multiple servers ->
+            servers
+                |> Dict.toList
+                |> List.map
+                    (\( key, value ) ->
+                        ( Common.Servers
+                        , Elm.string value
+                            |> Elm.declaration key
+                            |> Elm.exposeWith
+                                { exposeConstructor = True
+                                , group = Just "Servers"
+                                }
+                        )
+                    )
+
+        Single _ ->
+            []
+
+        Default ->
+            case OpenApi.servers apiSpec of
+                [] ->
+                    []
+
+                [ _ ] ->
+                    []
+
+                servers ->
+                    servers
+                        |> List.indexedMap
+                            (\i value ->
+                                let
+                                    key : String
+                                    key =
+                                        case OpenApi.Server.description value of
+                                            Nothing ->
+                                                "server" ++ String.fromInt i
+
+                                            Just description ->
+                                                description
+                                in
+                                ( Common.Servers
+                                , Elm.string (OpenApi.Server.url value)
+                                    |> Elm.declaration key
+                                    |> (case OpenApi.Server.description value of
+                                            Nothing ->
+                                                identity
+
+                                            Just description ->
+                                                Elm.withDocumentation description
+                                       )
+                                    |> Elm.exposeWith
+                                        { exposeConstructor = True
+                                        , group = Just "Servers"
+                                        }
+                                )
+                            )
 
 
 formatModuleDocs : List { group : Maybe String, members : List String } -> List String
@@ -457,8 +523,8 @@ requestBodiesDeclarations namespace =
         |> CliMonad.map List.concat
 
 
-componentDeclarations : List String -> CliMonad (List ( Common.Module, Elm.Declaration ))
-componentDeclarations namespace =
+schemasDeclarations : List String -> CliMonad (List ( Common.Module, Elm.Declaration ))
+schemasDeclarations namespace =
     CliMonad.fromApiSpec
         (OpenApi.components
             >> Maybe.map OpenApi.Components.schemas
@@ -467,12 +533,12 @@ componentDeclarations namespace =
         |> CliMonad.andThen
             (Dict.foldl
                 (\name schema ->
-                    CliMonad.map2 (::)
+                    CliMonad.map2
+                        (\decls declAcc -> decls ++ declAcc)
                         (JsonSchema.Generate.schemaToDeclarations namespace name (OpenApi.Schema.get schema))
                 )
                 (CliMonad.succeed [])
             )
-        |> CliMonad.map List.concat
 
 
 unitDeclarations : List String -> String -> CliMonad (List ( Common.Module, Elm.Declaration ))

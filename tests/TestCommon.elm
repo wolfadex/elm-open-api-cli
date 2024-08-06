@@ -19,6 +19,8 @@ toValueName =
         , toValueNameTest "MACOS" "macos"
         , toValueNameTest "SHA256" "sha256"
         , toValueNameTest "SHA256-DSA" "sha256_DSA"
+        , toValueNameTest "decode-not-found" "decode_not_found"
+        , toValueNameTest "not_found" "not_found"
         ]
 
 
@@ -36,6 +38,8 @@ toTypeName =
         , toTypeNameTest "MACOS" "MACOS"
         , toTypeNameTest "SHA256" "SHA256"
         , toTypeNameTest "SHA256-DSA" "SHA256DSA"
+        , toTypeNameTest "not-found" "NotFound"
+        , toTypeNameTest "not_found" "NotFound"
         ]
 
 

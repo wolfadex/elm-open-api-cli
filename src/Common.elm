@@ -81,11 +81,11 @@ toTypeName (UnsafeName name) =
         |> String.uncons
         |> Maybe.map (\( first, rest ) -> String.cons first (String.replace "-" " " rest))
         |> Maybe.withDefault ""
-        |> replaceSymbolsWith " "
         |> String.Extra.toTitleCase
         |> String.replace " " ""
         |> deSymbolify
         |> String.replace "_" ""
+        |> String.Extra.toTitleCase
 
 
 {-| Some OAS have response refs that are just the status code.

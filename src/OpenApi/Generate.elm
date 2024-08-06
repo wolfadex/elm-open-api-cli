@@ -122,10 +122,7 @@ files :
 files { namespace, generateTodos, effectTypes, server } apiSpec =
     case extractEnums apiSpec of
         Err e ->
-            Err
-                { message = e
-                , path = [ "Extracting enums" ]
-                }
+            Err e
 
         Ok enums ->
             CliMonad.combine
@@ -325,7 +322,7 @@ extractEnums :
     OpenApi.OpenApi
     ->
         Result
-            String
+            CliMonad.Message
             (FastDict.Dict (List String) { name : String, documentation : Maybe String })
 extractEnums openApi =
     openApi
@@ -343,14 +340,27 @@ extractEnums openApi =
                                         Ok acc
 
                                     Just enums ->
-                                        case Result.Extra.combineMap (Json.Decode.decodeValue Json.Decode.string) enums of
+                                        case
+                                            Result.Extra.combineMap
+                                                (Json.Decode.decodeValue
+                                                    (Json.Decode.oneOf
+                                                        [ Json.Decode.map Just Json.Decode.string
+                                                        , Json.Decode.null Nothing
+                                                        ]
+                                                    )
+                                                )
+                                                enums
+                                        of
                                             Err _ ->
-                                                Err "Attempted to parse an enum as a string and failed"
+                                                Err
+                                                    { message = "Attempted to parse an enum as a string and failed"
+                                                    , path = [ name, "Extracting enums" ]
+                                                    }
 
                                             Ok decodedEnums ->
                                                 Ok
                                                     (FastDict.insert
-                                                        decodedEnums
+                                                        (List.sort (List.filterMap identity decodedEnums))
                                                         { name = name
                                                         , documentation = subSchema.description
                                                         }

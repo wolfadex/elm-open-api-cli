@@ -80,6 +80,17 @@ schemaToDeclarations name schema =
                                     }
                           )
                             |> CliMonad.succeed
+                        , ( Common.Types
+                          , enumVariants
+                                |> List.map Elm.string
+                                |> Elm.list
+                                |> Elm.declaration (name ++ "Variants")
+                                |> Elm.exposeWith
+                                    { exposeConstructor = False
+                                    , group = Just "Enum"
+                                    }
+                          )
+                            |> CliMonad.succeed
                         , CliMonad.map
                             (\typesNamespace ->
                                 ( Common.Json

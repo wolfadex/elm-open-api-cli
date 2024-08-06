@@ -213,7 +213,10 @@ schemaToType qualify schema =
                                     CliMonad.fail "Attempted to parse an enum as a string and failed"
 
                                 Ok decodedEnums ->
-                                    CliMonad.succeed { type_ = Common.Enum decodedEnums, documentation = subSchema.description }
+                                    CliMonad.succeed
+                                        { type_ = Common.Enum (List.sort decodedEnums)
+                                        , documentation = subSchema.description
+                                        }
 
                 Json.Schema.Definitions.SingleType singleType ->
                     singleTypeToType singleType
@@ -285,7 +288,10 @@ schemaToType qualify schema =
                                                                     CliMonad.fail "Attempted to parse an enum as a string and failed"
 
                                                                 Ok decodedEnums ->
-                                                                    CliMonad.succeed { type_ = Common.Enum decodedEnums, documentation = subSchema.description }
+                                                                    CliMonad.succeed
+                                                                        { type_ = Common.Enum (List.sort decodedEnums)
+                                                                        , documentation = subSchema.description
+                                                                        }
 
                 Json.Schema.Definitions.NullableType singleType ->
                     nullable (singleTypeToType singleType)
@@ -537,8 +543,25 @@ typeToAnnotation qualify type_ =
         Common.List t ->
             CliMonad.map Elm.Annotation.list (typeToAnnotation qualify t)
 
-        Common.Enum _ ->
-            CliMonad.succeed Elm.Annotation.string
+        Common.Enum variants ->
+            CliMonad.enumName variants
+                |> CliMonad.andThen
+                    (\maybeName ->
+                        case maybeName of
+                            Nothing ->
+                                CliMonad.succeed Elm.Annotation.string
+
+                            Just name ->
+                                CliMonad.map
+                                    (\typesNamespace ->
+                                        if qualify then
+                                            Elm.Annotation.named typesNamespace name
+
+                                        else
+                                            Elm.Annotation.named [] name
+                                    )
+                                    (CliMonad.moduleToNamespace Common.Types)
+                    )
 
         Common.OneOf oneOfName oneOfData ->
             oneOfAnnotation qualify oneOfName oneOfData
@@ -548,14 +571,14 @@ typeToAnnotation qualify type_ =
 
         Common.Ref ref ->
             CliMonad.map2
-                (\namespace ->
+                (\typesNamespace ->
                     if qualify then
-                        Elm.Annotation.named (Common.moduleToNamespace namespace Common.Types)
+                        Elm.Annotation.named typesNamespace
 
                     else
                         Elm.Annotation.named []
                 )
-                CliMonad.namespace
+                (CliMonad.moduleToNamespace Common.Types)
                 (refToTypeName ref)
 
         Common.Bytes ->
@@ -589,8 +612,25 @@ typeToAnnotationMaybe qualify type_ =
         Common.List t ->
             CliMonad.map Elm.Annotation.list (typeToAnnotationMaybe qualify t)
 
-        Common.Enum _ ->
-            CliMonad.succeed Elm.Annotation.string
+        Common.Enum variants ->
+            CliMonad.enumName variants
+                |> CliMonad.andThen
+                    (\maybeName ->
+                        case maybeName of
+                            Nothing ->
+                                CliMonad.succeed Elm.Annotation.string
+
+                            Just name ->
+                                CliMonad.map
+                                    (\typesNamespace ->
+                                        if qualify then
+                                            Elm.Annotation.named typesNamespace name
+
+                                        else
+                                            Elm.Annotation.named [] name
+                                    )
+                                    (CliMonad.moduleToNamespace Common.Types)
+                    )
 
         Common.OneOf oneOfName oneOfData ->
             oneOfAnnotation qualify oneOfName oneOfData
@@ -600,14 +640,14 @@ typeToAnnotationMaybe qualify type_ =
 
         Common.Ref ref ->
             CliMonad.map2
-                (\namespace name ->
+                (\typesNamespace name ->
                     if qualify then
-                        Elm.Annotation.named (Common.moduleToNamespace namespace Common.Types) name
+                        Elm.Annotation.named typesNamespace name
 
                     else
                         Elm.Annotation.named [] name
                 )
-                CliMonad.namespace
+                (CliMonad.moduleToNamespace Common.Types)
                 (refToTypeName ref)
 
         Common.Bytes ->
@@ -664,8 +704,33 @@ typeToEncoder qualify type_ =
         Common.Bool ->
             CliMonad.succeed Gen.Json.Encode.call_.bool
 
-        Common.Enum _ ->
-            CliMonad.succeed Gen.Json.Encode.call_.string
+        Common.Enum variants ->
+            CliMonad.enumName variants
+                |> CliMonad.andThen
+                    (\maybeName ->
+                        case maybeName of
+                            Nothing ->
+                                CliMonad.succeed Gen.Json.Encode.call_.string
+
+                            Just name ->
+                                CliMonad.map
+                                    (\jsonNamespace rec ->
+                                        Elm.apply
+                                            (Elm.value
+                                                { importFrom =
+                                                    if qualify then
+                                                        jsonNamespace
+
+                                                    else
+                                                        []
+                                                , name = "encode" ++ name
+                                                , annotation = Nothing
+                                                }
+                                            )
+                                            [ rec ]
+                                    )
+                                    (CliMonad.moduleToNamespace Common.Json)
+                    )
 
         Common.Object properties ->
             let
@@ -883,22 +948,30 @@ typeToDecoder qualify type_ =
             CliMonad.map Gen.Json.Decode.list
                 (typeToDecoder qualify t)
 
-        Common.Enum constructors ->
-            CliMonad.succeed
-                (Gen.Json.Decode.andThen
-                    (\enumStr ->
-                        Elm.Case.string enumStr
-                            { cases =
-                                List.map
-                                    (\constructor ->
-                                        ( constructor, Gen.Json.Decode.succeed enumStr )
+        Common.Enum variants ->
+            CliMonad.enumName variants
+                |> CliMonad.andThen
+                    (\maybeName ->
+                        case maybeName of
+                            Nothing ->
+                                CliMonad.succeed Gen.Json.Decode.string
+
+                            Just name ->
+                                CliMonad.map
+                                    (\jsonNamespace ->
+                                        Elm.value
+                                            { importFrom =
+                                                if qualify then
+                                                    jsonNamespace
+
+                                                else
+                                                    []
+                                            , name = "decode" ++ name
+                                            , annotation = Nothing
+                                            }
                                     )
-                                    constructors
-                            , otherwise = Gen.Json.Decode.fail "Unknown enum"
-                            }
+                                    (CliMonad.moduleToNamespace Common.Json)
                     )
-                    Gen.Json.Decode.string
-                )
 
         Common.Value ->
             CliMonad.succeed Gen.Json.Decode.value

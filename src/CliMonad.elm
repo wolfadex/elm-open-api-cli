@@ -7,7 +7,7 @@ module CliMonad exposing
     , errorToWarning, fromApiSpec, enums, namespace
     , withPath, withWarning
     , todo, todoWithDefault
-    , moduleToNamespace
+    , enumName, moduleToNamespace
     )
 
 {-|
@@ -173,7 +173,7 @@ andThen3 f x y z =
 
 {-| Runs the transformation from OpenApi to declaration.
 
-Automatically appends the needed `enum` declarations.
+Automatically appends the needed `oneOf` declarations.
 
 -}
 run :
@@ -197,9 +197,9 @@ run oneOfDeclarations input (CliMonad x) =
                 in
                 h input
                     |> Result.map
-                        (\( enumDecls, enumWarnings, _ ) ->
-                            ( decls ++ enumDecls
-                            , (enumWarnings ++ warnings)
+                        (\( oneOfDecls, oneOfWarnings, _ ) ->
+                            ( decls ++ oneOfDecls
+                            , (oneOfWarnings ++ warnings)
                                 |> List.reverse
                             )
                         )
@@ -281,3 +281,8 @@ foldl f init list =
 moduleToNamespace : Common.Module -> CliMonad (List String)
 moduleToNamespace mod =
     CliMonad (\input -> Ok ( Common.moduleToNamespace input.namespace mod, [], FastDict.empty ))
+
+
+enumName : List String -> CliMonad (Maybe String)
+enumName variants =
+    enums |> map (\e -> FastDict.get variants e |> Maybe.map .name)

@@ -27,5 +27,6 @@ toValueNameTest from to =
     Test.test ("\"" ++ from ++ "\" becomes " ++ to) <|
         \_ ->
             from
+                |> Common.UnsafeName
                 |> Common.toValueName
                 |> Expect.equal to

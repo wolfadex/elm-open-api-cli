@@ -61,31 +61,43 @@ getAlias refUri =
             CliMonad.fail <| "Couldn't get the type ref (" ++ String.join "/" refUri ++ ") for the response"
 
 
-schemaToProperties : Bool -> Json.Schema.Definitions.Schema -> CliMonad (FastDict.Dict String Common.Field)
+schemaToProperties : Bool -> Json.Schema.Definitions.Schema -> CliMonad (List ( Common.UnsafeName, Common.Field ))
 schemaToProperties qualify allOfItem =
     case allOfItem of
         Json.Schema.Definitions.ObjectSchema allOfItemSchema ->
-            CliMonad.map2 FastDict.union
+            CliMonad.map2 listUnion
                 (subSchemaToProperties qualify allOfItemSchema)
                 (subSchemaRefToProperties qualify allOfItemSchema)
 
         Json.Schema.Definitions.BooleanSchema _ ->
-            CliMonad.todoWithDefault FastDict.empty "Boolean schema inside allOf"
+            CliMonad.todoWithDefault [] "Boolean schema inside allOf"
 
 
-subSchemaRefToProperties : Bool -> Json.Schema.Definitions.SubSchema -> CliMonad (FastDict.Dict String Common.Field)
+listUnion : List ( Common.UnsafeName, a ) -> List ( Common.UnsafeName, a ) -> List ( Common.UnsafeName, a )
+listUnion l r =
+    let
+        toDict : List ( Common.UnsafeName, b ) -> FastDict.Dict String b
+        toDict v =
+            FastDict.fromList (List.map (Tuple.mapFirst Common.unwrapUnsafe) v)
+    in
+    FastDict.union (toDict l) (toDict r)
+        |> FastDict.toList
+        |> List.map (Tuple.mapFirst Common.UnsafeName)
+
+
+subSchemaRefToProperties : Bool -> Json.Schema.Definitions.SubSchema -> CliMonad (List ( Common.UnsafeName, Common.Field ))
 subSchemaRefToProperties qualify allOfItem =
     case allOfItem.ref of
         Nothing ->
-            CliMonad.succeed FastDict.empty
+            CliMonad.succeed []
 
         Just ref ->
             getAlias (String.split "/" ref)
-                |> CliMonad.withPath ref
+                |> CliMonad.withPath (Common.UnsafeName ref)
                 |> CliMonad.andThen (schemaToProperties qualify)
 
 
-subSchemaToProperties : Bool -> Json.Schema.Definitions.SubSchema -> CliMonad (FastDict.Dict String Common.Field)
+subSchemaToProperties : Bool -> Json.Schema.Definitions.SubSchema -> CliMonad (List ( Common.UnsafeName, Common.Field ))
 subSchemaToProperties qualify sch =
     -- TODO: rename
     let
@@ -101,10 +113,10 @@ subSchemaToProperties qualify sch =
         |> CliMonad.combineMap
             (\( key, valueSchema ) ->
                 schemaToType qualify valueSchema
-                    |> CliMonad.withPath key
+                    |> CliMonad.withPath (Common.UnsafeName key)
                     |> CliMonad.map
                         (\{ type_, documentation } ->
-                            ( key
+                            ( Common.UnsafeName key
                             , { type_ = type_
                               , required = Set.member key requiredSet
                               , documentation = documentation
@@ -112,7 +124,6 @@ subSchemaToProperties qualify sch =
                             )
                         )
             )
-        |> CliMonad.map FastDict.fromList
 
 
 schemaToType : Bool -> Json.Schema.Definitions.Schema -> CliMonad { type_ : Common.Type, documentation : Maybe String }
@@ -214,7 +225,7 @@ schemaToType qualify schema =
 
                                 Ok decodedEnums ->
                                     CliMonad.succeed
-                                        { type_ = Common.Enum (List.sort decodedEnums)
+                                        { type_ = Common.enum decodedEnums
                                         , documentation = subSchema.description
                                         }
 
@@ -289,7 +300,7 @@ schemaToType qualify schema =
 
                                                                 Ok decodedEnums ->
                                                                     CliMonad.succeed
-                                                                        { type_ = Common.Enum (List.sort decodedEnums)
+                                                                        { type_ = Common.enum decodedEnums
                                                                         , documentation = subSchema.description
                                                                         }
 
@@ -322,26 +333,25 @@ schemaToType qualify schema =
 typeToOneOfVariant :
     Bool
     -> { type_ : Common.Type, documentation : Maybe String }
-    -> CliMonad (Maybe { name : Common.TypeName, type_ : Common.Type, documentation : Maybe String })
+    -> CliMonad (Maybe { name : Common.UnsafeName, type_ : Common.Type, documentation : Maybe String })
 typeToOneOfVariant qualify { type_, documentation } =
     type_
         |> typeToAnnotation qualify
         |> CliMonad.map
             (\ann ->
                 let
-                    rawName : Common.TypeName
+                    rawName : String
                     rawName =
                         ann
                             |> Elm.ToString.annotation
                             |> .signature
-                            |> Common.typifyName
                 in
                 if String.contains "{" rawName then
                     Nothing
 
                 else
                     Just
-                        { name = rawName
+                        { name = Common.UnsafeName rawName
                         , type_ = type_
                         , documentation = documentation
                         }
@@ -364,14 +374,14 @@ oneOfType types =
                         let
                             sortedVariants :
                                 List
-                                    { name : Common.TypeName
+                                    { name : Common.UnsafeName
                                     , type_ : Common.Type
                                     , documentation : Maybe String
                                     }
                             sortedVariants =
-                                List.sortBy .name variants
+                                List.sortBy (\{ name } -> Common.unwrapUnsafe name) variants
 
-                            names : List String
+                            names : List Common.UnsafeName
                             names =
                                 List.map .name sortedVariants
                         in
@@ -384,7 +394,7 @@ oneOfType types =
                                 sortedVariants
                         , documentation =
                             sortedVariants
-                                |> List.map (\{ name, documentation } -> Maybe.map (\doc -> " - " ++ name ++ ": " ++ doc) documentation)
+                                |> List.map (\{ name, documentation } -> Maybe.map (\doc -> " - " ++ Common.toValueName name ++ ": " ++ doc) documentation)
                                 |> joinIfNotEmpty "\n\n"
                                 |> Maybe.map (\doc -> "This is a oneOf. The alternatives are:\n\n" ++ doc)
                         }
@@ -394,26 +404,25 @@ oneOfType types =
 objectSchemaToType : Bool -> Json.Schema.Definitions.SubSchema -> CliMonad { type_ : Common.Type, documentation : Maybe String }
 objectSchemaToType qualify subSchema =
     let
-        propertiesFromAllOf : CliMonad (FastDict.Dict String Common.Field)
+        propertiesFromAllOf : CliMonad (List ( Common.UnsafeName, Common.Field ))
         propertiesFromAllOf =
             subSchema.allOf
                 |> Maybe.withDefault []
                 |> CliMonad.combineMap (schemaToProperties qualify)
-                |> CliMonad.map (List.foldl FastDict.union FastDict.empty)
+                |> CliMonad.map (List.foldl listUnion [])
     in
     CliMonad.map2
         (\schemaProps allOfProps ->
             let
                 ( props, propsDocumentations ) =
-                    FastDict.union schemaProps allOfProps
-                        |> FastDict.toList
+                    listUnion schemaProps allOfProps
                         |> List.map
                             (\( name, field ) ->
                                 ( ( name, field )
                                 , field.documentation
                                     |> Maybe.map
                                         (\doc ->
-                                            " - " ++ name ++ ": " ++ String.join "\n      " (String.split "\n" doc)
+                                            " - " ++ Common.toValueName name ++ ": " ++ String.join "\n      " (String.split "\n" doc)
                                         )
                                 )
                             )
@@ -424,7 +433,7 @@ objectSchemaToType qualify subSchema =
                     propsDocumentations
                         |> joinIfNotEmpty "\n"
             in
-            { type_ = Common.Object (FastDict.fromList props)
+            { type_ = Common.Object props
             , documentation =
                 case propsDocumentation of
                     Nothing ->
@@ -473,7 +482,7 @@ oneOfDeclaration :
     -> CliMonad ( Common.Module, Elm.Declaration )
 oneOfDeclaration ( oneOfName, variants ) =
     let
-        variantDeclaration : { name : Common.VariantName, type_ : Common.Type, documentation : Maybe String } -> CliMonad Elm.Variant
+        variantDeclaration : { name : Common.UnsafeName, type_ : Common.Type, documentation : Maybe String } -> CliMonad Elm.Variant
         variantDeclaration { name, type_ } =
             typeToAnnotation False type_
                 |> CliMonad.map
@@ -501,7 +510,7 @@ oneOfDeclaration ( oneOfName, variants ) =
             )
 
 
-toVariantName : String -> String -> String
+toVariantName : Common.TypeName -> Common.UnsafeName -> String
 toVariantName oneOfName variantName =
     oneOfName ++ "__" ++ fixOneOfName variantName
 
@@ -509,12 +518,14 @@ toVariantName oneOfName variantName =
 {-| When we go from `Elm.Annotation` to `String` it includes the module name if it's an imported type.
 We don't want that for our generated types, so we remove it here.
 -}
-fixOneOfName : String -> String
+fixOneOfName : Common.UnsafeName -> String
 fixOneOfName name =
     name
+        |> Common.unwrapUnsafe
         |> String.replace "OpenApi.Nullable" "Nullable"
         |> String.replace "." ""
-        |> Common.typifyName
+        |> Common.UnsafeName
+        |> Common.toTypeName
 
 
 typeToAnnotation : Bool -> Common.Type -> CliMonad Elm.Annotation.Annotation
@@ -555,10 +566,10 @@ typeToAnnotation qualify type_ =
                                 CliMonad.map
                                     (\typesNamespace ->
                                         if qualify then
-                                            Elm.Annotation.named typesNamespace name
+                                            Elm.Annotation.named typesNamespace (Common.toTypeName name)
 
                                         else
-                                            Elm.Annotation.named [] name
+                                            Elm.Annotation.named [] (Common.toTypeName name)
                                     )
                                     (CliMonad.moduleToNamespace Common.Types)
                     )
@@ -571,12 +582,12 @@ typeToAnnotation qualify type_ =
 
         Common.Ref ref ->
             CliMonad.map2
-                (\typesNamespace ->
+                (\typesNamespace name ->
                     if qualify then
-                        Elm.Annotation.named typesNamespace
+                        Elm.Annotation.named typesNamespace (Common.toTypeName name)
 
                     else
-                        Elm.Annotation.named []
+                        Elm.Annotation.named [] (Common.toTypeName name)
                 )
                 (CliMonad.moduleToNamespace Common.Types)
                 (refToTypeName ref)
@@ -624,10 +635,10 @@ typeToAnnotationMaybe qualify type_ =
                                 CliMonad.map
                                     (\typesNamespace ->
                                         if qualify then
-                                            Elm.Annotation.named typesNamespace name
+                                            Elm.Annotation.named typesNamespace (Common.toTypeName name)
 
                                         else
-                                            Elm.Annotation.named [] name
+                                            Elm.Annotation.named [] (Common.toTypeName name)
                                     )
                                     (CliMonad.moduleToNamespace Common.Types)
                     )
@@ -642,10 +653,10 @@ typeToAnnotationMaybe qualify type_ =
             CliMonad.map2
                 (\typesNamespace name ->
                     if qualify then
-                        Elm.Annotation.named typesNamespace name
+                        Elm.Annotation.named typesNamespace (Common.toTypeName name)
 
                     else
-                        Elm.Annotation.named [] name
+                        Elm.Annotation.named [] (Common.toTypeName name)
                 )
                 (CliMonad.moduleToNamespace Common.Types)
                 (refToTypeName ref)
@@ -659,12 +670,12 @@ typeToAnnotationMaybe qualify type_ =
 
 objectToAnnotation : Bool -> { useMaybe : Bool } -> Common.Object -> CliMonad Elm.Annotation.Annotation
 objectToAnnotation qualify config fields =
-    FastDict.toList fields
-        |> CliMonad.combineMap (\( k, v ) -> CliMonad.map (Tuple.pair (Common.toValueName k)) (fieldToAnnotation qualify config v))
+    fields
+        |> CliMonad.combineMap (\( k, v ) -> CliMonad.map (Tuple.pair k) (fieldToAnnotation qualify config v))
         |> CliMonad.map recordType
 
 
-recordType : List ( String, Elm.Annotation.Annotation ) -> Elm.Annotation.Annotation
+recordType : List ( Common.UnsafeName, Elm.Annotation.Annotation ) -> Elm.Annotation.Annotation
 recordType fields =
     fields
         |> List.map (Tuple.mapFirst Common.toValueName)
@@ -723,7 +734,7 @@ typeToEncoder qualify type_ =
 
                                                     else
                                                         []
-                                                , name = "encode" ++ name
+                                                , name = "encode" ++ Common.toTypeName name
                                                 , annotation = Nothing
                                                 }
                                             )
@@ -734,15 +745,11 @@ typeToEncoder qualify type_ =
 
         Common.Object properties ->
             let
-                propertiesList : List ( Common.FieldName, Common.Field )
-                propertiesList =
-                    FastDict.toList properties
-
                 allRequired : Bool
                 allRequired =
-                    List.all (\( _, { required } ) -> required) propertiesList
+                    List.all (\( _, { required } ) -> required) properties
             in
-            propertiesList
+            properties
                 |> CliMonad.combineMap
                     (\( key, field ) ->
                         typeToEncoder qualify field.type_
@@ -756,7 +763,7 @@ typeToEncoder qualify type_ =
                                         toTuple : Elm.Expression -> Elm.Expression
                                         toTuple value =
                                             Elm.tuple
-                                                (Elm.string key)
+                                                (Elm.string (Common.unwrapUnsafe key))
                                                 (encoder value)
                                     in
                                     if allRequired then
@@ -816,7 +823,7 @@ typeToEncoder qualify type_ =
 
                                 else
                                     []
-                            , name = "encode" ++ name
+                            , name = "encode" ++ Common.toTypeName name
                             , annotation = Nothing
                             }
                         )
@@ -872,11 +879,11 @@ oneOfAnnotation qualify oneOfName oneOfData =
         (CliMonad.moduleToNamespace Common.Types)
 
 
-refToTypeName : List String -> CliMonad Common.TypeName
+refToTypeName : List String -> CliMonad Common.UnsafeName
 refToTypeName ref =
     case ref of
         [ "#", "components", _, name ] ->
-            CliMonad.succeed (Common.typifyName name)
+            CliMonad.succeed (Common.UnsafeName name)
 
         _ ->
             CliMonad.fail <| "Couldn't get the type ref (" ++ String.join "/" ref ++ ") for the response"
@@ -886,11 +893,6 @@ typeToDecoder : Bool -> Common.Type -> CliMonad Elm.Expression
 typeToDecoder qualify type_ =
     case type_ of
         Common.Object properties ->
-            let
-                propertiesList : List ( String, Common.Field )
-                propertiesList =
-                    FastDict.toList properties
-            in
             List.foldl
                 (\( key, field ) prevExprRes ->
                     CliMonad.map2
@@ -899,11 +901,11 @@ typeToDecoder qualify type_ =
                                 (Elm.apply
                                     Gen.OpenApi.Common.values_.jsonDecodeAndMap
                                     [ if field.required then
-                                        Gen.Json.Decode.field key internalDecoder
+                                        Gen.Json.Decode.field (Common.unwrapUnsafe key) internalDecoder
 
                                       else
                                         Gen.OpenApi.Common.decodeOptionalField
-                                            key
+                                            (Common.unwrapUnsafe key)
                                             internalDecoder
                                     ]
                                 )
@@ -915,19 +917,19 @@ typeToDecoder qualify type_ =
                 (CliMonad.succeed
                     (Gen.Json.Decode.succeed
                         (Elm.function
-                            (List.map (\( key, _ ) -> ( Common.toValueName key, Nothing )) propertiesList)
+                            (List.map (\( key, _ ) -> ( Common.toValueName key, Nothing )) properties)
                             (\args ->
                                 Elm.record
                                     (List.map2
                                         (\( key, _ ) arg -> ( Common.toValueName key, arg ))
-                                        propertiesList
+                                        properties
                                         args
                                     )
                             )
                         )
                     )
                 )
-                propertiesList
+                properties
 
         Common.String ->
             CliMonad.succeed Gen.Json.Decode.string
@@ -966,7 +968,7 @@ typeToDecoder qualify type_ =
 
                                                 else
                                                     []
-                                            , name = "decode" ++ name
+                                            , name = "decode" ++ Common.toTypeName name
                                             , annotation = Nothing
                                             }
                                     )
@@ -991,19 +993,19 @@ typeToDecoder qualify type_ =
 
         Common.Ref ref ->
             CliMonad.map2
-                (\namespace name ->
+                (\jsonNamespace name ->
                     Elm.value
                         { importFrom =
                             if qualify then
-                                Common.moduleToNamespace namespace Common.Json
+                                jsonNamespace
 
                             else
                                 []
-                        , name = "decode" ++ name
+                        , name = "decode" ++ Common.toTypeName name
                         , annotation = Nothing
                         }
                 )
-                CliMonad.namespace
+                (CliMonad.moduleToNamespace Common.Json)
                 (refToTypeName ref)
 
         Common.OneOf oneOfName variants ->
@@ -1012,24 +1014,24 @@ typeToDecoder qualify type_ =
                     (\variant ->
                         typeToDecoder qualify variant.type_
                             |> CliMonad.map2
-                                (\namespace ->
+                                (\typesNamespace ->
                                     Gen.Json.Decode.call_.map
                                         (Elm.value
-                                            { importFrom = Common.moduleToNamespace namespace Common.Types
+                                            { importFrom = typesNamespace
                                             , name = toVariantName oneOfName variant.name
                                             , annotation = Nothing
                                             }
                                         )
                                 )
-                                CliMonad.namespace
+                                (CliMonad.moduleToNamespace Common.Types)
                     )
                 |> CliMonad.map2
-                    (\namespace decoders ->
+                    (\typesNamespace decoders ->
                         decoders
                             |> Gen.Json.Decode.oneOf
-                            |> Elm.withType (Elm.Annotation.named (Common.moduleToNamespace namespace Common.Types) oneOfName)
+                            |> Elm.withType (Elm.Annotation.named typesNamespace oneOfName)
                     )
-                    CliMonad.namespace
+                    (CliMonad.moduleToNamespace Common.Types)
 
         Common.Bytes ->
             CliMonad.todo "Bytes decoder not implemented yet"

@@ -1,20 +1,21 @@
 module Common exposing
     ( Field
-    , FieldName
     , Module(..)
     , Object
     , OneOfData
     , Package(..)
     , Type(..)
     , TypeName
+    , UnsafeName(..)
     , VariantName
+    , enum
     , moduleToNamespace
     , ref
+    , toTypeName
     , toValueName
-    , typifyName
+    , unwrapUnsafe
     )
 
-import FastDict
 import String.Extra
 
 
@@ -31,6 +32,12 @@ type Package
     = ElmHttp
     | DillonkearnsElmPages
     | LamderaProgramTest
+
+
+{-| An unsanitized name
+-}
+type UnsafeName
+    = UnsafeName String
 
 
 moduleToNamespace : List String -> Module -> List String
@@ -67,21 +74,18 @@ moduleToNamespace namespace module_ =
 -- Names adaptation --
 
 
-typifyName : String -> TypeName
-typifyName name =
+toTypeName : UnsafeName -> TypeName
+toTypeName (UnsafeName name) =
     name
         |> nameFromStatusCode
         |> String.uncons
         |> Maybe.map (\( first, rest ) -> String.cons first (String.replace "-" " " rest))
         |> Maybe.withDefault ""
-        |> String.replace "_" " "
-        |> String.replace "(" " "
-        |> String.replace ")" " "
-        |> String.replace "/" " "
-        |> String.replace "," " "
+        |> replaceSymbolsWith " "
         |> String.Extra.toTitleCase
         |> String.replace " " ""
         |> deSymbolify
+        |> String.replace "_" ""
 
 
 {-| Some OAS have response refs that are just the status code.
@@ -136,15 +140,25 @@ deSymbolify str =
         in
         str
             |> String.replace "-" "_"
-            |> String.replace "+" "_"
-            |> String.replace "$" "_"
+            |> replaceSymbolsWith "_"
             |> removeLeadingUnderscores
+
+
+replaceSymbolsWith : String -> String -> String
+replaceSymbolsWith replacement input =
+    input
+        |> String.replace "+" replacement
+        |> String.replace "$" replacement
+        |> String.replace "(" replacement
+        |> String.replace ")" replacement
+        |> String.replace "/" replacement
+        |> String.replace "," replacement
 
 
 {-| Convert into a name suitable to be used in Elm as a variable.
 -}
-toValueName : String -> String
-toValueName name =
+toValueName : UnsafeName -> String
+toValueName (UnsafeName name) =
     name
         |> deSymbolify
         |> initialUppercaseWordToLowercase
@@ -190,7 +204,7 @@ type Type
     | Bool
     | List Type
     | OneOf TypeName OneOfData
-    | Enum (List String)
+    | Enum (List UnsafeName)
     | Value
     | Ref (List String)
     | Bytes
@@ -198,12 +212,12 @@ type Type
 
 
 type alias Object =
-    FastDict.Dict FieldName Field
+    List ( UnsafeName, Field )
 
 
 type alias OneOfData =
     List
-        { name : VariantName
+        { name : UnsafeName
         , type_ : Type
         , documentation : Maybe String
         }
@@ -217,10 +231,6 @@ type alias VariantName =
     TypeName
 
 
-type alias FieldName =
-    String
-
-
 type alias Field =
     { type_ : Type
     , required : Bool
@@ -231,3 +241,16 @@ type alias Field =
 ref : String -> Type
 ref str =
     Ref (String.split "/" str)
+
+
+unwrapUnsafe : UnsafeName -> String
+unwrapUnsafe (UnsafeName name) =
+    name
+
+
+enum : List String -> Type
+enum variants =
+    variants
+        |> List.sort
+        |> List.map UnsafeName
+        |> Enum

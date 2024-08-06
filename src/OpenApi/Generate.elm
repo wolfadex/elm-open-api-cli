@@ -149,102 +149,8 @@ files { namespace, generateTodos, effectTypes, server } apiSpec =
                             allDecls : List ( Common.Module, Elm.Declaration )
                             allDecls =
                                 decls
-                                    ++ (if List.any (\effectType -> effectTypeToPackage effectType == Common.ElmHttp) effectTypes then
-                                            [ ( Common.Common
-                                              , expectJsonCustom.declaration
-                                                    |> Elm.exposeWith
-                                                        { exposeConstructor = False
-                                                        , group = Just "Http"
-                                                        }
-                                              )
-                                            , ( Common.Common
-                                              , jsonResolverCustom.declaration
-                                                    |> Elm.exposeWith
-                                                        { exposeConstructor = False
-                                                        , group = Just "Http"
-                                                        }
-                                              )
-                                            , ( Common.Common
-                                              , expectStringCustom.declaration
-                                                    |> Elm.exposeWith
-                                                        { exposeConstructor = False
-                                                        , group = Just "Http"
-                                                        }
-                                              )
-                                            , ( Common.Common
-                                              , stringResolverCustom.declaration
-                                                    |> Elm.exposeWith
-                                                        { exposeConstructor = False
-                                                        , group = Just "Http"
-                                                        }
-                                              )
-                                            , ( Common.Common
-                                              , expectBytesCustom.declaration
-                                                    |> Elm.exposeWith
-                                                        { exposeConstructor = False
-                                                        , group = Just "Http"
-                                                        }
-                                              )
-                                            , ( Common.Common
-                                              , bytesResolverCustom.declaration
-                                                    |> Elm.exposeWith
-                                                        { exposeConstructor = False
-                                                        , group = Just "Http"
-                                                        }
-                                              )
-                                            ]
-
-                                        else
-                                            []
-                                       )
-                                    ++ (if List.any (\effectType -> effectTypeToPackage effectType == Common.LamderaProgramTest) effectTypes then
-                                            [ ( Common.Common
-                                              , expectJsonCustomEffect.declaration
-                                                    |> Elm.exposeWith
-                                                        { exposeConstructor = False
-                                                        , group = Just "Http"
-                                                        }
-                                              )
-                                            , ( Common.Common
-                                              , jsonResolverCustomEffect.declaration
-                                                    |> Elm.exposeWith
-                                                        { exposeConstructor = False
-                                                        , group = Just "Http"
-                                                        }
-                                              )
-                                            , ( Common.Common
-                                              , expectStringCustomEffect.declaration
-                                                    |> Elm.exposeWith
-                                                        { exposeConstructor = False
-                                                        , group = Just "Http"
-                                                        }
-                                              )
-                                            , ( Common.Common
-                                              , stringResolverCustomEffect.declaration
-                                                    |> Elm.exposeWith
-                                                        { exposeConstructor = False
-                                                        , group = Just "Http"
-                                                        }
-                                              )
-                                            , ( Common.Common
-                                              , expectBytesCustomEffect.declaration
-                                                    |> Elm.exposeWith
-                                                        { exposeConstructor = False
-                                                        , group = Just "Http"
-                                                        }
-                                              )
-                                            , ( Common.Common
-                                              , bytesResolverCustomEffect.declaration
-                                                    |> Elm.exposeWith
-                                                        { exposeConstructor = False
-                                                        , group = Just "Http"
-                                                        }
-                                              )
-                                            ]
-
-                                        else
-                                            []
-                                       )
+                                    ++ elmHttpCommonDeclarations effectTypes
+                                    ++ lamderaProgramTestCommonDeclarations effectTypes
                                     ++ [ ( Common.Common
                                          , SchemaUtils.decodeOptionalField.declaration
                                             |> Elm.withDocumentation SchemaUtils.decodeOptionalFieldDocumentation
@@ -312,6 +218,108 @@ files { namespace, generateTodos, effectTypes, server } apiSpec =
                         , warnings
                         )
                     )
+
+
+elmHttpCommonDeclarations : List EffectType -> List ( Common.Module, Elm.Declaration )
+elmHttpCommonDeclarations effectTypes =
+    if List.any (\effectType -> effectTypeToPackage effectType == Common.ElmHttp) effectTypes then
+        [ ( Common.Common
+          , expectJsonCustom.declaration
+                |> Elm.exposeWith
+                    { exposeConstructor = False
+                    , group = Just "Http"
+                    }
+          )
+        , ( Common.Common
+          , jsonResolverCustom.declaration
+                |> Elm.exposeWith
+                    { exposeConstructor = False
+                    , group = Just "Http"
+                    }
+          )
+        , ( Common.Common
+          , expectStringCustom.declaration
+                |> Elm.exposeWith
+                    { exposeConstructor = False
+                    , group = Just "Http"
+                    }
+          )
+        , ( Common.Common
+          , stringResolverCustom.declaration
+                |> Elm.exposeWith
+                    { exposeConstructor = False
+                    , group = Just "Http"
+                    }
+          )
+        , ( Common.Common
+          , expectBytesCustom.declaration
+                |> Elm.exposeWith
+                    { exposeConstructor = False
+                    , group = Just "Http"
+                    }
+          )
+        , ( Common.Common
+          , bytesResolverCustom.declaration
+                |> Elm.exposeWith
+                    { exposeConstructor = False
+                    , group = Just "Http"
+                    }
+          )
+        ]
+
+    else
+        []
+
+
+lamderaProgramTestCommonDeclarations : List EffectType -> List ( Common.Module, Elm.Declaration )
+lamderaProgramTestCommonDeclarations effectTypes =
+    if List.any (\effectType -> effectTypeToPackage effectType == Common.LamderaProgramTest) effectTypes then
+        [ ( Common.Common
+          , expectJsonCustomEffect.declaration
+                |> Elm.exposeWith
+                    { exposeConstructor = False
+                    , group = Just "Http"
+                    }
+          )
+        , ( Common.Common
+          , jsonResolverCustomEffect.declaration
+                |> Elm.exposeWith
+                    { exposeConstructor = False
+                    , group = Just "Http"
+                    }
+          )
+        , ( Common.Common
+          , expectStringCustomEffect.declaration
+                |> Elm.exposeWith
+                    { exposeConstructor = False
+                    , group = Just "Http"
+                    }
+          )
+        , ( Common.Common
+          , stringResolverCustomEffect.declaration
+                |> Elm.exposeWith
+                    { exposeConstructor = False
+                    , group = Just "Http"
+                    }
+          )
+        , ( Common.Common
+          , expectBytesCustomEffect.declaration
+                |> Elm.exposeWith
+                    { exposeConstructor = False
+                    , group = Just "Http"
+                    }
+          )
+        , ( Common.Common
+          , bytesResolverCustomEffect.declaration
+                |> Elm.exposeWith
+                    { exposeConstructor = False
+                    , group = Just "Http"
+                    }
+          )
+        ]
+
+    else
+        []
 
 
 extractEnums :

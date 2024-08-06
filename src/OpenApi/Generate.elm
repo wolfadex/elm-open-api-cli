@@ -133,7 +133,6 @@ files { namespace, generateTodos, effectTypes, server } apiSpec =
                 , schemasDeclarations
                 , responsesDeclarations
                 , requestBodiesDeclarations
-                , SchemaUtils.enumDeclarations
                 ]
                 |> CliMonad.map List.concat
                 |> CliMonad.run

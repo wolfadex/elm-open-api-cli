@@ -2,7 +2,6 @@ module SchemaUtils exposing
     ( OneOfName
     , decodeOptionalField
     , decodeOptionalFieldDocumentation
-    , enumDeclarations
     , getAlias
     , oneOfDeclarations
     , recordType
@@ -494,37 +493,6 @@ oneOfDeclaration ( oneOfName, variants ) =
                         }
                 )
             )
-
-
-enumDeclarations : CliMonad (List ( Common.Module, Elm.Declaration ))
-enumDeclarations =
-    CliMonad.enums
-        |> CliMonad.map
-            (\enums ->
-                enums
-                    |> FastDict.toList
-                    |> List.map enumDeclaration
-            )
-
-
-enumDeclaration : ( List String, { name : String, documentation : Maybe String } ) -> ( Common.Module, Elm.Declaration )
-enumDeclaration ( enumVariants, enum ) =
-    ( Common.Types
-    , enumVariants
-        |> List.map (\variantName -> Elm.variant (toVariantName enum.name variantName))
-        |> Elm.customType enum.name
-        |> (case enum.documentation of
-                Nothing ->
-                    identity
-
-                Just doc ->
-                    Elm.withDocumentation doc
-           )
-        |> Elm.exposeWith
-            { exposeConstructor = True
-            , group = Just "Enum"
-            }
-    )
 
 
 toVariantName : String -> String -> String

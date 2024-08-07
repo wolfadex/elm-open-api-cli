@@ -84,7 +84,7 @@ toTypeName (UnsafeName name) =
         |> String.replace "_" " "
         |> String.trim
         |> String.Extra.toTitleCase
-        |> deSymbolify " "
+        |> deSymbolify ' '
         |> String.replace " " ""
         |> String.Extra.toTitleCase
 
@@ -95,7 +95,7 @@ toValueName : UnsafeName -> String
 toValueName (UnsafeName name) =
     name
         |> String.replace " " "_"
-        |> deSymbolify "_"
+        |> deSymbolify '_'
         |> initialUppercaseWordToLowercase
 
 
@@ -119,7 +119,7 @@ nameFromStatusCode name =
 {-| Sometimes a word in the schema contains invalid characers for an Elm name.
 We don't want to completely remove them though.
 -}
-deSymbolify : String -> String -> String
+deSymbolify : Char -> String -> String
 deSymbolify replacement str =
     if str == "$" then
         "dollar__"
@@ -140,30 +140,36 @@ deSymbolify replacement str =
         let
             removeLeadingUnderscores : String -> String
             removeLeadingUnderscores acc =
-                if String.isEmpty acc then
-                    "empty__"
+                case String.uncons acc of
+                    Nothing ->
+                        "empty__"
 
-                else if String.startsWith "_" acc then
-                    removeLeadingUnderscores (String.dropLeft 1 acc)
+                    Just ( head, tail ) ->
+                        if head == replacement then
+                            removeLeadingUnderscores tail
 
-                else
-                    acc
+                        else if Char.isDigit head then
+                            "N" ++ acc
+
+                        else
+                            acc
         in
         str
             |> replaceSymbolsWith replacement
             |> removeLeadingUnderscores
 
 
-replaceSymbolsWith : String -> String -> String
+replaceSymbolsWith : Char -> String -> String
 replaceSymbolsWith replacement input =
     input
-        |> String.replace "-" replacement
-        |> String.replace "+" replacement
-        |> String.replace "$" replacement
-        |> String.replace "(" replacement
-        |> String.replace ")" replacement
-        |> String.replace "/" replacement
-        |> String.replace "," replacement
+        |> String.map
+            (\c ->
+                if c /= '_' && not (Char.isAlphaNum c) then
+                    replacement
+
+                else
+                    c
+            )
 
 
 initialUppercaseWordToLowercase : String -> String

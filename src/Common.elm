@@ -86,7 +86,6 @@ toTypeName (UnsafeName name) =
         |> String.trim
         |> String.Extra.toTitleCase
         |> deSymbolify ' '
-        |> Debug.log "After deSymbolify"
         |> reduceWith replaceSpacesRegex
             (\match ->
                 case match.submatches of

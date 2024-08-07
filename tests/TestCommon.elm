@@ -25,7 +25,8 @@ toValueName =
         , toValueNameTest "SHA256-DSA" "sha256_DSA"
         , toValueNameTest "decode-not-found" "decode_not_found"
         , toValueNameTest "not_found" "not_found"
-        , toValueNameTest "PAS (2013)" "pas__2013_"
+        , toValueNameTest "PAS (2013)" "pas_2013"
+        , toValueNameTest "PAS2035 [2019]" "pas2035_2019"
         ]
 
 
@@ -46,12 +47,13 @@ toTypeName =
         , toTypeNameTest "not-found" "NotFound"
         , toTypeNameTest "not_found" "NotFound"
         , toTypeNameTest "PAS (2013)" "PAS2013"
+        , toTypeNameTest "PAS2035 [2019]" "PAS2035_2019"
         ]
 
 
 toTypeNameIdempotence : Test.Test
 toTypeNameIdempotence =
-    Test.fuzz Fuzz.string "toTypeName is idempotent" <|
+    Test.fuzz inputFuzzer "toTypeName is idempotent" <|
         \input ->
             let
                 typed : String
@@ -60,7 +62,7 @@ toTypeNameIdempotence =
                         |> Common.UnsafeName
                         |> Common.toTypeName
             in
-            if typed == "Empty__" then
+            if typed == "Empty__" || typed == "Dollar__" then
                 Expect.pass
 
             else
@@ -68,6 +70,30 @@ toTypeNameIdempotence =
                     |> Common.UnsafeName
                     |> Common.toTypeName
                     |> Expect.equal typed
+
+
+inputFuzzer : Fuzz.Fuzzer String
+inputFuzzer =
+    Fuzz.oneOf
+        [ Fuzz.string
+        , Fuzz.oneOfValues
+            [ "-1"
+            , "+1"
+            , "$"
+            , "$res"
+            , ""
+            , "$___"
+            , "X-API-KEY"
+            , "PASVersion"
+            , "MACOS"
+            , "SHA256"
+            , "SHA256-DSA"
+            , "decode-not-found"
+            , "not_found"
+            , "PAS (2013)"
+            , "PAS2035 [2019]"
+            ]
+        ]
 
 
 toTypeNameSafety : Test.Test

@@ -355,8 +355,8 @@ decodeOpenApiSpecOrFail config cliOptions value =
 
                 else
                     case Json.Decode.decodeValue swaggerFieldDecoder value of
-                        Err error ->
-                            jsonErrorToFatalError error
+                        Err _ ->
+                            jsonErrorToFatalError decodeError
                                 |> BackendTask.fail
 
                         Ok _ ->

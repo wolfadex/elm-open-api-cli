@@ -413,10 +413,10 @@ overrideWith override original =
                 _ ->
                     overrideError override original
 
-        Json.Value.ArrayValue _ ->
+        Json.Value.ArrayValue overrideArray ->
             case original of
-                Json.Value.ArrayValue _ ->
-                    Err "Merging of arrays not supported yet"
+                Json.Value.ArrayValue originalArray ->
+                    mergeArrays overrideArray originalArray []
 
                 _ ->
                     overrideError override original
@@ -432,6 +432,37 @@ overrideWith override original =
 
         Json.Value.NullValue ->
             Ok override
+
+
+mergeArrays : List Json.Value.JsonValue -> List Json.Value.JsonValue -> List Json.Value.JsonValue -> Result String Json.Value.JsonValue
+mergeArrays override original acc =
+    case original of
+        ogHead :: ogTail ->
+            case override of
+                Json.Value.NullValue :: ovTail ->
+                    mergeArrays ovTail ogTail acc
+
+                ovHead :: ovTail ->
+                    case overrideWith ovHead ogHead of
+                        Ok newHead ->
+                            mergeArrays ovTail ogTail (newHead :: acc)
+
+                        Err e ->
+                            Err e
+
+                [] ->
+                    if List.isEmpty original then
+                        Ok (Json.Value.ArrayValue (List.reverse acc))
+
+                    else
+                        Ok (Json.Value.ArrayValue (List.reverse acc ++ original))
+
+        [] ->
+            if List.isEmpty override then
+                Ok (Json.Value.ArrayValue (List.reverse acc))
+
+            else
+                Ok (Json.Value.ArrayValue (List.reverse acc ++ override))
 
 
 overrideError : Json.Value.JsonValue -> Json.Value.JsonValue -> Result String Json.Value.JsonValue

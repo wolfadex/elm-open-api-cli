@@ -383,13 +383,7 @@ decodeOpenApiSpecOrFail config cliOptions value =
 
                         Ok _ ->
                             if cliOptions.autoConvertSwagger then
-                                convertSwaggerToOpenApi cliOptions (Json.Encode.encode 0 value)
-                                    |> BackendTask.andThen
-                                        (\input ->
-                                            mergeOverrides cliOptions ( [], input )
-                                        )
-                                    |> Pages.Script.Spinner.runTask "Convert Swagger to Open API"
-                                    |> BackendTask.andThen (\input -> decodeOpenApiSpecOrFail { hasAttemptedToConvertFromSwagger = True } cliOptions input)
+                                convertToSwaggerAndThenDecode cliOptions value
 
                             else
                                 Pages.Script.question
@@ -403,13 +397,7 @@ Would you like to use """
                                         (\response ->
                                             case String.toLower response of
                                                 "y" ->
-                                                    convertSwaggerToOpenApi cliOptions (Json.Encode.encode 0 value)
-                                                        |> BackendTask.andThen
-                                                            (\input ->
-                                                                mergeOverrides cliOptions ( [], input )
-                                                            )
-                                                        |> Pages.Script.Spinner.runTask "Convert Swagger to Open API"
-                                                        |> BackendTask.andThen (\input -> decodeOpenApiSpecOrFail { hasAttemptedToConvertFromSwagger = True } cliOptions input)
+                                                    convertToSwaggerAndThenDecode cliOptions value
 
                                                 _ ->
                                                     ("""The input file appears to be a Swagger doc,
@@ -422,6 +410,18 @@ See the """
                                                         |> BackendTask.fail
                                         )
             )
+
+
+convertToSwaggerAndThenDecode : CliOptions -> Json.Decode.Value -> BackendTask.BackendTask FatalError.FatalError OpenApi.OpenApi
+convertToSwaggerAndThenDecode cliOptions value =
+    convertSwaggerToOpenApi cliOptions (Json.Encode.encode 0 value)
+        |> BackendTask.andThen
+            (\input ->
+                parseOriginal cliOptions input
+                    |> BackendTask.andThen mergeOverrides
+            )
+        |> Pages.Script.Spinner.runTask "Convert Swagger to Open API"
+        |> BackendTask.andThen (\input -> decodeOpenApiSpecOrFail { hasAttemptedToConvertFromSwagger = True } cliOptions input)
 
 
 jsonErrorToFatalError : Json.Decode.Error -> FatalError.FatalError

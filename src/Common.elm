@@ -16,6 +16,7 @@ module Common exposing
     , unwrapUnsafe
     )
 
+import Regex
 import String.Extra
 
 
@@ -84,19 +85,87 @@ toTypeName (UnsafeName name) =
         |> String.replace "_" " "
         |> String.trim
         |> String.Extra.toTitleCase
-        |> deSymbolify " "
-        |> String.replace " " ""
+        |> deSymbolify ' '
+        |> reduceWith replaceSpacesRegex
+            (\match ->
+                case match.submatches of
+                    [ Just before, Just after ] ->
+                        case String.toInt before of
+                            Nothing ->
+                                before ++ after
+
+                            Just _ ->
+                                case String.toInt after of
+                                    Nothing ->
+                                        before ++ after
+
+                                    Just _ ->
+                                        match.match
+
+                    [ Just before, Nothing ] ->
+                        before
+
+                    [ Nothing, Just after ] ->
+                        after
+
+                    _ ->
+                        ""
+            )
+        |> String.replace " " "_"
         |> String.Extra.toTitleCase
+
+
+replaceSpacesRegex : Regex.Regex
+replaceSpacesRegex =
+    Regex.fromString "(.)? (.)?"
+        |> Maybe.withDefault Regex.never
 
 
 {-| Convert into a name suitable to be used in Elm as a variable.
 -}
 toValueName : UnsafeName -> String
 toValueName (UnsafeName name) =
-    name
-        |> String.replace " " "_"
-        |> deSymbolify "_"
-        |> initialUppercaseWordToLowercase
+    let
+        raw : String
+        raw =
+            name
+                |> String.replace " " "_"
+                |> deSymbolify '_'
+    in
+    if raw == "dollar__" || raw == "empty__" then
+        raw
+
+    else
+        raw
+            |> reduceWith replaceUnderscoresRegex
+                (\{ match } ->
+                    if match == "__" then
+                        "_"
+
+                    else
+                        ""
+                )
+            |> initialUppercaseWordToLowercase
+
+
+replaceUnderscoresRegex : Regex.Regex
+replaceUnderscoresRegex =
+    Regex.fromString "(?:__)|(?:_$)"
+        |> Maybe.withDefault Regex.never
+
+
+reduceWith : Regex.Regex -> (Regex.Match -> String) -> String -> String
+reduceWith regex map input =
+    let
+        output : String
+        output =
+            Regex.replace regex map input
+    in
+    if output == input then
+        input
+
+    else
+        reduceWith regex map output
 
 
 {-| Some OAS have response refs that are just the status code.
@@ -119,7 +188,7 @@ nameFromStatusCode name =
 {-| Sometimes a word in the schema contains invalid characers for an Elm name.
 We don't want to completely remove them though.
 -}
-deSymbolify : String -> String -> String
+deSymbolify : Char -> String -> String
 deSymbolify replacement str =
     if str == "$" then
         "dollar__"
@@ -140,30 +209,36 @@ deSymbolify replacement str =
         let
             removeLeadingUnderscores : String -> String
             removeLeadingUnderscores acc =
-                if String.isEmpty acc then
-                    "empty__"
+                case String.uncons acc of
+                    Nothing ->
+                        "empty__"
 
-                else if String.startsWith "_" acc then
-                    removeLeadingUnderscores (String.dropLeft 1 acc)
+                    Just ( head, tail ) ->
+                        if head == replacement then
+                            removeLeadingUnderscores tail
 
-                else
-                    acc
+                        else if Char.isDigit head then
+                            "N" ++ acc
+
+                        else
+                            acc
         in
         str
             |> replaceSymbolsWith replacement
             |> removeLeadingUnderscores
 
 
-replaceSymbolsWith : String -> String -> String
+replaceSymbolsWith : Char -> String -> String
 replaceSymbolsWith replacement input =
     input
-        |> String.replace "-" replacement
-        |> String.replace "+" replacement
-        |> String.replace "$" replacement
-        |> String.replace "(" replacement
-        |> String.replace ")" replacement
-        |> String.replace "/" replacement
-        |> String.replace "," replacement
+        |> String.map
+            (\c ->
+                if c /= '_' && not (Char.isAlphaNum c) then
+                    replacement
+
+                else
+                    c
+            )
 
 
 initialUppercaseWordToLowercase : String -> String

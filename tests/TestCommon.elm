@@ -1,8 +1,12 @@
-module TestCommon exposing (toTypeName, toValueName)
+module TestCommon exposing (toTypeName, toTypeNameIdempotence, toTypeNameSafety, toValueName, toValueNameIdempotence, toValueNameSafety)
 
 import Common
 import Expect
+import Fuzz
+import Json.Encode
+import Set exposing (Set)
 import Test
+import Unicode
 
 
 toValueName : Test.Test
@@ -21,7 +25,8 @@ toValueName =
         , toValueNameTest "SHA256-DSA" "sha256_DSA"
         , toValueNameTest "decode-not-found" "decode_not_found"
         , toValueNameTest "not_found" "not_found"
-        , toValueNameTest "PAS (2013)" "pas__2013_"
+        , toValueNameTest "PAS (2013)" "pas_2013"
+        , toValueNameTest "PAS2035 [2019]" "pas2035_2019"
         ]
 
 
@@ -42,7 +47,165 @@ toTypeName =
         , toTypeNameTest "not-found" "NotFound"
         , toTypeNameTest "not_found" "NotFound"
         , toTypeNameTest "PAS (2013)" "PAS2013"
+        , toTypeNameTest "PAS2035 [2019]" "PAS2035_2019"
         ]
+
+
+toTypeNameIdempotence : Test.Test
+toTypeNameIdempotence =
+    Test.fuzz inputFuzzer "toTypeName is idempotent" <|
+        \input ->
+            let
+                typed : String
+                typed =
+                    input
+                        |> Common.UnsafeName
+                        |> Common.toTypeName
+            in
+            if typed == "Empty__" || typed == "Dollar__" then
+                Expect.pass
+
+            else
+                typed
+                    |> Common.UnsafeName
+                    |> Common.toTypeName
+                    |> Expect.equal typed
+
+
+inputFuzzer : Fuzz.Fuzzer String
+inputFuzzer =
+    Fuzz.oneOf
+        [ Fuzz.string
+        , Fuzz.oneOfValues
+            [ "-1"
+            , "+1"
+            , "$"
+            , "$res"
+            , ""
+            , "$___"
+            , "X-API-KEY"
+            , "PASVersion"
+            , "MACOS"
+            , "SHA256"
+            , "SHA256-DSA"
+            , "decode-not-found"
+            , "not_found"
+            , "PAS (2013)"
+            , "PAS2035 [2019]"
+            ]
+        ]
+
+
+toTypeNameSafety : Test.Test
+toTypeNameSafety =
+    Test.fuzz Fuzz.string "toTypeName produces a valid identifier" <|
+        \input ->
+            let
+                typed : String
+                typed =
+                    input
+                        |> Common.UnsafeName
+                        |> Common.toTypeName
+            in
+            if Set.member typed reservedList then
+                Expect.fail "Invalid identifier: reserved word"
+
+            else
+                case String.toList typed of
+                    [] ->
+                        Expect.fail "Invalid identifier: it is empty"
+
+                    head :: tail ->
+                        if isUpper head && List.all isAlphaNumOrUnderscore tail then
+                            Expect.pass
+
+                        else
+                            Expect.fail ("Invalid type name " ++ escape typed)
+
+
+toValueNameIdempotence : Test.Test
+toValueNameIdempotence =
+    Test.fuzz Fuzz.string "toValueName is idempotent" <|
+        \input ->
+            let
+                typed : String
+                typed =
+                    input
+                        |> Common.UnsafeName
+                        |> Common.toValueName
+            in
+            typed
+                |> Common.UnsafeName
+                |> Common.toValueName
+                |> Expect.equal typed
+
+
+toValueNameSafety : Test.Test
+toValueNameSafety =
+    Test.fuzz Fuzz.string "toValueName produces a valid identifier" <|
+        \input ->
+            let
+                typed : String
+                typed =
+                    input
+                        |> Common.UnsafeName
+                        |> Common.toValueName
+            in
+            if Set.member typed reservedList then
+                Expect.fail "Invalid identifier: reserved word"
+
+            else
+                case String.toList typed of
+                    [] ->
+                        Expect.fail "Invalid identifier: it is empty"
+
+                    head :: tail ->
+                        if isLower head && List.all isAlphaNumOrUnderscore tail then
+                            Expect.pass
+
+                        else
+                            Expect.fail ("Invalid value name " ++ escape typed)
+
+
+reservedList : Set String
+reservedList =
+    -- Copied from elm-syntax
+    [ "module"
+    , "exposing"
+    , "import"
+    , "as"
+    , "if"
+    , "then"
+    , "else"
+    , "let"
+    , "in"
+    , "case"
+    , "of"
+    , "port"
+    , "type"
+    , "where"
+    ]
+        |> Set.fromList
+
+
+isUpper : Char -> Bool
+isUpper c =
+    Char.isUpper c || Unicode.isUpper c
+
+
+isLower : Char -> Bool
+isLower c =
+    Char.isLower c || Unicode.isLower c
+
+
+isAlphaNumOrUnderscore : Char -> Bool
+isAlphaNumOrUnderscore c =
+    Char.isAlphaNum c || c == '_' || Unicode.isAlphaNum c
+
+
+escape : String -> String
+escape input =
+    Json.Encode.encode 0 (Json.Encode.string input)
 
 
 toValueNameTest : String -> String -> Test.Test

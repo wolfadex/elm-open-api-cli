@@ -41,6 +41,7 @@ type alias CliOptions =
     , swaggerConversionCommandArgs : List String
     , server : OpenApi.Generate.Server
     , overrides : List String
+    , writeMergedTo : Maybe String
     }
 
 
@@ -79,6 +80,8 @@ program =
                     )
                 |> Cli.OptionsParser.with
                     (Cli.Option.keywordArgList "overrides")
+                |> Cli.OptionsParser.with
+                    (Cli.Option.optionalKeywordArg "write-merged-to")
                 |> Cli.OptionsParser.withDoc """
 version: 0.6.1
 
@@ -140,6 +143,8 @@ options:
                                      instead of failing use one of: `yes`, `y`, `true`.
 
   --overrides                        Load an additional file to override parts of the original Open API file.
+
+  --write-merged-to                  Write the merged Open API spec to the given file.
 """
             )
 
@@ -289,6 +294,13 @@ run =
                                 cliOptions.overrides
                                 |> Pages.Script.Spinner.withStep "Merging overrides" mergeOverrides
                    )
+                |> (case cliOptions.writeMergedTo of
+                        Nothing ->
+                            identity
+
+                        Just destination ->
+                            Pages.Script.Spinner.withStep "Writing merged OAS" (writeMerged destination)
+                   )
                 |> Pages.Script.Spinner.withStep "Parse OAS" (decodeOpenApiSpecOrFail { hasAttemptedToConvertFromSwagger = False } cliOptions)
                 |> Pages.Script.Spinner.withStep "Generate Elm modules"
                     (generateFileFromOpenApiSpec
@@ -340,6 +352,16 @@ mergeOverrides ( overrides, original ) =
         )
         |> Result.Extra.join
         |> BackendTask.fromResult
+
+
+writeMerged : String -> Json.Decode.Value -> BackendTask.BackendTask FatalError.FatalError Json.Decode.Value
+writeMerged destination spec =
+    Pages.Script.writeFile
+        { path = destination
+        , body = spec |> Json.Encode.encode 4
+        }
+        |> BackendTask.allowFatal
+        |> BackendTask.map (\_ -> spec)
 
 
 decodeOpenApiSpecOrFail : { hasAttemptedToConvertFromSwagger : Bool } -> CliOptions -> Json.Decode.Value -> BackendTask.BackendTask FatalError.FatalError OpenApi.OpenApi

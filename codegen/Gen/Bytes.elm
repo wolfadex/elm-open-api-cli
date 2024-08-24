@@ -1,12 +1,24 @@
-module Gen.Bytes exposing (annotation_, call_, caseOf_, getHostEndianness, make_, moduleName_, values_, width)
+module Gen.Bytes exposing
+    ( annotation_
+    , call_
+    , caseOf_
+    , getHostEndianness
+    , make_
+    , moduleName_
+    , values_
+    , width
+    )
 
-{-| 
+{-|
+# Generated bindings for Bytes
+
 @docs moduleName_, width, getHostEndianness, annotation_, make_, caseOf_, call_, values_
 -}
 
 
 import Elm
 import Elm.Annotation as Type
+import Elm.Arg
 import Elm.Case
 
 
@@ -26,7 +38,7 @@ how many bytes there are!
 width: Bytes.Bytes -> Int
 -}
 width : Elm.Expression -> Elm.Expression
-width widthArg =
+width widthArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Bytes" ]
@@ -39,7 +51,7 @@ width widthArg =
                      )
              }
         )
-        [ widthArg ]
+        [ widthArg_ ]
 
 
 {-| Is this program running on a big-endian or little-endian machine?
@@ -90,7 +102,7 @@ make_ =
 caseOf_ :
     { endianness :
         Elm.Expression
-        -> { endiannessTags_0_0 | lE : Elm.Expression, bE : Elm.Expression }
+        -> { lE : Elm.Expression, bE : Elm.Expression }
         -> Elm.Expression
     }
 caseOf_ =
@@ -99,8 +111,12 @@ caseOf_ =
             Elm.Case.custom
                 endiannessExpression
                 (Type.namedWith [ "Bytes" ] "Endianness" [])
-                [ Elm.Case.branch0 "LE" endiannessTags.lE
-                , Elm.Case.branch0 "BE" endiannessTags.bE
+                [ Elm.Case.branch
+                    (Elm.Arg.customType "LE" endiannessTags.lE)
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType "BE" endiannessTags.bE)
+                    Basics.identity
                 ]
     }
 
@@ -108,7 +124,7 @@ caseOf_ =
 call_ : { width : Elm.Expression -> Elm.Expression }
 call_ =
     { width =
-        \widthArg ->
+        \widthArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Bytes" ]
@@ -121,7 +137,7 @@ call_ =
                              )
                      }
                 )
-                [ widthArg ]
+                [ widthArg_ ]
     }
 
 

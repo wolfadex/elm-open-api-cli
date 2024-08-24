@@ -1,6 +1,31 @@
-module Gen.Json.Decode.Extra exposing (andMap, call_, collection, combine, datetime, dict2, doubleEncoded, fromMaybe, fromResult, indexedList, keys, moduleName_, optionalField, optionalNullableField, parseFloat, parseInt, sequence, set, url, values_, when, withDefault)
+module Gen.Json.Decode.Extra exposing
+    ( andMap
+    , call_
+    , collection
+    , combine
+    , datetime
+    , dict2
+    , doubleEncoded
+    , fromMaybe
+    , fromResult
+    , indexedList
+    , keys
+    , moduleName_
+    , optionalField
+    , optionalNullableField
+    , parseFloat
+    , parseInt
+    , sequence
+    , set
+    , url
+    , values_
+    , when
+    , withDefault
+    )
 
-{-| 
+{-|
+# Generated bindings for Json.Decode.Extra
+
 @docs moduleName_, datetime, url, andMap, when, collection, sequence, combine, indexedList, keys, set, dict2, withDefault, optionalField, optionalNullableField, fromMaybe, fromResult, parseInt, parseFloat, doubleEncoded, call_, values_
 -}
 
@@ -89,7 +114,7 @@ for an explanation of how `andMap` works and how to use it.
 andMap: Json.Decode.Decoder a -> Json.Decode.Decoder (a -> b) -> Json.Decode.Decoder b
 -}
 andMap : Elm.Expression -> Elm.Expression -> Elm.Expression
-andMap andMapArg andMapArg0 =
+andMap andMapArg_ andMapArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Json", "Decode", "Extra" ]
@@ -114,7 +139,7 @@ andMap andMapArg andMapArg0 =
                      )
              }
         )
-        [ andMapArg, andMapArg0 ]
+        [ andMapArg_, andMapArg_0 ]
 
 
 {-| Helper for conditionally decoding values based on some discriminator
@@ -203,7 +228,7 @@ when :
     -> (Elm.Expression -> Elm.Expression)
     -> Elm.Expression
     -> Elm.Expression
-when whenArg whenArg0 whenArg1 =
+when whenArg_ whenArg_0 whenArg_1 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Json", "Decode", "Extra" ]
@@ -229,7 +254,7 @@ when whenArg whenArg0 whenArg1 =
                      )
              }
         )
-        [ whenArg, Elm.functionReduced "whenUnpack" whenArg0, whenArg1 ]
+        [ whenArg_, Elm.functionReduced "whenUnpack" whenArg_0, whenArg_1 ]
 
 
 {-| Some JavaScript structures look like arrays, but aren't really. Examples
@@ -249,7 +274,7 @@ This decoder can come to the rescue.
 collection: Json.Decode.Decoder a -> Json.Decode.Decoder (List a)
 -}
 collection : Elm.Expression -> Elm.Expression
-collection collectionArg =
+collection collectionArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Json", "Decode", "Extra" ]
@@ -270,7 +295,7 @@ collection collectionArg =
                      )
              }
         )
-        [ collectionArg ]
+        [ collectionArg_ ]
 
 
 {-| This function turns a list of decoders into a decoder that returns a list.
@@ -302,7 +327,7 @@ decoders to have the same length as the list of values in the JSON.
 sequence: List (Json.Decode.Decoder a) -> Json.Decode.Decoder (List a)
 -}
 sequence : List Elm.Expression -> Elm.Expression
-sequence sequenceArg =
+sequence sequenceArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Json", "Decode", "Extra" ]
@@ -325,7 +350,7 @@ sequence sequenceArg =
                      )
              }
         )
-        [ Elm.list sequenceArg ]
+        [ Elm.list sequenceArg_ ]
 
 
 {-| Helps converting a list of decoders into a decoder for a list of that type.
@@ -348,7 +373,7 @@ sequence sequenceArg =
 combine: List (Json.Decode.Decoder a) -> Json.Decode.Decoder (List a)
 -}
 combine : List Elm.Expression -> Elm.Expression
-combine combineArg =
+combine combineArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Json", "Decode", "Extra" ]
@@ -371,7 +396,7 @@ combine combineArg =
                      )
              }
         )
-        [ Elm.list combineArg ]
+        [ Elm.list combineArg_ ]
 
 
 {-| Get access to the current index while decoding a list element.
@@ -391,7 +416,7 @@ combine combineArg =
 indexedList: (Int -> Json.Decode.Decoder a) -> Json.Decode.Decoder (List a)
 -}
 indexedList : (Elm.Expression -> Elm.Expression) -> Elm.Expression
-indexedList indexedListArg =
+indexedList indexedListArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Json", "Decode", "Extra" ]
@@ -415,7 +440,7 @@ indexedList indexedListArg =
                      )
              }
         )
-        [ Elm.functionReduced "indexedListUnpack" indexedListArg ]
+        [ Elm.functionReduced "indexedListUnpack" indexedListArg_ ]
 
 
 {-| Get a list of the keys of a JSON object
@@ -457,7 +482,7 @@ keys =
 set: Json.Decode.Decoder comparable -> Json.Decode.Decoder (Set.Set comparable)
 -}
 set : Elm.Expression -> Elm.Expression
-set setArg =
+set setArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Json", "Decode", "Extra" ]
@@ -482,7 +507,7 @@ set setArg =
                      )
              }
         )
-        [ setArg ]
+        [ setArg_ ]
 
 
 {-| Extract a dict using separate decoders for keys and values.
@@ -501,7 +526,7 @@ dict2:
     -> Json.Decode.Decoder (Dict.Dict comparable v)
 -}
 dict2 : Elm.Expression -> Elm.Expression -> Elm.Expression
-dict2 dict2Arg dict2Arg0 =
+dict2 dict2Arg_ dict2Arg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Json", "Decode", "Extra" ]
@@ -530,7 +555,7 @@ dict2 dict2Arg dict2Arg0 =
                      )
              }
         )
-        [ dict2Arg, dict2Arg0 ]
+        [ dict2Arg_, dict2Arg_0 ]
 
 
 {-| Try running the given decoder; if that fails, then succeed with the given
@@ -556,7 +581,7 @@ fallback value.
 withDefault: a -> Json.Decode.Decoder a -> Json.Decode.Decoder a
 -}
 withDefault : Elm.Expression -> Elm.Expression -> Elm.Expression
-withDefault withDefaultArg withDefaultArg0 =
+withDefault withDefaultArg_ withDefaultArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Json", "Decode", "Extra" ]
@@ -578,7 +603,7 @@ withDefault withDefaultArg withDefaultArg0 =
                      )
              }
         )
-        [ withDefaultArg, withDefaultArg0 ]
+        [ withDefaultArg_, withDefaultArg_0 ]
 
 
 {-| If a field is missing, succeed with `Nothing`. If it is present, decode it
@@ -627,7 +652,7 @@ If the "stuff" field is present and valid, decode to Just String.
 optionalField: String -> Json.Decode.Decoder a -> Json.Decode.Decoder (Maybe a)
 -}
 optionalField : String -> Elm.Expression -> Elm.Expression
-optionalField optionalFieldArg optionalFieldArg0 =
+optionalField optionalFieldArg_ optionalFieldArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Json", "Decode", "Extra" ]
@@ -649,7 +674,7 @@ optionalField optionalFieldArg optionalFieldArg0 =
                      )
              }
         )
-        [ Elm.string optionalFieldArg, optionalFieldArg0 ]
+        [ Elm.string optionalFieldArg_, optionalFieldArg_0 ]
 
 
 {-| A neat combination of `optionalField` and `nullable`.
@@ -690,7 +715,7 @@ and `{}`, and an error for malformed input like `{"foo": 123}`.
 optionalNullableField: String -> Json.Decode.Decoder a -> Json.Decode.Decoder (Maybe a)
 -}
 optionalNullableField : String -> Elm.Expression -> Elm.Expression
-optionalNullableField optionalNullableFieldArg optionalNullableFieldArg0 =
+optionalNullableField optionalNullableFieldArg_ optionalNullableFieldArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Json", "Decode", "Extra" ]
@@ -712,7 +737,7 @@ optionalNullableField optionalNullableFieldArg optionalNullableFieldArg0 =
                      )
              }
         )
-        [ Elm.string optionalNullableFieldArg, optionalNullableFieldArg0 ]
+        [ Elm.string optionalNullableFieldArg_, optionalNullableFieldArg_0 ]
 
 
 {-| Transform a `Maybe a` into a `Decoder a`
@@ -751,7 +776,7 @@ letter of that string.
 fromMaybe: String -> Maybe a -> Json.Decode.Decoder a
 -}
 fromMaybe : String -> Elm.Expression -> Elm.Expression
-fromMaybe fromMaybeArg fromMaybeArg0 =
+fromMaybe fromMaybeArg_ fromMaybeArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Json", "Decode", "Extra" ]
@@ -768,7 +793,7 @@ fromMaybe fromMaybeArg fromMaybeArg0 =
                      )
              }
         )
-        [ Elm.string fromMaybeArg, fromMaybeArg0 ]
+        [ Elm.string fromMaybeArg_, fromMaybeArg_0 ]
 
 
 {-| Transform a result into a decoder
@@ -801,7 +826,7 @@ Sometimes it can be useful to use functions that primarily operate on
 fromResult: Result.Result String a -> Json.Decode.Decoder a
 -}
 fromResult : Elm.Expression -> Elm.Expression
-fromResult fromResultArg =
+fromResult fromResultArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Json", "Decode", "Extra" ]
@@ -822,7 +847,7 @@ fromResult fromResultArg =
                      )
              }
         )
-        [ fromResultArg ]
+        [ fromResultArg_ ]
 
 
 {-| Extract an int using [`String.toInt`](http://package.elm-lang.org/packages/elm-lang/core/latest/String#toInt)
@@ -896,7 +921,7 @@ field and yields the result (or fails if your decoder fails).
 doubleEncoded: Json.Decode.Decoder a -> Json.Decode.Decoder a
 -}
 doubleEncoded : Elm.Expression -> Elm.Expression
-doubleEncoded doubleEncodedArg =
+doubleEncoded doubleEncodedArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Json", "Decode", "Extra" ]
@@ -917,7 +942,7 @@ doubleEncoded doubleEncodedArg =
                      )
              }
         )
-        [ doubleEncodedArg ]
+        [ doubleEncodedArg_ ]
 
 
 call_ :
@@ -939,7 +964,7 @@ call_ :
     }
 call_ =
     { andMap =
-        \andMapArg andMapArg0 ->
+        \andMapArg_ andMapArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Json", "Decode", "Extra" ]
@@ -967,9 +992,9 @@ call_ =
                              )
                      }
                 )
-                [ andMapArg, andMapArg0 ]
+                [ andMapArg_, andMapArg_0 ]
     , when =
-        \whenArg whenArg0 whenArg1 ->
+        \whenArg_ whenArg_0 whenArg_1 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Json", "Decode", "Extra" ]
@@ -995,9 +1020,9 @@ call_ =
                              )
                      }
                 )
-                [ whenArg, whenArg0, whenArg1 ]
+                [ whenArg_, whenArg_0, whenArg_1 ]
     , collection =
-        \collectionArg ->
+        \collectionArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Json", "Decode", "Extra" ]
@@ -1018,9 +1043,9 @@ call_ =
                              )
                      }
                 )
-                [ collectionArg ]
+                [ collectionArg_ ]
     , sequence =
-        \sequenceArg ->
+        \sequenceArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Json", "Decode", "Extra" ]
@@ -1043,9 +1068,9 @@ call_ =
                              )
                      }
                 )
-                [ sequenceArg ]
+                [ sequenceArg_ ]
     , combine =
-        \combineArg ->
+        \combineArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Json", "Decode", "Extra" ]
@@ -1068,9 +1093,9 @@ call_ =
                              )
                      }
                 )
-                [ combineArg ]
+                [ combineArg_ ]
     , indexedList =
-        \indexedListArg ->
+        \indexedListArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Json", "Decode", "Extra" ]
@@ -1094,9 +1119,9 @@ call_ =
                              )
                      }
                 )
-                [ indexedListArg ]
+                [ indexedListArg_ ]
     , set =
-        \setArg ->
+        \setArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Json", "Decode", "Extra" ]
@@ -1121,9 +1146,9 @@ call_ =
                              )
                      }
                 )
-                [ setArg ]
+                [ setArg_ ]
     , dict2 =
-        \dict2Arg dict2Arg0 ->
+        \dict2Arg_ dict2Arg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Json", "Decode", "Extra" ]
@@ -1154,9 +1179,9 @@ call_ =
                              )
                      }
                 )
-                [ dict2Arg, dict2Arg0 ]
+                [ dict2Arg_, dict2Arg_0 ]
     , withDefault =
-        \withDefaultArg withDefaultArg0 ->
+        \withDefaultArg_ withDefaultArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Json", "Decode", "Extra" ]
@@ -1178,9 +1203,9 @@ call_ =
                              )
                      }
                 )
-                [ withDefaultArg, withDefaultArg0 ]
+                [ withDefaultArg_, withDefaultArg_0 ]
     , optionalField =
-        \optionalFieldArg optionalFieldArg0 ->
+        \optionalFieldArg_ optionalFieldArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Json", "Decode", "Extra" ]
@@ -1202,9 +1227,9 @@ call_ =
                              )
                      }
                 )
-                [ optionalFieldArg, optionalFieldArg0 ]
+                [ optionalFieldArg_, optionalFieldArg_0 ]
     , optionalNullableField =
-        \optionalNullableFieldArg optionalNullableFieldArg0 ->
+        \optionalNullableFieldArg_ optionalNullableFieldArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Json", "Decode", "Extra" ]
@@ -1226,9 +1251,9 @@ call_ =
                              )
                      }
                 )
-                [ optionalNullableFieldArg, optionalNullableFieldArg0 ]
+                [ optionalNullableFieldArg_, optionalNullableFieldArg_0 ]
     , fromMaybe =
-        \fromMaybeArg fromMaybeArg0 ->
+        \fromMaybeArg_ fromMaybeArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Json", "Decode", "Extra" ]
@@ -1245,9 +1270,9 @@ call_ =
                              )
                      }
                 )
-                [ fromMaybeArg, fromMaybeArg0 ]
+                [ fromMaybeArg_, fromMaybeArg_0 ]
     , fromResult =
-        \fromResultArg ->
+        \fromResultArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Json", "Decode", "Extra" ]
@@ -1268,9 +1293,9 @@ call_ =
                              )
                      }
                 )
-                [ fromResultArg ]
+                [ fromResultArg_ ]
     , doubleEncoded =
-        \doubleEncodedArg ->
+        \doubleEncodedArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Json", "Decode", "Extra" ]
@@ -1291,7 +1316,7 @@ call_ =
                              )
                      }
                 )
-                [ doubleEncodedArg ]
+                [ doubleEncodedArg_ ]
     }
 
 

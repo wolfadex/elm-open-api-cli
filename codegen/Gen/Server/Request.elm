@@ -1,12 +1,38 @@
-module Gen.Server.Request exposing (annotation_, body, call_, caseOf_, cookie, cookies, formData, formDataWithServerValidation, header, headers, jsonBody, make_, matchesContentType, method, methodToString, moduleName_, queryParam, queryParams, rawFormData, rawUrl, requestTime, values_)
+module Gen.Server.Request exposing
+    ( annotation_
+    , body
+    , call_
+    , caseOf_
+    , cookie
+    , cookies
+    , formData
+    , formDataWithServerValidation
+    , header
+    , headers
+    , jsonBody
+    , make_
+    , matchesContentType
+    , method
+    , methodToString
+    , moduleName_
+    , queryParam
+    , queryParams
+    , rawFormData
+    , rawUrl
+    , requestTime
+    , values_
+    )
 
-{-| 
+{-|
+# Generated bindings for Server.Request
+
 @docs moduleName_, requestTime, header, headers, method, methodToString, body, jsonBody, formData, formDataWithServerValidation, rawFormData, rawUrl, queryParam, queryParams, matchesContentType, cookie, cookies, annotation_, make_, caseOf_, call_, values_
 -}
 
 
 import Elm
 import Elm.Annotation as Type
+import Elm.Arg
 import Elm.Case
 
 
@@ -21,7 +47,7 @@ moduleName_ =
 requestTime: Server.Request.Request -> Time.Posix
 -}
 requestTime : Elm.Expression -> Elm.Expression
-requestTime requestTimeArg =
+requestTime requestTimeArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Server", "Request" ]
@@ -35,7 +61,7 @@ requestTime requestTimeArg =
                      )
              }
         )
-        [ requestTimeArg ]
+        [ requestTimeArg_ ]
 
 
 {-| Get a header from the request. The header name is case-insensitive.
@@ -48,7 +74,7 @@ Header: Accept-Language: en-US,en;q=0.5
 header: String -> Server.Request.Request -> Maybe String
 -}
 header : String -> Elm.Expression -> Elm.Expression
-header headerArg headerArg0 =
+header headerArg_ headerArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Server", "Request" ]
@@ -63,12 +89,12 @@ header headerArg headerArg0 =
                      )
              }
         )
-        [ Elm.string headerArg, headerArg0 ]
+        [ Elm.string headerArg_, headerArg_0 ]
 
 
 {-| headers: Server.Request.Request -> Dict.Dict String String -}
 headers : Elm.Expression -> Elm.Expression
-headers headersArg =
+headers headersArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Server", "Request" ]
@@ -86,7 +112,7 @@ headers headersArg =
                      )
              }
         )
-        [ headersArg ]
+        [ headersArg_ ]
 
 
 {-| The [HTTP request method](https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods) of the incoming request.
@@ -97,7 +123,7 @@ So you don't need to check the `method` in your Route Module's `data` function, 
 method: Server.Request.Request -> Server.Request.Method
 -}
 method : Elm.Expression -> Elm.Expression
-method methodArg =
+method methodArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Server", "Request" ]
@@ -111,7 +137,7 @@ method methodArg =
                      )
              }
         )
-        [ methodArg ]
+        [ methodArg_ ]
 
 
 {-| Gets the HTTP Method as an uppercase String.
@@ -125,7 +151,7 @@ Examples:
 methodToString: Server.Request.Method -> String
 -}
 methodToString : Elm.Expression -> Elm.Expression
-methodToString methodToStringArg =
+methodToString methodToStringArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Server", "Request" ]
@@ -138,7 +164,7 @@ methodToString methodToStringArg =
                      )
              }
         )
-        [ methodToStringArg ]
+        [ methodToStringArg_ ]
 
 
 {-| The Request body, if present (or `Nothing` if there is no request body).
@@ -146,7 +172,7 @@ methodToString methodToStringArg =
 body: Server.Request.Request -> Maybe String
 -}
 body : Elm.Expression -> Elm.Expression
-body bodyArg =
+body bodyArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Server", "Request" ]
@@ -160,7 +186,7 @@ body bodyArg =
                      )
              }
         )
-        [ bodyArg ]
+        [ bodyArg_ ]
 
 
 {-| If the request has a body and its `Content-Type` matches JSON, then
@@ -190,7 +216,7 @@ jsonBody:
     -> Maybe (Result.Result Json.Decode.Error value)
 -}
 jsonBody : Elm.Expression -> Elm.Expression -> Elm.Expression
-jsonBody jsonBodyArg jsonBodyArg0 =
+jsonBody jsonBodyArg_ jsonBodyArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Server", "Request" ]
@@ -219,7 +245,7 @@ jsonBody jsonBodyArg jsonBodyArg0 =
                      )
              }
         )
-        [ jsonBodyArg, jsonBodyArg0 ]
+        [ jsonBodyArg_, jsonBodyArg_0 ]
 
 
 {-| Takes a [`Form.Handler.Handler`](https://package.elm-lang.org/packages/dillonkearns/elm-form/latest/Form-Handler) and
@@ -310,7 +336,7 @@ formData:
     -> Maybe ( Form.ServerResponse error, Form.Validated error combined )
 -}
 formData : Elm.Expression -> Elm.Expression -> Elm.Expression
-formData formDataArg formDataArg0 =
+formData formDataArg_ formDataArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Server", "Request" ]
@@ -343,7 +369,7 @@ formData formDataArg formDataArg0 =
                      )
              }
         )
-        [ formDataArg, formDataArg0 ]
+        [ formDataArg_, formDataArg_0 ]
 
 
 {-| formDataWithServerValidation: 
@@ -353,7 +379,7 @@ formData formDataArg formDataArg0 =
 -}
 formDataWithServerValidation :
     Elm.Expression -> Elm.Expression -> Elm.Expression
-formDataWithServerValidation formDataWithServerValidationArg formDataWithServerValidationArg0 =
+formDataWithServerValidation formDataWithServerValidationArg_ formDataWithServerValidationArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Server", "Request" ]
@@ -396,7 +422,7 @@ formDataWithServerValidation formDataWithServerValidationArg formDataWithServerV
                      )
              }
         )
-        [ formDataWithServerValidationArg, formDataWithServerValidationArg0 ]
+        [ formDataWithServerValidationArg_, formDataWithServerValidationArg_0 ]
 
 
 {-| Get the raw key-value pairs from a form submission.
@@ -417,7 +443,7 @@ So you will want to handle any `Form`'s rendered using `withGetMethod` in your R
 rawFormData: Server.Request.Request -> Maybe (List ( String, String ))
 -}
 rawFormData : Elm.Expression -> Elm.Expression
-rawFormData rawFormDataArg =
+rawFormData rawFormDataArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Server", "Request" ]
@@ -433,7 +459,7 @@ rawFormData rawFormDataArg =
                      )
              }
         )
-        [ rawFormDataArg ]
+        [ rawFormDataArg_ ]
 
 
 {-| The full URL of the incoming HTTP request, including the query params.
@@ -453,7 +479,7 @@ Note that the fragment is not included because this is client-only (not sent to 
 rawUrl: Server.Request.Request -> String
 -}
 rawUrl : Elm.Expression -> Elm.Expression
-rawUrl rawUrlArg =
+rawUrl rawUrlArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Server", "Request" ]
@@ -467,7 +493,7 @@ rawUrl rawUrlArg =
                      )
              }
         )
-        [ rawUrlArg ]
+        [ rawUrlArg_ ]
 
 
 {-| Get `Nothing` if the query param with the given name is missing, or `Just` the value if it is present.
@@ -494,7 +520,7 @@ See also [`queryParams`](#queryParams), or [`rawUrl`](#rawUrl) if you need somet
 queryParam: String -> Server.Request.Request -> Maybe String
 -}
 queryParam : String -> Elm.Expression -> Elm.Expression
-queryParam queryParamArg queryParamArg0 =
+queryParam queryParamArg_ queryParamArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Server", "Request" ]
@@ -509,7 +535,7 @@ queryParam queryParamArg queryParamArg0 =
                      )
              }
         )
-        [ Elm.string queryParamArg, queryParamArg0 ]
+        [ Elm.string queryParamArg_, queryParamArg_0 ]
 
 
 {-| Gives all query params from the URL.
@@ -527,7 +553,7 @@ queryParam queryParamArg queryParamArg0 =
 queryParams: Server.Request.Request -> Dict.Dict String (List String)
 -}
 queryParams : Elm.Expression -> Elm.Expression
-queryParams queryParamsArg =
+queryParams queryParamsArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Server", "Request" ]
@@ -545,7 +571,7 @@ queryParams queryParamsArg =
                      )
              }
         )
-        [ queryParamsArg ]
+        [ queryParamsArg_ ]
 
 
 {-| True if the `content-type` header is present AND matches the given argument.
@@ -567,7 +593,7 @@ Examples:
 matchesContentType: String -> Server.Request.Request -> Bool
 -}
 matchesContentType : String -> Elm.Expression -> Elm.Expression
-matchesContentType matchesContentTypeArg matchesContentTypeArg0 =
+matchesContentType matchesContentTypeArg_ matchesContentTypeArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Server", "Request" ]
@@ -582,7 +608,7 @@ matchesContentType matchesContentTypeArg matchesContentTypeArg0 =
                      )
              }
         )
-        [ Elm.string matchesContentTypeArg, matchesContentTypeArg0 ]
+        [ Elm.string matchesContentTypeArg_, matchesContentTypeArg_0 ]
 
 
 {-| Get a cookie from the request. For a more high-level API, see [`Server.Session`](Server-Session).
@@ -590,7 +616,7 @@ matchesContentType matchesContentTypeArg matchesContentTypeArg0 =
 cookie: String -> Server.Request.Request -> Maybe String
 -}
 cookie : String -> Elm.Expression -> Elm.Expression
-cookie cookieArg cookieArg0 =
+cookie cookieArg_ cookieArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Server", "Request" ]
@@ -605,7 +631,7 @@ cookie cookieArg cookieArg0 =
                      )
              }
         )
-        [ Elm.string cookieArg, cookieArg0 ]
+        [ Elm.string cookieArg_, cookieArg_0 ]
 
 
 {-| Get all of the cookies from the incoming HTTP request. For a more high-level API, see [`Server.Session`](Server-Session).
@@ -613,7 +639,7 @@ cookie cookieArg cookieArg0 =
 cookies: Server.Request.Request -> Dict.Dict String String
 -}
 cookies : Elm.Expression -> Elm.Expression
-cookies cookiesArg =
+cookies cookiesArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Server", "Request" ]
@@ -631,7 +657,7 @@ cookies cookiesArg =
                      )
              }
         )
-        [ cookiesArg ]
+        [ cookiesArg_ ]
 
 
 annotation_ : { request : Type.Annotation, method : Type.Annotation }
@@ -729,17 +755,16 @@ make_ =
 caseOf_ :
     { method :
         Elm.Expression
-        -> { methodTags_0_0
-            | connect : Elm.Expression
-            , delete : Elm.Expression
-            , get : Elm.Expression
-            , head : Elm.Expression
-            , options : Elm.Expression
-            , patch : Elm.Expression
-            , post : Elm.Expression
-            , put : Elm.Expression
-            , trace : Elm.Expression
-            , nonStandard : Elm.Expression -> Elm.Expression
+        -> { connect : Elm.Expression
+        , delete : Elm.Expression
+        , get : Elm.Expression
+        , head : Elm.Expression
+        , options : Elm.Expression
+        , patch : Elm.Expression
+        , post : Elm.Expression
+        , put : Elm.Expression
+        , trace : Elm.Expression
+        , nonStandard : Elm.Expression -> Elm.Expression
         }
         -> Elm.Expression
     }
@@ -749,19 +774,42 @@ caseOf_ =
             Elm.Case.custom
                 methodExpression
                 (Type.namedWith [ "Server", "Request" ] "Method" [])
-                [ Elm.Case.branch0 "Connect" methodTags.connect
-                , Elm.Case.branch0 "Delete" methodTags.delete
-                , Elm.Case.branch0 "Get" methodTags.get
-                , Elm.Case.branch0 "Head" methodTags.head
-                , Elm.Case.branch0 "Options" methodTags.options
-                , Elm.Case.branch0 "Patch" methodTags.patch
-                , Elm.Case.branch0 "Post" methodTags.post
-                , Elm.Case.branch0 "Put" methodTags.put
-                , Elm.Case.branch0 "Trace" methodTags.trace
-                , Elm.Case.branch1
-                    "NonStandard"
-                    ( "stringString", Type.string )
-                    methodTags.nonStandard
+                [ Elm.Case.branch
+                    (Elm.Arg.customType "Connect" methodTags.connect)
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType "Delete" methodTags.delete)
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType "Get" methodTags.get)
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType "Head" methodTags.head)
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType "Options" methodTags.options)
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType "Patch" methodTags.patch)
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType "Post" methodTags.post)
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType "Put" methodTags.put)
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType "Trace" methodTags.trace)
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType
+                       "NonStandard"
+                       methodTags.nonStandard |> Elm.Arg.item
+                                                       (Elm.Arg.var
+                                                              "stringString"
+                                                       )
+                    )
+                    Basics.identity
                 ]
     }
 
@@ -787,7 +835,7 @@ call_ :
     }
 call_ =
     { requestTime =
-        \requestTimeArg ->
+        \requestTimeArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Server", "Request" ]
@@ -804,9 +852,9 @@ call_ =
                              )
                      }
                 )
-                [ requestTimeArg ]
+                [ requestTimeArg_ ]
     , header =
-        \headerArg headerArg0 ->
+        \headerArg_ headerArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Server", "Request" ]
@@ -824,9 +872,9 @@ call_ =
                              )
                      }
                 )
-                [ headerArg, headerArg0 ]
+                [ headerArg_, headerArg_0 ]
     , headers =
-        \headersArg ->
+        \headersArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Server", "Request" ]
@@ -847,9 +895,9 @@ call_ =
                              )
                      }
                 )
-                [ headersArg ]
+                [ headersArg_ ]
     , method =
-        \methodArg ->
+        \methodArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Server", "Request" ]
@@ -870,9 +918,9 @@ call_ =
                              )
                      }
                 )
-                [ methodArg ]
+                [ methodArg_ ]
     , methodToString =
-        \methodToStringArg ->
+        \methodToStringArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Server", "Request" ]
@@ -889,9 +937,9 @@ call_ =
                              )
                      }
                 )
-                [ methodToStringArg ]
+                [ methodToStringArg_ ]
     , body =
-        \bodyArg ->
+        \bodyArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Server", "Request" ]
@@ -908,9 +956,9 @@ call_ =
                              )
                      }
                 )
-                [ bodyArg ]
+                [ bodyArg_ ]
     , jsonBody =
-        \jsonBodyArg jsonBodyArg0 ->
+        \jsonBodyArg_ jsonBodyArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Server", "Request" ]
@@ -942,9 +990,9 @@ call_ =
                              )
                      }
                 )
-                [ jsonBodyArg, jsonBodyArg0 ]
+                [ jsonBodyArg_, jsonBodyArg_0 ]
     , formData =
-        \formDataArg formDataArg0 ->
+        \formDataArg_ formDataArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Server", "Request" ]
@@ -980,9 +1028,9 @@ call_ =
                              )
                      }
                 )
-                [ formDataArg, formDataArg0 ]
+                [ formDataArg_, formDataArg_0 ]
     , formDataWithServerValidation =
-        \formDataWithServerValidationArg formDataWithServerValidationArg0 ->
+        \formDataWithServerValidationArg_ formDataWithServerValidationArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Server", "Request" ]
@@ -1028,11 +1076,11 @@ call_ =
                              )
                      }
                 )
-                [ formDataWithServerValidationArg
-                , formDataWithServerValidationArg0
+                [ formDataWithServerValidationArg_
+                , formDataWithServerValidationArg_0
                 ]
     , rawFormData =
-        \rawFormDataArg ->
+        \rawFormDataArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Server", "Request" ]
@@ -1053,9 +1101,9 @@ call_ =
                              )
                      }
                 )
-                [ rawFormDataArg ]
+                [ rawFormDataArg_ ]
     , rawUrl =
-        \rawUrlArg ->
+        \rawUrlArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Server", "Request" ]
@@ -1072,9 +1120,9 @@ call_ =
                              )
                      }
                 )
-                [ rawUrlArg ]
+                [ rawUrlArg_ ]
     , queryParam =
-        \queryParamArg queryParamArg0 ->
+        \queryParamArg_ queryParamArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Server", "Request" ]
@@ -1092,9 +1140,9 @@ call_ =
                              )
                      }
                 )
-                [ queryParamArg, queryParamArg0 ]
+                [ queryParamArg_, queryParamArg_0 ]
     , queryParams =
-        \queryParamsArg ->
+        \queryParamsArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Server", "Request" ]
@@ -1115,9 +1163,9 @@ call_ =
                              )
                      }
                 )
-                [ queryParamsArg ]
+                [ queryParamsArg_ ]
     , matchesContentType =
-        \matchesContentTypeArg matchesContentTypeArg0 ->
+        \matchesContentTypeArg_ matchesContentTypeArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Server", "Request" ]
@@ -1135,9 +1183,9 @@ call_ =
                              )
                      }
                 )
-                [ matchesContentTypeArg, matchesContentTypeArg0 ]
+                [ matchesContentTypeArg_, matchesContentTypeArg_0 ]
     , cookie =
-        \cookieArg cookieArg0 ->
+        \cookieArg_ cookieArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Server", "Request" ]
@@ -1155,9 +1203,9 @@ call_ =
                              )
                      }
                 )
-                [ cookieArg, cookieArg0 ]
+                [ cookieArg_, cookieArg_0 ]
     , cookies =
-        \cookiesArg ->
+        \cookiesArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Server", "Request" ]
@@ -1178,7 +1226,7 @@ call_ =
                              )
                      }
                 )
-                [ cookiesArg ]
+                [ cookiesArg_ ]
     }
 
 

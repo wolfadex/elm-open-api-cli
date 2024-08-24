@@ -1,6 +1,24 @@
-module Gen.Json.Encode exposing (annotation_, array, bool, call_, dict, encode, float, int, list, moduleName_, null, object, set, string, values_)
+module Gen.Json.Encode exposing
+    ( annotation_
+    , array
+    , bool
+    , call_
+    , dict
+    , encode
+    , float
+    , int
+    , list
+    , moduleName_
+    , null
+    , object
+    , set
+    , string
+    , values_
+    )
 
-{-| 
+{-|
+# Generated bindings for Json.Encode
+
 @docs moduleName_, encode, string, int, float, bool, null, list, array, set, object, dict, annotation_, call_, values_
 -}
 
@@ -39,7 +57,7 @@ the amount of indentation in the resulting string.
 encode: Int -> Json.Encode.Value -> String
 -}
 encode : Int -> Elm.Expression -> Elm.Expression
-encode encodeArg encodeArg0 =
+encode encodeArg_ encodeArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Json", "Encode" ]
@@ -54,7 +72,7 @@ encode encodeArg encodeArg0 =
                      )
              }
         )
-        [ Elm.int encodeArg, encodeArg0 ]
+        [ Elm.int encodeArg_, encodeArg_0 ]
 
 
 {-| Turn a `String` into a JSON string.
@@ -68,7 +86,7 @@ encode encodeArg encodeArg0 =
 string: String -> Json.Encode.Value
 -}
 string : String -> Elm.Expression
-string stringArg =
+string stringArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Json", "Encode" ]
@@ -81,7 +99,7 @@ string stringArg =
                      )
              }
         )
-        [ Elm.string stringArg ]
+        [ Elm.string stringArg_ ]
 
 
 {-| Turn an `Int` into a JSON number.
@@ -95,7 +113,7 @@ string stringArg =
 int: Int -> Json.Encode.Value
 -}
 int : Int -> Elm.Expression
-int intArg =
+int intArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Json", "Encode" ]
@@ -108,7 +126,7 @@ int intArg =
                      )
              }
         )
-        [ Elm.int intArg ]
+        [ Elm.int intArg_ ]
 
 
 {-| Turn a `Float` into a JSON number.
@@ -132,7 +150,7 @@ both as `null`.
 float: Float -> Json.Encode.Value
 -}
 float : Float -> Elm.Expression
-float floatArg =
+float floatArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Json", "Encode" ]
@@ -145,7 +163,7 @@ float floatArg =
                      )
              }
         )
-        [ Elm.float floatArg ]
+        [ Elm.float floatArg_ ]
 
 
 {-| Turn a `Bool` into a JSON boolean.
@@ -158,7 +176,7 @@ float floatArg =
 bool: Bool -> Json.Encode.Value
 -}
 bool : Bool -> Elm.Expression
-bool boolArg =
+bool boolArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Json", "Encode" ]
@@ -171,7 +189,7 @@ bool boolArg =
                      )
              }
         )
-        [ Elm.bool boolArg ]
+        [ Elm.bool boolArg_ ]
 
 
 {-| Create a JSON `null` value.
@@ -203,7 +221,7 @@ list: (a -> Json.Encode.Value) -> List a -> Json.Encode.Value
 -}
 list :
     (Elm.Expression -> Elm.Expression) -> List Elm.Expression -> Elm.Expression
-list listArg listArg0 =
+list listArg_ listArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Json", "Encode" ]
@@ -220,7 +238,7 @@ list listArg listArg0 =
                      )
              }
         )
-        [ Elm.functionReduced "listUnpack" listArg, Elm.list listArg0 ]
+        [ Elm.functionReduced "listUnpack" listArg_, Elm.list listArg_0 ]
 
 
 {-| Turn an `Array` into a JSON array.
@@ -228,7 +246,7 @@ list listArg listArg0 =
 array: (a -> Json.Encode.Value) -> Array.Array a -> Json.Encode.Value
 -}
 array : (Elm.Expression -> Elm.Expression) -> Elm.Expression -> Elm.Expression
-array arrayArg arrayArg0 =
+array arrayArg_ arrayArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Json", "Encode" ]
@@ -245,7 +263,7 @@ array arrayArg arrayArg0 =
                      )
              }
         )
-        [ Elm.functionReduced "arrayUnpack" arrayArg, arrayArg0 ]
+        [ Elm.functionReduced "arrayUnpack" arrayArg_, arrayArg_0 ]
 
 
 {-| Turn an `Set` into a JSON array.
@@ -253,7 +271,7 @@ array arrayArg arrayArg0 =
 set: (a -> Json.Encode.Value) -> Set.Set a -> Json.Encode.Value
 -}
 set : (Elm.Expression -> Elm.Expression) -> Elm.Expression -> Elm.Expression
-set setArg setArg0 =
+set setArg_ setArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Json", "Encode" ]
@@ -270,7 +288,7 @@ set setArg setArg0 =
                      )
              }
         )
-        [ Elm.functionReduced "setUnpack" setArg, setArg0 ]
+        [ Elm.functionReduced "setUnpack" setArg_, setArg_0 ]
 
 
 {-| Create a JSON object.
@@ -289,7 +307,7 @@ set setArg setArg0 =
 object: List ( String, Json.Encode.Value ) -> Json.Encode.Value
 -}
 object : List Elm.Expression -> Elm.Expression
-object objectArg =
+object objectArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Json", "Encode" ]
@@ -308,7 +326,7 @@ object objectArg =
                      )
              }
         )
-        [ Elm.list objectArg ]
+        [ Elm.list objectArg_ ]
 
 
 {-| Turn a `Dict` into a JSON object.
@@ -330,7 +348,7 @@ dict :
     -> (Elm.Expression -> Elm.Expression)
     -> Elm.Expression
     -> Elm.Expression
-dict dictArg dictArg0 dictArg1 =
+dict dictArg_ dictArg_0 dictArg_1 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Json", "Encode" ]
@@ -351,9 +369,9 @@ dict dictArg dictArg0 dictArg1 =
                      )
              }
         )
-        [ Elm.functionReduced "dictUnpack" dictArg
-        , Elm.functionReduced "dictUnpack" dictArg0
-        , dictArg1
+        [ Elm.functionReduced "dictUnpack" dictArg_
+        , Elm.functionReduced "dictUnpack" dictArg_0
+        , dictArg_1
         ]
 
 
@@ -377,7 +395,7 @@ call_ :
     }
 call_ =
     { encode =
-        \encodeArg encodeArg0 ->
+        \encodeArg_ encodeArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Json", "Encode" ]
@@ -395,9 +413,9 @@ call_ =
                              )
                      }
                 )
-                [ encodeArg, encodeArg0 ]
+                [ encodeArg_, encodeArg_0 ]
     , string =
-        \stringArg ->
+        \stringArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Json", "Encode" ]
@@ -414,9 +432,9 @@ call_ =
                              )
                      }
                 )
-                [ stringArg ]
+                [ stringArg_ ]
     , int =
-        \intArg ->
+        \intArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Json", "Encode" ]
@@ -433,9 +451,9 @@ call_ =
                              )
                      }
                 )
-                [ intArg ]
+                [ intArg_ ]
     , float =
-        \floatArg ->
+        \floatArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Json", "Encode" ]
@@ -452,9 +470,9 @@ call_ =
                              )
                      }
                 )
-                [ floatArg ]
+                [ floatArg_ ]
     , bool =
-        \boolArg ->
+        \boolArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Json", "Encode" ]
@@ -471,9 +489,9 @@ call_ =
                              )
                      }
                 )
-                [ boolArg ]
+                [ boolArg_ ]
     , list =
-        \listArg listArg0 ->
+        \listArg_ listArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Json", "Encode" ]
@@ -498,9 +516,9 @@ call_ =
                              )
                      }
                 )
-                [ listArg, listArg0 ]
+                [ listArg_, listArg_0 ]
     , array =
-        \arrayArg arrayArg0 ->
+        \arrayArg_ arrayArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Json", "Encode" ]
@@ -528,9 +546,9 @@ call_ =
                              )
                      }
                 )
-                [ arrayArg, arrayArg0 ]
+                [ arrayArg_, arrayArg_0 ]
     , set =
-        \setArg setArg0 ->
+        \setArg_ setArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Json", "Encode" ]
@@ -558,9 +576,9 @@ call_ =
                              )
                      }
                 )
-                [ setArg, setArg0 ]
+                [ setArg_, setArg_0 ]
     , object =
-        \objectArg ->
+        \objectArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Json", "Encode" ]
@@ -586,9 +604,9 @@ call_ =
                              )
                      }
                 )
-                [ objectArg ]
+                [ objectArg_ ]
     , dict =
-        \dictArg dictArg0 dictArg1 ->
+        \dictArg_ dictArg_0 dictArg_1 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Json", "Encode" ]
@@ -617,7 +635,7 @@ call_ =
                              )
                      }
                 )
-                [ dictArg, dictArg0, dictArg1 ]
+                [ dictArg_, dictArg_0, dictArg_1 ]
     }
 
 

@@ -1,12 +1,24 @@
-module Gen.Pages.Fetcher exposing (annotation_, call_, caseOf_, make_, map, moduleName_, submit, values_)
+module Gen.Pages.Fetcher exposing
+    ( annotation_
+    , call_
+    , caseOf_
+    , make_
+    , map
+    , moduleName_
+    , submit
+    , values_
+    )
 
-{-| 
+{-|
+# Generated bindings for Pages.Fetcher
+
 @docs moduleName_, submit, map, annotation_, make_, caseOf_, call_, values_
 -}
 
 
 import Elm
 import Elm.Annotation as Type
+import Elm.Arg
 import Elm.Case
 
 
@@ -25,7 +37,7 @@ submit :
     Elm.Expression
     -> { fields : List Elm.Expression, headers : List Elm.Expression }
     -> Elm.Expression
-submit submitArg submitArg0 =
+submit submitArg_ submitArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Pages", "Fetcher" ]
@@ -60,17 +72,17 @@ submit submitArg submitArg0 =
                      )
              }
         )
-        [ submitArg
+        [ submitArg_
         , Elm.record
-            [ Tuple.pair "fields" (Elm.list submitArg0.fields)
-            , Tuple.pair "headers" (Elm.list submitArg0.headers)
+            [ Tuple.pair "fields" (Elm.list submitArg_0.fields)
+            , Tuple.pair "headers" (Elm.list submitArg_0.headers)
             ]
         ]
 
 
 {-| map: (a -> b) -> Pages.Fetcher.Fetcher a -> Pages.Fetcher.Fetcher b -}
 map : (Elm.Expression -> Elm.Expression) -> Elm.Expression -> Elm.Expression
-map mapArg mapArg0 =
+map mapArg_ mapArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Pages", "Fetcher" ]
@@ -92,7 +104,7 @@ map mapArg mapArg0 =
                      )
              }
         )
-        [ Elm.functionReduced "mapUnpack" mapArg, mapArg0 ]
+        [ Elm.functionReduced "mapUnpack" mapArg_, mapArg_0 ]
 
 
 annotation_ :
@@ -199,7 +211,7 @@ make_ =
 caseOf_ :
     { fetcher :
         Elm.Expression
-        -> { fetcherTags_0_0 | fetcher : Elm.Expression -> Elm.Expression }
+        -> { fetcher : Elm.Expression -> Elm.Expression }
         -> Elm.Expression
     }
 caseOf_ =
@@ -212,15 +224,15 @@ caseOf_ =
                      "Fetcher"
                      [ Type.var "decoded" ]
                 )
-                [ Elm.Case.branch1
-                    "Fetcher"
-                    ( "pagesFetcherFetcherInfo"
-                    , Type.namedWith
-                          [ "Pages", "Fetcher" ]
-                          "FetcherInfo"
-                          [ Type.var "decoded" ]
+                [ Elm.Case.branch
+                    (Elm.Arg.customType
+                       "Fetcher"
+                       fetcherTags.fetcher |> Elm.Arg.item
+                                                    (Elm.Arg.var
+                                                           "pagesFetcherFetcherInfo"
+                                                    )
                     )
-                    fetcherTags.fetcher
+                    Basics.identity
                 ]
     }
 
@@ -231,7 +243,7 @@ call_ :
     }
 call_ =
     { submit =
-        \submitArg submitArg0 ->
+        \submitArg_ submitArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Pages", "Fetcher" ]
@@ -271,9 +283,9 @@ call_ =
                              )
                      }
                 )
-                [ submitArg, submitArg0 ]
+                [ submitArg_, submitArg_0 ]
     , map =
-        \mapArg mapArg0 ->
+        \mapArg_ mapArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Pages", "Fetcher" ]
@@ -297,7 +309,7 @@ call_ =
                              )
                      }
                 )
-                [ mapArg, mapArg0 ]
+                [ mapArg_, mapArg_0 ]
     }
 
 

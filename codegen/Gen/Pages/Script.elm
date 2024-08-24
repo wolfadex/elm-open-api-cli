@@ -1,12 +1,33 @@
-module Gen.Pages.Script exposing (annotation_, call_, caseOf_, command, doThen, exec, expectWhich, log, make_, moduleName_, question, sleep, values_, which, withCliOptions, withoutCliOptions, writeFile)
+module Gen.Pages.Script exposing
+    ( annotation_
+    , call_
+    , caseOf_
+    , command
+    , doThen
+    , exec
+    , expectWhich
+    , log
+    , make_
+    , moduleName_
+    , question
+    , sleep
+    , values_
+    , which
+    , withCliOptions
+    , withoutCliOptions
+    , writeFile
+    )
 
-{-| 
+{-|
+# Generated bindings for Pages.Script
+
 @docs moduleName_, withCliOptions, withoutCliOptions, writeFile, command, exec, log, sleep, doThen, which, expectWhich, question, annotation_, make_, caseOf_, call_, values_
 -}
 
 
 import Elm
 import Elm.Annotation as Type
+import Elm.Arg
 import Elm.Case
 
 
@@ -30,7 +51,7 @@ withCliOptions:
 -}
 withCliOptions :
     Elm.Expression -> (Elm.Expression -> Elm.Expression) -> Elm.Expression
-withCliOptions withCliOptionsArg withCliOptionsArg0 =
+withCliOptions withCliOptionsArg_ withCliOptionsArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Pages", "Script" ]
@@ -59,8 +80,8 @@ withCliOptions withCliOptionsArg withCliOptionsArg0 =
                      )
              }
         )
-        [ withCliOptionsArg
-        , Elm.functionReduced "withCliOptionsUnpack" withCliOptionsArg0
+        [ withCliOptionsArg_
+        , Elm.functionReduced "withCliOptionsUnpack" withCliOptionsArg_0
         ]
 
 
@@ -80,7 +101,7 @@ withCliOptions withCliOptionsArg withCliOptionsArg0 =
 withoutCliOptions: BackendTask.BackendTask FatalError.FatalError () -> Pages.Script.Script
 -}
 withoutCliOptions : Elm.Expression -> Elm.Expression
-withoutCliOptions withoutCliOptionsArg =
+withoutCliOptions withoutCliOptionsArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Pages", "Script" ]
@@ -99,7 +120,7 @@ withoutCliOptions withoutCliOptionsArg =
                      )
              }
         )
-        [ withoutCliOptionsArg ]
+        [ withoutCliOptionsArg_ ]
 
 
 {-| Write a file to the file system.
@@ -127,7 +148,7 @@ writeFile:
     } ()
 -}
 writeFile : { path : String, body : String } -> Elm.Expression
-writeFile writeFileArg =
+writeFile writeFileArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Pages", "Script" ]
@@ -164,8 +185,8 @@ writeFile writeFileArg =
              }
         )
         [ Elm.record
-            [ Tuple.pair "path" (Elm.string writeFileArg.path)
-            , Tuple.pair "body" (Elm.string writeFileArg.body)
+            [ Tuple.pair "path" (Elm.string writeFileArg_.path)
+            , Tuple.pair "body" (Elm.string writeFileArg_.body)
             ]
         ]
 
@@ -192,7 +213,7 @@ If you want to do more advanced things like piping together multiple commands in
 command: String -> List String -> BackendTask.BackendTask FatalError.FatalError String
 -}
 command : String -> List String -> Elm.Expression
-command commandArg commandArg0 =
+command commandArg_ commandArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Pages", "Script" ]
@@ -211,7 +232,7 @@ command commandArg commandArg0 =
                      )
              }
         )
-        [ Elm.string commandArg, Elm.list (List.map Elm.string commandArg0) ]
+        [ Elm.string commandArg_, Elm.list (List.map Elm.string commandArg_0) ]
 
 
 {-| Like [`command`](#command), but prints stderr and stdout to the console as the command runs instead of capturing them.
@@ -229,7 +250,7 @@ command commandArg commandArg0 =
 exec: String -> List String -> BackendTask.BackendTask FatalError.FatalError ()
 -}
 exec : String -> List String -> Elm.Expression
-exec execArg execArg0 =
+exec execArg_ execArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Pages", "Script" ]
@@ -248,7 +269,7 @@ exec execArg execArg0 =
                      )
              }
         )
-        [ Elm.string execArg, Elm.list (List.map Elm.string execArg0) ]
+        [ Elm.string execArg_, Elm.list (List.map Elm.string execArg_0) ]
 
 
 {-| Log to stdout.
@@ -267,7 +288,7 @@ exec execArg execArg0 =
 log: String -> BackendTask.BackendTask error ()
 -}
 log : String -> Elm.Expression
-log logArg =
+log logArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Pages", "Script" ]
@@ -284,7 +305,7 @@ log logArg =
                      )
              }
         )
-        [ Elm.string logArg ]
+        [ Elm.string logArg_ ]
 
 
 {-| Sleep for a number of milliseconds.
@@ -306,7 +327,7 @@ log logArg =
 sleep: Int -> BackendTask.BackendTask error ()
 -}
 sleep : Int -> Elm.Expression
-sleep sleepArg =
+sleep sleepArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Pages", "Script" ]
@@ -323,7 +344,7 @@ sleep sleepArg =
                      )
              }
         )
-        [ Elm.int sleepArg ]
+        [ Elm.int sleepArg_ ]
 
 
 {-| Run a command with no output, then run another command.
@@ -346,7 +367,7 @@ doThen:
     -> BackendTask.BackendTask error value
 -}
 doThen : Elm.Expression -> Elm.Expression -> Elm.Expression
-doThen doThenArg doThenArg0 =
+doThen doThenArg_ doThenArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Pages", "Script" ]
@@ -371,7 +392,7 @@ doThen doThenArg doThenArg0 =
                      )
              }
         )
-        [ doThenArg, doThenArg0 ]
+        [ doThenArg_, doThenArg_0 ]
 
 
 {-| Same as [`expectWhich`](#expectWhich), but returns `Nothing` if the command is not found instead of failing with a [`FatalError`](FatalError).
@@ -379,7 +400,7 @@ doThen doThenArg doThenArg0 =
 which: String -> BackendTask.BackendTask error (Maybe String)
 -}
 which : String -> Elm.Expression
-which whichArg =
+which whichArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Pages", "Script" ]
@@ -396,7 +417,7 @@ which whichArg =
                      )
              }
         )
-        [ Elm.string whichArg ]
+        [ Elm.string whichArg_ ]
 
 
 {-| Check if a command is available on the system. If it is, return the full path to the command, otherwise fail with a [`FatalError`](FatalError).
@@ -428,7 +449,7 @@ I expected to find `hype-script`, but it was not on your PATH. Make sure it is i
 expectWhich: String -> BackendTask.BackendTask FatalError.FatalError String
 -}
 expectWhich : String -> Elm.Expression
-expectWhich expectWhichArg =
+expectWhich expectWhichArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Pages", "Script" ]
@@ -447,7 +468,7 @@ expectWhich expectWhichArg =
                      )
              }
         )
-        [ Elm.string expectWhichArg ]
+        [ Elm.string expectWhichArg_ ]
 
 
 {-| module QuestionDemo exposing (run)
@@ -467,7 +488,7 @@ expectWhich expectWhichArg =
 question: String -> BackendTask.BackendTask error String
 -}
 question : String -> Elm.Expression
-question questionArg =
+question questionArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Pages", "Script" ]
@@ -484,7 +505,7 @@ question questionArg =
                      )
              }
         )
-        [ Elm.string questionArg ]
+        [ Elm.string questionArg_ ]
 
 
 annotation_ : { script : Type.Annotation, error : Type.Annotation }
@@ -512,9 +533,7 @@ make_ =
 
 caseOf_ :
     { error :
-        Elm.Expression
-        -> { errorTags_0_0 | fileWriteError : Elm.Expression }
-        -> Elm.Expression
+        Elm.Expression -> { fileWriteError : Elm.Expression } -> Elm.Expression
     }
 caseOf_ =
     { error =
@@ -522,7 +541,13 @@ caseOf_ =
             Elm.Case.custom
                 errorExpression
                 (Type.namedWith [ "Pages", "Script" ] "Error" [])
-                [ Elm.Case.branch0 "FileWriteError" errorTags.fileWriteError ]
+                [ Elm.Case.branch
+                    (Elm.Arg.customType
+                       "FileWriteError"
+                       errorTags.fileWriteError
+                    )
+                    Basics.identity
+                ]
     }
 
 
@@ -541,7 +566,7 @@ call_ :
     }
 call_ =
     { withCliOptions =
-        \withCliOptionsArg withCliOptionsArg0 ->
+        \withCliOptionsArg_ withCliOptionsArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Pages", "Script" ]
@@ -574,9 +599,9 @@ call_ =
                              )
                      }
                 )
-                [ withCliOptionsArg, withCliOptionsArg0 ]
+                [ withCliOptionsArg_, withCliOptionsArg_0 ]
     , withoutCliOptions =
-        \withoutCliOptionsArg ->
+        \withoutCliOptionsArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Pages", "Script" ]
@@ -602,9 +627,9 @@ call_ =
                              )
                      }
                 )
-                [ withoutCliOptionsArg ]
+                [ withoutCliOptionsArg_ ]
     , writeFile =
-        \writeFileArg ->
+        \writeFileArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Pages", "Script" ]
@@ -640,9 +665,9 @@ call_ =
                              )
                      }
                 )
-                [ writeFileArg ]
+                [ writeFileArg_ ]
     , command =
-        \commandArg commandArg0 ->
+        \commandArg_ commandArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Pages", "Script" ]
@@ -664,9 +689,9 @@ call_ =
                              )
                      }
                 )
-                [ commandArg, commandArg0 ]
+                [ commandArg_, commandArg_0 ]
     , exec =
-        \execArg execArg0 ->
+        \execArg_ execArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Pages", "Script" ]
@@ -688,9 +713,9 @@ call_ =
                              )
                      }
                 )
-                [ execArg, execArg0 ]
+                [ execArg_, execArg_0 ]
     , log =
-        \logArg ->
+        \logArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Pages", "Script" ]
@@ -707,9 +732,9 @@ call_ =
                              )
                      }
                 )
-                [ logArg ]
+                [ logArg_ ]
     , sleep =
-        \sleepArg ->
+        \sleepArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Pages", "Script" ]
@@ -726,9 +751,9 @@ call_ =
                              )
                      }
                 )
-                [ sleepArg ]
+                [ sleepArg_ ]
     , doThen =
-        \doThenArg doThenArg0 ->
+        \doThenArg_ doThenArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Pages", "Script" ]
@@ -753,9 +778,9 @@ call_ =
                              )
                      }
                 )
-                [ doThenArg, doThenArg0 ]
+                [ doThenArg_, doThenArg_0 ]
     , which =
-        \whichArg ->
+        \whichArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Pages", "Script" ]
@@ -774,9 +799,9 @@ call_ =
                              )
                      }
                 )
-                [ whichArg ]
+                [ whichArg_ ]
     , expectWhich =
-        \expectWhichArg ->
+        \expectWhichArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Pages", "Script" ]
@@ -798,9 +823,9 @@ call_ =
                              )
                      }
                 )
-                [ expectWhichArg ]
+                [ expectWhichArg_ ]
     , question =
-        \questionArg ->
+        \questionArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Pages", "Script" ]
@@ -817,7 +842,7 @@ call_ =
                              )
                      }
                 )
-                [ questionArg ]
+                [ questionArg_ ]
     }
 
 

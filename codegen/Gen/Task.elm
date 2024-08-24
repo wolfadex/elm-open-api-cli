@@ -1,6 +1,26 @@
-module Gen.Task exposing (andThen, annotation_, attempt, call_, fail, map, map2, map3, map4, map5, mapError, moduleName_, onError, perform, sequence, succeed, values_)
+module Gen.Task exposing
+    ( andThen
+    , annotation_
+    , attempt
+    , call_
+    , fail
+    , map
+    , map2
+    , map3
+    , map4
+    , map5
+    , mapError
+    , moduleName_
+    , onError
+    , perform
+    , sequence
+    , succeed
+    , values_
+    )
 
-{-| 
+{-|
+# Generated bindings for Task
+
 @docs moduleName_, perform, attempt, andThen, succeed, fail, sequence, map, map2, map3, map4, map5, onError, mapError, annotation_, call_, values_
 -}
 
@@ -40,7 +60,7 @@ delicious lasagna and give it to my `update` function as a `Msg` value."
 perform: (a -> msg) -> Task.Task Basics.Never a -> Platform.Cmd.Cmd msg
 -}
 perform : (Elm.Expression -> Elm.Expression) -> Elm.Expression -> Elm.Expression
-perform performArg performArg0 =
+perform performArg_ performArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Task" ]
@@ -60,7 +80,7 @@ perform performArg performArg0 =
                      )
              }
         )
-        [ Elm.functionReduced "performUnpack" performArg, performArg0 ]
+        [ Elm.functionReduced "performUnpack" performArg_, performArg_0 ]
 
 
 {-| This is very similar to [`perform`](#perform) except it can handle failures!
@@ -90,7 +110,7 @@ feeling for how commands fit into The Elm Architecture.
 attempt: (Result.Result x a -> msg) -> Task.Task x a -> Platform.Cmd.Cmd msg
 -}
 attempt : (Elm.Expression -> Elm.Expression) -> Elm.Expression -> Elm.Expression
-attempt attemptArg attemptArg0 =
+attempt attemptArg_ attemptArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Task" ]
@@ -114,7 +134,7 @@ attempt attemptArg attemptArg0 =
                      )
              }
         )
-        [ Elm.functionReduced "attemptUnpack" attemptArg, attemptArg0 ]
+        [ Elm.functionReduced "attemptUnpack" attemptArg_, attemptArg_0 ]
 
 
 {-| Chain together a task and a callback. The first task will run, and if it is
@@ -135,7 +155,7 @@ First the process sleeps for an hour **and then** it tells us what time it is.
 andThen: (a -> Task.Task x b) -> Task.Task x a -> Task.Task x b
 -}
 andThen : (Elm.Expression -> Elm.Expression) -> Elm.Expression -> Elm.Expression
-andThen andThenArg andThenArg0 =
+andThen andThenArg_ andThenArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Task" ]
@@ -163,7 +183,7 @@ andThen andThenArg andThenArg0 =
                      )
              }
         )
-        [ Elm.functionReduced "andThenUnpack" andThenArg, andThenArg0 ]
+        [ Elm.functionReduced "andThenUnpack" andThenArg_, andThenArg_0 ]
 
 
 {-| A task that succeeds immediately when run. It is usually used with
@@ -179,7 +199,7 @@ andThen andThenArg andThenArg0 =
 succeed: a -> Task.Task x a
 -}
 succeed : Elm.Expression -> Elm.Expression
-succeed succeedArg =
+succeed succeedArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Task" ]
@@ -196,7 +216,7 @@ succeed succeedArg =
                      )
              }
         )
-        [ succeedArg ]
+        [ succeedArg_ ]
 
 
 {-| A task that fails immediately when run. Like with `succeed`, this can be
@@ -211,7 +231,7 @@ used with `andThen` to check on the outcome of another task.
 fail: x -> Task.Task x a
 -}
 fail : Elm.Expression -> Elm.Expression
-fail failArg =
+fail failArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Task" ]
@@ -228,7 +248,7 @@ fail failArg =
                      )
              }
         )
-        [ failArg ]
+        [ failArg_ ]
 
 
 {-| Start with a list of tasks, and turn them into a single task that returns a
@@ -240,7 +260,7 @@ sequence fails.
 sequence: List (Task.Task x a) -> Task.Task x (List a)
 -}
 sequence : List Elm.Expression -> Elm.Expression
-sequence sequenceArg =
+sequence sequenceArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Task" ]
@@ -263,7 +283,7 @@ sequence sequenceArg =
                      )
              }
         )
-        [ Elm.list sequenceArg ]
+        [ Elm.list sequenceArg_ ]
 
 
 {-| Transform a task. Maybe you want to use [`elm/time`][time] to figure
@@ -285,7 +305,7 @@ out what time it will be in one hour:
 map: (a -> b) -> Task.Task x a -> Task.Task x b
 -}
 map : (Elm.Expression -> Elm.Expression) -> Elm.Expression -> Elm.Expression
-map mapArg mapArg0 =
+map mapArg_ mapArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Task" ]
@@ -307,7 +327,7 @@ map mapArg mapArg0 =
                      )
              }
         )
-        [ Elm.functionReduced "mapUnpack" mapArg, mapArg0 ]
+        [ Elm.functionReduced "mapUnpack" mapArg_, mapArg_0 ]
 
 
 {-| Put the results of two tasks together. For example, if we wanted to know
@@ -333,7 +353,7 @@ map2 :
     -> Elm.Expression
     -> Elm.Expression
     -> Elm.Expression
-map2 map2Arg map2Arg0 map2Arg1 =
+map2 map2Arg_ map2Arg_0 map2Arg_1 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Task" ]
@@ -364,10 +384,10 @@ map2 map2Arg map2Arg0 map2Arg1 =
         [ Elm.functionReduced
             "map2Unpack"
             (\functionReducedUnpack ->
-               Elm.functionReduced "unpack" (map2Arg functionReducedUnpack)
+               Elm.functionReduced "unpack" (map2Arg_ functionReducedUnpack)
             )
-        , map2Arg0
-        , map2Arg1
+        , map2Arg_0
+        , map2Arg_1
         ]
 
 
@@ -384,7 +404,7 @@ map3 :
     -> Elm.Expression
     -> Elm.Expression
     -> Elm.Expression
-map3 map3Arg map3Arg0 map3Arg1 map3Arg2 =
+map3 map3Arg_ map3Arg_0 map3Arg_1 map3Arg_2 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Task" ]
@@ -424,14 +444,14 @@ map3 map3Arg map3Arg0 map3Arg1 map3Arg2 =
                    (\functionReducedUnpack0 ->
                         Elm.functionReduced
                             "unpack"
-                            ((map3Arg functionReducedUnpack)
+                            ((map3Arg_ functionReducedUnpack)
                                  functionReducedUnpack0
                             )
                    )
             )
-        , map3Arg0
-        , map3Arg1
-        , map3Arg2
+        , map3Arg_0
+        , map3Arg_1
+        , map3Arg_2
         ]
 
 
@@ -454,7 +474,7 @@ map4 :
     -> Elm.Expression
     -> Elm.Expression
     -> Elm.Expression
-map4 map4Arg map4Arg0 map4Arg1 map4Arg2 map4Arg3 =
+map4 map4Arg_ map4Arg_0 map4Arg_1 map4Arg_2 map4Arg_3 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Task" ]
@@ -505,7 +525,7 @@ map4 map4Arg map4Arg0 map4Arg1 map4Arg2 map4Arg3 =
                             (\functionReducedUnpack_2_1_2_0_2_0_2_0_0 ->
                                  Elm.functionReduced
                                      "unpack"
-                                     (((map4Arg functionReducedUnpack)
+                                     (((map4Arg_ functionReducedUnpack)
                                            functionReducedUnpack0
                                       )
                                           functionReducedUnpack_2_1_2_0_2_0_2_0_0
@@ -513,10 +533,10 @@ map4 map4Arg map4Arg0 map4Arg1 map4Arg2 map4Arg3 =
                             )
                    )
             )
-        , map4Arg0
-        , map4Arg1
-        , map4Arg2
-        , map4Arg3
+        , map4Arg_0
+        , map4Arg_1
+        , map4Arg_2
+        , map4Arg_3
         ]
 
 
@@ -542,7 +562,7 @@ map5 :
     -> Elm.Expression
     -> Elm.Expression
     -> Elm.Expression
-map5 map5Arg map5Arg0 map5Arg1 map5Arg2 map5Arg3 map5Arg4 =
+map5 map5Arg_ map5Arg_0 map5Arg_1 map5Arg_2 map5Arg_3 map5Arg_4 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Task" ]
@@ -601,7 +621,8 @@ map5 map5Arg map5Arg0 map5Arg1 map5Arg2 map5Arg3 map5Arg4 =
                                      (\functionReducedUnpack_2_1_2_1_2_0_2_0_2_0_0 ->
                                           Elm.functionReduced
                                               "unpack"
-                                              ((((map5Arg functionReducedUnpack)
+                                              ((((map5Arg_ functionReducedUnpack
+                                                 )
                                                      functionReducedUnpack0
                                                 )
                                                     functionReducedUnpack_2_1_2_0_2_0_2_0_0
@@ -612,11 +633,11 @@ map5 map5Arg map5Arg0 map5Arg1 map5Arg2 map5Arg3 map5Arg4 =
                             )
                    )
             )
-        , map5Arg0
-        , map5Arg1
-        , map5Arg2
-        , map5Arg3
-        , map5Arg4
+        , map5Arg_0
+        , map5Arg_1
+        , map5Arg_2
+        , map5Arg_3
+        , map5Arg_4
         ]
 
 
@@ -634,7 +655,7 @@ callback to recover.
 onError: (x -> Task.Task y a) -> Task.Task x a -> Task.Task y a
 -}
 onError : (Elm.Expression -> Elm.Expression) -> Elm.Expression -> Elm.Expression
-onError onErrorArg onErrorArg0 =
+onError onErrorArg_ onErrorArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Task" ]
@@ -662,7 +683,7 @@ onError onErrorArg onErrorArg0 =
                      )
              }
         )
-        [ Elm.functionReduced "onErrorUnpack" onErrorArg, onErrorArg0 ]
+        [ Elm.functionReduced "onErrorUnpack" onErrorArg_, onErrorArg_0 ]
 
 
 {-| Transform the error value. This can be useful if you need a bunch of error
@@ -683,7 +704,7 @@ mapError: (x -> y) -> Task.Task x a -> Task.Task y a
 -}
 mapError :
     (Elm.Expression -> Elm.Expression) -> Elm.Expression -> Elm.Expression
-mapError mapErrorArg mapErrorArg0 =
+mapError mapErrorArg_ mapErrorArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Task" ]
@@ -705,7 +726,7 @@ mapError mapErrorArg mapErrorArg0 =
                      )
              }
         )
-        [ Elm.functionReduced "mapErrorUnpack" mapErrorArg, mapErrorArg0 ]
+        [ Elm.functionReduced "mapErrorUnpack" mapErrorArg_, mapErrorArg_0 ]
 
 
 annotation_ : { task : Type.Annotation -> Type.Annotation -> Type.Annotation }
@@ -760,7 +781,7 @@ call_ :
     }
 call_ =
     { perform =
-        \performArg performArg0 ->
+        \performArg_ performArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Task" ]
@@ -782,9 +803,9 @@ call_ =
                              )
                      }
                 )
-                [ performArg, performArg0 ]
+                [ performArg_, performArg_0 ]
     , attempt =
-        \attemptArg attemptArg0 ->
+        \attemptArg_ attemptArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Task" ]
@@ -808,9 +829,9 @@ call_ =
                              )
                      }
                 )
-                [ attemptArg, attemptArg0 ]
+                [ attemptArg_, attemptArg_0 ]
     , andThen =
-        \andThenArg andThenArg0 ->
+        \andThenArg_ andThenArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Task" ]
@@ -838,9 +859,9 @@ call_ =
                              )
                      }
                 )
-                [ andThenArg, andThenArg0 ]
+                [ andThenArg_, andThenArg_0 ]
     , succeed =
-        \succeedArg ->
+        \succeedArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Task" ]
@@ -857,9 +878,9 @@ call_ =
                              )
                      }
                 )
-                [ succeedArg ]
+                [ succeedArg_ ]
     , fail =
-        \failArg ->
+        \failArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Task" ]
@@ -876,9 +897,9 @@ call_ =
                              )
                      }
                 )
-                [ failArg ]
+                [ failArg_ ]
     , sequence =
-        \sequenceArg ->
+        \sequenceArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Task" ]
@@ -903,9 +924,9 @@ call_ =
                              )
                      }
                 )
-                [ sequenceArg ]
+                [ sequenceArg_ ]
     , map =
-        \mapArg mapArg0 ->
+        \mapArg_ mapArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Task" ]
@@ -929,9 +950,9 @@ call_ =
                              )
                      }
                 )
-                [ mapArg, mapArg0 ]
+                [ mapArg_, mapArg_0 ]
     , map2 =
-        \map2Arg map2Arg0 map2Arg1 ->
+        \map2Arg_ map2Arg_0 map2Arg_1 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Task" ]
@@ -959,9 +980,9 @@ call_ =
                              )
                      }
                 )
-                [ map2Arg, map2Arg0, map2Arg1 ]
+                [ map2Arg_, map2Arg_0, map2Arg_1 ]
     , map3 =
-        \map3Arg map3Arg0 map3Arg1 map3Arg2 ->
+        \map3Arg_ map3Arg_0 map3Arg_1 map3Arg_2 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Task" ]
@@ -996,9 +1017,9 @@ call_ =
                              )
                      }
                 )
-                [ map3Arg, map3Arg0, map3Arg1, map3Arg2 ]
+                [ map3Arg_, map3Arg_0, map3Arg_1, map3Arg_2 ]
     , map4 =
-        \map4Arg map4Arg0 map4Arg1 map4Arg2 map4Arg3 ->
+        \map4Arg_ map4Arg_0 map4Arg_1 map4Arg_2 map4Arg_3 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Task" ]
@@ -1038,9 +1059,9 @@ call_ =
                              )
                      }
                 )
-                [ map4Arg, map4Arg0, map4Arg1, map4Arg2, map4Arg3 ]
+                [ map4Arg_, map4Arg_0, map4Arg_1, map4Arg_2, map4Arg_3 ]
     , map5 =
-        \map5Arg map5Arg0 map5Arg1 map5Arg2 map5Arg3 map5Arg4 ->
+        \map5Arg_ map5Arg_0 map5Arg_1 map5Arg_2 map5Arg_3 map5Arg_4 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Task" ]
@@ -1085,9 +1106,15 @@ call_ =
                              )
                      }
                 )
-                [ map5Arg, map5Arg0, map5Arg1, map5Arg2, map5Arg3, map5Arg4 ]
+                [ map5Arg_
+                , map5Arg_0
+                , map5Arg_1
+                , map5Arg_2
+                , map5Arg_3
+                , map5Arg_4
+                ]
     , onError =
-        \onErrorArg onErrorArg0 ->
+        \onErrorArg_ onErrorArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Task" ]
@@ -1115,9 +1142,9 @@ call_ =
                              )
                      }
                 )
-                [ onErrorArg, onErrorArg0 ]
+                [ onErrorArg_, onErrorArg_0 ]
     , mapError =
-        \mapErrorArg mapErrorArg0 ->
+        \mapErrorArg_ mapErrorArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Task" ]
@@ -1141,7 +1168,7 @@ call_ =
                              )
                      }
                 )
-                [ mapErrorArg, mapErrorArg0 ]
+                [ mapErrorArg_, mapErrorArg_0 ]
     }
 
 

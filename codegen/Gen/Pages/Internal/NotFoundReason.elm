@@ -1,12 +1,23 @@
-module Gen.Pages.Internal.NotFoundReason exposing (annotation_, call_, caseOf_, document, make_, moduleName_, values_)
+module Gen.Pages.Internal.NotFoundReason exposing
+    ( annotation_
+    , call_
+    , caseOf_
+    , document
+    , make_
+    , moduleName_
+    , values_
+    )
 
-{-| 
+{-|
+# Generated bindings for Pages.Internal.NotFoundReason
+
 @docs moduleName_, document, annotation_, make_, caseOf_, call_, values_
 -}
 
 
 import Elm
 import Elm.Annotation as Type
+import Elm.Arg
 import Elm.Case
 
 
@@ -22,7 +33,7 @@ moduleName_ =
     -> { title : String, body : List (Html.Html msg) }
 -}
 document : List Elm.Expression -> Elm.Expression -> Elm.Expression
-document documentArg documentArg0 =
+document documentArg_ documentArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Pages", "Internal", "NotFoundReason" ]
@@ -56,7 +67,7 @@ document documentArg documentArg0 =
                      )
              }
         )
-        [ Elm.list documentArg, documentArg0 ]
+        [ Elm.list documentArg_, documentArg_0 ]
 
 
 annotation_ :
@@ -228,19 +239,6 @@ make_ =
     }
 
 
-caseOf_ :
-    { notFoundReason :
-        Elm.Expression
-        -> { notFoundReasonTags_0_0
-            | noMatchingRoute : Elm.Expression
-            , notPrerendered :
-                Elm.Expression -> Elm.Expression -> Elm.Expression
-            , notPrerenderedOrHandledByFallback :
-                Elm.Expression -> Elm.Expression -> Elm.Expression
-            , unhandledServerRoute : Elm.Expression -> Elm.Expression
-        }
-        -> Elm.Expression
-    }
 caseOf_ =
     { notFoundReason =
         \notFoundReasonExpression notFoundReasonTags ->
@@ -251,52 +249,45 @@ caseOf_ =
                      "NotFoundReason"
                      []
                 )
-                [ Elm.Case.branch0
-                    "NoMatchingRoute"
-                    notFoundReasonTags.noMatchingRoute
-                , Elm.Case.branch2
-                    "NotPrerendered"
-                    ( "pagesInternalNotFoundReasonModuleContext"
-                    , Type.namedWith
-                          [ "Pages", "Internal", "NotFoundReason" ]
-                          "ModuleContext"
-                          []
+                [ Elm.Case.branch
+                    (Elm.Arg.customType
+                       "NoMatchingRoute"
+                       notFoundReasonTags.noMatchingRoute
                     )
-                    ( "listList"
-                    , Type.list
-                          (Type.namedWith
-                               [ "Pages", "Internal", "NotFoundReason" ]
-                               "Record"
-                               []
-                          )
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType
+                       "NotPrerendered"
+                       notFoundReasonTags.notPrerendered |> Elm.Arg.item
+                                                                  (Elm.Arg.var
+                                                                         "pagesInternalNotFoundReasonModuleContext"
+                                                                  ) |> Elm.Arg.item
+                                                                             (Elm.Arg.var
+                                                                                    "listList"
+                                                                             )
                     )
-                    notFoundReasonTags.notPrerendered
-                , Elm.Case.branch2
-                    "NotPrerenderedOrHandledByFallback"
-                    ( "pagesInternalNotFoundReasonModuleContext"
-                    , Type.namedWith
-                          [ "Pages", "Internal", "NotFoundReason" ]
-                          "ModuleContext"
-                          []
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType
+                       "NotPrerenderedOrHandledByFallback"
+                       notFoundReasonTags.notPrerenderedOrHandledByFallback |> Elm.Arg.item
+                                                                                     (Elm.Arg.var
+                                                                                            "pagesInternalNotFoundReasonModuleContext"
+                                                                                     ) |> Elm.Arg.item
+                                                                                                (Elm.Arg.var
+                                                                                                       "listList"
+                                                                                                )
                     )
-                    ( "listList"
-                    , Type.list
-                          (Type.namedWith
-                               [ "Pages", "Internal", "NotFoundReason" ]
-                               "Record"
-                               []
-                          )
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType
+                       "UnhandledServerRoute"
+                       notFoundReasonTags.unhandledServerRoute |> Elm.Arg.item
+                                                                        (Elm.Arg.var
+                                                                               "pagesInternalNotFoundReasonModuleContext"
+                                                                        )
                     )
-                    notFoundReasonTags.notPrerenderedOrHandledByFallback
-                , Elm.Case.branch1
-                    "UnhandledServerRoute"
-                    ( "pagesInternalNotFoundReasonModuleContext"
-                    , Type.namedWith
-                          [ "Pages", "Internal", "NotFoundReason" ]
-                          "ModuleContext"
-                          []
-                    )
-                    notFoundReasonTags.unhandledServerRoute
+                    Basics.identity
                 ]
     }
 
@@ -304,7 +295,7 @@ caseOf_ =
 call_ : { document : Elm.Expression -> Elm.Expression -> Elm.Expression }
 call_ =
     { document =
-        \documentArg documentArg0 ->
+        \documentArg_ documentArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Pages", "Internal", "NotFoundReason" ]
@@ -338,7 +329,7 @@ call_ =
                              )
                      }
                 )
-                [ documentArg, documentArg0 ]
+                [ documentArg_, documentArg_0 ]
     }
 
 

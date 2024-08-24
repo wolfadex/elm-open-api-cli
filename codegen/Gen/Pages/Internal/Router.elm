@@ -1,6 +1,19 @@
-module Gen.Pages.Internal.Router exposing (annotation_, call_, firstMatch, fromOptionalSplat, make_, maybeToList, moduleName_, nonEmptyToList, toNonEmpty, values_)
+module Gen.Pages.Internal.Router exposing
+    ( annotation_
+    , call_
+    , firstMatch
+    , fromOptionalSplat
+    , make_
+    , maybeToList
+    , moduleName_
+    , nonEmptyToList
+    , toNonEmpty
+    , values_
+    )
 
-{-| 
+{-|
+# Generated bindings for Pages.Internal.Router
+
 @docs moduleName_, firstMatch, fromOptionalSplat, maybeToList, nonEmptyToList, toNonEmpty, annotation_, make_, call_, values_
 -}
 
@@ -17,7 +30,7 @@ moduleName_ =
 
 {-| firstMatch: List (Pages.Internal.Router.Matcher route) -> String -> Maybe route -}
 firstMatch : List Elm.Expression -> String -> Elm.Expression
-firstMatch firstMatchArg firstMatchArg0 =
+firstMatch firstMatchArg_ firstMatchArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Pages", "Internal", "Router" ]
@@ -37,12 +50,12 @@ firstMatch firstMatchArg firstMatchArg0 =
                      )
              }
         )
-        [ Elm.list firstMatchArg, Elm.string firstMatchArg0 ]
+        [ Elm.list firstMatchArg_, Elm.string firstMatchArg_0 ]
 
 
 {-| fromOptionalSplat: Maybe String -> List String -}
 fromOptionalSplat : Elm.Expression -> Elm.Expression
-fromOptionalSplat fromOptionalSplatArg =
+fromOptionalSplat fromOptionalSplatArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Pages", "Internal", "Router" ]
@@ -55,12 +68,12 @@ fromOptionalSplat fromOptionalSplatArg =
                      )
              }
         )
-        [ fromOptionalSplatArg ]
+        [ fromOptionalSplatArg_ ]
 
 
 {-| maybeToList: Maybe String -> List String -}
 maybeToList : Elm.Expression -> Elm.Expression
-maybeToList maybeToListArg =
+maybeToList maybeToListArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Pages", "Internal", "Router" ]
@@ -73,12 +86,12 @@ maybeToList maybeToListArg =
                      )
              }
         )
-        [ maybeToListArg ]
+        [ maybeToListArg_ ]
 
 
 {-| nonEmptyToList: ( String, List String ) -> List String -}
 nonEmptyToList : Elm.Expression -> Elm.Expression
-nonEmptyToList nonEmptyToListArg =
+nonEmptyToList nonEmptyToListArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Pages", "Internal", "Router" ]
@@ -91,12 +104,12 @@ nonEmptyToList nonEmptyToListArg =
                      )
              }
         )
-        [ nonEmptyToListArg ]
+        [ nonEmptyToListArg_ ]
 
 
 {-| toNonEmpty: String -> ( String, List String ) -}
 toNonEmpty : String -> Elm.Expression
-toNonEmpty toNonEmptyArg =
+toNonEmpty toNonEmptyArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Pages", "Internal", "Router" ]
@@ -109,7 +122,7 @@ toNonEmpty toNonEmptyArg =
                      )
              }
         )
-        [ Elm.string toNonEmptyArg ]
+        [ Elm.string toNonEmptyArg_ ]
 
 
 annotation_ : { matcher : Type.Annotation -> Type.Annotation }
@@ -171,7 +184,7 @@ call_ :
     }
 call_ =
     { firstMatch =
-        \firstMatchArg firstMatchArg0 ->
+        \firstMatchArg_ firstMatchArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Pages", "Internal", "Router" ]
@@ -191,9 +204,9 @@ call_ =
                              )
                      }
                 )
-                [ firstMatchArg, firstMatchArg0 ]
+                [ firstMatchArg_, firstMatchArg_0 ]
     , fromOptionalSplat =
-        \fromOptionalSplatArg ->
+        \fromOptionalSplatArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Pages", "Internal", "Router" ]
@@ -206,9 +219,9 @@ call_ =
                              )
                      }
                 )
-                [ fromOptionalSplatArg ]
+                [ fromOptionalSplatArg_ ]
     , maybeToList =
-        \maybeToListArg ->
+        \maybeToListArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Pages", "Internal", "Router" ]
@@ -221,9 +234,9 @@ call_ =
                              )
                      }
                 )
-                [ maybeToListArg ]
+                [ maybeToListArg_ ]
     , nonEmptyToList =
-        \nonEmptyToListArg ->
+        \nonEmptyToListArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Pages", "Internal", "Router" ]
@@ -239,9 +252,9 @@ call_ =
                              )
                      }
                 )
-                [ nonEmptyToListArg ]
+                [ nonEmptyToListArg_ ]
     , toNonEmpty =
-        \toNonEmptyArg ->
+        \toNonEmptyArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Pages", "Internal", "Router" ]
@@ -257,7 +270,7 @@ call_ =
                              )
                      }
                 )
-                [ toNonEmptyArg ]
+                [ toNonEmptyArg_ ]
     }
 
 

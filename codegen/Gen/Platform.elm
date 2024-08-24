@@ -1,6 +1,16 @@
-module Gen.Platform exposing (annotation_, call_, moduleName_, sendToApp, sendToSelf, values_, worker)
+module Gen.Platform exposing
+    ( annotation_
+    , call_
+    , moduleName_
+    , sendToApp
+    , sendToSelf
+    , values_
+    , worker
+    )
 
-{-| 
+{-|
+# Generated bindings for Platform
+
 @docs moduleName_, worker, sendToApp, sendToSelf, annotation_, call_, values_
 -}
 
@@ -48,7 +58,7 @@ worker :
     , subscriptions : Elm.Expression -> Elm.Expression
     }
     -> Elm.Expression
-worker workerArg =
+worker workerArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Platform" ]
@@ -102,7 +112,7 @@ worker workerArg =
         [ Elm.record
             [ Tuple.pair
                   "init"
-                  (Elm.functionReduced "workerUnpack" workerArg.init)
+                  (Elm.functionReduced "workerUnpack" workerArg_.init)
             , Tuple.pair
                   "update"
                   (Elm.functionReduced
@@ -110,12 +120,12 @@ worker workerArg =
                        (\functionReducedUnpack ->
                             Elm.functionReduced
                                 "unpack"
-                                (workerArg.update functionReducedUnpack)
+                                (workerArg_.update functionReducedUnpack)
                        )
                   )
             , Tuple.pair
                   "subscriptions"
-                  (Elm.functionReduced "workerUnpack" workerArg.subscriptions)
+                  (Elm.functionReduced "workerUnpack" workerArg_.subscriptions)
             ]
         ]
 
@@ -126,7 +136,7 @@ be handled by the overall `update` function, just like events from `Html`.
 sendToApp: Platform.Router msg a -> msg -> Platform.Task x ()
 -}
 sendToApp : Elm.Expression -> Elm.Expression -> Elm.Expression
-sendToApp sendToAppArg sendToAppArg0 =
+sendToApp sendToAppArg_ sendToAppArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Platform" ]
@@ -148,7 +158,7 @@ sendToApp sendToAppArg sendToAppArg0 =
                      )
              }
         )
-        [ sendToAppArg, sendToAppArg0 ]
+        [ sendToAppArg_, sendToAppArg_0 ]
 
 
 {-| Send the router a message for your effect manager. This message will
@@ -160,7 +170,7 @@ As an example, the effect manager for web sockets
 sendToSelf: Platform.Router a msg -> msg -> Platform.Task x ()
 -}
 sendToSelf : Elm.Expression -> Elm.Expression -> Elm.Expression
-sendToSelf sendToSelfArg sendToSelfArg0 =
+sendToSelf sendToSelfArg_ sendToSelfArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Platform" ]
@@ -182,7 +192,7 @@ sendToSelf sendToSelfArg sendToSelfArg0 =
                      )
              }
         )
-        [ sendToSelfArg, sendToSelfArg0 ]
+        [ sendToSelfArg_, sendToSelfArg_0 ]
 
 
 annotation_ :
@@ -216,7 +226,7 @@ call_ :
     }
 call_ =
     { worker =
-        \workerArg ->
+        \workerArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Platform" ]
@@ -271,9 +281,9 @@ call_ =
                              )
                      }
                 )
-                [ workerArg ]
+                [ workerArg_ ]
     , sendToApp =
-        \sendToAppArg sendToAppArg0 ->
+        \sendToAppArg_ sendToAppArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Platform" ]
@@ -295,9 +305,9 @@ call_ =
                              )
                      }
                 )
-                [ sendToAppArg, sendToAppArg0 ]
+                [ sendToAppArg_, sendToAppArg_0 ]
     , sendToSelf =
-        \sendToSelfArg sendToSelfArg0 ->
+        \sendToSelfArg_ sendToSelfArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Platform" ]
@@ -319,7 +329,7 @@ call_ =
                              )
                      }
                 )
-                [ sendToSelfArg, sendToSelfArg0 ]
+                [ sendToSelfArg_, sendToSelfArg_0 ]
     }
 
 

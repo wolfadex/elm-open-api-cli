@@ -1,6 +1,25 @@
-module Gen.ApiRoute exposing (annotation_, call_, capture, getBuildTimeRoutes, getGlobalHeadTagsBackendTask, literal, moduleName_, preRender, preRenderWithFallback, serverRender, single, slash, succeed, toJson, values_, withGlobalHeadTags)
+module Gen.ApiRoute exposing
+    ( annotation_
+    , call_
+    , capture
+    , getBuildTimeRoutes
+    , getGlobalHeadTagsBackendTask
+    , literal
+    , moduleName_
+    , preRender
+    , preRenderWithFallback
+    , serverRender
+    , single
+    , slash
+    , succeed
+    , toJson
+    , values_
+    , withGlobalHeadTags
+    )
 
-{-| 
+{-|
+# Generated bindings for ApiRoute
+
 @docs moduleName_, single, preRender, serverRender, preRenderWithFallback, capture, literal, slash, succeed, withGlobalHeadTags, toJson, getBuildTimeRoutes, getGlobalHeadTagsBackendTask, annotation_, call_, values_
 -}
 
@@ -23,7 +42,7 @@ single:
     -> ApiRoute.ApiRoute ApiRoute.Response
 -}
 single : Elm.Expression -> Elm.Expression
-single singleArg =
+single singleArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "ApiRoute" ]
@@ -54,7 +73,7 @@ single singleArg =
                      )
              }
         )
-        [ singleArg ]
+        [ singleArg_ ]
 
 
 {-| Pre-render files for a given route pattern statically at build-time. If you only need to serve a single file, you can use [`single`](#single) instead.
@@ -112,7 +131,7 @@ preRender:
 -}
 preRender :
     (Elm.Expression -> Elm.Expression) -> Elm.Expression -> Elm.Expression
-preRender preRenderArg preRenderArg0 =
+preRender preRenderArg_ preRenderArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "ApiRoute" ]
@@ -155,7 +174,7 @@ preRender preRenderArg preRenderArg0 =
                      )
              }
         )
-        [ Elm.functionReduced "preRenderUnpack" preRenderArg, preRenderArg0 ]
+        [ Elm.functionReduced "preRenderUnpack" preRenderArg_, preRenderArg_0 ]
 
 
 {-| serverRender: 
@@ -164,7 +183,7 @@ preRender preRenderArg preRenderArg0 =
     -> ApiRoute.ApiRoute ApiRoute.Response
 -}
 serverRender : Elm.Expression -> Elm.Expression
-serverRender serverRenderArg =
+serverRender serverRenderArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "ApiRoute" ]
@@ -213,7 +232,7 @@ serverRender serverRenderArg =
                      )
              }
         )
-        [ serverRenderArg ]
+        [ serverRenderArg_ ]
 
 
 {-| preRenderWithFallback: 
@@ -224,7 +243,7 @@ serverRender serverRenderArg =
 -}
 preRenderWithFallback :
     (Elm.Expression -> Elm.Expression) -> Elm.Expression -> Elm.Expression
-preRenderWithFallback preRenderWithFallbackArg preRenderWithFallbackArg0 =
+preRenderWithFallback preRenderWithFallbackArg_ preRenderWithFallbackArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "ApiRoute" ]
@@ -274,8 +293,8 @@ preRenderWithFallback preRenderWithFallbackArg preRenderWithFallbackArg0 =
         )
         [ Elm.functionReduced
             "preRenderWithFallbackUnpack"
-            preRenderWithFallbackArg
-        , preRenderWithFallbackArg0
+            preRenderWithFallbackArg_
+        , preRenderWithFallbackArg_0
         ]
 
 
@@ -286,7 +305,7 @@ capture:
     -> ApiRoute.ApiRouteBuilder a (String -> constructor)
 -}
 capture : Elm.Expression -> Elm.Expression
-capture captureArg =
+capture captureArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "ApiRoute" ]
@@ -313,7 +332,7 @@ capture captureArg =
                      )
              }
         )
-        [ captureArg ]
+        [ captureArg_ ]
 
 
 {-| A literal String segment of a route.
@@ -324,7 +343,7 @@ literal:
     -> ApiRoute.ApiRouteBuilder a constructor
 -}
 literal : String -> Elm.Expression -> Elm.Expression
-literal literalArg literalArg0 =
+literal literalArg_ literalArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "ApiRoute" ]
@@ -346,7 +365,7 @@ literal literalArg literalArg0 =
                      )
              }
         )
-        [ Elm.string literalArg, literalArg0 ]
+        [ Elm.string literalArg_, literalArg_0 ]
 
 
 {-| A path separator within the route.
@@ -354,7 +373,7 @@ literal literalArg literalArg0 =
 slash: ApiRoute.ApiRouteBuilder a constructor -> ApiRoute.ApiRouteBuilder a constructor
 -}
 slash : Elm.Expression -> Elm.Expression
-slash slashArg =
+slash slashArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "ApiRoute" ]
@@ -375,7 +394,7 @@ slash slashArg =
                      )
              }
         )
-        [ slashArg ]
+        [ slashArg_ ]
 
 
 {-| Starts the definition of a route with any captured segments.
@@ -383,7 +402,7 @@ slash slashArg =
 succeed: a -> ApiRoute.ApiRouteBuilder a (List String)
 -}
 succeed : Elm.Expression -> Elm.Expression
-succeed succeedArg =
+succeed succeedArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "ApiRoute" ]
@@ -400,7 +419,7 @@ succeed succeedArg =
                      )
              }
         )
-        [ succeedArg ]
+        [ succeedArg_ ]
 
 
 {-| Include head tags on every page's HTML.
@@ -411,7 +430,7 @@ withGlobalHeadTags:
     -> ApiRoute.ApiRoute response
 -}
 withGlobalHeadTags : Elm.Expression -> Elm.Expression -> Elm.Expression
-withGlobalHeadTags withGlobalHeadTagsArg withGlobalHeadTagsArg0 =
+withGlobalHeadTags withGlobalHeadTagsArg_ withGlobalHeadTagsArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "ApiRoute" ]
@@ -438,7 +457,7 @@ withGlobalHeadTags withGlobalHeadTagsArg withGlobalHeadTagsArg0 =
                      )
              }
         )
-        [ withGlobalHeadTagsArg, withGlobalHeadTagsArg0 ]
+        [ withGlobalHeadTagsArg_, withGlobalHeadTagsArg_0 ]
 
 
 {-| Turn the route into a pattern in JSON format. For internal uses.
@@ -446,7 +465,7 @@ withGlobalHeadTags withGlobalHeadTagsArg withGlobalHeadTagsArg0 =
 toJson: ApiRoute.ApiRoute response -> Json.Encode.Value
 -}
 toJson : Elm.Expression -> Elm.Expression
-toJson toJsonArg =
+toJson toJsonArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "ApiRoute" ]
@@ -463,7 +482,7 @@ toJson toJsonArg =
                      )
              }
         )
-        [ toJsonArg ]
+        [ toJsonArg_ ]
 
 
 {-| For internal use by generated code. Not so useful in user-land.
@@ -473,7 +492,7 @@ getBuildTimeRoutes:
     -> BackendTask.BackendTask FatalError.FatalError (List String)
 -}
 getBuildTimeRoutes : Elm.Expression -> Elm.Expression
-getBuildTimeRoutes getBuildTimeRoutesArg =
+getBuildTimeRoutes getBuildTimeRoutesArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "ApiRoute" ]
@@ -496,7 +515,7 @@ getBuildTimeRoutes getBuildTimeRoutesArg =
                      )
              }
         )
-        [ getBuildTimeRoutesArg ]
+        [ getBuildTimeRoutesArg_ ]
 
 
 {-| For internal use.
@@ -506,7 +525,7 @@ getGlobalHeadTagsBackendTask:
     -> Maybe (BackendTask.BackendTask FatalError.FatalError (List Head.Tag))
 -}
 getGlobalHeadTagsBackendTask : Elm.Expression -> Elm.Expression
-getGlobalHeadTagsBackendTask getGlobalHeadTagsBackendTaskArg =
+getGlobalHeadTagsBackendTask getGlobalHeadTagsBackendTaskArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "ApiRoute" ]
@@ -535,7 +554,7 @@ getGlobalHeadTagsBackendTask getGlobalHeadTagsBackendTaskArg =
                      )
              }
         )
-        [ getGlobalHeadTagsBackendTaskArg ]
+        [ getGlobalHeadTagsBackendTaskArg_ ]
 
 
 annotation_ :
@@ -591,7 +610,7 @@ call_ :
     }
 call_ =
     { single =
-        \singleArg ->
+        \singleArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "ApiRoute" ]
@@ -626,9 +645,9 @@ call_ =
                              )
                      }
                 )
-                [ singleArg ]
+                [ singleArg_ ]
     , preRender =
-        \preRenderArg preRenderArg0 ->
+        \preRenderArg_ preRenderArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "ApiRoute" ]
@@ -675,9 +694,9 @@ call_ =
                              )
                      }
                 )
-                [ preRenderArg, preRenderArg0 ]
+                [ preRenderArg_, preRenderArg_0 ]
     , serverRender =
-        \serverRenderArg ->
+        \serverRenderArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "ApiRoute" ]
@@ -730,9 +749,9 @@ call_ =
                              )
                      }
                 )
-                [ serverRenderArg ]
+                [ serverRenderArg_ ]
     , preRenderWithFallback =
-        \preRenderWithFallbackArg preRenderWithFallbackArg0 ->
+        \preRenderWithFallbackArg_ preRenderWithFallbackArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "ApiRoute" ]
@@ -790,9 +809,9 @@ call_ =
                              )
                      }
                 )
-                [ preRenderWithFallbackArg, preRenderWithFallbackArg0 ]
+                [ preRenderWithFallbackArg_, preRenderWithFallbackArg_0 ]
     , capture =
-        \captureArg ->
+        \captureArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "ApiRoute" ]
@@ -821,9 +840,9 @@ call_ =
                              )
                      }
                 )
-                [ captureArg ]
+                [ captureArg_ ]
     , literal =
-        \literalArg literalArg0 ->
+        \literalArg_ literalArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "ApiRoute" ]
@@ -845,9 +864,9 @@ call_ =
                              )
                      }
                 )
-                [ literalArg, literalArg0 ]
+                [ literalArg_, literalArg_0 ]
     , slash =
-        \slashArg ->
+        \slashArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "ApiRoute" ]
@@ -868,9 +887,9 @@ call_ =
                              )
                      }
                 )
-                [ slashArg ]
+                [ slashArg_ ]
     , succeed =
-        \succeedArg ->
+        \succeedArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "ApiRoute" ]
@@ -887,9 +906,9 @@ call_ =
                              )
                      }
                 )
-                [ succeedArg ]
+                [ succeedArg_ ]
     , withGlobalHeadTags =
-        \withGlobalHeadTagsArg withGlobalHeadTagsArg0 ->
+        \withGlobalHeadTagsArg_ withGlobalHeadTagsArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "ApiRoute" ]
@@ -920,9 +939,9 @@ call_ =
                              )
                      }
                 )
-                [ withGlobalHeadTagsArg, withGlobalHeadTagsArg0 ]
+                [ withGlobalHeadTagsArg_, withGlobalHeadTagsArg_0 ]
     , toJson =
-        \toJsonArg ->
+        \toJsonArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "ApiRoute" ]
@@ -943,9 +962,9 @@ call_ =
                              )
                      }
                 )
-                [ toJsonArg ]
+                [ toJsonArg_ ]
     , getBuildTimeRoutes =
-        \getBuildTimeRoutesArg ->
+        \getBuildTimeRoutesArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "ApiRoute" ]
@@ -971,9 +990,9 @@ call_ =
                              )
                      }
                 )
-                [ getBuildTimeRoutesArg ]
+                [ getBuildTimeRoutesArg_ ]
     , getGlobalHeadTagsBackendTask =
-        \getGlobalHeadTagsBackendTaskArg ->
+        \getGlobalHeadTagsBackendTaskArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "ApiRoute" ]
@@ -1006,7 +1025,7 @@ call_ =
                              )
                      }
                 )
-                [ getGlobalHeadTagsBackendTaskArg ]
+                [ getGlobalHeadTagsBackendTaskArg_ ]
     }
 
 

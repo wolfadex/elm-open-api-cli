@@ -1,6 +1,57 @@
-module Gen.String exposing (all, annotation_, any, append, call_, concat, cons, contains, dropLeft, dropRight, endsWith, filter, foldl, foldr, fromChar, fromFloat, fromInt, fromList, indexes, indices, isEmpty, join, left, length, lines, map, moduleName_, pad, padLeft, padRight, repeat, replace, reverse, right, slice, split, startsWith, toFloat, toInt, toList, toLower, toUpper, trim, trimLeft, trimRight, uncons, values_, words)
+module Gen.String exposing
+    ( all
+    , annotation_
+    , any
+    , append
+    , call_
+    , concat
+    , cons
+    , contains
+    , dropLeft
+    , dropRight
+    , endsWith
+    , filter
+    , foldl
+    , foldr
+    , fromChar
+    , fromFloat
+    , fromInt
+    , fromList
+    , indexes
+    , indices
+    , isEmpty
+    , join
+    , left
+    , length
+    , lines
+    , map
+    , moduleName_
+    , pad
+    , padLeft
+    , padRight
+    , repeat
+    , replace
+    , reverse
+    , right
+    , slice
+    , split
+    , startsWith
+    , toFloat
+    , toInt
+    , toList
+    , toLower
+    , toUpper
+    , trim
+    , trimLeft
+    , trimRight
+    , uncons
+    , values_
+    , words
+    )
 
-{-| 
+{-|
+# Generated bindings for String
+
 @docs moduleName_, isEmpty, length, reverse, repeat, replace, append, concat, split, join, words, lines, slice, left, right, dropLeft, dropRight, contains, startsWith, endsWith, indexes, indices, toInt, fromInt, toFloat, fromFloat, fromChar, cons, uncons, toList, fromList, toUpper, toLower, pad, padLeft, padRight, trim, trimLeft, trimRight, map, filter, foldl, foldr, any, all, annotation_, call_, values_
 -}
 
@@ -23,7 +74,7 @@ moduleName_ =
 isEmpty: String -> Bool
 -}
 isEmpty : String -> Elm.Expression
-isEmpty isEmptyArg =
+isEmpty isEmptyArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "String" ]
@@ -31,7 +82,7 @@ isEmpty isEmptyArg =
              , annotation = Just (Type.function [ Type.string ] Type.bool)
              }
         )
-        [ Elm.string isEmptyArg ]
+        [ Elm.string isEmptyArg_ ]
 
 
 {-| Get the length of a string.
@@ -42,7 +93,7 @@ isEmpty isEmptyArg =
 length: String -> Int
 -}
 length : String -> Elm.Expression
-length lengthArg =
+length lengthArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "String" ]
@@ -50,7 +101,7 @@ length lengthArg =
              , annotation = Just (Type.function [ Type.string ] Type.int)
              }
         )
-        [ Elm.string lengthArg ]
+        [ Elm.string lengthArg_ ]
 
 
 {-| Reverse a string.
@@ -60,7 +111,7 @@ length lengthArg =
 reverse: String -> String
 -}
 reverse : String -> Elm.Expression
-reverse reverseArg =
+reverse reverseArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "String" ]
@@ -68,7 +119,7 @@ reverse reverseArg =
              , annotation = Just (Type.function [ Type.string ] Type.string)
              }
         )
-        [ Elm.string reverseArg ]
+        [ Elm.string reverseArg_ ]
 
 
 {-| Repeat a string *n* times.
@@ -78,7 +129,7 @@ reverse reverseArg =
 repeat: Int -> String -> String
 -}
 repeat : Int -> String -> Elm.Expression
-repeat repeatArg repeatArg0 =
+repeat repeatArg_ repeatArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "String" ]
@@ -87,7 +138,7 @@ repeat repeatArg repeatArg0 =
                  Just (Type.function [ Type.int, Type.string ] Type.string)
              }
         )
-        [ Elm.int repeatArg, Elm.string repeatArg0 ]
+        [ Elm.int repeatArg_, Elm.string repeatArg_0 ]
 
 
 {-| Replace all occurrences of some substring.
@@ -104,7 +155,7 @@ repeat repeatArg repeatArg0 =
 replace: String -> String -> String -> String
 -}
 replace : String -> String -> String -> Elm.Expression
-replace replaceArg replaceArg0 replaceArg1 =
+replace replaceArg_ replaceArg_0 replaceArg_1 =
     Elm.apply
         (Elm.value
              { importFrom = [ "String" ]
@@ -117,9 +168,9 @@ replace replaceArg replaceArg0 replaceArg1 =
                      )
              }
         )
-        [ Elm.string replaceArg
-        , Elm.string replaceArg0
-        , Elm.string replaceArg1
+        [ Elm.string replaceArg_
+        , Elm.string replaceArg_0
+        , Elm.string replaceArg_1
         ]
 
 
@@ -131,7 +182,7 @@ to do this.
 append: String -> String -> String
 -}
 append : String -> String -> Elm.Expression
-append appendArg appendArg0 =
+append appendArg_ appendArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "String" ]
@@ -140,7 +191,7 @@ append appendArg appendArg0 =
                  Just (Type.function [ Type.string, Type.string ] Type.string)
              }
         )
-        [ Elm.string appendArg, Elm.string appendArg0 ]
+        [ Elm.string appendArg_, Elm.string appendArg_0 ]
 
 
 {-| Concatenate many strings into one.
@@ -150,7 +201,7 @@ append appendArg appendArg0 =
 concat: List String -> String
 -}
 concat : List String -> Elm.Expression
-concat concatArg =
+concat concatArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "String" ]
@@ -159,7 +210,7 @@ concat concatArg =
                  Just (Type.function [ Type.list Type.string ] Type.string)
              }
         )
-        [ Elm.list (List.map Elm.string concatArg) ]
+        [ Elm.list (List.map Elm.string concatArg_) ]
 
 
 {-| Split a string using a given separator.
@@ -170,7 +221,7 @@ concat concatArg =
 split: String -> String -> List String
 -}
 split : String -> String -> Elm.Expression
-split splitArg splitArg0 =
+split splitArg_ splitArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "String" ]
@@ -183,7 +234,7 @@ split splitArg splitArg0 =
                      )
              }
         )
-        [ Elm.string splitArg, Elm.string splitArg0 ]
+        [ Elm.string splitArg_, Elm.string splitArg_0 ]
 
 
 {-| Put many strings together with a given separator.
@@ -195,7 +246,7 @@ split splitArg splitArg0 =
 join: String -> List String -> String
 -}
 join : String -> List String -> Elm.Expression
-join joinArg joinArg0 =
+join joinArg_ joinArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "String" ]
@@ -208,7 +259,7 @@ join joinArg joinArg0 =
                      )
              }
         )
-        [ Elm.string joinArg, Elm.list (List.map Elm.string joinArg0) ]
+        [ Elm.string joinArg_, Elm.list (List.map Elm.string joinArg_0) ]
 
 
 {-| Break a string into words, splitting on chunks of whitespace.
@@ -218,7 +269,7 @@ join joinArg joinArg0 =
 words: String -> List String
 -}
 words : String -> Elm.Expression
-words wordsArg =
+words wordsArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "String" ]
@@ -227,7 +278,7 @@ words wordsArg =
                  Just (Type.function [ Type.string ] (Type.list Type.string))
              }
         )
-        [ Elm.string wordsArg ]
+        [ Elm.string wordsArg_ ]
 
 
 {-| Break a string into lines, splitting on newlines.
@@ -237,7 +288,7 @@ words wordsArg =
 lines: String -> List String
 -}
 lines : String -> Elm.Expression
-lines linesArg =
+lines linesArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "String" ]
@@ -246,7 +297,7 @@ lines linesArg =
                  Just (Type.function [ Type.string ] (Type.list Type.string))
              }
         )
-        [ Elm.string linesArg ]
+        [ Elm.string linesArg_ ]
 
 
 {-| Take a substring given a start and end index. Negative indexes
@@ -260,7 +311,7 @@ are taken starting from the *end* of the list.
 slice: Int -> Int -> String -> String
 -}
 slice : Int -> Int -> String -> Elm.Expression
-slice sliceArg sliceArg0 sliceArg1 =
+slice sliceArg_ sliceArg_0 sliceArg_1 =
     Elm.apply
         (Elm.value
              { importFrom = [ "String" ]
@@ -273,7 +324,7 @@ slice sliceArg sliceArg0 sliceArg1 =
                      )
              }
         )
-        [ Elm.int sliceArg, Elm.int sliceArg0, Elm.string sliceArg1 ]
+        [ Elm.int sliceArg_, Elm.int sliceArg_0, Elm.string sliceArg_1 ]
 
 
 {-| Take *n* characters from the left side of a string.
@@ -283,7 +334,7 @@ slice sliceArg sliceArg0 sliceArg1 =
 left: Int -> String -> String
 -}
 left : Int -> String -> Elm.Expression
-left leftArg leftArg0 =
+left leftArg_ leftArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "String" ]
@@ -292,7 +343,7 @@ left leftArg leftArg0 =
                  Just (Type.function [ Type.int, Type.string ] Type.string)
              }
         )
-        [ Elm.int leftArg, Elm.string leftArg0 ]
+        [ Elm.int leftArg_, Elm.string leftArg_0 ]
 
 
 {-| Take *n* characters from the right side of a string.
@@ -302,7 +353,7 @@ left leftArg leftArg0 =
 right: Int -> String -> String
 -}
 right : Int -> String -> Elm.Expression
-right rightArg rightArg0 =
+right rightArg_ rightArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "String" ]
@@ -311,7 +362,7 @@ right rightArg rightArg0 =
                  Just (Type.function [ Type.int, Type.string ] Type.string)
              }
         )
-        [ Elm.int rightArg, Elm.string rightArg0 ]
+        [ Elm.int rightArg_, Elm.string rightArg_0 ]
 
 
 {-| Drop *n* characters from the left side of a string.
@@ -321,7 +372,7 @@ right rightArg rightArg0 =
 dropLeft: Int -> String -> String
 -}
 dropLeft : Int -> String -> Elm.Expression
-dropLeft dropLeftArg dropLeftArg0 =
+dropLeft dropLeftArg_ dropLeftArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "String" ]
@@ -330,7 +381,7 @@ dropLeft dropLeftArg dropLeftArg0 =
                  Just (Type.function [ Type.int, Type.string ] Type.string)
              }
         )
-        [ Elm.int dropLeftArg, Elm.string dropLeftArg0 ]
+        [ Elm.int dropLeftArg_, Elm.string dropLeftArg_0 ]
 
 
 {-| Drop *n* characters from the right side of a string.
@@ -340,7 +391,7 @@ dropLeft dropLeftArg dropLeftArg0 =
 dropRight: Int -> String -> String
 -}
 dropRight : Int -> String -> Elm.Expression
-dropRight dropRightArg dropRightArg0 =
+dropRight dropRightArg_ dropRightArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "String" ]
@@ -349,7 +400,7 @@ dropRight dropRightArg dropRightArg0 =
                  Just (Type.function [ Type.int, Type.string ] Type.string)
              }
         )
-        [ Elm.int dropRightArg, Elm.string dropRightArg0 ]
+        [ Elm.int dropRightArg_, Elm.string dropRightArg_0 ]
 
 
 {-| See if the second string contains the first one.
@@ -361,7 +412,7 @@ dropRight dropRightArg dropRightArg0 =
 contains: String -> String -> Bool
 -}
 contains : String -> String -> Elm.Expression
-contains containsArg containsArg0 =
+contains containsArg_ containsArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "String" ]
@@ -370,7 +421,7 @@ contains containsArg containsArg0 =
                  Just (Type.function [ Type.string, Type.string ] Type.bool)
              }
         )
-        [ Elm.string containsArg, Elm.string containsArg0 ]
+        [ Elm.string containsArg_, Elm.string containsArg_0 ]
 
 
 {-| See if the second string starts with the first one.
@@ -381,7 +432,7 @@ contains containsArg containsArg0 =
 startsWith: String -> String -> Bool
 -}
 startsWith : String -> String -> Elm.Expression
-startsWith startsWithArg startsWithArg0 =
+startsWith startsWithArg_ startsWithArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "String" ]
@@ -390,7 +441,7 @@ startsWith startsWithArg startsWithArg0 =
                  Just (Type.function [ Type.string, Type.string ] Type.bool)
              }
         )
-        [ Elm.string startsWithArg, Elm.string startsWithArg0 ]
+        [ Elm.string startsWithArg_, Elm.string startsWithArg_0 ]
 
 
 {-| See if the second string ends with the first one.
@@ -401,7 +452,7 @@ startsWith startsWithArg startsWithArg0 =
 endsWith: String -> String -> Bool
 -}
 endsWith : String -> String -> Elm.Expression
-endsWith endsWithArg endsWithArg0 =
+endsWith endsWithArg_ endsWithArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "String" ]
@@ -410,7 +461,7 @@ endsWith endsWithArg endsWithArg0 =
                  Just (Type.function [ Type.string, Type.string ] Type.bool)
              }
         )
-        [ Elm.string endsWithArg, Elm.string endsWithArg0 ]
+        [ Elm.string endsWithArg_, Elm.string endsWithArg_0 ]
 
 
 {-| Get all of the indexes for a substring in another string.
@@ -422,7 +473,7 @@ endsWith endsWithArg endsWithArg0 =
 indexes: String -> String -> List Int
 -}
 indexes : String -> String -> Elm.Expression
-indexes indexesArg indexesArg0 =
+indexes indexesArg_ indexesArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "String" ]
@@ -435,7 +486,7 @@ indexes indexesArg indexesArg0 =
                      )
              }
         )
-        [ Elm.string indexesArg, Elm.string indexesArg0 ]
+        [ Elm.string indexesArg_, Elm.string indexesArg_0 ]
 
 
 {-| Alias for `indexes`.
@@ -443,7 +494,7 @@ indexes indexesArg indexesArg0 =
 indices: String -> String -> List Int
 -}
 indices : String -> String -> Elm.Expression
-indices indicesArg indicesArg0 =
+indices indicesArg_ indicesArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "String" ]
@@ -456,7 +507,7 @@ indices indicesArg indicesArg0 =
                      )
              }
         )
-        [ Elm.string indicesArg, Elm.string indicesArg0 ]
+        [ Elm.string indicesArg_, Elm.string indicesArg_0 ]
 
 
 {-| Try to convert a string into an int, failing on improperly formatted strings.
@@ -475,7 +526,7 @@ want to use [`Maybe.withDefault`](Maybe#withDefault) to handle bad data:
 toInt: String -> Maybe Int
 -}
 toInt : String -> Elm.Expression
-toInt toIntArg =
+toInt toIntArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "String" ]
@@ -484,7 +535,7 @@ toInt toIntArg =
                  Just (Type.function [ Type.string ] (Type.maybe Type.int))
              }
         )
-        [ Elm.string toIntArg ]
+        [ Elm.string toIntArg_ ]
 
 
 {-| Convert an `Int` to a `String`.
@@ -498,7 +549,7 @@ for debugging purposes.
 fromInt: Int -> String
 -}
 fromInt : Int -> Elm.Expression
-fromInt fromIntArg =
+fromInt fromIntArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "String" ]
@@ -506,7 +557,7 @@ fromInt fromIntArg =
              , annotation = Just (Type.function [ Type.int ] Type.string)
              }
         )
-        [ Elm.int fromIntArg ]
+        [ Elm.int fromIntArg_ ]
 
 
 {-| Try to convert a string into a float, failing on improperly formatted strings.
@@ -525,7 +576,7 @@ want to use [`Maybe.withDefault`](Maybe#withDefault) to handle bad data:
 toFloat: String -> Maybe Float
 -}
 toFloat : String -> Elm.Expression
-toFloat toFloatArg =
+toFloat toFloatArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "String" ]
@@ -534,7 +585,7 @@ toFloat toFloatArg =
                  Just (Type.function [ Type.string ] (Type.maybe Type.float))
              }
         )
-        [ Elm.string toFloatArg ]
+        [ Elm.string toFloatArg_ ]
 
 
 {-| Convert a `Float` to a `String`.
@@ -549,7 +600,7 @@ for debugging purposes.
 fromFloat: Float -> String
 -}
 fromFloat : Float -> Elm.Expression
-fromFloat fromFloatArg =
+fromFloat fromFloatArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "String" ]
@@ -557,7 +608,7 @@ fromFloat fromFloatArg =
              , annotation = Just (Type.function [ Type.float ] Type.string)
              }
         )
-        [ Elm.float fromFloatArg ]
+        [ Elm.float fromFloatArg_ ]
 
 
 {-| Create a string from a given character.
@@ -567,7 +618,7 @@ fromFloat fromFloatArg =
 fromChar: Char.Char -> String
 -}
 fromChar : Char.Char -> Elm.Expression
-fromChar fromCharArg =
+fromChar fromCharArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "String" ]
@@ -575,7 +626,7 @@ fromChar fromCharArg =
              , annotation = Just (Type.function [ Type.char ] Type.string)
              }
         )
-        [ Elm.char fromCharArg ]
+        [ Elm.char fromCharArg_ ]
 
 
 {-| Add a character to the beginning of a string.
@@ -585,7 +636,7 @@ fromChar fromCharArg =
 cons: Char.Char -> String -> String
 -}
 cons : Char.Char -> String -> Elm.Expression
-cons consArg consArg0 =
+cons consArg_ consArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "String" ]
@@ -594,7 +645,7 @@ cons consArg consArg0 =
                  Just (Type.function [ Type.char, Type.string ] Type.string)
              }
         )
-        [ Elm.char consArg, Elm.string consArg0 ]
+        [ Elm.char consArg_, Elm.string consArg_0 ]
 
 
 {-| Split a non-empty string into its head and tail. This lets you
@@ -606,7 +657,7 @@ pattern match on strings exactly as you would with lists.
 uncons: String -> Maybe ( Char.Char, String )
 -}
 uncons : String -> Elm.Expression
-uncons unconsArg =
+uncons unconsArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "String" ]
@@ -619,7 +670,7 @@ uncons unconsArg =
                      )
              }
         )
-        [ Elm.string unconsArg ]
+        [ Elm.string unconsArg_ ]
 
 
 {-| Convert a string to a list of characters.
@@ -630,7 +681,7 @@ uncons unconsArg =
 toList: String -> List Char.Char
 -}
 toList : String -> Elm.Expression
-toList toListArg =
+toList toListArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "String" ]
@@ -639,7 +690,7 @@ toList toListArg =
                  Just (Type.function [ Type.string ] (Type.list Type.char))
              }
         )
-        [ Elm.string toListArg ]
+        [ Elm.string toListArg_ ]
 
 
 {-| Convert a list of characters into a String. Can be useful if you
@@ -652,7 +703,7 @@ something.
 fromList: List Char.Char -> String
 -}
 fromList : List Char.Char -> Elm.Expression
-fromList fromListArg =
+fromList fromListArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "String" ]
@@ -661,7 +712,7 @@ fromList fromListArg =
                  Just (Type.function [ Type.list Type.char ] Type.string)
              }
         )
-        [ Elm.list (List.map Elm.char fromListArg) ]
+        [ Elm.list (List.map Elm.char fromListArg_) ]
 
 
 {-| Convert a string to all upper case. Useful for case-insensitive comparisons
@@ -672,7 +723,7 @@ and VIRTUAL YELLING.
 toUpper: String -> String
 -}
 toUpper : String -> Elm.Expression
-toUpper toUpperArg =
+toUpper toUpperArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "String" ]
@@ -680,7 +731,7 @@ toUpper toUpperArg =
              , annotation = Just (Type.function [ Type.string ] Type.string)
              }
         )
-        [ Elm.string toUpperArg ]
+        [ Elm.string toUpperArg_ ]
 
 
 {-| Convert a string to all lower case. Useful for case-insensitive comparisons.
@@ -690,7 +741,7 @@ toUpper toUpperArg =
 toLower: String -> String
 -}
 toLower : String -> Elm.Expression
-toLower toLowerArg =
+toLower toLowerArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "String" ]
@@ -698,7 +749,7 @@ toLower toLowerArg =
              , annotation = Just (Type.function [ Type.string ] Type.string)
              }
         )
-        [ Elm.string toLowerArg ]
+        [ Elm.string toLowerArg_ ]
 
 
 {-| Pad a string on both sides until it has a given length.
@@ -710,7 +761,7 @@ toLower toLowerArg =
 pad: Int -> Char.Char -> String -> String
 -}
 pad : Int -> Char.Char -> String -> Elm.Expression
-pad padArg padArg0 padArg1 =
+pad padArg_ padArg_0 padArg_1 =
     Elm.apply
         (Elm.value
              { importFrom = [ "String" ]
@@ -723,7 +774,7 @@ pad padArg padArg0 padArg1 =
                      )
              }
         )
-        [ Elm.int padArg, Elm.char padArg0, Elm.string padArg1 ]
+        [ Elm.int padArg_, Elm.char padArg_0, Elm.string padArg_1 ]
 
 
 {-| Pad a string on the left until it has a given length.
@@ -735,7 +786,7 @@ pad padArg padArg0 padArg1 =
 padLeft: Int -> Char.Char -> String -> String
 -}
 padLeft : Int -> Char.Char -> String -> Elm.Expression
-padLeft padLeftArg padLeftArg0 padLeftArg1 =
+padLeft padLeftArg_ padLeftArg_0 padLeftArg_1 =
     Elm.apply
         (Elm.value
              { importFrom = [ "String" ]
@@ -748,7 +799,7 @@ padLeft padLeftArg padLeftArg0 padLeftArg1 =
                      )
              }
         )
-        [ Elm.int padLeftArg, Elm.char padLeftArg0, Elm.string padLeftArg1 ]
+        [ Elm.int padLeftArg_, Elm.char padLeftArg_0, Elm.string padLeftArg_1 ]
 
 
 {-| Pad a string on the right until it has a given length.
@@ -760,7 +811,7 @@ padLeft padLeftArg padLeftArg0 padLeftArg1 =
 padRight: Int -> Char.Char -> String -> String
 -}
 padRight : Int -> Char.Char -> String -> Elm.Expression
-padRight padRightArg padRightArg0 padRightArg1 =
+padRight padRightArg_ padRightArg_0 padRightArg_1 =
     Elm.apply
         (Elm.value
              { importFrom = [ "String" ]
@@ -773,7 +824,10 @@ padRight padRightArg padRightArg0 padRightArg1 =
                      )
              }
         )
-        [ Elm.int padRightArg, Elm.char padRightArg0, Elm.string padRightArg1 ]
+        [ Elm.int padRightArg_
+        , Elm.char padRightArg_0
+        , Elm.string padRightArg_1
+        ]
 
 
 {-| Get rid of whitespace on both sides of a string.
@@ -783,7 +837,7 @@ padRight padRightArg padRightArg0 padRightArg1 =
 trim: String -> String
 -}
 trim : String -> Elm.Expression
-trim trimArg =
+trim trimArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "String" ]
@@ -791,7 +845,7 @@ trim trimArg =
              , annotation = Just (Type.function [ Type.string ] Type.string)
              }
         )
-        [ Elm.string trimArg ]
+        [ Elm.string trimArg_ ]
 
 
 {-| Get rid of whitespace on the left of a string.
@@ -801,7 +855,7 @@ trim trimArg =
 trimLeft: String -> String
 -}
 trimLeft : String -> Elm.Expression
-trimLeft trimLeftArg =
+trimLeft trimLeftArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "String" ]
@@ -809,7 +863,7 @@ trimLeft trimLeftArg =
              , annotation = Just (Type.function [ Type.string ] Type.string)
              }
         )
-        [ Elm.string trimLeftArg ]
+        [ Elm.string trimLeftArg_ ]
 
 
 {-| Get rid of whitespace on the right of a string.
@@ -819,7 +873,7 @@ trimLeft trimLeftArg =
 trimRight: String -> String
 -}
 trimRight : String -> Elm.Expression
-trimRight trimRightArg =
+trimRight trimRightArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "String" ]
@@ -827,7 +881,7 @@ trimRight trimRightArg =
              , annotation = Just (Type.function [ Type.string ] Type.string)
              }
         )
-        [ Elm.string trimRightArg ]
+        [ Elm.string trimRightArg_ ]
 
 
 {-| Transform every character in a string
@@ -837,7 +891,7 @@ trimRight trimRightArg =
 map: (Char.Char -> Char.Char) -> String -> String
 -}
 map : (Elm.Expression -> Elm.Expression) -> String -> Elm.Expression
-map mapArg mapArg0 =
+map mapArg_ mapArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "String" ]
@@ -850,7 +904,7 @@ map mapArg mapArg0 =
                      )
              }
         )
-        [ Elm.functionReduced "mapUnpack" mapArg, Elm.string mapArg0 ]
+        [ Elm.functionReduced "mapUnpack" mapArg_, Elm.string mapArg_0 ]
 
 
 {-| Keep only the characters that pass the test.
@@ -860,7 +914,7 @@ map mapArg mapArg0 =
 filter: (Char.Char -> Bool) -> String -> String
 -}
 filter : (Elm.Expression -> Elm.Expression) -> String -> Elm.Expression
-filter filterArg filterArg0 =
+filter filterArg_ filterArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "String" ]
@@ -873,7 +927,9 @@ filter filterArg filterArg0 =
                      )
              }
         )
-        [ Elm.functionReduced "filterUnpack" filterArg, Elm.string filterArg0 ]
+        [ Elm.functionReduced "filterUnpack" filterArg_
+        , Elm.string filterArg_0
+        ]
 
 
 {-| Reduce a string from the left.
@@ -887,7 +943,7 @@ foldl :
     -> Elm.Expression
     -> String
     -> Elm.Expression
-foldl foldlArg foldlArg0 foldlArg1 =
+foldl foldlArg_ foldlArg_0 foldlArg_1 =
     Elm.apply
         (Elm.value
              { importFrom = [ "String" ]
@@ -908,10 +964,10 @@ foldl foldlArg foldlArg0 foldlArg1 =
         [ Elm.functionReduced
             "foldlUnpack"
             (\functionReducedUnpack ->
-               Elm.functionReduced "unpack" (foldlArg functionReducedUnpack)
+               Elm.functionReduced "unpack" (foldlArg_ functionReducedUnpack)
             )
-        , foldlArg0
-        , Elm.string foldlArg1
+        , foldlArg_0
+        , Elm.string foldlArg_1
         ]
 
 
@@ -926,7 +982,7 @@ foldr :
     -> Elm.Expression
     -> String
     -> Elm.Expression
-foldr foldrArg foldrArg0 foldrArg1 =
+foldr foldrArg_ foldrArg_0 foldrArg_1 =
     Elm.apply
         (Elm.value
              { importFrom = [ "String" ]
@@ -947,10 +1003,10 @@ foldr foldrArg foldrArg0 foldrArg1 =
         [ Elm.functionReduced
             "foldrUnpack"
             (\functionReducedUnpack ->
-               Elm.functionReduced "unpack" (foldrArg functionReducedUnpack)
+               Elm.functionReduced "unpack" (foldrArg_ functionReducedUnpack)
             )
-        , foldrArg0
-        , Elm.string foldrArg1
+        , foldrArg_0
+        , Elm.string foldrArg_1
         ]
 
 
@@ -963,7 +1019,7 @@ foldr foldrArg foldrArg0 foldrArg1 =
 any: (Char.Char -> Bool) -> String -> Bool
 -}
 any : (Elm.Expression -> Elm.Expression) -> String -> Elm.Expression
-any anyArg anyArg0 =
+any anyArg_ anyArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "String" ]
@@ -976,7 +1032,7 @@ any anyArg anyArg0 =
                      )
              }
         )
-        [ Elm.functionReduced "anyUnpack" anyArg, Elm.string anyArg0 ]
+        [ Elm.functionReduced "anyUnpack" anyArg_, Elm.string anyArg_0 ]
 
 
 {-| Determine whether *all* characters pass the test.
@@ -988,7 +1044,7 @@ any anyArg anyArg0 =
 all: (Char.Char -> Bool) -> String -> Bool
 -}
 all : (Elm.Expression -> Elm.Expression) -> String -> Elm.Expression
-all allArg allArg0 =
+all allArg_ allArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "String" ]
@@ -1001,7 +1057,7 @@ all allArg allArg0 =
                      )
              }
         )
-        [ Elm.functionReduced "allUnpack" allArg, Elm.string allArg0 ]
+        [ Elm.functionReduced "allUnpack" allArg_, Elm.string allArg_0 ]
 
 
 annotation_ : { string : Type.Annotation }
@@ -1063,7 +1119,7 @@ call_ :
     }
 call_ =
     { isEmpty =
-        \isEmptyArg ->
+        \isEmptyArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "String" ]
@@ -1072,9 +1128,9 @@ call_ =
                          Just (Type.function [ Type.string ] Type.bool)
                      }
                 )
-                [ isEmptyArg ]
+                [ isEmptyArg_ ]
     , length =
-        \lengthArg ->
+        \lengthArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "String" ]
@@ -1083,9 +1139,9 @@ call_ =
                          Just (Type.function [ Type.string ] Type.int)
                      }
                 )
-                [ lengthArg ]
+                [ lengthArg_ ]
     , reverse =
-        \reverseArg ->
+        \reverseArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "String" ]
@@ -1094,9 +1150,9 @@ call_ =
                          Just (Type.function [ Type.string ] Type.string)
                      }
                 )
-                [ reverseArg ]
+                [ reverseArg_ ]
     , repeat =
-        \repeatArg repeatArg0 ->
+        \repeatArg_ repeatArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "String" ]
@@ -1109,9 +1165,9 @@ call_ =
                              )
                      }
                 )
-                [ repeatArg, repeatArg0 ]
+                [ repeatArg_, repeatArg_0 ]
     , replace =
-        \replaceArg replaceArg0 replaceArg1 ->
+        \replaceArg_ replaceArg_0 replaceArg_1 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "String" ]
@@ -1124,9 +1180,9 @@ call_ =
                              )
                      }
                 )
-                [ replaceArg, replaceArg0, replaceArg1 ]
+                [ replaceArg_, replaceArg_0, replaceArg_1 ]
     , append =
-        \appendArg appendArg0 ->
+        \appendArg_ appendArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "String" ]
@@ -1139,9 +1195,9 @@ call_ =
                              )
                      }
                 )
-                [ appendArg, appendArg0 ]
+                [ appendArg_, appendArg_0 ]
     , concat =
-        \concatArg ->
+        \concatArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "String" ]
@@ -1154,9 +1210,9 @@ call_ =
                              )
                      }
                 )
-                [ concatArg ]
+                [ concatArg_ ]
     , split =
-        \splitArg splitArg0 ->
+        \splitArg_ splitArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "String" ]
@@ -1169,9 +1225,9 @@ call_ =
                              )
                      }
                 )
-                [ splitArg, splitArg0 ]
+                [ splitArg_, splitArg_0 ]
     , join =
-        \joinArg joinArg0 ->
+        \joinArg_ joinArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "String" ]
@@ -1184,9 +1240,9 @@ call_ =
                              )
                      }
                 )
-                [ joinArg, joinArg0 ]
+                [ joinArg_, joinArg_0 ]
     , words =
-        \wordsArg ->
+        \wordsArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "String" ]
@@ -1199,9 +1255,9 @@ call_ =
                              )
                      }
                 )
-                [ wordsArg ]
+                [ wordsArg_ ]
     , lines =
-        \linesArg ->
+        \linesArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "String" ]
@@ -1214,9 +1270,9 @@ call_ =
                              )
                      }
                 )
-                [ linesArg ]
+                [ linesArg_ ]
     , slice =
-        \sliceArg sliceArg0 sliceArg1 ->
+        \sliceArg_ sliceArg_0 sliceArg_1 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "String" ]
@@ -1229,9 +1285,9 @@ call_ =
                              )
                      }
                 )
-                [ sliceArg, sliceArg0, sliceArg1 ]
+                [ sliceArg_, sliceArg_0, sliceArg_1 ]
     , left =
-        \leftArg leftArg0 ->
+        \leftArg_ leftArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "String" ]
@@ -1244,9 +1300,9 @@ call_ =
                              )
                      }
                 )
-                [ leftArg, leftArg0 ]
+                [ leftArg_, leftArg_0 ]
     , right =
-        \rightArg rightArg0 ->
+        \rightArg_ rightArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "String" ]
@@ -1259,9 +1315,9 @@ call_ =
                              )
                      }
                 )
-                [ rightArg, rightArg0 ]
+                [ rightArg_, rightArg_0 ]
     , dropLeft =
-        \dropLeftArg dropLeftArg0 ->
+        \dropLeftArg_ dropLeftArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "String" ]
@@ -1274,9 +1330,9 @@ call_ =
                              )
                      }
                 )
-                [ dropLeftArg, dropLeftArg0 ]
+                [ dropLeftArg_, dropLeftArg_0 ]
     , dropRight =
-        \dropRightArg dropRightArg0 ->
+        \dropRightArg_ dropRightArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "String" ]
@@ -1289,9 +1345,9 @@ call_ =
                              )
                      }
                 )
-                [ dropRightArg, dropRightArg0 ]
+                [ dropRightArg_, dropRightArg_0 ]
     , contains =
-        \containsArg containsArg0 ->
+        \containsArg_ containsArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "String" ]
@@ -1304,9 +1360,9 @@ call_ =
                              )
                      }
                 )
-                [ containsArg, containsArg0 ]
+                [ containsArg_, containsArg_0 ]
     , startsWith =
-        \startsWithArg startsWithArg0 ->
+        \startsWithArg_ startsWithArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "String" ]
@@ -1319,9 +1375,9 @@ call_ =
                              )
                      }
                 )
-                [ startsWithArg, startsWithArg0 ]
+                [ startsWithArg_, startsWithArg_0 ]
     , endsWith =
-        \endsWithArg endsWithArg0 ->
+        \endsWithArg_ endsWithArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "String" ]
@@ -1334,9 +1390,9 @@ call_ =
                              )
                      }
                 )
-                [ endsWithArg, endsWithArg0 ]
+                [ endsWithArg_, endsWithArg_0 ]
     , indexes =
-        \indexesArg indexesArg0 ->
+        \indexesArg_ indexesArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "String" ]
@@ -1349,9 +1405,9 @@ call_ =
                              )
                      }
                 )
-                [ indexesArg, indexesArg0 ]
+                [ indexesArg_, indexesArg_0 ]
     , indices =
-        \indicesArg indicesArg0 ->
+        \indicesArg_ indicesArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "String" ]
@@ -1364,9 +1420,9 @@ call_ =
                              )
                      }
                 )
-                [ indicesArg, indicesArg0 ]
+                [ indicesArg_, indicesArg_0 ]
     , toInt =
-        \toIntArg ->
+        \toIntArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "String" ]
@@ -1379,9 +1435,9 @@ call_ =
                              )
                      }
                 )
-                [ toIntArg ]
+                [ toIntArg_ ]
     , fromInt =
-        \fromIntArg ->
+        \fromIntArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "String" ]
@@ -1390,9 +1446,9 @@ call_ =
                          Just (Type.function [ Type.int ] Type.string)
                      }
                 )
-                [ fromIntArg ]
+                [ fromIntArg_ ]
     , toFloat =
-        \toFloatArg ->
+        \toFloatArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "String" ]
@@ -1405,9 +1461,9 @@ call_ =
                              )
                      }
                 )
-                [ toFloatArg ]
+                [ toFloatArg_ ]
     , fromFloat =
-        \fromFloatArg ->
+        \fromFloatArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "String" ]
@@ -1416,9 +1472,9 @@ call_ =
                          Just (Type.function [ Type.float ] Type.string)
                      }
                 )
-                [ fromFloatArg ]
+                [ fromFloatArg_ ]
     , fromChar =
-        \fromCharArg ->
+        \fromCharArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "String" ]
@@ -1427,9 +1483,9 @@ call_ =
                          Just (Type.function [ Type.char ] Type.string)
                      }
                 )
-                [ fromCharArg ]
+                [ fromCharArg_ ]
     , cons =
-        \consArg consArg0 ->
+        \consArg_ consArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "String" ]
@@ -1442,9 +1498,9 @@ call_ =
                              )
                      }
                 )
-                [ consArg, consArg0 ]
+                [ consArg_, consArg_0 ]
     , uncons =
-        \unconsArg ->
+        \unconsArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "String" ]
@@ -1458,9 +1514,9 @@ call_ =
                              )
                      }
                 )
-                [ unconsArg ]
+                [ unconsArg_ ]
     , toList =
-        \toListArg ->
+        \toListArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "String" ]
@@ -1473,9 +1529,9 @@ call_ =
                              )
                      }
                 )
-                [ toListArg ]
+                [ toListArg_ ]
     , fromList =
-        \fromListArg ->
+        \fromListArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "String" ]
@@ -1485,9 +1541,9 @@ call_ =
                              (Type.function [ Type.list Type.char ] Type.string)
                      }
                 )
-                [ fromListArg ]
+                [ fromListArg_ ]
     , toUpper =
-        \toUpperArg ->
+        \toUpperArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "String" ]
@@ -1496,9 +1552,9 @@ call_ =
                          Just (Type.function [ Type.string ] Type.string)
                      }
                 )
-                [ toUpperArg ]
+                [ toUpperArg_ ]
     , toLower =
-        \toLowerArg ->
+        \toLowerArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "String" ]
@@ -1507,9 +1563,9 @@ call_ =
                          Just (Type.function [ Type.string ] Type.string)
                      }
                 )
-                [ toLowerArg ]
+                [ toLowerArg_ ]
     , pad =
-        \padArg padArg0 padArg1 ->
+        \padArg_ padArg_0 padArg_1 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "String" ]
@@ -1522,9 +1578,9 @@ call_ =
                              )
                      }
                 )
-                [ padArg, padArg0, padArg1 ]
+                [ padArg_, padArg_0, padArg_1 ]
     , padLeft =
-        \padLeftArg padLeftArg0 padLeftArg1 ->
+        \padLeftArg_ padLeftArg_0 padLeftArg_1 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "String" ]
@@ -1537,9 +1593,9 @@ call_ =
                              )
                      }
                 )
-                [ padLeftArg, padLeftArg0, padLeftArg1 ]
+                [ padLeftArg_, padLeftArg_0, padLeftArg_1 ]
     , padRight =
-        \padRightArg padRightArg0 padRightArg1 ->
+        \padRightArg_ padRightArg_0 padRightArg_1 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "String" ]
@@ -1552,9 +1608,9 @@ call_ =
                              )
                      }
                 )
-                [ padRightArg, padRightArg0, padRightArg1 ]
+                [ padRightArg_, padRightArg_0, padRightArg_1 ]
     , trim =
-        \trimArg ->
+        \trimArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "String" ]
@@ -1563,9 +1619,9 @@ call_ =
                          Just (Type.function [ Type.string ] Type.string)
                      }
                 )
-                [ trimArg ]
+                [ trimArg_ ]
     , trimLeft =
-        \trimLeftArg ->
+        \trimLeftArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "String" ]
@@ -1574,9 +1630,9 @@ call_ =
                          Just (Type.function [ Type.string ] Type.string)
                      }
                 )
-                [ trimLeftArg ]
+                [ trimLeftArg_ ]
     , trimRight =
-        \trimRightArg ->
+        \trimRightArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "String" ]
@@ -1585,9 +1641,9 @@ call_ =
                          Just (Type.function [ Type.string ] Type.string)
                      }
                 )
-                [ trimRightArg ]
+                [ trimRightArg_ ]
     , map =
-        \mapArg mapArg0 ->
+        \mapArg_ mapArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "String" ]
@@ -1602,9 +1658,9 @@ call_ =
                              )
                      }
                 )
-                [ mapArg, mapArg0 ]
+                [ mapArg_, mapArg_0 ]
     , filter =
-        \filterArg filterArg0 ->
+        \filterArg_ filterArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "String" ]
@@ -1619,9 +1675,9 @@ call_ =
                              )
                      }
                 )
-                [ filterArg, filterArg0 ]
+                [ filterArg_, filterArg_0 ]
     , foldl =
-        \foldlArg foldlArg0 foldlArg1 ->
+        \foldlArg_ foldlArg_0 foldlArg_1 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "String" ]
@@ -1639,9 +1695,9 @@ call_ =
                              )
                      }
                 )
-                [ foldlArg, foldlArg0, foldlArg1 ]
+                [ foldlArg_, foldlArg_0, foldlArg_1 ]
     , foldr =
-        \foldrArg foldrArg0 foldrArg1 ->
+        \foldrArg_ foldrArg_0 foldrArg_1 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "String" ]
@@ -1659,9 +1715,9 @@ call_ =
                              )
                      }
                 )
-                [ foldrArg, foldrArg0, foldrArg1 ]
+                [ foldrArg_, foldrArg_0, foldrArg_1 ]
     , any =
-        \anyArg anyArg0 ->
+        \anyArg_ anyArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "String" ]
@@ -1676,9 +1732,9 @@ call_ =
                              )
                      }
                 )
-                [ anyArg, anyArg0 ]
+                [ anyArg_, anyArg_0 ]
     , all =
-        \allArg allArg0 ->
+        \allArg_ allArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "String" ]
@@ -1693,7 +1749,7 @@ call_ =
                              )
                      }
                 )
-                [ allArg, allArg0 ]
+                [ allArg_, allArg_0 ]
     }
 
 

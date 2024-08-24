@@ -1,6 +1,16 @@
-module Gen.Pages.PageUrl exposing (annotation_, call_, make_, moduleName_, parseQueryParams, toUrl, values_)
+module Gen.Pages.PageUrl exposing
+    ( annotation_
+    , call_
+    , make_
+    , moduleName_
+    , parseQueryParams
+    , toUrl
+    , values_
+    )
 
-{-| 
+{-|
+# Generated bindings for Pages.PageUrl
+
 @docs moduleName_, toUrl, parseQueryParams, annotation_, make_, call_, values_
 -}
 
@@ -17,7 +27,7 @@ moduleName_ =
 
 {-| toUrl: Pages.PageUrl.PageUrl -> Url.Url -}
 toUrl : Elm.Expression -> Elm.Expression
-toUrl toUrlArg =
+toUrl toUrlArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Pages", "PageUrl" ]
@@ -30,12 +40,12 @@ toUrl toUrlArg =
                      )
              }
         )
-        [ toUrlArg ]
+        [ toUrlArg_ ]
 
 
 {-| parseQueryParams: String -> Dict.Dict String (List String) -}
 parseQueryParams : String -> Elm.Expression
-parseQueryParams parseQueryParamsArg =
+parseQueryParams parseQueryParamsArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Pages", "PageUrl" ]
@@ -52,7 +62,7 @@ parseQueryParams parseQueryParamsArg =
                      )
              }
         )
-        [ Elm.string parseQueryParamsArg ]
+        [ Elm.string parseQueryParamsArg_ ]
 
 
 annotation_ : { pageUrl : Type.Annotation }
@@ -135,7 +145,7 @@ call_ :
     }
 call_ =
     { toUrl =
-        \toUrlArg ->
+        \toUrlArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Pages", "PageUrl" ]
@@ -152,9 +162,9 @@ call_ =
                              )
                      }
                 )
-                [ toUrlArg ]
+                [ toUrlArg_ ]
     , parseQueryParams =
-        \parseQueryParamsArg ->
+        \parseQueryParamsArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Pages", "PageUrl" ]
@@ -171,7 +181,7 @@ call_ =
                              )
                      }
                 )
-                [ parseQueryParamsArg ]
+                [ parseQueryParamsArg_ ]
     }
 
 

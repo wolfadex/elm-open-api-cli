@@ -1,12 +1,15 @@
 module Gen.Pages.Internal.ResponseSketch exposing (annotation_, caseOf_, make_, moduleName_)
 
-{-| 
+{-|
+# Generated bindings for Pages.Internal.ResponseSketch
+
 @docs moduleName_, annotation_, make_, caseOf_
 -}
 
 
 import Elm
 import Elm.Annotation as Type
+import Elm.Arg
 import Elm.Case
 
 
@@ -137,22 +140,6 @@ make_ =
     }
 
 
-caseOf_ :
-    { responseSketch :
-        Elm.Expression
-        -> { responseSketchTags_0_0
-            | renderPage : Elm.Expression -> Elm.Expression -> Elm.Expression
-            , hotUpdate :
-                Elm.Expression
-                -> Elm.Expression
-                -> Elm.Expression
-                -> Elm.Expression
-            , redirect : Elm.Expression -> Elm.Expression
-            , notFound : Elm.Expression -> Elm.Expression
-            , action : Elm.Expression -> Elm.Expression
-        }
-        -> Elm.Expression
-    }
 caseOf_ =
     { responseSketch =
         \responseSketchExpression responseSketchTags ->
@@ -163,40 +150,55 @@ caseOf_ =
                      "ResponseSketch"
                      [ Type.var "data", Type.var "action", Type.var "shared" ]
                 )
-                [ Elm.Case.branch2
-                    "RenderPage"
-                    ( "data", Type.var "data" )
-                    ( "maybeMaybe", Type.maybe (Type.var "action") )
-                    responseSketchTags.renderPage
-                , Elm.Case.branch3
-                    "HotUpdate"
-                    ( "data", Type.var "data" )
-                    ( "shared", Type.var "shared" )
-                    ( "maybeMaybe", Type.maybe (Type.var "action") )
-                    responseSketchTags.hotUpdate
-                , Elm.Case.branch1
-                    "Redirect"
-                    ( "stringString", Type.string )
-                    responseSketchTags.redirect
-                , Elm.Case.branch1
-                    "NotFound"
-                    ( "one"
-                    , Type.record
-                          [ ( "reason"
-                            , Type.namedWith
-                                  [ "Pages", "Internal", "NotFoundReason" ]
-                                  "NotFoundReason"
-                                  []
-                            )
-                          , ( "path"
-                            , Type.namedWith [ "UrlPath" ] "UrlPath" []
-                            )
-                          ]
+                [ Elm.Case.branch
+                    (Elm.Arg.customType
+                       "RenderPage"
+                       responseSketchTags.renderPage |> Elm.Arg.item
+                                                              (Elm.Arg.var
+                                                                     "data"
+                                                              ) |> Elm.Arg.item
+                                                                         (Elm.Arg.var
+                                                                                "maybeMaybe"
+                                                                         )
                     )
-                    responseSketchTags.notFound
-                , Elm.Case.branch1
-                    "Action"
-                    ( "action", Type.var "action" )
-                    responseSketchTags.action
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType
+                       "HotUpdate"
+                       responseSketchTags.hotUpdate |> Elm.Arg.item
+                                                             (Elm.Arg.var "data"
+                                                             ) |> Elm.Arg.item
+                                                                        (Elm.Arg.var
+                                                                               "shared"
+                                                                        ) |> Elm.Arg.item
+                                                                                   (Elm.Arg.var
+                                                                                          "maybeMaybe"
+                                                                                   )
+                    )
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType
+                       "Redirect"
+                       responseSketchTags.redirect |> Elm.Arg.item
+                                                            (Elm.Arg.var
+                                                                   "stringString"
+                                                            )
+                    )
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType
+                       "NotFound"
+                       responseSketchTags.notFound |> Elm.Arg.item
+                                                            (Elm.Arg.var "arg_0"
+                                                            )
+                    )
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType
+                       "Action"
+                       responseSketchTags.action |> Elm.Arg.item
+                                                          (Elm.Arg.var "action")
+                    )
+                    Basics.identity
                 ]
     }

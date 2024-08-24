@@ -1,12 +1,43 @@
-module Gen.BackendTask.Glob exposing (annotation_, atLeastOne, call_, capture, captureFilePath, captureStats, caseOf_, defaultOptions, digits, expectUniqueMatch, expectUniqueMatchFromList, fromString, fromStringWithOptions, int, literal, make_, map, match, moduleName_, oneOf, recursiveWildcard, succeed, toBackendTask, toBackendTaskWithOptions, values_, wildcard, zeroOrMore)
+module Gen.BackendTask.Glob exposing
+    ( annotation_
+    , atLeastOne
+    , call_
+    , capture
+    , captureFilePath
+    , captureStats
+    , caseOf_
+    , defaultOptions
+    , digits
+    , expectUniqueMatch
+    , expectUniqueMatchFromList
+    , fromString
+    , fromStringWithOptions
+    , int
+    , literal
+    , make_
+    , map
+    , match
+    , moduleName_
+    , oneOf
+    , recursiveWildcard
+    , succeed
+    , toBackendTask
+    , toBackendTaskWithOptions
+    , values_
+    , wildcard
+    , zeroOrMore
+    )
 
-{-| 
+{-|
+# Generated bindings for BackendTask.Glob
+
 @docs moduleName_, capture, match, fromString, fromStringWithOptions, captureFilePath, wildcard, recursiveWildcard, int, digits, captureStats, expectUniqueMatch, expectUniqueMatchFromList, literal, map, succeed, oneOf, zeroOrMore, atLeastOne, toBackendTask, toBackendTaskWithOptions, defaultOptions, annotation_, make_, caseOf_, call_, values_
 -}
 
 
 import Elm
 import Elm.Annotation as Type
+import Elm.Arg
 import Elm.Case
 
 
@@ -67,7 +98,7 @@ capture:
     -> BackendTask.Glob.Glob value
 -}
 capture : Elm.Expression -> Elm.Expression -> Elm.Expression
-capture captureArg captureArg0 =
+capture captureArg_ captureArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "BackendTask", "Glob" ]
@@ -95,7 +126,7 @@ capture captureArg captureArg0 =
                      )
              }
         )
-        [ captureArg, captureArg0 ]
+        [ captureArg_, captureArg_0 ]
 
 
 {-| Adds on to the glob pattern, but does not capture it in the resulting Elm match value. That means this changes which
@@ -109,7 +140,7 @@ match:
     -> BackendTask.Glob.Glob value
 -}
 match : Elm.Expression -> Elm.Expression -> Elm.Expression
-match matchArg matchArg0 =
+match matchArg_ matchArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "BackendTask", "Glob" ]
@@ -134,7 +165,7 @@ match matchArg matchArg0 =
                      )
              }
         )
-        [ matchArg, matchArg0 ]
+        [ matchArg_, matchArg_0 ]
 
 
 {-| Runs a glob string directly, with `include = FilesAndFolders`. Behavior is similar to using glob patterns in a shell.
@@ -176,7 +207,7 @@ For example, if we have the following files:
 fromString: String -> BackendTask.BackendTask error (List String)
 -}
 fromString : String -> Elm.Expression
-fromString fromStringArg =
+fromString fromStringArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "BackendTask", "Glob" ]
@@ -193,7 +224,7 @@ fromString fromStringArg =
                      )
              }
         )
-        [ Elm.string fromStringArg ]
+        [ Elm.string fromStringArg_ ]
 
 
 {-| Same as [`fromString`](#fromString), but with custom [`Options`](#Options).
@@ -204,7 +235,7 @@ fromStringWithOptions:
     -> BackendTask.BackendTask error (List String)
 -}
 fromStringWithOptions : Elm.Expression -> String -> Elm.Expression
-fromStringWithOptions fromStringWithOptionsArg fromStringWithOptionsArg0 =
+fromStringWithOptions fromStringWithOptionsArg_ fromStringWithOptionsArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "BackendTask", "Glob" ]
@@ -226,7 +257,7 @@ fromStringWithOptions fromStringWithOptionsArg fromStringWithOptionsArg0 =
                      )
              }
         )
-        [ fromStringWithOptionsArg, Elm.string fromStringWithOptionsArg0 ]
+        [ fromStringWithOptionsArg_, Elm.string fromStringWithOptionsArg_0 ]
 
 
 {-| import BackendTask exposing (BackendTask)
@@ -261,7 +292,7 @@ Whenever possible, it's a good idea to use function to make sure you have an acc
 captureFilePath: BackendTask.Glob.Glob (String -> value) -> BackendTask.Glob.Glob value
 -}
 captureFilePath : Elm.Expression -> Elm.Expression
-captureFilePath captureFilePathArg =
+captureFilePath captureFilePathArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "BackendTask", "Glob" ]
@@ -283,7 +314,7 @@ captureFilePath captureFilePathArg =
                      )
              }
         )
-        [ captureFilePathArg ]
+        [ captureFilePathArg_ ]
 
 
 {-| Matches anything except for a `/` in a file path. You may be familiar with this syntax from shells like bash
@@ -547,7 +578,7 @@ captureStats:
     -> BackendTask.Glob.Glob value
 -}
 captureStats : Elm.Expression -> Elm.Expression
-captureStats captureStatsArg =
+captureStats captureStatsArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "BackendTask", "Glob" ]
@@ -575,7 +606,7 @@ captureStats captureStatsArg =
                      )
              }
         )
-        [ captureStatsArg ]
+        [ captureStatsArg_ ]
 
 
 {-| Sometimes you want to make sure there is a unique file matching a particular pattern.
@@ -638,7 +669,7 @@ expectUniqueMatch:
     } a
 -}
 expectUniqueMatch : Elm.Expression -> Elm.Expression
-expectUniqueMatch expectUniqueMatchArg =
+expectUniqueMatch expectUniqueMatchArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "BackendTask", "Glob" ]
@@ -669,12 +700,12 @@ expectUniqueMatch expectUniqueMatchArg =
                      )
              }
         )
-        [ expectUniqueMatchArg ]
+        [ expectUniqueMatchArg_ ]
 
 
 {-| expectUniqueMatchFromList: List (BackendTask.Glob.Glob a) -> BackendTask.BackendTask String a -}
 expectUniqueMatchFromList : List Elm.Expression -> Elm.Expression
-expectUniqueMatchFromList expectUniqueMatchFromListArg =
+expectUniqueMatchFromList expectUniqueMatchFromListArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "BackendTask", "Glob" ]
@@ -697,7 +728,7 @@ expectUniqueMatchFromList expectUniqueMatchFromListArg =
                      )
              }
         )
-        [ Elm.list expectUniqueMatchFromListArg ]
+        [ Elm.list expectUniqueMatchFromListArg_ ]
 
 
 {-| Match a literal part of a path. Can include `/`s.
@@ -727,7 +758,7 @@ blogPosts =
 literal: String -> BackendTask.Glob.Glob String
 -}
 literal : String -> Elm.Expression
-literal literalArg =
+literal literalArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "BackendTask", "Glob" ]
@@ -744,7 +775,7 @@ literal literalArg =
                      )
              }
         )
-        [ Elm.string literalArg ]
+        [ Elm.string literalArg_ ]
 
 
 {-| A `Glob` can be mapped. This can be useful for transforming a sub-match in-place.
@@ -799,7 +830,7 @@ For example, you could take a date and parse it.
 map: (a -> b) -> BackendTask.Glob.Glob a -> BackendTask.Glob.Glob b
 -}
 map : (Elm.Expression -> Elm.Expression) -> Elm.Expression -> Elm.Expression
-map mapArg mapArg0 =
+map mapArg_ mapArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "BackendTask", "Glob" ]
@@ -821,7 +852,7 @@ map mapArg mapArg0 =
                      )
              }
         )
-        [ Elm.functionReduced "mapUnpack" mapArg, mapArg0 ]
+        [ Elm.functionReduced "mapUnpack" mapArg_, mapArg_0 ]
 
 
 {-| `succeed` is how you start a pipeline for a `Glob`. You will need one argument for each `capture` in your `Glob`.
@@ -829,7 +860,7 @@ map mapArg mapArg0 =
 succeed: constructor -> BackendTask.Glob.Glob constructor
 -}
 succeed : Elm.Expression -> Elm.Expression
-succeed succeedArg =
+succeed succeedArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "BackendTask", "Glob" ]
@@ -846,7 +877,7 @@ succeed succeedArg =
                      )
              }
         )
-        [ succeedArg ]
+        [ succeedArg_ ]
 
 
 {-| import BackendTask.Glob as Glob
@@ -932,7 +963,7 @@ This would give us:
 oneOf: ( ( String, a ), List ( String, a ) ) -> BackendTask.Glob.Glob a
 -}
 oneOf : Elm.Expression -> Elm.Expression
-oneOf oneOfArg =
+oneOf oneOfArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "BackendTask", "Glob" ]
@@ -953,12 +984,12 @@ oneOf oneOfArg =
                      )
              }
         )
-        [ oneOfArg ]
+        [ oneOfArg_ ]
 
 
 {-| zeroOrMore: List String -> BackendTask.Glob.Glob (Maybe String) -}
 zeroOrMore : List String -> Elm.Expression
-zeroOrMore zeroOrMoreArg =
+zeroOrMore zeroOrMoreArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "BackendTask", "Glob" ]
@@ -975,12 +1006,12 @@ zeroOrMore zeroOrMoreArg =
                      )
              }
         )
-        [ Elm.list (List.map Elm.string zeroOrMoreArg) ]
+        [ Elm.list (List.map Elm.string zeroOrMoreArg_) ]
 
 
 {-| atLeastOne: ( ( String, a ), List ( String, a ) ) -> BackendTask.Glob.Glob ( a, List a ) -}
 atLeastOne : Elm.Expression -> Elm.Expression
-atLeastOne atLeastOneArg =
+atLeastOne atLeastOneArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "BackendTask", "Glob" ]
@@ -1004,7 +1035,7 @@ atLeastOne atLeastOneArg =
                      )
              }
         )
-        [ atLeastOneArg ]
+        [ atLeastOneArg_ ]
 
 
 {-| In order to get match data from your glob, turn it into a `BackendTask` with this function.
@@ -1012,7 +1043,7 @@ atLeastOne atLeastOneArg =
 toBackendTask: BackendTask.Glob.Glob a -> BackendTask.BackendTask error (List a)
 -}
 toBackendTask : Elm.Expression -> Elm.Expression
-toBackendTask toBackendTaskArg =
+toBackendTask toBackendTaskArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "BackendTask", "Glob" ]
@@ -1033,7 +1064,7 @@ toBackendTask toBackendTaskArg =
                      )
              }
         )
-        [ toBackendTaskArg ]
+        [ toBackendTaskArg_ ]
 
 
 {-| Same as toBackendTask, but lets you set custom glob options. For example, to list folders instead of files,
@@ -1051,7 +1082,7 @@ toBackendTaskWithOptions:
     -> BackendTask.BackendTask error (List a)
 -}
 toBackendTaskWithOptions : Elm.Expression -> Elm.Expression -> Elm.Expression
-toBackendTaskWithOptions toBackendTaskWithOptionsArg toBackendTaskWithOptionsArg0 =
+toBackendTaskWithOptions toBackendTaskWithOptionsArg_ toBackendTaskWithOptionsArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "BackendTask", "Glob" ]
@@ -1076,7 +1107,7 @@ toBackendTaskWithOptions toBackendTaskWithOptionsArg toBackendTaskWithOptionsArg
                      )
              }
         )
-        [ toBackendTaskWithOptionsArg, toBackendTaskWithOptionsArg0 ]
+        [ toBackendTaskWithOptionsArg_, toBackendTaskWithOptionsArg_0 ]
 
 
 {-| The default options used in [`toBackendTask`](#toBackendTask). To use a custom set of options, use [`toBackendTaskWithOptions`](#toBackendTaskWithOptions).
@@ -1268,10 +1299,9 @@ make_ =
 caseOf_ :
     { include :
         Elm.Expression
-        -> { includeTags_0_0
-            | onlyFiles : Elm.Expression
-            , onlyFolders : Elm.Expression
-            , filesAndFolders : Elm.Expression
+        -> { onlyFiles : Elm.Expression
+        , onlyFolders : Elm.Expression
+        , filesAndFolders : Elm.Expression
         }
         -> Elm.Expression
     }
@@ -1281,9 +1311,18 @@ caseOf_ =
             Elm.Case.custom
                 includeExpression
                 (Type.namedWith [ "BackendTask", "Glob" ] "Include" [])
-                [ Elm.Case.branch0 "OnlyFiles" includeTags.onlyFiles
-                , Elm.Case.branch0 "OnlyFolders" includeTags.onlyFolders
-                , Elm.Case.branch0 "FilesAndFolders" includeTags.filesAndFolders
+                [ Elm.Case.branch
+                    (Elm.Arg.customType "OnlyFiles" includeTags.onlyFiles)
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType "OnlyFolders" includeTags.onlyFolders)
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType
+                       "FilesAndFolders"
+                       includeTags.filesAndFolders
+                    )
+                    Basics.identity
                 ]
     }
 
@@ -1309,7 +1348,7 @@ call_ :
     }
 call_ =
     { capture =
-        \captureArg captureArg0 ->
+        \captureArg_ captureArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "BackendTask", "Glob" ]
@@ -1337,9 +1376,9 @@ call_ =
                              )
                      }
                 )
-                [ captureArg, captureArg0 ]
+                [ captureArg_, captureArg_0 ]
     , match =
-        \matchArg matchArg0 ->
+        \matchArg_ matchArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "BackendTask", "Glob" ]
@@ -1364,9 +1403,9 @@ call_ =
                              )
                      }
                 )
-                [ matchArg, matchArg0 ]
+                [ matchArg_, matchArg_0 ]
     , fromString =
-        \fromStringArg ->
+        \fromStringArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "BackendTask", "Glob" ]
@@ -1385,9 +1424,9 @@ call_ =
                              )
                      }
                 )
-                [ fromStringArg ]
+                [ fromStringArg_ ]
     , fromStringWithOptions =
-        \fromStringWithOptionsArg fromStringWithOptionsArg0 ->
+        \fromStringWithOptionsArg_ fromStringWithOptionsArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "BackendTask", "Glob" ]
@@ -1411,9 +1450,9 @@ call_ =
                              )
                      }
                 )
-                [ fromStringWithOptionsArg, fromStringWithOptionsArg0 ]
+                [ fromStringWithOptionsArg_, fromStringWithOptionsArg_0 ]
     , captureFilePath =
-        \captureFilePathArg ->
+        \captureFilePathArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "BackendTask", "Glob" ]
@@ -1437,9 +1476,9 @@ call_ =
                              )
                      }
                 )
-                [ captureFilePathArg ]
+                [ captureFilePathArg_ ]
     , captureStats =
-        \captureStatsArg ->
+        \captureStatsArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "BackendTask", "Glob" ]
@@ -1467,9 +1506,9 @@ call_ =
                              )
                      }
                 )
-                [ captureStatsArg ]
+                [ captureStatsArg_ ]
     , expectUniqueMatch =
-        \expectUniqueMatchArg ->
+        \expectUniqueMatchArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "BackendTask", "Glob" ]
@@ -1500,9 +1539,9 @@ call_ =
                              )
                      }
                 )
-                [ expectUniqueMatchArg ]
+                [ expectUniqueMatchArg_ ]
     , expectUniqueMatchFromList =
-        \expectUniqueMatchFromListArg ->
+        \expectUniqueMatchFromListArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "BackendTask", "Glob" ]
@@ -1525,9 +1564,9 @@ call_ =
                              )
                      }
                 )
-                [ expectUniqueMatchFromListArg ]
+                [ expectUniqueMatchFromListArg_ ]
     , literal =
-        \literalArg ->
+        \literalArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "BackendTask", "Glob" ]
@@ -1544,9 +1583,9 @@ call_ =
                              )
                      }
                 )
-                [ literalArg ]
+                [ literalArg_ ]
     , map =
-        \mapArg mapArg0 ->
+        \mapArg_ mapArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "BackendTask", "Glob" ]
@@ -1570,9 +1609,9 @@ call_ =
                              )
                      }
                 )
-                [ mapArg, mapArg0 ]
+                [ mapArg_, mapArg_0 ]
     , succeed =
-        \succeedArg ->
+        \succeedArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "BackendTask", "Glob" ]
@@ -1589,9 +1628,9 @@ call_ =
                              )
                      }
                 )
-                [ succeedArg ]
+                [ succeedArg_ ]
     , oneOf =
-        \oneOfArg ->
+        \oneOfArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "BackendTask", "Glob" ]
@@ -1613,9 +1652,9 @@ call_ =
                              )
                      }
                 )
-                [ oneOfArg ]
+                [ oneOfArg_ ]
     , zeroOrMore =
-        \zeroOrMoreArg ->
+        \zeroOrMoreArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "BackendTask", "Glob" ]
@@ -1632,9 +1671,9 @@ call_ =
                              )
                      }
                 )
-                [ zeroOrMoreArg ]
+                [ zeroOrMoreArg_ ]
     , atLeastOne =
-        \atLeastOneArg ->
+        \atLeastOneArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "BackendTask", "Glob" ]
@@ -1659,9 +1698,9 @@ call_ =
                              )
                      }
                 )
-                [ atLeastOneArg ]
+                [ atLeastOneArg_ ]
     , toBackendTask =
-        \toBackendTaskArg ->
+        \toBackendTaskArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "BackendTask", "Glob" ]
@@ -1684,9 +1723,9 @@ call_ =
                              )
                      }
                 )
-                [ toBackendTaskArg ]
+                [ toBackendTaskArg_ ]
     , toBackendTaskWithOptions =
-        \toBackendTaskWithOptionsArg toBackendTaskWithOptionsArg0 ->
+        \toBackendTaskWithOptionsArg_ toBackendTaskWithOptionsArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "BackendTask", "Glob" ]
@@ -1713,7 +1752,7 @@ call_ =
                              )
                      }
                 )
-                [ toBackendTaskWithOptionsArg, toBackendTaskWithOptionsArg0 ]
+                [ toBackendTaskWithOptionsArg_, toBackendTaskWithOptionsArg_0 ]
     }
 
 

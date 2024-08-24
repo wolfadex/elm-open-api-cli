@@ -1,6 +1,26 @@
-module Gen.Bytes.Encode exposing (annotation_, bytes, call_, encode, float32, float64, getStringWidth, moduleName_, sequence, signedInt16, signedInt32, signedInt8, string, unsignedInt16, unsignedInt32, unsignedInt8, values_)
+module Gen.Bytes.Encode exposing
+    ( annotation_
+    , bytes
+    , call_
+    , encode
+    , float32
+    , float64
+    , getStringWidth
+    , moduleName_
+    , sequence
+    , signedInt16
+    , signedInt32
+    , signedInt8
+    , string
+    , unsignedInt16
+    , unsignedInt32
+    , unsignedInt8
+    , values_
+    )
 
-{-| 
+{-|
+# Generated bindings for Bytes.Encode
+
 @docs moduleName_, encode, sequence, signedInt8, signedInt16, signedInt32, unsignedInt8, unsignedInt16, unsignedInt32, float32, float64, bytes, string, getStringWidth, annotation_, call_, values_
 -}
 
@@ -50,7 +70,7 @@ this intermediate `Encoder` can help reduce allocation quite a lot!
 encode: Bytes.Encode.Encoder -> Bytes.Bytes
 -}
 encode : Elm.Expression -> Elm.Expression
-encode encodeArg =
+encode encodeArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Bytes", "Encode" ]
@@ -63,7 +83,7 @@ encode encodeArg =
                      )
              }
         )
-        [ encodeArg ]
+        [ encodeArg_ ]
 
 
 {-| Put together a bunch of builders. So if you wanted to encode three `Float`
@@ -85,7 +105,7 @@ values for the position of a ball in 3D space, you could say:
 sequence: List Bytes.Encode.Encoder -> Bytes.Encode.Encoder
 -}
 sequence : List Elm.Expression -> Elm.Expression
-sequence sequenceArg =
+sequence sequenceArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Bytes", "Encode" ]
@@ -101,7 +121,7 @@ sequence sequenceArg =
                      )
              }
         )
-        [ Elm.list sequenceArg ]
+        [ Elm.list sequenceArg_ ]
 
 
 {-| Encode integers from `-128` to `127` in one byte.
@@ -109,7 +129,7 @@ sequence sequenceArg =
 signedInt8: Int -> Bytes.Encode.Encoder
 -}
 signedInt8 : Int -> Elm.Expression
-signedInt8 signedInt8Arg =
+signedInt8 signedInt8Arg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Bytes", "Encode" ]
@@ -122,7 +142,7 @@ signedInt8 signedInt8Arg =
                      )
              }
         )
-        [ Elm.int signedInt8Arg ]
+        [ Elm.int signedInt8Arg_ ]
 
 
 {-| Encode integers from `-32768` to `32767` in two bytes.
@@ -130,7 +150,7 @@ signedInt8 signedInt8Arg =
 signedInt16: Bytes.Endianness -> Int -> Bytes.Encode.Encoder
 -}
 signedInt16 : Elm.Expression -> Int -> Elm.Expression
-signedInt16 signedInt16Arg signedInt16Arg0 =
+signedInt16 signedInt16Arg_ signedInt16Arg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Bytes", "Encode" ]
@@ -145,7 +165,7 @@ signedInt16 signedInt16Arg signedInt16Arg0 =
                      )
              }
         )
-        [ signedInt16Arg, Elm.int signedInt16Arg0 ]
+        [ signedInt16Arg_, Elm.int signedInt16Arg_0 ]
 
 
 {-| Encode integers from `-2147483648` to `2147483647` in four bytes.
@@ -153,7 +173,7 @@ signedInt16 signedInt16Arg signedInt16Arg0 =
 signedInt32: Bytes.Endianness -> Int -> Bytes.Encode.Encoder
 -}
 signedInt32 : Elm.Expression -> Int -> Elm.Expression
-signedInt32 signedInt32Arg signedInt32Arg0 =
+signedInt32 signedInt32Arg_ signedInt32Arg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Bytes", "Encode" ]
@@ -168,7 +188,7 @@ signedInt32 signedInt32Arg signedInt32Arg0 =
                      )
              }
         )
-        [ signedInt32Arg, Elm.int signedInt32Arg0 ]
+        [ signedInt32Arg_, Elm.int signedInt32Arg_0 ]
 
 
 {-| Encode integers from `0` to `255` in one byte.
@@ -176,7 +196,7 @@ signedInt32 signedInt32Arg signedInt32Arg0 =
 unsignedInt8: Int -> Bytes.Encode.Encoder
 -}
 unsignedInt8 : Int -> Elm.Expression
-unsignedInt8 unsignedInt8Arg =
+unsignedInt8 unsignedInt8Arg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Bytes", "Encode" ]
@@ -189,7 +209,7 @@ unsignedInt8 unsignedInt8Arg =
                      )
              }
         )
-        [ Elm.int unsignedInt8Arg ]
+        [ Elm.int unsignedInt8Arg_ ]
 
 
 {-| Encode integers from `0` to `65535` in two bytes.
@@ -197,7 +217,7 @@ unsignedInt8 unsignedInt8Arg =
 unsignedInt16: Bytes.Endianness -> Int -> Bytes.Encode.Encoder
 -}
 unsignedInt16 : Elm.Expression -> Int -> Elm.Expression
-unsignedInt16 unsignedInt16Arg unsignedInt16Arg0 =
+unsignedInt16 unsignedInt16Arg_ unsignedInt16Arg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Bytes", "Encode" ]
@@ -212,7 +232,7 @@ unsignedInt16 unsignedInt16Arg unsignedInt16Arg0 =
                      )
              }
         )
-        [ unsignedInt16Arg, Elm.int unsignedInt16Arg0 ]
+        [ unsignedInt16Arg_, Elm.int unsignedInt16Arg_0 ]
 
 
 {-| Encode integers from `0` to `4294967295` in four bytes.
@@ -220,7 +240,7 @@ unsignedInt16 unsignedInt16Arg unsignedInt16Arg0 =
 unsignedInt32: Bytes.Endianness -> Int -> Bytes.Encode.Encoder
 -}
 unsignedInt32 : Elm.Expression -> Int -> Elm.Expression
-unsignedInt32 unsignedInt32Arg unsignedInt32Arg0 =
+unsignedInt32 unsignedInt32Arg_ unsignedInt32Arg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Bytes", "Encode" ]
@@ -235,7 +255,7 @@ unsignedInt32 unsignedInt32Arg unsignedInt32Arg0 =
                      )
              }
         )
-        [ unsignedInt32Arg, Elm.int unsignedInt32Arg0 ]
+        [ unsignedInt32Arg_, Elm.int unsignedInt32Arg_0 ]
 
 
 {-| Encode 32-bit floating point numbers in four bytes.
@@ -243,7 +263,7 @@ unsignedInt32 unsignedInt32Arg unsignedInt32Arg0 =
 float32: Bytes.Endianness -> Float -> Bytes.Encode.Encoder
 -}
 float32 : Elm.Expression -> Float -> Elm.Expression
-float32 float32Arg float32Arg0 =
+float32 float32Arg_ float32Arg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Bytes", "Encode" ]
@@ -258,7 +278,7 @@ float32 float32Arg float32Arg0 =
                      )
              }
         )
-        [ float32Arg, Elm.float float32Arg0 ]
+        [ float32Arg_, Elm.float float32Arg_0 ]
 
 
 {-| Encode 64-bit floating point numbers in eight bytes.
@@ -266,7 +286,7 @@ float32 float32Arg float32Arg0 =
 float64: Bytes.Endianness -> Float -> Bytes.Encode.Encoder
 -}
 float64 : Elm.Expression -> Float -> Elm.Expression
-float64 float64Arg float64Arg0 =
+float64 float64Arg_ float64Arg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Bytes", "Encode" ]
@@ -281,7 +301,7 @@ float64 float64Arg float64Arg0 =
                      )
              }
         )
-        [ float64Arg, Elm.float float64Arg0 ]
+        [ float64Arg_, Elm.float float64Arg_0 ]
 
 
 {-| Copy bytes directly into the new `Bytes` sequence. This does not record the
@@ -307,7 +327,7 @@ For example, you can use [Base 128 Varints][pb] for ProtoBuf,
 bytes: Bytes.Bytes -> Bytes.Encode.Encoder
 -}
 bytes : Elm.Expression -> Elm.Expression
-bytes bytesArg =
+bytes bytesArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Bytes", "Encode" ]
@@ -320,7 +340,7 @@ bytes bytesArg =
                      )
              }
         )
-        [ bytesArg ]
+        [ bytesArg_ ]
 
 
 {-| Encode a `String` as a bunch of UTF-8 bytes.
@@ -360,7 +380,7 @@ to make negative numbers small.
 string: String -> Bytes.Encode.Encoder
 -}
 string : String -> Elm.Expression
-string stringArg =
+string stringArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Bytes", "Encode" ]
@@ -373,7 +393,7 @@ string stringArg =
                      )
              }
         )
-        [ Elm.string stringArg ]
+        [ Elm.string stringArg_ ]
 
 
 {-| Get the width of a `String` in UTF-8 bytes.
@@ -392,7 +412,7 @@ Read more about how UTF-8 works [here](https://en.wikipedia.org/wiki/UTF-8).
 getStringWidth: String -> Int
 -}
 getStringWidth : String -> Elm.Expression
-getStringWidth getStringWidthArg =
+getStringWidth getStringWidthArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Bytes", "Encode" ]
@@ -400,7 +420,7 @@ getStringWidth getStringWidthArg =
              , annotation = Just (Type.function [ Type.string ] Type.int)
              }
         )
-        [ Elm.string getStringWidthArg ]
+        [ Elm.string getStringWidthArg_ ]
 
 
 annotation_ : { encoder : Type.Annotation }
@@ -425,7 +445,7 @@ call_ :
     }
 call_ =
     { encode =
-        \encodeArg ->
+        \encodeArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Bytes", "Encode" ]
@@ -442,9 +462,9 @@ call_ =
                              )
                      }
                 )
-                [ encodeArg ]
+                [ encodeArg_ ]
     , sequence =
-        \sequenceArg ->
+        \sequenceArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Bytes", "Encode" ]
@@ -467,9 +487,9 @@ call_ =
                              )
                      }
                 )
-                [ sequenceArg ]
+                [ sequenceArg_ ]
     , signedInt8 =
-        \signedInt8Arg ->
+        \signedInt8Arg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Bytes", "Encode" ]
@@ -486,9 +506,9 @@ call_ =
                              )
                      }
                 )
-                [ signedInt8Arg ]
+                [ signedInt8Arg_ ]
     , signedInt16 =
-        \signedInt16Arg signedInt16Arg0 ->
+        \signedInt16Arg_ signedInt16Arg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Bytes", "Encode" ]
@@ -507,9 +527,9 @@ call_ =
                              )
                      }
                 )
-                [ signedInt16Arg, signedInt16Arg0 ]
+                [ signedInt16Arg_, signedInt16Arg_0 ]
     , signedInt32 =
-        \signedInt32Arg signedInt32Arg0 ->
+        \signedInt32Arg_ signedInt32Arg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Bytes", "Encode" ]
@@ -528,9 +548,9 @@ call_ =
                              )
                      }
                 )
-                [ signedInt32Arg, signedInt32Arg0 ]
+                [ signedInt32Arg_, signedInt32Arg_0 ]
     , unsignedInt8 =
-        \unsignedInt8Arg ->
+        \unsignedInt8Arg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Bytes", "Encode" ]
@@ -547,9 +567,9 @@ call_ =
                              )
                      }
                 )
-                [ unsignedInt8Arg ]
+                [ unsignedInt8Arg_ ]
     , unsignedInt16 =
-        \unsignedInt16Arg unsignedInt16Arg0 ->
+        \unsignedInt16Arg_ unsignedInt16Arg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Bytes", "Encode" ]
@@ -568,9 +588,9 @@ call_ =
                              )
                      }
                 )
-                [ unsignedInt16Arg, unsignedInt16Arg0 ]
+                [ unsignedInt16Arg_, unsignedInt16Arg_0 ]
     , unsignedInt32 =
-        \unsignedInt32Arg unsignedInt32Arg0 ->
+        \unsignedInt32Arg_ unsignedInt32Arg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Bytes", "Encode" ]
@@ -589,9 +609,9 @@ call_ =
                              )
                      }
                 )
-                [ unsignedInt32Arg, unsignedInt32Arg0 ]
+                [ unsignedInt32Arg_, unsignedInt32Arg_0 ]
     , float32 =
-        \float32Arg float32Arg0 ->
+        \float32Arg_ float32Arg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Bytes", "Encode" ]
@@ -610,9 +630,9 @@ call_ =
                              )
                      }
                 )
-                [ float32Arg, float32Arg0 ]
+                [ float32Arg_, float32Arg_0 ]
     , float64 =
-        \float64Arg float64Arg0 ->
+        \float64Arg_ float64Arg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Bytes", "Encode" ]
@@ -631,9 +651,9 @@ call_ =
                              )
                      }
                 )
-                [ float64Arg, float64Arg0 ]
+                [ float64Arg_, float64Arg_0 ]
     , bytes =
-        \bytesArg ->
+        \bytesArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Bytes", "Encode" ]
@@ -650,9 +670,9 @@ call_ =
                              )
                      }
                 )
-                [ bytesArg ]
+                [ bytesArg_ ]
     , string =
-        \stringArg ->
+        \stringArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Bytes", "Encode" ]
@@ -669,9 +689,9 @@ call_ =
                              )
                      }
                 )
-                [ stringArg ]
+                [ stringArg_ ]
     , getStringWidth =
-        \getStringWidthArg ->
+        \getStringWidthArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Bytes", "Encode" ]
@@ -680,7 +700,7 @@ call_ =
                          Just (Type.function [ Type.string ] Type.int)
                      }
                 )
-                [ getStringWidthArg ]
+                [ getStringWidthArg_ ]
     }
 
 

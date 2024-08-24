@@ -1,6 +1,23 @@
-module Gen.Head.Seo exposing (annotation_, article, audioPlayer, book, call_, make_, moduleName_, profile, song, summary, summaryLarge, values_, videoPlayer, website)
+module Gen.Head.Seo exposing
+    ( annotation_
+    , article
+    , audioPlayer
+    , book
+    , call_
+    , make_
+    , moduleName_
+    , profile
+    , song
+    , summary
+    , summaryLarge
+    , values_
+    , videoPlayer
+    , website
+    )
 
-{-| 
+{-|
+# Generated bindings for Head.Seo
+
 @docs moduleName_, article, audioPlayer, book, profile, song, summary, summaryLarge, videoPlayer, website, annotation_, make_, call_, values_
 -}
 
@@ -36,7 +53,7 @@ article :
     }
     -> Elm.Expression
     -> Elm.Expression
-article articleArg articleArg0 =
+article articleArg_ articleArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Head", "Seo" ]
@@ -79,13 +96,15 @@ article articleArg articleArg0 =
              }
         )
         [ Elm.record
-            [ Tuple.pair "tags" (Elm.list (List.map Elm.string articleArg.tags))
-            , Tuple.pair "section" articleArg.section
-            , Tuple.pair "publishedTime" articleArg.publishedTime
-            , Tuple.pair "modifiedTime" articleArg.modifiedTime
-            , Tuple.pair "expirationTime" articleArg.expirationTime
+            [ Tuple.pair
+                  "tags"
+                  (Elm.list (List.map Elm.string articleArg_.tags))
+            , Tuple.pair "section" articleArg_.section
+            , Tuple.pair "publishedTime" articleArg_.publishedTime
+            , Tuple.pair "modifiedTime" articleArg_.modifiedTime
+            , Tuple.pair "expirationTime" articleArg_.expirationTime
             ]
-        , articleArg0
+        , articleArg_0
         ]
 
 
@@ -116,7 +135,7 @@ audioPlayer :
     , locale : Elm.Expression
     }
     -> Elm.Expression
-audioPlayer audioPlayerArg =
+audioPlayer audioPlayerArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Head", "Seo" ]
@@ -154,13 +173,13 @@ audioPlayer audioPlayerArg =
         [ Elm.record
             [ Tuple.pair
                   "canonicalUrlOverride"
-                  audioPlayerArg.canonicalUrlOverride
-            , Tuple.pair "siteName" (Elm.string audioPlayerArg.siteName)
-            , Tuple.pair "image" audioPlayerArg.image
-            , Tuple.pair "description" (Elm.string audioPlayerArg.description)
-            , Tuple.pair "title" (Elm.string audioPlayerArg.title)
-            , Tuple.pair "audio" audioPlayerArg.audio
-            , Tuple.pair "locale" audioPlayerArg.locale
+                  audioPlayerArg_.canonicalUrlOverride
+            , Tuple.pair "siteName" (Elm.string audioPlayerArg_.siteName)
+            , Tuple.pair "image" audioPlayerArg_.image
+            , Tuple.pair "description" (Elm.string audioPlayerArg_.description)
+            , Tuple.pair "title" (Elm.string audioPlayerArg_.title)
+            , Tuple.pair "audio" audioPlayerArg_.audio
+            , Tuple.pair "locale" audioPlayerArg_.locale
             ]
         ]
 
@@ -182,7 +201,7 @@ book :
     , releaseDate : Elm.Expression
     }
     -> Elm.Expression
-book bookArg bookArg0 =
+book bookArg_ bookArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Head", "Seo" ]
@@ -208,11 +227,11 @@ book bookArg bookArg0 =
                      )
              }
         )
-        [ bookArg
+        [ bookArg_
         , Elm.record
-            [ Tuple.pair "tags" (Elm.list (List.map Elm.string bookArg0.tags))
-            , Tuple.pair "isbn" bookArg0.isbn
-            , Tuple.pair "releaseDate" bookArg0.releaseDate
+            [ Tuple.pair "tags" (Elm.list (List.map Elm.string bookArg_0.tags))
+            , Tuple.pair "isbn" bookArg_0.isbn
+            , Tuple.pair "releaseDate" bookArg_0.releaseDate
             ]
         ]
 
@@ -228,7 +247,7 @@ profile :
     { firstName : String, lastName : String, username : Elm.Expression }
     -> Elm.Expression
     -> Elm.Expression
-profile profileArg profileArg0 =
+profile profileArg_ profileArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Head", "Seo" ]
@@ -248,11 +267,11 @@ profile profileArg profileArg0 =
              }
         )
         [ Elm.record
-            [ Tuple.pair "firstName" (Elm.string profileArg.firstName)
-            , Tuple.pair "lastName" (Elm.string profileArg.lastName)
-            , Tuple.pair "username" profileArg.username
+            [ Tuple.pair "firstName" (Elm.string profileArg_.firstName)
+            , Tuple.pair "lastName" (Elm.string profileArg_.lastName)
+            , Tuple.pair "username" profileArg_.username
             ]
-        , profileArg0
+        , profileArg_0
         ]
 
 
@@ -275,7 +294,7 @@ song :
     , track : Elm.Expression
     }
     -> Elm.Expression
-song songArg songArg0 =
+song songArg_ songArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Head", "Seo" ]
@@ -295,12 +314,12 @@ song songArg songArg0 =
                      )
              }
         )
-        [ songArg
+        [ songArg_
         , Elm.record
-            [ Tuple.pair "duration" songArg0.duration
-            , Tuple.pair "album" songArg0.album
-            , Tuple.pair "disc" songArg0.disc
-            , Tuple.pair "track" songArg0.track
+            [ Tuple.pair "duration" songArg_0.duration
+            , Tuple.pair "album" songArg_0.album
+            , Tuple.pair "disc" songArg_0.disc
+            , Tuple.pair "track" songArg_0.track
             ]
         ]
 
@@ -332,7 +351,7 @@ summary :
     , locale : Elm.Expression
     }
     -> Elm.Expression
-summary summaryArg =
+summary summaryArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Head", "Seo" ]
@@ -365,12 +384,12 @@ summary summaryArg =
              }
         )
         [ Elm.record
-            [ Tuple.pair "canonicalUrlOverride" summaryArg.canonicalUrlOverride
-            , Tuple.pair "siteName" (Elm.string summaryArg.siteName)
-            , Tuple.pair "image" summaryArg.image
-            , Tuple.pair "description" (Elm.string summaryArg.description)
-            , Tuple.pair "title" (Elm.string summaryArg.title)
-            , Tuple.pair "locale" summaryArg.locale
+            [ Tuple.pair "canonicalUrlOverride" summaryArg_.canonicalUrlOverride
+            , Tuple.pair "siteName" (Elm.string summaryArg_.siteName)
+            , Tuple.pair "image" summaryArg_.image
+            , Tuple.pair "description" (Elm.string summaryArg_.description)
+            , Tuple.pair "title" (Elm.string summaryArg_.title)
+            , Tuple.pair "locale" summaryArg_.locale
             ]
         ]
 
@@ -402,7 +421,7 @@ summaryLarge :
     , locale : Elm.Expression
     }
     -> Elm.Expression
-summaryLarge summaryLargeArg =
+summaryLarge summaryLargeArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Head", "Seo" ]
@@ -437,12 +456,12 @@ summaryLarge summaryLargeArg =
         [ Elm.record
             [ Tuple.pair
                   "canonicalUrlOverride"
-                  summaryLargeArg.canonicalUrlOverride
-            , Tuple.pair "siteName" (Elm.string summaryLargeArg.siteName)
-            , Tuple.pair "image" summaryLargeArg.image
-            , Tuple.pair "description" (Elm.string summaryLargeArg.description)
-            , Tuple.pair "title" (Elm.string summaryLargeArg.title)
-            , Tuple.pair "locale" summaryLargeArg.locale
+                  summaryLargeArg_.canonicalUrlOverride
+            , Tuple.pair "siteName" (Elm.string summaryLargeArg_.siteName)
+            , Tuple.pair "image" summaryLargeArg_.image
+            , Tuple.pair "description" (Elm.string summaryLargeArg_.description)
+            , Tuple.pair "title" (Elm.string summaryLargeArg_.title)
+            , Tuple.pair "locale" summaryLargeArg_.locale
             ]
         ]
 
@@ -474,7 +493,7 @@ videoPlayer :
     , locale : Elm.Expression
     }
     -> Elm.Expression
-videoPlayer videoPlayerArg =
+videoPlayer videoPlayerArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Head", "Seo" ]
@@ -512,13 +531,13 @@ videoPlayer videoPlayerArg =
         [ Elm.record
             [ Tuple.pair
                   "canonicalUrlOverride"
-                  videoPlayerArg.canonicalUrlOverride
-            , Tuple.pair "siteName" (Elm.string videoPlayerArg.siteName)
-            , Tuple.pair "image" videoPlayerArg.image
-            , Tuple.pair "description" (Elm.string videoPlayerArg.description)
-            , Tuple.pair "title" (Elm.string videoPlayerArg.title)
-            , Tuple.pair "video" videoPlayerArg.video
-            , Tuple.pair "locale" videoPlayerArg.locale
+                  videoPlayerArg_.canonicalUrlOverride
+            , Tuple.pair "siteName" (Elm.string videoPlayerArg_.siteName)
+            , Tuple.pair "image" videoPlayerArg_.image
+            , Tuple.pair "description" (Elm.string videoPlayerArg_.description)
+            , Tuple.pair "title" (Elm.string videoPlayerArg_.title)
+            , Tuple.pair "video" videoPlayerArg_.video
+            , Tuple.pair "locale" videoPlayerArg_.locale
             ]
         ]
 
@@ -528,7 +547,7 @@ videoPlayer videoPlayerArg =
 website: Head.Seo.Common -> List Head.Tag
 -}
 website : Elm.Expression -> Elm.Expression
-website websiteArg =
+website websiteArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Head", "Seo" ]
@@ -541,7 +560,7 @@ website websiteArg =
                      )
              }
         )
-        [ websiteArg ]
+        [ websiteArg_ ]
 
 
 annotation_ : { common : Type.Annotation, image : Type.Annotation }
@@ -726,7 +745,7 @@ call_ :
     }
 call_ =
     { article =
-        \articleArg articleArg0 ->
+        \articleArg_ articleArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Head", "Seo" ]
@@ -770,9 +789,9 @@ call_ =
                              )
                      }
                 )
-                [ articleArg, articleArg0 ]
+                [ articleArg_, articleArg_0 ]
     , audioPlayer =
-        \audioPlayerArg ->
+        \audioPlayerArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Head", "Seo" ]
@@ -813,9 +832,9 @@ call_ =
                              )
                      }
                 )
-                [ audioPlayerArg ]
+                [ audioPlayerArg_ ]
     , book =
-        \bookArg bookArg0 ->
+        \bookArg_ bookArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Head", "Seo" ]
@@ -843,9 +862,9 @@ call_ =
                              )
                      }
                 )
-                [ bookArg, bookArg0 ]
+                [ bookArg_, bookArg_0 ]
     , profile =
-        \profileArg profileArg0 ->
+        \profileArg_ profileArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Head", "Seo" ]
@@ -866,9 +885,9 @@ call_ =
                              )
                      }
                 )
-                [ profileArg, profileArg0 ]
+                [ profileArg_, profileArg_0 ]
     , song =
-        \songArg songArg0 ->
+        \songArg_ songArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Head", "Seo" ]
@@ -890,9 +909,9 @@ call_ =
                              )
                      }
                 )
-                [ songArg, songArg0 ]
+                [ songArg_, songArg_0 ]
     , summary =
-        \summaryArg ->
+        \summaryArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Head", "Seo" ]
@@ -927,9 +946,9 @@ call_ =
                              )
                      }
                 )
-                [ summaryArg ]
+                [ summaryArg_ ]
     , summaryLarge =
-        \summaryLargeArg ->
+        \summaryLargeArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Head", "Seo" ]
@@ -964,9 +983,9 @@ call_ =
                              )
                      }
                 )
-                [ summaryLargeArg ]
+                [ summaryLargeArg_ ]
     , videoPlayer =
-        \videoPlayerArg ->
+        \videoPlayerArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Head", "Seo" ]
@@ -1007,9 +1026,9 @@ call_ =
                              )
                      }
                 )
-                [ videoPlayerArg ]
+                [ videoPlayerArg_ ]
     , website =
-        \websiteArg ->
+        \websiteArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Head", "Seo" ]
@@ -1025,7 +1044,7 @@ call_ =
                              )
                      }
                 )
-                [ websiteArg ]
+                [ websiteArg_ ]
     }
 
 

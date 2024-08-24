@@ -1,6 +1,16 @@
-module Gen.Pages.Form exposing (annotation_, call_, moduleName_, renderHtml, renderStyledHtml, values_, withConcurrent)
+module Gen.Pages.Form exposing
+    ( annotation_
+    , call_
+    , moduleName_
+    , renderHtml
+    , renderStyledHtml
+    , values_
+    , withConcurrent
+    )
 
-{-| 
+{-|
+# Generated bindings for Pages.Form
+
 @docs moduleName_, renderHtml, renderStyledHtml, withConcurrent, annotation_, call_, values_
 -}
 
@@ -44,7 +54,7 @@ renderHtml :
     }
     -> Elm.Expression
     -> Elm.Expression
-renderHtml renderHtmlArg renderHtmlArg0 renderHtmlArg1 renderHtmlArg2 =
+renderHtml renderHtmlArg_ renderHtmlArg_0 renderHtmlArg_1 renderHtmlArg_2 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Pages", "Form" ]
@@ -148,16 +158,16 @@ renderHtml renderHtmlArg renderHtmlArg0 renderHtmlArg1 renderHtmlArg2 =
                      )
              }
         )
-        [ Elm.list renderHtmlArg
-        , renderHtmlArg0
+        [ Elm.list renderHtmlArg_
+        , renderHtmlArg_0
         , Elm.record
-            [ Tuple.pair "pageFormState" renderHtmlArg1.pageFormState
-            , Tuple.pair "navigation" renderHtmlArg1.navigation
+            [ Tuple.pair "pageFormState" renderHtmlArg_1.pageFormState
+            , Tuple.pair "navigation" renderHtmlArg_1.navigation
             , Tuple.pair
                   "concurrentSubmissions"
-                  renderHtmlArg1.concurrentSubmissions
+                  renderHtmlArg_1.concurrentSubmissions
             ]
-        , renderHtmlArg2
+        , renderHtmlArg_2
         ]
 
 
@@ -191,7 +201,7 @@ renderStyledHtml :
     }
     -> Elm.Expression
     -> Elm.Expression
-renderStyledHtml renderStyledHtmlArg renderStyledHtmlArg0 renderStyledHtmlArg1 renderStyledHtmlArg2 =
+renderStyledHtml renderStyledHtmlArg_ renderStyledHtmlArg_0 renderStyledHtmlArg_1 renderStyledHtmlArg_2 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Pages", "Form" ]
@@ -295,16 +305,16 @@ renderStyledHtml renderStyledHtmlArg renderStyledHtmlArg0 renderStyledHtmlArg1 r
                      )
              }
         )
-        [ Elm.list renderStyledHtmlArg
-        , renderStyledHtmlArg0
+        [ Elm.list renderStyledHtmlArg_
+        , renderStyledHtmlArg_0
         , Elm.record
-            [ Tuple.pair "pageFormState" renderStyledHtmlArg1.pageFormState
-            , Tuple.pair "navigation" renderStyledHtmlArg1.navigation
+            [ Tuple.pair "pageFormState" renderStyledHtmlArg_1.pageFormState
+            , Tuple.pair "navigation" renderStyledHtmlArg_1.navigation
             , Tuple.pair
                   "concurrentSubmissions"
-                  renderStyledHtmlArg1.concurrentSubmissions
+                  renderStyledHtmlArg_1.concurrentSubmissions
             ]
-        , renderStyledHtmlArg2
+        , renderStyledHtmlArg_2
         ]
 
 
@@ -342,7 +352,7 @@ withConcurrent:
     -> Pages.Form.Options error parsed input msg
 -}
 withConcurrent : Elm.Expression -> Elm.Expression
-withConcurrent withConcurrentArg =
+withConcurrent withConcurrentArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Pages", "Form" ]
@@ -371,7 +381,7 @@ withConcurrent withConcurrentArg =
                      )
              }
         )
-        [ withConcurrentArg ]
+        [ withConcurrentArg_ ]
 
 
 annotation_ :
@@ -523,7 +533,7 @@ call_ :
     }
 call_ =
     { renderHtml =
-        \renderHtmlArg renderHtmlArg0 renderHtmlArg1 renderHtmlArg2 ->
+        \renderHtmlArg_ renderHtmlArg_0 renderHtmlArg_1 renderHtmlArg_2 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Pages", "Form" ]
@@ -633,13 +643,13 @@ call_ =
                              )
                      }
                 )
-                [ renderHtmlArg
-                , renderHtmlArg0
-                , renderHtmlArg1
-                , renderHtmlArg2
+                [ renderHtmlArg_
+                , renderHtmlArg_0
+                , renderHtmlArg_1
+                , renderHtmlArg_2
                 ]
     , renderStyledHtml =
-        \renderStyledHtmlArg renderStyledHtmlArg0 renderStyledHtmlArg1 renderStyledHtmlArg2 ->
+        \renderStyledHtmlArg_ renderStyledHtmlArg_0 renderStyledHtmlArg_1 renderStyledHtmlArg_2 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Pages", "Form" ]
@@ -751,13 +761,13 @@ call_ =
                              )
                      }
                 )
-                [ renderStyledHtmlArg
-                , renderStyledHtmlArg0
-                , renderStyledHtmlArg1
-                , renderStyledHtmlArg2
+                [ renderStyledHtmlArg_
+                , renderStyledHtmlArg_0
+                , renderStyledHtmlArg_1
+                , renderStyledHtmlArg_2
                 ]
     , withConcurrent =
-        \withConcurrentArg ->
+        \withConcurrentArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Pages", "Form" ]
@@ -786,7 +796,7 @@ call_ =
                              )
                      }
                 )
-                [ withConcurrentArg ]
+                [ withConcurrentArg_ ]
     }
 
 

@@ -1,12 +1,32 @@
-module Gen.Pages.Script.Spinner exposing (annotation_, call_, caseOf_, make_, moduleName_, options, runSpinnerWithTask, runSteps, runTask, runTaskWithOptions, showStep, steps, values_, withOnCompletion, withStep, withStepWithOptions)
+module Gen.Pages.Script.Spinner exposing
+    ( annotation_
+    , call_
+    , caseOf_
+    , make_
+    , moduleName_
+    , options
+    , runSpinnerWithTask
+    , runSteps
+    , runTask
+    , runTaskWithOptions
+    , showStep
+    , steps
+    , values_
+    , withOnCompletion
+    , withStep
+    , withStepWithOptions
+    )
 
-{-| 
+{-|
+# Generated bindings for Pages.Script.Spinner
+
 @docs moduleName_, steps, withStep, withStepWithOptions, runSteps, options, withOnCompletion, runTask, runTaskWithOptions, showStep, runSpinnerWithTask, annotation_, make_, caseOf_, call_, values_
 -}
 
 
 import Elm
 import Elm.Annotation as Type
+import Elm.Arg
 import Elm.Case
 
 
@@ -50,7 +70,7 @@ withStep :
     -> (Elm.Expression -> Elm.Expression)
     -> Elm.Expression
     -> Elm.Expression
-withStep withStepArg withStepArg0 withStepArg1 =
+withStep withStepArg_ withStepArg_0 withStepArg_1 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Pages", "Script", "Spinner" ]
@@ -88,9 +108,9 @@ withStep withStepArg withStepArg0 withStepArg1 =
                      )
              }
         )
-        [ Elm.string withStepArg
-        , Elm.functionReduced "withStepUnpack" withStepArg0
-        , withStepArg1
+        [ Elm.string withStepArg_
+        , Elm.functionReduced "withStepUnpack" withStepArg_0
+        , withStepArg_1
         ]
 
 
@@ -107,7 +127,7 @@ withStepWithOptions :
     -> (Elm.Expression -> Elm.Expression)
     -> Elm.Expression
     -> Elm.Expression
-withStepWithOptions withStepWithOptionsArg withStepWithOptionsArg0 withStepWithOptionsArg1 =
+withStepWithOptions withStepWithOptionsArg_ withStepWithOptionsArg_0 withStepWithOptionsArg_1 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Pages", "Script", "Spinner" ]
@@ -150,11 +170,11 @@ withStepWithOptions withStepWithOptionsArg withStepWithOptionsArg0 withStepWithO
                      )
              }
         )
-        [ withStepWithOptionsArg
+        [ withStepWithOptionsArg_
         , Elm.functionReduced
             "withStepWithOptionsUnpack"
-            withStepWithOptionsArg0
-        , withStepWithOptionsArg1
+            withStepWithOptionsArg_0
+        , withStepWithOptionsArg_1
         ]
 
 
@@ -165,7 +185,7 @@ runSteps:
     -> BackendTask.BackendTask FatalError.FatalError value
 -}
 runSteps : Elm.Expression -> Elm.Expression
-runSteps runStepsArg =
+runSteps runStepsArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Pages", "Script", "Spinner" ]
@@ -190,7 +210,7 @@ runSteps runStepsArg =
                      )
              }
         )
-        [ runStepsArg ]
+        [ runStepsArg_ ]
 
 
 {-| The default options for a spinner. The spinner `text` is a required argument and will be displayed as the step name.
@@ -203,7 +223,7 @@ runSteps runStepsArg =
 options: String -> Pages.Script.Spinner.Options error value
 -}
 options : String -> Elm.Expression
-options optionsArg =
+options optionsArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Pages", "Script", "Spinner" ]
@@ -220,7 +240,7 @@ options optionsArg =
                      )
              }
         )
-        [ Elm.string optionsArg ]
+        [ Elm.string optionsArg_ ]
 
 
 {-| Set the completion icon and text based on the result of the task.
@@ -249,7 +269,7 @@ withOnCompletion:
 -}
 withOnCompletion :
     (Elm.Expression -> Elm.Expression) -> Elm.Expression -> Elm.Expression
-withOnCompletion withOnCompletionArg withOnCompletionArg0 =
+withOnCompletion withOnCompletionArg_ withOnCompletionArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Pages", "Script", "Spinner" ]
@@ -284,8 +304,8 @@ withOnCompletion withOnCompletionArg withOnCompletionArg0 =
                      )
              }
         )
-        [ Elm.functionReduced "withOnCompletionUnpack" withOnCompletionArg
-        , withOnCompletionArg0
+        [ Elm.functionReduced "withOnCompletionUnpack" withOnCompletionArg_
+        , withOnCompletionArg_0
         ]
 
 
@@ -320,7 +340,7 @@ runTask:
     -> BackendTask.BackendTask error value
 -}
 runTask : String -> Elm.Expression -> Elm.Expression
-runTask runTaskArg runTaskArg0 =
+runTask runTaskArg_ runTaskArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Pages", "Script", "Spinner" ]
@@ -342,7 +362,7 @@ runTask runTaskArg runTaskArg0 =
                      )
              }
         )
-        [ Elm.string runTaskArg, runTaskArg0 ]
+        [ Elm.string runTaskArg_, runTaskArg_0 ]
 
 
 {-| runTaskWithOptions: 
@@ -351,7 +371,7 @@ runTask runTaskArg runTaskArg0 =
     -> BackendTask.BackendTask error value
 -}
 runTaskWithOptions : Elm.Expression -> Elm.Expression -> Elm.Expression
-runTaskWithOptions runTaskWithOptionsArg runTaskWithOptionsArg0 =
+runTaskWithOptions runTaskWithOptionsArg_ runTaskWithOptionsArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Pages", "Script", "Spinner" ]
@@ -376,7 +396,7 @@ runTaskWithOptions runTaskWithOptionsArg runTaskWithOptionsArg0 =
                      )
              }
         )
-        [ runTaskWithOptionsArg, runTaskWithOptionsArg0 ]
+        [ runTaskWithOptionsArg_, runTaskWithOptionsArg_0 ]
 
 
 {-| `showStep` gives you a `Spinner` reference which you can use to start the spinner later with `runSpinnerWithTask`.
@@ -420,7 +440,7 @@ showStep:
     -> BackendTask.BackendTask error (Pages.Script.Spinner.Spinner error value)
 -}
 showStep : Elm.Expression -> Elm.Expression
-showStep showStepArg =
+showStep showStepArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Pages", "Script", "Spinner" ]
@@ -446,7 +466,7 @@ showStep showStepArg =
                      )
              }
         )
-        [ showStepArg ]
+        [ showStepArg_ ]
 
 
 {-| After calling `showStep` to get a reference to a `Spinner`, use `runSpinnerWithTask` to run a `BackendTask` and show a failure or success
@@ -458,7 +478,7 @@ runSpinnerWithTask:
     -> BackendTask.BackendTask error value
 -}
 runSpinnerWithTask : Elm.Expression -> Elm.Expression -> Elm.Expression
-runSpinnerWithTask runSpinnerWithTaskArg runSpinnerWithTaskArg0 =
+runSpinnerWithTask runSpinnerWithTaskArg_ runSpinnerWithTaskArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Pages", "Script", "Spinner" ]
@@ -483,7 +503,7 @@ runSpinnerWithTask runSpinnerWithTaskArg runSpinnerWithTaskArg0 =
                      )
              }
         )
-        [ runSpinnerWithTaskArg, runSpinnerWithTaskArg0 ]
+        [ runSpinnerWithTaskArg_, runSpinnerWithTaskArg_0 ]
 
 
 annotation_ :
@@ -570,15 +590,14 @@ make_ =
 caseOf_ :
     { steps :
         Elm.Expression
-        -> { stepsTags_0_0 | steps : Elm.Expression -> Elm.Expression }
+        -> { steps : Elm.Expression -> Elm.Expression }
         -> Elm.Expression
     , completionIcon :
         Elm.Expression
-        -> { completionIconTags_1_0
-            | succeed : Elm.Expression
-            , fail : Elm.Expression
-            , warn : Elm.Expression
-            , info : Elm.Expression
+        -> { succeed : Elm.Expression
+        , fail : Elm.Expression
+        , warn : Elm.Expression
+        , info : Elm.Expression
         }
         -> Elm.Expression
     }
@@ -592,15 +611,13 @@ caseOf_ =
                      "Steps"
                      [ Type.var "error", Type.var "value" ]
                 )
-                [ Elm.Case.branch1
-                    "Steps"
-                    ( "backendTaskBackendTask"
-                    , Type.namedWith
-                          [ "BackendTask" ]
-                          "BackendTask"
-                          [ Type.var "error", Type.var "value" ]
+                [ Elm.Case.branch
+                    (Elm.Arg.customType "Steps" stepsTags.steps |> Elm.Arg.item
+                                                                         (Elm.Arg.var
+                                                                                "backendTaskBackendTask"
+                                                                         )
                     )
-                    stepsTags.steps
+                    Basics.identity
                 ]
     , completionIcon =
         \completionIconExpression completionIconTags ->
@@ -611,10 +628,18 @@ caseOf_ =
                      "CompletionIcon"
                      []
                 )
-                [ Elm.Case.branch0 "Succeed" completionIconTags.succeed
-                , Elm.Case.branch0 "Fail" completionIconTags.fail
-                , Elm.Case.branch0 "Warn" completionIconTags.warn
-                , Elm.Case.branch0 "Info" completionIconTags.info
+                [ Elm.Case.branch
+                    (Elm.Arg.customType "Succeed" completionIconTags.succeed)
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType "Fail" completionIconTags.fail)
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType "Warn" completionIconTags.warn)
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType "Info" completionIconTags.info)
+                    Basics.identity
                 ]
     }
 
@@ -634,7 +659,7 @@ call_ :
     }
 call_ =
     { withStep =
-        \withStepArg withStepArg0 withStepArg1 ->
+        \withStepArg_ withStepArg_0 withStepArg_1 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Pages", "Script", "Spinner" ]
@@ -678,9 +703,9 @@ call_ =
                              )
                      }
                 )
-                [ withStepArg, withStepArg0, withStepArg1 ]
+                [ withStepArg_, withStepArg_0, withStepArg_1 ]
     , withStepWithOptions =
-        \withStepWithOptionsArg withStepWithOptionsArg0 withStepWithOptionsArg1 ->
+        \withStepWithOptionsArg_ withStepWithOptionsArg_0 withStepWithOptionsArg_1 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Pages", "Script", "Spinner" ]
@@ -732,12 +757,12 @@ call_ =
                              )
                      }
                 )
-                [ withStepWithOptionsArg
-                , withStepWithOptionsArg0
-                , withStepWithOptionsArg1
+                [ withStepWithOptionsArg_
+                , withStepWithOptionsArg_0
+                , withStepWithOptionsArg_1
                 ]
     , runSteps =
-        \runStepsArg ->
+        \runStepsArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Pages", "Script", "Spinner" ]
@@ -768,9 +793,9 @@ call_ =
                              )
                      }
                 )
-                [ runStepsArg ]
+                [ runStepsArg_ ]
     , options =
-        \optionsArg ->
+        \optionsArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Pages", "Script", "Spinner" ]
@@ -787,9 +812,9 @@ call_ =
                              )
                      }
                 )
-                [ optionsArg ]
+                [ optionsArg_ ]
     , withOnCompletion =
-        \withOnCompletionArg withOnCompletionArg0 ->
+        \withOnCompletionArg_ withOnCompletionArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Pages", "Script", "Spinner" ]
@@ -826,9 +851,9 @@ call_ =
                              )
                      }
                 )
-                [ withOnCompletionArg, withOnCompletionArg0 ]
+                [ withOnCompletionArg_, withOnCompletionArg_0 ]
     , runTask =
-        \runTaskArg runTaskArg0 ->
+        \runTaskArg_ runTaskArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Pages", "Script", "Spinner" ]
@@ -850,9 +875,9 @@ call_ =
                              )
                      }
                 )
-                [ runTaskArg, runTaskArg0 ]
+                [ runTaskArg_, runTaskArg_0 ]
     , runTaskWithOptions =
-        \runTaskWithOptionsArg runTaskWithOptionsArg0 ->
+        \runTaskWithOptionsArg_ runTaskWithOptionsArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Pages", "Script", "Spinner" ]
@@ -877,9 +902,9 @@ call_ =
                              )
                      }
                 )
-                [ runTaskWithOptionsArg, runTaskWithOptionsArg0 ]
+                [ runTaskWithOptionsArg_, runTaskWithOptionsArg_0 ]
     , showStep =
-        \showStepArg ->
+        \showStepArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Pages", "Script", "Spinner" ]
@@ -907,9 +932,9 @@ call_ =
                              )
                      }
                 )
-                [ showStepArg ]
+                [ showStepArg_ ]
     , runSpinnerWithTask =
-        \runSpinnerWithTaskArg runSpinnerWithTaskArg0 ->
+        \runSpinnerWithTaskArg_ runSpinnerWithTaskArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Pages", "Script", "Spinner" ]
@@ -934,7 +959,7 @@ call_ =
                              )
                      }
                 )
-                [ runSpinnerWithTaskArg, runSpinnerWithTaskArg0 ]
+                [ runSpinnerWithTaskArg_, runSpinnerWithTaskArg_0 ]
     }
 
 

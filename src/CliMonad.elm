@@ -181,15 +181,15 @@ Automatically appends the needed `oneOf` declarations.
 
 -}
 run :
-    (FastDict.Dict OneOfName Common.OneOfData -> CliMonad (List ( Common.Module, Elm.Declaration )))
+    (FastDict.Dict OneOfName Common.OneOfData -> CliMonad (List declaration))
     ->
         { openApi : OpenApi
         , generateTodos : Bool
         , enums : FastDict.Dict (List String) { name : Common.UnsafeName, documentation : Maybe String }
         , namespace : List String
         }
-    -> CliMonad (List ( Common.Module, Elm.Declaration ))
-    -> Result Message ( List ( Common.Module, Elm.Declaration ), List Message )
+    -> CliMonad (List declaration)
+    -> Result Message ( List declaration, List Message )
 run oneOfDeclarations input (CliMonad x) =
     x input
         |> Result.andThen

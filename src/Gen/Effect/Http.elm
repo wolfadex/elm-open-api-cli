@@ -8,6 +8,7 @@ module Gen.Effect.Http exposing (moduleName_, riskyTask, bytesResolver, stringRe
 
 import Elm
 import Elm.Annotation as Type
+import Elm.Arg
 import Elm.Case
 
 
@@ -1586,18 +1587,7 @@ make_ =
 
 
 caseOf_ :
-    { error :
-        Elm.Expression
-        ->
-            { errorTags_0_0
-                | badUrl : Elm.Expression -> Elm.Expression
-                , timeout : Elm.Expression
-                , networkError : Elm.Expression
-                , badStatus : Elm.Expression -> Elm.Expression
-                , badBody : Elm.Expression -> Elm.Expression
-            }
-        -> Elm.Expression
-    , response :
+    { response :
         Elm.Expression
         ->
             { responseTags_1_0
@@ -1608,37 +1598,9 @@ caseOf_ :
                 , goodStatus_ : Elm.Expression -> Elm.Expression -> Elm.Expression
             }
         -> Elm.Expression
-    , progress :
-        Elm.Expression
-        ->
-            { progressTags_2_0
-                | sending : Elm.Expression -> Elm.Expression
-                , receiving : Elm.Expression -> Elm.Expression
-            }
-        -> Elm.Expression
     }
 caseOf_ =
-    { error =
-        \errorExpression errorTags ->
-            Elm.Case.custom
-                errorExpression
-                (Type.namedWith [ "Effect", "Http" ] "Error" [])
-                [ Elm.Case.branch1
-                    "BadUrl"
-                    ( "stringString", Type.string )
-                    errorTags.badUrl
-                , Elm.Case.branch0 "Timeout" errorTags.timeout
-                , Elm.Case.branch0 "NetworkError" errorTags.networkError
-                , Elm.Case.branch1
-                    "BadStatus"
-                    ( "basicsInt", Type.int )
-                    errorTags.badStatus
-                , Elm.Case.branch1
-                    "BadBody"
-                    ( "stringString", Type.string )
-                    errorTags.badBody
-                ]
-    , response =
+    { response =
         \responseExpression responseTags ->
             Elm.Case.custom
                 responseExpression
@@ -1647,47 +1609,33 @@ caseOf_ =
                     "Response"
                     [ Type.var "body" ]
                 )
-                [ Elm.Case.branch1
-                    "BadUrl_"
-                    ( "stringString", Type.string )
-                    responseTags.badUrl_
-                , Elm.Case.branch0 "Timeout_" responseTags.timeout_
-                , Elm.Case.branch0 "NetworkError_" responseTags.networkError_
-                , Elm.Case.branch2
-                    "BadStatus_"
-                    ( "effectHttpMetadata"
-                    , Type.namedWith [ "Effect", "Http" ] "Metadata" []
+                [ Elm.Case.branch
+                    (Elm.Arg.customType "BadUrl_" responseTags.badUrl_
+                        |> Elm.Arg.item (Elm.Arg.varWith "stringString" Type.string)
                     )
-                    ( "body", Type.var "body" )
-                    responseTags.badStatus_
-                , Elm.Case.branch2
-                    "GoodStatus_"
-                    ( "effectHttpMetadata"
-                    , Type.namedWith [ "Effect", "Http" ] "Metadata" []
+                    identity
+                , Elm.Case.branch (Elm.Arg.customType "Timeout_" responseTags.timeout_) identity
+                , Elm.Case.branch (Elm.Arg.customType "NetworkError_" responseTags.networkError_) identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType "BadStatus_" responseTags.badStatus_
+                        |> Elm.Arg.item
+                            (Elm.Arg.varWith "effectHttpMetadata" <|
+                                Type.namedWith [ "Effect", "Http" ] "Metadata" []
+                            )
+                        |> Elm.Arg.item
+                            (Elm.Arg.varWith "body" (Type.var "body"))
                     )
-                    ( "body", Type.var "body" )
-                    responseTags.goodStatus_
-                ]
-    , progress =
-        \progressExpression progressTags ->
-            Elm.Case.custom
-                progressExpression
-                (Type.namedWith [ "Effect", "Http" ] "Progress" [])
-                [ Elm.Case.branch1
-                    "Sending"
-                    ( "one"
-                    , Type.record [ ( "sent", Type.int ), ( "size", Type.int ) ]
+                    identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType "GoodStatus_" responseTags.goodStatus_
+                        |> Elm.Arg.item
+                            (Elm.Arg.varWith "effectHttpMetadata" <|
+                                Type.namedWith [ "Effect", "Http" ] "Metadata" []
+                            )
+                        |> Elm.Arg.item
+                            (Elm.Arg.varWith "body" (Type.var "body"))
                     )
-                    progressTags.sending
-                , Elm.Case.branch1
-                    "Receiving"
-                    ( "one"
-                    , Type.record
-                        [ ( "received", Type.int )
-                        , ( "size", Type.maybe Type.int )
-                        ]
-                    )
-                    progressTags.receiving
+                    identity
                 ]
     }
 

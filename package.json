@@ -22,7 +22,7 @@
         "@lydell/elm-json": "0.2.13-1",
         "@redocly/cli": "1.11.0",
         "elm": "0.19.1-6",
-        "elm-codegen": "0.5.3",
+        "elm-codegen": "file:../elm-codegen",
         "elm-format": "0.8.7",
         "elm-optimize-level-2": "0.3.5",
         "elm-pages": "3.0.13",

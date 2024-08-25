@@ -19,6 +19,7 @@ import Common
 import Dict
 import Elm
 import Elm.Annotation
+import Elm.Arg
 import Elm.Case
 import Elm.Declare
 import Elm.Op
@@ -41,6 +42,7 @@ import Json.Schema.Definitions
 import Maybe.Extra
 import OpenApi
 import OpenApi.Components
+import OpenApi.Generate.Common
 import OpenApi.Schema
 import Result.Extra
 import Set exposing (Set)
@@ -490,7 +492,7 @@ type alias OneOfName =
 
 oneOfDeclarations :
     FastDict.Dict OneOfName Common.OneOfData
-    -> CliMonad (List ( Common.Module, Elm.Declaration ))
+    -> CliMonad (List { module_ : Common.Module, declaration : Elm.Declaration, group : String })
 oneOfDeclarations enums =
     CliMonad.combineMap
         oneOfDeclaration
@@ -499,7 +501,7 @@ oneOfDeclarations enums =
 
 oneOfDeclaration :
     ( OneOfName, Common.OneOfData )
-    -> CliMonad ( Common.Module, Elm.Declaration )
+    -> CliMonad { module_ : Common.Module, declaration : Elm.Declaration, group : String }
 oneOfDeclaration ( oneOfName, variants ) =
     let
         variantDeclaration : { name : Common.UnsafeName, type_ : Common.Type, documentation : Maybe String } -> CliMonad Elm.Variant
@@ -519,14 +521,13 @@ oneOfDeclaration ( oneOfName, variants ) =
         |> CliMonad.combineMap variantDeclaration
         |> CliMonad.map
             (\decl ->
-                ( Common.Types
-                , decl
-                    |> Elm.customType oneOfName
-                    |> Elm.exposeWith
-                        { exposeConstructor = True
-                        , group = Just "One of"
-                        }
-                )
+                { module_ = Common.Types
+                , declaration =
+                    decl
+                        |> Elm.customType oneOfName
+                        |> Elm.exposeConstructor
+                , group = "One of"
+                }
             )
 
 
@@ -856,14 +857,11 @@ typeToEncoder qualify type_ =
         Common.Nullable t ->
             CliMonad.map
                 (\encoder nullableValue ->
-                    Elm.Case.custom
+                    OpenApi.Generate.Common.module_.call.nullable.case_
                         nullableValue
-                        (Gen.OpenApi.Common.annotation_.nullable (Elm.Annotation.var "value"))
-                        [ Elm.Case.branch0 "Null" Gen.Json.Encode.null
-                        , Elm.Case.branch1 "Present"
-                            ( "value", Elm.Annotation.var "value" )
-                            encoder
-                        ]
+                        { null = Gen.Json.Encode.null
+                        , present = encoder
+                        }
                 )
                 (typeToEncoder qualify t)
 
@@ -896,8 +894,12 @@ typeToEncoder qualify type_ =
                     (\variant ->
                         CliMonad.map2
                             (\ann variantEncoder ->
-                                Elm.Case.branch1 (toVariantName oneOfName variant.name)
-                                    ( "content", ann )
+                                Elm.Case.branch
+                                    (Elm.Arg.customType
+                                        (toVariantName oneOfName variant.name)
+                                        identity
+                                        |> Elm.Arg.item (Elm.Arg.varWith "content" ann)
+                                    )
                                     variantEncoder
                             )
                             (typeToAnnotation True variant.type_)
@@ -1069,10 +1071,10 @@ typeToDecoder qualify type_ =
                 (\decoder ->
                     Gen.Json.Decode.oneOf
                         [ Gen.Json.Decode.map
-                            Gen.OpenApi.Common.make_.present
+                            OpenApi.Generate.Common.module_.call.nullable.make_.present
                             decoder
                         , Gen.Json.Decode.null
-                            Gen.OpenApi.Common.make_.null
+                            OpenApi.Generate.Common.module_.call.nullable.make_.null
                         ]
                 )
                 (typeToDecoder qualify t)
@@ -1135,12 +1137,7 @@ typeToDecoder qualify type_ =
     --> Ok Nothing
 
 -}
-decodeOptionalField :
-    { declaration : Elm.Declaration
-    , call : Elm.Expression -> Elm.Expression -> Elm.Expression
-    , callFrom : List String -> Elm.Expression -> Elm.Expression -> Elm.Expression
-    , value : List String -> Elm.Expression
-    }
+decodeOptionalField : Elm.Declare.Function (Elm.Expression -> Elm.Expression -> Elm.Expression)
 decodeOptionalField =
     let
         decoderAnnotation : Elm.Annotation.Annotation
@@ -1152,8 +1149,8 @@ decodeOptionalField =
             Gen.Json.Decode.annotation_.decoder (Gen.Maybe.annotation_.maybe <| Elm.Annotation.var "t")
     in
     Elm.Declare.fn2 "decodeOptionalField"
-        ( "key", Just Elm.Annotation.string )
-        ( "fieldDecoder", Just decoderAnnotation )
+        (Elm.Arg.varWith "key" Elm.Annotation.string)
+        (Elm.Arg.varWith "fieldDecoder" decoderAnnotation)
     <|
         \key fieldDecoder ->
             -- The tricky part is that we want to make sure that
@@ -1163,7 +1160,7 @@ decodeOptionalField =
             -- give `Nothing` when the shape is wrong.
             Gen.Json.Decode.oneOf
                 [ Gen.Json.Decode.call_.map
-                    (Elm.fn ( "_", Nothing ) <| \_ -> Elm.bool True)
+                    (Elm.fn Elm.Arg.ignore <| \_ -> Elm.bool True)
                     (Gen.Json.Decode.call_.field key Gen.Json.Decode.value)
                 , Gen.Json.Decode.succeed (Elm.bool False)
                 ]

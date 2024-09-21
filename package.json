@@ -20,7 +20,6 @@
     "license": "MIT",
     "devDependencies": {
         "@lydell/elm-json": "0.2.13-1",
-        "@openapitools/openapi-generator-cli": "2.13.2",
         "@redocly/cli": "1.11.0",
         "elm": "0.19.1-6",
         "elm-codegen": "0.5.3",

@@ -26,11 +26,16 @@ import Elm.ToString
 import FastDict
 import Gen.Basics
 import Gen.Bytes
+import Gen.Date
 import Gen.Json.Decode
 import Gen.Json.Encode
 import Gen.List
 import Gen.Maybe
 import Gen.OpenApi.Common
+import Gen.Parser.Advanced
+import Gen.Result
+import Gen.Rfc3339
+import Gen.Time
 import Json.Decode
 import Json.Schema.Definitions
 import Maybe.Extra
@@ -150,7 +155,22 @@ schemaToType qualify schema =
                             objectSchemaToType qualify subSchema
 
                         Json.Schema.Definitions.StringType ->
-                            CliMonad.succeed { type_ = Common.String, documentation = subSchema.description }
+                            case subSchema.format of
+                                Just "date-time" ->
+                                    CliMonad.succeed { type_ = Common.DateTime, documentation = subSchema.description }
+
+                                Just "date" ->
+                                    CliMonad.succeed { type_ = Common.Date, documentation = subSchema.description }
+
+                                Just "password" ->
+                                    CliMonad.succeed { type_ = Common.String, documentation = subSchema.description }
+
+                                Just format ->
+                                    CliMonad.succeed { type_ = Common.String, documentation = subSchema.description }
+                                        |> CliMonad.withWarning ("Format \"" ++ format ++ "\" not supported - using string instead")
+
+                                Nothing ->
+                                    CliMonad.succeed { type_ = Common.String, documentation = subSchema.description }
 
                         Json.Schema.Definitions.IntegerType ->
                             CliMonad.succeed { type_ = Common.Int, documentation = subSchema.description }
@@ -542,6 +562,12 @@ typeToAnnotation qualify type_ =
         Common.String ->
             CliMonad.succeed Elm.Annotation.string
 
+        Common.DateTime ->
+            CliMonad.succeed Gen.Time.annotation_.posix
+
+        Common.Date ->
+            CliMonad.succeed Gen.Date.annotation_.date
+
         Common.Int ->
             CliMonad.succeed Elm.Annotation.int
 
@@ -610,6 +636,12 @@ typeToAnnotationMaybe qualify type_ =
 
         Common.String ->
             CliMonad.succeed Elm.Annotation.string
+
+        Common.DateTime ->
+            CliMonad.succeed Gen.Time.annotation_.posix
+
+        Common.Date ->
+            CliMonad.succeed Gen.Date.annotation_.date
 
         Common.Int ->
             CliMonad.succeed Elm.Annotation.int
@@ -705,6 +737,32 @@ typeToEncoder qualify type_ =
     case type_ of
         Common.String ->
             CliMonad.succeed Gen.Json.Encode.call_.string
+
+        Common.DateTime ->
+            CliMonad.succeed
+                (\instant ->
+                    Gen.Rfc3339.make_.dateTimeOffset
+                        (Elm.record
+                            [ ( "instant", instant )
+                            , ( "offset"
+                              , Elm.record
+                                    [ ( "hour", Elm.int 0 )
+                                    , ( "minute", Elm.int 0 )
+                                    ]
+                              )
+                            ]
+                        )
+                        |> Gen.Rfc3339.toString
+                        |> Gen.Json.Encode.call_.string
+                )
+
+        Common.Date ->
+            CliMonad.succeed
+                (\date ->
+                    date
+                        |> Gen.Date.toIsoString
+                        |> Gen.Json.Encode.call_.string
+                )
 
         Common.Int ->
             CliMonad.succeed Gen.Json.Encode.call_.int
@@ -933,6 +991,34 @@ typeToDecoder qualify type_ =
 
         Common.String ->
             CliMonad.succeed Gen.Json.Decode.string
+
+        Common.DateTime ->
+            CliMonad.succeed
+                (Gen.Json.Decode.string
+                    |> Gen.Json.Decode.andThen
+                        (\raw ->
+                            Gen.Result.caseOf_.result
+                                (Gen.Parser.Advanced.call_.run Gen.Rfc3339.dateTimeOffsetParser raw)
+                                { ok = \record -> Gen.Json.Decode.succeed (Elm.get "instant" record)
+
+                                -- TODO: improve error message
+                                , err = \_ -> Gen.Json.Decode.fail "Invalid date"
+                                }
+                        )
+                )
+
+        Common.Date ->
+            CliMonad.succeed
+                (Gen.Json.Decode.string
+                    |> Gen.Json.Decode.andThen
+                        (\raw ->
+                            Gen.Result.caseOf_.result
+                                (Gen.Date.call_.fromIsoString raw)
+                                { ok = Gen.Json.Decode.succeed
+                                , err = Gen.Json.Decode.call_.fail
+                                }
+                        )
+                )
 
         Common.Int ->
             CliMonad.succeed Gen.Json.Decode.int

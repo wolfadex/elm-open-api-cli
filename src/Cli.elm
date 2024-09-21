@@ -746,7 +746,14 @@ printSuccessMessageAndWarnings ( outputPaths, warnings ) =
 
         optionalPackages : List String
         optionalPackages =
-            [ "elm/bytes", "elm/url" ]
+            [ "elm/bytes"
+            , "elm/parser"
+            , "elm/time"
+            , "elm/url"
+            , "justinmimbs/date"
+            , "justinmimbs/time-extra"
+            , "wolfadex/elm-rfc3339"
+            ]
 
         toInstall : String -> String
         toInstall dependency =

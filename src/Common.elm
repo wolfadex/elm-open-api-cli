@@ -286,6 +286,8 @@ type Type
     | Ref (List String)
     | Bytes
     | Unit
+    | Date
+    | DateTime
 
 
 type alias Object =

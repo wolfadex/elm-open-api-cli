@@ -740,15 +740,23 @@ printSuccessMessageAndWarnings ( outputPaths, warnings ) =
         indentBy amount input =
             String.repeat amount " " ++ input
 
-        requiredLinks : List String
-        requiredLinks =
+        requiredPackages : List String
+        requiredPackages =
             [ "elm/http", "elm/json" ]
-                |> List.map toElmDependencyLink
 
-        optionalLinks : List String
-        optionalLinks =
+        optionalPackages : List String
+        optionalPackages =
             [ "elm/bytes", "elm/url" ]
+
+        toInstall : String -> String
+        toInstall dependency =
+            indentBy 4 "elm install " ++ dependency
+
+        toSentence : List String -> String
+        toSentence links =
+            links
                 |> List.map toElmDependencyLink
+                |> String.Extra.toSentenceOxford
 
         toElmDependencyLink : String -> String
         toElmDependencyLink dependency =
@@ -774,16 +782,15 @@ printSuccessMessageAndWarnings ( outputPaths, warnings ) =
                 |> List.map (indentBy 4)
             , [ ""
               , ""
-              , "You'll also need " ++ String.Extra.toSentenceOxford requiredLinks ++ " installed. Try running:"
+              , "You'll also need " ++ toSentence requiredPackages ++ " installed. Try running:"
               , ""
-              , indentBy 4 "elm install elm/http"
-              , indentBy 4 "elm install elm/json"
-              , ""
-              , ""
-              , "and possibly need " ++ String.Extra.toSentenceOxford optionalLinks ++ " installed. If that's the case, try running:"
-              , indentBy 4 "elm install elm/bytes"
-              , indentBy 4 "elm install elm/url"
               ]
+            , List.map toInstall requiredPackages
+            , [ ""
+              , ""
+              , "and possibly need " ++ toSentence optionalPackages ++ " installed. If that's the case, try running:"
+              ]
+            , List.map toInstall optionalPackages
             ]
                 |> List.concat
                 |> List.map Pages.Script.log

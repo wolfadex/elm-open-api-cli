@@ -1002,7 +1002,7 @@ typeToDecoder qualify type_ =
                                 { ok = \record -> Gen.Json.Decode.succeed (Elm.get "instant" record)
 
                                 -- TODO: improve error message
-                                , err = \_ -> Gen.Json.Decode.fail "Invalid date"
+                                , err = \_ -> Gen.Json.Decode.fail "Invalid RFC-3339 date-time"
                                 }
                         )
                 )

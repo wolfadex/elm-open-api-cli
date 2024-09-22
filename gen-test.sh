@@ -4,13 +4,13 @@ set -e
 
 # Generate various SDKs
 
-npm run dev -- ./example/trustmark.json --module-name Trustmark --effect-types 'cmd' --server 'https://api.sandbox.retrofitintegration.data-hub.org.uk'
 npm run dev ./example/realworld-conduit.yaml
 npm run dev ./example/amadeus-airline-lookup.json
-npm run dev ./example/github-spec.json
 npm run dev -- ./example/db-fahrplan-api-specification.yaml --auto-convert-swagger
 npm run dev ./example/single-enum.yaml
 npm run dev ./example/viaggiatreno.yaml
+npm run dev -- ./example/trustmark.json --module-name Trustmark --effect-types 'cmd' --server 'https://api.sandbox.retrofitintegration.data-hub.org.uk'
+npm run dev ./example/github-spec.json
 
 # Compile example Elm
 

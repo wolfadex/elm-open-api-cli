@@ -2,24 +2,26 @@
 
 ### Install the CLI:
 
-- `npm install -D elm-open-api`
+-   `npm install -D elm-open-api`
 
 ### Run the CLI:
 
-- `npx elm-open-api ./page/to/oas.json`
+-   `npx elm-open-api ./page/to/oas.json`
 
 ### Arguments you can pass:
 
-- `<entryFilePath>`: The path to the Open API Spec, either `.json` or `.y[a]ml`
-  - Technically the OAS allows for parts of a spec to be in separate files, but this isn't supported yet.
-- `[--output-dir <output dir>]`: The directory to output to. Defaults to `generated/`.
-- `[--module-name <module name>]`: The Elm module name. Default to `<OAS info.title>`.
-- `[--auto-convert-swagger]`: If passed in, and a Swagger doc is encountered, will attempt to convert it to an Open API file. If not passed in, and a Swagger doc is encountered, the user will be manually prompted to convert.
-- `[--swagger-conversion-url]`: The URL to use to convert a Swagger doc to an Open API file. Defaults to `https://converter.swagger.io/api/convert`.
-- `[--swagger-conversion-command]`: Instead of making an HTTP request to convert from Swagger to Open API, use this command.
-- `[--swagger-conversion-command-args]`: Additional arguments to pass to the Swagger conversion command, before the contents of the Swagger file are passed in.
-- `[--generateTodos <generateTodos>]`: Whether to generate TODOs for unimplemented endpoints, or fail when something unexpected is encountered. Defaults to `no`. To generate `Debug.todo ""` instead of failing use one of: `yes`, `y`, `true`.
-
+-   `<entryFilePath>`: The path to the Open API Spec, either `.json` or `.y[a]ml`
+    -   Technically the OAS allows for parts of a spec to be in separate files, but this isn't supported yet.
+-   `[--output-dir <output dir>]`: The directory to output to. Defaults to `generated/`.
+-   `[--module-name <module name>]`: The Elm module name. Default to `<OAS info.title>`.
+-   `[--auto-convert-swagger]`: If passed in, and a Swagger doc is encountered, will attempt to convert it to an Open API file. If not passed in, and a Swagger doc is encountered, the user will be manually prompted to convert.
+-   `[--swagger-conversion-url]`: The URL to use to convert a Swagger doc to an Open API file. Defaults to `https://converter.swagger.io/api/convert`.
+-   `[--swagger-conversion-command]`: Instead of making an HTTP request to convert from Swagger to Open API, use this command.
+-   `[--swagger-conversion-command-args]`: Additional arguments to pass to the Swagger conversion command, before the contents of the Swagger file are passed in.
+-   `[--generateTodos <generateTodos>]`: Whether to generate TODOs for unimplemented endpoints, or fail when something unexpected is encountered. Defaults to `no`. To generate `Debug.todo ""` instead of failing use one of: `yes`, `y`, `true`.
+-   `[--overrides <file path>]`: Load an additional file to override parts of the original Open API file.
+    - This is most commonly used for malformed OAS files (e.g. missing `required` on a required field) but can be used for anything you want
+-   `[--write-merged-to <file path>]`: Write the merged Open API spec to the given file (see `--overrides` for merging).
 ## Example outputs:
 
 Assume we have an OAS file named `my-cool-company-oas.json` and it has a field `"title": "My Coool Company"` and we run the CLI like so

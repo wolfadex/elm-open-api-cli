@@ -7,15 +7,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unreleased]
 
+## [0.7.0] - 2024-09-23
+
 ### Added
--   Add documentation for generated types. [Leonardo Taglialegne](https://github.com/miniBill)
+
+-   Documentation for generated types. [Leonardo Taglialegne](https://github.com/miniBill)
+-   A new record type for generated endpoints. [Leonardo Taglialegne](https://github.com/miniBill)
+    -   This allows for incorporating with your own custom HTTP approach.
+-   Support for multiple servers as a CLI argument. [Leonardo Taglialegne](https://github.com/miniBill)
+-   Support for overriding portions of an OAS with the `--overrides` CLI argument. [Leonardo Taglialegne](https://github.com/miniBill)
+    -   Support for writing the overridden OAS to a file. [Leonardo Taglialegne](https://github.com/miniBill)
+-   Support for `date` and `date-time` types. [Leonardo Taglialegne](https://github.com/miniBill)
+    -   If your OAS has these types, you'll need these additional dependencies:
+        -   [wolfadex/elm-rfc3339](https://package.elm-lang.org/packages/wolfadex/elm-rfc3339/latest)
+            -   This is the core new requirement as JSON Schema `date` and `date-time` are in [RFC-3339](https://json-schema.org/understanding-json-schema/reference/string#dates-and-times) format
+        -   [justinmimbs/time-extra](https://package.elm-lang.org/packages/justinmimbs/time-extra/latest)
+        -   [justinmimbs/date](https://package.elm-lang.org/packages/justinmimbs/date/latest)
+        -   [elm/time](https://package.elm-lang.org/packages/elm/time/latest)
+        -   [elm/parser](https://package.elm-lang.org/packages/elm/parser/latest)
+
+### Changed
+
+-   General documentation cleanup. [Leonardo Taglialegne](https://github.com/miniBill)
+-   Improved handling of bytes. [Leonardo Taglialegne](https://github.com/miniBill)
+-   When there's a single error, don't define a custom type for it. [Leonardo Taglialegne](https://github.com/miniBill)
+-   Enums are now custom types not `String`s. [Leonardo Taglialegne](https://github.com/miniBill)
+-   Improved errors for Swagger files. [Leonardo Taglialegne](https://github.com/miniBill)
 
 ## [0.6.1] - 2024-07-23
 
 ### Fixed
 
 -   Decoding a `String` as a `String` and not as JSON. ✨ [Leonardo Taglialegne](https://github.com/miniBill)
-
 
 ## [0.6.0] - 2024-07-16
 

@@ -739,9 +739,11 @@ toRequestFunctions server effectTypes method pathUrl operation =
                 BytesContent _ ->
                     CliMonad.succeed [ ( Common.UnsafeName "body", Gen.Bytes.annotation_.bytes ) ]
 
-        headersFromList : (Elm.Expression -> Elm.Expression -> Elm.Expression) -> AuthorizationInfo -> Elm.Expression -> Elm.Expression
-        headersFromList f auth config =
-            Elm.list <| List.map (\( k, v ) -> f k v) <| auth.headers config
+        headersFromList : (Elm.Expression -> Elm.Expression -> Elm.Expression) -> AuthorizationInfo -> Elm.Expression -> List ( Elm.Expression, Elm.Expression ) -> Elm.Expression
+        headersFromList f auth config headerParams =
+            (auth.headers config ++ headerParams)
+                |> List.map (\( k, v ) -> f k v)
+                |> Elm.list
 
         documentation : AuthorizationInfo -> String
         documentation { scopes } =
@@ -822,12 +824,13 @@ toRequestFunctions server effectTypes method pathUrl operation =
 
                 elmHttpCommands :
                     AuthorizationInfo
+                    -> List (Elm.Expression -> ( Elm.Expression, Elm.Expression ))
                     -> Elm.Annotation.Annotation
                     -> (Elm.Expression -> PerPackage Elm.Expression)
                     -> (Elm.Expression -> Elm.Expression)
                     -> ({ requireToMsg : Bool } -> PerPackage Elm.Annotation.Annotation)
                     -> List ( Common.Module, Elm.Declaration )
-                elmHttpCommands auth _ toBody replaced paramType =
+                elmHttpCommands auth toHeaderParams _ toBody replaced paramType =
                     declarationGroup auth
                         (\_ ->
                             { cmdArg =
@@ -835,7 +838,11 @@ toRequestFunctions server effectTypes method pathUrl operation =
                                     Elm.record
                                         [ ( "url", replaced config )
                                         , ( "method", Elm.string method )
-                                        , ( "headers", headersFromList Gen.Http.call_.header auth config )
+                                        , ( "headers"
+                                          , toHeaderParams
+                                                |> List.map (\f -> f config)
+                                                |> headersFromList Gen.Http.call_.header auth config
+                                          )
                                         , ( "expect", (expect <| toMsg config).core )
                                         , ( "body", (toBody config).core )
                                         , ( "timeout", Gen.Maybe.make_.nothing )
@@ -888,12 +895,13 @@ toRequestFunctions server effectTypes method pathUrl operation =
 
                 elmHttpTasks :
                     AuthorizationInfo
+                    -> List (Elm.Expression -> ( Elm.Expression, Elm.Expression ))
                     -> Elm.Annotation.Annotation
                     -> (Elm.Expression -> PerPackage Elm.Expression)
                     -> (Elm.Expression -> Elm.Expression)
                     -> ({ requireToMsg : Bool } -> PerPackage Elm.Annotation.Annotation)
                     -> List ( Common.Module, Elm.Declaration )
-                elmHttpTasks auth successAnnotation toBody replaced paramType =
+                elmHttpTasks auth toHeaderParams successAnnotation toBody replaced paramType =
                     declarationGroup auth
                         (\_ ->
                             { taskArg =
@@ -901,7 +909,11 @@ toRequestFunctions server effectTypes method pathUrl operation =
                                     Elm.record
                                         [ ( "url", replaced config )
                                         , ( "method", Elm.string method )
-                                        , ( "headers", headersFromList Gen.Http.call_.header auth config )
+                                        , ( "headers"
+                                          , toHeaderParams
+                                                |> List.map (\f -> f config)
+                                                |> headersFromList Gen.Http.call_.header auth config
+                                          )
                                         , ( "resolver", resolver.core )
                                         , ( "body", (toBody config).core )
                                         , ( "timeout", Gen.Maybe.make_.nothing )
@@ -959,12 +971,13 @@ toRequestFunctions server effectTypes method pathUrl operation =
 
                 dillonkearnsElmPagesBackendTask :
                     AuthorizationInfo
+                    -> List (Elm.Expression -> ( Elm.Expression, Elm.Expression ))
                     -> Elm.Annotation.Annotation
                     -> (Elm.Expression -> PerPackage Elm.Expression)
                     -> (Elm.Expression -> Elm.Expression)
                     -> ({ requireToMsg : Bool } -> PerPackage Elm.Annotation.Annotation)
                     -> List ( Common.Module, Elm.Declaration )
-                dillonkearnsElmPagesBackendTask auth successAnnotation toBody replaced paramType =
+                dillonkearnsElmPagesBackendTask auth toHeaderParams successAnnotation toBody replaced paramType =
                     declarationGroup auth
                         (\_ ->
                             { taskArg =
@@ -972,7 +985,11 @@ toRequestFunctions server effectTypes method pathUrl operation =
                                     Elm.record
                                         [ ( "url", replaced config )
                                         , ( "method", Elm.string method )
-                                        , ( "headers", headersFromList Elm.tuple auth config )
+                                        , ( "headers"
+                                          , toHeaderParams
+                                                |> List.map (\f -> f config)
+                                                |> headersFromList Gen.Http.call_.header auth config
+                                          )
                                         , ( "body", (toBody config).elmPages )
                                         , ( "retries", Gen.Maybe.make_.nothing )
                                         , ( "timeoutInMs", Gen.Maybe.make_.nothing )
@@ -1025,12 +1042,13 @@ toRequestFunctions server effectTypes method pathUrl operation =
 
                 lamderaProgramTestCommands :
                     AuthorizationInfo
+                    -> List (Elm.Expression -> ( Elm.Expression, Elm.Expression ))
                     -> Elm.Annotation.Annotation
                     -> (Elm.Expression -> PerPackage Elm.Expression)
                     -> (Elm.Expression -> Elm.Expression)
                     -> ({ requireToMsg : Bool } -> PerPackage Elm.Annotation.Annotation)
                     -> List ( Common.Module, Elm.Declaration )
-                lamderaProgramTestCommands auth _ toBody replaced paramType =
+                lamderaProgramTestCommands auth toHeaderParams _ toBody replaced paramType =
                     declarationGroup auth
                         (\_ ->
                             { cmdArg =
@@ -1038,7 +1056,11 @@ toRequestFunctions server effectTypes method pathUrl operation =
                                     Elm.record
                                         [ ( "url", replaced config )
                                         , ( "method", Elm.string method )
-                                        , ( "headers", headersFromList Gen.Effect.Http.call_.header auth config )
+                                        , ( "headers"
+                                          , toHeaderParams
+                                                |> List.map (\f -> f config)
+                                                |> headersFromList Gen.Http.call_.header auth config
+                                          )
                                         , ( "expect", (expect <| toMsg config).lamderaProgramTest )
                                         , ( "body", (toBody config).lamderaProgramTest )
                                         , ( "timeout", Gen.Maybe.make_.nothing )
@@ -1072,12 +1094,13 @@ toRequestFunctions server effectTypes method pathUrl operation =
 
                 lamderaProgramTestTasks :
                     AuthorizationInfo
+                    -> List (Elm.Expression -> ( Elm.Expression, Elm.Expression ))
                     -> Elm.Annotation.Annotation
                     -> (Elm.Expression -> PerPackage Elm.Expression)
                     -> (Elm.Expression -> Elm.Expression)
                     -> ({ requireToMsg : Bool } -> PerPackage Elm.Annotation.Annotation)
                     -> List ( Common.Module, Elm.Declaration )
-                lamderaProgramTestTasks auth successAnnotation toBody replaced paramType =
+                lamderaProgramTestTasks auth toHeaderParams successAnnotation toBody replaced paramType =
                     declarationGroup auth
                         (\_ ->
                             { taskArg =
@@ -1085,7 +1108,11 @@ toRequestFunctions server effectTypes method pathUrl operation =
                                     Elm.record
                                         [ ( "url", replaced config )
                                         , ( "method", Elm.string method )
-                                        , ( "headers", headersFromList Gen.Effect.Http.call_.header auth config )
+                                        , ( "headers"
+                                          , toHeaderParams
+                                                |> List.map (\f -> f config)
+                                                |> headersFromList Gen.Http.call_.header auth config
+                                          )
                                         , ( "resolver", resolver.lamderaProgramTest )
                                         , ( "body", (toBody config).lamderaProgramTest )
                                         , ( "timeout", Gen.Maybe.make_.nothing )
@@ -1145,12 +1172,12 @@ toRequestFunctions server effectTypes method pathUrl operation =
             in
             CliMonad.andThen3
                 (\contentSchema auth successAnnotation ->
-                    CliMonad.map3
-                        (\toBody configAnnotation replaced ->
+                    CliMonad.map4
+                        (\toBody configAnnotation replaced toHeaderParams ->
                             ([ elmHttpCommands, elmHttpTasks, dillonkearnsElmPagesBackendTask, lamderaProgramTestCommands, lamderaProgramTestTasks ]
                                 |> List.concatMap
                                     (\toDecls ->
-                                        toDecls auth successAnnotation toBody replaced configAnnotation
+                                        toDecls auth toHeaderParams successAnnotation toBody replaced configAnnotation
                                     )
                             )
                                 ++ (case errorTypeDeclaration of
@@ -1177,8 +1204,9 @@ toRequestFunctions server effectTypes method pathUrl operation =
                                 )
                         )
                         (replacedUrl server auth pathUrl operation)
+                        (operationToHeaderParams operation)
                 )
-                (operationToContentSchema True operation)
+                (operationToContentSchema operation)
                 (operationToAuthorizationInfo operation)
                 (SchemaUtils.typeToAnnotation True successType)
     in
@@ -1244,6 +1272,68 @@ operationToGroup operation =
             "Operations"
 
 
+operationToHeaderParams : OpenApi.Operation.Operation -> CliMonad (List (Elm.Expression -> ( Elm.Expression, Elm.Expression )))
+operationToHeaderParams operation =
+    operation
+        |> OpenApi.Operation.parameters
+        |> CliMonad.combineMap
+            (\param ->
+                toConcreteParam param
+                    |> CliMonad.andThen
+                        (\concreteParam ->
+                            paramToType True concreteParam
+                                |> CliMonad.andThen
+                                    (\( paramName, type_ ) ->
+                                        paramToString True type_
+                                            |> CliMonad.map
+                                                (\{ inputToString, alwaysJust } ->
+                                                    { concreteParam = concreteParam
+                                                    , paramName = paramName
+                                                    , inputToString = inputToString
+                                                    , alwaysJust = alwaysJust
+                                                    }
+                                                )
+                                    )
+                        )
+                    |> CliMonad.andThen
+                        (\{ concreteParam, paramName, inputToString, alwaysJust } ->
+                            case OpenApi.Parameter.in_ concreteParam of
+                                "path" ->
+                                    -- NOTE: This is handled in `replacedUrl`
+                                    CliMonad.succeed Nothing
+
+                                "query" ->
+                                    -- CliMonad.succeed ( Nothing, [ concreteParam ] )
+                                    -- NOTE: This is handled in `replacedUrl`
+                                    CliMonad.succeed Nothing
+
+                                "header" ->
+                                    CliMonad.succeed
+                                        (Just
+                                            (\config ->
+                                                ( Common.toValueName paramName
+                                                    |> Elm.string
+                                                , config
+                                                    |> Elm.get "params"
+                                                    |> Elm.get (Common.toValueName paramName)
+                                                    |> inputToString
+                                                )
+                                            )
+                                        )
+
+                                _ ->
+                                    -- NOTE: The warning for this is handled in `replacedUrl`
+                                    CliMonad.succeed Nothing
+                        )
+            )
+        -- |> CliMonad.map
+        --     (\headers ->
+        --         headers
+        --             |> List.concat
+        --     )
+        |> CliMonad.map (List.filterMap identity)
+
+
 replacedUrl : Server -> AuthorizationInfo -> String -> OpenApi.Operation.Operation -> CliMonad (Elm.Expression -> Elm.Expression)
 replacedUrl server authInfo pathUrl operation =
     let
@@ -1259,10 +1349,6 @@ replacedUrl server authInfo pathUrl operation =
                         else
                             Just segment
                     )
-
-        params : List (OpenApi.Reference.ReferenceOr OpenApi.Parameter.Parameter)
-        params =
-            OpenApi.Operation.parameters operation
 
         initialUrl : List ( String, Elm.Expression -> Elm.Expression ) -> List (Elm.Expression -> Elm.Expression) -> CliMonad (Elm.Expression -> Elm.Expression)
         initialUrl replacements queryParams =
@@ -1352,7 +1438,8 @@ replacedUrl server authInfo pathUrl operation =
                                     Gen.Url.Builder.call_.crossOrigin s (Elm.list replacedSegments) allQueryParams
                     )
     in
-    params
+    operation
+        |> OpenApi.Operation.parameters
         |> CliMonad.combineMap
             (\param ->
                 toConcreteParam param
@@ -1394,6 +1481,10 @@ replacedUrl server authInfo pathUrl operation =
 
                                 "query" ->
                                     CliMonad.succeed ( Nothing, [ concreteParam ] )
+
+                                "header" ->
+                                    -- NOTE: This is handled in `operationToHeaderParams`
+                                    CliMonad.succeed ( Nothing, [] )
 
                                 paramIn ->
                                     CliMonad.todoWithDefault ( Nothing, [] ) <| "Parameters in \"" ++ paramIn ++ "\""
@@ -1602,8 +1693,8 @@ operationToAuthorizationInfo operation =
         (CliMonad.fromApiSpec OpenApi.components)
 
 
-operationToContentSchema : Bool -> OpenApi.Operation.Operation -> CliMonad ContentSchema
-operationToContentSchema qualify operation =
+operationToContentSchema : OpenApi.Operation.Operation -> CliMonad ContentSchema
+operationToContentSchema operation =
     case OpenApi.Operation.requestBody operation of
         Nothing ->
             CliMonad.succeed EmptyContent
@@ -1612,7 +1703,7 @@ operationToContentSchema qualify operation =
             case OpenApi.Reference.toConcrete requestOrRef of
                 Just request ->
                     OpenApi.RequestBody.content request
-                        |> contentToContentSchema qualify
+                        |> contentToContentSchema True
 
                 Nothing ->
                     CliMonad.succeed requestOrRef

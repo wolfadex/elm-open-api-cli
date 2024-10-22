@@ -1,0 +1,1942 @@
+{
+    "openapi": "3.0.1",
+    "info": {
+        "title": "Mario Party Stats",
+        "description": "",
+        "version": "12.2.3 (519615d)"
+    },
+    "externalDocs": {
+        "description": "PostgREST Documentation",
+        "url": "https://postgrest.org/en/v12/references/api.html"
+    },
+    "servers": [
+        {
+            "url": "https://arcnqxvnpxdmstefiizl.supabase.co:443/"
+        }
+    ],
+    "paths": {
+        "/": {
+            "get": {
+                "tags": ["Introspection"],
+                "summary": "OpenAPI description (this document)",
+                "operationId": "getOas",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {}
+                    }
+                }
+            }
+        },
+        "/boards": {
+            "get": {
+                "tags": ["boards"],
+                "operationId": "getBoards",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "created_at",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "updated_at",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "name",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "select",
+                        "in": "query",
+                        "description": "Filtering Columns",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "order",
+                        "in": "query",
+                        "description": "Ordering",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "Range",
+                        "in": "header",
+                        "description": "Limiting and Pagination",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "Range-Unit",
+                        "in": "header",
+                        "description": "Limiting and Pagination",
+                        "schema": {
+                            "type": "string",
+                            "default": "items"
+                        }
+                    },
+                    {
+                        "name": "offset",
+                        "in": "query",
+                        "description": "Limiting and Pagination",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Limiting and Pagination",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "Prefer",
+                        "in": "header",
+                        "description": "Preference",
+                        "schema": {
+                            "type": "string",
+                            "enum": ["count=none"]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/boards"
+                                    }
+                                }
+                            },
+                            "application/vnd.pgrst.object+json;nulls=stripped": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/boards"
+                                    }
+                                }
+                            },
+                            "application/vnd.pgrst.object+json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/boards"
+                                    }
+                                }
+                            },
+                            "text/csv": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/boards"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "206": {
+                        "description": "Partial Content",
+                        "content": {}
+                    }
+                }
+            },
+            "post": {
+                "tags": ["boards"],
+                "operationId": "createBoard",
+                "parameters": [
+                    {
+                        "name": "select",
+                        "in": "query",
+                        "description": "Filtering Columns",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "Prefer",
+                        "in": "header",
+                        "description": "Preference",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "return=representation",
+                                "return=minimal",
+                                "return=none",
+                                "resolution=ignore-duplicates",
+                                "resolution=merge-duplicates"
+                            ]
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "description": "boards",
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/boards"
+                            }
+                        },
+                        "application/vnd.pgrst.object+json;nulls=stripped": {
+                            "schema": {
+                                "$ref": "#/components/schemas/boards"
+                            }
+                        },
+                        "application/vnd.pgrst.object+json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/boards"
+                            }
+                        },
+                        "text/csv": {
+                            "schema": {
+                                "$ref": "#/components/schemas/boards"
+                            }
+                        }
+                    },
+                    "required": false
+                },
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "content": {}
+                    }
+                },
+                "x-codegen-request-body-name": "boards"
+            },
+            "delete": {
+                "tags": ["boards"],
+                "operationId": "deleteBoard",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "created_at",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "updated_at",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "name",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "Prefer",
+                        "in": "header",
+                        "description": "Preference",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "return=representation",
+                                "return=minimal",
+                                "return=none"
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content",
+                        "content": {}
+                    }
+                }
+            },
+            "patch": {
+                "tags": ["boards"],
+                "operationId": "updateBoard",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "created_at",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "updated_at",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "name",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "Prefer",
+                        "in": "header",
+                        "description": "Preference",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "return=representation",
+                                "return=minimal",
+                                "return=none"
+                            ]
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "description": "boards",
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/boards"
+                            }
+                        },
+                        "application/vnd.pgrst.object+json;nulls=stripped": {
+                            "schema": {
+                                "$ref": "#/components/schemas/boards"
+                            }
+                        },
+                        "application/vnd.pgrst.object+json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/boards"
+                            }
+                        },
+                        "text/csv": {
+                            "schema": {
+                                "$ref": "#/components/schemas/boards"
+                            }
+                        }
+                    },
+                    "required": false
+                },
+                "responses": {
+                    "204": {
+                        "description": "No Content",
+                        "content": {}
+                    }
+                },
+                "x-codegen-request-body-name": "boards"
+            }
+        },
+        "/match_players": {
+            "get": {
+                "tags": ["match_players"],
+                "operationId": "getMatchPlayers",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "created_at",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "updated_at",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "match",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "player",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "stars",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "coins",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "select",
+                        "in": "query",
+                        "description": "Filtering Columns",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "order",
+                        "in": "query",
+                        "description": "Ordering",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "Range",
+                        "in": "header",
+                        "description": "Limiting and Pagination",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "Range-Unit",
+                        "in": "header",
+                        "description": "Limiting and Pagination",
+                        "schema": {
+                            "type": "string",
+                            "default": "items"
+                        }
+                    },
+                    {
+                        "name": "offset",
+                        "in": "query",
+                        "description": "Limiting and Pagination",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Limiting and Pagination",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "Prefer",
+                        "in": "header",
+                        "description": "Preference",
+                        "schema": {
+                            "type": "string",
+                            "enum": ["count=none"]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/match_players"
+                                    }
+                                }
+                            },
+                            "application/vnd.pgrst.object+json;nulls=stripped": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/match_players"
+                                    }
+                                }
+                            },
+                            "application/vnd.pgrst.object+json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/match_players"
+                                    }
+                                }
+                            },
+                            "text/csv": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/match_players"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "206": {
+                        "description": "Partial Content",
+                        "content": {}
+                    }
+                }
+            },
+            "post": {
+                "tags": ["match_players"],
+                "operationId": "createMatchPlayer",
+                "parameters": [
+                    {
+                        "name": "select",
+                        "in": "query",
+                        "description": "Filtering Columns",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "Prefer",
+                        "in": "header",
+                        "description": "Preference",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "return=representation",
+                                "return=minimal",
+                                "return=none",
+                                "resolution=ignore-duplicates",
+                                "resolution=merge-duplicates"
+                            ]
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "description": "match_players",
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/match_players"
+                            }
+                        },
+                        "application/vnd.pgrst.object+json;nulls=stripped": {
+                            "schema": {
+                                "$ref": "#/components/schemas/match_players"
+                            }
+                        },
+                        "application/vnd.pgrst.object+json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/match_players"
+                            }
+                        },
+                        "text/csv": {
+                            "schema": {
+                                "$ref": "#/components/schemas/match_players"
+                            }
+                        }
+                    },
+                    "required": false
+                },
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "content": {}
+                    }
+                },
+                "x-codegen-request-body-name": "match_players"
+            },
+            "delete": {
+                "tags": ["match_players"],
+                "operationId": "deleteMatchPlayer",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "created_at",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "updated_at",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "match",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "player",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "stars",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "coins",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "Prefer",
+                        "in": "header",
+                        "description": "Preference",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "return=representation",
+                                "return=minimal",
+                                "return=none"
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content",
+                        "content": {}
+                    }
+                }
+            },
+            "patch": {
+                "tags": ["match_players"],
+                "operationId": "updateMatchPlayer",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "created_at",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "updated_at",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "match",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "player",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "stars",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "coins",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "Prefer",
+                        "in": "header",
+                        "description": "Preference",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "return=representation",
+                                "return=minimal",
+                                "return=none"
+                            ]
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "description": "match_players",
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/match_players"
+                            }
+                        },
+                        "application/vnd.pgrst.object+json;nulls=stripped": {
+                            "schema": {
+                                "$ref": "#/components/schemas/match_players"
+                            }
+                        },
+                        "application/vnd.pgrst.object+json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/match_players"
+                            }
+                        },
+                        "text/csv": {
+                            "schema": {
+                                "$ref": "#/components/schemas/match_players"
+                            }
+                        }
+                    },
+                    "required": false
+                },
+                "responses": {
+                    "204": {
+                        "description": "No Content",
+                        "content": {}
+                    }
+                },
+                "x-codegen-request-body-name": "match_players"
+            }
+        },
+        "/matches": {
+            "get": {
+                "tags": ["matches"],
+                "operationId": "getMatches",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "created_at",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "updated_at",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "board",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "turns",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "select",
+                        "in": "query",
+                        "description": "Filtering Columns",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "order",
+                        "in": "query",
+                        "description": "Ordering",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "Range",
+                        "in": "header",
+                        "description": "Limiting and Pagination",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "Range-Unit",
+                        "in": "header",
+                        "description": "Limiting and Pagination",
+                        "schema": {
+                            "type": "string",
+                            "default": "items"
+                        }
+                    },
+                    {
+                        "name": "offset",
+                        "in": "query",
+                        "description": "Limiting and Pagination",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Limiting and Pagination",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "Prefer",
+                        "in": "header",
+                        "description": "Preference",
+                        "schema": {
+                            "type": "string",
+                            "enum": ["count=none"]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/matches"
+                                    }
+                                }
+                            },
+                            "application/vnd.pgrst.object+json;nulls=stripped": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/matches"
+                                    }
+                                }
+                            },
+                            "application/vnd.pgrst.object+json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/matches"
+                                    }
+                                }
+                            },
+                            "text/csv": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/matches"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "206": {
+                        "description": "Partial Content",
+                        "content": {}
+                    }
+                }
+            },
+            "post": {
+                "tags": ["matches"],
+                "operationId": "createMatch",
+                "parameters": [
+                    {
+                        "name": "select",
+                        "in": "query",
+                        "description": "Filtering Columns",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "Prefer",
+                        "in": "header",
+                        "description": "Preference",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "return=representation",
+                                "return=minimal",
+                                "return=none",
+                                "resolution=ignore-duplicates",
+                                "resolution=merge-duplicates"
+                            ]
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "description": "matches",
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/matches"
+                            }
+                        },
+                        "application/vnd.pgrst.object+json;nulls=stripped": {
+                            "schema": {
+                                "$ref": "#/components/schemas/matches"
+                            }
+                        },
+                        "application/vnd.pgrst.object+json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/matches"
+                            }
+                        },
+                        "text/csv": {
+                            "schema": {
+                                "$ref": "#/components/schemas/matches"
+                            }
+                        }
+                    },
+                    "required": false
+                },
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "content": {}
+                    }
+                },
+                "x-codegen-request-body-name": "matches"
+            },
+            "delete": {
+                "tags": ["matches"],
+                "operationId": "deleteMatch",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "created_at",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "updated_at",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "board",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "turns",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "Prefer",
+                        "in": "header",
+                        "description": "Preference",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "return=representation",
+                                "return=minimal",
+                                "return=none"
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content",
+                        "content": {}
+                    }
+                }
+            },
+            "patch": {
+                "tags": ["matches"],
+                "operationId": "updateMatch",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "created_at",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "updated_at",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "board",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "turns",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "Prefer",
+                        "in": "header",
+                        "description": "Preference",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "return=representation",
+                                "return=minimal",
+                                "return=none"
+                            ]
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "description": "matches",
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/matches"
+                            }
+                        },
+                        "application/vnd.pgrst.object+json;nulls=stripped": {
+                            "schema": {
+                                "$ref": "#/components/schemas/matches"
+                            }
+                        },
+                        "application/vnd.pgrst.object+json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/matches"
+                            }
+                        },
+                        "text/csv": {
+                            "schema": {
+                                "$ref": "#/components/schemas/matches"
+                            }
+                        }
+                    },
+                    "required": false
+                },
+                "responses": {
+                    "204": {
+                        "description": "No Content",
+                        "content": {}
+                    }
+                },
+                "x-codegen-request-body-name": "matches"
+            }
+        },
+        "/players": {
+            "get": {
+                "tags": ["players"],
+                "operationId": "getPlayers",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "created_at",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "updated_at",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "name",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "select",
+                        "in": "query",
+                        "description": "Filtering Columns",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "order",
+                        "in": "query",
+                        "description": "Ordering",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "Range",
+                        "in": "header",
+                        "description": "Limiting and Pagination",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "Range-Unit",
+                        "in": "header",
+                        "description": "Limiting and Pagination",
+                        "schema": {
+                            "type": "string",
+                            "default": "items"
+                        }
+                    },
+                    {
+                        "name": "offset",
+                        "in": "query",
+                        "description": "Limiting and Pagination",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Limiting and Pagination",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "Prefer",
+                        "in": "header",
+                        "description": "Preference",
+                        "schema": {
+                            "type": "string",
+                            "enum": ["count=none"]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/players"
+                                    }
+                                }
+                            },
+                            "application/vnd.pgrst.object+json;nulls=stripped": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/players"
+                                    }
+                                }
+                            },
+                            "application/vnd.pgrst.object+json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/players"
+                                    }
+                                }
+                            },
+                            "text/csv": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/players"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "206": {
+                        "description": "Partial Content",
+                        "content": {}
+                    }
+                }
+            },
+            "post": {
+                "tags": ["players"],
+                "operationId": "createPlayer",
+                "parameters": [
+                    {
+                        "name": "select",
+                        "in": "query",
+                        "description": "Filtering Columns",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "Prefer",
+                        "in": "header",
+                        "description": "Preference",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "return=representation",
+                                "return=minimal",
+                                "return=none",
+                                "resolution=ignore-duplicates",
+                                "resolution=merge-duplicates"
+                            ]
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "description": "players",
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/players"
+                            }
+                        },
+                        "application/vnd.pgrst.object+json;nulls=stripped": {
+                            "schema": {
+                                "$ref": "#/components/schemas/players"
+                            }
+                        },
+                        "application/vnd.pgrst.object+json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/players"
+                            }
+                        },
+                        "text/csv": {
+                            "schema": {
+                                "$ref": "#/components/schemas/players"
+                            }
+                        }
+                    },
+                    "required": false
+                },
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "content": {}
+                    }
+                },
+                "x-codegen-request-body-name": "players"
+            },
+            "delete": {
+                "tags": ["players"],
+                "operationId": "deletePlayer",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "created_at",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "updated_at",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "name",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "Prefer",
+                        "in": "header",
+                        "description": "Preference",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "return=representation",
+                                "return=minimal",
+                                "return=none"
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content",
+                        "content": {}
+                    }
+                }
+            },
+            "patch": {
+                "tags": ["players"],
+                "operationId": "updatePlayer",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "created_at",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "updated_at",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "name",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "Prefer",
+                        "in": "header",
+                        "description": "Preference",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "return=representation",
+                                "return=minimal",
+                                "return=none"
+                            ]
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "description": "players",
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/players"
+                            }
+                        },
+                        "application/vnd.pgrst.object+json;nulls=stripped": {
+                            "schema": {
+                                "$ref": "#/components/schemas/players"
+                            }
+                        },
+                        "application/vnd.pgrst.object+json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/players"
+                            }
+                        },
+                        "text/csv": {
+                            "schema": {
+                                "$ref": "#/components/schemas/players"
+                            }
+                        }
+                    },
+                    "required": false
+                },
+                "responses": {
+                    "204": {
+                        "description": "No Content",
+                        "content": {}
+                    }
+                },
+                "x-codegen-request-body-name": "players"
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "boards": {
+                "required": ["created_at", "id", "name", "updated_at"],
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "description": "Note:\nThis is a Primary Key.<pk/>",
+                        "format": "uuid"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "timestamp with time zone",
+                        "default": "now()"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "timestamp with time zone",
+                        "default": "now()"
+                    },
+                    "name": {
+                        "type": "string",
+                        "format": "text",
+                        "default": ""
+                    }
+                }
+            },
+            "matches": {
+                "required": [
+                    "board",
+                    "created_at",
+                    "id",
+                    "turns",
+                    "updated_at"
+                ],
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "description": "Note:\nThis is a Primary Key.<pk/>",
+                        "format": "uuid"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "timestamp with time zone",
+                        "default": "now()"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "timestamp with time zone",
+                        "default": "now()"
+                    },
+                    "board": {
+                        "type": "string",
+                        "description": "Note:\nThis is a Foreign Key to `boards.id`.<fk table='boards' column='id'/>",
+                        "format": "uuid"
+                    },
+                    "turns": {
+                        "type": "integer",
+                        "format": "smallint"
+                    }
+                }
+            },
+            "players": {
+                "required": ["created_at", "id", "name", "updated_at"],
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "description": "Note:\nThis is a Primary Key.<pk/>",
+                        "format": "uuid"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "timestamp with time zone",
+                        "default": "now()"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "timestamp with time zone",
+                        "default": "now()"
+                    },
+                    "name": {
+                        "type": "string",
+                        "format": "text",
+                        "default": ""
+                    }
+                }
+            },
+            "match_players": {
+                "required": [
+                    "coins",
+                    "created_at",
+                    "id",
+                    "match",
+                    "player",
+                    "stars",
+                    "updated_at"
+                ],
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "description": "Note:\nThis is a Primary Key.<pk/>",
+                        "format": "uuid"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "timestamp with time zone",
+                        "default": "now()"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "timestamp with time zone",
+                        "default": "now()"
+                    },
+                    "match": {
+                        "type": "string",
+                        "description": "Note:\nThis is a Foreign Key to `matches.id`.<fk table='matches' column='id'/>",
+                        "format": "uuid"
+                    },
+                    "player": {
+                        "type": "string",
+                        "description": "Note:\nThis is a Foreign Key to `players.id`.<fk table='players' column='id'/>",
+                        "format": "uuid"
+                    },
+                    "stars": {
+                        "type": "integer",
+                        "format": "smallint"
+                    },
+                    "coins": {
+                        "type": "integer",
+                        "format": "smallint"
+                    }
+                }
+            }
+        },
+        "parameters": {
+            "preferParams": {
+                "name": "Prefer",
+                "in": "header",
+                "description": "Preference",
+                "schema": {
+                    "type": "string",
+                    "enum": ["params=single-object"]
+                }
+            },
+            "preferReturn": {
+                "name": "Prefer",
+                "in": "header",
+                "description": "Preference",
+                "schema": {
+                    "type": "string",
+                    "enum": [
+                        "return=representation",
+                        "return=minimal",
+                        "return=none"
+                    ]
+                }
+            },
+            "preferCount": {
+                "name": "Prefer",
+                "in": "header",
+                "description": "Preference",
+                "schema": {
+                    "type": "string",
+                    "enum": ["count=none"]
+                }
+            },
+            "preferPost": {
+                "name": "Prefer",
+                "in": "header",
+                "description": "Preference",
+                "schema": {
+                    "type": "string",
+                    "enum": [
+                        "return=representation",
+                        "return=minimal",
+                        "return=none",
+                        "resolution=ignore-duplicates",
+                        "resolution=merge-duplicates"
+                    ]
+                }
+            },
+            "select": {
+                "name": "select",
+                "in": "query",
+                "description": "Filtering Columns",
+                "schema": {
+                    "type": "string"
+                }
+            },
+            "on_conflict": {
+                "name": "on_conflict",
+                "in": "query",
+                "description": "On Conflict",
+                "schema": {
+                    "type": "string"
+                }
+            },
+            "order": {
+                "name": "order",
+                "in": "query",
+                "description": "Ordering",
+                "schema": {
+                    "type": "string"
+                }
+            },
+            "range": {
+                "name": "Range",
+                "in": "header",
+                "description": "Limiting and Pagination",
+                "schema": {
+                    "type": "string"
+                }
+            },
+            "rangeUnit": {
+                "name": "Range-Unit",
+                "in": "header",
+                "description": "Limiting and Pagination",
+                "schema": {
+                    "type": "string",
+                    "default": "items"
+                }
+            },
+            "offset": {
+                "name": "offset",
+                "in": "query",
+                "description": "Limiting and Pagination",
+                "schema": {
+                    "type": "string"
+                }
+            },
+            "limit": {
+                "name": "limit",
+                "in": "query",
+                "description": "Limiting and Pagination",
+                "schema": {
+                    "type": "string"
+                }
+            },
+            "rowFilter.boards.id": {
+                "name": "id",
+                "in": "query",
+                "schema": {
+                    "type": "string"
+                }
+            },
+            "rowFilter.boards.created_at": {
+                "name": "created_at",
+                "in": "query",
+                "schema": {
+                    "type": "string"
+                }
+            },
+            "rowFilter.boards.updated_at": {
+                "name": "updated_at",
+                "in": "query",
+                "schema": {
+                    "type": "string"
+                }
+            },
+            "rowFilter.boards.name": {
+                "name": "name",
+                "in": "query",
+                "schema": {
+                    "type": "string"
+                }
+            },
+            "rowFilter.matches.id": {
+                "name": "id",
+                "in": "query",
+                "schema": {
+                    "type": "string"
+                }
+            },
+            "rowFilter.matches.created_at": {
+                "name": "created_at",
+                "in": "query",
+                "schema": {
+                    "type": "string"
+                }
+            },
+            "rowFilter.matches.updated_at": {
+                "name": "updated_at",
+                "in": "query",
+                "schema": {
+                    "type": "string"
+                }
+            },
+            "rowFilter.matches.board": {
+                "name": "board",
+                "in": "query",
+                "schema": {
+                    "type": "string"
+                }
+            },
+            "rowFilter.matches.turns": {
+                "name": "turns",
+                "in": "query",
+                "schema": {
+                    "type": "string"
+                }
+            },
+            "rowFilter.players.id": {
+                "name": "id",
+                "in": "query",
+                "schema": {
+                    "type": "string"
+                }
+            },
+            "rowFilter.players.created_at": {
+                "name": "created_at",
+                "in": "query",
+                "schema": {
+                    "type": "string"
+                }
+            },
+            "rowFilter.players.updated_at": {
+                "name": "updated_at",
+                "in": "query",
+                "schema": {
+                    "type": "string"
+                }
+            },
+            "rowFilter.players.name": {
+                "name": "name",
+                "in": "query",
+                "schema": {
+                    "type": "string"
+                }
+            },
+            "rowFilter.match_players.id": {
+                "name": "id",
+                "in": "query",
+                "schema": {
+                    "type": "string"
+                }
+            },
+            "rowFilter.match_players.created_at": {
+                "name": "created_at",
+                "in": "query",
+                "schema": {
+                    "type": "string"
+                }
+            },
+            "rowFilter.match_players.updated_at": {
+                "name": "updated_at",
+                "in": "query",
+                "schema": {
+                    "type": "string"
+                }
+            },
+            "rowFilter.match_players.match": {
+                "name": "match",
+                "in": "query",
+                "schema": {
+                    "type": "string"
+                }
+            },
+            "rowFilter.match_players.player": {
+                "name": "player",
+                "in": "query",
+                "schema": {
+                    "type": "string"
+                }
+            },
+            "rowFilter.match_players.stars": {
+                "name": "stars",
+                "in": "query",
+                "schema": {
+                    "type": "string"
+                }
+            },
+            "rowFilter.match_players.coins": {
+                "name": "coins",
+                "in": "query",
+                "schema": {
+                    "type": "string"
+                }
+            }
+        },
+        "requestBodies": {
+            "body.boards": {
+                "description": "boards",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/boards"
+                        }
+                    },
+                    "application/vnd.pgrst.object+json;nulls=stripped": {
+                        "schema": {
+                            "$ref": "#/components/schemas/boards"
+                        }
+                    },
+                    "application/vnd.pgrst.object+json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/boards"
+                        }
+                    },
+                    "text/csv": {
+                        "schema": {
+                            "$ref": "#/components/schemas/boards"
+                        }
+                    }
+                },
+                "required": false
+            },
+            "body.matches": {
+                "description": "matches",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/matches"
+                        }
+                    },
+                    "application/vnd.pgrst.object+json;nulls=stripped": {
+                        "schema": {
+                            "$ref": "#/components/schemas/matches"
+                        }
+                    },
+                    "application/vnd.pgrst.object+json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/matches"
+                        }
+                    },
+                    "text/csv": {
+                        "schema": {
+                            "$ref": "#/components/schemas/matches"
+                        }
+                    }
+                },
+                "required": false
+            },
+            "body.players": {
+                "description": "players",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/players"
+                        }
+                    },
+                    "application/vnd.pgrst.object+json;nulls=stripped": {
+                        "schema": {
+                            "$ref": "#/components/schemas/players"
+                        }
+                    },
+                    "application/vnd.pgrst.object+json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/players"
+                        }
+                    },
+                    "text/csv": {
+                        "schema": {
+                            "$ref": "#/components/schemas/players"
+                        }
+                    }
+                },
+                "required": false
+            },
+            "body.match_players": {
+                "description": "match_players",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/match_players"
+                        }
+                    },
+                    "application/vnd.pgrst.object+json;nulls=stripped": {
+                        "schema": {
+                            "$ref": "#/components/schemas/match_players"
+                        }
+                    },
+                    "application/vnd.pgrst.object+json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/match_players"
+                        }
+                    },
+                    "text/csv": {
+                        "schema": {
+                            "$ref": "#/components/schemas/match_players"
+                        }
+                    }
+                },
+                "required": false
+            }
+        },
+        "securitySchemes": {
+            "authorization": {
+                "type": "apiKey",
+                "name": "apikey",
+                "in": "query"
+            }
+        }
+    },
+    "x-original-swagger-version": "2.0"
+}

@@ -14,6 +14,8 @@ import GithubV3RestApi.Types
 import OpenApi.Common
 import RealworldConduitApi.Api
 import RealworldConduitApi.Types
+import MarioPartyStats.Api
+import MarioPartyStats.Types
 
 
 main : Program () Model Msg
@@ -57,6 +59,22 @@ init () =
                 , input = "München"
                 }
             }
+        , MarioPartyStats.Api.getBoards
+            { toMsg = MarioPartyStatsResponse
+            , params =
+                { id = Nothing
+                , created_at = Nothing
+                , updated_at = Nothing
+                , name = Nothing
+                , select = Nothing
+                , order = Nothing
+                , range = Nothing
+                , range_Unit = Nothing
+                , offset = Nothing
+                , limit = Nothing
+                , prefer = Nothing
+                }
+            }
         ]
     )
 
@@ -72,6 +90,7 @@ type Msg
       -- | BimResponse (Result (OpenApi.Common.Error BimcloudApi20232AlphaRelease.BlobStoreService10BeginBatchUpload_Error Bytes.Bytes) Bytes.Bytes)
     | GithubResponse (Result (OpenApi.Common.Error () String) GithubV3RestApi.Types.Root)
     | DbFahrplanResponse (Result (OpenApi.Common.Error Never String) DbFahrplanApi.Types.LocationResponse)
+    | MarioPartyStatsResponse (Result (OpenApi.Common.Error Never String) (List MarioPartyStats.Types.Boards))
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -90,6 +109,9 @@ update msg model =
 
         DbFahrplanResponse _ ->
             ( model, Cmd.none )
+
+        MarioPartyStatsResponse _ ->
+            ( model, Cmd.none  )
 
 
 view : Model -> Browser.Document Msg

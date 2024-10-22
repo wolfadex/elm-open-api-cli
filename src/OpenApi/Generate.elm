@@ -742,24 +742,48 @@ toRequestFunctions server effectTypes method pathUrl operation =
         headersFromList : (Elm.Expression -> Elm.Expression -> Elm.Expression) -> AuthorizationInfo -> Elm.Expression -> List ( Elm.Expression, Elm.Expression, Bool ) -> Elm.Expression
         headersFromList f auth config headerParams =
             let
+                hasMaybes =
+                    List.any (\( _, _, isMaybe ) -> isMaybe) headerParams
+
                 authHeaders =
-                    List.map (\( k, v ) -> Elm.just (f k v)) (auth.headers config)
+                    List.map
+                        (\( k, v ) ->
+                            if hasMaybes then
+                                Elm.just
+                                    (f k v)
+
+                            else
+                                f k v
+                        )
+                        (auth.headers config)
 
                 paramHeaders =
                     List.map
                         (\( k, v, isMaybe ) ->
                             if isMaybe then
-                                Gen.Maybe.map (f k)
-                                    v
+                                Gen.Maybe.map (f k) v
+
+                            else if hasMaybes then
+                                f k v
 
                             else
                                 Elm.just (f k v)
                         )
                         headerParams
             in
-            (authHeaders ++ paramHeaders)
-                |> Elm.list
-                |> Gen.List.call_.filterMap Gen.Basics.values_.identity
+            case authHeaders ++ paramHeaders of
+                [] ->
+                    Elm.list []
+
+                allHeaders ->
+                    allHeaders
+                        |> Elm.list
+                        |> (if hasMaybes then
+                                Gen.List.call_.filterMap Gen.Basics.values_.identity
+
+                            else
+                                identity
+                           )
 
         documentation : AuthorizationInfo -> String
         documentation { scopes } =
@@ -1313,7 +1337,7 @@ operationToHeaderParams operation =
                                     )
                         )
                     |> CliMonad.andThen
-                        (\{ concreteParam, paramName, inputToString, alwaysJust, isMaybe } ->
+                        (\{ concreteParam, paramName, inputToString, isMaybe } ->
                             case OpenApi.Parameter.in_ concreteParam of
                                 "path" ->
                                     -- NOTE: This is handled in `replacedUrl`

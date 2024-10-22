@@ -742,9 +742,11 @@ toRequestFunctions server effectTypes method pathUrl operation =
         headersFromList : (Elm.Expression -> Elm.Expression -> Elm.Expression) -> AuthorizationInfo -> Elm.Expression -> List ( Elm.Expression, Elm.Expression, Bool ) -> Elm.Expression
         headersFromList f auth config headerParams =
             let
+                hasMaybes : Bool
                 hasMaybes =
                     List.any (\( _, _, isMaybe ) -> isMaybe) headerParams
 
+                authHeaders : List Elm.Expression
                 authHeaders =
                     List.map
                         (\( k, v ) ->
@@ -757,6 +759,7 @@ toRequestFunctions server effectTypes method pathUrl operation =
                         )
                         (auth.headers config)
 
+                paramHeaders : List Elm.Expression
                 paramHeaders =
                     List.map
                         (\( k, v, isMaybe ) ->

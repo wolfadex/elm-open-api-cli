@@ -1320,7 +1320,6 @@ operationToHeaderParams operation =
                                     CliMonad.succeed Nothing
 
                                 "query" ->
-                                    -- CliMonad.succeed ( Nothing, [ concreteParam ] )
                                     -- NOTE: This is handled in `replacedUrl`
                                     CliMonad.succeed Nothing
 

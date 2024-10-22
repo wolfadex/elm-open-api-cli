@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unreleased]
 
+### Added
+-   Support for params being passed in the header
+
 ## [0.7.0] - 2024-09-23
 
 ### Added

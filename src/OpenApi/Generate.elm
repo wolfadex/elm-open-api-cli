@@ -739,11 +739,27 @@ toRequestFunctions server effectTypes method pathUrl operation =
                 BytesContent _ ->
                     CliMonad.succeed [ ( Common.UnsafeName "body", Gen.Bytes.annotation_.bytes ) ]
 
-        headersFromList : (Elm.Expression -> Elm.Expression -> Elm.Expression) -> AuthorizationInfo -> Elm.Expression -> List ( Elm.Expression, Elm.Expression ) -> Elm.Expression
+        headersFromList : (Elm.Expression -> Elm.Expression -> Elm.Expression) -> AuthorizationInfo -> Elm.Expression -> List ( Elm.Expression, Elm.Expression, Bool ) -> Elm.Expression
         headersFromList f auth config headerParams =
-            (auth.headers config ++ headerParams)
-                |> List.map (\( k, v ) -> f k v)
+            let
+                authHeaders =
+                    List.map (\( k, v ) -> Elm.just (f k v)) (auth.headers config)
+
+                paramHeaders =
+                    List.map
+                        (\( k, v, isMaybe ) ->
+                            if isMaybe then
+                                Gen.Maybe.map (f k)
+                                    v
+
+                            else
+                                Elm.just (f k v)
+                        )
+                        headerParams
+            in
+            (authHeaders ++ paramHeaders)
                 |> Elm.list
+                |> Gen.List.call_.filterMap Gen.Basics.values_.identity
 
         documentation : AuthorizationInfo -> String
         documentation { scopes } =
@@ -824,7 +840,7 @@ toRequestFunctions server effectTypes method pathUrl operation =
 
                 elmHttpCommands :
                     AuthorizationInfo
-                    -> List (Elm.Expression -> ( Elm.Expression, Elm.Expression ))
+                    -> List (Elm.Expression -> ( Elm.Expression, Elm.Expression, Bool ))
                     -> Elm.Annotation.Annotation
                     -> (Elm.Expression -> PerPackage Elm.Expression)
                     -> (Elm.Expression -> Elm.Expression)
@@ -895,7 +911,7 @@ toRequestFunctions server effectTypes method pathUrl operation =
 
                 elmHttpTasks :
                     AuthorizationInfo
-                    -> List (Elm.Expression -> ( Elm.Expression, Elm.Expression ))
+                    -> List (Elm.Expression -> ( Elm.Expression, Elm.Expression, Bool ))
                     -> Elm.Annotation.Annotation
                     -> (Elm.Expression -> PerPackage Elm.Expression)
                     -> (Elm.Expression -> Elm.Expression)
@@ -971,7 +987,7 @@ toRequestFunctions server effectTypes method pathUrl operation =
 
                 dillonkearnsElmPagesBackendTask :
                     AuthorizationInfo
-                    -> List (Elm.Expression -> ( Elm.Expression, Elm.Expression ))
+                    -> List (Elm.Expression -> ( Elm.Expression, Elm.Expression, Bool ))
                     -> Elm.Annotation.Annotation
                     -> (Elm.Expression -> PerPackage Elm.Expression)
                     -> (Elm.Expression -> Elm.Expression)
@@ -1042,7 +1058,7 @@ toRequestFunctions server effectTypes method pathUrl operation =
 
                 lamderaProgramTestCommands :
                     AuthorizationInfo
-                    -> List (Elm.Expression -> ( Elm.Expression, Elm.Expression ))
+                    -> List (Elm.Expression -> ( Elm.Expression, Elm.Expression, Bool ))
                     -> Elm.Annotation.Annotation
                     -> (Elm.Expression -> PerPackage Elm.Expression)
                     -> (Elm.Expression -> Elm.Expression)
@@ -1094,7 +1110,7 @@ toRequestFunctions server effectTypes method pathUrl operation =
 
                 lamderaProgramTestTasks :
                     AuthorizationInfo
-                    -> List (Elm.Expression -> ( Elm.Expression, Elm.Expression ))
+                    -> List (Elm.Expression -> ( Elm.Expression, Elm.Expression, Bool ))
                     -> Elm.Annotation.Annotation
                     -> (Elm.Expression -> PerPackage Elm.Expression)
                     -> (Elm.Expression -> Elm.Expression)
@@ -1272,7 +1288,7 @@ operationToGroup operation =
             "Operations"
 
 
-operationToHeaderParams : OpenApi.Operation.Operation -> CliMonad (List (Elm.Expression -> ( Elm.Expression, Elm.Expression )))
+operationToHeaderParams : OpenApi.Operation.Operation -> CliMonad (List (Elm.Expression -> ( Elm.Expression, Elm.Expression, Bool )))
 operationToHeaderParams operation =
     operation
         |> OpenApi.Operation.parameters
@@ -1286,17 +1302,18 @@ operationToHeaderParams operation =
                                     (\( paramName, type_ ) ->
                                         paramToString True type_
                                             |> CliMonad.map
-                                                (\{ inputToString, alwaysJust } ->
+                                                (\{ inputToString, alwaysJust, isMaybe } ->
                                                     { concreteParam = concreteParam
                                                     , paramName = paramName
                                                     , inputToString = inputToString
                                                     , alwaysJust = alwaysJust
+                                                    , isMaybe = isMaybe
                                                     }
                                                 )
                                     )
                         )
                     |> CliMonad.andThen
-                        (\{ concreteParam, paramName, inputToString, alwaysJust } ->
+                        (\{ concreteParam, paramName, inputToString, alwaysJust, isMaybe } ->
                             case OpenApi.Parameter.in_ concreteParam of
                                 "path" ->
                                     -- NOTE: This is handled in `replacedUrl`
@@ -1311,12 +1328,14 @@ operationToHeaderParams operation =
                                     CliMonad.succeed
                                         (Just
                                             (\config ->
-                                                ( Common.toValueName paramName
+                                                ( paramName
+                                                    |> Common.unwrapUnsafe
                                                     |> Elm.string
                                                 , config
                                                     |> Elm.get "params"
                                                     |> Elm.get (Common.toValueName paramName)
                                                     |> inputToString
+                                                , isMaybe
                                                 )
                                             )
                                         )
@@ -1326,11 +1345,6 @@ operationToHeaderParams operation =
                                     CliMonad.succeed Nothing
                         )
             )
-        -- |> CliMonad.map
-        --     (\headers ->
-        --         headers
-        --             |> List.concat
-        --     )
         |> CliMonad.map (List.filterMap identity)
 
 
@@ -1950,20 +1964,24 @@ queryParameterToUrlBuilderArgument qualify param =
             )
 
 
-paramToString : Bool -> Common.Type -> CliMonad { inputToString : Elm.Expression -> Elm.Expression, alwaysJust : Bool }
+paramToString :
+    Bool
+    -> Common.Type
+    -> CliMonad { inputToString : Elm.Expression -> Elm.Expression, alwaysJust : Bool, isMaybe : Bool }
 paramToString qualify type_ =
     let
         basic :
             (Elm.Expression -> Elm.Expression)
-            -> CliMonad { inputToString : Elm.Expression -> Elm.Expression, alwaysJust : Bool }
+            -> CliMonad { inputToString : Elm.Expression -> Elm.Expression, alwaysJust : Bool, isMaybe : Bool }
         basic f =
-            CliMonad.succeed { inputToString = f, alwaysJust = True }
+            CliMonad.succeed { inputToString = f, alwaysJust = True, isMaybe = False }
 
         recursive :
             Common.Type
-            -> ({ inputToString : Elm.Expression, alwaysJust : Bool } -> Elm.Expression -> Elm.Expression)
-            -> CliMonad { inputToString : Elm.Expression -> Elm.Expression, alwaysJust : Bool }
-        recursive p f =
+            -> Bool
+            -> ({ inputToString : Elm.Expression, alwaysJust : Bool, isMaybe : Bool } -> Elm.Expression -> Elm.Expression)
+            -> CliMonad { inputToString : Elm.Expression -> Elm.Expression, alwaysJust : Bool, isMaybe : Bool }
+        recursive p isMaybe f =
             paramToString qualify p
                 |> CliMonad.map
                     (\{ inputToString, alwaysJust } ->
@@ -1971,8 +1989,10 @@ paramToString qualify type_ =
                             f
                                 { alwaysJust = alwaysJust
                                 , inputToString = Elm.functionReduced "toStringArg" inputToString
+                                , isMaybe = isMaybe
                                 }
                         , alwaysJust = False
+                        , isMaybe = isMaybe
                         }
                     )
     in
@@ -1997,11 +2017,12 @@ paramToString qualify type_ =
         Common.Nullable Common.String ->
             { inputToString = identity
             , alwaysJust = False
+            , isMaybe = True
             }
                 |> CliMonad.succeed
 
         Common.Nullable p ->
-            recursive p <|
+            recursive p True <|
                 \{ inputToString, alwaysJust } val ->
                     if alwaysJust then
                         Gen.Maybe.call_.map inputToString val
@@ -2019,11 +2040,12 @@ paramToString qualify type_ =
                             |> Gen.Maybe.make_.just
                         )
             , alwaysJust = False
+            , isMaybe = False
             }
                 |> CliMonad.succeed
 
         Common.List p ->
-            recursive p <|
+            recursive p False <|
                 \{ inputToString, alwaysJust } val ->
                     let
                         map : Elm.Expression -> Elm.Expression -> Elm.Expression
@@ -2054,6 +2076,7 @@ paramToString qualify type_ =
                     { inputToString =
                         \val -> Elm.Case.custom val valType branches
                     , alwaysJust = True
+                    , isMaybe = False
                     }
                 )
                 (SchemaUtils.typeToAnnotation qualify type_)
@@ -2096,6 +2119,7 @@ paramToString qualify type_ =
                                                     )
                                                     [ val ]
                                         , alwaysJust = True
+                                        , isMaybe = False
                                         }
                                     )
                                     (CliMonad.moduleToNamespace Common.Types)
@@ -2113,6 +2137,7 @@ paramToString qualify type_ =
                         CliMonad.todoWithDefault
                             { inputToString = \_ -> Gen.Debug.todo msg
                             , alwaysJust = True
+                            , isMaybe = False
                             }
                             msg
                     )

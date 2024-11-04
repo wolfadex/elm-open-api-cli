@@ -1813,11 +1813,12 @@ contentToContentSchema qualify content =
                 |> CliMonad.andThen (SchemaUtils.schemaToType True)
                 |> CliMonad.andThen
                     (\{ type_ } ->
-                        if type_ == Common.String then
-                            CliMonad.succeed (StringContent mime)
+                        case type_ of
+                            Common.String _ ->
+                                CliMonad.succeed (StringContent mime)
 
-                        else
-                            CliMonad.fail ("The only supported type for " ++ mime ++ " content is string")
+                            _ ->
+                                CliMonad.fail ("The only supported type for " ++ mime ++ " content is string")
                     )
     in
     case Dict.toList content of
@@ -2023,16 +2024,16 @@ paramToString qualify type_ =
                     )
     in
     case type_ of
-        Common.String ->
+        Common.String _ ->
             basic identity
 
-        Common.Int ->
+        Common.Int _ ->
             basic Gen.String.call_.fromInt
 
-        Common.Float ->
+        Common.Float _ ->
             basic Gen.String.call_.fromFloat
 
-        Common.Bool ->
+        Common.Bool _ ->
             (\val ->
                 Elm.ifThen val
                     (Elm.string "true")
@@ -2040,7 +2041,7 @@ paramToString qualify type_ =
             )
                 |> basic
 
-        Common.Nullable Common.String ->
+        Common.Nullable (Common.String _) ->
             { inputToString = identity
             , alwaysJust = False
             , isMaybe = True
@@ -2056,7 +2057,7 @@ paramToString qualify type_ =
                     else
                         Gen.Maybe.call_.andThen inputToString val
 
-        Common.List Common.String ->
+        Common.List (Common.String _) ->
             { inputToString =
                 \val ->
                     Elm.ifThen (Gen.List.call_.isEmpty val)
@@ -2528,7 +2529,7 @@ operationToTypesExpectAndResolver functionName operation =
                                         StringContent _ ->
                                             CliMonad.map2
                                                 (\errorDecoders_ ( errorTypeDeclaration_, errorTypeAnnotation ) ->
-                                                    { successType = Common.String
+                                                    { successType = Common.String { const = Nothing }
                                                     , bodyTypeAnnotation = Elm.Annotation.string
                                                     , errorTypeDeclaration = errorTypeDeclaration_
                                                     , errorTypeAnnotation = errorTypeAnnotation

@@ -182,7 +182,7 @@ schemaToType qualify schema =
                             CliMonad.succeed { type_ = Common.Bool, documentation = subSchema.description }
 
                         Json.Schema.Definitions.NullType ->
-                            CliMonad.todoWithDefault { type_ = Common.Value, documentation = subSchema.description } "Null type annotation"
+                            CliMonad.succeed { type_ = Common.Null, documentation = subSchema.description }
 
                         Json.Schema.Definitions.ArrayType ->
                             case subSchema.items of
@@ -579,6 +579,9 @@ typeToAnnotationWithNullable qualify type_ =
         Common.Bool ->
             CliMonad.succeed Elm.Annotation.bool
 
+        Common.Null ->
+            CliMonad.succeed Elm.Annotation.unit
+
         Common.List t ->
             CliMonad.map Elm.Annotation.list (typeToAnnotationWithNullable qualify t)
 
@@ -655,6 +658,9 @@ typeToAnnotationWithMaybe qualify type_ =
 
         Common.Bool ->
             CliMonad.succeed Elm.Annotation.bool
+
+        Common.Null ->
+            CliMonad.succeed Elm.Annotation.unit
 
         Common.List t ->
             CliMonad.map Elm.Annotation.list (typeToAnnotationWithMaybe qualify t)
@@ -776,6 +782,9 @@ typeToEncoder qualify type_ =
 
         Common.Bool ->
             CliMonad.succeed Gen.Json.Encode.call_.bool
+
+        Common.Null ->
+            CliMonad.succeed (\_ -> Gen.Json.Encode.null)
 
         Common.Enum variants ->
             CliMonad.enumName variants
@@ -1032,6 +1041,9 @@ typeToDecoder qualify type_ =
 
         Common.Bool ->
             CliMonad.succeed Gen.Json.Decode.bool
+
+        Common.Null ->
+            CliMonad.succeed (Gen.Json.Decode.null Elm.unit)
 
         Common.Unit ->
             CliMonad.succeed (Gen.Json.Decode.succeed Elm.unit)

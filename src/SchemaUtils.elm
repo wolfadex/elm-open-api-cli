@@ -8,8 +8,8 @@ module SchemaUtils exposing
     , refToTypeName
     , schemaToType
     , toVariantName
-    , typeToAnnotation
-    , typeToAnnotationMaybe
+    , typeToAnnotationWithMaybe
+    , typeToAnnotationWithNullable
     , typeToDecoder
     , typeToEncoder
     )
@@ -356,7 +356,7 @@ typeToOneOfVariant :
     -> CliMonad (Maybe { name : Common.UnsafeName, type_ : Common.Type, documentation : Maybe String })
 typeToOneOfVariant qualify { type_, documentation } =
     type_
-        |> typeToAnnotation qualify
+        |> typeToAnnotationWithNullable qualify
         |> CliMonad.map
             (\ann ->
                 let
@@ -504,7 +504,7 @@ oneOfDeclaration ( oneOfName, variants ) =
     let
         variantDeclaration : { name : Common.UnsafeName, type_ : Common.Type, documentation : Maybe String } -> CliMonad Elm.Variant
         variantDeclaration { name, type_ } =
-            typeToAnnotation False type_
+            typeToAnnotationWithNullable False type_
                 |> CliMonad.map
                     (\variantAnnotation ->
                         let
@@ -548,13 +548,15 @@ fixOneOfName name =
         |> Common.toTypeName
 
 
-typeToAnnotation : Bool -> Common.Type -> CliMonad Elm.Annotation.Annotation
-typeToAnnotation qualify type_ =
+{-| Transform an OpenAPI type into an Elm annotation. Nullable values are represented using Nullable.
+-}
+typeToAnnotationWithNullable : Bool -> Common.Type -> CliMonad Elm.Annotation.Annotation
+typeToAnnotationWithNullable qualify type_ =
     case type_ of
         Common.Nullable t ->
             CliMonad.map
                 Gen.OpenApi.Common.annotation_.nullable
-                (typeToAnnotation qualify t)
+                (typeToAnnotationWithNullable qualify t)
 
         Common.Object fields ->
             objectToAnnotation qualify { useMaybe = False } fields
@@ -578,7 +580,7 @@ typeToAnnotation qualify type_ =
             CliMonad.succeed Elm.Annotation.bool
 
         Common.List t ->
-            CliMonad.map Elm.Annotation.list (typeToAnnotation qualify t)
+            CliMonad.map Elm.Annotation.list (typeToAnnotationWithNullable qualify t)
 
         Common.Enum variants ->
             CliMonad.enumName variants
@@ -625,11 +627,13 @@ typeToAnnotation qualify type_ =
             CliMonad.succeed Elm.Annotation.unit
 
 
-typeToAnnotationMaybe : Bool -> Common.Type -> CliMonad Elm.Annotation.Annotation
-typeToAnnotationMaybe qualify type_ =
+{-| Transform an OpenAPI type into an Elm annotation. Nullable values are represented using Maybe.
+-}
+typeToAnnotationWithMaybe : Bool -> Common.Type -> CliMonad Elm.Annotation.Annotation
+typeToAnnotationWithMaybe qualify type_ =
     case type_ of
         Common.Nullable t ->
-            CliMonad.map Elm.Annotation.maybe (typeToAnnotationMaybe qualify t)
+            CliMonad.map Elm.Annotation.maybe (typeToAnnotationWithMaybe qualify t)
 
         Common.Object fields ->
             objectToAnnotation qualify { useMaybe = True } fields
@@ -653,7 +657,7 @@ typeToAnnotationMaybe qualify type_ =
             CliMonad.succeed Elm.Annotation.bool
 
         Common.List t ->
-            CliMonad.map Elm.Annotation.list (typeToAnnotationMaybe qualify t)
+            CliMonad.map Elm.Annotation.list (typeToAnnotationWithMaybe qualify t)
 
         Common.Enum variants ->
             CliMonad.enumName variants
@@ -720,10 +724,10 @@ fieldToAnnotation qualify { useMaybe } { type_, required } =
         annotation : CliMonad Elm.Annotation.Annotation
         annotation =
             if useMaybe then
-                typeToAnnotationMaybe qualify type_
+                typeToAnnotationWithMaybe qualify type_
 
             else
-                typeToAnnotation qualify type_
+                typeToAnnotationWithNullable qualify type_
     in
     if required then
         annotation
@@ -900,7 +904,7 @@ typeToEncoder qualify type_ =
                                     ( "content", ann )
                                     variantEncoder
                             )
-                            (typeToAnnotation True variant.type_)
+                            (typeToAnnotationWithNullable True variant.type_)
                             (typeToEncoder qualify variant.type_)
                     )
                 |> CliMonad.map2

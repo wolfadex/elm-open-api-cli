@@ -176,7 +176,7 @@ schemaToDeclarations name schema =
 
                     _ ->
                         type_
-                            |> SchemaUtils.typeToAnnotation False
+                            |> SchemaUtils.typeToAnnotationWithNullable False
                             |> CliMonad.andThen
                                 (\annotation ->
                                     if (Elm.ToString.annotation annotation).signature == typeName then

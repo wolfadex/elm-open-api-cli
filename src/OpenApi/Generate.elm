@@ -730,7 +730,7 @@ toRequestFunctions server effectTypes method pathUrl operation =
                     CliMonad.succeed []
 
                 JsonContent type_ ->
-                    SchemaUtils.typeToAnnotation True type_
+                    SchemaUtils.typeToAnnotationWithNullable True type_
                         |> CliMonad.map (\annotation -> [ ( Common.UnsafeName "body", annotation ) ])
 
                 StringContent _ ->
@@ -1251,7 +1251,7 @@ toRequestFunctions server effectTypes method pathUrl operation =
                 )
                 (operationToContentSchema operation)
                 (operationToAuthorizationInfo operation)
-                (SchemaUtils.typeToAnnotation True successType)
+                (SchemaUtils.typeToAnnotationWithNullable True successType)
     in
     operationToTypesExpectAndResolver functionName operation
         |> CliMonad.andThen step
@@ -2105,7 +2105,7 @@ paramToString qualify type_ =
                     , isMaybe = False
                     }
                 )
-                (SchemaUtils.typeToAnnotation qualify type_)
+                (SchemaUtils.typeToAnnotationWithNullable qualify type_)
                 (CliMonad.combineMap
                     (\alternative ->
                         CliMonad.andThen2
@@ -2118,7 +2118,7 @@ paramToString qualify type_ =
                                         |> CliMonad.succeed
                             )
                             (paramToString qualify alternative.type_)
-                            (SchemaUtils.typeToAnnotation qualify alternative.type_)
+                            (SchemaUtils.typeToAnnotationWithNullable qualify alternative.type_)
                     )
                     data
                 )
@@ -2152,7 +2152,7 @@ paramToString qualify type_ =
                     )
 
         _ ->
-            SchemaUtils.typeToAnnotation qualify type_
+            SchemaUtils.typeToAnnotationWithNullable qualify type_
                 |> CliMonad.andThen
                     (\annotation ->
                         let
@@ -2174,7 +2174,7 @@ paramToAnnotation qualify concreteParam =
     paramToType qualify concreteParam
         |> CliMonad.andThen
             (\( paramName, type_ ) ->
-                SchemaUtils.typeToAnnotationMaybe qualify type_
+                SchemaUtils.typeToAnnotationWithMaybe qualify type_
                     |> CliMonad.map
                         (\annotation -> ( paramName, annotation ))
             )
@@ -2426,8 +2426,8 @@ operationToTypesExpectAndResolver functionName operation =
                                                         case contentSchema of
                                                             JsonContent type_ ->
                                                                 CliMonad.map2 Tuple.pair
-                                                                    (SchemaUtils.typeToAnnotation False type_)
-                                                                    (SchemaUtils.typeToAnnotation True type_)
+                                                                    (SchemaUtils.typeToAnnotationWithNullable False type_)
+                                                                    (SchemaUtils.typeToAnnotationWithNullable True type_)
 
                                                             StringContent _ ->
                                                                 CliMonad.succeed

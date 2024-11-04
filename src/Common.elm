@@ -279,6 +279,7 @@ type Type
     | Int
     | Float
     | Bool
+    | Null
     | List Type
     | OneOf TypeName OneOfData
     | Enum (List UnsafeName)

@@ -1,0 +1,183 @@
+{
+    "openapi": "3.0.1",
+    "info": {
+        "title": "Trustmark.LAP.Trades.Api",
+        "version": "v1"
+    },
+    "servers": [
+        {
+            "description": "Sandbox",
+            "url": "https://api.sandbox.trades.data-hub.org.uk"
+        },
+        {
+            "description": "Production",
+            "url": "https://api.trades.data-hub.org.uk"
+        }
+    ],
+    "paths": {
+        "/Hello": {
+            "post": {
+                "tags": [
+                    "Hello"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                }
+            }
+        },
+        "/TradeCheck": {
+            "post": {
+                "tags": [
+                    "TradeCheck"
+                ],
+                "summary": "Perform a trade check for a TrustMark Licence Number (TMLN), optionally filtered by a schemeId. Provides a list of trades the licence is registered for.",
+                "requestBody": {
+                    "description": "",
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TradeCheckRequest"
+                            }
+                        },
+                        "text/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TradeCheckRequest"
+                            }
+                        },
+                        "application/*+json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TradeCheckRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TradeCheckResponse"
+                                }
+                            }
+                        },
+                        "description": "Success"
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "TradeCheckRequest": {
+                "type": "object",
+                "properties": {
+                    "publicId": {
+                        "type": "integer",
+                        "description": "The TMLN to query",
+                        "format": "int32"
+                    },
+                    "schemeId": {
+                        "type": "string",
+                        "description": "Optional schemeId filter, omit or set to view all trades under the TMLN"
+                    }
+                },
+                "required": ["publicId"],
+                "additionalProperties": false
+            },
+            "TradeCheckResponse": {
+                "oneOf": [
+                    {
+                        "$ref": "#/components/schemas/TradeCheckSuccessfulResponse"
+                    },
+                    {
+                        "$ref": "#/components/schemas/TradeCheckFailedResponse"
+                    }
+                ]
+            },
+            "TradeCheckSuccessfulResponse": {
+                "type": "object",
+                "properties": {
+                    "success": {
+                        "type": "boolean",
+                        "const": true
+                    },
+                    "tmin": {},
+                    "trades": {},
+                    "schemes": {},
+                    "organisationRegisteredName": {},
+                    "previousTrades": {},
+                    "rcInfo": {
+                        "$ref": "#/components/schemas/RcInfo"
+                    },
+                    "lastUpdated": {},
+                    "licenceStatus": {}
+                },
+                "required": [
+                    "success",
+                    "tmin",
+                    "trades",
+                    "schemes",
+                    "organisationRegisteredName",
+                    "previousTrades",
+                    "rcInfo",
+                    "lastUpdated",
+                    "licenceStatus"
+                ]
+            },
+            "RcInfo": {
+                "type": "object",
+                "properties": {
+                    "isRC": {
+                        "type": "boolean"
+                    },
+                    "isRA": {
+                        "type": "boolean"
+                    },
+                    "apiOnlyRC": {
+                        "type": "boolean"
+                    },
+                    "apiOnlyRA": {
+                        "type": "boolean"
+                    },
+                    "rcSchemeIds": {},
+                    "apiOnlyRCSchemeIds": {},
+                    "apiOnlyRASchemeIds": {}
+                },
+                "required": [
+                    "isRC",
+                    "isRA",
+                    "apiOnlyRC",
+                    "apiOnlyRA",
+                    "rcSchemeIds",
+                    "apiOnlyRCSchemeIds",
+                    "apiOnlyRASchemeIds"
+                ]
+            },
+            "TradeCheckFailedResponse": {
+                "type": "object",
+                "properties": {
+                    "success": {
+                        "type": "boolean",
+                        "const": false
+                    }
+                },
+                "required": ["success"]
+            }
+        },
+        "securitySchemes": {
+            "apiKey": {
+                "type": "apiKey",
+                "description": "Your x-api-key will be issued by TrustMark as part of onboarding",
+                "name": "X-API-KEY",
+                "in": "header"
+            }
+        }
+    },
+    "security": [
+        {
+            "apiKey": [ ]
+        }
+    ]
+}

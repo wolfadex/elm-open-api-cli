@@ -11,11 +11,14 @@ import DbFahrplanApi.Api
 import DbFahrplanApi.Types
 import GithubV3RestApi.Api
 import GithubV3RestApi.Types
+import MarioPartyStats.Api
+import MarioPartyStats.Types
 import OpenApi.Common
 import RealworldConduitApi.Api
 import RealworldConduitApi.Types
-import MarioPartyStats.Api
-import MarioPartyStats.Types
+import Trustmark.TradeCheck.Api
+import Trustmark.TradeCheck.Servers
+import Trustmark.TradeCheck.Types
 
 
 main : Program () Model Msg
@@ -75,6 +78,12 @@ init () =
                 , prefer = Nothing
                 }
             }
+        , Trustmark.TradeCheck.Api.tradeCheck
+            { server = Trustmark.TradeCheck.Servers.sandbox
+            , authorization = { x_api_key = "?" }
+            , body = { publicId = 0, schemeId = Nothing }
+            , toMsg = TrustmarkResponse
+            }
         ]
     )
 
@@ -91,6 +100,7 @@ type Msg
     | GithubResponse (Result (OpenApi.Common.Error () String) GithubV3RestApi.Types.Root)
     | DbFahrplanResponse (Result (OpenApi.Common.Error Never String) DbFahrplanApi.Types.LocationResponse)
     | MarioPartyStatsResponse (Result (OpenApi.Common.Error Never String) (List MarioPartyStats.Types.Boards))
+    | TrustmarkResponse (Result (OpenApi.Common.Error Never String) Trustmark.TradeCheck.Types.TradeCheckResponse)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -111,7 +121,10 @@ update msg model =
             ( model, Cmd.none )
 
         MarioPartyStatsResponse _ ->
-            ( model, Cmd.none  )
+            ( model, Cmd.none )
+
+        TrustmarkResponse _ ->
+            ( model, Cmd.none )
 
 
 view : Model -> Browser.Document Msg

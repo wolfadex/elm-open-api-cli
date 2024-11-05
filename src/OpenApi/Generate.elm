@@ -1102,7 +1102,7 @@ toRequestFunctions server effectTypes method pathUrl operation =
                                         , ( "headers"
                                           , toHeaderParams
                                                 |> List.map (\f -> f config)
-                                                |> headersFromList Gen.Http.call_.header auth config
+                                                |> headersFromList Gen.Effect.Http.call_.header auth config
                                           )
                                         , ( "expect", (expect <| toMsg config).lamderaProgramTest )
                                         , ( "body", (toBody config).lamderaProgramTest )

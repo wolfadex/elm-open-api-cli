@@ -35,6 +35,7 @@ import Gen.OpenApi.Common
 import Gen.Parser.Advanced
 import Gen.Result
 import Gen.Rfc3339
+import Gen.String
 import Gen.Time
 import Json.Decode
 import Json.Encode
@@ -1001,8 +1002,8 @@ refToTypeName ref =
 typeToDecoder : Bool -> Common.Type -> CliMonad Elm.Expression
 typeToDecoder qualify type_ =
     let
-        base : (a -> Elm.Expression) -> Maybe a -> Elm.Expression -> CliMonad Elm.Expression
-        base toExpr const decoder =
+        base : (a -> Elm.Expression) -> (a -> String) -> (Elm.Expression -> Elm.Expression) -> Maybe a -> Elm.Expression -> CliMonad Elm.Expression
+        base toExpr toString toStringGen const decoder =
             (case const of
                 Nothing ->
                     decoder
@@ -1016,14 +1017,13 @@ typeToDecoder qualify type_ =
                                     (Gen.Json.Decode.succeed actual)
                                     (Gen.Json.Decode.call_.fail
                                         (Elm.Op.append
-                                            (Elm.Op.append
-                                                (Elm.Op.append
-                                                    (Elm.string "Unexpected value: expected ")
-                                                    (Gen.Json.Encode.encode 0 (toExpr expected))
+                                            (Elm.string
+                                                ("Unexpected value: expected "
+                                                    ++ toString expected
+                                                    ++ " got "
                                                 )
-                                                (Elm.string " got ")
                                             )
-                                            (Gen.Json.Encode.encode 0 actual)
+                                            (toStringGen actual)
                                         )
                                     )
                             )
@@ -1071,7 +1071,11 @@ typeToDecoder qualify type_ =
                 properties
 
         Common.String { const } ->
-            base Elm.string const Gen.Json.Decode.string
+            base Elm.string
+                (\s -> Json.Encode.encode 0 (Json.Encode.string s))
+                (\s -> Gen.Json.Encode.encode 0 (Gen.Json.Encode.call_.string s))
+                const
+                Gen.Json.Decode.string
 
         Common.DateTime ->
             CliMonad.succeed
@@ -1102,13 +1106,27 @@ typeToDecoder qualify type_ =
                 )
 
         Common.Int { const } ->
-            base Elm.int const Gen.Json.Decode.int
+            base Elm.int String.fromInt Gen.String.call_.fromInt const Gen.Json.Decode.int
 
         Common.Float { const } ->
-            base Elm.float const Gen.Json.Decode.float
+            base Elm.float String.fromFloat Gen.String.call_.fromFloat const Gen.Json.Decode.float
 
         Common.Bool { const } ->
-            base Elm.bool const Gen.Json.Decode.bool
+            base Elm.bool
+                (\b ->
+                    if b then
+                        "true"
+
+                    else
+                        "false"
+                )
+                (\s ->
+                    Elm.ifThen s
+                        (Elm.string "true")
+                        (Elm.string "false")
+                )
+                const
+                Gen.Json.Decode.bool
 
         Common.Null ->
             CliMonad.succeed (Gen.Json.Decode.null Elm.unit)

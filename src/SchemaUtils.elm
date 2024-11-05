@@ -1112,21 +1112,38 @@ typeToDecoder qualify type_ =
             base Elm.float String.fromFloat Gen.String.call_.fromFloat const Gen.Json.Decode.float
 
         Common.Bool { const } ->
-            base Elm.bool
-                (\b ->
+            let
+                boolToString : Bool -> String
+                boolToString b =
                     if b then
                         "true"
 
                     else
                         "false"
-                )
-                (\s ->
-                    Elm.ifThen s
-                        (Elm.string "true")
-                        (Elm.string "false")
-                )
-                const
-                Gen.Json.Decode.bool
+            in
+            (case const of
+                Nothing ->
+                    Gen.Json.Decode.bool
+
+                Just expected ->
+                    Gen.Json.Decode.bool
+                        |> Gen.Json.Decode.andThen
+                            (\actual ->
+                                Elm.ifThen
+                                    (Elm.Op.equal actual (Elm.bool expected))
+                                    (Gen.Json.Decode.succeed actual)
+                                    (Gen.Json.Decode.call_.fail
+                                        (Elm.string
+                                            ("Unexpected value: expected "
+                                                ++ boolToString expected
+                                                ++ " got "
+                                                ++ boolToString (not expected)
+                                            )
+                                        )
+                                    )
+                            )
+            )
+                |> CliMonad.succeed
 
         Common.Null ->
             CliMonad.succeed (Gen.Json.Decode.null Elm.unit)

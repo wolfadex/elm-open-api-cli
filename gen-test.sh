@@ -11,7 +11,7 @@ npm run dev ./example/single-enum.yaml
 npm run dev ./example/MarioPartyStats.json
 npm run dev ./example/viaggiatreno.yaml
 npm run dev -- ./example/trustmark.json --module-name Trustmark --effect-types 'cmd' --server 'https://api.sandbox.retrofitintegration.data-hub.org.uk'
-npm run dev -- ./example/trustmark-trade-check.json --module-name Trustmark.TradeCheck --effect-types 'cmd' --server 'https://api.sandbox.trades.data-hub.org.uk'
+npm run dev -- ./example/trustmark-trade-check.json --module-name Trustmark.TradeCheck --effect-types 'cmd'
 npm run dev ./example/github-spec.json
 
 # Compile example Elm

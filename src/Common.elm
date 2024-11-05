@@ -275,10 +275,10 @@ initialUppercaseWordToLowercase input =
 type Type
     = Nullable Type
     | Object Object
-    | String
-    | Int
-    | Float
-    | Bool
+    | String { const : Maybe String }
+    | Int { const : Maybe Int }
+    | Float { const : Maybe Float }
+    | Bool { const : Maybe Bool }
     | Null
     | List Type
     | OneOf TypeName OneOfData

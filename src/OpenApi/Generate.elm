@@ -3176,7 +3176,7 @@ jsonDecodeAndMap =
 responseToSchema : OpenApi.Response.Response -> CliMonad Json.Schema.Definitions.Schema
 responseToSchema response =
     CliMonad.succeed response
-        |> CliMonad.stepOrFail "Could not get application's json content"
+        |> CliMonad.stepOrFail "The response does not have a json content"
             (OpenApi.Response.content
                 >> Dict.Extra.find searchForJsonMediaType
                 >> Maybe.map Tuple.second
@@ -3189,7 +3189,7 @@ responseToSchema response =
 requestBodyToSchema : OpenApi.RequestBody.RequestBody -> CliMonad Json.Schema.Definitions.Schema
 requestBodyToSchema requestBody =
     CliMonad.succeed requestBody
-        |> CliMonad.stepOrFail "Could not get application's json content"
+        |> CliMonad.stepOrFail "The request does not have a json content"
             (OpenApi.RequestBody.content
                 >> Dict.Extra.find searchForJsonMediaType
                 >> Maybe.map Tuple.second

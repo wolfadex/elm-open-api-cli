@@ -256,8 +256,8 @@ schemaToType qualify schema =
                 anyOfToType _ =
                     CliMonad.succeed { type_ = Common.Value, documentation = subSchema.description }
 
-                oneOfToType : List Json.Schema.Definitions.Schema -> CliMonad { type_ : Common.Type, documentation : Maybe String }
-                oneOfToType oneOf =
+                oneOfCombine : List Json.Schema.Definitions.Schema -> CliMonad { type_ : Common.Type, documentation : Maybe String }
+                oneOfCombine oneOf =
                     CliMonad.combineMap (schemaToType qualify) oneOf
                         |> CliMonad.andThen oneOfType
                         |> CliMonad.map
@@ -270,6 +270,30 @@ schemaToType qualify schema =
                                         |> joinIfNotEmpty "\n\n"
                                 }
                             )
+
+                oneOfToType : List Json.Schema.Definitions.Schema -> CliMonad { type_ : Common.Type, documentation : Maybe String }
+                oneOfToType oneOf =
+                    case oneOf of
+                        -- handle the oneOf syntax for nullable values
+                        -- "oneOf": [
+                        --   { "type": "null" },
+                        --   { "$ref": "#/components/schemas/Foo" }
+                        -- ]
+                        [ (Json.Schema.Definitions.ObjectSchema firstSchema) as first, (Json.Schema.Definitions.ObjectSchema secondSchema) as second ] ->
+                            case ( firstSchema.type_, secondSchema.type_ ) of
+                                ( Json.Schema.Definitions.SingleType Json.Schema.Definitions.NullType, _ ) ->
+                                    schemaToType qualify second
+                                        |> nullable
+
+                                ( _, Json.Schema.Definitions.SingleType Json.Schema.Definitions.NullType ) ->
+                                    schemaToType qualify first
+                                        |> nullable
+
+                                _ ->
+                                    oneOfCombine oneOf
+
+                        _ ->
+                            oneOfCombine oneOf
             in
             case subSchema.type_ of
                 Json.Schema.Definitions.SingleType Json.Schema.Definitions.StringType ->

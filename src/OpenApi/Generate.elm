@@ -116,10 +116,11 @@ files :
     , generateTodos : Bool
     , effectTypes : List EffectType
     , server : Server
+    , formats : FastDict.Dict CliMonad.FormatName CliMonad.Format
     }
     -> OpenApi.OpenApi
     -> Result CliMonad.Message ( List Elm.File, List CliMonad.Message )
-files { namespace, generateTodos, effectTypes, server } apiSpec =
+files { namespace, generateTodos, effectTypes, server, formats } apiSpec =
     case extractEnums apiSpec of
         Err e ->
             Err e
@@ -138,6 +139,7 @@ files { namespace, generateTodos, effectTypes, server } apiSpec =
                     , generateTodos = generateTodos
                     , enums = enums
                     , namespace = namespace
+                    , formats = formats
                     }
                 |> Result.map
                     (\( decls, warnings ) ->
@@ -2563,7 +2565,7 @@ operationToTypesExpectAndResolver functionName operation =
                                         StringContent _ ->
                                             CliMonad.map2
                                                 (\errorDecoders_ ( errorTypeDeclaration_, errorTypeAnnotation ) ->
-                                                    { successType = Common.String { const = Nothing }
+                                                    { successType = Common.String { const = Nothing, format = Nothing }
                                                     , bodyTypeAnnotation = Elm.Annotation.string
                                                     , errorTypeDeclaration = errorTypeDeclaration_
                                                     , errorTypeAnnotation = errorTypeAnnotation

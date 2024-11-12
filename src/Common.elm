@@ -275,7 +275,7 @@ initialUppercaseWordToLowercase input =
 type Type
     = Nullable Type
     | Object Object
-    | String { const : Maybe String }
+    | String { const : Maybe String, format : Maybe String }
     | Int { const : Maybe Int }
     | Float { const : Maybe Float }
     | Bool { const : Maybe Bool }
@@ -287,8 +287,6 @@ type Type
     | Ref (List String)
     | Bytes
     | Unit
-    | Date
-    | DateTime
 
 
 type alias Object =

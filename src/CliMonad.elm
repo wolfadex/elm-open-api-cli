@@ -7,6 +7,7 @@ module CliMonad exposing
     , errorToWarning, fromApiSpec, enumName, moduleToNamespace
     , withPath, withWarning
     , todo, todoWithDefault
+    , FormatName, Format, withFormat
     )
 
 {-|
@@ -19,12 +20,14 @@ module CliMonad exposing
 @docs errorToWarning, fromApiSpec, enumName, moduleToNamespace
 @docs withPath, withWarning
 @docs todo, todoWithDefault
+@docs FormatName, Format, withFormat
 
 -}
 
 import Common
 import Dict
 import Elm
+import Elm.Annotation
 import FastDict
 import Gen.Debug
 import OpenApi exposing (OpenApi)
@@ -44,12 +47,28 @@ type alias OneOfName =
     Common.TypeName
 
 
+{-| The first String is the `type`, the second the `format`.
+-}
+type alias FormatName =
+    ( String, String )
+
+
+type alias Format =
+    { encode : Elm.Expression -> Elm.Expression
+    , decoder : Elm.Expression
+    , annotation : Elm.Annotation.Annotation
+    , sharedDeclarations : List Elm.Declaration
+    , requiresPackages : List String
+    }
+
+
 type CliMonad a
     = CliMonad
         ({ openApi : OpenApi
          , generateTodos : Bool
          , enums : FastDict.Dict (List String) { name : Common.UnsafeName, documentation : Maybe String }
          , namespace : List String
+         , formats : FastDict.Dict FormatName Format
          }
          ->
             Result
@@ -187,6 +206,7 @@ run :
         , generateTodos : Bool
         , enums : FastDict.Dict (List String) { name : Common.UnsafeName, documentation : Maybe String }
         , namespace : List String
+        , formats : FastDict.Dict FormatName Format
         }
     -> CliMonad (List ( Common.Module, Elm.Declaration ))
     -> Result Message ( List ( Common.Module, Elm.Declaration ), List Message )
@@ -290,3 +310,22 @@ enumName variants =
                 |> Maybe.map .name
         )
         enums
+
+
+withFormat : ( String, Maybe String ) -> (Format -> a) -> a -> CliMonad a
+withFormat ( typeName, maybeFormatName ) getter default =
+    case maybeFormatName of
+        Nothing ->
+            succeed default
+
+        Just formatName ->
+            CliMonad
+                (\{ formats } ->
+                    ( FastDict.get ( typeName, formatName ) formats
+                        |> Maybe.map getter
+                        |> Maybe.withDefault default
+                    , []
+                    , FastDict.empty
+                    )
+                        |> Ok
+                )

@@ -26,17 +26,12 @@ import Elm.ToString
 import FastDict
 import Gen.Basics
 import Gen.Bytes
-import Gen.Date
 import Gen.Json.Decode
 import Gen.Json.Encode
 import Gen.List
 import Gen.Maybe
 import Gen.OpenApi.Common
-import Gen.Parser.Advanced
-import Gen.Result
-import Gen.Rfc3339
 import Gen.String
-import Gen.Time
 import Json.Decode
 import Json.Encode
 import Json.Schema.Definitions
@@ -173,30 +168,15 @@ schemaToType qualify schema =
 
                         Json.Schema.Definitions.StringType ->
                             getConstAs Json.Decode.string
-                                |> CliMonad.andThen
+                                |> CliMonad.map
                                     (\const ->
-                                        case subSchema.format of
-                                            Just "date-time" ->
-                                                CliMonad.succeed { type_ = Common.DateTime, documentation = subSchema.description }
-
-                                            Just "date" ->
-                                                CliMonad.succeed { type_ = Common.Date, documentation = subSchema.description }
-
-                                            Just "password" ->
-                                                { type_ = Common.String { const = const }
-                                                , documentation = subSchema.description
+                                        { type_ =
+                                            Common.String
+                                                { const = const
+                                                , format = subSchema.format
                                                 }
-                                                    |> CliMonad.succeed
-
-                                            Just format ->
-                                                { type_ = Common.String { const = const }
-                                                , documentation = subSchema.description
-                                                }
-                                                    |> CliMonad.succeed
-                                                    |> CliMonad.withWarning ("Format \"" ++ format ++ "\" not supported - using string instead")
-
-                                            Nothing ->
-                                                CliMonad.succeed { type_ = Common.String { const = const }, documentation = subSchema.description }
+                                        , documentation = subSchema.description
+                                        }
                                     )
 
                         Json.Schema.Definitions.IntegerType ->
@@ -624,14 +604,8 @@ typeToAnnotationWithNullable qualify type_ =
         Common.Object fields ->
             objectToAnnotation qualify { useMaybe = False } fields
 
-        Common.String _ ->
-            CliMonad.succeed Elm.Annotation.string
-
-        Common.DateTime ->
-            CliMonad.succeed Gen.Time.annotation_.posix
-
-        Common.Date ->
-            CliMonad.succeed Gen.Date.annotation_.date
+        Common.String { format } ->
+            typeToAnnotationString format
 
         Common.Int _ ->
             CliMonad.succeed Elm.Annotation.int
@@ -704,14 +678,8 @@ typeToAnnotationWithMaybe qualify type_ =
         Common.Object fields ->
             objectToAnnotation qualify { useMaybe = True } fields
 
-        Common.String _ ->
-            CliMonad.succeed Elm.Annotation.string
-
-        Common.DateTime ->
-            CliMonad.succeed Gen.Time.annotation_.posix
-
-        Common.Date ->
-            CliMonad.succeed Gen.Date.annotation_.date
+        Common.String { format } ->
+            typeToAnnotationString format
 
         Common.Int _ ->
             CliMonad.succeed Elm.Annotation.int
@@ -773,6 +741,11 @@ typeToAnnotationWithMaybe qualify type_ =
             CliMonad.succeed Elm.Annotation.unit
 
 
+typeToAnnotationString : Maybe String -> CliMonad Elm.Annotation.Annotation
+typeToAnnotationString maybeFormat =
+    CliMonad.withFormat ( "string", maybeFormat ) .annotation Elm.Annotation.string
+
+
 objectToAnnotation : Bool -> { useMaybe : Bool } -> Common.Object -> CliMonad Elm.Annotation.Annotation
 objectToAnnotation qualify config fields =
     fields
@@ -808,34 +781,8 @@ fieldToAnnotation qualify { useMaybe } { type_, required } =
 typeToEncoder : Bool -> Common.Type -> CliMonad (Elm.Expression -> Elm.Expression)
 typeToEncoder qualify type_ =
     case type_ of
-        Common.String _ ->
-            CliMonad.succeed Gen.Json.Encode.call_.string
-
-        Common.DateTime ->
-            CliMonad.succeed
-                (\instant ->
-                    Gen.Rfc3339.make_.dateTimeOffset
-                        (Elm.record
-                            [ ( "instant", instant )
-                            , ( "offset"
-                              , Elm.record
-                                    [ ( "hour", Elm.int 0 )
-                                    , ( "minute", Elm.int 0 )
-                                    ]
-                              )
-                            ]
-                        )
-                        |> Gen.Rfc3339.toString
-                        |> Gen.Json.Encode.call_.string
-                )
-
-        Common.Date ->
-            CliMonad.succeed
-                (\date ->
-                    date
-                        |> Gen.Date.toIsoString
-                        |> Gen.Json.Encode.call_.string
-                )
+        Common.String { format } ->
+            CliMonad.withFormat ( "string", format ) .encode Gen.Json.Encode.call_.string
 
         Common.Int _ ->
             CliMonad.succeed Gen.Json.Encode.call_.int
@@ -1026,9 +973,9 @@ refToTypeName ref =
 typeToDecoder : Bool -> Common.Type -> CliMonad Elm.Expression
 typeToDecoder qualify type_ =
     let
-        base : (a -> Elm.Expression) -> (a -> String) -> (Elm.Expression -> Elm.Expression) -> Maybe a -> Elm.Expression -> CliMonad Elm.Expression
+        base : (a -> Elm.Expression) -> (a -> String) -> (Elm.Expression -> Elm.Expression) -> Maybe a -> Elm.Expression -> Elm.Expression
         base toExpr toString toStringGen const decoder =
-            (case const of
+            case const of
                 Nothing ->
                     decoder
 
@@ -1051,8 +998,6 @@ typeToDecoder qualify type_ =
                                         )
                                     )
                             )
-            )
-                |> CliMonad.succeed
     in
     case type_ of
         Common.Object properties ->
@@ -1094,46 +1039,21 @@ typeToDecoder qualify type_ =
                 )
                 properties
 
-        Common.String { const } ->
-            base Elm.string
-                (\s -> Json.Encode.encode 0 (Json.Encode.string s))
-                (\s -> Gen.Json.Encode.encode 0 (Gen.Json.Encode.call_.string s))
-                const
-                Gen.Json.Decode.string
-
-        Common.DateTime ->
-            CliMonad.succeed
-                (Gen.Json.Decode.string
-                    |> Gen.Json.Decode.andThen
-                        (\raw ->
-                            Gen.Result.caseOf_.result
-                                (Gen.Parser.Advanced.call_.run Gen.Rfc3339.dateTimeOffsetParser raw)
-                                { ok = \record -> Gen.Json.Decode.succeed (Elm.get "instant" record)
-
-                                -- TODO: improve error message
-                                , err = \_ -> Gen.Json.Decode.fail "Invalid RFC-3339 date-time"
-                                }
-                        )
-                )
-
-        Common.Date ->
-            CliMonad.succeed
-                (Gen.Json.Decode.string
-                    |> Gen.Json.Decode.andThen
-                        (\raw ->
-                            Gen.Result.caseOf_.result
-                                (Gen.Date.call_.fromIsoString raw)
-                                { ok = Gen.Json.Decode.succeed
-                                , err = Gen.Json.Decode.call_.fail
-                                }
-                        )
-                )
+        Common.String { const, format } ->
+            CliMonad.withFormat ( "string", format ) .decoder <|
+                base Elm.string
+                    (\s -> Json.Encode.encode 0 (Json.Encode.string s))
+                    (\s -> Gen.Json.Encode.encode 0 (Gen.Json.Encode.call_.string s))
+                    const
+                    Gen.Json.Decode.string
 
         Common.Int { const } ->
             base Elm.int String.fromInt Gen.String.call_.fromInt const Gen.Json.Decode.int
+                |> CliMonad.succeed
 
         Common.Float { const } ->
             base Elm.float String.fromFloat Gen.String.call_.fromFloat const Gen.Json.Decode.float
+                |> CliMonad.succeed
 
         Common.Bool { const } ->
             let

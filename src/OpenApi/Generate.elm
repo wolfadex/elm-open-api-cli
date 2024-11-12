@@ -1677,8 +1677,42 @@ operationToAuthorizationInfo operation =
                                                             OpenApi.SecurityScheme.Cookie ->
                                                                 CliMonad.todoWithDefault acc "Unsupported security schema: ApiKey in Cookie"
 
-                                                    OpenApi.SecurityScheme.Http _ ->
-                                                        CliMonad.todoWithDefault acc "Unsupported security schema: Http"
+                                                    OpenApi.SecurityScheme.Http details ->
+                                                        case details.scheme of
+                                                            "bearer" ->
+                                                                let
+                                                                    unsafeName : Common.UnsafeName
+                                                                    unsafeName =
+                                                                        Common.UnsafeName (String.toLower name)
+
+                                                                    cleanName : String
+                                                                    cleanName =
+                                                                        Common.toValueName unsafeName
+                                                                in
+                                                                { acc
+                                                                    | headers =
+                                                                        Dict.insert "authorization"
+                                                                            (\config ->
+                                                                                Elm.Op.append
+                                                                                    (Elm.string "Bearer ")
+                                                                                    (config
+                                                                                        |> Elm.get "authorization"
+                                                                                        |> Elm.get cleanName
+                                                                                    )
+                                                                            )
+                                                                            acc.headers
+                                                                    , params =
+                                                                        Dict.insert "authorization"
+                                                                            (Dict.insert cleanName Elm.Annotation.string <|
+                                                                                Maybe.withDefault Dict.empty <|
+                                                                                    Dict.get "authorization" acc.params
+                                                                            )
+                                                                            acc.params
+                                                                }
+                                                                    |> CliMonad.succeed
+
+                                                            unsupportedScheme ->
+                                                                CliMonad.todoWithDefault acc ("Unsupported security schema 'Http' with scheme of '" ++ unsupportedScheme ++ "'")
 
                                                     OpenApi.SecurityScheme.MutualTls ->
                                                         CliMonad.todoWithDefault acc "Unsupported security schema: MutualTls"

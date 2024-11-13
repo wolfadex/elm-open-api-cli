@@ -1,4 +1,4 @@
-module Cli exposing (run)
+module Cli exposing (defaultFormats, run)
 
 import Ansi
 import Ansi.Color
@@ -10,9 +10,18 @@ import Cli.Option
 import Cli.OptionsParser
 import Cli.Program
 import CliMonad
+import Common
 import Dict
 import Elm
+import Elm.Annotation
 import FatalError
+import Gen.Date
+import Gen.Json.Decode
+import Gen.Json.Encode
+import Gen.Parser.Advanced
+import Gen.Result
+import Gen.Rfc3339
+import Gen.Time
 import Json.Decode
 import Json.Encode
 import Json.Value
@@ -666,10 +675,102 @@ generateFileFromOpenApiSpec config apiSpec =
         , generateTodos = generateTodos
         , effectTypes = config.effectTypes
         , server = config.server
+        , formats = defaultFormats
         }
         apiSpec
         |> Result.mapError (messageToString >> FatalError.fromString)
         |> BackendTask.fromResult
+
+
+defaultFormats : List CliMonad.Format
+defaultFormats =
+    [ dateTimeFormat
+    , dateFormat
+    , defaultStringFormat "password"
+    ]
+
+
+dateTimeFormat : CliMonad.Format
+dateTimeFormat =
+    let
+        toString : Elm.Expression -> Elm.Expression
+        toString instant =
+            Gen.Rfc3339.make_.dateTimeOffset
+                (Elm.record
+                    [ ( "instant", instant )
+                    , ( "offset"
+                      , Elm.record
+                            [ ( "hour", Elm.int 0 )
+                            , ( "minute", Elm.int 0 )
+                            ]
+                      )
+                    ]
+                )
+                |> Gen.Rfc3339.toString
+    in
+    { basicType = Common.String
+    , format = "date-time"
+    , annotation = Gen.Time.annotation_.posix
+    , encode =
+        \instant ->
+            instant
+                |> toString
+                |> Gen.Json.Encode.call_.string
+    , decoder =
+        Gen.Json.Decode.string
+            |> Gen.Json.Decode.andThen
+                (\raw ->
+                    Gen.Result.caseOf_.result
+                        (Gen.Parser.Advanced.call_.run Gen.Rfc3339.dateTimeOffsetParser raw)
+                        { ok = \record -> Gen.Json.Decode.succeed (Elm.get "instant" record)
+
+                        -- TODO: improve error message
+                        , err = \_ -> Gen.Json.Decode.fail "Invalid RFC-3339 date-time"
+                        }
+                )
+    , toParamString = toString
+    , sharedDeclarations = []
+    , requiresPackages = []
+    }
+
+
+dateFormat : CliMonad.Format
+dateFormat =
+    { basicType = Common.String
+    , format = "date"
+    , annotation = Gen.Date.annotation_.date
+    , encode =
+        \date ->
+            date
+                |> Gen.Date.toIsoString
+                |> Gen.Json.Encode.call_.string
+    , toParamString = Gen.Date.toIsoString
+    , decoder =
+        Gen.Json.Decode.string
+            |> Gen.Json.Decode.andThen
+                (\raw ->
+                    Gen.Result.caseOf_.result
+                        (Gen.Date.call_.fromIsoString raw)
+                        { ok = Gen.Json.Decode.succeed
+                        , err = Gen.Json.Decode.call_.fail
+                        }
+                )
+    , sharedDeclarations = []
+    , requiresPackages = []
+    }
+
+
+defaultStringFormat : String -> CliMonad.Format
+defaultStringFormat format =
+    { basicType = Common.String
+    , format = format
+    , annotation = Elm.Annotation.string
+    , encode = Gen.Json.Encode.call_.string
+    , decoder = Gen.Json.Decode.string
+    , toParamString = identity
+    , sharedDeclarations = []
+    , requiresPackages = []
+    }
 
 
 {-| Check to see if `elm-format` is available, and if so format the files

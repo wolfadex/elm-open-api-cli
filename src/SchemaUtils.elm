@@ -26,17 +26,12 @@ import Elm.ToString
 import FastDict
 import Gen.Basics
 import Gen.Bytes
-import Gen.Date
 import Gen.Json.Decode
 import Gen.Json.Encode
 import Gen.List
 import Gen.Maybe
 import Gen.OpenApi.Common
-import Gen.Parser.Advanced
-import Gen.Result
-import Gen.Rfc3339
 import Gen.String
-import Gen.Time
 import Json.Decode
 import Json.Encode
 import Json.Schema.Definitions
@@ -153,16 +148,28 @@ schemaToType qualify schema =
                 singleTypeToType : Json.Schema.Definitions.SingleType -> CliMonad { type_ : Common.Type, documentation : Maybe String }
                 singleTypeToType singleType =
                     let
-                        getConstAs : Json.Decode.Decoder a -> CliMonad (Maybe a)
-                        getConstAs decoder =
+                        basic : Common.BasicType -> (a -> Common.ConstValue) -> Json.Decode.Decoder a -> CliMonad { type_ : Common.Type, documentation : Maybe String }
+                        basic basicType toConst decoder =
+                            let
+                                build : Maybe a -> CliMonad { type_ : Common.Type, documentation : Maybe String }
+                                build const =
+                                    { type_ =
+                                        Common.Basic basicType
+                                            { const = Maybe.map toConst const
+                                            , format = subSchema.format
+                                            }
+                                    , documentation = subSchema.description
+                                    }
+                                        |> CliMonad.succeed
+                            in
                             case subSchema.const of
                                 Nothing ->
-                                    CliMonad.succeed Nothing
+                                    build Nothing
 
                                 Just const ->
                                     case Json.Decode.decodeValue decoder const of
                                         Ok value ->
-                                            CliMonad.succeed (Just value)
+                                            build (Just value)
 
                                         Err _ ->
                                             CliMonad.fail ("Invalid const value: " ++ Json.Encode.encode 0 const)
@@ -172,53 +179,16 @@ schemaToType qualify schema =
                             objectSchemaToType qualify subSchema
 
                         Json.Schema.Definitions.StringType ->
-                            getConstAs Json.Decode.string
-                                |> CliMonad.andThen
-                                    (\const ->
-                                        case subSchema.format of
-                                            Just "date-time" ->
-                                                CliMonad.succeed { type_ = Common.DateTime, documentation = subSchema.description }
-
-                                            Just "date" ->
-                                                CliMonad.succeed { type_ = Common.Date, documentation = subSchema.description }
-
-                                            Just "password" ->
-                                                { type_ = Common.String { const = const }
-                                                , documentation = subSchema.description
-                                                }
-                                                    |> CliMonad.succeed
-
-                                            Just format ->
-                                                { type_ = Common.String { const = const }
-                                                , documentation = subSchema.description
-                                                }
-                                                    |> CliMonad.succeed
-                                                    |> CliMonad.withWarning ("Format \"" ++ format ++ "\" not supported - using string instead")
-
-                                            Nothing ->
-                                                CliMonad.succeed { type_ = Common.String { const = const }, documentation = subSchema.description }
-                                    )
+                            basic Common.String Common.ConstString Json.Decode.string
 
                         Json.Schema.Definitions.IntegerType ->
-                            getConstAs Json.Decode.int
-                                |> CliMonad.map
-                                    (\const ->
-                                        { type_ = Common.Int { const = const }, documentation = subSchema.description }
-                                    )
+                            basic Common.Integer Common.ConstInteger Json.Decode.int
 
                         Json.Schema.Definitions.NumberType ->
-                            getConstAs Json.Decode.float
-                                |> CliMonad.map
-                                    (\const ->
-                                        { type_ = Common.Float { const = const }, documentation = subSchema.description }
-                                    )
+                            basic Common.Number Common.ConstNumber Json.Decode.float
 
                         Json.Schema.Definitions.BooleanType ->
-                            getConstAs Json.Decode.bool
-                                |> CliMonad.map
-                                    (\const ->
-                                        { type_ = Common.Bool { const = const }, documentation = subSchema.description }
-                                    )
+                            basic Common.Boolean Common.ConstBoolean Json.Decode.bool
 
                         Json.Schema.Definitions.NullType ->
                             CliMonad.succeed { type_ = Common.Null, documentation = subSchema.description }
@@ -624,23 +594,8 @@ typeToAnnotationWithNullable qualify type_ =
         Common.Object fields ->
             objectToAnnotation qualify { useMaybe = False } fields
 
-        Common.String _ ->
-            CliMonad.succeed Elm.Annotation.string
-
-        Common.DateTime ->
-            CliMonad.succeed Gen.Time.annotation_.posix
-
-        Common.Date ->
-            CliMonad.succeed Gen.Date.annotation_.date
-
-        Common.Int _ ->
-            CliMonad.succeed Elm.Annotation.int
-
-        Common.Float _ ->
-            CliMonad.succeed Elm.Annotation.float
-
-        Common.Bool _ ->
-            CliMonad.succeed Elm.Annotation.bool
+        Common.Basic basicType basic ->
+            basicTypeToAnnotation basicType basic
 
         Common.Null ->
             CliMonad.succeed Elm.Annotation.unit
@@ -704,23 +659,8 @@ typeToAnnotationWithMaybe qualify type_ =
         Common.Object fields ->
             objectToAnnotation qualify { useMaybe = True } fields
 
-        Common.String _ ->
-            CliMonad.succeed Elm.Annotation.string
-
-        Common.DateTime ->
-            CliMonad.succeed Gen.Time.annotation_.posix
-
-        Common.Date ->
-            CliMonad.succeed Gen.Date.annotation_.date
-
-        Common.Int _ ->
-            CliMonad.succeed Elm.Annotation.int
-
-        Common.Float _ ->
-            CliMonad.succeed Elm.Annotation.float
-
-        Common.Bool _ ->
-            CliMonad.succeed Elm.Annotation.bool
+        Common.Basic basicType basic ->
+            basicTypeToAnnotation basicType basic
 
         Common.Null ->
             CliMonad.succeed Elm.Annotation.unit
@@ -773,6 +713,27 @@ typeToAnnotationWithMaybe qualify type_ =
             CliMonad.succeed Elm.Annotation.unit
 
 
+basicTypeToAnnotation : Common.BasicType -> { a | format : Maybe String } -> CliMonad Elm.Annotation.Annotation
+basicTypeToAnnotation basicType { format } =
+    let
+        default : Elm.Annotation.Annotation
+        default =
+            case basicType of
+                Common.String ->
+                    Elm.Annotation.string
+
+                Common.Integer ->
+                    Elm.Annotation.int
+
+                Common.Boolean ->
+                    Elm.Annotation.bool
+
+                Common.Number ->
+                    Elm.Annotation.float
+    in
+    CliMonad.withFormat basicType format .annotation default
+
+
 objectToAnnotation : Bool -> { useMaybe : Bool } -> Common.Object -> CliMonad Elm.Annotation.Annotation
 objectToAnnotation qualify config fields =
     fields
@@ -808,43 +769,8 @@ fieldToAnnotation qualify { useMaybe } { type_, required } =
 typeToEncoder : Bool -> Common.Type -> CliMonad (Elm.Expression -> Elm.Expression)
 typeToEncoder qualify type_ =
     case type_ of
-        Common.String _ ->
-            CliMonad.succeed Gen.Json.Encode.call_.string
-
-        Common.DateTime ->
-            CliMonad.succeed
-                (\instant ->
-                    Gen.Rfc3339.make_.dateTimeOffset
-                        (Elm.record
-                            [ ( "instant", instant )
-                            , ( "offset"
-                              , Elm.record
-                                    [ ( "hour", Elm.int 0 )
-                                    , ( "minute", Elm.int 0 )
-                                    ]
-                              )
-                            ]
-                        )
-                        |> Gen.Rfc3339.toString
-                        |> Gen.Json.Encode.call_.string
-                )
-
-        Common.Date ->
-            CliMonad.succeed
-                (\date ->
-                    date
-                        |> Gen.Date.toIsoString
-                        |> Gen.Json.Encode.call_.string
-                )
-
-        Common.Int _ ->
-            CliMonad.succeed Gen.Json.Encode.call_.int
-
-        Common.Float _ ->
-            CliMonad.succeed Gen.Json.Encode.call_.float
-
-        Common.Bool _ ->
-            CliMonad.succeed Gen.Json.Encode.call_.bool
+        Common.Basic basicType basic ->
+            basicTypeToEncoder basicType basic
 
         Common.Null ->
             CliMonad.succeed (\_ -> Gen.Json.Encode.null)
@@ -995,6 +921,27 @@ typeToEncoder qualify type_ =
             CliMonad.succeed (\_ -> Gen.Json.Encode.null)
 
 
+basicTypeToEncoder : Common.BasicType -> { a | format : Maybe String } -> CliMonad (Elm.Expression -> Elm.Expression)
+basicTypeToEncoder basicType { format } =
+    let
+        default : Elm.Expression -> Elm.Expression
+        default =
+            case basicType of
+                Common.String ->
+                    Gen.Json.Encode.call_.string
+
+                Common.Integer ->
+                    Gen.Json.Encode.call_.int
+
+                Common.Number ->
+                    Gen.Json.Encode.call_.float
+
+                Common.Boolean ->
+                    Gen.Json.Encode.call_.bool
+    in
+    CliMonad.withFormat basicType format .encode default
+
+
 oneOfAnnotation : Bool -> Common.TypeName -> Common.OneOfData -> CliMonad Elm.Annotation.Annotation
 oneOfAnnotation qualify oneOfName oneOfData =
     CliMonad.andThen
@@ -1025,35 +972,6 @@ refToTypeName ref =
 
 typeToDecoder : Bool -> Common.Type -> CliMonad Elm.Expression
 typeToDecoder qualify type_ =
-    let
-        base : (a -> Elm.Expression) -> (a -> String) -> (Elm.Expression -> Elm.Expression) -> Maybe a -> Elm.Expression -> CliMonad Elm.Expression
-        base toExpr toString toStringGen const decoder =
-            (case const of
-                Nothing ->
-                    decoder
-
-                Just expected ->
-                    decoder
-                        |> Gen.Json.Decode.andThen
-                            (\actual ->
-                                Elm.ifThen
-                                    (Elm.Op.equal actual (toExpr expected))
-                                    (Gen.Json.Decode.succeed actual)
-                                    (Gen.Json.Decode.call_.fail
-                                        (Elm.Op.append
-                                            (Elm.string
-                                                ("Unexpected value: expected "
-                                                    ++ toString expected
-                                                    ++ " got "
-                                                )
-                                            )
-                                            (toStringGen actual)
-                                        )
-                                    )
-                            )
-            )
-                |> CliMonad.succeed
-    in
     case type_ of
         Common.Object properties ->
             List.foldl
@@ -1094,80 +1012,8 @@ typeToDecoder qualify type_ =
                 )
                 properties
 
-        Common.String { const } ->
-            base Elm.string
-                (\s -> Json.Encode.encode 0 (Json.Encode.string s))
-                (\s -> Gen.Json.Encode.encode 0 (Gen.Json.Encode.call_.string s))
-                const
-                Gen.Json.Decode.string
-
-        Common.DateTime ->
-            CliMonad.succeed
-                (Gen.Json.Decode.string
-                    |> Gen.Json.Decode.andThen
-                        (\raw ->
-                            Gen.Result.caseOf_.result
-                                (Gen.Parser.Advanced.call_.run Gen.Rfc3339.dateTimeOffsetParser raw)
-                                { ok = \record -> Gen.Json.Decode.succeed (Elm.get "instant" record)
-
-                                -- TODO: improve error message
-                                , err = \_ -> Gen.Json.Decode.fail "Invalid RFC-3339 date-time"
-                                }
-                        )
-                )
-
-        Common.Date ->
-            CliMonad.succeed
-                (Gen.Json.Decode.string
-                    |> Gen.Json.Decode.andThen
-                        (\raw ->
-                            Gen.Result.caseOf_.result
-                                (Gen.Date.call_.fromIsoString raw)
-                                { ok = Gen.Json.Decode.succeed
-                                , err = Gen.Json.Decode.call_.fail
-                                }
-                        )
-                )
-
-        Common.Int { const } ->
-            base Elm.int String.fromInt Gen.String.call_.fromInt const Gen.Json.Decode.int
-
-        Common.Float { const } ->
-            base Elm.float String.fromFloat Gen.String.call_.fromFloat const Gen.Json.Decode.float
-
-        Common.Bool { const } ->
-            let
-                boolToString : Bool -> String
-                boolToString b =
-                    if b then
-                        "true"
-
-                    else
-                        "false"
-            in
-            (case const of
-                Nothing ->
-                    Gen.Json.Decode.bool
-
-                Just expected ->
-                    Gen.Json.Decode.bool
-                        |> Gen.Json.Decode.andThen
-                            (\actual ->
-                                Elm.ifThen
-                                    (Elm.Op.equal actual (Elm.bool expected))
-                                    (Gen.Json.Decode.succeed actual)
-                                    (Gen.Json.Decode.call_.fail
-                                        (Elm.string
-                                            ("Unexpected value: expected "
-                                                ++ boolToString expected
-                                                ++ " got "
-                                                ++ boolToString (not expected)
-                                            )
-                                        )
-                                    )
-                            )
-            )
-                |> CliMonad.succeed
+        Common.Basic basicType basic ->
+            basicTypeToDecoder basicType basic
 
         Common.Null ->
             CliMonad.succeed (Gen.Json.Decode.null Elm.unit)
@@ -1264,6 +1110,122 @@ typeToDecoder qualify type_ =
 
         Common.Bytes ->
             CliMonad.todo "Bytes decoder not implemented yet"
+
+
+basicTypeToDecoder : Common.BasicType -> { format : Maybe String, const : Maybe Common.ConstValue } -> CliMonad Elm.Expression
+basicTypeToDecoder basicType { format, const } =
+    let
+        base : (Elm.Expression -> Elm.Expression) -> Elm.Expression -> Elm.Expression
+        base toString decoder =
+            case const of
+                Nothing ->
+                    decoder
+
+                Just expected ->
+                    decoder
+                        |> Gen.Json.Decode.andThen
+                            (\actual ->
+                                Elm.ifThen
+                                    (Elm.Op.equal actual (constToExpr expected))
+                                    (Gen.Json.Decode.succeed actual)
+                                    (Gen.Json.Decode.call_.fail
+                                        (Elm.Op.append
+                                            (Elm.string
+                                                ("Unexpected value: expected "
+                                                    ++ constToString expected
+                                                    ++ " got "
+                                                )
+                                            )
+                                            (toString actual)
+                                        )
+                                    )
+                            )
+
+        default : Elm.Expression
+        default =
+            case basicType of
+                Common.String ->
+                    base
+                        (\s -> Gen.Json.Encode.encode 0 (Gen.Json.Encode.call_.string s))
+                        Gen.Json.Decode.string
+
+                Common.Integer ->
+                    base Gen.String.call_.fromInt Gen.Json.Decode.int
+
+                Common.Number ->
+                    base Gen.String.call_.fromFloat Gen.Json.Decode.float
+
+                Common.Boolean ->
+                    let
+                        boolToString : Bool -> String
+                        boolToString b =
+                            if b then
+                                "true"
+
+                            else
+                                "false"
+                    in
+                    case const of
+                        Just (Common.ConstBoolean expected) ->
+                            Gen.Json.Decode.bool
+                                |> Gen.Json.Decode.andThen
+                                    (\actual ->
+                                        Elm.ifThen
+                                            (Elm.Op.equal actual (Elm.bool expected))
+                                            (Gen.Json.Decode.succeed actual)
+                                            (Gen.Json.Decode.call_.fail
+                                                (Elm.string
+                                                    ("Unexpected value: expected "
+                                                        ++ boolToString expected
+                                                        ++ " got "
+                                                        ++ boolToString (not expected)
+                                                    )
+                                                )
+                                            )
+                                    )
+
+                        Just _ ->
+                            Gen.Json.Decode.bool
+
+                        Nothing ->
+                            Gen.Json.Decode.bool
+    in
+    CliMonad.withFormat basicType format .decoder default
+
+
+constToString : Common.ConstValue -> String
+constToString const =
+    case const of
+        Common.ConstInteger i ->
+            String.fromInt i
+
+        Common.ConstBoolean True ->
+            "true"
+
+        Common.ConstBoolean False ->
+            "false"
+
+        Common.ConstNumber f ->
+            String.fromFloat f
+
+        Common.ConstString s ->
+            Json.Encode.encode 0 (Json.Encode.string s)
+
+
+constToExpr : Common.ConstValue -> Elm.Expression
+constToExpr const =
+    case const of
+        Common.ConstInteger i ->
+            Elm.int i
+
+        Common.ConstBoolean b ->
+            Elm.bool b
+
+        Common.ConstString s ->
+            Elm.string s
+
+        Common.ConstNumber f ->
+            Elm.float f
 
 
 {-| Decode an optional field

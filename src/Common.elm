@@ -1,5 +1,7 @@
 module Common exposing
-    ( Field
+    ( BasicType(..)
+    , ConstValue(..)
+    , Field
     , Module(..)
     , Object
     , OneOfData
@@ -8,6 +10,7 @@ module Common exposing
     , TypeName
     , UnsafeName(..)
     , VariantName
+    , basicTypeToString
     , enum
     , moduleToNamespace
     , ref
@@ -275,10 +278,12 @@ initialUppercaseWordToLowercase input =
 type Type
     = Nullable Type
     | Object Object
-    | String { const : Maybe String }
-    | Int { const : Maybe Int }
-    | Float { const : Maybe Float }
-    | Bool { const : Maybe Bool }
+    | Basic
+        -- This is separate for easier pattern matching
+        BasicType
+        { format : Maybe String
+        , const : Maybe ConstValue
+        }
     | Null
     | List Type
     | OneOf TypeName OneOfData
@@ -287,8 +292,36 @@ type Type
     | Ref (List String)
     | Bytes
     | Unit
-    | Date
-    | DateTime
+
+
+type BasicType
+    = Integer
+    | Boolean
+    | String
+    | Number
+
+
+type ConstValue
+    = ConstInteger Int
+    | ConstBoolean Bool
+    | ConstString String
+    | ConstNumber Float
+
+
+basicTypeToString : BasicType -> String
+basicTypeToString basicType =
+    case basicType of
+        Integer ->
+            "integer"
+
+        Boolean ->
+            "boolean"
+
+        String ->
+            "string"
+
+        Number ->
+            "number"
 
 
 type alias Object =

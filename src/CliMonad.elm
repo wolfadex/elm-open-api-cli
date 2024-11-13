@@ -7,6 +7,7 @@ module CliMonad exposing
     , errorToWarning, fromApiSpec, enumName, moduleToNamespace
     , withPath, withWarning
     , todo, todoWithDefault
+    , Format, withFormat
     )
 
 {-|
@@ -19,12 +20,14 @@ module CliMonad exposing
 @docs errorToWarning, fromApiSpec, enumName, moduleToNamespace
 @docs withPath, withWarning
 @docs todo, todoWithDefault
+@docs Format, withFormat
 
 -}
 
 import Common
 import Dict
 import Elm
+import Elm.Annotation
 import FastDict
 import Gen.Debug
 import OpenApi exposing (OpenApi)
@@ -44,12 +47,41 @@ type alias OneOfName =
     Common.TypeName
 
 
+{-| The first String is the `type`, the second the `format`.
+-}
+type alias InternalFormatName =
+    ( String, String )
+
+
+type alias Format =
+    { basicType : Common.BasicType
+    , format : String
+    , encode : Elm.Expression -> Elm.Expression
+    , decoder : Elm.Expression
+    , toParamString : Elm.Expression -> Elm.Expression
+    , annotation : Elm.Annotation.Annotation
+    , sharedDeclarations : List Elm.Declaration
+    , requiresPackages : List String
+    }
+
+
+type alias InternalFormat =
+    { encode : Elm.Expression -> Elm.Expression
+    , decoder : Elm.Expression
+    , toParamString : Elm.Expression -> Elm.Expression
+    , annotation : Elm.Annotation.Annotation
+    , sharedDeclarations : List Elm.Declaration
+    , requiresPackages : List String
+    }
+
+
 type CliMonad a
     = CliMonad
         ({ openApi : OpenApi
          , generateTodos : Bool
          , enums : FastDict.Dict (List String) { name : Common.UnsafeName, documentation : Maybe String }
          , namespace : List String
+         , formats : FastDict.Dict InternalFormatName InternalFormat
          }
          ->
             Result
@@ -187,11 +219,31 @@ run :
         , generateTodos : Bool
         , enums : FastDict.Dict (List String) { name : Common.UnsafeName, documentation : Maybe String }
         , namespace : List String
+        , formats : List Format
         }
     -> CliMonad (List ( Common.Module, Elm.Declaration ))
     -> Result Message ( List ( Common.Module, Elm.Declaration ), List Message )
 run oneOfDeclarations input (CliMonad x) =
-    x input
+    let
+        internalInput :
+            { openApi : OpenApi
+            , generateTodos : Bool
+            , enums : FastDict.Dict (List String) { name : Common.UnsafeName, documentation : Maybe String }
+            , namespace : List String
+            , formats : FastDict.Dict InternalFormatName InternalFormat
+            }
+        internalInput =
+            { openApi = input.openApi
+            , generateTodos = input.generateTodos
+            , enums = input.enums
+            , namespace = input.namespace
+            , formats =
+                input.formats
+                    |> List.map toInternalFormat
+                    |> FastDict.fromList
+            }
+    in
+    x internalInput
         |> Result.andThen
             (\( decls, warnings, oneOfs ) ->
                 let
@@ -199,7 +251,7 @@ run oneOfDeclarations input (CliMonad x) =
                         oneOfDeclarations oneOfs
                             |> withPath (Common.UnsafeName "While generating `oneOf`s")
                 in
-                h input
+                h internalInput
                     |> Result.map
                         (\( oneOfDecls, oneOfWarnings, _ ) ->
                             ( decls ++ oneOfDecls
@@ -208,6 +260,19 @@ run oneOfDeclarations input (CliMonad x) =
                             )
                         )
             )
+
+
+toInternalFormat : Format -> ( InternalFormatName, InternalFormat )
+toInternalFormat format =
+    ( ( Common.basicTypeToString format.basicType, format.format )
+    , { encode = format.encode
+      , decoder = format.decoder
+      , toParamString = format.toParamString
+      , annotation = format.annotation
+      , sharedDeclarations = format.sharedDeclarations
+      , requiresPackages = format.requiresPackages
+      }
+    )
 
 
 combineMap : (a -> CliMonad b) -> List a -> CliMonad (List b)
@@ -290,3 +355,36 @@ enumName variants =
                 |> Maybe.map .name
         )
         enums
+
+
+withFormat :
+    Common.BasicType
+    -> Maybe String
+    ->
+        ({ encode : Elm.Expression -> Elm.Expression
+         , decoder : Elm.Expression
+         , toParamString : Elm.Expression -> Elm.Expression
+         , annotation : Elm.Annotation.Annotation
+         , sharedDeclarations : List Elm.Declaration
+         , requiresPackages : List String
+         }
+         -> a
+        )
+    -> a
+    -> CliMonad a
+withFormat basicType maybeFormatName getter default =
+    case maybeFormatName of
+        Nothing ->
+            succeed default
+
+        Just formatName ->
+            CliMonad
+                (\{ formats } ->
+                    ( FastDict.get ( Common.basicTypeToString basicType, formatName ) formats
+                        |> Maybe.map getter
+                        |> Maybe.withDefault default
+                    , []
+                    , FastDict.empty
+                    )
+                        |> Ok
+                )

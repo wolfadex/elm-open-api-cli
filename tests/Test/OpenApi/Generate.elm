@@ -1,6 +1,7 @@
 module Test.OpenApi.Generate exposing (suite)
 
 import Char
+import Cli
 import CliMonad
 import Elm
 import Expect
@@ -78,6 +79,7 @@ suite =
                                     , generateTodos = False
                                     , effectTypes = [ OpenApi.Generate.ElmHttpCmd, OpenApi.Generate.ElmHttpTask ]
                                     , server = OpenApi.Generate.Default
+                                    , formats = Cli.defaultFormats
                                     }
                                     oas
                         in

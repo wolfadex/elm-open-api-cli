@@ -739,8 +739,10 @@ dateTimeFormat =
     , toParamString = toString
     , sharedDeclarations = []
     , requiresPackages =
-        [ "wolfadex/elm-rfc3339"
+        [ "elm/parser"
+        , "elm/time"
         , "justinmimbs/time-extra"
+        , "wolfadex/elm-rfc3339"
         ]
     }
 
@@ -868,8 +870,6 @@ printSuccessMessageAndWarnings ( outputPaths, { requiredPackages, warnings } ) =
         optionalPackages : List String
         optionalPackages =
             [ "elm/bytes"
-            , "elm/parser"
-            , "elm/time"
             , "elm/url"
             ]
 

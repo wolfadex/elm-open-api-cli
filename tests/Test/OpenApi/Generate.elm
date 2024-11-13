@@ -5,6 +5,7 @@ import Cli
 import CliMonad
 import Elm
 import Expect
+import FastSet
 import Fuzz
 import Json.Decode
 import OpenApi
@@ -72,7 +73,7 @@ suite =
                                     |> Maybe.withDefault "Carl"
                                     |> List.singleton
 
-                            genFiles : Result CliMonad.Message ( List Elm.File, List CliMonad.Message )
+                            genFiles : Result CliMonad.Message ( List Elm.File, { warnings : List CliMonad.Message, requiredPackages : FastSet.Set String } )
                             genFiles =
                                 OpenApi.Generate.files
                                     { namespace = namespace

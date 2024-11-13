@@ -58,6 +58,7 @@ type alias Format =
     , format : String
     , encode : Elm.Expression -> Elm.Expression
     , decoder : Elm.Expression
+    , toParamString : Elm.Expression -> Elm.Expression
     , annotation : Elm.Annotation.Annotation
     , sharedDeclarations : List Elm.Declaration
     , requiresPackages : List String
@@ -67,6 +68,7 @@ type alias Format =
 type alias InternalFormat =
     { encode : Elm.Expression -> Elm.Expression
     , decoder : Elm.Expression
+    , toParamString : Elm.Expression -> Elm.Expression
     , annotation : Elm.Annotation.Annotation
     , sharedDeclarations : List Elm.Declaration
     , requiresPackages : List String
@@ -265,6 +267,7 @@ toInternalFormat format =
     ( ( Common.basicTypeToString format.basicType, format.format )
     , { encode = format.encode
       , decoder = format.decoder
+      , toParamString = format.toParamString
       , annotation = format.annotation
       , sharedDeclarations = format.sharedDeclarations
       , requiresPackages = format.requiresPackages
@@ -360,6 +363,7 @@ withFormat :
     ->
         ({ encode : Elm.Expression -> Elm.Expression
          , decoder : Elm.Expression
+         , toParamString : Elm.Expression -> Elm.Expression
          , annotation : Elm.Annotation.Annotation
          , sharedDeclarations : List Elm.Declaration
          , requiresPackages : List String

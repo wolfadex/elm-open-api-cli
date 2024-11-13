@@ -2078,25 +2078,29 @@ paramToString qualify type_ =
                         (Elm.string "false")
     in
     case type_ of
-        Common.Basic basicType _ ->
-            CliMonad.succeed
-                { inputToString = basicTypeToString basicType
-                , alwaysJust = True
-                , isMaybe = False
-                }
-
-        Common.Nullable (Common.Basic basicType _) ->
-            { inputToString = basicTypeToString basicType
-            , alwaysJust = False
-            , isMaybe = True
-            }
-                |> CliMonad.succeed
+        Common.Basic basicType basic ->
+            CliMonad.withFormat basicType
+                basic.format
+                .toParamString
+                (basicTypeToString basicType)
+                |> CliMonad.map
+                    (\inputToString ->
+                        { inputToString = inputToString
+                        , alwaysJust = True
+                        , isMaybe = False
+                        }
+                    )
 
         Common.Nullable p ->
             recursive p True <|
                 \{ inputToString, alwaysJust } val ->
                     if alwaysJust then
-                        Gen.Maybe.call_.map inputToString val
+                        case p of
+                            Common.Basic Common.String _ ->
+                                val
+
+                            _ ->
+                                Gen.Maybe.call_.map inputToString val
 
                     else
                         Gen.Maybe.call_.andThen inputToString val

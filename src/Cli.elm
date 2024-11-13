@@ -692,11 +692,9 @@ defaultFormats =
 
 dateTimeFormat : CliMonad.Format
 dateTimeFormat =
-    { basicType = Common.String
-    , format = "date-time"
-    , annotation = Gen.Time.annotation_.posix
-    , encode =
-        \instant ->
+    let
+        toString : Elm.Expression -> Elm.Expression
+        toString instant =
             Gen.Rfc3339.make_.dateTimeOffset
                 (Elm.record
                     [ ( "instant", instant )
@@ -709,6 +707,14 @@ dateTimeFormat =
                     ]
                 )
                 |> Gen.Rfc3339.toString
+    in
+    { basicType = Common.String
+    , format = "date-time"
+    , annotation = Gen.Time.annotation_.posix
+    , encode =
+        \instant ->
+            instant
+                |> toString
                 |> Gen.Json.Encode.call_.string
     , decoder =
         Gen.Json.Decode.string
@@ -722,6 +728,7 @@ dateTimeFormat =
                         , err = \_ -> Gen.Json.Decode.fail "Invalid RFC-3339 date-time"
                         }
                 )
+    , toParamString = toString
     , sharedDeclarations = []
     , requiresPackages = []
     }
@@ -737,6 +744,7 @@ dateFormat =
             date
                 |> Gen.Date.toIsoString
                 |> Gen.Json.Encode.call_.string
+    , toParamString = Gen.Date.toIsoString
     , decoder =
         Gen.Json.Decode.string
             |> Gen.Json.Decode.andThen
@@ -759,6 +767,7 @@ defaultStringFormat format =
     , annotation = Elm.Annotation.string
     , encode = Gen.Json.Encode.call_.string
     , decoder = Gen.Json.Decode.string
+    , toParamString = identity
     , sharedDeclarations = []
     , requiresPackages = []
     }

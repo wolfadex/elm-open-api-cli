@@ -116,7 +116,7 @@ files :
     , generateTodos : Bool
     , effectTypes : List EffectType
     , server : Server
-    , formats : FastDict.Dict CliMonad.FormatName CliMonad.Format
+    , formats : List CliMonad.Format
     }
     -> OpenApi.OpenApi
     -> Result CliMonad.Message ( List Elm.File, List CliMonad.Message )
@@ -1850,7 +1850,7 @@ contentToContentSchema qualify content =
                 |> CliMonad.andThen
                     (\{ type_ } ->
                         case type_ of
-                            Common.String _ ->
+                            Common.Basic Common.String _ ->
                                 CliMonad.succeed (StringContent mime)
 
                             _ ->
@@ -2033,12 +2033,6 @@ paramToString :
     -> CliMonad { inputToString : Elm.Expression -> Elm.Expression, alwaysJust : Bool, isMaybe : Bool }
 paramToString qualify type_ =
     let
-        basic :
-            (Elm.Expression -> Elm.Expression)
-            -> CliMonad { inputToString : Elm.Expression -> Elm.Expression, alwaysJust : Bool, isMaybe : Bool }
-        basic f =
-            CliMonad.succeed { inputToString = f, alwaysJust = True, isMaybe = False }
-
         recursive :
             Common.Type
             -> Bool
@@ -2058,27 +2052,34 @@ paramToString qualify type_ =
                         , isMaybe = isMaybe
                         }
                     )
+
+        basicTypeToString : Common.BasicType -> Elm.Expression -> Elm.Expression
+        basicTypeToString basicType val =
+            case basicType of
+                Common.String ->
+                    val
+
+                Common.Integer ->
+                    Gen.String.call_.fromInt val
+
+                Common.Number ->
+                    Gen.String.call_.fromFloat val
+
+                Common.Boolean ->
+                    Elm.ifThen val
+                        (Elm.string "true")
+                        (Elm.string "false")
     in
     case type_ of
-        Common.String _ ->
-            basic identity
+        Common.Basic basicType _ ->
+            CliMonad.succeed
+                { inputToString = basicTypeToString basicType
+                , alwaysJust = True
+                , isMaybe = False
+                }
 
-        Common.Int _ ->
-            basic Gen.String.call_.fromInt
-
-        Common.Float _ ->
-            basic Gen.String.call_.fromFloat
-
-        Common.Bool _ ->
-            (\val ->
-                Elm.ifThen val
-                    (Elm.string "true")
-                    (Elm.string "false")
-            )
-                |> basic
-
-        Common.Nullable (Common.String _) ->
-            { inputToString = identity
+        Common.Nullable (Common.Basic basicType _) ->
+            { inputToString = basicTypeToString basicType
             , alwaysJust = False
             , isMaybe = True
             }
@@ -2093,12 +2094,20 @@ paramToString qualify type_ =
                     else
                         Gen.Maybe.call_.andThen inputToString val
 
-        Common.List (Common.String _) ->
+        Common.List (Common.Basic basicType _) ->
             { inputToString =
                 \val ->
                     Elm.ifThen (Gen.List.call_.isEmpty val)
                         Gen.Maybe.make_.nothing
-                        (val
+                        ((case basicType of
+                            Common.String ->
+                                val
+
+                            _ ->
+                                val
+                                    |> Gen.List.call_.map
+                                        (Elm.functionReduced "toStringArg" (basicTypeToString basicType))
+                         )
                             |> Gen.String.call_.join (Elm.string ",")
                             |> Gen.Maybe.make_.just
                         )
@@ -2166,7 +2175,7 @@ paramToString qualify type_ =
                     (\maybeName ->
                         case maybeName of
                             Nothing ->
-                                basic identity
+                                CliMonad.succeed { inputToString = identity, alwaysJust = True, isMaybe = False }
 
                             Just name ->
                                 CliMonad.map
@@ -2565,7 +2574,11 @@ operationToTypesExpectAndResolver functionName operation =
                                         StringContent _ ->
                                             CliMonad.map2
                                                 (\errorDecoders_ ( errorTypeDeclaration_, errorTypeAnnotation ) ->
-                                                    { successType = Common.String { const = Nothing, format = Nothing }
+                                                    { successType =
+                                                        Common.Basic Common.String
+                                                            { const = Nothing
+                                                            , format = Nothing
+                                                            }
                                                     , bodyTypeAnnotation = Elm.Annotation.string
                                                     , errorTypeDeclaration = errorTypeDeclaration_
                                                     , errorTypeAnnotation = errorTypeAnnotation

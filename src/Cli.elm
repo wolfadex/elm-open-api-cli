@@ -10,10 +10,10 @@ import Cli.Option
 import Cli.OptionsParser
 import Cli.Program
 import CliMonad
+import Common
 import Dict
 import Elm
 import Elm.Annotation
-import FastDict
 import FatalError
 import Gen.Date
 import Gen.Json.Decode
@@ -682,18 +682,19 @@ generateFileFromOpenApiSpec config apiSpec =
         |> BackendTask.fromResult
 
 
-defaultFormats : FastDict.Dict CliMonad.FormatName CliMonad.Format
+defaultFormats : List CliMonad.Format
 defaultFormats =
-    [ ( ( "string", "date-time" ), dateTimeFormat )
-    , ( ( "string", "date" ), dateFormat )
-    , ( ( "string", "password" ), defaultStringFormat )
+    [ dateTimeFormat
+    , dateFormat
+    , defaultStringFormat "password"
     ]
-        |> FastDict.fromList
 
 
 dateTimeFormat : CliMonad.Format
 dateTimeFormat =
-    { annotation = Gen.Time.annotation_.posix
+    { basicType = Common.String
+    , format = "date-time"
+    , annotation = Gen.Time.annotation_.posix
     , encode =
         \instant ->
             Gen.Rfc3339.make_.dateTimeOffset
@@ -728,7 +729,9 @@ dateTimeFormat =
 
 dateFormat : CliMonad.Format
 dateFormat =
-    { annotation = Gen.Date.annotation_.date
+    { basicType = Common.String
+    , format = "date"
+    , annotation = Gen.Date.annotation_.date
     , encode =
         \date ->
             date
@@ -749,9 +752,11 @@ dateFormat =
     }
 
 
-defaultStringFormat : CliMonad.Format
-defaultStringFormat =
-    { annotation = Elm.Annotation.string
+defaultStringFormat : String -> CliMonad.Format
+defaultStringFormat format =
+    { basicType = Common.String
+    , format = format
+    , annotation = Elm.Annotation.string
     , encode = Gen.Json.Encode.call_.string
     , decoder = Gen.Json.Decode.string
     , sharedDeclarations = []

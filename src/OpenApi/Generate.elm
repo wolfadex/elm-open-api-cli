@@ -1369,7 +1369,7 @@ operationToHeaderParams operation =
                                                 , config
                                                     |> Elm.get "params"
                                                     |> Elm.get (Common.toValueName paramName)
-                                                    |> inputToString
+                                                    |> inputToStringToFunction inputToString
                                                 , isMaybe
                                                 )
                                             )
@@ -1520,7 +1520,7 @@ replacedUrl server authInfo pathUrl operation =
                                                     config
                                                         |> Elm.get "params"
                                                         |> Elm.get (Common.toValueName paramName)
-                                                        |> inputToString
+                                                        |> inputToStringToFunction inputToString
                                                 )
                                             , []
                                             )
@@ -2019,7 +2019,7 @@ queryParameterToUrlBuilderArgument qualify param =
                                     config
                                         |> Elm.get "params"
                                         |> Elm.get (Common.toValueName paramName)
-                                        |> inputToString
+                                        |> inputToStringToFunction inputToString
 
                                 build : Elm.Expression -> Elm.Expression
                                 build =
@@ -2034,17 +2034,22 @@ queryParameterToUrlBuilderArgument qualify param =
             )
 
 
+type InputToString
+    = InputToString (Elm.Expression -> Elm.Expression)
+    | Identity
+
+
 paramToString :
     Bool
     -> Common.Type
-    -> CliMonad { inputToString : Elm.Expression -> Elm.Expression, alwaysJust : Bool, isMaybe : Bool }
+    -> CliMonad { inputToString : InputToString, alwaysJust : Bool, isMaybe : Bool }
 paramToString qualify type_ =
     let
         recursive :
             Common.Type
             -> Bool
-            -> ({ inputToString : Elm.Expression, alwaysJust : Bool, isMaybe : Bool } -> Elm.Expression -> Elm.Expression)
-            -> CliMonad { inputToString : Elm.Expression -> Elm.Expression, alwaysJust : Bool, isMaybe : Bool }
+            -> ({ inputToString : InputToString, alwaysJust : Bool, isMaybe : Bool } -> InputToString)
+            -> CliMonad { inputToString : InputToString, alwaysJust : Bool, isMaybe : Bool }
         recursive p isMaybe f =
             paramToString qualify p
                 |> CliMonad.map
@@ -2052,7 +2057,7 @@ paramToString qualify type_ =
                         { inputToString =
                             f
                                 { alwaysJust = alwaysJust
-                                , inputToString = Elm.functionReduced "toStringArg" inputToString
+                                , inputToString = inputToString
                                 , isMaybe = isMaybe
                                 }
                         , alwaysJust = False
@@ -2060,28 +2065,31 @@ paramToString qualify type_ =
                         }
                     )
 
-        basicTypeToString : Common.BasicType -> Elm.Expression -> Elm.Expression
-        basicTypeToString basicType val =
+        basicTypeToString : Common.BasicType -> InputToString
+        basicTypeToString basicType =
             case basicType of
                 Common.String ->
-                    val
+                    Identity
 
                 Common.Integer ->
-                    Gen.String.call_.fromInt val
+                    InputToString Gen.String.call_.fromInt
 
                 Common.Number ->
-                    Gen.String.call_.fromFloat val
+                    InputToString Gen.String.call_.fromFloat
 
                 Common.Boolean ->
-                    Elm.ifThen val
-                        (Elm.string "true")
-                        (Elm.string "false")
+                    InputToString
+                        (\val ->
+                            Elm.ifThen val
+                                (Elm.string "true")
+                                (Elm.string "false")
+                        )
     in
     case type_ of
         Common.Basic basicType basic ->
             CliMonad.withFormat basicType
                 basic.format
-                .toParamString
+                (\{ toParamString } -> InputToString toParamString)
                 (basicTypeToString basicType)
                 |> CliMonad.map
                     (\inputToString ->
@@ -2093,39 +2101,39 @@ paramToString qualify type_ =
 
         Common.Nullable p ->
             recursive p True <|
-                \{ inputToString, alwaysJust } val ->
+                \{ inputToString, alwaysJust } ->
                     if alwaysJust then
-                        case p of
-                            Common.Basic Common.String { format } ->
-                                if format == Nothing then
-                                    val
+                        case inputToString of
+                            Identity ->
+                                Identity
 
-                                else
-                                    Gen.Maybe.call_.map inputToString val
-
-                            _ ->
-                                Gen.Maybe.call_.map inputToString val
+                            InputToString f ->
+                                InputToString (\val -> Gen.Maybe.map f val)
 
                     else
-                        Gen.Maybe.call_.andThen inputToString val
+                        InputToString
+                            (\val ->
+                                val
+                                    |> Gen.Maybe.andThen (inputToStringToFunction inputToString)
+                            )
 
         Common.List (Common.Basic basicType _) ->
             { inputToString =
-                \val ->
-                    Elm.ifThen (Gen.List.call_.isEmpty val)
-                        Gen.Maybe.make_.nothing
-                        ((case basicType of
-                            Common.String ->
-                                val
+                InputToString
+                    (\val ->
+                        Elm.ifThen (Gen.List.call_.isEmpty val)
+                            Gen.Maybe.make_.nothing
+                            ((case basicTypeToString basicType of
+                                Identity ->
+                                    val
 
-                            _ ->
-                                val
-                                    |> Gen.List.call_.map
-                                        (Elm.functionReduced "toStringArg" (basicTypeToString basicType))
-                         )
-                            |> Gen.String.call_.join (Elm.string ",")
-                            |> Gen.Maybe.make_.just
-                        )
+                                InputToString f ->
+                                    Gen.List.call_.map (Elm.functionReduced "arg" f) val
+                             )
+                                |> Gen.String.call_.join (Elm.string ",")
+                                |> Gen.Maybe.make_.just
+                            )
+                    )
             , alwaysJust = False
             , isMaybe = False
             }
@@ -2133,22 +2141,29 @@ paramToString qualify type_ =
 
         Common.List p ->
             recursive p False <|
-                \{ inputToString, alwaysJust } val ->
-                    let
-                        map : Elm.Expression -> Elm.Expression -> Elm.Expression
-                        map =
-                            if alwaysJust then
-                                Gen.List.call_.map
+                \{ inputToString, alwaysJust } ->
+                    InputToString
+                        (\val ->
+                            Elm.ifThen (Gen.List.call_.isEmpty val)
+                                Gen.Maybe.make_.nothing
+                                ((if alwaysJust then
+                                    case inputToString of
+                                        Identity ->
+                                            val
 
-                            else
-                                Gen.List.call_.filterMap
-                    in
-                    Elm.ifThen (Gen.List.call_.isEmpty val)
-                        Gen.Maybe.make_.nothing
-                        (val
-                            |> map inputToString
-                            |> Gen.String.call_.join (Elm.string ",")
-                            |> Gen.Maybe.make_.just
+                                        InputToString f ->
+                                            Gen.List.call_.map (Elm.functionReduced "unpack" f) val
+
+                                  else
+                                    Gen.List.call_.filterMap
+                                        (Elm.functionReduced "unpack"
+                                            (inputToStringToFunction inputToString)
+                                        )
+                                        val
+                                 )
+                                    |> Gen.String.call_.join (Elm.string ",")
+                                    |> Gen.Maybe.make_.just
+                                )
                         )
 
         Common.Ref ref ->
@@ -2161,7 +2176,7 @@ paramToString qualify type_ =
             CliMonad.map2
                 (\valType branches ->
                     { inputToString =
-                        \val -> Elm.Case.custom val valType branches
+                        InputToString (\val -> Elm.Case.custom val valType branches)
                     , alwaysJust = True
                     , isMaybe = False
                     }
@@ -2175,7 +2190,7 @@ paramToString qualify type_ =
                                     CliMonad.fail "Nullable alternative"
 
                                 else
-                                    Elm.Case.branch1 (SchemaUtils.toVariantName name alternative.name) ( "alternative", annotation ) inputToString
+                                    Elm.Case.branch1 (SchemaUtils.toVariantName name alternative.name) ( "alternative", annotation ) (inputToStringToFunction inputToString)
                                         |> CliMonad.succeed
                             )
                             (paramToString qualify alternative.type_)
@@ -2190,21 +2205,23 @@ paramToString qualify type_ =
                     (\maybeName ->
                         case maybeName of
                             Nothing ->
-                                CliMonad.succeed { inputToString = identity, alwaysJust = True, isMaybe = False }
+                                CliMonad.succeed { inputToString = Identity, alwaysJust = True, isMaybe = False }
 
                             Just name ->
                                 CliMonad.map
                                     (\typesNamespace ->
                                         { inputToString =
-                                            \val ->
-                                                Elm.apply
-                                                    (Elm.value
-                                                        { importFrom = typesNamespace
-                                                        , name = Common.toValueName name ++ "ToString"
-                                                        , annotation = Nothing
-                                                        }
-                                                    )
-                                                    [ val ]
+                                            InputToString
+                                                (\val ->
+                                                    Elm.apply
+                                                        (Elm.value
+                                                            { importFrom = typesNamespace
+                                                            , name = Common.toValueName name ++ "ToString"
+                                                            , annotation = Nothing
+                                                            }
+                                                        )
+                                                        [ val ]
+                                                )
                                         , alwaysJust = True
                                         , isMaybe = False
                                         }
@@ -2222,12 +2239,22 @@ paramToString qualify type_ =
                                 "Params of type \"" ++ Elm.Annotation.toString annotation ++ "\""
                         in
                         CliMonad.todoWithDefault
-                            { inputToString = \_ -> Gen.Debug.todo msg
+                            { inputToString = InputToString (\_ -> Gen.Debug.todo msg)
                             , alwaysJust = True
                             , isMaybe = False
                             }
                             msg
                     )
+
+
+inputToStringToFunction : InputToString -> Elm.Expression -> Elm.Expression
+inputToStringToFunction inputToString val =
+    case inputToString of
+        Identity ->
+            val
+
+        InputToString f ->
+            f val
 
 
 paramToAnnotation : Bool -> OpenApi.Parameter.Parameter -> CliMonad ( Common.UnsafeName, Elm.Annotation.Annotation )

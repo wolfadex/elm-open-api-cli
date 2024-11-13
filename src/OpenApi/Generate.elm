@@ -18,6 +18,7 @@ import Elm.Case
 import Elm.Declare
 import Elm.Op
 import FastDict
+import FastSet
 import Gen.BackendTask
 import Gen.BackendTask.Http
 import Gen.Basics
@@ -119,7 +120,14 @@ files :
     , formats : List CliMonad.Format
     }
     -> OpenApi.OpenApi
-    -> Result CliMonad.Message ( List Elm.File, List CliMonad.Message )
+    ->
+        Result
+            CliMonad.Message
+            ( List Elm.File
+            , { warnings : List CliMonad.Message
+              , requiredPackages : FastSet.Set String
+              }
+            )
 files { namespace, generateTodos, effectTypes, server, formats } apiSpec =
     case extractEnums apiSpec of
         Err e ->
@@ -142,11 +150,11 @@ files { namespace, generateTodos, effectTypes, server, formats } apiSpec =
                     , formats = formats
                     }
                 |> Result.map
-                    (\( decls, warnings ) ->
+                    (\{ declarations, warnings, requiredPackages } ->
                         let
                             allDecls : List ( Common.Module, Elm.Declaration )
                             allDecls =
-                                decls
+                                declarations
                                     ++ elmHttpCommonDeclarations effectTypes
                                     ++ lamderaProgramTestCommonDeclarations effectTypes
                                     ++ [ ( Common.Common
@@ -213,7 +221,9 @@ files { namespace, generateTodos, effectTypes, server, formats } apiSpec =
                                         }
                                         (head :: List.map Tuple.second tail)
                                 )
-                        , warnings
+                        , { warnings = warnings
+                          , requiredPackages = requiredPackages
+                          }
                         )
                     )
 

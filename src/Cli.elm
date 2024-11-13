@@ -14,6 +14,7 @@ import Common
 import Dict
 import Elm
 import Elm.Annotation
+import FastSet
 import FatalError
 import Gen.Date
 import Gen.Json.Decode
@@ -647,7 +648,14 @@ generateFileFromOpenApiSpec :
     , server : OpenApi.Generate.Server
     }
     -> OpenApi.OpenApi
-    -> BackendTask.BackendTask FatalError.FatalError ( List Elm.File, List CliMonad.Message )
+    ->
+        BackendTask.BackendTask
+            FatalError.FatalError
+            ( List Elm.File
+            , { warnings : List CliMonad.Message
+              , requiredPackages : FastSet.Set String
+              }
+            )
 generateFileFromOpenApiSpec config apiSpec =
     let
         moduleName : List String
@@ -730,7 +738,10 @@ dateTimeFormat =
                 )
     , toParamString = toString
     , sharedDeclarations = []
-    , requiresPackages = []
+    , requiresPackages =
+        [ "wolfadex/elm-rfc3339"
+        , "justinmimbs/time-extra"
+        ]
     }
 
 
@@ -756,7 +767,7 @@ dateFormat =
                         }
                 )
     , sharedDeclarations = []
-    , requiresPackages = []
+    , requiresPackages = [ "justinmimbs/date" ]
     }
 
 
@@ -834,16 +845,25 @@ writeSdkToDisk outputDirectory =
         >> BackendTask.combine
 
 
-printSuccessMessageAndWarnings : ( List String, List CliMonad.Message ) -> BackendTask.BackendTask FatalError.FatalError ()
-printSuccessMessageAndWarnings ( outputPaths, warnings ) =
+printSuccessMessageAndWarnings :
+    ( List String
+    , { warnings : List CliMonad.Message
+      , requiredPackages : FastSet.Set String
+      }
+    )
+    -> BackendTask.BackendTask FatalError.FatalError ()
+printSuccessMessageAndWarnings ( outputPaths, { requiredPackages, warnings } ) =
     let
         indentBy : Int -> String -> String
         indentBy amount input =
             String.repeat amount " " ++ input
 
-        requiredPackages : List String
-        requiredPackages =
-            [ "elm/http", "elm/json" ]
+        allRequiredPackages : List String
+        allRequiredPackages =
+            requiredPackages
+                |> FastSet.insert "elm/http"
+                |> FastSet.insert "elm/json"
+                |> FastSet.toList
 
         optionalPackages : List String
         optionalPackages =
@@ -851,9 +871,6 @@ printSuccessMessageAndWarnings ( outputPaths, warnings ) =
             , "elm/parser"
             , "elm/time"
             , "elm/url"
-            , "justinmimbs/date"
-            , "justinmimbs/time-extra"
-            , "wolfadex/elm-rfc3339"
             ]
 
         toInstall : String -> String
@@ -890,10 +907,10 @@ printSuccessMessageAndWarnings ( outputPaths, warnings ) =
                 |> List.map (indentBy 4)
             , [ ""
               , ""
-              , "You'll also need " ++ toSentence requiredPackages ++ " installed. Try running:"
+              , "You'll also need " ++ toSentence allRequiredPackages ++ " installed. Try running:"
               , ""
               ]
-            , List.map toInstall requiredPackages
+            , List.map toInstall allRequiredPackages
             , [ ""
               , ""
               , "and possibly need " ++ toSentence optionalPackages ++ " installed. If that's the case, try running:"

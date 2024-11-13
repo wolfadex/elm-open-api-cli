@@ -2096,8 +2096,12 @@ paramToString qualify type_ =
                 \{ inputToString, alwaysJust } val ->
                     if alwaysJust then
                         case p of
-                            Common.Basic Common.String _ ->
-                                val
+                            Common.Basic Common.String { format } ->
+                                if format == Nothing then
+                                    val
+
+                                else
+                                    Gen.Maybe.call_.map inputToString val
 
                             _ ->
                                 Gen.Maybe.call_.map inputToString val

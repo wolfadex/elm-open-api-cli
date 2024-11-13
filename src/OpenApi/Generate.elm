@@ -661,6 +661,13 @@ toRequestFunctions server effectTypes method pathUrl operation =
                 |> makeNamespaceValid
                 |> removeInvalidChars
                 |> String.Extra.camelize
+                |> (\n ->
+                        if String.isEmpty n then
+                            "root"
+
+                        else
+                            n
+                   )
 
         isSinglePackage : Bool
         isSinglePackage =

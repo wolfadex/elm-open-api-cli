@@ -2706,9 +2706,7 @@ outerExpectJsonCustom name f =
         ( "toMsg"
         , Just
             (Elm.Annotation.function
-                [ Gen.Result.annotation_.result
-                    (Elm.Annotation.namedWith [] "Error" [ Elm.Annotation.var "err", Elm.Annotation.string ])
-                    (Elm.Annotation.var "success")
+                [ Gen.Result.annotation_.result errorAnnotation (Elm.Annotation.var "success")
                 ]
                 (Elm.Annotation.var "msg")
             )
@@ -2726,6 +2724,11 @@ outerExpectJsonCustom name f =
         f
 
 
+errorAnnotation : Elm.Annotation.Annotation
+errorAnnotation =
+    Elm.Annotation.namedWith [] "Error" [ Elm.Annotation.var "err", Elm.Annotation.string ]
+
+
 outerExpectStringCustom :
     String
     -> (Elm.Expression -> Elm.Expression -> Elm.Expression)
@@ -2740,10 +2743,7 @@ outerExpectStringCustom name f =
         ( "toMsg"
         , Just
             (Elm.Annotation.function
-                [ Gen.Result.annotation_.result
-                    (Elm.Annotation.namedWith [] "Error" [ Elm.Annotation.var "err", Elm.Annotation.string ])
-                    Elm.Annotation.string
-                ]
+                [ Gen.Result.annotation_.result errorAnnotation Elm.Annotation.string ]
                 (Elm.Annotation.var "msg")
             )
         )
@@ -2964,7 +2964,7 @@ jsonResolverCustom =
                         (innerExpectJsonCustom errorDecoders successDecoder)
             in
             Gen.Http.stringResolver toResult
-                |> Elm.withType (Gen.Http.annotation_.resolver (Elm.Annotation.namedWith [] "Error" [ Elm.Annotation.var "err", Elm.Annotation.string ]) (Elm.Annotation.var "success"))
+                |> Elm.withType (Gen.Http.annotation_.resolver errorAnnotation (Elm.Annotation.var "success"))
 
 
 jsonResolverCustomEffect :
@@ -2983,7 +2983,7 @@ jsonResolverCustomEffect =
                         (innerExpectJsonCustom errorDecoders successDecoder)
             in
             Gen.Effect.Http.stringResolver toResult
-                |> Elm.withType (Gen.Effect.Http.annotation_.resolver (Elm.Annotation.var "restrictions") (Elm.Annotation.namedWith [] "Error" [ Elm.Annotation.var "err", Elm.Annotation.string ]) (Elm.Annotation.var "success"))
+                |> Elm.withType (Gen.Effect.Http.annotation_.resolver (Elm.Annotation.var "restrictions") errorAnnotation (Elm.Annotation.var "success"))
 
 
 bytesResolverCustom :
@@ -3040,7 +3040,7 @@ stringResolverCustom =
                         (innerExpectRawCustom identity errorDecoders)
             in
             Gen.Http.stringResolver toResult
-                |> Elm.withType (Gen.Http.annotation_.resolver (Elm.Annotation.namedWith [] "Error" [ Elm.Annotation.var "err", Elm.Annotation.string ]) Elm.Annotation.string)
+                |> Elm.withType (Gen.Http.annotation_.resolver errorAnnotation Elm.Annotation.string)
 
 
 stringResolverCustomEffect :
@@ -3059,7 +3059,7 @@ stringResolverCustomEffect =
                         (innerExpectRawCustom identity errorDecoders)
             in
             Gen.Effect.Http.stringResolver toResult
-                |> Elm.withType (Gen.Effect.Http.annotation_.resolver (Elm.Annotation.var "restrictions") (Elm.Annotation.namedWith [] "Error" [ Elm.Annotation.var "err", Elm.Annotation.string ]) Elm.Annotation.string)
+                |> Elm.withType (Gen.Effect.Http.annotation_.resolver (Elm.Annotation.var "restrictions") errorAnnotation Elm.Annotation.string)
 
 
 bytesToString : Elm.Expression -> Elm.Expression

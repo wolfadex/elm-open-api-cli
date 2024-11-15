@@ -865,13 +865,9 @@ printSuccessMessageAndWarnings ( outputPaths, { requiredPackages, warnings } ) =
             requiredPackages
                 |> FastSet.insert "elm/http"
                 |> FastSet.insert "elm/json"
+                |> FastSet.insert "elm/url"
+                |> FastSet.insert "elm/bytes"
                 |> FastSet.toList
-
-        optionalPackages : List String
-        optionalPackages =
-            [ "elm/bytes"
-            , "elm/url"
-            ]
 
         toInstall : String -> String
         toInstall dependency =
@@ -911,11 +907,6 @@ printSuccessMessageAndWarnings ( outputPaths, { requiredPackages, warnings } ) =
               , ""
               ]
             , List.map toInstall allRequiredPackages
-            , [ ""
-              , ""
-              , "and possibly need " ++ toSentence optionalPackages ++ " installed. If that's the case, try running:"
-              ]
-            , List.map toInstall optionalPackages
             ]
                 |> List.concat
                 |> List.map Pages.Script.log

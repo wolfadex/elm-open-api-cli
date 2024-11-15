@@ -5,7 +5,7 @@ module CliMonad exposing
     , map, map2, map3, map4
     , andThen, andThen2, andThen3, combine, combineDict, combineMap, foldl
     , errorToWarning, fromApiSpec, enumName, moduleToNamespace
-    , withPath, withWarning
+    , withPath, withWarning, withRequiredPackage
     , todo, todoWithDefault
     , Format, withFormat
     )
@@ -18,7 +18,7 @@ module CliMonad exposing
 @docs map, map2, map3, map4
 @docs andThen, andThen2, andThen3, combine, combineDict, combineMap, foldl
 @docs errorToWarning, fromApiSpec, enumName, moduleToNamespace
-@docs withPath, withWarning
+@docs withPath, withWarning, withRequiredPackage
 @docs todo, todoWithDefault
 @docs Format, withFormat
 
@@ -457,3 +457,17 @@ withFormat basicType maybeFormatName getter default =
                             )
                                 |> Ok
                 )
+
+
+withRequiredPackage : String -> CliMonad a -> CliMonad a
+withRequiredPackage package (CliMonad f) =
+    CliMonad
+        (\input ->
+            Result.map
+                (\( y, output ) ->
+                    ( y
+                    , { output | requiredPackages = FastSet.insert package output.requiredPackages }
+                    )
+                )
+                (f input)
+        )

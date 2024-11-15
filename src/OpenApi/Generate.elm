@@ -757,6 +757,7 @@ toRequestFunctions server effectTypes method pathUrl operation =
 
                 BytesContent _ ->
                     CliMonad.succeed [ ( Common.UnsafeName "body", Gen.Bytes.annotation_.bytes ) ]
+                        |> CliMonad.withRequiredPackage "elm/bytes"
 
         headersFromList : (Elm.Expression -> Elm.Expression -> Elm.Expression) -> AuthorizationInfo -> Elm.Expression -> List ( Elm.Expression, Elm.Expression, Bool ) -> Elm.Expression
         headersFromList f auth config headerParams =
@@ -2660,6 +2661,7 @@ operationToTypesExpectAndResolver functionName operation =
                                                 )
                                                 errorDecoders
                                                 errorTypeDeclaration
+                                                |> CliMonad.withRequiredPackage "elm/bytes"
 
                                         EmptyContent ->
                                             CliMonad.map2

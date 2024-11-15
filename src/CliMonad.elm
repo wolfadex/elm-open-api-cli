@@ -28,10 +28,12 @@ import Common
 import Dict
 import Elm
 import Elm.Annotation
+import Elm.ToString
 import FastDict
 import FastSet
 import Gen.Debug
 import OpenApi exposing (OpenApi)
+import Regex exposing (Regex)
 
 
 type alias Message =
@@ -92,6 +94,7 @@ type alias Output =
     { warnings : List Message
     , oneOfs : FastDict.Dict OneOfName Common.OneOfData
     , requiredPackages : FastSet.Set String
+    , sharedDeclarations : FastDict.Dict String Elm.Declaration
     }
 
 
@@ -100,6 +103,7 @@ emptyOutput =
     { warnings = []
     , oneOfs = FastDict.empty
     , requiredPackages = FastSet.empty
+    , sharedDeclarations = FastDict.empty
     }
 
 
@@ -195,6 +199,7 @@ mergeOutput l r =
     { warnings = l.warnings ++ r.warnings
     , oneOfs = FastDict.union l.oneOfs r.oneOfs
     , requiredPackages = FastSet.union l.requiredPackages r.requiredPackages
+    , sharedDeclarations = FastDict.union l.sharedDeclarations r.sharedDeclarations
     }
 
 
@@ -310,11 +315,17 @@ run oneOfDeclarations input (CliMonad x) =
                     (CliMonad h) =
                         oneOfDeclarations output.oneOfs
                             |> withPath (Common.UnsafeName "While generating `oneOf`s")
+
+                    declarationsForFormats : Output -> List ( Common.Module, Elm.Declaration )
+                    declarationsForFormats out =
+                        out.sharedDeclarations
+                            |> FastDict.values
+                            |> List.map (\decl -> ( Common.Json, decl ))
                 in
                 h internalInput
                     |> Result.map
                         (\( oneOfDecls, oneOfOutput ) ->
-                            { declarations = decls ++ oneOfDecls
+                            { declarations = decls ++ oneOfDecls ++ declarationsForFormats output ++ declarationsForFormats oneOfOutput
                             , warnings =
                                 (oneOfOutput.warnings ++ output.warnings)
                                     |> List.reverse
@@ -453,10 +464,33 @@ withFormat basicType maybeFormatName getter default =
 
                         Just format ->
                             ( getter format
-                            , { emptyOutput | requiredPackages = FastSet.fromList format.requiresPackages }
+                            , { emptyOutput
+                                | requiredPackages = FastSet.fromList format.requiresPackages
+                                , sharedDeclarations =
+                                    format.sharedDeclarations
+                                        |> List.map (\decl -> ( declarationName decl, decl ))
+                                        |> FastDict.fromList
+                              }
                             )
                                 |> Ok
                 )
+
+
+declarationName : Elm.Declaration -> String
+declarationName decl =
+    let
+        -- TODO: do this in a nonhorrible way
+        nameRegex : Regex
+        nameRegex =
+            Regex.fromString "^([a-zA-Z][a-zA-Z0-9_]*) ="
+                |> Maybe.withDefault Regex.never
+    in
+    (Elm.ToString.declaration decl).body
+        |> Regex.findAtMost 1 nameRegex
+        |> List.head
+        |> Maybe.andThen (\{ submatches } -> List.head submatches)
+        |> Maybe.andThen identity
+        |> Maybe.withDefault ""
 
 
 withRequiredPackage : String -> CliMonad a -> CliMonad a

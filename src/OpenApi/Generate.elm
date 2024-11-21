@@ -58,6 +58,7 @@ import OpenApi.Schema
 import OpenApi.SecurityRequirement
 import OpenApi.SecurityScheme
 import OpenApi.Server
+import OpenApi.Server.Variable
 import Result.Extra
 import SchemaUtils
 import String.Extra
@@ -680,9 +681,7 @@ toRequestFunctions server effectTypes method pathUrl operation =
         toMsg config msg =
             Elm.apply (Elm.get "toMsg" config) [ msg ]
 
-        body :
-            ContentSchema
-            -> CliMonad (Elm.Expression -> PerPackage Elm.Expression)
+        body : ContentSchema -> CliMonad (Elm.Expression -> PerPackage Elm.Expression)
         body bodyContent =
             case bodyContent of
                 EmptyContent ->
@@ -1482,6 +1481,49 @@ replacedUrl server authInfo pathUrl operation =
 
                                     Multiple _ ->
                                         Ok (Elm.get "server" config)
+
+                            variablesToApply : Dict.Dict String OpenApi.Server.Variable.Variable
+                            variablesToApply =
+                                case server of
+                                    Single _ ->
+                                        Dict.empty
+
+                                    Default ->
+                                        case servers of
+                                            [] ->
+                                                Dict.empty
+
+                                            [ oneServer ] ->
+                                                OpenApi.Server.variables oneServer
+
+                                            _ ->
+                                                Dict.empty
+
+                                    Multiple _ ->
+                                        Dict.empty
+
+                            applyVariabeles : Elm.Expression -> Elm.Expression
+                            applyVariabeles url =
+                                if Dict.isEmpty variablesToApply then
+                                    url
+
+                                else
+                                    Dict.foldl
+                                        (\varName variable url_ ->
+                                            url_
+                                                |> Elm.Op.pipe
+                                                    (Gen.String.call_.replace
+                                                        (Elm.string ("{" ++ varName ++ "}"))
+                                                        (config
+                                                            |> Elm.get "url"
+                                                            |> Elm.get (Common.toValueName (Common.UnsafeName varName))
+                                                            |> Gen.Maybe.withDefault (Elm.string (OpenApi.Server.Variable.default variable))
+                                                        )
+                                                        url_
+                                                    )
+                                        )
+                                        url
+                                        variablesToApply
                         in
                         if List.isEmpty pathSegments && List.isEmpty queryParams && List.isEmpty authArgs then
                             case resolvedServer of
@@ -1490,6 +1532,7 @@ replacedUrl server authInfo pathUrl operation =
 
                                 Err s ->
                                     Elm.string s
+                                        |> applyVariabeles
 
                                 Ok s ->
                                     s
@@ -1530,7 +1573,7 @@ replacedUrl server authInfo pathUrl operation =
                                     Gen.Url.Builder.call_.absolute (Elm.list replacedSegments) allQueryParams
 
                                 Err s ->
-                                    Gen.Url.Builder.call_.crossOrigin (Elm.string s) (Elm.list replacedSegments) allQueryParams
+                                    Gen.Url.Builder.call_.crossOrigin (Elm.string s |> applyVariabeles) (Elm.list replacedSegments) allQueryParams
 
                                 Ok s ->
                                     Gen.Url.Builder.call_.crossOrigin s (Elm.list replacedSegments) allQueryParams
@@ -2029,8 +2072,23 @@ toConfigParamAnnotation options =
                                 [] ->
                                     []
 
-                                [ _ ] ->
-                                    []
+                                [ oneServer ] ->
+                                    let
+                                        variables : Dict.Dict String OpenApi.Server.Variable.Variable
+                                        variables =
+                                            OpenApi.Server.variables oneServer
+                                    in
+                                    if Dict.isEmpty variables then
+                                        []
+
+                                    else
+                                        [ ( Common.UnsafeName "url"
+                                          , variables
+                                                |> Dict.keys
+                                                |> List.map (\key -> ( key, Gen.Maybe.annotation_.maybe Elm.Annotation.string ))
+                                                |> Elm.Annotation.record
+                                          )
+                                        ]
 
                                 _ ->
                                     [ ( Common.UnsafeName "server", Elm.Annotation.string ) ]

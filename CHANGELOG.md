@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 -   Support for `type : null`
 -   Support for `const : <value>`
 -   Support for `application/x-www-form-urlencoded` bodies
+-   Support for variables in server urls
 
 ## [0.7.0] - 2024-09-23
 

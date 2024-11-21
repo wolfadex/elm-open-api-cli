@@ -1946,8 +1946,6 @@ contentToContentSchema qualify content =
 
                     else if singleKey == "application/octet-stream" then
                         CliMonad.succeed (BytesContent singleKey)
-                        -- else if singleKey == "application/x-www-form-urlencoded" then
-                        --     CliMonad.succeed (StringContent singleKey)
 
                     else
                         default (Just fallback)

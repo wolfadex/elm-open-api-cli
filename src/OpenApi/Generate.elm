@@ -16,6 +16,7 @@ import Elm
 import Elm.Annotation
 import Elm.Case
 import Elm.Declare
+import Elm.Let
 import Elm.Op
 import FastDict
 import Gen.BackendTask
@@ -37,6 +38,7 @@ import Gen.OpenApi.Common
 import Gen.Result
 import Gen.String
 import Gen.Task
+import Gen.Url
 import Gen.Url.Builder
 import Json.Decode
 import Json.Schema.Definitions
@@ -87,6 +89,7 @@ type ContentSchema
     = EmptyContent
     | JsonContent Common.Type
     | StringContent Mime
+    | UrlEncodedContent Common.Type
     | BytesContent Mime
 
 
@@ -698,9 +701,51 @@ toRequestFunctions server effectTypes method pathUrl operation =
                                 let
                                     encoded : Elm.Expression
                                     encoded =
-                                        encoder <| Elm.get "body" config
+                                        Elm.get "body" config
+                                            |> encoder
                                 in
                                 { core = Gen.Http.jsonBody encoded
+                                , elmPages = Gen.BackendTask.Http.jsonBody encoded
+                                , lamderaProgramTest = Gen.Effect.Http.jsonBody encoded
+                                }
+                            )
+
+                UrlEncodedContent type_ ->
+                    SchemaUtils.typeToEncoder True type_
+                        |> CliMonad.map
+                            (\encoder config ->
+                                let
+                                    encoded : Elm.Expression
+                                    encoded =
+                                        Elm.get "body" config
+                                            |> encoder
+                                            |> Gen.Json.Decode.decodeValue (Gen.Json.Decode.dict Gen.Json.Decode.value)
+                                            |> Gen.Result.map
+                                                (\keyValues ->
+                                                    keyValues
+                                                        |> Gen.Dict.toList
+                                                        |> Gen.List.call_.map
+                                                            (Elm.fn ( "keyVal", Nothing )
+                                                                (\keyVal ->
+                                                                    Elm.Let.letIn
+                                                                        (\( key, value ) ->
+                                                                            Gen.String.call_.concat
+                                                                                (Elm.list
+                                                                                    [ Gen.Url.call_.percentEncode key
+                                                                                    , Elm.string "="
+                                                                                    , Gen.Url.call_.percentEncode (Gen.Json.Encode.encode 0 value)
+                                                                                    ]
+                                                                                )
+                                                                        )
+                                                                        |> Elm.Let.tuple "key" "value" keyVal
+                                                                        |> Elm.Let.toExpression
+                                                                )
+                                                            )
+                                                        |> Gen.String.call_.join (Elm.string "&")
+                                                )
+                                            |> Gen.Result.withDefault (Elm.string "")
+                                in
+                                { core = Gen.Http.call_.stringBody (Elm.string "application/x-www-form-urlencoded") encoded
                                 , elmPages = Gen.BackendTask.Http.jsonBody encoded
                                 , lamderaProgramTest = Gen.Effect.Http.jsonBody encoded
                                 }
@@ -739,6 +784,10 @@ toRequestFunctions server effectTypes method pathUrl operation =
                     CliMonad.succeed []
 
                 JsonContent type_ ->
+                    SchemaUtils.typeToAnnotationWithNullable True type_
+                        |> CliMonad.map (\annotation -> [ ( Common.UnsafeName "body", annotation ) ])
+
+                UrlEncodedContent type_ ->
                     SchemaUtils.typeToAnnotationWithNullable True type_
                         |> CliMonad.map (\annotation -> [ ( Common.UnsafeName "body", annotation ) ])
 
@@ -1840,13 +1889,22 @@ contentToContentSchema qualify content =
                                     stringContent "text/plain" htmlSchema
 
                                 Nothing ->
-                                    let
-                                        msg : String
-                                        msg =
-                                            "The content doesn't have an application/json, text/html or text/plain option, it has " ++ String.join ", " (Dict.keys content)
-                                    in
-                                    fallback
-                                        |> Maybe.withDefault (CliMonad.fail msg)
+                                    case Dict.get "application/x-www-form-urlencoded" content of
+                                        Just urlEncodedSchema ->
+                                            CliMonad.succeed urlEncodedSchema
+                                                |> CliMonad.stepOrFail "The request's application/x-www-form-urlencoded content option doesn't havea  schema"
+                                                    (OpenApi.MediaType.schema >> Maybe.map OpenApi.Schema.get)
+                                                |> CliMonad.andThen (SchemaUtils.schemaToType qualify)
+                                                |> CliMonad.map (\{ type_ } -> UrlEncodedContent type_)
+
+                                        Nothing ->
+                                            let
+                                                msg : String
+                                                msg =
+                                                    "The content doesn't have an application/json, text/html, text/plain, or application/x-www-form-urlencoded option, it has " ++ String.join ", " (Dict.keys content)
+                                            in
+                                            fallback
+                                                |> Maybe.withDefault (CliMonad.fail msg)
 
         stringContent : String -> OpenApi.MediaType.MediaType -> CliMonad ContentSchema
         stringContent mime htmlSchema =
@@ -1888,6 +1946,8 @@ contentToContentSchema qualify content =
 
                     else if singleKey == "application/octet-stream" then
                         CliMonad.succeed (BytesContent singleKey)
+                        -- else if singleKey == "application/x-www-form-urlencoded" then
+                        --     CliMonad.succeed (StringContent singleKey)
 
                     else
                         default (Just fallback)
@@ -2457,6 +2517,10 @@ operationToTypesExpectAndResolver functionName operation =
                                                                         SchemaUtils.typeToDecoder True type_
                                                                             |> CliMonad.andThen common
 
+                                                                    UrlEncodedContent type_ ->
+                                                                        SchemaUtils.typeToDecoder True type_
+                                                                            |> CliMonad.andThen common
+
                                                                     StringContent _ ->
                                                                         CliMonad.succeed Gen.Json.Decode.string
                                                                             |> CliMonad.andThen common
@@ -2513,6 +2577,11 @@ operationToTypesExpectAndResolver functionName operation =
                                                     (\contentSchema ->
                                                         case contentSchema of
                                                             JsonContent type_ ->
+                                                                CliMonad.map2 Tuple.pair
+                                                                    (SchemaUtils.typeToAnnotationWithNullable False type_)
+                                                                    (SchemaUtils.typeToAnnotationWithNullable True type_)
+
+                                                            UrlEncodedContent type_ ->
                                                                 CliMonad.map2 Tuple.pair
                                                                     (SchemaUtils.typeToAnnotationWithNullable False type_)
                                                                     (SchemaUtils.typeToAnnotationWithNullable True type_)
@@ -2596,6 +2665,24 @@ operationToTypesExpectAndResolver functionName operation =
                                 (\contentSchema ->
                                     case contentSchema of
                                         JsonContent type_ ->
+                                            CliMonad.map3
+                                                (\successDecoder errorDecoders_ ( errorTypeDeclaration_, errorTypeAnnotation ) ->
+                                                    { successType = type_
+                                                    , bodyTypeAnnotation = Elm.Annotation.string
+                                                    , errorTypeDeclaration = errorTypeDeclaration_
+                                                    , errorTypeAnnotation = errorTypeAnnotation
+                                                    , expect = expectJsonBetter errorDecoders_ successDecoder
+                                                    , resolver =
+                                                        { core = Gen.OpenApi.Common.jsonResolverCustom errorDecoders_ successDecoder
+                                                        , lamderaProgramTest = Gen.OpenApi.Common.jsonResolverCustomEffect errorDecoders_ successDecoder
+                                                        }
+                                                    }
+                                                )
+                                                (SchemaUtils.typeToDecoder True type_)
+                                                errorDecoders
+                                                errorTypeDeclaration
+
+                                        UrlEncodedContent type_ ->
                                             CliMonad.map3
                                                 (\successDecoder errorDecoders_ ( errorTypeDeclaration_, errorTypeAnnotation ) ->
                                                     { successType = type_

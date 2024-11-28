@@ -35,13 +35,13 @@ type alias CliOptions =
     { entryFilePath : OpenApi.Config.Path
     , outputDirectory : String
     , outputModuleName : Maybe String
-    , effectTypes : List OpenApi.Generate.EffectType
+    , effectTypes : List OpenApi.Config.EffectType
     , generateTodos : Bool
     , autoConvertSwagger : Bool
     , swaggerConversionUrl : Maybe String
     , swaggerConversionCommand : Maybe String
     , swaggerConversionCommandArgs : List String
-    , server : OpenApi.Generate.Server
+    , server : OpenApi.Config.Server
     , overrides : List OpenApi.Config.Path
     , writeMergedTo : Maybe String
     }
@@ -153,7 +153,7 @@ options:
             )
 
 
-effectTypesValidation : Maybe String -> Result String (List OpenApi.Generate.EffectType)
+effectTypesValidation : Maybe String -> Result String (List OpenApi.Config.EffectType)
 effectTypesValidation str =
     case str of
         Nothing ->
@@ -167,99 +167,99 @@ effectTypesValidation str =
                 |> Result.map List.concat
 
 
-effectTypeValidation : String -> Result String (List OpenApi.Generate.EffectType)
+effectTypeValidation : String -> Result String (List OpenApi.Config.EffectType)
 effectTypeValidation effectType =
     case effectType of
         "cmd" ->
-            Ok [ OpenApi.Generate.ElmHttpCmd ]
+            Ok [ OpenApi.Config.ElmHttpCmd ]
 
         "cmdrisky" ->
-            Ok [ OpenApi.Generate.ElmHttpCmdRisky ]
+            Ok [ OpenApi.Config.ElmHttpCmdRisky ]
 
         "cmdrecord" ->
-            Ok [ OpenApi.Generate.ElmHttpCmdRecord ]
+            Ok [ OpenApi.Config.ElmHttpCmdRecord ]
 
         "task" ->
-            Ok [ OpenApi.Generate.ElmHttpTask ]
+            Ok [ OpenApi.Config.ElmHttpTask ]
 
         "taskrisky" ->
-            Ok [ OpenApi.Generate.ElmHttpTaskRisky ]
+            Ok [ OpenApi.Config.ElmHttpTaskRisky ]
 
         "taskrecord" ->
-            Ok [ OpenApi.Generate.ElmHttpTaskRecord ]
+            Ok [ OpenApi.Config.ElmHttpTaskRecord ]
 
         "elm/http" ->
-            Ok [ OpenApi.Generate.ElmHttpCmd, OpenApi.Generate.ElmHttpTask ]
+            Ok [ OpenApi.Config.ElmHttpCmd, OpenApi.Config.ElmHttpTask ]
 
         "elm/http.cmd" ->
-            Ok [ OpenApi.Generate.ElmHttpCmd ]
+            Ok [ OpenApi.Config.ElmHttpCmd ]
 
         "elm/http.cmdrisky" ->
-            Ok [ OpenApi.Generate.ElmHttpCmdRisky ]
+            Ok [ OpenApi.Config.ElmHttpCmdRisky ]
 
         "elm/http.cmdrecord" ->
-            Ok [ OpenApi.Generate.ElmHttpCmdRecord ]
+            Ok [ OpenApi.Config.ElmHttpCmdRecord ]
 
         "elm/http.task" ->
-            Ok [ OpenApi.Generate.ElmHttpTask ]
+            Ok [ OpenApi.Config.ElmHttpTask ]
 
         "elm/http.taskrisky" ->
-            Ok [ OpenApi.Generate.ElmHttpTaskRisky ]
+            Ok [ OpenApi.Config.ElmHttpTaskRisky ]
 
         "elm/http.taskrecord" ->
-            Ok [ OpenApi.Generate.ElmHttpTaskRecord ]
+            Ok [ OpenApi.Config.ElmHttpTaskRecord ]
 
         "dillonkearns/elm-pages" ->
-            Ok [ OpenApi.Generate.DillonkearnsElmPagesTask ]
+            Ok [ OpenApi.Config.DillonkearnsElmPagesTask ]
 
         "dillonkearns/elm-pages.task" ->
-            Ok [ OpenApi.Generate.DillonkearnsElmPagesTask ]
+            Ok [ OpenApi.Config.DillonkearnsElmPagesTask ]
 
         "dillonkearns/elm-pages.taskrecord" ->
-            Ok [ OpenApi.Generate.DillonkearnsElmPagesTaskRecord ]
+            Ok [ OpenApi.Config.DillonkearnsElmPagesTaskRecord ]
 
         "lamdera/program-test" ->
-            Ok [ OpenApi.Generate.LamderaProgramTestCmd, OpenApi.Generate.LamderaProgramTestTask ]
+            Ok [ OpenApi.Config.LamderaProgramTestCmd, OpenApi.Config.LamderaProgramTestTask ]
 
         "lamdera/program-test.cmd" ->
-            Ok [ OpenApi.Generate.LamderaProgramTestCmd ]
+            Ok [ OpenApi.Config.LamderaProgramTestCmd ]
 
         "lamdera/program-test.cmdrisky" ->
-            Ok [ OpenApi.Generate.LamderaProgramTestCmdRisky ]
+            Ok [ OpenApi.Config.LamderaProgramTestCmdRisky ]
 
         "lamdera/program-test.cmdrecord" ->
-            Ok [ OpenApi.Generate.LamderaProgramTestCmdRecord ]
+            Ok [ OpenApi.Config.LamderaProgramTestCmdRecord ]
 
         "lamdera/program-test.task" ->
-            Ok [ OpenApi.Generate.LamderaProgramTestTask ]
+            Ok [ OpenApi.Config.LamderaProgramTestTask ]
 
         "lamdera/program-test.taskrisky" ->
-            Ok [ OpenApi.Generate.LamderaProgramTestTaskRisky ]
+            Ok [ OpenApi.Config.LamderaProgramTestTaskRisky ]
 
         "lamdera/program-test.taskrecord" ->
-            Ok [ OpenApi.Generate.LamderaProgramTestTaskRecord ]
+            Ok [ OpenApi.Config.LamderaProgramTestTaskRecord ]
 
         _ ->
             Err <| "Unexpected effect type: " ++ effectType
 
 
-serverValidation : Maybe String -> Result String OpenApi.Generate.Server
+serverValidation : Maybe String -> Result String OpenApi.Config.Server
 serverValidation server =
     case Maybe.withDefault "" server of
         "" ->
-            Ok OpenApi.Generate.Default
+            Ok OpenApi.Config.Default
 
         input ->
             case Json.Decode.decodeString (Json.Decode.dict Json.Decode.string) input of
                 Ok servers ->
-                    Ok <| OpenApi.Generate.Multiple servers
+                    Ok <| OpenApi.Config.Multiple servers
 
                 Err _ ->
                     if String.startsWith "{" input then
                         Err <| "Invalid JSON: " ++ input
 
                     else
-                        Ok <| OpenApi.Generate.Single input
+                        Ok <| OpenApi.Config.Single input
 
 
 run : Pages.Script.Script
@@ -283,7 +283,7 @@ parseCliOptions cliOptions =
         | outputModuleName = Maybe.map (String.split ".") cliOptions.outputModuleName
         , effectTypes =
             if List.isEmpty cliOptions.effectTypes then
-                [ OpenApi.Generate.ElmHttpCmd, OpenApi.Generate.ElmHttpTask ]
+                config.effectTypes
 
             else
                 cliOptions.effectTypes
@@ -680,9 +680,9 @@ yamlToJsonValueDecoder =
 generateFileFromOpenApiSpec :
     { outputModuleName : Maybe (List String)
     , generateTodos : Bool
-    , effectTypes : List OpenApi.Generate.EffectType
-    , server : OpenApi.Generate.Server
-    , formats : List CliMonad.Format
+    , effectTypes : List OpenApi.Config.EffectType
+    , server : OpenApi.Config.Server
+    , formats : List OpenApi.Config.Format
     }
     -> OpenApi.OpenApi
     ->

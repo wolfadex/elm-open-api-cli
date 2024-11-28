@@ -7,7 +7,7 @@ module CliMonad exposing
     , errorToWarning, fromApiSpec, enumName, moduleToNamespace
     , withPath, withWarning, withRequiredPackage
     , todo, todoWithDefault
-    , Format, withFormat
+    , withFormat
     )
 
 {-|
@@ -20,7 +20,7 @@ module CliMonad exposing
 @docs errorToWarning, fromApiSpec, enumName, moduleToNamespace
 @docs withPath, withWarning, withRequiredPackage
 @docs todo, todoWithDefault
-@docs Format, withFormat
+@docs withFormat
 
 -}
 
@@ -33,6 +33,7 @@ import FastDict
 import FastSet
 import Gen.Debug
 import OpenApi exposing (OpenApi)
+import OpenApi.Config
 import Regex exposing (Regex)
 
 
@@ -54,18 +55,6 @@ type alias OneOfName =
 -}
 type alias InternalFormatName =
     ( String, String )
-
-
-type alias Format =
-    { basicType : Common.BasicType
-    , format : String
-    , encode : Elm.Expression -> Elm.Expression
-    , decoder : Elm.Expression
-    , toParamString : Elm.Expression -> Elm.Expression
-    , annotation : Elm.Annotation.Annotation
-    , sharedDeclarations : List Elm.Declaration
-    , requiresPackages : List String
-    }
 
 
 type alias InternalFormat =
@@ -278,7 +267,7 @@ run :
         , generateTodos : Bool
         , enums : FastDict.Dict (List String) { name : Common.UnsafeName, documentation : Maybe String }
         , namespace : List String
-        , formats : List Format
+        , formats : List OpenApi.Config.Format
         }
     -> CliMonad (List ( Common.Module, Elm.Declaration ))
     ->
@@ -335,7 +324,7 @@ run oneOfDeclarations input (CliMonad x) =
             )
 
 
-toInternalFormat : Format -> ( InternalFormatName, InternalFormat )
+toInternalFormat : OpenApi.Config.Format -> ( InternalFormatName, InternalFormat )
 toInternalFormat format =
     ( ( Common.basicTypeToString format.basicType, format.format )
     , { encode = format.encode

@@ -78,8 +78,8 @@ suite =
                                 OpenApi.Generate.files
                                     { namespace = namespace
                                     , generateTodos = False
-                                    , effectTypes = [ OpenApi.Generate.ElmHttpCmd, OpenApi.Generate.ElmHttpTask ]
-                                    , server = OpenApi.Generate.Default
+                                    , effectTypes = [ OpenApi.Config.ElmHttpCmd, OpenApi.Config.ElmHttpTask ]
+                                    , server = OpenApi.Config.Default
                                     , formats = OpenApi.Config.defaultFormats
                                     }
                                     oas

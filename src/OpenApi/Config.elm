@@ -1,7 +1,7 @@
-module OpenApi.Config exposing (Config, Path(..), defaultFormats, init, pathFromString, pathToString)
+module OpenApi.Config exposing (Config, EffectType(..), Format, Path(..), Server(..), defaultFormats, init, pathFromString, pathToString)
 
-import CliMonad
 import Common
+import Dict
 import Elm
 import Elm.Annotation
 import Gen.Date
@@ -11,7 +11,6 @@ import Gen.Parser.Advanced
 import Gen.Result
 import Gen.Rfc3339
 import Gen.Time
-import OpenApi.Generate
 import Url
 
 
@@ -19,15 +18,50 @@ type alias Config =
     { oasPath : Path
     , outputDirectory : String
     , outputModuleName : Maybe (List String)
-    , effectTypes : List OpenApi.Generate.EffectType
+    , effectTypes : List EffectType
     , generateTodos : Bool
     , autoConvertSwagger : Bool
     , swaggerConversionUrl : String
     , swaggerConversionCommand : Maybe { command : String, args : List String }
-    , server : OpenApi.Generate.Server
+    , server : Server
     , overrides : List Path
     , writeMergedTo : Maybe String
-    , formats : List CliMonad.Format
+    , formats : List Format
+    }
+
+
+type EffectType
+    = ElmHttpCmd
+    | ElmHttpCmdRecord
+    | ElmHttpCmdRisky
+    | ElmHttpTask
+    | ElmHttpTaskRecord
+    | ElmHttpTaskRisky
+    | DillonkearnsElmPagesTask
+    | DillonkearnsElmPagesTaskRecord
+    | LamderaProgramTestCmd
+    | LamderaProgramTestCmdRisky
+    | LamderaProgramTestCmdRecord
+    | LamderaProgramTestTask
+    | LamderaProgramTestTaskRisky
+    | LamderaProgramTestTaskRecord
+
+
+type Server
+    = Default
+    | Single String
+    | Multiple (Dict.Dict String String)
+
+
+type alias Format =
+    { basicType : Common.BasicType
+    , format : String
+    , encode : Elm.Expression -> Elm.Expression
+    , decoder : Elm.Expression
+    , toParamString : Elm.Expression -> Elm.Expression
+    , annotation : Elm.Annotation.Annotation
+    , sharedDeclarations : List Elm.Declaration
+    , requiresPackages : List String
     }
 
 
@@ -61,19 +95,19 @@ init oasPath outputDirectory =
     { oasPath = oasPath
     , outputDirectory = outputDirectory
     , outputModuleName = Nothing
-    , effectTypes = []
+    , effectTypes = [ ElmHttpCmd, ElmHttpTask ]
     , generateTodos = False
     , autoConvertSwagger = False
     , swaggerConversionUrl = "https://converter.swagger.io/api/convert"
     , swaggerConversionCommand = Nothing
-    , server = OpenApi.Generate.Default
+    , server = Default
     , overrides = []
     , writeMergedTo = Nothing
     , formats = defaultFormats
     }
 
 
-defaultFormats : List CliMonad.Format
+defaultFormats : List Format
 defaultFormats =
     [ dateTimeFormat
     , dateFormat
@@ -81,7 +115,7 @@ defaultFormats =
     ]
 
 
-dateTimeFormat : CliMonad.Format
+dateTimeFormat : Format
 dateTimeFormat =
     let
         toString : Elm.Expression -> Elm.Expression
@@ -130,7 +164,7 @@ dateTimeFormat =
     }
 
 
-dateFormat : CliMonad.Format
+dateFormat : Format
 dateFormat =
     { basicType = Common.String
     , format = "date"
@@ -156,7 +190,7 @@ dateFormat =
     }
 
 
-defaultStringFormat : String -> CliMonad.Format
+defaultStringFormat : String -> Format
 defaultStringFormat format =
     { basicType = Common.String
     , format = format

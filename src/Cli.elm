@@ -1,4 +1,4 @@
-module Cli exposing (run)
+module Cli exposing (run, withConfig)
 
 import Ansi
 import Ansi.Color
@@ -268,7 +268,7 @@ run =
         (\cliOptions ->
             cliOptions
                 |> parseCliOptions
-                |> script
+                |> withConfig
         )
 
 
@@ -301,8 +301,8 @@ parseCliOptions cliOptions =
     }
 
 
-script : OpenApi.Config.Config -> BackendTask FatalError ()
-script config =
+withConfig : OpenApi.Config.Config -> BackendTask FatalError ()
+withConfig config =
     Pages.Script.Spinner.steps
         |> (case config.oasPath of
                 OpenApi.Config.Url url ->

@@ -60,6 +60,10 @@ run =
         ifconfigOvh =
             OpenApi.Config.inputFrom (OpenApi.Config.File "./example/ifconfig.ovh.json")
 
+        int64 : OpenApi.Config.Input
+        int64 =
+            OpenApi.Config.inputFrom (OpenApi.Config.File "./example/int64.json")
+
         marioPartyStats : OpenApi.Config.Input
         marioPartyStats =
             OpenApi.Config.inputFrom (OpenApi.Config.File "./example/MarioPartyStats.json")
@@ -147,6 +151,7 @@ run =
                 |> OpenApi.Config.withInput binaryResponse
                 |> OpenApi.Config.withInput cookieAuth
                 |> OpenApi.Config.withInput ifconfigOvh
+                |> OpenApi.Config.withInput int64
                 |> OpenApi.Config.withInput marioPartyStats
                 |> OpenApi.Config.withInput multipartFormData
                 |> OpenApi.Config.withInput nullableEnum

@@ -1,4 +1,4 @@
-module OpenApi.Config exposing (Config, EffectType(..), Format, Path(..), Server(..), autoConvertSwagger, defaultFormats, init, oasPath, outputDirectory, overrides, pathFromString, pathToString, swaggerConversionCommand, swaggerConversionUrl, toGenerationConfig, withAutoConvertSwagger, withEffectTypes, withGenerateTodos, withOutputModuleName, withOverrides, withServer, withSwaggerConversionCommand, withSwaggerConversionUrl, withWriteMergedTo, writeMergedTo)
+module OpenApi.Config exposing (Config, EffectType(..), Format, Path(..), Server(..), autoConvertSwagger, defaultFormats, init, oasPath, outputDirectory, overrides, pathFromString, pathToString, swaggerConversionCommand, swaggerConversionUrl, toGenerationConfig, withAutoConvertSwagger, withEffectTypes, withFormat, withGenerateTodos, withOutputModuleName, withOverrides, withServer, withSwaggerConversionCommand, withSwaggerConversionUrl, withWriteMergedTo, writeMergedTo)
 
 import Common
 import Dict
@@ -248,6 +248,11 @@ withServer newServer (Config config) =
 withWriteMergedTo : String -> Config -> Config
 withWriteMergedTo newWriteMergedTo (Config config) =
     Config { config | writeMergedTo = Just newWriteMergedTo }
+
+
+withFormat : Format -> Config -> Config
+withFormat newFormat (Config config) =
+    Config { config | formats = newFormat :: config.formats }
 
 
 swaggerConversionUrl : Config -> String

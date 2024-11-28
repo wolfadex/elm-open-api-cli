@@ -18,6 +18,7 @@ import Elm.Case
 import Elm.Declare
 import Elm.Op
 import FastDict
+import FastSet
 import Gen.BackendTask
 import Gen.BackendTask.Http
 import Gen.Basics
@@ -119,7 +120,14 @@ files :
     , formats : List CliMonad.Format
     }
     -> OpenApi.OpenApi
-    -> Result CliMonad.Message ( List Elm.File, List CliMonad.Message )
+    ->
+        Result
+            CliMonad.Message
+            ( List Elm.File
+            , { warnings : List CliMonad.Message
+              , requiredPackages : FastSet.Set String
+              }
+            )
 files { namespace, generateTodos, effectTypes, server, formats } apiSpec =
     case extractEnums apiSpec of
         Err e ->
@@ -142,11 +150,11 @@ files { namespace, generateTodos, effectTypes, server, formats } apiSpec =
                     , formats = formats
                     }
                 |> Result.map
-                    (\( decls, warnings ) ->
+                    (\{ declarations, warnings, requiredPackages } ->
                         let
                             allDecls : List ( Common.Module, Elm.Declaration )
                             allDecls =
-                                decls
+                                declarations
                                     ++ elmHttpCommonDeclarations effectTypes
                                     ++ lamderaProgramTestCommonDeclarations effectTypes
                                     ++ [ ( Common.Common
@@ -213,7 +221,9 @@ files { namespace, generateTodos, effectTypes, server, formats } apiSpec =
                                         }
                                         (head :: List.map Tuple.second tail)
                                 )
-                        , warnings
+                        , { warnings = warnings
+                          , requiredPackages = requiredPackages
+                          }
                         )
                     )
 
@@ -747,6 +757,7 @@ toRequestFunctions server effectTypes method pathUrl operation =
 
                 BytesContent _ ->
                     CliMonad.succeed [ ( Common.UnsafeName "body", Gen.Bytes.annotation_.bytes ) ]
+                        |> CliMonad.withRequiredPackage "elm/bytes"
 
         headersFromList : (Elm.Expression -> Elm.Expression -> Elm.Expression) -> AuthorizationInfo -> Elm.Expression -> List ( Elm.Expression, Elm.Expression, Bool ) -> Elm.Expression
         headersFromList f auth config headerParams =
@@ -2528,6 +2539,7 @@ operationToTypesExpectAndResolver functionName operation =
                                                                     ( Gen.Bytes.annotation_.bytes
                                                                     , Gen.Bytes.annotation_.bytes
                                                                     )
+                                                                    |> CliMonad.withRequiredPackage "elm/bytes"
 
                                                             EmptyContent ->
                                                                 CliMonad.succeed
@@ -2635,7 +2647,7 @@ operationToTypesExpectAndResolver functionName operation =
                                                 errorTypeDeclaration
 
                                         BytesContent _ ->
-                                            CliMonad.map2
+                                            CliMonad.andThen2
                                                 (\errorDecoders_ ( errorTypeDeclaration_, errorTypeAnnotation ) ->
                                                     { successType = Common.Bytes
                                                     , bodyTypeAnnotation = Gen.Bytes.annotation_.bytes
@@ -2647,6 +2659,8 @@ operationToTypesExpectAndResolver functionName operation =
                                                         , lamderaProgramTest = Gen.OpenApi.Common.bytesResolverCustomEffect errorDecoders_
                                                         }
                                                     }
+                                                        |> CliMonad.succeed
+                                                        |> CliMonad.withRequiredPackage "elm/bytes"
                                                 )
                                                 errorDecoders
                                                 errorTypeDeclaration

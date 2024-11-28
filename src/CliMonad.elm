@@ -5,7 +5,7 @@ module CliMonad exposing
     , map, map2, map3, map4
     , andThen, andThen2, andThen3, combine, combineDict, combineMap, foldl
     , errorToWarning, fromApiSpec, enumName, moduleToNamespace
-    , withPath, withWarning
+    , withPath, withWarning, withRequiredPackage
     , todo, todoWithDefault
     , Format, withFormat
     )
@@ -18,7 +18,7 @@ module CliMonad exposing
 @docs map, map2, map3, map4
 @docs andThen, andThen2, andThen3, combine, combineDict, combineMap, foldl
 @docs errorToWarning, fromApiSpec, enumName, moduleToNamespace
-@docs withPath, withWarning
+@docs withPath, withWarning, withRequiredPackage
 @docs todo, todoWithDefault
 @docs Format, withFormat
 
@@ -28,9 +28,12 @@ import Common
 import Dict
 import Elm
 import Elm.Annotation
+import Elm.ToString
 import FastDict
+import FastSet
 import Gen.Debug
 import OpenApi exposing (OpenApi)
+import Regex exposing (Regex)
 
 
 type alias Message =
@@ -83,14 +86,25 @@ type CliMonad a
          , namespace : List String
          , formats : FastDict.Dict InternalFormatName InternalFormat
          }
-         ->
-            Result
-                Message
-                ( a
-                , List Message
-                , FastDict.Dict OneOfName Common.OneOfData
-                )
+         -> Result Message ( a, Output )
         )
+
+
+type alias Output =
+    { warnings : List Message
+    , oneOfs : FastDict.Dict OneOfName Common.OneOfData
+    , requiredPackages : FastSet.Set String
+    , sharedDeclarations : FastDict.Dict String Elm.Declaration
+    }
+
+
+emptyOutput : Output
+emptyOutput =
+    { warnings = []
+    , oneOfs = FastDict.empty
+    , requiredPackages = FastSet.empty
+    , sharedDeclarations = FastDict.empty
+    }
 
 
 withPath : Common.UnsafeName -> CliMonad a -> CliMonad a
@@ -101,8 +115,8 @@ withPath segment (CliMonad f) =
                 Err message ->
                     Err (addPath segment message)
 
-                Ok ( res, warns, oneOfs ) ->
-                    Ok ( res, List.map (addPath segment) warns, oneOfs )
+                Ok ( res, output ) ->
+                    Ok ( res, { output | warnings = List.map (addPath segment) output.warnings } )
         )
 
 
@@ -118,7 +132,11 @@ withWarning message (CliMonad f) =
     CliMonad
         (\inputs ->
             Result.map
-                (\( res, warnings, oneOfs ) -> ( res, { path = [], message = message } :: warnings, oneOfs ))
+                (\( res, output ) ->
+                    ( res
+                    , { output | warnings = { path = [], message = message } :: output.warnings }
+                    )
+                )
                 (f inputs)
         )
 
@@ -133,7 +151,7 @@ todoWithDefault default message =
     CliMonad
         (\{ generateTodos } ->
             if generateTodos then
-                Ok ( default, [ { path = [], message = message } ], FastDict.empty )
+                Ok ( default, { emptyOutput | warnings = [ { path = [], message = message } ] } )
 
             else
                 Err
@@ -150,32 +168,73 @@ fail message =
 
 succeed : a -> CliMonad a
 succeed x =
-    CliMonad (\_ -> Ok ( x, [], FastDict.empty ))
+    CliMonad (\_ -> Ok ( x, emptyOutput ))
 
 
 succeedWith : FastDict.Dict OneOfName Common.OneOfData -> a -> CliMonad a
 succeedWith oneOfs x =
-    CliMonad (\_ -> Ok ( x, [], oneOfs ))
+    CliMonad (\_ -> Ok ( x, { emptyOutput | oneOfs = oneOfs } ))
 
 
 map : (a -> b) -> CliMonad a -> CliMonad b
 map f (CliMonad x) =
-    CliMonad (\input -> Result.map (\( xr, xw, xm ) -> ( f xr, xw, xm )) (x input))
+    CliMonad (\input -> Result.map (\( xr, o ) -> ( f xr, o )) (x input))
 
 
 map2 : (a -> b -> c) -> CliMonad a -> CliMonad b -> CliMonad c
 map2 f (CliMonad x) (CliMonad y) =
-    CliMonad (\input -> Result.map2 (\( xr, xw, xm ) ( yr, yw, ym ) -> ( f xr yr, xw ++ yw, FastDict.union xm ym )) (x input) (y input))
+    CliMonad
+        (\input ->
+            Result.map2
+                (\( xr, xo ) ( yr, yo ) ->
+                    ( f xr yr, mergeOutput xo yo )
+                )
+                (x input)
+                (y input)
+        )
+
+
+mergeOutput : Output -> Output -> Output
+mergeOutput l r =
+    { warnings = l.warnings ++ r.warnings
+    , oneOfs = FastDict.union l.oneOfs r.oneOfs
+    , requiredPackages = FastSet.union l.requiredPackages r.requiredPackages
+    , sharedDeclarations = FastDict.union l.sharedDeclarations r.sharedDeclarations
+    }
+
+
+mergeOutputs : List Output -> Output
+mergeOutputs list =
+    List.foldl (\e acc -> mergeOutput acc e) emptyOutput list
 
 
 map3 : (a -> b -> c -> d) -> CliMonad a -> CliMonad b -> CliMonad c -> CliMonad d
 map3 f (CliMonad x) (CliMonad y) (CliMonad z) =
-    CliMonad (\input -> Result.map3 (\( xr, xw, xm ) ( yr, yw, ym ) ( zr, zw, zm ) -> ( f xr yr zr, xw ++ yw ++ zw, FastDict.union (FastDict.union xm ym) zm )) (x input) (y input) (z input))
+    CliMonad
+        (\input ->
+            Result.map3
+                (\( xr, xo ) ( yr, yo ) ( zr, zo ) ->
+                    ( f xr yr zr, mergeOutputs [ xo, yo, zo ] )
+                )
+                (x input)
+                (y input)
+                (z input)
+        )
 
 
 map4 : (a -> b -> c -> d -> e) -> CliMonad a -> CliMonad b -> CliMonad c -> CliMonad d -> CliMonad e
 map4 f (CliMonad x) (CliMonad y) (CliMonad z) (CliMonad w) =
-    CliMonad (\input -> Result.map4 (\( xr, xw, xm ) ( yr, yw, ym ) ( zr, zw, zm ) ( wr, ww, wm ) -> ( f xr yr zr wr, xw ++ yw ++ zw ++ ww, FastDict.union (FastDict.union xm ym) (FastDict.union zm wm) )) (x input) (y input) (z input) (w input))
+    CliMonad
+        (\input ->
+            Result.map4
+                (\( xr, xo ) ( yr, yo ) ( zr, zo ) ( wr, wo ) ->
+                    ( f xr yr zr wr, mergeOutputs [ xo, yo, zo, wo ] )
+                )
+                (x input)
+                (y input)
+                (z input)
+                (w input)
+        )
 
 
 andThen : (a -> CliMonad b) -> CliMonad a -> CliMonad b
@@ -183,13 +242,13 @@ andThen f (CliMonad x) =
     CliMonad
         (\input ->
             Result.andThen
-                (\( y, yw, ym ) ->
+                (\( y, yo ) ->
                     let
                         (CliMonad z) =
                             f y
                     in
                     z input
-                        |> Result.map (\( w, ww, wm ) -> ( w, yw ++ ww, FastDict.union ym wm ))
+                        |> Result.map (\( w, wo ) -> ( w, mergeOutput yo wo ))
                 )
                 (x input)
         )
@@ -222,7 +281,13 @@ run :
         , formats : List Format
         }
     -> CliMonad (List ( Common.Module, Elm.Declaration ))
-    -> Result Message ( List ( Common.Module, Elm.Declaration ), List Message )
+    ->
+        Result
+            Message
+            { declarations : List ( Common.Module, Elm.Declaration )
+            , warnings : List Message
+            , requiredPackages : FastSet.Set String
+            }
 run oneOfDeclarations input (CliMonad x) =
     let
         internalInput :
@@ -245,19 +310,27 @@ run oneOfDeclarations input (CliMonad x) =
     in
     x internalInput
         |> Result.andThen
-            (\( decls, warnings, oneOfs ) ->
+            (\( decls, output ) ->
                 let
                     (CliMonad h) =
-                        oneOfDeclarations oneOfs
+                        oneOfDeclarations output.oneOfs
                             |> withPath (Common.UnsafeName "While generating `oneOf`s")
+
+                    declarationsForFormats : Output -> List ( Common.Module, Elm.Declaration )
+                    declarationsForFormats out =
+                        out.sharedDeclarations
+                            |> FastDict.values
+                            |> List.map (\decl -> ( Common.Json, decl ))
                 in
                 h internalInput
                     |> Result.map
-                        (\( oneOfDecls, oneOfWarnings, _ ) ->
-                            ( decls ++ oneOfDecls
-                            , (oneOfWarnings ++ warnings)
-                                |> List.reverse
-                            )
+                        (\( oneOfDecls, oneOfOutput ) ->
+                            { declarations = decls ++ oneOfDecls ++ declarationsForFormats output ++ declarationsForFormats oneOfOutput
+                            , warnings =
+                                (oneOfOutput.warnings ++ output.warnings)
+                                    |> List.reverse
+                            , requiredPackages = FastSet.union output.requiredPackages oneOfOutput.requiredPackages
+                            }
                         )
             )
 
@@ -287,12 +360,12 @@ combine =
 
 fromApiSpec : (OpenApi -> a) -> CliMonad a
 fromApiSpec f =
-    CliMonad (\input -> Ok ( f input.openApi, [], FastDict.empty ))
+    CliMonad (\input -> Ok ( f input.openApi, emptyOutput ))
 
 
 enums : CliMonad (FastDict.Dict (List String) { name : Common.UnsafeName, documentation : Maybe String })
 enums =
-    CliMonad (\input -> Ok ( input.enums, [], FastDict.empty ))
+    CliMonad (\input -> Ok ( input.enums, emptyOutput ))
 
 
 errorToWarning : CliMonad a -> CliMonad (Maybe a)
@@ -300,11 +373,11 @@ errorToWarning (CliMonad f) =
     CliMonad
         (\input ->
             case f input of
-                Ok ( res, warns, oneOfs ) ->
-                    Ok ( Just res, warns, oneOfs )
+                Ok ( res, output ) ->
+                    Ok ( Just res, output )
 
                 Err { path, message } ->
-                    Ok ( Nothing, [ { path = path, message = message } ], FastDict.empty )
+                    Ok ( Nothing, { emptyOutput | warnings = [ { path = path, message = message } ] } )
         )
 
 
@@ -344,7 +417,7 @@ foldl f init list =
 
 moduleToNamespace : Common.Module -> CliMonad (List String)
 moduleToNamespace mod =
-    CliMonad (\input -> Ok ( Common.moduleToNamespace input.namespace mod, [], FastDict.empty ))
+    CliMonad (\input -> Ok ( Common.moduleToNamespace input.namespace mod, emptyOutput ))
 
 
 enumName : List Common.UnsafeName -> CliMonad (Maybe Common.UnsafeName)
@@ -380,11 +453,55 @@ withFormat basicType maybeFormatName getter default =
         Just formatName ->
             CliMonad
                 (\{ formats } ->
-                    ( FastDict.get ( Common.basicTypeToString basicType, formatName ) formats
-                        |> Maybe.map getter
-                        |> Maybe.withDefault default
-                    , []
-                    , FastDict.empty
-                    )
-                        |> Ok
+                    case
+                        FastDict.get ( Common.basicTypeToString basicType, formatName ) formats
+                    of
+                        Nothing ->
+                            ( default
+                            , emptyOutput
+                            )
+                                |> Ok
+
+                        Just format ->
+                            ( getter format
+                            , { emptyOutput
+                                | requiredPackages = FastSet.fromList format.requiresPackages
+                                , sharedDeclarations =
+                                    format.sharedDeclarations
+                                        |> List.map (\decl -> ( declarationName decl, decl ))
+                                        |> FastDict.fromList
+                              }
+                            )
+                                |> Ok
                 )
+
+
+declarationName : Elm.Declaration -> String
+declarationName decl =
+    let
+        -- TODO: do this in a nonhorrible way
+        nameRegex : Regex
+        nameRegex =
+            Regex.fromString "^([a-zA-Z][a-zA-Z0-9_]*) ="
+                |> Maybe.withDefault Regex.never
+    in
+    (Elm.ToString.declaration decl).body
+        |> Regex.findAtMost 1 nameRegex
+        |> List.head
+        |> Maybe.andThen (\{ submatches } -> List.head submatches)
+        |> Maybe.andThen identity
+        |> Maybe.withDefault ""
+
+
+withRequiredPackage : String -> CliMonad a -> CliMonad a
+withRequiredPackage package (CliMonad f) =
+    CliMonad
+        (\input ->
+            Result.map
+                (\( y, output ) ->
+                    ( y
+                    , { output | requiredPackages = FastSet.insert package output.requiredPackages }
+                    )
+                )
+                (f input)
+        )

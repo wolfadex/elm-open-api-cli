@@ -1,4 +1,4 @@
-module OpenApi.Config exposing (Config, EffectType(..), Format, Path(..), Server(..), defaultFormats, init, pathFromString, pathToString)
+module OpenApi.Config exposing (Config, EffectType(..), Format, Path(..), Server(..), autoConvertSwagger, defaultFormats, init, oasPath, outputDirectory, overrides, pathFromString, pathToString, swaggerConversionCommand, swaggerConversionUrl, toGenerationConfig, withAutoConvertSwagger, withEffectTypes, withGenerateTodos, withOutputModuleName, withOverrides, withServer, withSwaggerConversionCommand, withSwaggerConversionUrl, withWriteMergedTo, writeMergedTo)
 
 import Common
 import Dict
@@ -14,20 +14,21 @@ import Gen.Time
 import Url
 
 
-type alias Config =
-    { oasPath : Path
-    , outputDirectory : String
-    , outputModuleName : Maybe (List String)
-    , effectTypes : List EffectType
-    , generateTodos : Bool
-    , autoConvertSwagger : Bool
-    , swaggerConversionUrl : String
-    , swaggerConversionCommand : Maybe { command : String, args : List String }
-    , server : Server
-    , overrides : List Path
-    , writeMergedTo : Maybe String
-    , formats : List Format
-    }
+type Config
+    = Config
+        { oasPath : Path
+        , outputDirectory : String
+        , outputModuleName : Maybe (List String)
+        , effectTypes : List EffectType
+        , generateTodos : Bool
+        , autoConvertSwagger : Bool
+        , swaggerConversionUrl : String
+        , swaggerConversionCommand : Maybe { command : String, args : List String }
+        , server : Server
+        , overrides : List Path
+        , writeMergedTo : Maybe String
+        , formats : List Format
+        }
 
 
 type EffectType
@@ -91,9 +92,9 @@ type Path
 
 
 init : Path -> String -> Config
-init oasPath outputDirectory =
-    { oasPath = oasPath
-    , outputDirectory = outputDirectory
+init initialOasPath initialOutputDirectory =
+    { oasPath = initialOasPath
+    , outputDirectory = initialOutputDirectory
     , outputModuleName = Nothing
     , effectTypes = [ ElmHttpCmd, ElmHttpTask ]
     , generateTodos = False
@@ -105,6 +106,7 @@ init oasPath outputDirectory =
     , writeMergedTo = Nothing
     , formats = defaultFormats
     }
+        |> Config
 
 
 defaultFormats : List Format
@@ -201,3 +203,101 @@ defaultStringFormat format =
     , sharedDeclarations = []
     , requiresPackages = []
     }
+
+
+withEffectTypes : List EffectType -> Config -> Config
+withEffectTypes effectTypes (Config config) =
+    Config { config | effectTypes = effectTypes }
+
+
+withOutputModuleName : List String -> Config -> Config
+withOutputModuleName moduleName (Config config) =
+    Config { config | outputModuleName = Just moduleName }
+
+
+withOverrides : List Path -> Config -> Config
+withOverrides newOverrides (Config config) =
+    Config { config | overrides = newOverrides }
+
+
+withGenerateTodos : Bool -> Config -> Config
+withGenerateTodos generateTodos (Config config) =
+    Config { config | generateTodos = generateTodos }
+
+
+withAutoConvertSwagger : Bool -> Config -> Config
+withAutoConvertSwagger newAutoConvertSwagger (Config config) =
+    Config { config | autoConvertSwagger = newAutoConvertSwagger }
+
+
+withSwaggerConversionUrl : String -> Config -> Config
+withSwaggerConversionUrl newSwaggerConversionUrl (Config config) =
+    Config { config | swaggerConversionUrl = newSwaggerConversionUrl }
+
+
+withSwaggerConversionCommand : { command : String, args : List String } -> Config -> Config
+withSwaggerConversionCommand newSwaggerConversionCommand (Config config) =
+    Config { config | swaggerConversionCommand = Just newSwaggerConversionCommand }
+
+
+withServer : Server -> Config -> Config
+withServer newServer (Config config) =
+    Config { config | server = newServer }
+
+
+withWriteMergedTo : String -> Config -> Config
+withWriteMergedTo newWriteMergedTo (Config config) =
+    Config { config | writeMergedTo = Just newWriteMergedTo }
+
+
+swaggerConversionUrl : Config -> String
+swaggerConversionUrl (Config config) =
+    config.swaggerConversionUrl
+
+
+swaggerConversionCommand : Config -> Maybe { command : String, args : List String }
+swaggerConversionCommand (Config config) =
+    config.swaggerConversionCommand
+
+
+autoConvertSwagger : Config -> Bool
+autoConvertSwagger (Config config) =
+    config.autoConvertSwagger
+
+
+oasPath : Config -> Path
+oasPath (Config config) =
+    config.oasPath
+
+
+toGenerationConfig :
+    Config
+    ->
+        { outputModuleName : Maybe (List String)
+        , generateTodos : Bool
+        , effectTypes : List EffectType
+        , server : Server
+        , formats : List Format
+        }
+toGenerationConfig (Config config) =
+    { outputModuleName = config.outputModuleName
+    , generateTodos = config.generateTodos
+    , effectTypes = config.effectTypes
+    , server = config.server
+    , formats = config.formats
+    }
+
+
+writeMergedTo : Config -> Maybe String
+writeMergedTo (Config config) =
+    config.writeMergedTo
+
+
+overrides : Config -> List Path
+overrides (Config config) =
+    config.overrides
+
+
+outputDirectory : Config -> String
+outputDirectory (Config config) =
+    config.outputDirectory

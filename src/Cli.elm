@@ -278,33 +278,49 @@ parseCliOptions cliOptions =
         config : OpenApi.Config.Config
         config =
             OpenApi.Config.init cliOptions.entryFilePath cliOptions.outputDirectory
-    in
-    { config
-        | outputModuleName = Maybe.map (String.split ".") cliOptions.outputModuleName
-        , effectTypes =
-            if List.isEmpty cliOptions.effectTypes then
-                config.effectTypes
+
+        -- Apply an update if the input is `Just x`
+        maybe :
+            (value -> config -> config)
+            -> Maybe value
+            -> config
+            -> config
+        maybe updater maybeValue input =
+            case maybeValue of
+                Nothing ->
+                    input
+
+                Just value ->
+                    updater value input
+
+        -- Apply an update if a condition is met
+        iif : Bool -> (config -> config) -> config -> config
+        iif cond updater input =
+            if cond then
+                updater input
 
             else
-                cliOptions.effectTypes
-        , generateTodos = cliOptions.generateTodos
-        , autoConvertSwagger = cliOptions.autoConvertSwagger
-        , swaggerConversionUrl =
-            cliOptions.swaggerConversionUrl
-                |> Maybe.withDefault config.swaggerConversionUrl
-        , swaggerConversionCommand =
-            cliOptions.swaggerConversionCommand
+                input
+    in
+    config
+        |> OpenApi.Config.withGenerateTodos cliOptions.generateTodos
+        |> OpenApi.Config.withAutoConvertSwagger cliOptions.autoConvertSwagger
+        |> OpenApi.Config.withServer cliOptions.server
+        |> OpenApi.Config.withOverrides cliOptions.overrides
+        |> iif (not (List.isEmpty cliOptions.effectTypes)) (OpenApi.Config.withEffectTypes cliOptions.effectTypes)
+        |> maybe OpenApi.Config.withOutputModuleName (Maybe.map (String.split ".") cliOptions.outputModuleName)
+        |> maybe OpenApi.Config.withWriteMergedTo cliOptions.writeMergedTo
+        |> maybe OpenApi.Config.withSwaggerConversionUrl cliOptions.swaggerConversionUrl
+        |> maybe OpenApi.Config.withSwaggerConversionCommand
+            (cliOptions.swaggerConversionCommand
                 |> Maybe.map (\command -> { command = command, args = cliOptions.swaggerConversionCommandArgs })
-        , server = cliOptions.server
-        , overrides = cliOptions.overrides
-        , writeMergedTo = cliOptions.writeMergedTo
-    }
+            )
 
 
 withConfig : OpenApi.Config.Config -> BackendTask FatalError ()
 withConfig config =
     Pages.Script.Spinner.steps
-        |> (case config.oasPath of
+        |> (case OpenApi.Config.oasPath config of
                 OpenApi.Config.Url url ->
                     Pages.Script.Spinner.withStep ("Download OAS from " ++ Url.toString url)
                         (\_ -> BackendTask.andThen (parseOriginal config) (readFromUrl url))
@@ -314,7 +330,12 @@ withConfig config =
                         (\_ -> BackendTask.andThen (parseOriginal config) (readFromFile path))
            )
         |> (\prev ->
-                if List.isEmpty config.overrides then
+                let
+                    overrides : List OpenApi.Config.Path
+                    overrides =
+                        OpenApi.Config.overrides config
+                in
+                if List.isEmpty overrides then
                     prev
                         |> Pages.Script.Spinner.withStep "No overrides"
                             (\( _, original ) -> BackendTask.succeed (Json.Value.encode original))
@@ -332,10 +353,10 @@ withConfig config =
                                         (\( acc, original ) -> BackendTask.map (\read -> ( ( override, read ) :: acc, original )) (readFromFile path))
                         )
                         prev
-                        config.overrides
+                        overrides
                         |> Pages.Script.Spinner.withStep "Merging overrides" mergeOverrides
            )
-        |> (case config.writeMergedTo of
+        |> (case OpenApi.Config.writeMergedTo config of
                 Nothing ->
                     identity
 
@@ -344,16 +365,9 @@ withConfig config =
            )
         |> Pages.Script.Spinner.withStep "Parse OAS" (decodeOpenApiSpecOrFail { hasAttemptedToConvertFromSwagger = False } config)
         |> Pages.Script.Spinner.withStep "Generate Elm modules"
-            (generateFileFromOpenApiSpec
-                { outputModuleName = config.outputModuleName
-                , generateTodos = config.generateTodos
-                , effectTypes = config.effectTypes
-                , server = config.server
-                , formats = config.formats
-                }
-            )
+            (generateFileFromOpenApiSpec (OpenApi.Config.toGenerationConfig config))
         |> Pages.Script.Spinner.withStep "Format with elm-format" (onFirst attemptToFormat)
-        |> Pages.Script.Spinner.withStep "Write to disk" (onFirst (writeSdkToDisk config.outputDirectory))
+        |> Pages.Script.Spinner.withStep "Write to disk" (onFirst (writeSdkToDisk (OpenApi.Config.outputDirectory config)))
         |> Pages.Script.Spinner.runSteps
         |> BackendTask.andThen printSuccessMessageAndWarnings
 
@@ -365,7 +379,7 @@ onFirst f ( a, b ) =
 
 parseOriginal : OpenApi.Config.Config -> String -> BackendTask.BackendTask FatalError.FatalError ( List a, Json.Value.JsonValue )
 parseOriginal config original =
-    case decodeMaybeYaml config.oasPath original of
+    case decodeMaybeYaml (OpenApi.Config.oasPath config) original of
         Err e ->
             e
                 |> jsonErrorToFatalError
@@ -423,15 +437,15 @@ decodeOpenApiSpecOrFail { hasAttemptedToConvertFromSwagger } config value =
                                 |> BackendTask.fail
 
                         Ok _ ->
-                            if config.autoConvertSwagger then
+                            if OpenApi.Config.autoConvertSwagger config then
                                 convertToSwaggerAndThenDecode config value
 
                             else
                                 Pages.Script.question
-                                    (Ansi.Color.fontColor Ansi.Color.brightCyan (OpenApi.Config.pathToString config.oasPath)
+                                    (Ansi.Color.fontColor Ansi.Color.brightCyan (OpenApi.Config.pathToString (OpenApi.Config.oasPath config))
                                         ++ """ is a Swagger doc (aka Open API v2) and this tool only supports Open API v3.
 Would you like to use """
-                                        ++ Ansi.Color.fontColor Ansi.Color.brightCyan config.swaggerConversionUrl
+                                        ++ Ansi.Color.fontColor Ansi.Color.brightCyan (OpenApi.Config.swaggerConversionUrl config)
                                         ++ " to upgrade to v3? (y/n)\n"
                                     )
                                     |> BackendTask.andThen
@@ -568,7 +582,7 @@ overrideError override original =
 
 convertSwaggerToOpenApi : OpenApi.Config.Config -> String -> BackendTask.BackendTask FatalError.FatalError String
 convertSwaggerToOpenApi config input =
-    case config.swaggerConversionCommand of
+    case OpenApi.Config.swaggerConversionCommand config of
         Just { command, args } ->
             BackendTask.Stream.fromString input
                 |> BackendTask.Stream.pipe (BackendTask.Stream.command command args)
@@ -600,7 +614,12 @@ convertSwaggerToOpenApi config input =
                 |> BackendTask.map .body
 
         Nothing ->
-            BackendTask.Http.post config.swaggerConversionUrl
+            let
+                swaggerConversionUrl : String
+                swaggerConversionUrl =
+                    OpenApi.Config.swaggerConversionUrl config
+            in
+            BackendTask.Http.post swaggerConversionUrl
                 (BackendTask.Http.stringBody "application/yaml" input)
                 (BackendTask.Http.expectJson Json.Decode.value)
                 |> BackendTask.map (Json.Encode.encode 0)
@@ -611,7 +630,7 @@ convertSwaggerToOpenApi config input =
                                 ++ (Ansi.Color.fontColor Ansi.Color.brightRed <|
                                         case error.recoverable of
                                             BackendTask.Http.BadUrl _ ->
-                                                "with the URL: " ++ config.swaggerConversionUrl
+                                                "with the URL: " ++ swaggerConversionUrl
 
                                             BackendTask.Http.Timeout ->
                                                 "the request timed out"

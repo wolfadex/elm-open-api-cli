@@ -1,5 +1,6 @@
 module OpenApi.Generate exposing
-    ( ContentSchema(..)
+    ( Config
+    , ContentSchema(..)
     , EffectType(..)
     , Mime
     , Server(..)
@@ -112,13 +113,17 @@ type alias PerPackage a =
     }
 
 
-files :
+type alias Config =
     { namespace : List String
     , generateTodos : Bool
     , effectTypes : List EffectType
     , server : Server
     , formats : List CliMonad.Format
     }
+
+
+files :
+    Config
     -> OpenApi.OpenApi
     ->
         Result

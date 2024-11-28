@@ -2,7 +2,7 @@ module Cli exposing (defaultFormats, run)
 
 import Ansi
 import Ansi.Color
-import BackendTask
+import BackendTask exposing (BackendTask)
 import BackendTask.File
 import BackendTask.Http
 import BackendTask.Stream
@@ -15,7 +15,7 @@ import Dict
 import Elm
 import Elm.Annotation
 import FastSet
-import FatalError
+import FatalError exposing (FatalError)
 import Gen.Date
 import Gen.Json.Decode
 import Gen.Json.Encode
@@ -272,59 +272,100 @@ run : Pages.Script.Script
 run =
     Pages.Script.withCliOptions program
         (\cliOptions ->
-            Pages.Script.Spinner.steps
-                |> (case typeOfPath cliOptions.entryFilePath of
-                        Url url ->
-                            Pages.Script.Spinner.withStep ("Download OAS from " ++ Url.toString url)
-                                (\_ -> BackendTask.andThen (parseOriginal cliOptions) (readFromUrl url))
-
-                        File path ->
-                            Pages.Script.Spinner.withStep ("Read OAS from " ++ path)
-                                (\_ -> BackendTask.andThen (parseOriginal cliOptions) (readFromFile path))
-                   )
-                |> (\prev ->
-                        if List.isEmpty cliOptions.overrides then
-                            prev
-                                |> Pages.Script.Spinner.withStep "No overrides"
-                                    (\( _, original ) -> BackendTask.succeed (Json.Value.encode original))
-
-                        else
-                            List.foldl
-                                (\override ->
-                                    case typeOfPath override of
-                                        Url url ->
-                                            Pages.Script.Spinner.withStep ("Download override from " ++ Url.toString url)
-                                                (\( acc, original ) -> BackendTask.map (\read -> ( ( override, read ) :: acc, original )) (readFromUrl url))
-
-                                        File path ->
-                                            Pages.Script.Spinner.withStep ("Read override from " ++ path)
-                                                (\( acc, original ) -> BackendTask.map (\read -> ( ( override, read ) :: acc, original )) (readFromFile path))
-                                )
-                                prev
-                                cliOptions.overrides
-                                |> Pages.Script.Spinner.withStep "Merging overrides" mergeOverrides
-                   )
-                |> (case cliOptions.writeMergedTo of
-                        Nothing ->
-                            identity
-
-                        Just destination ->
-                            Pages.Script.Spinner.withStep "Writing merged OAS" (writeMerged destination)
-                   )
-                |> Pages.Script.Spinner.withStep "Parse OAS" (decodeOpenApiSpecOrFail { hasAttemptedToConvertFromSwagger = False } cliOptions)
-                |> Pages.Script.Spinner.withStep "Generate Elm modules"
-                    (generateFileFromOpenApiSpec
-                        { outputModuleName = cliOptions.outputModuleName
-                        , generateTodos = cliOptions.generateTodos
-                        , effectTypes = cliOptions.effectTypes
-                        , server = cliOptions.server
-                        }
-                    )
-                |> Pages.Script.Spinner.withStep "Format with elm-format" (onFirst attemptToFormat)
-                |> Pages.Script.Spinner.withStep "Write to disk" (onFirst (writeSdkToDisk cliOptions.outputDirectory))
-                |> Pages.Script.Spinner.runSteps
-                |> BackendTask.andThen printSuccessMessageAndWarnings
+            cliOptions
+                |> parseCliOptions
+                |> BackendTask.andThen script
         )
+
+
+type alias Config =
+    { oasPath : PathType
+    , outputDirectory : String
+    , outputModuleName : Maybe String
+    , effectTypes : List OpenApi.Generate.EffectType
+    , generateTodos : Maybe String
+    , autoConvertSwagger : Bool
+    , swaggerConversionUrl : String
+    , swaggerConversionCommand : Maybe String
+    , swaggerConversionCommandArgs : List String
+    , server : OpenApi.Generate.Server
+    , overrides : List PathType
+    , writeMergedTo : Maybe String
+    }
+
+
+parseCliOptions : CliOptions -> BackendTask FatalError Config
+parseCliOptions cliOptions =
+    BackendTask.succeed
+        { oasPath = typeOfPath cliOptions.entryFilePath
+        , overrides = List.map typeOfPath cliOptions.overrides
+        , outputDirectory = cliOptions.outputDirectory
+        , outputModuleName = cliOptions.outputModuleName
+        , effectTypes = cliOptions.effectTypes
+        , generateTodos = cliOptions.generateTodos
+        , autoConvertSwagger = cliOptions.autoConvertSwagger
+        , swaggerConversionUrl = cliOptions.swaggerConversionUrl
+        , swaggerConversionCommand = cliOptions.swaggerConversionCommand
+        , swaggerConversionCommandArgs = cliOptions.swaggerConversionCommandArgs
+        , server = cliOptions.server
+        , writeMergedTo = cliOptions.writeMergedTo
+        }
+
+
+script : Config -> BackendTask FatalError ()
+script config =
+    Pages.Script.Spinner.steps
+        |> (case config.oasPath of
+                Url url ->
+                    Pages.Script.Spinner.withStep ("Download OAS from " ++ Url.toString url)
+                        (\_ -> BackendTask.andThen (parseOriginal config) (readFromUrl url))
+
+                File path ->
+                    Pages.Script.Spinner.withStep ("Read OAS from " ++ path)
+                        (\_ -> BackendTask.andThen (parseOriginal config) (readFromFile path))
+           )
+        |> (\prev ->
+                if List.isEmpty config.overrides then
+                    prev
+                        |> Pages.Script.Spinner.withStep "No overrides"
+                            (\( _, original ) -> BackendTask.succeed (Json.Value.encode original))
+
+                else
+                    List.foldl
+                        (\override ->
+                            case override of
+                                Url url ->
+                                    Pages.Script.Spinner.withStep ("Download override from " ++ Url.toString url)
+                                        (\( acc, original ) -> BackendTask.map (\read -> ( ( override, read ) :: acc, original )) (readFromUrl url))
+
+                                File path ->
+                                    Pages.Script.Spinner.withStep ("Read override from " ++ path)
+                                        (\( acc, original ) -> BackendTask.map (\read -> ( ( override, read ) :: acc, original )) (readFromFile path))
+                        )
+                        prev
+                        config.overrides
+                        |> Pages.Script.Spinner.withStep "Merging overrides" mergeOverrides
+           )
+        |> (case config.writeMergedTo of
+                Nothing ->
+                    identity
+
+                Just destination ->
+                    Pages.Script.Spinner.withStep "Writing merged OAS" (writeMerged destination)
+           )
+        |> Pages.Script.Spinner.withStep "Parse OAS" (decodeOpenApiSpecOrFail { hasAttemptedToConvertFromSwagger = False } config)
+        |> Pages.Script.Spinner.withStep "Generate Elm modules"
+            (generateFileFromOpenApiSpec
+                { outputModuleName = config.outputModuleName
+                , generateTodos = config.generateTodos
+                , effectTypes = config.effectTypes
+                , server = config.server
+                }
+            )
+        |> Pages.Script.Spinner.withStep "Format with elm-format" (onFirst attemptToFormat)
+        |> Pages.Script.Spinner.withStep "Write to disk" (onFirst (writeSdkToDisk config.outputDirectory))
+        |> Pages.Script.Spinner.runSteps
+        |> BackendTask.andThen printSuccessMessageAndWarnings
 
 
 onFirst : (a -> BackendTask.BackendTask error c) -> ( a, b ) -> BackendTask.BackendTask error ( c, b )
@@ -332,9 +373,9 @@ onFirst f ( a, b ) =
     f a |> BackendTask.map (\c -> ( c, b ))
 
 
-parseOriginal : CliOptions -> String -> BackendTask.BackendTask FatalError.FatalError ( List a, Json.Value.JsonValue )
-parseOriginal cliOptions original =
-    case decodeMaybeYaml cliOptions.entryFilePath original of
+parseOriginal : Config -> String -> BackendTask.BackendTask FatalError.FatalError ( List a, Json.Value.JsonValue )
+parseOriginal config original =
+    case decodeMaybeYaml config.oasPath original of
         Err e ->
             e
                 |> jsonErrorToFatalError
@@ -344,7 +385,7 @@ parseOriginal cliOptions original =
             BackendTask.succeed ( [], decoded )
 
 
-mergeOverrides : ( List ( String, String ), Json.Value.JsonValue ) -> BackendTask.BackendTask FatalError.FatalError Json.Decode.Value
+mergeOverrides : ( List ( PathType, String ), Json.Value.JsonValue ) -> BackendTask.BackendTask FatalError.FatalError Json.Decode.Value
 mergeOverrides ( overrides, original ) =
     Result.map
         (\overridesValues ->
@@ -374,14 +415,14 @@ writeMerged destination spec =
         |> BackendTask.map (\_ -> spec)
 
 
-decodeOpenApiSpecOrFail : { hasAttemptedToConvertFromSwagger : Bool } -> CliOptions -> Json.Decode.Value -> BackendTask.BackendTask FatalError.FatalError OpenApi.OpenApi
-decodeOpenApiSpecOrFail config cliOptions value =
+decodeOpenApiSpecOrFail : { hasAttemptedToConvertFromSwagger : Bool } -> Config -> Json.Decode.Value -> BackendTask.BackendTask FatalError.FatalError OpenApi.OpenApi
+decodeOpenApiSpecOrFail { hasAttemptedToConvertFromSwagger } config value =
     value
         |> Json.Decode.decodeValue OpenApi.decode
         |> BackendTask.fromResult
         |> BackendTask.onError
             (\decodeError ->
-                if config.hasAttemptedToConvertFromSwagger then
+                if hasAttemptedToConvertFromSwagger then
                     jsonErrorToFatalError decodeError
                         |> BackendTask.fail
 
@@ -392,22 +433,22 @@ decodeOpenApiSpecOrFail config cliOptions value =
                                 |> BackendTask.fail
 
                         Ok _ ->
-                            if cliOptions.autoConvertSwagger then
-                                convertToSwaggerAndThenDecode cliOptions value
+                            if config.autoConvertSwagger then
+                                convertToSwaggerAndThenDecode config value
 
                             else
                                 Pages.Script.question
-                                    (Ansi.Color.fontColor Ansi.Color.brightCyan cliOptions.entryFilePath
+                                    (Ansi.Color.fontColor Ansi.Color.brightCyan (pathTypeToString config.oasPath)
                                         ++ """ is a Swagger doc (aka Open API v2) and this tool only supports Open API v3.
 Would you like to use """
-                                        ++ Ansi.Color.fontColor Ansi.Color.brightCyan cliOptions.swaggerConversionUrl
+                                        ++ Ansi.Color.fontColor Ansi.Color.brightCyan config.swaggerConversionUrl
                                         ++ " to upgrade to v3? (y/n)\n"
                                     )
                                     |> BackendTask.andThen
                                         (\response ->
                                             case String.toLower response of
                                                 "y" ->
-                                                    convertToSwaggerAndThenDecode cliOptions value
+                                                    convertToSwaggerAndThenDecode config value
 
                                                 _ ->
                                                     ("""The input file appears to be a Swagger doc,
@@ -422,16 +463,16 @@ See the """
             )
 
 
-convertToSwaggerAndThenDecode : CliOptions -> Json.Decode.Value -> BackendTask.BackendTask FatalError.FatalError OpenApi.OpenApi
-convertToSwaggerAndThenDecode cliOptions value =
-    convertSwaggerToOpenApi cliOptions (Json.Encode.encode 0 value)
+convertToSwaggerAndThenDecode : Config -> Json.Decode.Value -> BackendTask.BackendTask FatalError.FatalError OpenApi.OpenApi
+convertToSwaggerAndThenDecode config value =
+    convertSwaggerToOpenApi config (Json.Encode.encode 0 value)
         |> BackendTask.andThen
             (\input ->
-                parseOriginal cliOptions input
+                parseOriginal config input
                     |> BackendTask.andThen mergeOverrides
             )
         |> Pages.Script.Spinner.runTask "Convert Swagger to Open API"
-        |> BackendTask.andThen (\input -> decodeOpenApiSpecOrFail { hasAttemptedToConvertFromSwagger = True } cliOptions input)
+        |> BackendTask.andThen (\input -> decodeOpenApiSpecOrFail { hasAttemptedToConvertFromSwagger = True } config input)
 
 
 jsonErrorToFatalError : Json.Decode.Error -> FatalError.FatalError
@@ -535,12 +576,12 @@ overrideError override original =
     Err message
 
 
-convertSwaggerToOpenApi : CliOptions -> String -> BackendTask.BackendTask FatalError.FatalError String
-convertSwaggerToOpenApi cliOptions input =
-    case cliOptions.swaggerConversionCommand of
+convertSwaggerToOpenApi : Config -> String -> BackendTask.BackendTask FatalError.FatalError String
+convertSwaggerToOpenApi config input =
+    case config.swaggerConversionCommand of
         Just command ->
             BackendTask.Stream.fromString input
-                |> BackendTask.Stream.pipe (BackendTask.Stream.command command cliOptions.swaggerConversionCommandArgs)
+                |> BackendTask.Stream.pipe (BackendTask.Stream.command command config.swaggerConversionCommandArgs)
                 |> BackendTask.Stream.read
                 |> BackendTask.mapError
                     (\error ->
@@ -548,7 +589,7 @@ convertSwaggerToOpenApi cliOptions input =
                             ("Attempted to convert the Swagger doc to an Open API spec using\n"
                                 ++ Ansi.Color.fontColor Ansi.Color.brightCyan
                                     (String.join " "
-                                        (command :: cliOptions.swaggerConversionCommandArgs)
+                                        (command :: config.swaggerConversionCommandArgs)
                                     )
                                 ++ "\nbut encountered an issue:\n\n"
                                 ++ (Ansi.Color.fontColor Ansi.Color.brightRed <|
@@ -569,7 +610,7 @@ convertSwaggerToOpenApi cliOptions input =
                 |> BackendTask.map .body
 
         Nothing ->
-            BackendTask.Http.post cliOptions.swaggerConversionUrl
+            BackendTask.Http.post config.swaggerConversionUrl
                 (BackendTask.Http.stringBody "application/yaml" input)
                 (BackendTask.Http.expectJson Json.Decode.value)
                 |> BackendTask.map (Json.Encode.encode 0)
@@ -580,7 +621,7 @@ convertSwaggerToOpenApi cliOptions input =
                                 ++ (Ansi.Color.fontColor Ansi.Color.brightRed <|
                                         case error.recoverable of
                                             BackendTask.Http.BadUrl _ ->
-                                                "with the URL: " ++ cliOptions.swaggerConversionUrl
+                                                "with the URL: " ++ config.swaggerConversionUrl
 
                                             BackendTask.Http.Timeout ->
                                                 "the request timed out"
@@ -603,13 +644,18 @@ swaggerFieldDecoder =
     Json.Decode.field "swagger" Json.Decode.string
 
 
-decodeMaybeYaml : String -> String -> Result Json.Decode.Error Json.Value.JsonValue
-decodeMaybeYaml entryFilePath input =
+decodeMaybeYaml : PathType -> String -> Result Json.Decode.Error Json.Value.JsonValue
+decodeMaybeYaml oasPath input =
     let
         -- TODO: Better handling of errors: https://github.com/wolfadex/elm-open-api-cli/issues/40
         isJson : Bool
         isJson =
-            String.endsWith ".json" entryFilePath
+            case oasPath of
+                File file ->
+                    String.endsWith ".json" file
+
+                Url url ->
+                    String.endsWith ".json" url.path
     in
     -- Short-circuit the error-prone yaml parsing of JSON structures if we
     -- are reasonably confident that it is a JSON file
@@ -1009,6 +1055,16 @@ typeOfPath path =
 
         Nothing ->
             File path
+
+
+pathTypeToString : PathType -> String
+pathTypeToString pathType =
+    case pathType of
+        File file ->
+            file
+
+        Url url ->
+            Url.toString url
 
 
 type PathType

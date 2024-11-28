@@ -1,4 +1,4 @@
-module Cli exposing (defaultFormats, run)
+module Cli exposing (run)
 
 import Ansi
 import Ansi.Color
@@ -10,19 +10,10 @@ import Cli.Option
 import Cli.OptionsParser
 import Cli.Program
 import CliMonad
-import Common
 import Dict
 import Elm
-import Elm.Annotation
 import FastSet
 import FatalError exposing (FatalError)
-import Gen.Date
-import Gen.Json.Decode
-import Gen.Json.Encode
-import Gen.Parser.Advanced
-import Gen.Result
-import Gen.Rfc3339
-import Gen.Time
 import Json.Decode
 import Json.Encode
 import Json.Value
@@ -41,17 +32,17 @@ import Yaml.Decode
 
 
 type alias CliOptions =
-    { entryFilePath : OpenApi.Config.PathType
+    { entryFilePath : OpenApi.Config.Path
     , outputDirectory : String
     , outputModuleName : Maybe String
     , effectTypes : List OpenApi.Generate.EffectType
     , generateTodos : Bool
     , autoConvertSwagger : Bool
-    , swaggerConversionUrl : String
+    , swaggerConversionUrl : Maybe String
     , swaggerConversionCommand : Maybe String
     , swaggerConversionCommandArgs : List String
     , server : OpenApi.Generate.Server
-    , overrides : List OpenApi.Config.PathType
+    , overrides : List OpenApi.Config.Path
     , writeMergedTo : Maybe String
     }
 
@@ -63,7 +54,7 @@ program =
             (Cli.OptionsParser.build CliOptions
                 |> Cli.OptionsParser.with
                     (Cli.Option.requiredPositionalArg "entryFilePath"
-                        |> Cli.Option.map OpenApi.Config.pathTypeFromString
+                        |> Cli.Option.map OpenApi.Config.pathFromString
                     )
                 |> Cli.OptionsParser.with
                     (Cli.Option.optionalKeywordArg "output-dir"
@@ -80,9 +71,7 @@ program =
                 |> Cli.OptionsParser.with
                     (Cli.Option.flag "auto-convert-swagger")
                 |> Cli.OptionsParser.with
-                    (Cli.Option.optionalKeywordArg "swagger-conversion-url"
-                        |> Cli.Option.withDefault "https://converter.swagger.io/api/convert"
-                    )
+                    (Cli.Option.optionalKeywordArg "swagger-conversion-url")
                 |> Cli.OptionsParser.with
                     (Cli.Option.optionalKeywordArg "swagger-conversion-command")
                 |> Cli.OptionsParser.with
@@ -93,7 +82,7 @@ program =
                     )
                 |> Cli.OptionsParser.with
                     (Cli.Option.keywordArgList "overrides"
-                        |> Cli.Option.map (List.map OpenApi.Config.pathTypeFromString)
+                        |> Cli.Option.map (List.map OpenApi.Config.pathFromString)
                     )
                 |> Cli.OptionsParser.with
                     (Cli.Option.optionalKeywordArg "write-merged-to")
@@ -285,25 +274,30 @@ run =
 
 parseCliOptions : CliOptions -> OpenApi.Config.Config
 parseCliOptions cliOptions =
-    { oasPath = cliOptions.entryFilePath
-    , outputDirectory = cliOptions.outputDirectory
-    , outputModuleName = Maybe.map (String.split ".") cliOptions.outputModuleName
-    , effectTypes =
-        if List.isEmpty cliOptions.effectTypes then
-            [ OpenApi.Generate.ElmHttpCmd, OpenApi.Generate.ElmHttpTask ]
+    let
+        config : OpenApi.Config.Config
+        config =
+            OpenApi.Config.init cliOptions.entryFilePath cliOptions.outputDirectory
+    in
+    { config
+        | outputModuleName = Maybe.map (String.split ".") cliOptions.outputModuleName
+        , effectTypes =
+            if List.isEmpty cliOptions.effectTypes then
+                [ OpenApi.Generate.ElmHttpCmd, OpenApi.Generate.ElmHttpTask ]
 
-        else
-            cliOptions.effectTypes
-    , generateTodos = cliOptions.generateTodos
-    , autoConvertSwagger = cliOptions.autoConvertSwagger
-    , swaggerConversionUrl = cliOptions.swaggerConversionUrl
-    , swaggerConversionCommand =
-        cliOptions.swaggerConversionCommand
-            |> Maybe.map (\command -> { command = command, args = cliOptions.swaggerConversionCommandArgs })
-    , server = cliOptions.server
-    , overrides = cliOptions.overrides
-    , writeMergedTo = cliOptions.writeMergedTo
-    , formats = defaultFormats
+            else
+                cliOptions.effectTypes
+        , generateTodos = cliOptions.generateTodos
+        , autoConvertSwagger = cliOptions.autoConvertSwagger
+        , swaggerConversionUrl =
+            cliOptions.swaggerConversionUrl
+                |> Maybe.withDefault config.swaggerConversionUrl
+        , swaggerConversionCommand =
+            cliOptions.swaggerConversionCommand
+                |> Maybe.map (\command -> { command = command, args = cliOptions.swaggerConversionCommandArgs })
+        , server = cliOptions.server
+        , overrides = cliOptions.overrides
+        , writeMergedTo = cliOptions.writeMergedTo
     }
 
 
@@ -381,7 +375,7 @@ parseOriginal config original =
             BackendTask.succeed ( [], decoded )
 
 
-mergeOverrides : ( List ( OpenApi.Config.PathType, String ), Json.Value.JsonValue ) -> BackendTask.BackendTask FatalError.FatalError Json.Decode.Value
+mergeOverrides : ( List ( OpenApi.Config.Path, String ), Json.Value.JsonValue ) -> BackendTask.BackendTask FatalError.FatalError Json.Decode.Value
 mergeOverrides ( overrides, original ) =
     Result.map
         (\overridesValues ->
@@ -434,7 +428,7 @@ decodeOpenApiSpecOrFail { hasAttemptedToConvertFromSwagger } config value =
 
                             else
                                 Pages.Script.question
-                                    (Ansi.Color.fontColor Ansi.Color.brightCyan (OpenApi.Config.pathTypeToString config.oasPath)
+                                    (Ansi.Color.fontColor Ansi.Color.brightCyan (OpenApi.Config.pathToString config.oasPath)
                                         ++ """ is a Swagger doc (aka Open API v2) and this tool only supports Open API v3.
 Would you like to use """
                                         ++ Ansi.Color.fontColor Ansi.Color.brightCyan config.swaggerConversionUrl
@@ -640,7 +634,7 @@ swaggerFieldDecoder =
     Json.Decode.field "swagger" Json.Decode.string
 
 
-decodeMaybeYaml : OpenApi.Config.PathType -> String -> Result Json.Decode.Error Json.Value.JsonValue
+decodeMaybeYaml : OpenApi.Config.Path -> String -> Result Json.Decode.Error Json.Value.JsonValue
 decodeMaybeYaml oasPath input =
     let
         -- TODO: Better handling of errors: https://github.com/wolfadex/elm-open-api-cli/issues/40
@@ -725,102 +719,6 @@ generateFileFromOpenApiSpec config apiSpec =
         apiSpec
         |> Result.mapError (messageToString >> FatalError.fromString)
         |> BackendTask.fromResult
-
-
-defaultFormats : List CliMonad.Format
-defaultFormats =
-    [ dateTimeFormat
-    , dateFormat
-    , defaultStringFormat "password"
-    ]
-
-
-dateTimeFormat : CliMonad.Format
-dateTimeFormat =
-    let
-        toString : Elm.Expression -> Elm.Expression
-        toString instant =
-            Gen.Rfc3339.make_.dateTimeOffset
-                (Elm.record
-                    [ ( "instant", instant )
-                    , ( "offset"
-                      , Elm.record
-                            [ ( "hour", Elm.int 0 )
-                            , ( "minute", Elm.int 0 )
-                            ]
-                      )
-                    ]
-                )
-                |> Gen.Rfc3339.toString
-    in
-    { basicType = Common.String
-    , format = "date-time"
-    , annotation = Gen.Time.annotation_.posix
-    , encode =
-        \instant ->
-            instant
-                |> toString
-                |> Gen.Json.Encode.call_.string
-    , decoder =
-        Gen.Json.Decode.string
-            |> Gen.Json.Decode.andThen
-                (\raw ->
-                    Gen.Result.caseOf_.result
-                        (Gen.Parser.Advanced.call_.run Gen.Rfc3339.dateTimeOffsetParser raw)
-                        { ok = \record -> Gen.Json.Decode.succeed (Elm.get "instant" record)
-
-                        -- TODO: improve error message
-                        , err = \_ -> Gen.Json.Decode.fail "Invalid RFC-3339 date-time"
-                        }
-                )
-    , toParamString = toString
-    , sharedDeclarations = []
-    , requiresPackages =
-        [ "elm/parser"
-        , "elm/time"
-        , "justinmimbs/time-extra"
-        , "wolfadex/elm-rfc3339"
-        ]
-    }
-
-
-dateFormat : CliMonad.Format
-dateFormat =
-    { basicType = Common.String
-    , format = "date"
-    , annotation = Gen.Date.annotation_.date
-    , encode =
-        \date ->
-            date
-                |> Gen.Date.toIsoString
-                |> Gen.Json.Encode.call_.string
-    , toParamString = Gen.Date.toIsoString
-    , decoder =
-        Gen.Json.Decode.string
-            |> Gen.Json.Decode.andThen
-                (\raw ->
-                    Gen.Result.caseOf_.result
-                        (Gen.Date.call_.fromIsoString raw)
-                        { ok = Gen.Json.Decode.succeed
-                        , err = Gen.Json.Decode.call_.fail
-                        }
-                )
-    , sharedDeclarations = []
-    , requiresPackages = [ "justinmimbs/date" ]
-    }
-
-
-defaultStringFormat : String -> CliMonad.Format
-defaultStringFormat format =
-    { basicType = Common.String
-    , format = format
-    , annotation = Elm.Annotation.string
-    , encode = Gen.Json.Encode.call_.string
-    , decoder = Gen.Json.Decode.string
-    , toParamString = identity
-    , sharedDeclarations = []
-    , requiresPackages = []
-    }
 
 
 {-| Check to see if `elm-format` is available, and if so format the files

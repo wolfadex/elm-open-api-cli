@@ -40,17 +40,17 @@ import Yaml.Decode
 
 
 type alias CliOptions =
-    { entryFilePath : String
+    { entryFilePath : PathType
     , outputDirectory : String
     , outputModuleName : Maybe String
     , effectTypes : List OpenApi.Generate.EffectType
-    , generateTodos : Maybe String
+    , generateTodos : Bool
     , autoConvertSwagger : Bool
     , swaggerConversionUrl : String
     , swaggerConversionCommand : Maybe String
     , swaggerConversionCommandArgs : List String
     , server : OpenApi.Generate.Server
-    , overrides : List String
+    , overrides : List PathType
     , writeMergedTo : Maybe String
     }
 
@@ -61,7 +61,9 @@ program =
         |> Cli.Program.add
             (Cli.OptionsParser.build CliOptions
                 |> Cli.OptionsParser.with
-                    (Cli.Option.requiredPositionalArg "entryFilePath")
+                    (Cli.Option.requiredPositionalArg "entryFilePath"
+                        |> Cli.Option.map typeOfPath
+                    )
                 |> Cli.OptionsParser.with
                     (Cli.Option.optionalKeywordArg "output-dir"
                         |> Cli.Option.withDefault "generated"
@@ -73,7 +75,7 @@ program =
                         |> Cli.Option.validateMap effectTypesValidation
                     )
                 |> Cli.OptionsParser.with
-                    (Cli.Option.optionalKeywordArg "generateTodos")
+                    (Cli.Option.flag "generateTodos")
                 |> Cli.OptionsParser.with
                     (Cli.Option.flag "auto-convert-swagger")
                 |> Cli.OptionsParser.with
@@ -89,7 +91,9 @@ program =
                         |> Cli.Option.validateMap serverValidation
                     )
                 |> Cli.OptionsParser.with
-                    (Cli.Option.keywordArgList "overrides")
+                    (Cli.Option.keywordArgList "overrides"
+                        |> Cli.Option.map (List.map typeOfPath)
+                    )
                 |> Cli.OptionsParser.with
                     (Cli.Option.optionalKeywordArg "write-merged-to")
                 |> Cli.OptionsParser.withDoc """
@@ -283,11 +287,10 @@ type alias Config =
     , outputDirectory : String
     , outputModuleName : Maybe String
     , effectTypes : List OpenApi.Generate.EffectType
-    , generateTodos : Maybe String
+    , generateTodos : Bool
     , autoConvertSwagger : Bool
     , swaggerConversionUrl : String
-    , swaggerConversionCommand : Maybe String
-    , swaggerConversionCommandArgs : List String
+    , swaggerConversionCommand : Maybe { command : String, args : List String }
     , server : OpenApi.Generate.Server
     , overrides : List PathType
     , writeMergedTo : Maybe String
@@ -297,17 +300,18 @@ type alias Config =
 parseCliOptions : CliOptions -> BackendTask FatalError Config
 parseCliOptions cliOptions =
     BackendTask.succeed
-        { oasPath = typeOfPath cliOptions.entryFilePath
-        , overrides = List.map typeOfPath cliOptions.overrides
+        { oasPath = cliOptions.entryFilePath
         , outputDirectory = cliOptions.outputDirectory
         , outputModuleName = cliOptions.outputModuleName
         , effectTypes = cliOptions.effectTypes
         , generateTodos = cliOptions.generateTodos
         , autoConvertSwagger = cliOptions.autoConvertSwagger
         , swaggerConversionUrl = cliOptions.swaggerConversionUrl
-        , swaggerConversionCommand = cliOptions.swaggerConversionCommand
-        , swaggerConversionCommandArgs = cliOptions.swaggerConversionCommandArgs
+        , swaggerConversionCommand =
+            cliOptions.swaggerConversionCommand
+                |> Maybe.map (\command -> { command = command, args = cliOptions.swaggerConversionCommandArgs })
         , server = cliOptions.server
+        , overrides = cliOptions.overrides
         , writeMergedTo = cliOptions.writeMergedTo
         }
 
@@ -579,9 +583,9 @@ overrideError override original =
 convertSwaggerToOpenApi : Config -> String -> BackendTask.BackendTask FatalError.FatalError String
 convertSwaggerToOpenApi config input =
     case config.swaggerConversionCommand of
-        Just command ->
+        Just { command, args } ->
             BackendTask.Stream.fromString input
-                |> BackendTask.Stream.pipe (BackendTask.Stream.command command config.swaggerConversionCommandArgs)
+                |> BackendTask.Stream.pipe (BackendTask.Stream.command command args)
                 |> BackendTask.Stream.read
                 |> BackendTask.mapError
                     (\error ->
@@ -589,7 +593,7 @@ convertSwaggerToOpenApi config input =
                             ("Attempted to convert the Swagger doc to an Open API spec using\n"
                                 ++ Ansi.Color.fontColor Ansi.Color.brightCyan
                                     (String.join " "
-                                        (command :: config.swaggerConversionCommandArgs)
+                                        (command :: args)
                                     )
                                 ++ "\nbut encountered an issue:\n\n"
                                 ++ (Ansi.Color.fontColor Ansi.Color.brightRed <|
@@ -689,7 +693,7 @@ yamlToJsonValueDecoder =
 
 generateFileFromOpenApiSpec :
     { outputModuleName : Maybe String
-    , generateTodos : Maybe String
+    , generateTodos : Bool
     , effectTypes : List OpenApi.Generate.EffectType
     , server : OpenApi.Generate.Server
     }
@@ -717,16 +721,10 @@ generateFileFromOpenApiSpec config apiSpec =
                         |> OpenApi.Generate.sanitizeModuleName
                         |> Maybe.withDefault "Api"
                         |> List.singleton
-
-        generateTodos : Bool
-        generateTodos =
-            List.member
-                (String.toLower <| Maybe.withDefault "no" config.generateTodos)
-                [ "y", "yes", "true" ]
     in
     OpenApi.Generate.files
         { namespace = moduleName
-        , generateTodos = generateTodos
+        , generateTodos = config.generateTodos
         , effectTypes = config.effectTypes
         , server = config.server
         , formats = defaultFormats

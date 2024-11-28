@@ -294,6 +294,7 @@ type alias Config =
     , server : OpenApi.Generate.Server
     , overrides : List PathType
     , writeMergedTo : Maybe String
+    , formats : List CliMonad.Format
     }
 
 
@@ -313,6 +314,7 @@ parseCliOptions cliOptions =
         , server = cliOptions.server
         , overrides = cliOptions.overrides
         , writeMergedTo = cliOptions.writeMergedTo
+        , formats = defaultFormats
         }
 
 
@@ -364,6 +366,7 @@ script config =
                 , generateTodos = config.generateTodos
                 , effectTypes = config.effectTypes
                 , server = config.server
+                , formats = config.formats
                 }
             )
         |> Pages.Script.Spinner.withStep "Format with elm-format" (onFirst attemptToFormat)
@@ -696,6 +699,7 @@ generateFileFromOpenApiSpec :
     , generateTodos : Bool
     , effectTypes : List OpenApi.Generate.EffectType
     , server : OpenApi.Generate.Server
+    , formats : List CliMonad.Format
     }
     -> OpenApi.OpenApi
     ->
@@ -727,7 +731,7 @@ generateFileFromOpenApiSpec config apiSpec =
         , generateTodos = config.generateTodos
         , effectTypes = config.effectTypes
         , server = config.server
-        , formats = defaultFormats
+        , formats = config.formats
         }
         apiSpec
         |> Result.mapError (messageToString >> FatalError.fromString)

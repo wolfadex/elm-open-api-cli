@@ -65,6 +65,10 @@ run =
         gitHub =
             OpenApi.Config.inputFrom (OpenApi.Config.File "./example/github-spec.json")
 
+        ifconfigOvh : OpenApi.Config.Input
+        ifconfigOvh =
+            OpenApi.Config.inputFrom (OpenApi.Config.File "./example/ifconfig.ovh.json")
+
         config : OpenApi.Config.Config
         config =
             OpenApi.Config.init "./generated"
@@ -80,6 +84,7 @@ run =
                 |> OpenApi.Config.withInput trustmark
                 |> OpenApi.Config.withInput trustmarkTradeCheck
                 |> OpenApi.Config.withInput gitHub
+                |> OpenApi.Config.withInput ifconfigOvh
     in
     Pages.Script.withoutCliOptions
         (BackendTask.doEach

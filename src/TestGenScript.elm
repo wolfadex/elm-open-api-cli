@@ -74,6 +74,10 @@ run =
         gitHub =
             OpenApi.Config.inputFrom (OpenApi.Config.File "./example/github-spec.json")
 
+        ifconfigOvh : OpenApi.Config.Input
+        ifconfigOvh =
+            OpenApi.Config.inputFrom (OpenApi.Config.File "./example/ifconfig.ovh.json")
+
         anyOfEnums : OpenApi.Config.Input
         anyOfEnums =
             OpenApi.Config.inputFrom (OpenApi.Config.File "./example/anyOfEnums.yaml")
@@ -95,6 +99,7 @@ run =
                 |> OpenApi.Config.withInput trustmark
                 |> OpenApi.Config.withInput trustmarkTradeCheck
                 |> OpenApi.Config.withInput gitHub
+                |> OpenApi.Config.withInput ifconfigOvh
                 |> OpenApi.Config.withInput anyOfEnums
     in
     Pages.Script.withoutCliOptions

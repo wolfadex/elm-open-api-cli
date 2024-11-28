@@ -78,6 +78,10 @@ run =
         anyOfEnums =
             OpenApi.Config.inputFrom (OpenApi.Config.File "./example/anyOfEnums.yaml")
 
+        int64 : OpenApi.Config.Input
+        int64 =
+            OpenApi.Config.inputFrom (OpenApi.Config.File "./example/int64.json")
+
         config : OpenApi.Config.Config
         config =
             OpenApi.Config.init "./generated"
@@ -96,6 +100,7 @@ run =
                 |> OpenApi.Config.withInput trustmarkTradeCheck
                 |> OpenApi.Config.withInput gitHub
                 |> OpenApi.Config.withInput anyOfEnums
+                |> OpenApi.Config.withInput int64
     in
     Pages.Script.withoutCliOptions
         (BackendTask.doEach

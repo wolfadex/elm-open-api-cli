@@ -15,7 +15,8 @@
             "elm/parser": "1.1.0",
             "wolfadex/elm-rfc3339": "2.0.0",
             "danfishgold/base64-bytes": "1.1.0",
-            "cachix/elm-uuid": "2.0.0"
+            "cachix/elm-uuid": "2.0.0",
+            "folkertdev/elm-int64": "1.0.0"
         },
         "local": [
             "helpers"

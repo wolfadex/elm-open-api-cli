@@ -99,6 +99,10 @@ run =
         telegramBot =
             OpenApi.Config.inputFrom (OpenApi.Config.File "./example/telegram-bot.json")
 
+        int64 : OpenApi.Config.Input
+        int64 =
+            OpenApi.Config.inputFrom (OpenApi.Config.File "./example/int64.json")
+
         config : OpenApi.Config.Config
         config =
             OpenApi.Config.init "./generated"
@@ -122,6 +126,7 @@ run =
                 |> OpenApi.Config.withInput nullableEnum
                 |> OpenApi.Config.withInput cookieAuth
                 |> OpenApi.Config.withInput telegramBot
+                |> OpenApi.Config.withInput int64
     in
     Pages.Script.withoutCliOptions
         (BackendTask.doEach

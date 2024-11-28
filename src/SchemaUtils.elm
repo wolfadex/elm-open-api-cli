@@ -643,6 +643,7 @@ typeToAnnotationWithNullable qualify type_ =
 
         Common.Bytes ->
             CliMonad.succeed Gen.Bytes.annotation_.bytes
+                |> CliMonad.withRequiredPackage "elm/bytes"
 
         Common.Unit ->
             CliMonad.succeed Elm.Annotation.unit
@@ -708,6 +709,7 @@ typeToAnnotationWithMaybe qualify type_ =
 
         Common.Bytes ->
             CliMonad.succeed Gen.Bytes.annotation_.bytes
+                |> CliMonad.withRequiredPackage "elm/bytes"
 
         Common.Unit ->
             CliMonad.succeed Elm.Annotation.unit

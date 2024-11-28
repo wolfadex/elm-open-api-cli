@@ -2539,6 +2539,7 @@ operationToTypesExpectAndResolver functionName operation =
                                                                     ( Gen.Bytes.annotation_.bytes
                                                                     , Gen.Bytes.annotation_.bytes
                                                                     )
+                                                                    |> CliMonad.withRequiredPackage "elm/bytes"
 
                                                             EmptyContent ->
                                                                 CliMonad.succeed
@@ -2646,7 +2647,7 @@ operationToTypesExpectAndResolver functionName operation =
                                                 errorTypeDeclaration
 
                                         BytesContent _ ->
-                                            CliMonad.map2
+                                            CliMonad.andThen2
                                                 (\errorDecoders_ ( errorTypeDeclaration_, errorTypeAnnotation ) ->
                                                     { successType = Common.Bytes
                                                     , bodyTypeAnnotation = Gen.Bytes.annotation_.bytes
@@ -2658,10 +2659,11 @@ operationToTypesExpectAndResolver functionName operation =
                                                         , lamderaProgramTest = Gen.OpenApi.Common.bytesResolverCustomEffect errorDecoders_
                                                         }
                                                     }
+                                                        |> CliMonad.succeed
+                                                        |> CliMonad.withRequiredPackage "elm/bytes"
                                                 )
                                                 errorDecoders
                                                 errorTypeDeclaration
-                                                |> CliMonad.withRequiredPackage "elm/bytes"
 
                                         EmptyContent ->
                                             CliMonad.map2

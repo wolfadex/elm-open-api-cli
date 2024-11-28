@@ -285,7 +285,7 @@ run =
 type alias Config =
     { oasPath : PathType
     , outputDirectory : String
-    , outputModuleName : Maybe String
+    , outputModuleName : Maybe (List String)
     , effectTypes : List OpenApi.Generate.EffectType
     , generateTodos : Bool
     , autoConvertSwagger : Bool
@@ -302,7 +302,7 @@ parseCliOptions cliOptions =
     BackendTask.succeed
         { oasPath = cliOptions.entryFilePath
         , outputDirectory = cliOptions.outputDirectory
-        , outputModuleName = cliOptions.outputModuleName
+        , outputModuleName = Maybe.map (String.split ".") cliOptions.outputModuleName
         , effectTypes = cliOptions.effectTypes
         , generateTodos = cliOptions.generateTodos
         , autoConvertSwagger = cliOptions.autoConvertSwagger
@@ -692,7 +692,7 @@ yamlToJsonValueDecoder =
 
 
 generateFileFromOpenApiSpec :
-    { outputModuleName : Maybe String
+    { outputModuleName : Maybe (List String)
     , generateTodos : Bool
     , effectTypes : List OpenApi.Generate.EffectType
     , server : OpenApi.Generate.Server
@@ -712,7 +712,7 @@ generateFileFromOpenApiSpec config apiSpec =
         moduleName =
             case config.outputModuleName of
                 Just modName ->
-                    String.split "." modName
+                    modName
 
                 Nothing ->
                     apiSpec

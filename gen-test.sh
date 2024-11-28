@@ -4,6 +4,8 @@ set -e
 
 # Generate various SDKs
 
+npm run dev ./example/ifconfig.ovh.json
+exit 0
 npm run dev ./example/realworld-conduit.yaml
 npm run dev ./example/amadeus-airline-lookup.json
 npm run dev -- ./example/db-fahrplan-api-specification.yaml --auto-convert-swagger

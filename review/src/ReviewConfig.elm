@@ -33,6 +33,7 @@ config =
         , from = exposedModules
         }
     , Docs.ReviewLinksAndSections.rule
+        |> Rule.ignoreErrorsForDirectories [ "src/Gen" ]
     , Docs.ReviewAtDocs.rule
     , Docs.UpToDateReadmeLinks.rule
     , NoConfusingPrefixOperator.rule
@@ -55,6 +56,8 @@ config =
     , NoUnused.Patterns.rule
     , NoUnused.Variables.rule
     , Simplify.rule Simplify.defaults
+        |> Rule.ignoreErrorsForDirectories [ "src/Gen" ]
     , Review.ImportSimple.rule
+        |> Rule.ignoreErrorsForDirectories [ "src/Gen" ]
     ]
-        |> List.map (Rule.ignoreErrorsForDirectories [ "codegen", "src/Gen" ])
+        |> List.map (Rule.ignoreErrorsForDirectories [ "codegen" ])

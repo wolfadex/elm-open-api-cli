@@ -10,6 +10,7 @@ import Gen.Json.Encode
 import Gen.Parser.Advanced
 import Gen.Result
 import Gen.Rfc3339
+import Gen.String
 import Gen.Time
 import Url
 
@@ -115,6 +116,7 @@ defaultFormats : List Format
 defaultFormats =
     [ dateTimeFormat
     , dateFormat
+    , defaultIntFormat "int32"
     , defaultStringFormat "password"
     ]
 
@@ -191,6 +193,19 @@ dateFormat =
                 )
     , sharedDeclarations = []
     , requiresPackages = [ "justinmimbs/date" ]
+    }
+
+
+defaultIntFormat : String -> Format
+defaultIntFormat format =
+    { basicType = Common.Integer
+    , format = format
+    , annotation = Elm.Annotation.int
+    , encode = Gen.Json.Encode.call_.int
+    , decoder = Gen.Json.Decode.int
+    , toParamString = Gen.String.call_.fromInt
+    , sharedDeclarations = []
+    , requiresPackages = []
     }
 
 

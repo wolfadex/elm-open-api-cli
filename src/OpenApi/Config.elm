@@ -120,7 +120,9 @@ defaultFormats =
     [ dateTimeFormat
     , dateFormat
     , uriFormat
-    , defaultIntFormat "int32"
+    , defaultIntFormat "int32" Common.Integer
+    , defaultIntFormat "int32" Common.Number
+    , defaultFloatFormat "double"
     , defaultStringFormat "password"
     ]
 
@@ -228,14 +230,27 @@ uriFormat =
     }
 
 
-defaultIntFormat : String -> Format
-defaultIntFormat format =
-    { basicType = Common.Integer
+defaultIntFormat : String -> Common.BasicType -> Format
+defaultIntFormat format basicType =
+    { basicType = basicType
     , format = format
     , annotation = Elm.Annotation.int
     , encode = Gen.Json.Encode.call_.int
     , decoder = Gen.Json.Decode.int
     , toParamString = Gen.String.call_.fromInt
+    , sharedDeclarations = []
+    , requiresPackages = []
+    }
+
+
+defaultFloatFormat : String -> Format
+defaultFloatFormat format =
+    { basicType = Common.Number
+    , format = format
+    , annotation = Elm.Annotation.float
+    , encode = Gen.Json.Encode.call_.float
+    , decoder = Gen.Json.Decode.float
+    , toParamString = Gen.String.call_.fromFloat
     , sharedDeclarations = []
     , requiresPackages = []
     }

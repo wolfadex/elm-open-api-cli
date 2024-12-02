@@ -26,6 +26,7 @@ import OpenApi.Info
 import Pages.Script
 import Pages.Script.Spinner
 import Result.Extra
+import Set
 import String.Extra
 import Url
 import UrlPath
@@ -976,6 +977,8 @@ logWarning ( head, tail ) =
                         else
                             Just ("  at " ++ String.join " -> " path)
                     )
+                |> Set.fromList
+                |> Set.toList
     in
     (firstLine :: paths)
         |> List.map Pages.Script.log

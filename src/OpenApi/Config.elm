@@ -1,4 +1,4 @@
-module OpenApi.Config exposing (Config, EffectType(..), Format, Path(..), Server(..), autoConvertSwagger, defaultFormats, init, oasPath, outputDirectory, overrides, pathFromString, pathToString, swaggerConversionCommand, swaggerConversionUrl, toGenerationConfig, withAutoConvertSwagger, withEffectTypes, withFormat, withGenerateTodos, withOutputModuleName, withOverrides, withServer, withSwaggerConversionCommand, withSwaggerConversionUrl, withWriteMergedTo, writeMergedTo)
+module OpenApi.Config exposing (Config, EffectType(..), Format, Path(..), Server(..), autoConvertSwagger, defaultFormats, init, oasPath, outputDirectory, overrides, pathFromString, pathToString, swaggerConversionCommand, swaggerConversionUrl, toGenerationConfig, withAutoConvertSwagger, withEffectTypes, withFormat, withFormats, withGenerateTodos, withOutputModuleName, withOverrides, withServer, withSwaggerConversionCommand, withSwaggerConversionUrl, withWriteMergedTo, writeMergedTo)
 
 import Common
 import Dict
@@ -27,7 +27,8 @@ type Config
         , server : Server
         , overrides : List Path
         , writeMergedTo : Maybe String
-        , formats : List Format
+        , staticFormats : List Format
+        , dynamicFormats : List { format : String, basicType : Common.BasicType } -> List Format
         }
 
 
@@ -104,7 +105,8 @@ init initialOasPath initialOutputDirectory =
     , server = Default
     , overrides = []
     , writeMergedTo = Nothing
-    , formats = defaultFormats
+    , staticFormats = defaultFormats
+    , dynamicFormats = \_ -> []
     }
         |> Config
 
@@ -252,7 +254,15 @@ withWriteMergedTo newWriteMergedTo (Config config) =
 
 withFormat : Format -> Config -> Config
 withFormat newFormat (Config config) =
-    Config { config | formats = newFormat :: config.formats }
+    Config { config | staticFormats = newFormat :: config.staticFormats }
+
+
+withFormats :
+    (List { format : String, basicType : Common.BasicType } -> List Format)
+    -> Config
+    -> Config
+withFormats newFormat (Config config) =
+    Config { config | dynamicFormats = \input -> newFormat input ++ config.dynamicFormats input }
 
 
 swaggerConversionUrl : Config -> String
@@ -276,7 +286,8 @@ oasPath (Config config) =
 
 
 toGenerationConfig :
-    Config
+    List { format : String, basicType : Common.BasicType }
+    -> Config
     ->
         { outputModuleName : Maybe (List String)
         , generateTodos : Bool
@@ -284,12 +295,12 @@ toGenerationConfig :
         , server : Server
         , formats : List Format
         }
-toGenerationConfig (Config config) =
+toGenerationConfig input (Config config) =
     { outputModuleName = config.outputModuleName
     , generateTodos = config.generateTodos
     , effectTypes = config.effectTypes
     , server = config.server
-    , formats = config.formats
+    , formats = config.staticFormats ++ config.dynamicFormats input
     }
 
 

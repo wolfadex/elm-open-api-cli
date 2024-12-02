@@ -10,6 +10,7 @@ import Cli.Option
 import Cli.OptionsParser
 import Cli.Program
 import CliMonad
+import Common
 import Dict
 import Elm
 import FastSet
@@ -365,7 +366,7 @@ withConfig config =
            )
         |> Pages.Script.Spinner.withStep "Parse OAS" (decodeOpenApiSpecOrFail { hasAttemptedToConvertFromSwagger = False } config)
         |> Pages.Script.Spinner.withStep "Generate Elm modules"
-            (generateFileFromOpenApiSpec (OpenApi.Config.toGenerationConfig config))
+            (\( apiSpec, allFormats ) -> generateFileFromOpenApiSpec (OpenApi.Config.toGenerationConfig allFormats config) apiSpec)
         |> Pages.Script.Spinner.withStep "Format with elm-format" (onFirst attemptToFormat)
         |> Pages.Script.Spinner.withStep "Write to disk" (onFirst (writeSdkToDisk (OpenApi.Config.outputDirectory config)))
         |> Pages.Script.Spinner.runSteps
@@ -419,9 +420,13 @@ writeMerged destination spec =
         |> BackendTask.map (\_ -> spec)
 
 
-decodeOpenApiSpecOrFail : { hasAttemptedToConvertFromSwagger : Bool } -> OpenApi.Config.Config -> Json.Decode.Value -> BackendTask.BackendTask FatalError.FatalError OpenApi.OpenApi
+decodeOpenApiSpecOrFail : { hasAttemptedToConvertFromSwagger : Bool } -> OpenApi.Config.Config -> Json.Decode.Value -> BackendTask.BackendTask FatalError.FatalError ( OpenApi.OpenApi, List { format : String, basicType : Common.BasicType } )
 decodeOpenApiSpecOrFail { hasAttemptedToConvertFromSwagger } config value =
-    case Json.Decode.decodeValue OpenApi.decode value of
+    case
+        Result.map2 Tuple.pair
+            (Json.Decode.decodeValue OpenApi.decode value)
+            (extractFormats value)
+    of
         Ok pair ->
             BackendTask.succeed pair
 
@@ -471,7 +476,78 @@ See the """
                                 )
 
 
-convertToSwaggerAndThenDecode : OpenApi.Config.Config -> Json.Decode.Value -> BackendTask.BackendTask FatalError.FatalError OpenApi.OpenApi
+extractFormats : Json.Decode.Value -> Result Json.Decode.Error (List { format : String, basicType : Common.BasicType })
+extractFormats value =
+    Json.Decode.decodeValue formatDecoder value
+
+
+formatDecoder : Json.Decode.Decoder (List { format : String, basicType : Common.BasicType })
+formatDecoder =
+    let
+        typeDecoder : Json.Decode.Decoder Common.BasicType
+        typeDecoder =
+            Json.Decode.string
+                |> Json.Decode.andThen
+                    (\type_ ->
+                        case type_ of
+                            "string" ->
+                                Json.Decode.succeed Common.String
+
+                            "integer" ->
+                                Json.Decode.succeed Common.Integer
+
+                            "boolean" ->
+                                Json.Decode.succeed Common.Boolean
+
+                            "number" ->
+                                Json.Decode.succeed Common.Number
+
+                            _ ->
+                                Json.Decode.fail "Unexpected type"
+                    )
+    in
+    Json.Decode.oneOf
+        [ Json.Decode.list (Json.Decode.lazy (\_ -> formatDecoder))
+            |> Json.Decode.map List.concat
+        , Json.Decode.dict Json.Decode.value
+            |> Json.Decode.andThen
+                (\dict ->
+                    case ( Dict.get "format" dict, Dict.get "type" dict ) of
+                        ( Just format, Just type_ ) ->
+                            Result.map2
+                                (\fmt basicType ->
+                                    [ { format = fmt
+                                      , basicType = basicType
+                                      }
+                                    ]
+                                )
+                                (Json.Decode.decodeValue Json.Decode.string format)
+                                (Json.Decode.decodeValue typeDecoder type_)
+                                |> resultToDecoder
+
+                        _ ->
+                            dict
+                                |> Dict.values
+                                |> Result.Extra.combineMap
+                                    (\v -> Json.Decode.decodeValue (Json.Decode.lazy (\_ -> formatDecoder)) v)
+                                |> Result.map List.concat
+                                |> resultToDecoder
+                )
+        , Json.Decode.succeed []
+        ]
+
+
+resultToDecoder : Result Json.Decode.Error a -> Json.Decode.Decoder a
+resultToDecoder result =
+    case result of
+        Ok ok ->
+            Json.Decode.succeed ok
+
+        Err e ->
+            Json.Decode.fail (Json.Decode.errorToString e)
+
+
+convertToSwaggerAndThenDecode : OpenApi.Config.Config -> Json.Decode.Value -> BackendTask.BackendTask FatalError.FatalError ( OpenApi.OpenApi, List { format : String, basicType : Common.BasicType } )
 convertToSwaggerAndThenDecode config value =
     convertSwaggerToOpenApi config (Json.Encode.encode 0 value)
         |> BackendTask.andThen

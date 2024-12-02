@@ -4,14 +4,17 @@ import Common
 import Dict
 import Elm
 import Elm.Annotation
+import Elm.Op
 import Gen.Date
 import Gen.Json.Decode
 import Gen.Json.Encode
+import Gen.Maybe
 import Gen.Parser.Advanced
 import Gen.Result
 import Gen.Rfc3339
 import Gen.String
 import Gen.Time
+import Gen.Url
 import Url
 
 
@@ -116,6 +119,7 @@ defaultFormats : List Format
 defaultFormats =
     [ dateTimeFormat
     , dateFormat
+    , uriFormat
     , defaultIntFormat "int32"
     , defaultStringFormat "password"
     ]
@@ -189,6 +193,34 @@ dateFormat =
                         (Gen.Date.call_.fromIsoString raw)
                         { ok = Gen.Json.Decode.succeed
                         , err = Gen.Json.Decode.call_.fail
+                        }
+                )
+    , sharedDeclarations = []
+    , requiresPackages = [ "justinmimbs/date" ]
+    }
+
+
+uriFormat : Format
+uriFormat =
+    { basicType = Common.String
+    , format = "uri"
+    , annotation = Gen.Url.annotation_.url
+    , encode =
+        \url ->
+            url
+                |> Gen.Url.toString
+                |> Gen.Json.Encode.call_.string
+    , toParamString = Gen.Url.toString
+    , decoder =
+        Gen.Json.Decode.string
+            |> Gen.Json.Decode.andThen
+                (\raw ->
+                    Gen.Maybe.caseOf_.maybe
+                        (Gen.Url.call_.fromString raw)
+                        { just = Gen.Json.Decode.succeed
+                        , nothing =
+                            Gen.Json.Decode.call_.fail
+                                (Elm.Op.append raw (Elm.string " is not a valid URL"))
                         }
                 )
     , sharedDeclarations = []

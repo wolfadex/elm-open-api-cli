@@ -447,7 +447,18 @@ withFormat basicType maybeFormatName getter default =
                     of
                         Nothing ->
                             ( default
-                            , emptyOutput
+                            , { emptyOutput
+                                | warnings =
+                                    [ { message =
+                                            "Don't know how to handle format \""
+                                                ++ formatName
+                                                ++ "\" for type "
+                                                ++ Common.basicTypeToString basicType
+                                                ++ ", treating as the corresponding basic type."
+                                      , path = [ "format" ]
+                                      }
+                                    ]
+                              }
                             )
                                 |> Ok
 

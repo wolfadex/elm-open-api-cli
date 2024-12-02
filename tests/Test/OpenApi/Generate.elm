@@ -1,7 +1,6 @@
 module Test.OpenApi.Generate exposing (suite)
 
 import Char
-import Cli
 import CliMonad
 import Elm
 import Expect
@@ -9,6 +8,7 @@ import FastSet
 import Fuzz
 import Json.Decode
 import OpenApi
+import OpenApi.Config
 import OpenApi.Generate
 import String.Extra
 import Test exposing (Test)
@@ -78,9 +78,9 @@ suite =
                                 OpenApi.Generate.files
                                     { namespace = namespace
                                     , generateTodos = False
-                                    , effectTypes = [ OpenApi.Generate.ElmHttpCmd, OpenApi.Generate.ElmHttpTask ]
-                                    , server = OpenApi.Generate.Default
-                                    , formats = Cli.defaultFormats
+                                    , effectTypes = [ OpenApi.Config.ElmHttpCmd, OpenApi.Config.ElmHttpTask ]
+                                    , server = OpenApi.Config.Default
+                                    , formats = OpenApi.Config.defaultFormats
                                     }
                                     oas
                         in

@@ -51,7 +51,7 @@ config =
     , NoUnused.CustomTypeConstructorArgs.rule
     , NoUnused.Dependencies.rule
     , NoUnused.Exports.rule
-        |> Rule.ignoreErrorsForFiles [ "src/Cli.elm" ]
+        |> Rule.ignoreErrorsForFiles [ "src/Cli.elm", "src/OpenApi/Config.elm" ]
     , NoUnused.Parameters.rule
     , NoUnused.Patterns.rule
     , NoUnused.Variables.rule

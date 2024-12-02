@@ -1,8 +1,7 @@
 module OpenApi.Generate exposing
-    ( ContentSchema(..)
-    , EffectType(..)
+    ( Config
+    , ContentSchema(..)
     , Mime
-    , Server(..)
     , files
     , sanitizeModuleName
     )
@@ -46,6 +45,7 @@ import List.Extra
 import List.NonEmpty
 import OpenApi
 import OpenApi.Components
+import OpenApi.Config
 import OpenApi.MediaType
 import OpenApi.Operation
 import OpenApi.Parameter
@@ -67,34 +67,11 @@ type alias Mime =
     String
 
 
-type EffectType
-    = ElmHttpCmd
-    | ElmHttpCmdRecord
-    | ElmHttpCmdRisky
-    | ElmHttpTask
-    | ElmHttpTaskRecord
-    | ElmHttpTaskRisky
-    | DillonkearnsElmPagesTask
-    | DillonkearnsElmPagesTaskRecord
-    | LamderaProgramTestCmd
-    | LamderaProgramTestCmdRisky
-    | LamderaProgramTestCmdRecord
-    | LamderaProgramTestTask
-    | LamderaProgramTestTaskRisky
-    | LamderaProgramTestTaskRecord
-
-
 type ContentSchema
     = EmptyContent
     | JsonContent Common.Type
     | StringContent Mime
     | BytesContent Mime
-
-
-type Server
-    = Default
-    | Single String
-    | Multiple (Dict.Dict String String)
 
 
 type alias AuthorizationInfo =
@@ -112,13 +89,17 @@ type alias PerPackage a =
     }
 
 
-files :
+type alias Config =
     { namespace : List String
     , generateTodos : Bool
-    , effectTypes : List EffectType
-    , server : Server
-    , formats : List CliMonad.Format
+    , effectTypes : List OpenApi.Config.EffectType
+    , server : OpenApi.Config.Server
+    , formats : List OpenApi.Config.Format
     }
+
+
+files :
+    Config
     -> OpenApi.OpenApi
     ->
         Result
@@ -228,7 +209,7 @@ files { namespace, generateTodos, effectTypes, server, formats } apiSpec =
                     )
 
 
-elmHttpCommonDeclarations : List EffectType -> List ( Common.Module, Elm.Declaration )
+elmHttpCommonDeclarations : List OpenApi.Config.EffectType -> List ( Common.Module, Elm.Declaration )
 elmHttpCommonDeclarations effectTypes =
     if List.any (\effectType -> effectTypeToPackage effectType == Common.ElmHttp) effectTypes then
         [ ( Common.Common
@@ -279,7 +260,7 @@ elmHttpCommonDeclarations effectTypes =
         []
 
 
-lamderaProgramTestCommonDeclarations : List EffectType -> List ( Common.Module, Elm.Declaration )
+lamderaProgramTestCommonDeclarations : List OpenApi.Config.EffectType -> List ( Common.Module, Elm.Declaration )
 lamderaProgramTestCommonDeclarations effectTypes =
     if List.any (\effectType -> effectTypeToPackage effectType == Common.LamderaProgramTest) effectTypes then
         [ ( Common.Common
@@ -387,10 +368,10 @@ extractEnums openApi =
             (Ok FastDict.empty)
 
 
-serverDecls : OpenApi.OpenApi -> Server -> List ( Common.Module, Elm.Declaration )
+serverDecls : OpenApi.OpenApi -> OpenApi.Config.Server -> List ( Common.Module, Elm.Declaration )
 serverDecls apiSpec server =
     case server of
-        Multiple servers ->
+        OpenApi.Config.Multiple servers ->
             servers
                 |> Dict.toList
                 |> List.map
@@ -405,10 +386,10 @@ serverDecls apiSpec server =
                         )
                     )
 
-        Single _ ->
+        OpenApi.Config.Single _ ->
             []
 
-        Default ->
+        OpenApi.Config.Default ->
             case OpenApi.servers apiSpec of
                 [] ->
                     []
@@ -483,7 +464,7 @@ formatModuleDocs =
         )
 
 
-pathDeclarations : Server -> List EffectType -> CliMonad (List ( Common.Module, Elm.Declaration ))
+pathDeclarations : OpenApi.Config.Server -> List OpenApi.Config.EffectType -> CliMonad (List ( Common.Module, Elm.Declaration ))
 pathDeclarations server effectTypes =
     CliMonad.fromApiSpec OpenApi.paths
         |> CliMonad.andThen
@@ -661,7 +642,7 @@ requestBodyToDeclarations name reference =
                 |> CliMonad.withPath name
 
 
-toRequestFunctions : Server -> List EffectType -> String -> String -> OpenApi.Operation.Operation -> CliMonad (List ( Common.Module, Elm.Declaration ))
+toRequestFunctions : OpenApi.Config.Server -> List OpenApi.Config.EffectType -> String -> String -> OpenApi.Operation.Operation -> CliMonad (List ( Common.Module, Elm.Declaration ))
 toRequestFunctions server effectTypes method pathUrl operation =
     let
         functionName : String
@@ -848,7 +829,7 @@ toRequestFunctions server effectTypes method pathUrl operation =
                 declarationGroup :
                     AuthorizationInfo
                     -> (() -> a)
-                    -> List ( EffectType, a -> Elm.Declaration )
+                    -> List ( OpenApi.Config.EffectType, a -> Elm.Declaration )
                     -> List ( Common.Module, Elm.Declaration )
                 declarationGroup auth sharedData list =
                     if List.any (\( effectType, _ ) -> List.member effectType effectTypes) list then
@@ -930,7 +911,7 @@ toRequestFunctions server effectTypes method pathUrl operation =
                                     )
                             }
                         )
-                        [ ( ElmHttpCmd
+                        [ ( OpenApi.Config.ElmHttpCmd
                           , \{ cmdArg, cmdAnnotation } ->
                                 Elm.fn
                                     ( "config", Nothing )
@@ -938,7 +919,7 @@ toRequestFunctions server effectTypes method pathUrl operation =
                                     |> Elm.withType cmdAnnotation
                                     |> Elm.declaration functionName
                           )
-                        , ( ElmHttpCmdRisky
+                        , ( OpenApi.Config.ElmHttpCmdRisky
                           , \{ cmdArg, cmdAnnotation } ->
                                 Elm.fn
                                     ( "config", Nothing )
@@ -946,7 +927,7 @@ toRequestFunctions server effectTypes method pathUrl operation =
                                     |> Elm.withType cmdAnnotation
                                     |> Elm.declaration (functionName ++ "Risky")
                           )
-                        , ( ElmHttpCmdRecord
+                        , ( OpenApi.Config.ElmHttpCmdRecord
                           , \{ cmdArg, recordAnnotation } ->
                                 Elm.fn
                                     ( "config", Nothing )
@@ -1006,7 +987,7 @@ toRequestFunctions server effectTypes method pathUrl operation =
                                     )
                             }
                         )
-                        [ ( ElmHttpTask
+                        [ ( OpenApi.Config.ElmHttpTask
                           , \{ taskArg, taskAnnotation } ->
                                 Elm.fn
                                     ( "config", Nothing )
@@ -1014,7 +995,7 @@ toRequestFunctions server effectTypes method pathUrl operation =
                                     |> Elm.withType taskAnnotation
                                     |> Elm.declaration (functionName ++ "Task")
                           )
-                        , ( ElmHttpTaskRisky
+                        , ( OpenApi.Config.ElmHttpTaskRisky
                           , \{ taskArg, taskAnnotation } ->
                                 Elm.fn
                                     ( "config", Nothing )
@@ -1022,7 +1003,7 @@ toRequestFunctions server effectTypes method pathUrl operation =
                                     |> Elm.withType taskAnnotation
                                     |> Elm.declaration (functionName ++ "TaskRisky")
                           )
-                        , ( ElmHttpTaskRecord
+                        , ( OpenApi.Config.ElmHttpTaskRecord
                           , \{ taskArg, recordAnnotation } ->
                                 Elm.fn
                                     ( "config", Nothing )
@@ -1085,7 +1066,7 @@ toRequestFunctions server effectTypes method pathUrl operation =
                                     )
                             }
                         )
-                        [ ( DillonkearnsElmPagesTask
+                        [ ( OpenApi.Config.DillonkearnsElmPagesTask
                           , \{ taskArg, taskAnnotation } ->
                                 Elm.fn
                                     ( "config", Nothing )
@@ -1093,7 +1074,7 @@ toRequestFunctions server effectTypes method pathUrl operation =
                                     |> Elm.withType taskAnnotation
                                     |> Elm.declaration functionName
                           )
-                        , ( DillonkearnsElmPagesTaskRecord
+                        , ( OpenApi.Config.DillonkearnsElmPagesTaskRecord
                           , \{ taskArg, recordAnnotation } ->
                                 Elm.fn
                                     ( "config", Nothing )
@@ -1132,21 +1113,21 @@ toRequestFunctions server effectTypes method pathUrl operation =
                             , cmdParam = (paramType { requireToMsg = True }).lamderaProgramTest
                             }
                         )
-                        [ ( LamderaProgramTestCmd
+                        [ ( OpenApi.Config.LamderaProgramTestCmd
                           , \{ cmdArg, cmdParam } ->
                                 Elm.fn
                                     ( "config", Just cmdParam )
                                     (\config -> Gen.Effect.Http.call_.request (cmdArg config))
                                     |> Elm.declaration functionName
                           )
-                        , ( LamderaProgramTestCmdRisky
+                        , ( OpenApi.Config.LamderaProgramTestCmdRisky
                           , \{ cmdArg, cmdParam } ->
                                 Elm.fn
                                     ( "config", Just cmdParam )
                                     (\config -> Gen.Effect.Http.call_.riskyRequest (cmdArg config))
                                     |> Elm.declaration (functionName ++ "Risky")
                           )
-                        , ( LamderaProgramTestCmdRecord
+                        , ( OpenApi.Config.LamderaProgramTestCmdRecord
                           , \{ cmdArg, cmdParam } ->
                                 Elm.fn
                                     ( "config", Just cmdParam )
@@ -1207,7 +1188,7 @@ toRequestFunctions server effectTypes method pathUrl operation =
                                     )
                             }
                         )
-                        [ ( LamderaProgramTestTask
+                        [ ( OpenApi.Config.LamderaProgramTestTask
                           , \{ taskArg, taskAnnotation } ->
                                 Elm.fn
                                     ( "config", Nothing )
@@ -1215,7 +1196,7 @@ toRequestFunctions server effectTypes method pathUrl operation =
                                     |> Elm.withType taskAnnotation
                                     |> Elm.declaration (functionName ++ "Task")
                           )
-                        , ( LamderaProgramTestTaskRisky
+                        , ( OpenApi.Config.LamderaProgramTestTaskRisky
                           , \{ taskArg, taskAnnotation } ->
                                 Elm.fn
                                     ( "config", Nothing )
@@ -1223,7 +1204,7 @@ toRequestFunctions server effectTypes method pathUrl operation =
                                     |> Elm.withType taskAnnotation
                                     |> Elm.declaration (functionName ++ "TaskRisky")
                           )
-                        , ( LamderaProgramTestTaskRecord
+                        , ( OpenApi.Config.LamderaProgramTestTaskRecord
                           , \{ taskArg, recordAnnotation } ->
                                 Elm.fn
                                     ( "config", Nothing )
@@ -1279,49 +1260,49 @@ toRequestFunctions server effectTypes method pathUrl operation =
         |> CliMonad.withPath (Common.UnsafeName pathUrl)
 
 
-effectTypeToPackage : EffectType -> Common.Package
+effectTypeToPackage : OpenApi.Config.EffectType -> Common.Package
 effectTypeToPackage effectType =
     case effectType of
-        ElmHttpCmd ->
+        OpenApi.Config.ElmHttpCmd ->
             Common.ElmHttp
 
-        ElmHttpCmdRisky ->
+        OpenApi.Config.ElmHttpCmdRisky ->
             Common.ElmHttp
 
-        ElmHttpCmdRecord ->
+        OpenApi.Config.ElmHttpCmdRecord ->
             Common.ElmHttp
 
-        ElmHttpTask ->
+        OpenApi.Config.ElmHttpTask ->
             Common.ElmHttp
 
-        ElmHttpTaskRisky ->
+        OpenApi.Config.ElmHttpTaskRisky ->
             Common.ElmHttp
 
-        ElmHttpTaskRecord ->
+        OpenApi.Config.ElmHttpTaskRecord ->
             Common.ElmHttp
 
-        DillonkearnsElmPagesTaskRecord ->
+        OpenApi.Config.DillonkearnsElmPagesTaskRecord ->
             Common.ElmHttp
 
-        DillonkearnsElmPagesTask ->
+        OpenApi.Config.DillonkearnsElmPagesTask ->
             Common.DillonkearnsElmPages
 
-        LamderaProgramTestCmd ->
+        OpenApi.Config.LamderaProgramTestCmd ->
             Common.LamderaProgramTest
 
-        LamderaProgramTestCmdRisky ->
+        OpenApi.Config.LamderaProgramTestCmdRisky ->
             Common.LamderaProgramTest
 
-        LamderaProgramTestCmdRecord ->
+        OpenApi.Config.LamderaProgramTestCmdRecord ->
             Common.LamderaProgramTest
 
-        LamderaProgramTestTask ->
+        OpenApi.Config.LamderaProgramTestTask ->
             Common.LamderaProgramTest
 
-        LamderaProgramTestTaskRisky ->
+        OpenApi.Config.LamderaProgramTestTaskRisky ->
             Common.LamderaProgramTest
 
-        LamderaProgramTestTaskRecord ->
+        OpenApi.Config.LamderaProgramTestTaskRecord ->
             Common.LamderaProgramTest
 
 
@@ -1394,7 +1375,7 @@ operationToHeaderParams operation =
         |> CliMonad.map (List.filterMap identity)
 
 
-replacedUrl : Server -> AuthorizationInfo -> String -> OpenApi.Operation.Operation -> CliMonad (Elm.Expression -> Elm.Expression)
+replacedUrl : OpenApi.Config.Server -> AuthorizationInfo -> String -> OpenApi.Operation.Operation -> CliMonad (Elm.Expression -> Elm.Expression)
 replacedUrl server authInfo pathUrl operation =
     let
         pathSegments : List String
@@ -1428,10 +1409,10 @@ replacedUrl server authInfo pathUrl operation =
                             resolvedServer : Result String Elm.Expression
                             resolvedServer =
                                 case server of
-                                    Single cliServer ->
+                                    OpenApi.Config.Single cliServer ->
                                         Err cliServer
 
-                                    Default ->
+                                    OpenApi.Config.Default ->
                                         case servers of
                                             [] ->
                                                 Err ""
@@ -1442,7 +1423,7 @@ replacedUrl server authInfo pathUrl operation =
                                             _ ->
                                                 Ok (Elm.get "server" config)
 
-                                    Multiple _ ->
+                                    OpenApi.Config.Multiple _ ->
                                         Ok (Elm.get "server" config)
                         in
                         if List.isEmpty pathSegments && List.isEmpty queryParams && List.isEmpty authArgs then
@@ -1917,7 +1898,7 @@ toConfigParamAnnotation :
     , errorTypeAnnotation : Elm.Annotation.Annotation
     , authorizationInfo : AuthorizationInfo
     , bodyParams : List ( Common.UnsafeName, Elm.Annotation.Annotation )
-    , server : Server
+    , server : OpenApi.Config.Server
     }
     -> CliMonad ({ requireToMsg : Bool } -> PerPackage Elm.Annotation.Annotation)
 toConfigParamAnnotation options =
@@ -1966,14 +1947,14 @@ toConfigParamAnnotation options =
         )
         (operationToUrlParams options.operation)
         (case options.server of
-            Multiple _ ->
+            OpenApi.Config.Multiple _ ->
                 [ ( Common.UnsafeName "server", Elm.Annotation.string ) ]
                     |> CliMonad.succeed
 
-            Single _ ->
+            OpenApi.Config.Single _ ->
                 CliMonad.succeed []
 
-            Default ->
+            OpenApi.Config.Default ->
                 OpenApi.servers
                     |> CliMonad.fromApiSpec
                     |> CliMonad.map

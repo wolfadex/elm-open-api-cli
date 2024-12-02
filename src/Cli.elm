@@ -421,50 +421,54 @@ writeMerged destination spec =
 
 decodeOpenApiSpecOrFail : { hasAttemptedToConvertFromSwagger : Bool } -> OpenApi.Config.Config -> Json.Decode.Value -> BackendTask.BackendTask FatalError.FatalError OpenApi.OpenApi
 decodeOpenApiSpecOrFail { hasAttemptedToConvertFromSwagger } config value =
-    value
-        |> Json.Decode.decodeValue OpenApi.decode
-        |> BackendTask.fromResult
-        |> BackendTask.onError
-            (\decodeError ->
-                if hasAttemptedToConvertFromSwagger then
-                    jsonErrorToFatalError decodeError
-                        |> BackendTask.fail
+    case Json.Decode.decodeValue OpenApi.decode value of
+        Ok pair ->
+            BackendTask.succeed pair
 
-                else
-                    case Json.Decode.decodeValue swaggerFieldDecoder value of
-                        Err _ ->
-                            jsonErrorToFatalError decodeError
-                                |> BackendTask.fail
+        Err decodeError ->
+            if hasAttemptedToConvertFromSwagger then
+                jsonErrorToFatalError decodeError
+                    |> BackendTask.fail
 
-                        Ok _ ->
-                            if OpenApi.Config.autoConvertSwagger config then
-                                convertToSwaggerAndThenDecode config value
+            else
+                case Json.Decode.decodeValue swaggerFieldDecoder value of
+                    Err _ ->
+                        jsonErrorToFatalError decodeError
+                            |> BackendTask.fail
 
-                            else
-                                Pages.Script.question
-                                    (Ansi.Color.fontColor Ansi.Color.brightCyan (OpenApi.Config.pathToString (OpenApi.Config.oasPath config))
-                                        ++ """ is a Swagger doc (aka Open API v2) and this tool only supports Open API v3.
+                    Ok _ ->
+                        let
+                            askForConversion : BackendTask error Bool
+                            askForConversion =
+                                if OpenApi.Config.autoConvertSwagger config then
+                                    BackendTask.succeed True
+
+                                else
+                                    Pages.Script.question
+                                        (Ansi.Color.fontColor Ansi.Color.brightCyan (OpenApi.Config.pathToString (OpenApi.Config.oasPath config))
+                                            ++ """ is a Swagger doc (aka Open API v2) and this tool only supports Open API v3.
 Would you like to use """
-                                        ++ Ansi.Color.fontColor Ansi.Color.brightCyan (OpenApi.Config.swaggerConversionUrl config)
-                                        ++ " to upgrade to v3? (y/n)\n"
-                                    )
-                                    |> BackendTask.andThen
-                                        (\response ->
-                                            case String.toLower response of
-                                                "y" ->
-                                                    convertToSwaggerAndThenDecode config value
+                                            ++ Ansi.Color.fontColor Ansi.Color.brightCyan (OpenApi.Config.swaggerConversionUrl config)
+                                            ++ " to upgrade to v3? (y/n)\n"
+                                        )
+                                        |> BackendTask.map (\response -> String.toLower response == "y")
+                        in
+                        askForConversion
+                            |> BackendTask.andThen
+                                (\shouldConvert ->
+                                    if shouldConvert then
+                                        convertToSwaggerAndThenDecode config value
 
-                                                _ ->
-                                                    ("""The input file appears to be a Swagger doc,
+                                    else
+                                        ("""The input file appears to be a Swagger doc,
 and the CLI was not configured to automatically convert it to an Open API spec.
 See the """
-                                                        ++ Ansi.Color.fontColor Ansi.Color.brightCyan "--auto-convert-swagger"
-                                                        ++ " flag for more info."
-                                                    )
-                                                        |> FatalError.fromString
-                                                        |> BackendTask.fail
+                                            ++ Ansi.Color.fontColor Ansi.Color.brightCyan "--auto-convert-swagger"
+                                            ++ " flag for more info."
                                         )
-            )
+                                            |> FatalError.fromString
+                                            |> BackendTask.fail
+                                )
 
 
 convertToSwaggerAndThenDecode : OpenApi.Config.Config -> Json.Decode.Value -> BackendTask.BackendTask FatalError.FatalError OpenApi.OpenApi

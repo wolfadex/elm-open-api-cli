@@ -107,7 +107,7 @@ toTypeNameSafety =
                         |> Common.UnsafeName
                         |> Common.toTypeName
             in
-            if Set.member typed reservedList then
+            if Set.member typed Common.reservedList then
                 Expect.fail "Invalid identifier: reserved word"
 
             else
@@ -151,7 +151,7 @@ toValueNameSafety =
                         |> Common.UnsafeName
                         |> Common.toValueName
             in
-            if Set.member typed reservedList then
+            if Set.member typed Common.reservedList then
                 Expect.fail "Invalid identifier: reserved word"
 
             else
@@ -165,27 +165,6 @@ toValueNameSafety =
 
                         else
                             Expect.fail ("Invalid value name " ++ escape typed)
-
-
-reservedList : Set String
-reservedList =
-    -- Copied from elm-syntax
-    [ "module"
-    , "exposing"
-    , "import"
-    , "as"
-    , "if"
-    , "then"
-    , "else"
-    , "let"
-    , "in"
-    , "case"
-    , "of"
-    , "port"
-    , "type"
-    , "where"
-    ]
-        |> Set.fromList
 
 
 isUpper : Char -> Bool

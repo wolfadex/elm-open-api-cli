@@ -14,12 +14,14 @@ module Common exposing
     , enum
     , moduleToNamespace
     , ref
+    , reservedList
     , toTypeName
     , toValueName
     , unwrapUnsafe
     )
 
 import Regex
+import Set exposing (Set)
 import String.Extra
 
 
@@ -139,16 +141,46 @@ toValueName (UnsafeName name) =
         raw
 
     else
-        raw
-            |> reduceWith replaceUnderscoresRegex
-                (\{ match } ->
-                    if match == "__" then
-                        "_"
+        let
+            clean : String
+            clean =
+                raw
+                    |> reduceWith replaceUnderscoresRegex
+                        (\{ match } ->
+                            if match == "__" then
+                                "_"
 
-                    else
-                        ""
-                )
-            |> initialUppercaseWordToLowercase
+                            else
+                                ""
+                        )
+                    |> initialUppercaseWordToLowercase
+        in
+        if Set.member clean reservedList then
+            clean ++ "_"
+
+        else
+            clean
+
+
+reservedList : Set String
+reservedList =
+    -- Copied from elm-syntax
+    [ "module"
+    , "exposing"
+    , "import"
+    , "as"
+    , "if"
+    , "then"
+    , "else"
+    , "let"
+    , "in"
+    , "case"
+    , "of"
+    , "port"
+    , "type"
+    , "where"
+    ]
+        |> Set.fromList
 
 
 replaceUnderscoresRegex : Regex.Regex

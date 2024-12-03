@@ -310,7 +310,7 @@ run oneOfDeclarations input (CliMonad x) =
                     declarationsForFormats out =
                         out.sharedDeclarations
                             |> FastDict.toList
-                            |> List.map (\( name, expr ) -> ( Common.Json, Elm.declaration name expr ))
+                            |> List.map (\( name, expr ) -> ( Common.Json, Elm.expose (Elm.declaration name expr) ))
                 in
                 h internalInput
                     |> Result.map
@@ -440,7 +440,7 @@ withFormat basicType maybeFormatName getter default =
 
         Just formatName ->
             CliMonad
-                (\{ formats } ->
+                (\{ formats, namespace } ->
                     case
                         FastDict.get ( Common.basicTypeToString basicType, formatName ) formats
                     of
@@ -532,7 +532,7 @@ withFormat basicType maybeFormatName getter default =
                                             (Elm.value
                                                 { name = "encode" ++ name
                                                 , annotation = Just encodeAnnotation
-                                                , importFrom = []
+                                                , importFrom = Common.moduleToNamespace namespace Common.Json
                                                 }
                                                 |> Elm.withType encodeAnnotation
                                             )
@@ -541,7 +541,7 @@ withFormat basicType maybeFormatName getter default =
                                     Elm.value
                                         { name = "decode" ++ name
                                         , annotation = Just decodeAnnotation
-                                        , importFrom = []
+                                        , importFrom = Common.moduleToNamespace namespace Common.Json
                                         }
                                         |> Elm.withType decodeAnnotation
                                 , toParamString =
@@ -550,7 +550,7 @@ withFormat basicType maybeFormatName getter default =
                                             (Elm.value
                                                 { name = "toParamString" ++ name
                                                 , annotation = Just toParamStringAnnotation
-                                                , importFrom = []
+                                                , importFrom = Common.moduleToNamespace namespace Common.Json
                                                 }
                                                 |> Elm.withType toParamStringAnnotation
                                             )

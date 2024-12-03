@@ -66,7 +66,7 @@ type alias Format =
     , decoder : Elm.Expression
     , toParamString : Elm.Expression -> Elm.Expression
     , annotation : Elm.Annotation.Annotation
-    , sharedDeclarations : List Elm.Declaration
+    , sharedDeclarations : List ( String, Elm.Expression )
     , requiresPackages : List String
     }
 

@@ -482,7 +482,7 @@ declarationName decl =
         -- TODO: do this in a nonhorrible way
         nameRegex : Regex
         nameRegex =
-            Regex.fromString "^([a-zA-Z][a-zA-Z0-9_]*) ="
+            Regex.fromString "^([a-zA-Z][a-zA-Z0-9_]*) [=:]"
                 |> Maybe.withDefault Regex.never
     in
     (Elm.ToString.declaration decl).body

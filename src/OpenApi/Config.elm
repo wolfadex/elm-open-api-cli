@@ -1,16 +1,19 @@
-module OpenApi.Config exposing (Config, EffectType(..), Format, Path(..), Server(..), autoConvertSwagger, defaultFormats, init, oasPath, outputDirectory, overrides, pathFromString, pathToString, swaggerConversionCommand, swaggerConversionUrl, toGenerationConfig, withAutoConvertSwagger, withEffectTypes, withFormat, withGenerateTodos, withOutputModuleName, withOverrides, withServer, withSwaggerConversionCommand, withSwaggerConversionUrl, withWriteMergedTo, writeMergedTo)
+module OpenApi.Config exposing (Config, EffectType(..), Format, Path(..), Server(..), autoConvertSwagger, defaultFormats, init, oasPath, outputDirectory, overrides, pathFromString, pathToString, swaggerConversionCommand, swaggerConversionUrl, toGenerationConfig, withAutoConvertSwagger, withEffectTypes, withFormat, withFormats, withGenerateTodos, withOutputModuleName, withOverrides, withServer, withSwaggerConversionCommand, withSwaggerConversionUrl, withWriteMergedTo, writeMergedTo)
 
 import Common
 import Dict
 import Elm
 import Elm.Annotation
+import Elm.Op
 import Gen.Date
 import Gen.Json.Decode
 import Gen.Json.Encode
+import Gen.Maybe
 import Gen.Parser.Advanced
 import Gen.Result
 import Gen.Rfc3339
 import Gen.Time
+import Gen.Url
 import Url
 
 
@@ -27,7 +30,8 @@ type Config
         , server : Server
         , overrides : List Path
         , writeMergedTo : Maybe String
-        , formats : List Format
+        , staticFormats : List Format
+        , dynamicFormats : List { format : String, basicType : Common.BasicType } -> List Format
         }
 
 
@@ -61,7 +65,7 @@ type alias Format =
     , decoder : Elm.Expression
     , toParamString : Elm.Expression -> Elm.Expression
     , annotation : Elm.Annotation.Annotation
-    , sharedDeclarations : List Elm.Declaration
+    , sharedDeclarations : List ( String, Elm.Expression )
     , requiresPackages : List String
     }
 
@@ -104,7 +108,8 @@ init initialOasPath initialOutputDirectory =
     , server = Default
     , overrides = []
     , writeMergedTo = Nothing
-    , formats = defaultFormats
+    , staticFormats = defaultFormats
+    , dynamicFormats = \_ -> []
     }
         |> Config
 
@@ -113,7 +118,7 @@ defaultFormats : List Format
 defaultFormats =
     [ dateTimeFormat
     , dateFormat
-    , defaultStringFormat "password"
+    , uriFormat
     ]
 
 
@@ -192,16 +197,31 @@ dateFormat =
     }
 
 
-defaultStringFormat : String -> Format
-defaultStringFormat format =
+uriFormat : Format
+uriFormat =
     { basicType = Common.String
-    , format = format
-    , annotation = Elm.Annotation.string
-    , encode = Gen.Json.Encode.call_.string
-    , decoder = Gen.Json.Decode.string
-    , toParamString = identity
+    , format = "uri"
+    , annotation = Gen.Url.annotation_.url
+    , encode =
+        \url ->
+            url
+                |> Gen.Url.toString
+                |> Gen.Json.Encode.call_.string
+    , toParamString = Gen.Url.toString
+    , decoder =
+        Gen.Json.Decode.string
+            |> Gen.Json.Decode.andThen
+                (\raw ->
+                    Gen.Maybe.caseOf_.maybe
+                        (Gen.Url.call_.fromString raw)
+                        { just = Gen.Json.Decode.succeed
+                        , nothing =
+                            Gen.Json.Decode.call_.fail
+                                (Elm.Op.append raw (Elm.string " is not a valid URL"))
+                        }
+                )
     , sharedDeclarations = []
-    , requiresPackages = []
+    , requiresPackages = [ "justinmimbs/date" ]
     }
 
 
@@ -252,7 +272,15 @@ withWriteMergedTo newWriteMergedTo (Config config) =
 
 withFormat : Format -> Config -> Config
 withFormat newFormat (Config config) =
-    Config { config | formats = newFormat :: config.formats }
+    Config { config | staticFormats = newFormat :: config.staticFormats }
+
+
+withFormats :
+    (List { format : String, basicType : Common.BasicType } -> List Format)
+    -> Config
+    -> Config
+withFormats newFormat (Config config) =
+    Config { config | dynamicFormats = \input -> newFormat input ++ config.dynamicFormats input }
 
 
 swaggerConversionUrl : Config -> String
@@ -276,7 +304,8 @@ oasPath (Config config) =
 
 
 toGenerationConfig :
-    Config
+    List { format : String, basicType : Common.BasicType }
+    -> Config
     ->
         { outputModuleName : Maybe (List String)
         , generateTodos : Bool
@@ -284,12 +313,12 @@ toGenerationConfig :
         , server : Server
         , formats : List Format
         }
-toGenerationConfig (Config config) =
+toGenerationConfig input (Config config) =
     { outputModuleName = config.outputModuleName
     , generateTodos = config.generateTodos
     , effectTypes = config.effectTypes
     , server = config.server
-    , formats = config.formats
+    , formats = config.staticFormats ++ config.dynamicFormats input
     }
 
 

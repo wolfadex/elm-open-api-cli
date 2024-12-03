@@ -28,13 +28,14 @@ import Common
 import Dict
 import Elm
 import Elm.Annotation
-import Elm.ToString
 import FastDict
 import FastSet
 import Gen.Debug
+import Gen.Json.Decode
+import Gen.Json.Encode
 import OpenApi exposing (OpenApi)
 import OpenApi.Config
-import Regex exposing (Regex)
+import String.Extra
 
 
 type alias Message =
@@ -62,7 +63,7 @@ type alias InternalFormat =
     , decoder : Elm.Expression
     , toParamString : Elm.Expression -> Elm.Expression
     , annotation : Elm.Annotation.Annotation
-    , sharedDeclarations : List Elm.Declaration
+    , sharedDeclarations : List ( String, Elm.Expression )
     , requiresPackages : List String
     }
 
@@ -83,7 +84,7 @@ type alias Output =
     { warnings : List Message
     , oneOfs : FastDict.Dict OneOfName Common.OneOfData
     , requiredPackages : FastSet.Set String
-    , sharedDeclarations : FastDict.Dict String Elm.Declaration
+    , sharedDeclarations : FastDict.Dict String Elm.Expression
     }
 
 
@@ -308,8 +309,8 @@ run oneOfDeclarations input (CliMonad x) =
                     declarationsForFormats : Output -> List ( Common.Module, Elm.Declaration )
                     declarationsForFormats out =
                         out.sharedDeclarations
-                            |> FastDict.values
-                            |> List.map (\decl -> ( Common.Json, decl ))
+                            |> FastDict.toList
+                            |> List.map (\( name, expr ) -> ( Common.Common, Elm.expose (Elm.declaration name expr) ))
                 in
                 h internalInput
                     |> Result.map
@@ -427,8 +428,6 @@ withFormat :
          , decoder : Elm.Expression
          , toParamString : Elm.Expression -> Elm.Expression
          , annotation : Elm.Annotation.Annotation
-         , sharedDeclarations : List Elm.Declaration
-         , requiresPackages : List String
          }
          -> a
         )
@@ -441,45 +440,135 @@ withFormat basicType maybeFormatName getter default =
 
         Just formatName ->
             CliMonad
-                (\{ formats } ->
+                (\{ formats, namespace } ->
                     case
                         FastDict.get ( Common.basicTypeToString basicType, formatName ) formats
                     of
                         Nothing ->
+                            let
+                                isSimple : Bool
+                                isSimple =
+                                    case ( basicType, formatName ) of
+                                        -- These formats don't require special handling
+                                        ( Common.Integer, "int32" ) ->
+                                            True
+
+                                        ( Common.Number, "int32" ) ->
+                                            True
+
+                                        ( Common.Number, "float" ) ->
+                                            True
+
+                                        ( Common.Number, "double" ) ->
+                                            True
+
+                                        ( Common.String, "password" ) ->
+                                            True
+
+                                        _ ->
+                                            False
+                            in
                             ( default
-                            , emptyOutput
+                            , if isSimple then
+                                emptyOutput
+
+                              else
+                                { emptyOutput
+                                    | warnings =
+                                        [ { message =
+                                                "Don't know how to handle format \""
+                                                    ++ formatName
+                                                    ++ "\" for type "
+                                                    ++ Common.basicTypeToString basicType
+                                                    ++ ", treating as the corresponding basic type."
+                                          , path = [ "format" ]
+                                          }
+                                        ]
+                                }
                             )
                                 |> Ok
 
                         Just format ->
-                            ( getter format
+                            let
+                                name : String
+                                name =
+                                    String.Extra.classify (Common.basicTypeToString basicType ++ "-" ++ formatName)
+
+                                encodeAnnotation : Elm.Annotation.Annotation
+                                encodeAnnotation =
+                                    Elm.Annotation.function
+                                        [ format.annotation ]
+                                        Gen.Json.Encode.annotation_.value
+
+                                toParamStringAnnotation : Elm.Annotation.Annotation
+                                toParamStringAnnotation =
+                                    Elm.Annotation.function
+                                        [ format.annotation ]
+                                        Elm.Annotation.string
+
+                                decodeAnnotation : Elm.Annotation.Annotation
+                                decodeAnnotation =
+                                    Gen.Json.Decode.annotation_.decoder format.annotation
+
+                                encoder : Elm.Expression
+                                encoder =
+                                    Elm.functionReduced "value" format.encode
+                                        |> Elm.withType encodeAnnotation
+
+                                decoder : Elm.Expression
+                                decoder =
+                                    format.decoder
+                                        |> Elm.withType decodeAnnotation
+
+                                toParamString : Elm.Expression
+                                toParamString =
+                                    Elm.functionReduced "value" format.toParamString
+                                        |> Elm.withType toParamStringAnnotation
+                            in
+                            ( getter
+                                { encode =
+                                    \value ->
+                                        Elm.apply
+                                            (Elm.value
+                                                { name = "encode" ++ name
+                                                , annotation = Just encodeAnnotation
+                                                , importFrom = Common.moduleToNamespace namespace Common.Common
+                                                }
+                                                |> Elm.withType encodeAnnotation
+                                            )
+                                            [ value ]
+                                , decoder =
+                                    Elm.value
+                                        { name = "decode" ++ name
+                                        , annotation = Just decodeAnnotation
+                                        , importFrom = Common.moduleToNamespace namespace Common.Common
+                                        }
+                                        |> Elm.withType decodeAnnotation
+                                , toParamString =
+                                    \value ->
+                                        Elm.apply
+                                            (Elm.value
+                                                { name = "toParamString" ++ name
+                                                , annotation = Just toParamStringAnnotation
+                                                , importFrom = Common.moduleToNamespace namespace Common.Common
+                                                }
+                                                |> Elm.withType toParamStringAnnotation
+                                            )
+                                            [ value ]
+                                , annotation = format.annotation
+                                }
                             , { emptyOutput
                                 | requiredPackages = FastSet.fromList format.requiresPackages
                                 , sharedDeclarations =
                                     format.sharedDeclarations
-                                        |> List.map (\decl -> ( declarationName decl, decl ))
                                         |> FastDict.fromList
+                                        |> FastDict.insert ("encode" ++ name) encoder
+                                        |> FastDict.insert ("decode" ++ name) decoder
+                                        |> FastDict.insert ("toParamString" ++ name) toParamString
                               }
                             )
                                 |> Ok
                 )
-
-
-declarationName : Elm.Declaration -> String
-declarationName decl =
-    let
-        -- TODO: do this in a nonhorrible way
-        nameRegex : Regex
-        nameRegex =
-            Regex.fromString "^([a-zA-Z][a-zA-Z0-9_]*) ="
-                |> Maybe.withDefault Regex.never
-    in
-    (Elm.ToString.declaration decl).body
-        |> Regex.findAtMost 1 nameRegex
-        |> List.head
-        |> Maybe.andThen (\{ submatches } -> List.head submatches)
-        |> Maybe.andThen identity
-        |> Maybe.withDefault ""
 
 
 withRequiredPackage : String -> CliMonad a -> CliMonad a

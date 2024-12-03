@@ -310,7 +310,7 @@ run oneOfDeclarations input (CliMonad x) =
                     declarationsForFormats out =
                         out.sharedDeclarations
                             |> FastDict.toList
-                            |> List.map (\( name, expr ) -> ( Common.Json, Elm.expose (Elm.declaration name expr) ))
+                            |> List.map (\( name, expr ) -> ( Common.Common, Elm.expose (Elm.declaration name expr) ))
                 in
                 h internalInput
                     |> Result.map
@@ -532,7 +532,7 @@ withFormat basicType maybeFormatName getter default =
                                             (Elm.value
                                                 { name = "encode" ++ name
                                                 , annotation = Just encodeAnnotation
-                                                , importFrom = Common.moduleToNamespace namespace Common.Json
+                                                , importFrom = Common.moduleToNamespace namespace Common.Common
                                                 }
                                                 |> Elm.withType encodeAnnotation
                                             )
@@ -541,7 +541,7 @@ withFormat basicType maybeFormatName getter default =
                                     Elm.value
                                         { name = "decode" ++ name
                                         , annotation = Just decodeAnnotation
-                                        , importFrom = Common.moduleToNamespace namespace Common.Json
+                                        , importFrom = Common.moduleToNamespace namespace Common.Common
                                         }
                                         |> Elm.withType decodeAnnotation
                                 , toParamString =
@@ -550,7 +550,7 @@ withFormat basicType maybeFormatName getter default =
                                             (Elm.value
                                                 { name = "toParamString" ++ name
                                                 , annotation = Just toParamStringAnnotation
-                                                , importFrom = Common.moduleToNamespace namespace Common.Json
+                                                , importFrom = Common.moduleToNamespace namespace Common.Common
                                                 }
                                                 |> Elm.withType toParamStringAnnotation
                                             )

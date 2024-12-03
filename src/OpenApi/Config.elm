@@ -122,6 +122,7 @@ defaultFormats =
     , uriFormat
     , defaultIntFormat "int32" Common.Integer
     , defaultIntFormat "int32" Common.Number
+    , defaultFloatFormat "float"
     , defaultFloatFormat "double"
     , defaultStringFormat "password"
     ]

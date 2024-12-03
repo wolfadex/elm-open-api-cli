@@ -12,7 +12,6 @@ import Gen.Maybe
 import Gen.Parser.Advanced
 import Gen.Result
 import Gen.Rfc3339
-import Gen.String
 import Gen.Time
 import Gen.Url
 import Url
@@ -120,11 +119,6 @@ defaultFormats =
     [ dateTimeFormat
     , dateFormat
     , uriFormat
-    , defaultIntFormat "int32" Common.Integer
-    , defaultIntFormat "int32" Common.Number
-    , defaultFloatFormat "float"
-    , defaultFloatFormat "double"
-    , defaultStringFormat "password"
     ]
 
 
@@ -228,45 +222,6 @@ uriFormat =
                 )
     , sharedDeclarations = []
     , requiresPackages = [ "justinmimbs/date" ]
-    }
-
-
-defaultIntFormat : String -> Common.BasicType -> Format
-defaultIntFormat format basicType =
-    { basicType = basicType
-    , format = format
-    , annotation = Elm.Annotation.int
-    , encode = Gen.Json.Encode.call_.int
-    , decoder = Gen.Json.Decode.int
-    , toParamString = Gen.String.call_.fromInt
-    , sharedDeclarations = []
-    , requiresPackages = []
-    }
-
-
-defaultFloatFormat : String -> Format
-defaultFloatFormat format =
-    { basicType = Common.Number
-    , format = format
-    , annotation = Elm.Annotation.float
-    , encode = Gen.Json.Encode.call_.float
-    , decoder = Gen.Json.Decode.float
-    , toParamString = Gen.String.call_.fromFloat
-    , sharedDeclarations = []
-    , requiresPackages = []
-    }
-
-
-defaultStringFormat : String -> Format
-defaultStringFormat format =
-    { basicType = Common.String
-    , format = format
-    , annotation = Elm.Annotation.string
-    , encode = Gen.Json.Encode.call_.string
-    , decoder = Gen.Json.Decode.string
-    , toParamString = identity
-    , sharedDeclarations = []
-    , requiresPackages = []
     }
 
 

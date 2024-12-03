@@ -445,19 +445,46 @@ withFormat basicType maybeFormatName getter default =
                         FastDict.get ( Common.basicTypeToString basicType, formatName ) formats
                     of
                         Nothing ->
+                            let
+                                isSimple : Bool
+                                isSimple =
+                                    case ( basicType, formatName ) of
+                                        -- These formats don't require special handling
+                                        ( Common.Integer, "int32" ) ->
+                                            True
+
+                                        ( Common.Number, "int32" ) ->
+                                            True
+
+                                        ( Common.Number, "float" ) ->
+                                            True
+
+                                        ( Common.Number, "double" ) ->
+                                            True
+
+                                        ( Common.String, "password" ) ->
+                                            True
+
+                                        _ ->
+                                            False
+                            in
                             ( default
-                            , { emptyOutput
-                                | warnings =
-                                    [ { message =
-                                            "Don't know how to handle format \""
-                                                ++ formatName
-                                                ++ "\" for type "
-                                                ++ Common.basicTypeToString basicType
-                                                ++ ", treating as the corresponding basic type."
-                                      , path = [ "format" ]
-                                      }
-                                    ]
-                              }
+                            , if isSimple then
+                                emptyOutput
+
+                              else
+                                { emptyOutput
+                                    | warnings =
+                                        [ { message =
+                                                "Don't know how to handle format \""
+                                                    ++ formatName
+                                                    ++ "\" for type "
+                                                    ++ Common.basicTypeToString basicType
+                                                    ++ ", treating as the corresponding basic type."
+                                          , path = [ "format" ]
+                                          }
+                                        ]
+                                }
                             )
                                 |> Ok
 
@@ -465,7 +492,7 @@ withFormat basicType maybeFormatName getter default =
                             let
                                 name : String
                                 name =
-                                    Common.basicTypeToString basicType ++ String.Extra.classify formatName
+                                    String.Extra.classify (Common.basicTypeToString basicType ++ "-" ++ formatName)
 
                                 encodeAnnotation : Elm.Annotation.Annotation
                                 encodeAnnotation =

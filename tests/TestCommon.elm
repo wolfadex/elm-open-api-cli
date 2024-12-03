@@ -4,7 +4,7 @@ import Common
 import Expect
 import Fuzz
 import Json.Encode
-import Set exposing (Set)
+import Set
 import Test
 import Unicode
 

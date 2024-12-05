@@ -3,6 +3,7 @@ module Cli exposing (run, withConfig)
 import Ansi
 import Ansi.Color
 import BackendTask exposing (BackendTask)
+import BackendTask.Extra
 import BackendTask.File
 import BackendTask.Http
 import BackendTask.Stream
@@ -825,13 +826,12 @@ generateFilesFromOpenApiSpecs :
             )
 generateFilesFromOpenApiSpecs configs =
     configs
-        |> List.map
+        |> BackendTask.Extra.combineMap
             (\( config, apiSpec ) ->
                 OpenApi.Generate.files config apiSpec
                     |> Result.mapError (messageToString >> FatalError.fromString)
                     |> BackendTask.fromResult
             )
-        |> BackendTask.combine
         |> BackendTask.map
             (\result ->
                 let
@@ -860,7 +860,7 @@ attemptToFormat files =
                 case maybeFound of
                     Just _ ->
                         files
-                            |> List.map
+                            |> BackendTask.Extra.combineMap
                                 (\file ->
                                     BackendTask.Stream.fromString file.contents
                                         |> BackendTask.Stream.pipe (BackendTask.Stream.command "elm-format" [ "--stdin" ])
@@ -869,7 +869,6 @@ attemptToFormat files =
                                         -- Never fail on formatting errors
                                         |> BackendTask.onError (\_ -> BackendTask.succeed file)
                                 )
-                            |> BackendTask.combine
 
                     Nothing ->
                         BackendTask.succeed files
@@ -877,8 +876,8 @@ attemptToFormat files =
 
 
 writeSdkToDisk : String -> List Elm.File -> BackendTask.BackendTask FatalError.FatalError (List String)
-writeSdkToDisk outputDirectory =
-    List.map
+writeSdkToDisk outputDirectory files =
+    BackendTask.Extra.combineMap
         (\file ->
             let
                 filePath : String
@@ -908,7 +907,7 @@ writeSdkToDisk outputDirectory =
                     )
                 |> BackendTask.map (\_ -> outputPath)
         )
-        >> BackendTask.combine
+        files
 
 
 printSuccessMessageAndWarnings :

@@ -465,6 +465,9 @@ withFormat basicType maybeFormatName getter default =
                                         ( Common.String, "password" ) ->
                                             True
 
+                                        ( Common.String, "email" ) ->
+                                            True
+
                                         _ ->
                                             False
                             in

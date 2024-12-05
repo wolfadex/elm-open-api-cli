@@ -102,7 +102,10 @@ files :
     ->
         Result
             CliMonad.Message
-            ( List Elm.File
+            ( List
+                { moduleName : List String
+                , declarations : List Elm.Declaration
+                }
             , { warnings : List CliMonad.Message
               , requiredPackages : FastSet.Set String
               }
@@ -173,32 +176,9 @@ files { namespace, generateTodos, effectTypes, server, formats } apiSpec =
                             |> List.Extra.gatherEqualsBy Tuple.first
                             |> List.map
                                 (\( ( module_, head ), tail ) ->
-                                    Elm.fileWith (Common.moduleToNamespace namespace module_)
-                                        { docs =
-                                            \docs ->
-                                                docs
-                                                    |> List.sortBy
-                                                        (\{ group } ->
-                                                            case group of
-                                                                Just "Request functions" ->
-                                                                    1
-
-                                                                Just "Types" ->
-                                                                    2
-
-                                                                Just "Encoders" ->
-                                                                    3
-
-                                                                Just "Decoders" ->
-                                                                    4
-
-                                                                _ ->
-                                                                    5
-                                                        )
-                                                    |> formatModuleDocs
-                                        , aliases = []
-                                        }
-                                        (head :: List.map Tuple.second tail)
+                                    { moduleName = Common.moduleToNamespace namespace module_
+                                    , declarations = head :: List.map Tuple.second tail
+                                    }
                                 )
                         , { warnings = warnings
                           , requiredPackages = requiredPackages
@@ -425,41 +405,6 @@ serverDecls apiSpec server =
                                         }
                                 )
                             )
-
-
-formatModuleDocs : List { group : Maybe String, members : List String } -> List String
-formatModuleDocs =
-    List.map
-        (\{ group, members } ->
-            "## "
-                ++ Maybe.withDefault "Other" group
-                ++ "\n\n\n"
-                ++ (members
-                        |> List.sort
-                        |> List.foldl
-                            (\member memberLines ->
-                                case memberLines of
-                                    [] ->
-                                        [ [ member ] ]
-
-                                    memberLine :: restOfLines ->
-                                        let
-                                            groupSize : Int
-                                            groupSize =
-                                                String.length (String.join ", " memberLine)
-                                        in
-                                        if String.length member + groupSize < 105 then
-                                            (member :: memberLine) :: restOfLines
-
-                                        else
-                                            [ member ] :: memberLines
-                            )
-                            []
-                        |> List.map (\memberLine -> "@docs " ++ String.join ", " (List.reverse memberLine))
-                        |> List.reverse
-                        |> String.join "\n"
-                   )
-        )
 
 
 pathDeclarations : OpenApi.Config.Server -> List OpenApi.Config.EffectType -> CliMonad (List ( Common.Module, Elm.Declaration ))

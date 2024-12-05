@@ -15,6 +15,7 @@ import Common
 import Dict
 import Dict.Extra
 import Elm
+import FastDict
 import FastSet
 import FatalError exposing (FatalError)
 import Json.Decode
@@ -903,11 +904,13 @@ generateFilesFromOpenApiSpecs configs =
                     |> Dict.toList
                     |> List.map
                         (\( moduleName, group ) ->
-                            Elm.fileWith moduleName
-                                { docs = formatDocs
-                                , aliases = []
-                                }
-                                (List.concatMap .declarations group)
+                            group
+                                |> List.foldl (\{ declarations } acc -> FastDict.union declarations acc) FastDict.empty
+                                |> FastDict.values
+                                |> Elm.fileWith moduleName
+                                    { docs = formatDocs
+                                    , aliases = []
+                                    }
                         )
                 , { warnings = List.concatMap .warnings messages
                   , requiredPackages =

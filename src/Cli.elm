@@ -3,6 +3,7 @@ module Cli exposing (run, withConfig)
 import Ansi
 import Ansi.Color
 import BackendTask exposing (BackendTask)
+import BackendTask.Extra
 import BackendTask.File
 import BackendTask.Http
 import BackendTask.Stream
@@ -12,17 +13,17 @@ import Cli.Program
 import CliMonad
 import Common
 import Dict
+import Dict.Extra
 import Elm
+import FastDict
 import FastSet
 import FatalError exposing (FatalError)
 import Json.Decode
 import Json.Encode
 import Json.Value
-import List.Extra
 import OpenApi
 import OpenApi.Config
 import OpenApi.Generate
-import OpenApi.Info
 import Pages.Script
 import Pages.Script.Spinner
 import Result.Extra
@@ -277,41 +278,42 @@ run =
 parseCliOptions : CliOptions -> OpenApi.Config.Config
 parseCliOptions cliOptions =
     let
-        config : OpenApi.Config.Config
-        config =
-            OpenApi.Config.init cliOptions.entryFilePath cliOptions.outputDirectory
-
         -- Apply an update if the input is `Just x`
         maybe :
             (value -> config -> config)
             -> Maybe value
             -> config
             -> config
-        maybe updater maybeValue input =
+        maybe updater maybeValue config =
             case maybeValue of
                 Nothing ->
-                    input
+                    config
 
                 Just value ->
-                    updater value input
+                    updater value config
 
         -- Apply an update if a condition is met
         iif : Bool -> (config -> config) -> config -> config
-        iif cond updater input =
+        iif cond updater config =
             if cond then
-                updater input
+                updater config
 
             else
-                input
+                config
+
+        input : OpenApi.Config.Input
+        input =
+            OpenApi.Config.inputFrom cliOptions.entryFilePath
+                |> OpenApi.Config.withServer cliOptions.server
+                |> OpenApi.Config.withOverrides cliOptions.overrides
+                |> maybe OpenApi.Config.withWriteMergedTo cliOptions.writeMergedTo
+                |> maybe OpenApi.Config.withOutputModuleName (Maybe.map (String.split ".") cliOptions.outputModuleName)
+                |> iif (not (List.isEmpty cliOptions.effectTypes)) (OpenApi.Config.withEffectTypes cliOptions.effectTypes)
     in
-    config
+    OpenApi.Config.init cliOptions.outputDirectory
+        |> OpenApi.Config.withInput input
         |> OpenApi.Config.withGenerateTodos cliOptions.generateTodos
         |> OpenApi.Config.withAutoConvertSwagger cliOptions.autoConvertSwagger
-        |> OpenApi.Config.withServer cliOptions.server
-        |> OpenApi.Config.withOverrides cliOptions.overrides
-        |> iif (not (List.isEmpty cliOptions.effectTypes)) (OpenApi.Config.withEffectTypes cliOptions.effectTypes)
-        |> maybe OpenApi.Config.withOutputModuleName (Maybe.map (String.split ".") cliOptions.outputModuleName)
-        |> maybe OpenApi.Config.withWriteMergedTo cliOptions.writeMergedTo
         |> maybe OpenApi.Config.withSwaggerConversionUrl cliOptions.swaggerConversionUrl
         |> maybe OpenApi.Config.withSwaggerConversionCommand
             (cliOptions.swaggerConversionCommand
@@ -319,59 +321,125 @@ parseCliOptions cliOptions =
             )
 
 
+withInnerStep :
+    Int
+    -> Int
+    -> String
+    -> (a -> BackendTask FatalError b)
+    -> Pages.Script.Spinner.Steps FatalError ( a, c, d )
+    -> Pages.Script.Spinner.Steps FatalError ( b, c, d )
+withInnerStep index total label toTask =
+    Pages.Script.Spinner.withStep (counter index total ++ " " ++ label)
+        (\( input, acc1, acc2 ) -> toTask input |> BackendTask.map (\result -> ( result, acc1, acc2 )))
+
+
 withConfig : OpenApi.Config.Config -> BackendTask FatalError ()
 withConfig config =
-    Pages.Script.Spinner.steps
-        |> (case OpenApi.Config.oasPath config of
-                OpenApi.Config.Url url ->
-                    Pages.Script.Spinner.withStep ("Download OAS from " ++ Url.toString url)
-                        (\_ -> BackendTask.andThen (parseOriginal config) (readFromUrl url))
+    let
+        total : Int
+        total =
+            List.length (OpenApi.Config.inputs config)
+    in
+    List.foldl
+        (\input ( index, steps ) ->
+            ( index + 1
+            , steps
+                |> (case OpenApi.Config.oasPath input of
+                        OpenApi.Config.Url url ->
+                            withInnerStep index
+                                total
+                                ("Download OAS from " ++ Url.toString url)
+                                (\_ -> BackendTask.andThen (parseOriginal input) (readFromUrl url))
 
-                OpenApi.Config.File path ->
-                    Pages.Script.Spinner.withStep ("Read OAS from " ++ path)
-                        (\_ -> BackendTask.andThen (parseOriginal config) (readFromFile path))
-           )
-        |> (\prev ->
-                let
-                    overrides : List OpenApi.Config.Path
-                    overrides =
-                        OpenApi.Config.overrides config
-                in
-                if List.isEmpty overrides then
-                    prev
-                        |> Pages.Script.Spinner.withStep "No overrides"
-                            (\( _, original ) -> BackendTask.succeed (Json.Value.encode original))
+                        OpenApi.Config.File path ->
+                            withInnerStep index
+                                total
+                                ("Read OAS from " ++ path)
+                                (\_ -> BackendTask.andThen (parseOriginal input) (readFromFile path))
+                   )
+                |> (\prev ->
+                        let
+                            overrides : List OpenApi.Config.Path
+                            overrides =
+                                OpenApi.Config.overrides input
+                        in
+                        if List.isEmpty overrides then
+                            prev
+                                |> withInnerStep index
+                                    total
+                                    "No overrides"
+                                    (\( _, original ) -> BackendTask.succeed (Json.Value.encode original))
 
-                else
-                    List.foldl
-                        (\override ->
-                            case override of
-                                OpenApi.Config.Url url ->
-                                    Pages.Script.Spinner.withStep ("Download override from " ++ Url.toString url)
-                                        (\( acc, original ) -> BackendTask.map (\read -> ( ( override, read ) :: acc, original )) (readFromUrl url))
+                        else
+                            List.foldl
+                                (\override ->
+                                    case override of
+                                        OpenApi.Config.Url url ->
+                                            withInnerStep index
+                                                total
+                                                ("Download override from " ++ Url.toString url)
+                                                (\( acc, original ) -> BackendTask.map (\read -> ( ( override, read ) :: acc, original )) (readFromUrl url))
 
-                                OpenApi.Config.File path ->
-                                    Pages.Script.Spinner.withStep ("Read override from " ++ path)
-                                        (\( acc, original ) -> BackendTask.map (\read -> ( ( override, read ) :: acc, original )) (readFromFile path))
-                        )
-                        prev
-                        overrides
-                        |> Pages.Script.Spinner.withStep "Merging overrides" mergeOverrides
-           )
-        |> (case OpenApi.Config.writeMergedTo config of
-                Nothing ->
-                    identity
+                                        OpenApi.Config.File path ->
+                                            withInnerStep index
+                                                total
+                                                ("Read override from " ++ path)
+                                                (\( acc, original ) -> BackendTask.map (\read -> ( ( override, read ) :: acc, original )) (readFromFile path))
+                                )
+                                prev
+                                overrides
+                                |> withInnerStep index total "Merging overrides" mergeOverrides
+                   )
+                |> (case OpenApi.Config.writeMergedTo input of
+                        Nothing ->
+                            identity
 
-                Just destination ->
-                    Pages.Script.Spinner.withStep "Writing merged OAS" (writeMerged destination)
-           )
-        |> Pages.Script.Spinner.withStep "Parse OAS" (decodeOpenApiSpecOrFail { hasAttemptedToConvertFromSwagger = False } config)
+                        Just destination ->
+                            withInnerStep index total "Writing merged OAS" (writeMerged destination)
+                   )
+                |> Pages.Script.Spinner.withStep (counter index total ++ " Parse OAS")
+                    (\( merged, apiSpecAcc, formatsAcc ) ->
+                        merged
+                            |> decodeOpenApiSpecOrFail { hasAttemptedToConvertFromSwagger = False } config input
+                            |> BackendTask.map
+                                (\( apiSpec, formats ) ->
+                                    ( ()
+                                    , ( input, apiSpec ) :: apiSpecAcc
+                                    , formats :: formatsAcc
+                                    )
+                                )
+                    )
+            )
+        )
+        ( 1
+        , Pages.Script.Spinner.steps
+            |> Pages.Script.Spinner.withStep "Collecting configuration" (\_ -> BackendTask.succeed ( (), [], [] ))
+        )
+        (OpenApi.Config.inputs config)
+        |> Tuple.second
         |> Pages.Script.Spinner.withStep "Generate Elm modules"
-            (\( apiSpec, allFormats ) -> generateFileFromOpenApiSpec (OpenApi.Config.toGenerationConfig allFormats config) apiSpec)
+            (\( (), apiSpecs, allFormats ) ->
+                OpenApi.Config.toGenerationConfig (List.concat allFormats) config apiSpecs
+                    |> generateFilesFromOpenApiSpecs
+            )
         |> Pages.Script.Spinner.withStep "Format with elm-format" (onFirst attemptToFormat)
         |> Pages.Script.Spinner.withStep "Write to disk" (onFirst (writeSdkToDisk (OpenApi.Config.outputDirectory config)))
         |> Pages.Script.Spinner.runSteps
         |> BackendTask.andThen printSuccessMessageAndWarnings
+
+
+counter : Int -> Int -> String
+counter index total =
+    let
+        totalString : String
+        totalString =
+            String.fromInt total
+    in
+    "["
+        ++ String.padLeft (String.length totalString) '0' (String.fromInt index)
+        ++ "/"
+        ++ totalString
+        ++ "]"
 
 
 onFirst : (a -> BackendTask.BackendTask error c) -> ( a, b ) -> BackendTask.BackendTask error ( c, b )
@@ -379,9 +447,9 @@ onFirst f ( a, b ) =
     f a |> BackendTask.map (\c -> ( c, b ))
 
 
-parseOriginal : OpenApi.Config.Config -> String -> BackendTask.BackendTask FatalError.FatalError ( List a, Json.Value.JsonValue )
-parseOriginal config original =
-    case decodeMaybeYaml (OpenApi.Config.oasPath config) original of
+parseOriginal : OpenApi.Config.Input -> String -> BackendTask.BackendTask FatalError.FatalError ( List a, Json.Value.JsonValue )
+parseOriginal input original =
+    case decodeMaybeYaml (OpenApi.Config.oasPath input) original of
         Err e ->
             e
                 |> jsonErrorToFatalError
@@ -421,8 +489,13 @@ writeMerged destination spec =
         |> BackendTask.map (\_ -> spec)
 
 
-decodeOpenApiSpecOrFail : { hasAttemptedToConvertFromSwagger : Bool } -> OpenApi.Config.Config -> Json.Decode.Value -> BackendTask.BackendTask FatalError.FatalError ( OpenApi.OpenApi, List { format : String, basicType : Common.BasicType } )
-decodeOpenApiSpecOrFail { hasAttemptedToConvertFromSwagger } config value =
+decodeOpenApiSpecOrFail :
+    { hasAttemptedToConvertFromSwagger : Bool }
+    -> OpenApi.Config.Config
+    -> OpenApi.Config.Input
+    -> Json.Decode.Value
+    -> BackendTask.BackendTask FatalError.FatalError ( OpenApi.OpenApi, List { format : String, basicType : Common.BasicType } )
+decodeOpenApiSpecOrFail { hasAttemptedToConvertFromSwagger } config input value =
     case
         Result.map2 Tuple.pair
             (Json.Decode.decodeValue OpenApi.decode value)
@@ -451,7 +524,7 @@ decodeOpenApiSpecOrFail { hasAttemptedToConvertFromSwagger } config value =
 
                                 else
                                     Pages.Script.question
-                                        (Ansi.Color.fontColor Ansi.Color.brightCyan (OpenApi.Config.pathToString (OpenApi.Config.oasPath config))
+                                        (Ansi.Color.fontColor Ansi.Color.brightCyan (OpenApi.Config.pathToString (OpenApi.Config.oasPath input))
                                             ++ """ is a Swagger doc (aka Open API v2) and this tool only supports Open API v3.
 Would you like to use """
                                             ++ Ansi.Color.fontColor Ansi.Color.brightCyan (OpenApi.Config.swaggerConversionUrl config)
@@ -463,7 +536,7 @@ Would you like to use """
                             |> BackendTask.andThen
                                 (\shouldConvert ->
                                     if shouldConvert then
-                                        convertToSwaggerAndThenDecode config value
+                                        convertToSwaggerAndThenDecode config input value
 
                                     else
                                         ("""The input file appears to be a Swagger doc,
@@ -548,16 +621,16 @@ resultToDecoder result =
             Json.Decode.fail (Json.Decode.errorToString e)
 
 
-convertToSwaggerAndThenDecode : OpenApi.Config.Config -> Json.Decode.Value -> BackendTask.BackendTask FatalError.FatalError ( OpenApi.OpenApi, List { format : String, basicType : Common.BasicType } )
-convertToSwaggerAndThenDecode config value =
+convertToSwaggerAndThenDecode : OpenApi.Config.Config -> OpenApi.Config.Input -> Json.Decode.Value -> BackendTask.BackendTask FatalError.FatalError ( OpenApi.OpenApi, List { format : String, basicType : Common.BasicType } )
+convertToSwaggerAndThenDecode config input value =
     convertSwaggerToOpenApi config (Json.Encode.encode 0 value)
         |> BackendTask.andThen
-            (\input ->
-                parseOriginal config input
+            (\swagger ->
+                parseOriginal input swagger
                     |> BackendTask.andThen mergeOverrides
             )
         |> Pages.Script.Spinner.runTask "Convert Swagger to Open API"
-        |> BackendTask.andThen (\input -> decodeOpenApiSpecOrFail { hasAttemptedToConvertFromSwagger = True } config input)
+        |> BackendTask.andThen (\converted -> decodeOpenApiSpecOrFail { hasAttemptedToConvertFromSwagger = True } config input converted)
 
 
 jsonErrorToFatalError : Json.Decode.Error -> FatalError.FatalError
@@ -777,14 +850,8 @@ yamlToJsonValueDecoder =
         ]
 
 
-generateFileFromOpenApiSpec :
-    { outputModuleName : Maybe (List String)
-    , generateTodos : Bool
-    , effectTypes : List OpenApi.Config.EffectType
-    , server : OpenApi.Config.Server
-    , formats : List OpenApi.Config.Format
-    }
-    -> OpenApi.OpenApi
+generateFilesFromOpenApiSpecs :
+    List ( OpenApi.Generate.Config, OpenApi.OpenApi )
     ->
         BackendTask.BackendTask
             FatalError.FatalError
@@ -793,32 +860,102 @@ generateFileFromOpenApiSpec :
               , requiredPackages : FastSet.Set String
               }
             )
-generateFileFromOpenApiSpec config apiSpec =
-    let
-        moduleName : List String
-        moduleName =
-            case config.outputModuleName of
-                Just modName ->
-                    modName
+generateFilesFromOpenApiSpecs configs =
+    configs
+        |> BackendTask.Extra.combineMap
+            (\( config, apiSpec ) ->
+                OpenApi.Generate.files config apiSpec
+                    |> Result.mapError (messageToString >> FatalError.fromString)
+                    |> BackendTask.fromResult
+            )
+        |> BackendTask.map
+            (\result ->
+                let
+                    ( files, messages ) =
+                        List.unzip result
 
-                Nothing ->
-                    apiSpec
-                        |> OpenApi.info
-                        |> OpenApi.Info.title
-                        |> OpenApi.Generate.sanitizeModuleName
-                        |> Maybe.withDefault "Api"
-                        |> List.singleton
-    in
-    OpenApi.Generate.files
-        { namespace = moduleName
-        , generateTodos = config.generateTodos
-        , effectTypes = config.effectTypes
-        , server = config.server
-        , formats = config.formats
-        }
-        apiSpec
-        |> Result.mapError (messageToString >> FatalError.fromString)
-        |> BackendTask.fromResult
+                    formatDocs : List { members : List String, group : Maybe String } -> List String
+                    formatDocs docs =
+                        docs
+                            |> List.sortBy groupOrder
+                            |> formatModuleDocs
+
+                    groupOrder : { members : List String, group : Maybe String } -> Int
+                    groupOrder { group } =
+                        case group of
+                            Just "Request functions" ->
+                                1
+
+                            Just "Types" ->
+                                2
+
+                            Just "Encoders" ->
+                                3
+
+                            Just "Decoders" ->
+                                4
+
+                            _ ->
+                                5
+                in
+                ( files
+                    |> List.concat
+                    |> Dict.Extra.groupBy .moduleName
+                    |> Dict.toList
+                    |> List.map
+                        (\( moduleName, group ) ->
+                            group
+                                |> List.foldl (\{ declarations } acc -> FastDict.union declarations acc) FastDict.empty
+                                |> FastDict.values
+                                |> Elm.fileWith moduleName
+                                    { docs = formatDocs
+                                    , aliases = []
+                                    }
+                        )
+                , { warnings = List.concatMap .warnings messages
+                  , requiredPackages =
+                        List.foldl
+                            (\{ requiredPackages } acc -> FastSet.union requiredPackages acc)
+                            FastSet.empty
+                            messages
+                  }
+                )
+            )
+
+
+formatModuleDocs : List { group : Maybe String, members : List String } -> List String
+formatModuleDocs =
+    List.map
+        (\{ group, members } ->
+            "## "
+                ++ Maybe.withDefault "Other" group
+                ++ "\n\n\n"
+                ++ (members
+                        |> List.sort
+                        |> List.foldl
+                            (\member memberLines ->
+                                case memberLines of
+                                    [] ->
+                                        [ [ member ] ]
+
+                                    memberLine :: restOfLines ->
+                                        let
+                                            groupSize : Int
+                                            groupSize =
+                                                String.length (String.join ", " memberLine)
+                                        in
+                                        if String.length member + groupSize < 105 then
+                                            (member :: memberLine) :: restOfLines
+
+                                        else
+                                            [ member ] :: memberLines
+                            )
+                            []
+                        |> List.map (\memberLine -> "@docs " ++ String.join ", " (List.reverse memberLine))
+                        |> List.reverse
+                        |> String.join "\n"
+                   )
+        )
 
 
 {-| Check to see if `elm-format` is available, and if so format the files
@@ -831,7 +968,7 @@ attemptToFormat files =
                 case maybeFound of
                     Just _ ->
                         files
-                            |> List.map
+                            |> BackendTask.Extra.combineMap
                                 (\file ->
                                     BackendTask.Stream.fromString file.contents
                                         |> BackendTask.Stream.pipe (BackendTask.Stream.command "elm-format" [ "--stdin" ])
@@ -840,7 +977,6 @@ attemptToFormat files =
                                         -- Never fail on formatting errors
                                         |> BackendTask.onError (\_ -> BackendTask.succeed file)
                                 )
-                            |> BackendTask.combine
 
                     Nothing ->
                         BackendTask.succeed files
@@ -848,8 +984,8 @@ attemptToFormat files =
 
 
 writeSdkToDisk : String -> List Elm.File -> BackendTask.BackendTask FatalError.FatalError (List String)
-writeSdkToDisk outputDirectory =
-    List.map
+writeSdkToDisk outputDirectory files =
+    BackendTask.Extra.combineMap
         (\file ->
             let
                 filePath : String
@@ -879,7 +1015,7 @@ writeSdkToDisk outputDirectory =
                     )
                 |> BackendTask.map (\_ -> outputPath)
         )
-        >> BackendTask.combine
+        files
 
 
 printSuccessMessageAndWarnings :
@@ -924,7 +1060,8 @@ printSuccessMessageAndWarnings ( outputPaths, { requiredPackages, warnings } ) =
         warningTask : BackendTask.BackendTask FatalError.FatalError ()
         warningTask =
             warnings
-                |> List.Extra.gatherEqualsBy .message
+                |> Dict.Extra.groupBy .message
+                |> Dict.toList
                 |> List.map logWarning
                 |> BackendTask.doEach
 
@@ -959,16 +1096,16 @@ messageToString { path, message } =
         "Error! " ++ message ++ "\n  Path: " ++ String.join " -> " path
 
 
-logWarning : ( CliMonad.Message, List CliMonad.Message ) -> BackendTask.BackendTask FatalError.FatalError ()
-logWarning ( head, tail ) =
+logWarning : ( String, List CliMonad.Message ) -> BackendTask.BackendTask FatalError.FatalError ()
+logWarning ( message, messages ) =
     let
         firstLine : String
         firstLine =
-            Ansi.Color.fontColor Ansi.Color.brightYellow "Warning: " ++ head.message
+            Ansi.Color.fontColor Ansi.Color.brightYellow "Warning: " ++ message
 
         paths : List String
         paths =
-            (head :: tail)
+            messages
                 |> List.filterMap
                     (\{ path } ->
                         if List.isEmpty path then

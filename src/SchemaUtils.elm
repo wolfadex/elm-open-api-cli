@@ -523,7 +523,7 @@ type alias OneOfName =
 
 oneOfDeclarations :
     FastDict.Dict OneOfName Common.OneOfData
-    -> CliMonad (List ( Common.Module, Elm.Declaration ))
+    -> CliMonad (List ( Common.Module, String, Elm.Declaration ))
 oneOfDeclarations enums =
     CliMonad.combineMap
         oneOfDeclaration
@@ -532,7 +532,7 @@ oneOfDeclarations enums =
 
 oneOfDeclaration :
     ( OneOfName, Common.OneOfData )
-    -> CliMonad ( Common.Module, Elm.Declaration )
+    -> CliMonad ( Common.Module, String, Elm.Declaration )
 oneOfDeclaration ( oneOfName, variants ) =
     let
         variantDeclaration : { name : Common.UnsafeName, type_ : Common.Type, documentation : Maybe String } -> CliMonad Elm.Variant
@@ -553,6 +553,7 @@ oneOfDeclaration ( oneOfName, variants ) =
         |> CliMonad.map
             (\decl ->
                 ( Common.Types
+                , oneOfName
                 , decl
                     |> Elm.customType oneOfName
                     |> Elm.exposeWith

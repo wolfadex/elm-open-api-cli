@@ -262,7 +262,7 @@ Automatically appends the needed `oneOf` declarations.
 
 -}
 run :
-    (FastDict.Dict OneOfName Common.OneOfData -> CliMonad (List ( Common.Module, Elm.Declaration )))
+    (FastDict.Dict OneOfName Common.OneOfData -> CliMonad (List ( Common.Module, String, Elm.Declaration )))
     ->
         { openApi : OpenApi
         , generateTodos : Bool
@@ -270,11 +270,11 @@ run :
         , namespace : List String
         , formats : List OpenApi.Config.Format
         }
-    -> CliMonad (List ( Common.Module, Elm.Declaration ))
+    -> CliMonad (List ( Common.Module, String, Elm.Declaration ))
     ->
         Result
             Message
-            { declarations : List ( Common.Module, Elm.Declaration )
+            { declarations : List ( Common.Module, String, Elm.Declaration )
             , warnings : List Message
             , requiredPackages : FastSet.Set String
             }
@@ -306,11 +306,11 @@ run oneOfDeclarations input (CliMonad x) =
                         oneOfDeclarations output.oneOfs
                             |> withPath (Common.UnsafeName "While generating `oneOf`s")
 
-                    declarationsForFormats : Output -> List ( Common.Module, Elm.Declaration )
+                    declarationsForFormats : Output -> List ( Common.Module, String, Elm.Declaration )
                     declarationsForFormats out =
                         out.sharedDeclarations
                             |> FastDict.toList
-                            |> List.map (\( name, expr ) -> ( Common.Common, Elm.expose (Elm.declaration name expr) ))
+                            |> List.map (\( name, expr ) -> ( Common.Common, name, Elm.expose (Elm.declaration name expr) ))
                 in
                 h internalInput
                     |> Result.map

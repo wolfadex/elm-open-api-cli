@@ -1,0 +1,4956 @@
+{
+    "openapi": "3.1.0",
+    "info": {
+      "title": "Patreon API",
+      "version": "2",
+      "description": "An unofficial OpenAPI schema for the V2 Patreon API. Made based on the official api with https://github.com/ghostrider-05/patreon-api.ts",
+      "termsOfService": "https://patreon.com/legal",
+      "contact": {
+        "name": "Patreon",
+        "url": "https://www.patreondevelopers.com/"
+      }
+    },
+    "externalDocs": {
+      "description": "Official Patreon documentation",
+      "url": "https://docs.patreon.com"
+    },
+    "servers": [
+      {
+        "description": "API domain",
+        "url": "https://patreon.com"
+      }
+    ],
+    "tags": [
+      {
+        "name": "Resources",
+        "externalDocs": {
+          "description": "Resource endpoints documentation",
+          "url": "https://docs.patreon.com/#apiv2-resource-endpoints"
+        }
+      },
+      {
+        "name": "Webhooks",
+        "externalDocs": {
+          "description": "Webhook endpoints documentation",
+          "url": "https://docs.patreon.com/#apiv2-webhook-endpoints"
+        }
+      }
+    ],
+    "components": {
+      "headers": {
+        "x-patreon-uuid": {
+          "schema": {
+            "type": "string"
+          }
+        },
+        "x-patreon-sha": {
+          "schema": {
+            "type": "string"
+          }
+        },
+        "cf-cache-status": {
+          "schema": {
+            "type": "string"
+          }
+        },
+        "cf-ray": {
+          "schema": {
+            "type": "string"
+          }
+        },
+        "X-Patreon-Event": {
+          "schema": {
+            "type": "string"
+          }
+        },
+        "X-Patreon-Signature": {
+          "schema": {
+            "type": "string"
+          }
+        }
+      },
+      "parameters": {
+        "id": {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        "campaign_id": {
+          "name": "campaign_id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        "userAgent": {
+          "name": "User-Agent",
+          "in": "header",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "default": "PatreonBot patreon-api.ts (https://github.com/ghostrider-05/patreon-api.ts, 0.8.0)"
+          }
+        }
+      },
+      "responses": {
+        "400": {
+          "description": "Bad Request: Something was wrong with your request (syntax, size too large, etc.)",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/JSONAPIError"
+                }
+              }
+            }
+          },
+          "headers": {
+            "x-patreon-sha": {
+              "$ref": "#/components/headers/x-patreon-sha"
+            },
+            "x-patreon-uuid": {
+              "$ref": "#/components/headers/x-patreon-uuid"
+            },
+            "cf-cache-status": {
+              "$ref": "#/components/headers/cf-cache-status"
+            },
+            "cf-ray": {
+              "$ref": "#/components/headers/cf-ray"
+            }
+          }
+        },
+        "401": {
+          "description": "Unauthorized: Authentication failed (bad API key, invalid OAuth token, incorrect scopes, etc.)",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/JSONAPIError"
+                }
+              }
+            }
+          },
+          "headers": {
+            "x-patreon-sha": {
+              "$ref": "#/components/headers/x-patreon-sha"
+            },
+            "x-patreon-uuid": {
+              "$ref": "#/components/headers/x-patreon-uuid"
+            },
+            "cf-cache-status": {
+              "$ref": "#/components/headers/cf-cache-status"
+            },
+            "cf-ray": {
+              "$ref": "#/components/headers/cf-ray"
+            }
+          }
+        },
+        "403": {
+          "description": "Forbidden: The requested is hidden for administrators only.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/JSONAPIError"
+                }
+              }
+            }
+          },
+          "headers": {
+            "x-patreon-sha": {
+              "$ref": "#/components/headers/x-patreon-sha"
+            },
+            "x-patreon-uuid": {
+              "$ref": "#/components/headers/x-patreon-uuid"
+            },
+            "cf-cache-status": {
+              "$ref": "#/components/headers/cf-cache-status"
+            },
+            "cf-ray": {
+              "$ref": "#/components/headers/cf-ray"
+            }
+          }
+        },
+        "404": {
+          "description": "Not Found: The specified resource could not be found.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/JSONAPIError"
+                }
+              }
+            }
+          },
+          "headers": {
+            "x-patreon-sha": {
+              "$ref": "#/components/headers/x-patreon-sha"
+            },
+            "x-patreon-uuid": {
+              "$ref": "#/components/headers/x-patreon-uuid"
+            },
+            "cf-cache-status": {
+              "$ref": "#/components/headers/cf-cache-status"
+            },
+            "cf-ray": {
+              "$ref": "#/components/headers/cf-ray"
+            }
+          }
+        },
+        "405": {
+          "description": "Method Not Allowed: You tried to access a resource with an invalid method.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/JSONAPIError"
+                }
+              }
+            }
+          },
+          "headers": {
+            "x-patreon-sha": {
+              "$ref": "#/components/headers/x-patreon-sha"
+            },
+            "x-patreon-uuid": {
+              "$ref": "#/components/headers/x-patreon-uuid"
+            },
+            "cf-cache-status": {
+              "$ref": "#/components/headers/cf-cache-status"
+            },
+            "cf-ray": {
+              "$ref": "#/components/headers/cf-ray"
+            }
+          }
+        },
+        "406": {
+          "description": "Not Acceptable: You requested a format that isn't json.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/JSONAPIError"
+                }
+              }
+            }
+          },
+          "headers": {
+            "x-patreon-sha": {
+              "$ref": "#/components/headers/x-patreon-sha"
+            },
+            "x-patreon-uuid": {
+              "$ref": "#/components/headers/x-patreon-uuid"
+            },
+            "cf-cache-status": {
+              "$ref": "#/components/headers/cf-cache-status"
+            },
+            "cf-ray": {
+              "$ref": "#/components/headers/cf-ray"
+            }
+          }
+        },
+        "410": {
+          "description": "Gone: The resource requested has been removed from our servers.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/JSONAPIError"
+                }
+              }
+            }
+          },
+          "headers": {
+            "x-patreon-sha": {
+              "$ref": "#/components/headers/x-patreon-sha"
+            },
+            "x-patreon-uuid": {
+              "$ref": "#/components/headers/x-patreon-uuid"
+            },
+            "cf-cache-status": {
+              "$ref": "#/components/headers/cf-cache-status"
+            },
+            "cf-ray": {
+              "$ref": "#/components/headers/cf-ray"
+            }
+          }
+        },
+        "429": {
+          "description": "Too Many Requests: Slow down!",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/JSONAPIError"
+                }
+              }
+            }
+          },
+          "headers": {
+            "x-patreon-sha": {
+              "$ref": "#/components/headers/x-patreon-sha"
+            },
+            "x-patreon-uuid": {
+              "$ref": "#/components/headers/x-patreon-uuid"
+            },
+            "cf-cache-status": {
+              "$ref": "#/components/headers/cf-cache-status"
+            },
+            "cf-ray": {
+              "$ref": "#/components/headers/cf-ray"
+            }
+          }
+        },
+        "500": {
+          "description": "Internal Server Error: Our server ran into a problem while processing this request. Please try again later.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/JSONAPIError"
+                }
+              }
+            }
+          },
+          "headers": {
+            "x-patreon-sha": {
+              "$ref": "#/components/headers/x-patreon-sha"
+            },
+            "x-patreon-uuid": {
+              "$ref": "#/components/headers/x-patreon-uuid"
+            },
+            "cf-cache-status": {
+              "$ref": "#/components/headers/cf-cache-status"
+            },
+            "cf-ray": {
+              "$ref": "#/components/headers/cf-ray"
+            }
+          }
+        },
+        "503": {
+          "description": "Service Unavailable: We're temporarily offline for maintenance. Please try again later.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/JSONAPIError"
+                }
+              }
+            }
+          },
+          "headers": {
+            "x-patreon-sha": {
+              "$ref": "#/components/headers/x-patreon-sha"
+            },
+            "x-patreon-uuid": {
+              "$ref": "#/components/headers/x-patreon-uuid"
+            },
+            "cf-cache-status": {
+              "$ref": "#/components/headers/cf-cache-status"
+            },
+            "cf-ray": {
+              "$ref": "#/components/headers/cf-ray"
+            }
+          }
+        },
+        "userResponse": {
+          "description": "OK: Completed your request succesfully",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "data",
+                  "links"
+                ],
+                "properties": {
+                  "data": {
+                    "type": "object",
+                    "required": [
+                      "id",
+                      "type"
+                    ],
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "type": {
+                        "type": "string",
+                        "enum": [
+                          "user"
+                        ]
+                      },
+                      "attributes": {
+                        "$ref": "#/components/schemas/user"
+                      },
+                      "relationships": {
+                        "properties": {
+                          "campaign": {
+                            "required": [
+                              "data"
+                            ],
+                            "properties": {
+                              "data": {
+                                "properties": {
+                                  "id": {
+                                    "type": "string"
+                                  },
+                                  "type": {
+                                    "type": "string",
+                                    "enum": [
+                                      "campaign"
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "id",
+                                  "type"
+                                ]
+                              },
+                              "links": {
+                                "properties": {
+                                  "related": {
+                                    "type": "string",
+                                    "format": "uri"
+                                  }
+                                }
+                              }
+                            }
+                          },
+                          "memberships": {
+                            "required": [
+                              "data"
+                            ],
+                            "properties": {
+                              "data": {
+                                "type": "array",
+                                "items": {
+                                  "properties": {
+                                    "id": {
+                                      "type": "string"
+                                    },
+                                    "type": {
+                                      "type": "string",
+                                      "enum": [
+                                        "member"
+                                      ]
+                                    }
+                                  },
+                                  "required": [
+                                    "id",
+                                    "type"
+                                  ]
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "included": {
+                    "type": "array",
+                    "items": {
+                      "oneOf": [
+                        {
+                          "type": "object",
+                          "required": [
+                            "attributes",
+                            "type",
+                            "id"
+                          ],
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "type": {
+                              "type": "string",
+                              "enum": [
+                                "campaign"
+                              ]
+                            },
+                            "attributes": {
+                              "$ref": "#/components/schemas/campaign"
+                            }
+                          }
+                        },
+                        {
+                          "type": "object",
+                          "required": [
+                            "attributes",
+                            "type",
+                            "id"
+                          ],
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "type": {
+                              "type": "string",
+                              "enum": [
+                                "member"
+                              ]
+                            },
+                            "attributes": {
+                              "$ref": "#/components/schemas/member"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  "links": {
+                    "$ref": "#/components/schemas/JSONAPIResponseLinks"
+                  }
+                }
+              }
+            }
+          },
+          "headers": {
+            "x-patreon-sha": {
+              "$ref": "#/components/headers/x-patreon-sha"
+            },
+            "x-patreon-uuid": {
+              "$ref": "#/components/headers/x-patreon-uuid"
+            },
+            "cf-cache-status": {
+              "$ref": "#/components/headers/cf-cache-status"
+            },
+            "cf-ray": {
+              "$ref": "#/components/headers/cf-ray"
+            }
+          }
+        },
+        "campaignResponse": {
+          "description": "OK: Completed your request succesfully",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "data",
+                  "links"
+                ],
+                "properties": {
+                  "data": {
+                    "type": "object",
+                    "required": [
+                      "id",
+                      "type"
+                    ],
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "type": {
+                        "type": "string",
+                        "enum": [
+                          "campaign"
+                        ]
+                      },
+                      "attributes": {
+                        "$ref": "#/components/schemas/campaign"
+                      },
+                      "relationships": {
+                        "properties": {
+                          "benefits": {
+                            "required": [
+                              "data"
+                            ],
+                            "properties": {
+                              "data": {
+                                "type": "array",
+                                "items": {
+                                  "properties": {
+                                    "id": {
+                                      "type": "string"
+                                    },
+                                    "type": {
+                                      "type": "string",
+                                      "enum": [
+                                        "benefit"
+                                      ]
+                                    }
+                                  },
+                                  "required": [
+                                    "id",
+                                    "type"
+                                  ]
+                                }
+                              }
+                            }
+                          },
+                          "creator": {
+                            "required": [
+                              "data"
+                            ],
+                            "properties": {
+                              "data": {
+                                "properties": {
+                                  "id": {
+                                    "type": "string"
+                                  },
+                                  "type": {
+                                    "type": "string",
+                                    "enum": [
+                                      "user"
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "id",
+                                  "type"
+                                ]
+                              },
+                              "links": {
+                                "properties": {
+                                  "related": {
+                                    "type": "string",
+                                    "format": "uri"
+                                  }
+                                }
+                              }
+                            }
+                          },
+                          "goals": {
+                            "required": [
+                              "data"
+                            ],
+                            "properties": {
+                              "data": {
+                                "type": "array",
+                                "items": {
+                                  "properties": {
+                                    "id": {
+                                      "type": "string"
+                                    },
+                                    "type": {
+                                      "type": "string",
+                                      "enum": [
+                                        "goal"
+                                      ]
+                                    }
+                                  },
+                                  "required": [
+                                    "id",
+                                    "type"
+                                  ]
+                                }
+                              }
+                            }
+                          },
+                          "tiers": {
+                            "required": [
+                              "data"
+                            ],
+                            "properties": {
+                              "data": {
+                                "type": "array",
+                                "items": {
+                                  "properties": {
+                                    "id": {
+                                      "type": "string"
+                                    },
+                                    "type": {
+                                      "type": "string",
+                                      "enum": [
+                                        "tier"
+                                      ]
+                                    }
+                                  },
+                                  "required": [
+                                    "id",
+                                    "type"
+                                  ]
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "included": {
+                    "type": "array",
+                    "items": {
+                      "oneOf": [
+                        {
+                          "type": "object",
+                          "required": [
+                            "attributes",
+                            "type",
+                            "id"
+                          ],
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "type": {
+                              "type": "string",
+                              "enum": [
+                                "benefit"
+                              ]
+                            },
+                            "attributes": {
+                              "$ref": "#/components/schemas/benefit"
+                            }
+                          }
+                        },
+                        {
+                          "type": "object",
+                          "required": [
+                            "attributes",
+                            "type",
+                            "id"
+                          ],
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "type": {
+                              "type": "string",
+                              "enum": [
+                                "user"
+                              ]
+                            },
+                            "attributes": {
+                              "$ref": "#/components/schemas/user"
+                            }
+                          }
+                        },
+                        {
+                          "type": "object",
+                          "required": [
+                            "attributes",
+                            "type",
+                            "id"
+                          ],
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "type": {
+                              "type": "string",
+                              "enum": [
+                                "goal"
+                              ]
+                            },
+                            "attributes": {
+                              "$ref": "#/components/schemas/goal"
+                            }
+                          }
+                        },
+                        {
+                          "type": "object",
+                          "required": [
+                            "attributes",
+                            "type",
+                            "id"
+                          ],
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "type": {
+                              "type": "string",
+                              "enum": [
+                                "tier"
+                              ]
+                            },
+                            "attributes": {
+                              "$ref": "#/components/schemas/tier"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  "links": {
+                    "$ref": "#/components/schemas/JSONAPIResponseLinks"
+                  }
+                }
+              }
+            }
+          },
+          "headers": {
+            "x-patreon-sha": {
+              "$ref": "#/components/headers/x-patreon-sha"
+            },
+            "x-patreon-uuid": {
+              "$ref": "#/components/headers/x-patreon-uuid"
+            },
+            "cf-cache-status": {
+              "$ref": "#/components/headers/cf-cache-status"
+            },
+            "cf-ray": {
+              "$ref": "#/components/headers/cf-ray"
+            }
+          }
+        },
+        "campaignsResponse": {
+          "description": "OK: Completed your request succesfully",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "data",
+                  "meta"
+                ],
+                "properties": {
+                  "data": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "id",
+                        "type"
+                      ],
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "type": {
+                          "type": "string",
+                          "enum": [
+                            "campaign"
+                          ]
+                        },
+                        "attributes": {
+                          "$ref": "#/components/schemas/campaign"
+                        },
+                        "relationships": {
+                          "properties": {
+                            "benefits": {
+                              "required": [
+                                "data"
+                              ],
+                              "properties": {
+                                "data": {
+                                  "type": "array",
+                                  "items": {
+                                    "properties": {
+                                      "id": {
+                                        "type": "string"
+                                      },
+                                      "type": {
+                                        "type": "string",
+                                        "enum": [
+                                          "benefit"
+                                        ]
+                                      }
+                                    },
+                                    "required": [
+                                      "id",
+                                      "type"
+                                    ]
+                                  }
+                                }
+                              }
+                            },
+                            "creator": {
+                              "required": [
+                                "data"
+                              ],
+                              "properties": {
+                                "data": {
+                                  "properties": {
+                                    "id": {
+                                      "type": "string"
+                                    },
+                                    "type": {
+                                      "type": "string",
+                                      "enum": [
+                                        "user"
+                                      ]
+                                    }
+                                  },
+                                  "required": [
+                                    "id",
+                                    "type"
+                                  ]
+                                },
+                                "links": {
+                                  "properties": {
+                                    "related": {
+                                      "type": "string",
+                                      "format": "uri"
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            "goals": {
+                              "required": [
+                                "data"
+                              ],
+                              "properties": {
+                                "data": {
+                                  "type": "array",
+                                  "items": {
+                                    "properties": {
+                                      "id": {
+                                        "type": "string"
+                                      },
+                                      "type": {
+                                        "type": "string",
+                                        "enum": [
+                                          "goal"
+                                        ]
+                                      }
+                                    },
+                                    "required": [
+                                      "id",
+                                      "type"
+                                    ]
+                                  }
+                                }
+                              }
+                            },
+                            "tiers": {
+                              "required": [
+                                "data"
+                              ],
+                              "properties": {
+                                "data": {
+                                  "type": "array",
+                                  "items": {
+                                    "properties": {
+                                      "id": {
+                                        "type": "string"
+                                      },
+                                      "type": {
+                                        "type": "string",
+                                        "enum": [
+                                          "tier"
+                                        ]
+                                      }
+                                    },
+                                    "required": [
+                                      "id",
+                                      "type"
+                                    ]
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "included": {
+                    "type": "array",
+                    "items": {
+                      "oneOf": [
+                        {
+                          "type": "object",
+                          "required": [
+                            "attributes",
+                            "type",
+                            "id"
+                          ],
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "type": {
+                              "type": "string",
+                              "enum": [
+                                "benefit"
+                              ]
+                            },
+                            "attributes": {
+                              "$ref": "#/components/schemas/benefit"
+                            }
+                          }
+                        },
+                        {
+                          "type": "object",
+                          "required": [
+                            "attributes",
+                            "type",
+                            "id"
+                          ],
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "type": {
+                              "type": "string",
+                              "enum": [
+                                "user"
+                              ]
+                            },
+                            "attributes": {
+                              "$ref": "#/components/schemas/user"
+                            }
+                          }
+                        },
+                        {
+                          "type": "object",
+                          "required": [
+                            "attributes",
+                            "type",
+                            "id"
+                          ],
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "type": {
+                              "type": "string",
+                              "enum": [
+                                "goal"
+                              ]
+                            },
+                            "attributes": {
+                              "$ref": "#/components/schemas/goal"
+                            }
+                          }
+                        },
+                        {
+                          "type": "object",
+                          "required": [
+                            "attributes",
+                            "type",
+                            "id"
+                          ],
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "type": {
+                              "type": "string",
+                              "enum": [
+                                "tier"
+                              ]
+                            },
+                            "attributes": {
+                              "$ref": "#/components/schemas/tier"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  "meta": {
+                    "$ref": "#/components/schemas/JSONAPIResponseMeta"
+                  }
+                }
+              }
+            }
+          },
+          "headers": {
+            "x-patreon-sha": {
+              "$ref": "#/components/headers/x-patreon-sha"
+            },
+            "x-patreon-uuid": {
+              "$ref": "#/components/headers/x-patreon-uuid"
+            },
+            "cf-cache-status": {
+              "$ref": "#/components/headers/cf-cache-status"
+            },
+            "cf-ray": {
+              "$ref": "#/components/headers/cf-ray"
+            }
+          }
+        },
+        "membersResponse": {
+          "description": "OK: Completed your request succesfully",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "data",
+                  "meta"
+                ],
+                "properties": {
+                  "data": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "id",
+                        "type"
+                      ],
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "type": {
+                          "type": "string",
+                          "enum": [
+                            "member"
+                          ]
+                        },
+                        "attributes": {
+                          "$ref": "#/components/schemas/member"
+                        },
+                        "relationships": {
+                          "properties": {
+                            "address": {
+                              "required": [
+                                "data"
+                              ],
+                              "properties": {
+                                "data": {
+                                  "properties": {
+                                    "id": {
+                                      "type": "string"
+                                    },
+                                    "type": {
+                                      "type": "string",
+                                      "enum": [
+                                        "address"
+                                      ]
+                                    }
+                                  },
+                                  "required": [
+                                    "id",
+                                    "type"
+                                  ]
+                                },
+                                "links": {
+                                  "properties": {
+                                    "related": {
+                                      "type": "string",
+                                      "format": "uri"
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            "campaign": {
+                              "required": [
+                                "data"
+                              ],
+                              "properties": {
+                                "data": {
+                                  "properties": {
+                                    "id": {
+                                      "type": "string"
+                                    },
+                                    "type": {
+                                      "type": "string",
+                                      "enum": [
+                                        "campaign"
+                                      ]
+                                    }
+                                  },
+                                  "required": [
+                                    "id",
+                                    "type"
+                                  ]
+                                },
+                                "links": {
+                                  "properties": {
+                                    "related": {
+                                      "type": "string",
+                                      "format": "uri"
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            "currently_entitled_tiers": {
+                              "required": [
+                                "data"
+                              ],
+                              "properties": {
+                                "data": {
+                                  "type": "array",
+                                  "items": {
+                                    "properties": {
+                                      "id": {
+                                        "type": "string"
+                                      },
+                                      "type": {
+                                        "type": "string",
+                                        "enum": [
+                                          "tier"
+                                        ]
+                                      }
+                                    },
+                                    "required": [
+                                      "id",
+                                      "type"
+                                    ]
+                                  }
+                                }
+                              }
+                            },
+                            "pledge_history": {
+                              "required": [
+                                "data"
+                              ],
+                              "properties": {
+                                "data": {
+                                  "type": "array",
+                                  "items": {
+                                    "properties": {
+                                      "id": {
+                                        "type": "string"
+                                      },
+                                      "type": {
+                                        "type": "string",
+                                        "enum": [
+                                          "pledge-event"
+                                        ]
+                                      }
+                                    },
+                                    "required": [
+                                      "id",
+                                      "type"
+                                    ]
+                                  }
+                                }
+                              }
+                            },
+                            "user": {
+                              "required": [
+                                "data"
+                              ],
+                              "properties": {
+                                "data": {
+                                  "properties": {
+                                    "id": {
+                                      "type": "string"
+                                    },
+                                    "type": {
+                                      "type": "string",
+                                      "enum": [
+                                        "user"
+                                      ]
+                                    }
+                                  },
+                                  "required": [
+                                    "id",
+                                    "type"
+                                  ]
+                                },
+                                "links": {
+                                  "properties": {
+                                    "related": {
+                                      "type": "string",
+                                      "format": "uri"
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "included": {
+                    "type": "array",
+                    "items": {
+                      "oneOf": [
+                        {
+                          "type": "object",
+                          "required": [
+                            "attributes",
+                            "type",
+                            "id"
+                          ],
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "type": {
+                              "type": "string",
+                              "enum": [
+                                "address"
+                              ]
+                            },
+                            "attributes": {
+                              "$ref": "#/components/schemas/address"
+                            }
+                          }
+                        },
+                        {
+                          "type": "object",
+                          "required": [
+                            "attributes",
+                            "type",
+                            "id"
+                          ],
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "type": {
+                              "type": "string",
+                              "enum": [
+                                "campaign"
+                              ]
+                            },
+                            "attributes": {
+                              "$ref": "#/components/schemas/campaign"
+                            }
+                          }
+                        },
+                        {
+                          "type": "object",
+                          "required": [
+                            "attributes",
+                            "type",
+                            "id"
+                          ],
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "type": {
+                              "type": "string",
+                              "enum": [
+                                "tier"
+                              ]
+                            },
+                            "attributes": {
+                              "$ref": "#/components/schemas/tier"
+                            }
+                          }
+                        },
+                        {
+                          "type": "object",
+                          "required": [
+                            "attributes",
+                            "type",
+                            "id"
+                          ],
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "type": {
+                              "type": "string",
+                              "enum": [
+                                "pledge-event"
+                              ]
+                            },
+                            "attributes": {
+                              "$ref": "#/components/schemas/pledge-event"
+                            }
+                          }
+                        },
+                        {
+                          "type": "object",
+                          "required": [
+                            "attributes",
+                            "type",
+                            "id"
+                          ],
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "type": {
+                              "type": "string",
+                              "enum": [
+                                "user"
+                              ]
+                            },
+                            "attributes": {
+                              "$ref": "#/components/schemas/user"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  "meta": {
+                    "$ref": "#/components/schemas/JSONAPIResponseMeta"
+                  }
+                }
+              }
+            }
+          },
+          "headers": {
+            "x-patreon-sha": {
+              "$ref": "#/components/headers/x-patreon-sha"
+            },
+            "x-patreon-uuid": {
+              "$ref": "#/components/headers/x-patreon-uuid"
+            },
+            "cf-cache-status": {
+              "$ref": "#/components/headers/cf-cache-status"
+            },
+            "cf-ray": {
+              "$ref": "#/components/headers/cf-ray"
+            }
+          }
+        },
+        "memberResponse": {
+          "description": "OK: Completed your request succesfully",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "data",
+                  "links"
+                ],
+                "properties": {
+                  "data": {
+                    "type": "object",
+                    "required": [
+                      "id",
+                      "type"
+                    ],
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "type": {
+                        "type": "string",
+                        "enum": [
+                          "member"
+                        ]
+                      },
+                      "attributes": {
+                        "$ref": "#/components/schemas/member"
+                      },
+                      "relationships": {
+                        "properties": {
+                          "address": {
+                            "required": [
+                              "data"
+                            ],
+                            "properties": {
+                              "data": {
+                                "properties": {
+                                  "id": {
+                                    "type": "string"
+                                  },
+                                  "type": {
+                                    "type": "string",
+                                    "enum": [
+                                      "address"
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "id",
+                                  "type"
+                                ]
+                              },
+                              "links": {
+                                "properties": {
+                                  "related": {
+                                    "type": "string",
+                                    "format": "uri"
+                                  }
+                                }
+                              }
+                            }
+                          },
+                          "campaign": {
+                            "required": [
+                              "data"
+                            ],
+                            "properties": {
+                              "data": {
+                                "properties": {
+                                  "id": {
+                                    "type": "string"
+                                  },
+                                  "type": {
+                                    "type": "string",
+                                    "enum": [
+                                      "campaign"
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "id",
+                                  "type"
+                                ]
+                              },
+                              "links": {
+                                "properties": {
+                                  "related": {
+                                    "type": "string",
+                                    "format": "uri"
+                                  }
+                                }
+                              }
+                            }
+                          },
+                          "currently_entitled_tiers": {
+                            "required": [
+                              "data"
+                            ],
+                            "properties": {
+                              "data": {
+                                "type": "array",
+                                "items": {
+                                  "properties": {
+                                    "id": {
+                                      "type": "string"
+                                    },
+                                    "type": {
+                                      "type": "string",
+                                      "enum": [
+                                        "tier"
+                                      ]
+                                    }
+                                  },
+                                  "required": [
+                                    "id",
+                                    "type"
+                                  ]
+                                }
+                              }
+                            }
+                          },
+                          "pledge_history": {
+                            "required": [
+                              "data"
+                            ],
+                            "properties": {
+                              "data": {
+                                "type": "array",
+                                "items": {
+                                  "properties": {
+                                    "id": {
+                                      "type": "string"
+                                    },
+                                    "type": {
+                                      "type": "string",
+                                      "enum": [
+                                        "pledge-event"
+                                      ]
+                                    }
+                                  },
+                                  "required": [
+                                    "id",
+                                    "type"
+                                  ]
+                                }
+                              }
+                            }
+                          },
+                          "user": {
+                            "required": [
+                              "data"
+                            ],
+                            "properties": {
+                              "data": {
+                                "properties": {
+                                  "id": {
+                                    "type": "string"
+                                  },
+                                  "type": {
+                                    "type": "string",
+                                    "enum": [
+                                      "user"
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "id",
+                                  "type"
+                                ]
+                              },
+                              "links": {
+                                "properties": {
+                                  "related": {
+                                    "type": "string",
+                                    "format": "uri"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "included": {
+                    "type": "array",
+                    "items": {
+                      "oneOf": [
+                        {
+                          "type": "object",
+                          "required": [
+                            "attributes",
+                            "type",
+                            "id"
+                          ],
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "type": {
+                              "type": "string",
+                              "enum": [
+                                "address"
+                              ]
+                            },
+                            "attributes": {
+                              "$ref": "#/components/schemas/address"
+                            }
+                          }
+                        },
+                        {
+                          "type": "object",
+                          "required": [
+                            "attributes",
+                            "type",
+                            "id"
+                          ],
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "type": {
+                              "type": "string",
+                              "enum": [
+                                "campaign"
+                              ]
+                            },
+                            "attributes": {
+                              "$ref": "#/components/schemas/campaign"
+                            }
+                          }
+                        },
+                        {
+                          "type": "object",
+                          "required": [
+                            "attributes",
+                            "type",
+                            "id"
+                          ],
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "type": {
+                              "type": "string",
+                              "enum": [
+                                "tier"
+                              ]
+                            },
+                            "attributes": {
+                              "$ref": "#/components/schemas/tier"
+                            }
+                          }
+                        },
+                        {
+                          "type": "object",
+                          "required": [
+                            "attributes",
+                            "type",
+                            "id"
+                          ],
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "type": {
+                              "type": "string",
+                              "enum": [
+                                "pledge-event"
+                              ]
+                            },
+                            "attributes": {
+                              "$ref": "#/components/schemas/pledge-event"
+                            }
+                          }
+                        },
+                        {
+                          "type": "object",
+                          "required": [
+                            "attributes",
+                            "type",
+                            "id"
+                          ],
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "type": {
+                              "type": "string",
+                              "enum": [
+                                "user"
+                              ]
+                            },
+                            "attributes": {
+                              "$ref": "#/components/schemas/user"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  "links": {
+                    "$ref": "#/components/schemas/JSONAPIResponseLinks"
+                  }
+                }
+              }
+            }
+          },
+          "headers": {
+            "x-patreon-sha": {
+              "$ref": "#/components/headers/x-patreon-sha"
+            },
+            "x-patreon-uuid": {
+              "$ref": "#/components/headers/x-patreon-uuid"
+            },
+            "cf-cache-status": {
+              "$ref": "#/components/headers/cf-cache-status"
+            },
+            "cf-ray": {
+              "$ref": "#/components/headers/cf-ray"
+            }
+          }
+        },
+        "postsResponse": {
+          "description": "OK: Completed your request succesfully",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "data",
+                  "meta"
+                ],
+                "properties": {
+                  "data": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "id",
+                        "type"
+                      ],
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "type": {
+                          "type": "string",
+                          "enum": [
+                            "post"
+                          ]
+                        },
+                        "attributes": {
+                          "$ref": "#/components/schemas/post"
+                        },
+                        "relationships": {
+                          "properties": {
+                            "user": {
+                              "required": [
+                                "data"
+                              ],
+                              "properties": {
+                                "data": {
+                                  "properties": {
+                                    "id": {
+                                      "type": "string"
+                                    },
+                                    "type": {
+                                      "type": "string",
+                                      "enum": [
+                                        "user"
+                                      ]
+                                    }
+                                  },
+                                  "required": [
+                                    "id",
+                                    "type"
+                                  ]
+                                },
+                                "links": {
+                                  "properties": {
+                                    "related": {
+                                      "type": "string",
+                                      "format": "uri"
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            "campaign": {
+                              "required": [
+                                "data"
+                              ],
+                              "properties": {
+                                "data": {
+                                  "properties": {
+                                    "id": {
+                                      "type": "string"
+                                    },
+                                    "type": {
+                                      "type": "string",
+                                      "enum": [
+                                        "campaign"
+                                      ]
+                                    }
+                                  },
+                                  "required": [
+                                    "id",
+                                    "type"
+                                  ]
+                                },
+                                "links": {
+                                  "properties": {
+                                    "related": {
+                                      "type": "string",
+                                      "format": "uri"
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "included": {
+                    "type": "array",
+                    "items": {
+                      "oneOf": [
+                        {
+                          "type": "object",
+                          "required": [
+                            "attributes",
+                            "type",
+                            "id"
+                          ],
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "type": {
+                              "type": "string",
+                              "enum": [
+                                "user"
+                              ]
+                            },
+                            "attributes": {
+                              "$ref": "#/components/schemas/user"
+                            }
+                          }
+                        },
+                        {
+                          "type": "object",
+                          "required": [
+                            "attributes",
+                            "type",
+                            "id"
+                          ],
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "type": {
+                              "type": "string",
+                              "enum": [
+                                "campaign"
+                              ]
+                            },
+                            "attributes": {
+                              "$ref": "#/components/schemas/campaign"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  "meta": {
+                    "$ref": "#/components/schemas/JSONAPIResponseMeta"
+                  }
+                }
+              }
+            }
+          },
+          "headers": {
+            "x-patreon-sha": {
+              "$ref": "#/components/headers/x-patreon-sha"
+            },
+            "x-patreon-uuid": {
+              "$ref": "#/components/headers/x-patreon-uuid"
+            },
+            "cf-cache-status": {
+              "$ref": "#/components/headers/cf-cache-status"
+            },
+            "cf-ray": {
+              "$ref": "#/components/headers/cf-ray"
+            }
+          }
+        },
+        "postResponse": {
+          "description": "OK: Completed your request succesfully",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "data",
+                  "links"
+                ],
+                "properties": {
+                  "data": {
+                    "type": "object",
+                    "required": [
+                      "id",
+                      "type"
+                    ],
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "type": {
+                        "type": "string",
+                        "enum": [
+                          "post"
+                        ]
+                      },
+                      "attributes": {
+                        "$ref": "#/components/schemas/post"
+                      },
+                      "relationships": {
+                        "properties": {
+                          "user": {
+                            "required": [
+                              "data"
+                            ],
+                            "properties": {
+                              "data": {
+                                "properties": {
+                                  "id": {
+                                    "type": "string"
+                                  },
+                                  "type": {
+                                    "type": "string",
+                                    "enum": [
+                                      "user"
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "id",
+                                  "type"
+                                ]
+                              },
+                              "links": {
+                                "properties": {
+                                  "related": {
+                                    "type": "string",
+                                    "format": "uri"
+                                  }
+                                }
+                              }
+                            }
+                          },
+                          "campaign": {
+                            "required": [
+                              "data"
+                            ],
+                            "properties": {
+                              "data": {
+                                "properties": {
+                                  "id": {
+                                    "type": "string"
+                                  },
+                                  "type": {
+                                    "type": "string",
+                                    "enum": [
+                                      "campaign"
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "id",
+                                  "type"
+                                ]
+                              },
+                              "links": {
+                                "properties": {
+                                  "related": {
+                                    "type": "string",
+                                    "format": "uri"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "included": {
+                    "type": "array",
+                    "items": {
+                      "oneOf": [
+                        {
+                          "type": "object",
+                          "required": [
+                            "attributes",
+                            "type",
+                            "id"
+                          ],
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "type": {
+                              "type": "string",
+                              "enum": [
+                                "user"
+                              ]
+                            },
+                            "attributes": {
+                              "$ref": "#/components/schemas/user"
+                            }
+                          }
+                        },
+                        {
+                          "type": "object",
+                          "required": [
+                            "attributes",
+                            "type",
+                            "id"
+                          ],
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "type": {
+                              "type": "string",
+                              "enum": [
+                                "campaign"
+                              ]
+                            },
+                            "attributes": {
+                              "$ref": "#/components/schemas/campaign"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  "links": {
+                    "$ref": "#/components/schemas/JSONAPIResponseLinks"
+                  }
+                }
+              }
+            }
+          },
+          "headers": {
+            "x-patreon-sha": {
+              "$ref": "#/components/headers/x-patreon-sha"
+            },
+            "x-patreon-uuid": {
+              "$ref": "#/components/headers/x-patreon-uuid"
+            },
+            "cf-cache-status": {
+              "$ref": "#/components/headers/cf-cache-status"
+            },
+            "cf-ray": {
+              "$ref": "#/components/headers/cf-ray"
+            }
+          }
+        },
+        "webhookResponse": {
+          "description": "OK: Completed your request succesfully",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "data",
+                  "links"
+                ],
+                "properties": {
+                  "data": {
+                    "type": "object",
+                    "required": [
+                      "id",
+                      "type"
+                    ],
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "type": {
+                        "type": "string",
+                        "enum": [
+                          "webhook"
+                        ]
+                      },
+                      "attributes": {
+                        "$ref": "#/components/schemas/webhook"
+                      },
+                      "relationships": {
+                        "properties": {
+                          "campaign": {
+                            "required": [
+                              "data"
+                            ],
+                            "properties": {
+                              "data": {
+                                "properties": {
+                                  "id": {
+                                    "type": "string"
+                                  },
+                                  "type": {
+                                    "type": "string",
+                                    "enum": [
+                                      "campaign"
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "id",
+                                  "type"
+                                ]
+                              },
+                              "links": {
+                                "properties": {
+                                  "related": {
+                                    "type": "string",
+                                    "format": "uri"
+                                  }
+                                }
+                              }
+                            }
+                          },
+                          "client": {
+                            "required": [
+                              "data"
+                            ],
+                            "properties": {
+                              "data": {
+                                "properties": {
+                                  "id": {
+                                    "type": "string"
+                                  },
+                                  "type": {
+                                    "type": "string",
+                                    "enum": [
+                                      "client"
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "id",
+                                  "type"
+                                ]
+                              },
+                              "links": {
+                                "properties": {
+                                  "related": {
+                                    "type": "string",
+                                    "format": "uri"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "included": {
+                    "type": "array",
+                    "items": {
+                      "oneOf": [
+                        {
+                          "type": "object",
+                          "required": [
+                            "attributes",
+                            "type",
+                            "id"
+                          ],
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "type": {
+                              "type": "string",
+                              "enum": [
+                                "campaign"
+                              ]
+                            },
+                            "attributes": {
+                              "$ref": "#/components/schemas/campaign"
+                            }
+                          }
+                        },
+                        {
+                          "type": "object",
+                          "required": [
+                            "attributes",
+                            "type",
+                            "id"
+                          ],
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "type": {
+                              "type": "string",
+                              "enum": [
+                                "client"
+                              ]
+                            },
+                            "attributes": {
+                              "$ref": "#/components/schemas/client"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  "links": {
+                    "$ref": "#/components/schemas/JSONAPIResponseLinks"
+                  }
+                }
+              }
+            }
+          },
+          "headers": {
+            "x-patreon-sha": {
+              "$ref": "#/components/headers/x-patreon-sha"
+            },
+            "x-patreon-uuid": {
+              "$ref": "#/components/headers/x-patreon-uuid"
+            },
+            "cf-cache-status": {
+              "$ref": "#/components/headers/cf-cache-status"
+            },
+            "cf-ray": {
+              "$ref": "#/components/headers/cf-ray"
+            }
+          }
+        },
+        "webhooksResponse": {
+          "description": "OK: Completed your request succesfully",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "data",
+                  "meta"
+                ],
+                "properties": {
+                  "data": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "id",
+                        "type"
+                      ],
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "type": {
+                          "type": "string",
+                          "enum": [
+                            "webhook"
+                          ]
+                        },
+                        "attributes": {
+                          "$ref": "#/components/schemas/webhook"
+                        },
+                        "relationships": {
+                          "properties": {
+                            "campaign": {
+                              "required": [
+                                "data"
+                              ],
+                              "properties": {
+                                "data": {
+                                  "properties": {
+                                    "id": {
+                                      "type": "string"
+                                    },
+                                    "type": {
+                                      "type": "string",
+                                      "enum": [
+                                        "campaign"
+                                      ]
+                                    }
+                                  },
+                                  "required": [
+                                    "id",
+                                    "type"
+                                  ]
+                                },
+                                "links": {
+                                  "properties": {
+                                    "related": {
+                                      "type": "string",
+                                      "format": "uri"
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            "client": {
+                              "required": [
+                                "data"
+                              ],
+                              "properties": {
+                                "data": {
+                                  "properties": {
+                                    "id": {
+                                      "type": "string"
+                                    },
+                                    "type": {
+                                      "type": "string",
+                                      "enum": [
+                                        "client"
+                                      ]
+                                    }
+                                  },
+                                  "required": [
+                                    "id",
+                                    "type"
+                                  ]
+                                },
+                                "links": {
+                                  "properties": {
+                                    "related": {
+                                      "type": "string",
+                                      "format": "uri"
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "included": {
+                    "type": "array",
+                    "items": {
+                      "oneOf": [
+                        {
+                          "type": "object",
+                          "required": [
+                            "attributes",
+                            "type",
+                            "id"
+                          ],
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "type": {
+                              "type": "string",
+                              "enum": [
+                                "campaign"
+                              ]
+                            },
+                            "attributes": {
+                              "$ref": "#/components/schemas/campaign"
+                            }
+                          }
+                        },
+                        {
+                          "type": "object",
+                          "required": [
+                            "attributes",
+                            "type",
+                            "id"
+                          ],
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "type": {
+                              "type": "string",
+                              "enum": [
+                                "client"
+                              ]
+                            },
+                            "attributes": {
+                              "$ref": "#/components/schemas/client"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  "meta": {
+                    "$ref": "#/components/schemas/JSONAPIResponseMeta"
+                  }
+                }
+              }
+            }
+          },
+          "headers": {
+            "x-patreon-sha": {
+              "$ref": "#/components/headers/x-patreon-sha"
+            },
+            "x-patreon-uuid": {
+              "$ref": "#/components/headers/x-patreon-uuid"
+            },
+            "cf-cache-status": {
+              "$ref": "#/components/headers/cf-cache-status"
+            },
+            "cf-ray": {
+              "$ref": "#/components/headers/cf-ray"
+            }
+          }
+        }
+      },
+      "securitySchemes": {
+        "Oauth2": {
+          "type": "oauth2",
+          "flows": {
+            "authorizationCode": {
+              "tokenUrl": "https://patreon.com/api/oauth2/token",
+              "authorizationUrl": "https://patreon.com/oauth2/authorize",
+              "scopes": {
+                "identity": "\nProvides read access to data about the user.\nSee the /identity endpoint documentation for details about what data is available.",
+                "identity[email]": "\nProvides read access to the user’s email.",
+                "identity.memberships": "\nProvides read access to the user’s memberships.",
+                "campaigns": "\nProvides read access to basic campaign data.\nSee the /campaign endpoint documentation for details about what data is available.",
+                "campaigns.members": "\nProvides read access to data about a campaign’s members.\nSee the /members endpoint documentation for details about what data is available.\nAlso allows the same information to be sent via webhooks created by your client.",
+                "campaigns.members[email]": "\nProvides read access to the member’s email.\nAlso allows the same information to be sent via webhooks created by your client.",
+                "campaigns.members.address": "\nProvides read access to the member’s address, if an address was collected in the pledge flow.\nAlso allows the same information to be sent via webhooks created by your client.",
+                "campaigns.posts": "\nProvides read access to the posts on a campaign.",
+                "w:campaigns.webhook": "\nProvides read, write, update, and delete access to the campaign’s webhooks created by the client."
+              }
+            }
+          }
+        }
+      },
+      "schemas": {
+        "address": {
+          "type": "object",
+          "title": "Address",
+          "description": "\nA patron's shipping address.",
+          "externalDocs": {
+            "description": "Official documentation for the Address resource",
+            "url": "https://docs.patreon.com/#address"
+          },
+          "properties": {
+            "addressee": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "\nFull recipient name"
+            },
+            "city": {
+              "type": "string",
+              "description": "\n"
+            },
+            "country": {
+              "type": "string",
+              "description": "\n"
+            },
+            "created_at": {
+              "type": "string",
+              "description": "\nDatetime address was first created",
+              "format": "date-time"
+            },
+            "line_1": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "\nFirst line of street address"
+            },
+            "line_2": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "\nSecond line of street address"
+            },
+            "phone_number": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "\nTelephone number. Specified for non-US addresses"
+            },
+            "postal_code": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "\nPostal or zip code"
+            },
+            "state": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "\nState or province name"
+            }
+          }
+        },
+        "benefit": {
+          "type": "object",
+          "title": "Benefit",
+          "description": "\nA benefit added to the campaign, which can be added to a tier to be delivered to the patron.",
+          "externalDocs": {
+            "description": "Official documentation for the Benefit resource",
+            "url": "https://docs.patreon.com/#benefit"
+          },
+          "properties": {
+            "app_external_id": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "\nThe third-party external ID this reward is associated with"
+            },
+            "app_meta": {
+              "type": [
+                "object",
+                "null"
+              ],
+              "description": "\nAny metadata the third-party app included with this benefit on creation"
+            },
+            "benefit_type": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "\nType of benefit, such as `custom` for creator-defined benefits"
+            },
+            "created_at": {
+              "type": "string",
+              "description": "\nDatetime this benefit was created",
+              "format": "date-time"
+            },
+            "deliverables_due_today_count": {
+              "type": "number",
+              "description": "\nNumber of deliverables for this benefit that are due today specifically"
+            },
+            "delivered_deliverables_count": {
+              "type": "number",
+              "description": "\nNumber of deliverables for this benefit that have been marked complete"
+            },
+            "description": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "\nDisplay description"
+            },
+            "is_deleted": {
+              "type": "boolean",
+              "description": "\nWhether this benefit has been deleted"
+            },
+            "is_ended": {
+              "type": "boolean",
+              "description": "\nWhether this benefit is no longer available to new patrons"
+            },
+            "is_published": {
+              "type": "boolean",
+              "description": "\nWhether this benefit is ready to be fulfilled to patrons"
+            },
+            "next_deliverable_due_date": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "\nThe next due date (after EOD today) for this benefit",
+              "format": "date-time"
+            },
+            "not_delivered_deliverables_count": {
+              "type": "number",
+              "description": "\nNumber of deliverables for this benefit that are due, for all dates"
+            },
+            "rule_type": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "\nA rule type designation, such as `eom_monthly` or `one_time_immediate`"
+            },
+            "tiers_count": {
+              "type": "number",
+              "description": "\nNumber of tiers containing this benefit"
+            },
+            "title": {
+              "type": "string",
+              "description": "\nDisplay title"
+            }
+          }
+        },
+        "campaign": {
+          "type": "object",
+          "title": "Campaign",
+          "description": "\nThe creator's page, and the top-level object for accessing lists of members, tiers, etc",
+          "externalDocs": {
+            "description": "Official documentation for the Campaign resource",
+            "url": "https://docs.patreon.com/#campaign-v2"
+          },
+          "properties": {
+            "vanity": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "\nThe campaign's vanity name"
+            },
+            "url": {
+              "type": "string",
+              "description": "\nThe url to visit this campaign",
+              "format": "uri"
+            },
+            "thanks_video_url": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "\nThe URL of the video that is shown to patrons after pledging",
+              "format": "uri"
+            },
+            "thanks_msg": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "\nThe message that is shown to patrons after pledging"
+            },
+            "thanks_embed": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "\nThe embed that is shown to patrons after pledging"
+            },
+            "summary": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "\nThe summary of this campaign.\nCan be viewed in the About section of the campaign"
+            },
+            "show_earnings": {
+              "type": "boolean",
+              "description": "\nWhether the campaign's total earnings are shown publicly"
+            },
+            "rss_feed_title": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "\nThe title of the campaigns rss feed"
+            },
+            "rss_artwork_url": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "\nThe url for the rss album artwork",
+              "format": "uri"
+            },
+            "published_at": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "\nDatetime that the creator most recently published (made publicly visible) the campaign.\nNull when the campaign has not been public.",
+              "format": "date-time"
+            },
+            "pledge_url": {
+              "type": "string",
+              "description": "\nRelative (to patreon.com) URL for the pledge checkout flow for this campaign"
+            },
+            "pay_per_name": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "\nThe thing which patrons are paying per, as in \"{@link Campaign.vanity} is making $1000 per {@link Campaign.pay_per_name}\""
+            },
+            "patron_count": {
+              "type": "number",
+              "description": "\nNumber of patrons pledging to this creator"
+            },
+            "one_liner": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "\nPithy one-liner for this campaign, displayed on the creator page"
+            },
+            "main_video_url": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "",
+              "format": "uri"
+            },
+            "main_video_embed": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "\n"
+            },
+            "is_nsfw": {
+              "type": "boolean",
+              "description": "\nWhether the creator has marked the campaign as containing nsfw content"
+            },
+            "is_monthly": {
+              "type": "boolean",
+              "description": "\nWhether the campaign charges per month"
+            },
+            "is_charged_immediately": {
+              "type": "boolean",
+              "description": "\nWhether the campaign charges upfront"
+            },
+            "image_url": {
+              "type": "string",
+              "description": "\nBanner image URL for the campaign",
+              "format": "uri"
+            },
+            "image_small_url": {
+              "type": "string",
+              "description": "\nProfile image URL for the campaign",
+              "format": "uri"
+            },
+            "has_sent_rss_notify": {
+              "type": "boolean",
+              "description": "\nWhether the creator has sent a one-time rss notification email"
+            },
+            "has_rss": {
+              "type": "boolean",
+              "description": "\nWhether this user has opted-in to rss feeds"
+            },
+            "google_analytics_id": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "\nThe ID of the Google Analytics tracker that the creator wants metrics to be sent to"
+            },
+            "discord_server_id": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "\nThe ID of the external discord server that is linked to this campaign"
+            },
+            "creation_name": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "\nThe type of content the creator is creating, as in \"{@link Campaign.vanity} is creating {@link Campaign.creation_name}\""
+            },
+            "created_at": {
+              "type": "string",
+              "description": "\nDatetime that the creator first began the campaign creation process",
+              "format": "date-time"
+            }
+          }
+        },
+        "client": {
+          "type": "object",
+          "title": "OauthClient",
+          "description": "\nA client created by a developer, used for getting OAuth2 access tokens.",
+          "externalDocs": {
+            "description": "Official documentation for the OauthClient resource",
+            "url": "https://docs.patreon.com/#oauthclient"
+          },
+          "properties": {
+            "author_name": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "\nThe author name provided during client setup."
+            },
+            "client_secret": {
+              "type": "string",
+              "description": "\nThe client's secret."
+            },
+            "default_scopes": {
+              "type": "string",
+              "description": "\nThe client's default OAuth scopes for the authorization flow."
+            },
+            "description": {
+              "type": "string",
+              "description": "\nThe description provided during client setup."
+            },
+            "domain": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "\nThe domain provided during client setup.",
+              "format": "uri"
+            },
+            "icon_url": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "\nThe URL of the icon used in the OAuth authorization flow.",
+              "format": "uri"
+            },
+            "name": {
+              "type": "string",
+              "description": "\nThe name provided during client setup."
+            },
+            "privacy_policy_url": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "\nThe URL of the privacy policy provided during client setup.",
+              "format": "uri"
+            },
+            "redirect_uris": {
+              "type": "string",
+              "description": "\nThe allowable redirect URIs for the OAuth authorization flow."
+            },
+            "tos_url": {
+              "type": "string",
+              "description": "\nThe URL of the terms of service provided during client setup.",
+              "format": "uri"
+            },
+            "version": {
+              "type": "number",
+              "description": "\nThe Patreon API version the client is targeting.",
+              "examples": [
+                2
+              ]
+            }
+          }
+        },
+        "deliverable": {
+          "type": "object",
+          "title": "Deliverable",
+          "description": "\nThe record of whether or not a patron has been delivered the benefit they are owed because of their member tier.",
+          "externalDocs": {
+            "description": "Official documentation for the Deliverable resource",
+            "url": "https://docs.patreon.com/#deliverable"
+          },
+          "properties": {
+            "completed_at": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "\nWhen the creator marked the deliverable as completed or fulfilled to the patron",
+              "format": "date-time"
+            },
+            "delivery_status": {
+              "type": "string",
+              "enum": [
+                "delivered",
+                "not_delivered",
+                "wont_deliver"
+              ],
+              "description": ""
+            },
+            "due_at": {
+              "type": "string",
+              "description": "\nWhen the deliverable is due to the patron",
+              "format": "date-time"
+            }
+          }
+        },
+        "goal": {
+          "type": "object",
+          "title": "Goal",
+          "description": "",
+          "externalDocs": {
+            "description": "Official documentation for the Goal resource",
+            "url": "https://docs.patreon.com/#goal"
+          },
+          "properties": {}
+        },
+        "media": {
+          "type": "object",
+          "title": "Media",
+          "description": "\nA file uploaded to patreon.com, usually an image.",
+          "externalDocs": {
+            "description": "Official documentation for the Media resource",
+            "url": "https://docs.patreon.com/#media"
+          },
+          "properties": {
+            "created_at": {
+              "type": "string",
+              "description": "\nWhen the file was created",
+              "format": "date-time"
+            },
+            "download_url": {
+              "type": "string",
+              "description": "\nThe URL to download this media. Valid for 24 hours.",
+              "format": "uri"
+            },
+            "file_name": {
+              "type": "string",
+              "description": "\nFile name."
+            },
+            "image_urls": {
+              "type": "object",
+              "description": "\nThe resized image URLs for this media. Valid for 2 weeks."
+            },
+            "metadata": {
+              "type": [
+                "object",
+                "null"
+              ],
+              "description": "\nMetadata related to the file"
+            },
+            "mimetype": {
+              "type": "string",
+              "description": "\nMimetype of uploaded file, eg: \"application/jpeg\""
+            },
+            "owner_id": {
+              "type": "string",
+              "description": "\nOwnership id (See also {@link Media.owner_type})"
+            },
+            "owner_relationship": {
+              "type": "string",
+              "description": "\nOwnership relationship type for multi-relationship medias"
+            },
+            "owner_type": {
+              "type": "string",
+              "description": "\nType of the resource that owns the file"
+            },
+            "size_bytes": {
+              "type": "number",
+              "description": "\n"
+            },
+            "state": {
+              "type": "string",
+              "description": "\n"
+            },
+            "upload_expires_at": {
+              "type": "string",
+              "description": "\nWhen the upload URL expires",
+              "format": "date-time"
+            },
+            "upload_parameters": {
+              "type": "object",
+              "description": "\nAll the parameters that have to be added to the upload form request"
+            },
+            "upload_url": {
+              "type": "string",
+              "description": "\nThe URL to perform a POST request to in order to upload the media file",
+              "format": "uri"
+            }
+          }
+        },
+        "member": {
+          "type": "object",
+          "title": "Member",
+          "description": "\nThe record of a user's membership to a campaign.\nRemains consistent across months of pledging.",
+          "externalDocs": {
+            "description": "Official documentation for the Member resource",
+            "url": "https://docs.patreon.com/#member"
+          },
+          "properties": {
+            "campaign_lifetime_support_cents": {
+              "type": "number",
+              "description": "\nThe total amount that the member has ever paid to the campaign in campaign's currency.\n0 if never paid"
+            },
+            "currently_entitled_amount_cents": {
+              "type": "number",
+              "description": "\nThe amount in cents that the member is entitled to.\nThis includes a current pledge, or payment that covers the current payment period"
+            },
+            "email": {
+              "type": "string",
+              "description": "\nThe member's email address.\nRequires the campaigns.members[email] scope"
+            },
+            "full_name": {
+              "type": "string",
+              "description": "\nFull name of the member user",
+              "examples": [
+                "John Doe"
+              ]
+            },
+            "is_follower": {
+              "type": "boolean",
+              "description": "\nThe user is not a pledging patron but has subscribed to updates about public posts"
+            },
+            "last_charge_date": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "\nDatetime of last attempted charge.\n`null` if never charged",
+              "format": "date-time"
+            },
+            "last_charge_status": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "enum": [
+                "Paid",
+                "Declined",
+                "Deleted",
+                "Pending",
+                "Refunded",
+                "Fraud",
+                "Other"
+              ],
+              "description": "\nThe result of the last attempted charge.\nThe only successful status is `'Paid'`.\n`null` if never charged\n\nNote: this will likely be either `'Paid'` or `'Pending'`"
+            },
+            "lifetime_support_cents": {
+              "type": "number",
+              "description": "\nThe total amount that the member has ever paid to the campaign.\n0 if never paid"
+            },
+            "next_charge_date": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "\nDatetime of next charge.\n`null` if annual pledge downgrade",
+              "format": "date-time"
+            },
+            "note": {
+              "type": "string",
+              "description": "\nThe creator's notes on the member"
+            },
+            "patron_status": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "enum": [
+                "active_patron",
+                "declined_patron",
+                "former_patron"
+              ],
+              "description": "\nA `null` value indicates the member has never pledged"
+            },
+            "pledge_cadence": {
+              "type": "number",
+              "description": "\nNumber of months between charges\n\nNote: this will be `1` if Campaign.is_monthly is `true`",
+              "examples": [
+                1
+              ]
+            },
+            "pledge_relationship_start": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "\nDatetime of beginning of most recent pledge chainfrom this member to the campaign.\nPledge updates do not change this value",
+              "format": "date-time"
+            },
+            "will_pay_amount_cents": {
+              "type": "number",
+              "description": "\nThe amount in cents the user will pay at the next pay cycle",
+              "examples": [
+                500
+              ]
+            }
+          }
+        },
+        "post": {
+          "type": "object",
+          "title": "Post",
+          "description": "\nContent posted by a creator on a campaign page.",
+          "externalDocs": {
+            "description": "Official documentation for the Post resource",
+            "url": "https://docs.patreon.com/#post-v2"
+          },
+          "properties": {
+            "app_id": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "description": "\nPlatform app id"
+            },
+            "app_status": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "\nProcessing status of the post"
+            },
+            "content": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "\n"
+            },
+            "embed_data": {
+              "type": [
+                "object",
+                "null"
+              ],
+              "description": "\nAn object containing embed data if media is embedded in the post"
+            },
+            "embed_url": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "\nEmbed media url",
+              "format": "uri"
+            },
+            "is_paid": {
+              "type": [
+                "boolean",
+                "null"
+              ],
+              "description": "\nWhether the post incurs a bill as part of a pay-per-post campaign"
+            },
+            "is_public": {
+              "type": [
+                "boolean",
+                "null"
+              ],
+              "description": "\n- `true` if the post is viewable by anyone\n- `false` if only patrons (or a subset of patrons) can view"
+            },
+            "published_at": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "\nDatetime that the creator most recently published (made publicly visible) the post",
+              "format": "date-time"
+            },
+            "tiers": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "\nThe tier ids that allow the patrons from those tiers to view the post.\nEmpty array if no tiers assigned even if {@link Post.is_paid} is true"
+            },
+            "title": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "\n"
+            },
+            "url": {
+              "type": "string",
+              "description": "\nA URL to access this post on patreon.com",
+              "format": "uri"
+            }
+          }
+        },
+        "pledge-event": {
+          "type": "object",
+          "title": "PledgeEvent",
+          "description": "\nThe record of a pledging action taken by the user, or that action's failure.",
+          "externalDocs": {
+            "description": "Official documentation for the PledgeEvent resource",
+            "url": "https://docs.patreon.com/#pledge-event"
+          },
+          "properties": {
+            "amount_cents": {
+              "type": "number",
+              "description": "\nAmount (in the currency in which the patron paid) of the underlying event",
+              "examples": [
+                500
+              ]
+            },
+            "currency_code": {
+              "type": "string",
+              "description": "\nISO code of the currency of the event"
+            },
+            "date": {
+              "type": "string",
+              "description": "\nThe date which this event occurred",
+              "format": "date-time"
+            },
+            "payment_status": {
+              "type": "string",
+              "enum": [
+                "Paid",
+                "Declined",
+                "Pending",
+                "Refunded",
+                "Fraud",
+                "Other"
+              ],
+              "description": "\nStatus of underlying payment"
+            },
+            "tier_id": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "\nId of the tier associated with the pledge"
+            },
+            "tier_title": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "\nTitle of the reward tier associated with the pledge"
+            },
+            "type": {
+              "type": "string",
+              "enum": [
+                "pledge_start",
+                "pledge_upgrade",
+                "pledge_downgrade",
+                "pledge_delete",
+                "subscription"
+              ],
+              "description": "\nEvent type."
+            }
+          }
+        },
+        "tier": {
+          "type": "object",
+          "title": "Tier",
+          "description": "\nA membership level on a campaign, which can have benefits attached to it.",
+          "externalDocs": {
+            "description": "Official documentation for the Tier resource",
+            "url": "https://docs.patreon.com/#tier"
+          },
+          "properties": {
+            "amount_cents": {
+              "type": "number",
+              "description": "\nMonetary amount associated with this tier (in U.S. cents)"
+            },
+            "created_at": {
+              "type": "string",
+              "description": "\nDatetime this tier was created",
+              "format": "date-time"
+            },
+            "description": {
+              "type": "string",
+              "description": "\nTier display description"
+            },
+            "discord_role_ids": {
+              "type": [
+                "object",
+                "null"
+              ],
+              "description": "\nThe discord role IDs granted by this tier"
+            },
+            "edited_at": {
+              "type": "string",
+              "description": "\nDatetime tier was last modified",
+              "format": "date-time"
+            },
+            "image_url": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "\nFull qualified image URL associated with this tier",
+              "format": "uri"
+            },
+            "patron_count": {
+              "type": "number",
+              "description": "\nNumber of patrons currently registered for this tier"
+            },
+            "post_count": {
+              "type": "number",
+              "description": "\nNumber of posts published to this tier"
+            },
+            "published": {
+              "type": "boolean",
+              "description": "\nWhether the tier is currently published"
+            },
+            "published_at": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "\nDatetime this tier was last published",
+              "format": "date-time"
+            },
+            "remaining": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "description": "\nRemaining number of patrons who may subscribe, if there is a {@link Tier.user_limit}"
+            },
+            "requires_shipping": {
+              "type": "boolean",
+              "description": "\nWhether this tier requires a shipping address from patrons"
+            },
+            "title": {
+              "type": "string",
+              "description": "\nTier display title"
+            },
+            "unpublished_at": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "\nDatetime tier was unpublished, while applicable",
+              "format": "date-time"
+            },
+            "url": {
+              "type": "string",
+              "description": "\nFully qualified URL associated with this tier",
+              "format": "uri"
+            },
+            "user_limit": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "description": "\nMaximum number of patrons this tier is limited to, if applicable"
+            }
+          }
+        },
+        "user": {
+          "type": "object",
+          "title": "User",
+          "description": "\nThe Patreon user, which can be both patron and creator.",
+          "externalDocs": {
+            "description": "Official documentation for the User resource",
+            "url": "https://docs.patreon.com/#user-v2"
+          },
+          "properties": {
+            "about": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "\nThe user's about text, which appears on their profile"
+            },
+            "can_see_nsfw": {
+              "type": [
+                "boolean",
+                "null"
+              ],
+              "description": "\nWhether this user can view nsfw content"
+            },
+            "created": {
+              "type": "string",
+              "description": "\nDatetime of this user's account creation",
+              "format": "date-time"
+            },
+            "email": {
+              "type": "string",
+              "description": "\nThe user's email address.\nRequires certain scopes to access.\nSee the scopes section of the documentation",
+              "format": "email"
+            },
+            "first_name": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "\nFirst name."
+            },
+            "full_name": {
+              "type": "string",
+              "description": "\nCombined first and last name"
+            },
+            "hide_pledges": {
+              "type": [
+                "boolean",
+                "null"
+              ],
+              "description": "\nWhether the user has chosen to keep private which creators they pledge to"
+            },
+            "image_url": {
+              "type": "string",
+              "description": "\nThe user's profile picture URL, scaled to width 400px",
+              "format": "uri"
+            },
+            "is_email_verified": {
+              "type": "boolean",
+              "description": "\nWhether the user has confirmed their email"
+            },
+            "last_name": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "\nLast name."
+            },
+            "like_count": {
+              "type": "number",
+              "description": "\nHow many posts this user has liked"
+            },
+            "social_connections": {
+              "type": "object",
+              "description": "\nMapping from user's connected app names to external user id on the respective app\n\nNOTE: since the documentation is `object`, this can change without notice.\nFor a more accurate representation use the following type using TypeScript module augmentation:\n```ts\nimport 'patreon-api.ts'\n\ndeclare module 'patreon-api.ts' {\n   interface CustomTypeOptions {\n       social_connections: Record<string, { url: string, user_id: string } | null>\n   }\n}\n```"
+            },
+            "thumb_url": {
+              "type": "string",
+              "description": "\nThe user's profile picture URL, scaled to a square of size 100x100px",
+              "format": "uri"
+            },
+            "url": {
+              "type": "string",
+              "description": "\nURL of this user's creator or patron profile",
+              "format": "uri"
+            },
+            "vanity": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "\nThe public \"username\" of the user.\npatreon.com/ goes to this user's creator page.\nNon-creator users might not have a vanity."
+            }
+          }
+        },
+        "webhook": {
+          "type": "object",
+          "title": "Webhook",
+          "description": "\nWebhooks are fired based on events happening on a particular campaign.",
+          "externalDocs": {
+            "description": "Official documentation for the Webhook resource",
+            "url": "https://docs.patreon.com/#webhook"
+          },
+          "properties": {
+            "last_attempted_at": {
+              "type": "string",
+              "description": "\nLast date that the webhook was attempted or used.",
+              "format": "date-time"
+            },
+            "num_consecutive_times_failed": {
+              "type": "number",
+              "description": "\nNumber of times the webhook has failed consecutively, when in an error state.",
+              "examples": [
+                0,
+                2
+              ]
+            },
+            "paused": {
+              "type": "boolean",
+              "description": "\n`true` if the webhook is paused as a result of repeated failed attempts to post to uri.\nSet to `false` to attempt to re-enable a previously failing webhook."
+            },
+            "secret": {
+              "type": "string",
+              "description": "\nSecret used to sign your webhook message body, so you can validate authenticity upon receipt."
+            },
+            "triggers": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "\nList of events that will trigger this webhook.",
+              "externalDocs": {
+                "url": "://docs.patreon.com/#triggers-v2"
+              },
+              "examples": [
+                "[\n   'members:pledge:create',\n   'members:update',\n   'members:pledge:delete',\n]"
+              ]
+            },
+            "uri": {
+              "type": "string",
+              "description": "\nFully qualified uri where webhook will be sent",
+              "format": "uri",
+              "examples": [
+                "'https://www.example.com/webhooks/incoming'"
+              ]
+            }
+          }
+        },
+        "webhookTrigger": {
+          "type": "array",
+          "title": "Webhook trigger",
+          "items": {
+            "type": "string",
+            "enum": [
+              "members:create",
+              "members:update",
+              "members:delete",
+              "members:pledge:create",
+              "members:pledge:update",
+              "members:pledge:delete",
+              "posts:publish",
+              "posts:update",
+              "posts:delete"
+            ]
+          },
+          "externalDocs": {
+            "url": "https://docs.patreon.com/#triggers-v2"
+          },
+          "examples": [
+            [
+              "members:pledge:create",
+              "members:update",
+              "members:pledge:delete"
+            ]
+          ]
+        },
+        "JSONAPIError": {
+          "type": "object",
+          "properties": {
+            "code": {
+              "type": "number"
+            },
+            "code_name": {
+              "type": "string"
+            },
+            "detail": {
+              "type": "string"
+            },
+            "id": {
+              "type": "string"
+            },
+            "status": {
+              "type": "string"
+            },
+            "title": {
+              "type": "string"
+            }
+          }
+        },
+        "JSONAPIResource": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string"
+            },
+            "id": {
+              "readOnly": true,
+              "type": "string"
+            }
+          },
+          "required": [
+            "id",
+            "type"
+          ],
+          "discriminator": {
+            "propertyName": "type"
+          }
+        },
+        "JSONAPILinksRelated": {},
+        "JSONAPIResponseLinks": {
+          "properties": {
+            "self": {
+              "type": "string"
+            }
+          }
+        },
+        "JSONAPIResponseMeta": {
+          "properties": {
+            "meta": {
+              "properties": {
+                "total": {
+                  "type": "number"
+                },
+                "pagination": {
+                  "properties": {
+                    "cursors": {
+                      "properties": {
+                        "next": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "paths": {
+      "/api/oauth/v2/identity": {
+        "summary": "",
+        "description": "",
+        "get": {
+          "tags": [
+            "Resources"
+          ],
+          "operationId": "getIdentity",
+          "description": "",
+          "summary": "Get identity",
+          "deprecated": false,
+          "externalDocs": {
+            "description": "Official documentation",
+            "url": "https://docs.patreon.com/#get-api-oauth2-v2-identity"
+          },
+          "parameters": [
+            {
+              "name": "include",
+              "in": "query",
+              "required": false,
+              "style": "form",
+              "explode": false,
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "campaign",
+                    "memberships"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "fields",
+              "in": "query",
+              "required": false,
+              "style": "deepObject",
+              "explode": true,
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "campaign": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "$ref": "#/components/schemas/campaign"
+                    }
+                  },
+                  "member": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "$ref": "#/components/schemas/member"
+                    }
+                  },
+                  "user": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "$ref": "#/components/schemas/user"
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "$ref": "#/components/parameters/userAgent"
+            }
+          ],
+          "responses": {
+            "200": {
+              "$ref": "#/components/responses/userResponse"
+            },
+            "400": {
+              "$ref": "#/components/responses/400"
+            },
+            "401": {
+              "$ref": "#/components/responses/401"
+            },
+            "403": {
+              "$ref": "#/components/responses/403"
+            },
+            "404": {
+              "$ref": "#/components/responses/404"
+            },
+            "405": {
+              "$ref": "#/components/responses/405"
+            },
+            "406": {
+              "$ref": "#/components/responses/406"
+            },
+            "410": {
+              "$ref": "#/components/responses/410"
+            },
+            "429": {
+              "$ref": "#/components/responses/429"
+            },
+            "500": {
+              "$ref": "#/components/responses/500"
+            },
+            "503": {
+              "$ref": "#/components/responses/503"
+            }
+          },
+          "security": [
+            {
+              "Oauth2": []
+            }
+          ]
+        }
+      },
+      "/api/oauth/v2/campaigns/{campaign_id}": {
+        "summary": "",
+        "description": "",
+        "get": {
+          "tags": [
+            "Resources"
+          ],
+          "operationId": "getCampaign",
+          "description": "",
+          "summary": "Get campaign",
+          "deprecated": false,
+          "externalDocs": {
+            "description": "Official documentation",
+            "url": "https://docs.patreon.com/#get-api-oauth2-v2-campaigns-campaign_id"
+          },
+          "parameters": [
+            {
+              "name": "include",
+              "in": "query",
+              "required": false,
+              "style": "form",
+              "explode": false,
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "benefits",
+                    "creator",
+                    "goals",
+                    "tiers"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "fields",
+              "in": "query",
+              "required": false,
+              "style": "deepObject",
+              "explode": true,
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "benefit": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "$ref": "#/components/schemas/benefit"
+                    }
+                  },
+                  "user": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "$ref": "#/components/schemas/user"
+                    }
+                  },
+                  "goal": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "$ref": "#/components/schemas/goal"
+                    }
+                  },
+                  "tier": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "$ref": "#/components/schemas/tier"
+                    }
+                  },
+                  "campaign": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "$ref": "#/components/schemas/campaign"
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "$ref": "#/components/parameters/campaign_id"
+            },
+            {
+              "$ref": "#/components/parameters/userAgent"
+            }
+          ],
+          "responses": {
+            "200": {
+              "$ref": "#/components/responses/campaignResponse"
+            },
+            "400": {
+              "$ref": "#/components/responses/400"
+            },
+            "401": {
+              "$ref": "#/components/responses/401"
+            },
+            "403": {
+              "$ref": "#/components/responses/403"
+            },
+            "404": {
+              "$ref": "#/components/responses/404"
+            },
+            "405": {
+              "$ref": "#/components/responses/405"
+            },
+            "406": {
+              "$ref": "#/components/responses/406"
+            },
+            "410": {
+              "$ref": "#/components/responses/410"
+            },
+            "429": {
+              "$ref": "#/components/responses/429"
+            },
+            "500": {
+              "$ref": "#/components/responses/500"
+            },
+            "503": {
+              "$ref": "#/components/responses/503"
+            }
+          },
+          "security": [
+            {
+              "Oauth2": [
+                "campaigns"
+              ]
+            }
+          ]
+        }
+      },
+      "/api/oauth/v2/campaigns": {
+        "summary": "",
+        "description": "",
+        "get": {
+          "tags": [
+            "Resources"
+          ],
+          "operationId": "getCampaigns",
+          "description": "",
+          "summary": "Get campaigns",
+          "deprecated": false,
+          "externalDocs": {
+            "description": "Official documentation",
+            "url": "https://docs.patreon.com/#get-api-oauth2-v2-campaigns"
+          },
+          "parameters": [
+            {
+              "name": "include",
+              "in": "query",
+              "required": false,
+              "style": "form",
+              "explode": false,
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "benefits",
+                    "creator",
+                    "goals",
+                    "tiers"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "fields",
+              "in": "query",
+              "required": false,
+              "style": "deepObject",
+              "explode": true,
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "benefit": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "$ref": "#/components/schemas/benefit"
+                    }
+                  },
+                  "user": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "$ref": "#/components/schemas/user"
+                    }
+                  },
+                  "goal": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "$ref": "#/components/schemas/goal"
+                    }
+                  },
+                  "tier": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "$ref": "#/components/schemas/tier"
+                    }
+                  },
+                  "campaign": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "$ref": "#/components/schemas/campaign"
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "name": "sort",
+              "in": "query",
+              "required": false,
+              "style": "form",
+              "explode": false,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "page",
+              "in": "query",
+              "required": false,
+              "style": "deepObject",
+              "explode": true,
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "cursor": {
+                    "type": "string"
+                  },
+                  "count": {
+                    "type": "number"
+                  }
+                }
+              }
+            },
+            {
+              "$ref": "#/components/parameters/userAgent"
+            }
+          ],
+          "responses": {
+            "200": {
+              "$ref": "#/components/responses/campaignsResponse"
+            },
+            "400": {
+              "$ref": "#/components/responses/400"
+            },
+            "401": {
+              "$ref": "#/components/responses/401"
+            },
+            "403": {
+              "$ref": "#/components/responses/403"
+            },
+            "404": {
+              "$ref": "#/components/responses/404"
+            },
+            "405": {
+              "$ref": "#/components/responses/405"
+            },
+            "406": {
+              "$ref": "#/components/responses/406"
+            },
+            "410": {
+              "$ref": "#/components/responses/410"
+            },
+            "429": {
+              "$ref": "#/components/responses/429"
+            },
+            "500": {
+              "$ref": "#/components/responses/500"
+            },
+            "503": {
+              "$ref": "#/components/responses/503"
+            }
+          },
+          "security": [
+            {
+              "Oauth2": [
+                "campaigns"
+              ]
+            }
+          ]
+        }
+      },
+      "/api/oauth/v2/campaigns/{campaign_id}/members": {
+        "summary": "",
+        "description": "",
+        "get": {
+          "tags": [
+            "Resources"
+          ],
+          "operationId": "getCampaignMembers",
+          "description": "",
+          "summary": "Get campaign members",
+          "deprecated": false,
+          "externalDocs": {
+            "description": "Official documentation",
+            "url": "https://docs.patreon.com/#get-api-oauth2-v2-campaigns-campaign_id-members"
+          },
+          "parameters": [
+            {
+              "name": "include",
+              "in": "query",
+              "required": false,
+              "style": "form",
+              "explode": false,
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "address",
+                    "campaign",
+                    "currently_entitled_tiers",
+                    "pledge_history",
+                    "user"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "fields",
+              "in": "query",
+              "required": false,
+              "style": "deepObject",
+              "explode": true,
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "address": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "$ref": "#/components/schemas/address"
+                    }
+                  },
+                  "campaign": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "$ref": "#/components/schemas/campaign"
+                    }
+                  },
+                  "tier": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "$ref": "#/components/schemas/tier"
+                    }
+                  },
+                  "pledge-event": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "$ref": "#/components/schemas/pledge-event"
+                    }
+                  },
+                  "user": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "$ref": "#/components/schemas/user"
+                    }
+                  },
+                  "member": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "$ref": "#/components/schemas/member"
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "name": "sort",
+              "in": "query",
+              "required": false,
+              "style": "form",
+              "explode": false,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "page",
+              "in": "query",
+              "required": false,
+              "style": "deepObject",
+              "explode": true,
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "cursor": {
+                    "type": "string"
+                  },
+                  "count": {
+                    "type": "number"
+                  }
+                }
+              }
+            },
+            {
+              "$ref": "#/components/parameters/campaign_id"
+            },
+            {
+              "$ref": "#/components/parameters/userAgent"
+            }
+          ],
+          "responses": {
+            "200": {
+              "$ref": "#/components/responses/membersResponse"
+            },
+            "400": {
+              "$ref": "#/components/responses/400"
+            },
+            "401": {
+              "$ref": "#/components/responses/401"
+            },
+            "403": {
+              "$ref": "#/components/responses/403"
+            },
+            "404": {
+              "$ref": "#/components/responses/404"
+            },
+            "405": {
+              "$ref": "#/components/responses/405"
+            },
+            "406": {
+              "$ref": "#/components/responses/406"
+            },
+            "410": {
+              "$ref": "#/components/responses/410"
+            },
+            "429": {
+              "$ref": "#/components/responses/429"
+            },
+            "500": {
+              "$ref": "#/components/responses/500"
+            },
+            "503": {
+              "$ref": "#/components/responses/503"
+            }
+          },
+          "security": [
+            {
+              "Oauth2": [
+                "campaigns.members"
+              ]
+            }
+          ]
+        }
+      },
+      "/api/oauth/v2/members/{id}": {
+        "summary": "",
+        "description": "",
+        "get": {
+          "tags": [
+            "Resources"
+          ],
+          "operationId": "getMember",
+          "description": "",
+          "summary": "Get member",
+          "deprecated": false,
+          "externalDocs": {
+            "description": "Official documentation",
+            "url": "https://docs.patreon.com/#get-api-oauth2-v2-members-id"
+          },
+          "parameters": [
+            {
+              "name": "include",
+              "in": "query",
+              "required": false,
+              "style": "form",
+              "explode": false,
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "address",
+                    "campaign",
+                    "currently_entitled_tiers",
+                    "pledge_history",
+                    "user"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "fields",
+              "in": "query",
+              "required": false,
+              "style": "deepObject",
+              "explode": true,
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "address": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "$ref": "#/components/schemas/address"
+                    }
+                  },
+                  "campaign": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "$ref": "#/components/schemas/campaign"
+                    }
+                  },
+                  "tier": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "$ref": "#/components/schemas/tier"
+                    }
+                  },
+                  "pledge-event": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "$ref": "#/components/schemas/pledge-event"
+                    }
+                  },
+                  "user": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "$ref": "#/components/schemas/user"
+                    }
+                  },
+                  "member": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "$ref": "#/components/schemas/member"
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "$ref": "#/components/parameters/id"
+            },
+            {
+              "$ref": "#/components/parameters/userAgent"
+            }
+          ],
+          "responses": {
+            "200": {
+              "$ref": "#/components/responses/memberResponse"
+            },
+            "400": {
+              "$ref": "#/components/responses/400"
+            },
+            "401": {
+              "$ref": "#/components/responses/401"
+            },
+            "403": {
+              "$ref": "#/components/responses/403"
+            },
+            "404": {
+              "$ref": "#/components/responses/404"
+            },
+            "405": {
+              "$ref": "#/components/responses/405"
+            },
+            "406": {
+              "$ref": "#/components/responses/406"
+            },
+            "410": {
+              "$ref": "#/components/responses/410"
+            },
+            "429": {
+              "$ref": "#/components/responses/429"
+            },
+            "500": {
+              "$ref": "#/components/responses/500"
+            },
+            "503": {
+              "$ref": "#/components/responses/503"
+            }
+          },
+          "security": [
+            {
+              "Oauth2": [
+                "campaigns.members"
+              ]
+            }
+          ]
+        }
+      },
+      "/api/oauth/v2/campaigns/{campaign_id}/posts": {
+        "summary": "",
+        "description": "",
+        "get": {
+          "tags": [
+            "Resources"
+          ],
+          "operationId": "getCampaignPosts",
+          "description": "",
+          "summary": "Get campaign posts",
+          "deprecated": false,
+          "externalDocs": {
+            "description": "Official documentation",
+            "url": "https://docs.patreon.com/#get-api-oauth2-v2-campaigns-campaign_id-posts"
+          },
+          "parameters": [
+            {
+              "name": "include",
+              "in": "query",
+              "required": false,
+              "style": "form",
+              "explode": false,
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "user",
+                    "campaign"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "fields",
+              "in": "query",
+              "required": false,
+              "style": "deepObject",
+              "explode": true,
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "user": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "$ref": "#/components/schemas/user"
+                    }
+                  },
+                  "campaign": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "$ref": "#/components/schemas/campaign"
+                    }
+                  },
+                  "post": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "$ref": "#/components/schemas/post"
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "name": "sort",
+              "in": "query",
+              "required": false,
+              "style": "form",
+              "explode": false,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "page",
+              "in": "query",
+              "required": false,
+              "style": "deepObject",
+              "explode": true,
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "cursor": {
+                    "type": "string"
+                  },
+                  "count": {
+                    "type": "number"
+                  }
+                }
+              }
+            },
+            {
+              "$ref": "#/components/parameters/campaign_id"
+            },
+            {
+              "$ref": "#/components/parameters/userAgent"
+            }
+          ],
+          "responses": {
+            "200": {
+              "$ref": "#/components/responses/postsResponse"
+            },
+            "400": {
+              "$ref": "#/components/responses/400"
+            },
+            "401": {
+              "$ref": "#/components/responses/401"
+            },
+            "403": {
+              "$ref": "#/components/responses/403"
+            },
+            "404": {
+              "$ref": "#/components/responses/404"
+            },
+            "405": {
+              "$ref": "#/components/responses/405"
+            },
+            "406": {
+              "$ref": "#/components/responses/406"
+            },
+            "410": {
+              "$ref": "#/components/responses/410"
+            },
+            "429": {
+              "$ref": "#/components/responses/429"
+            },
+            "500": {
+              "$ref": "#/components/responses/500"
+            },
+            "503": {
+              "$ref": "#/components/responses/503"
+            }
+          },
+          "security": [
+            {
+              "Oauth2": [
+                "campaigns.posts"
+              ]
+            }
+          ]
+        }
+      },
+      "/api/oauth/v2/posts/{id}": {
+        "summary": "",
+        "description": "",
+        "get": {
+          "tags": [
+            "Resources"
+          ],
+          "operationId": "getPost",
+          "description": "",
+          "summary": "Get post",
+          "deprecated": false,
+          "externalDocs": {
+            "description": "Official documentation",
+            "url": "https://docs.patreon.com/#get-api-oauth2-v2-posts-id"
+          },
+          "parameters": [
+            {
+              "name": "include",
+              "in": "query",
+              "required": false,
+              "style": "form",
+              "explode": false,
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "user",
+                    "campaign"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "fields",
+              "in": "query",
+              "required": false,
+              "style": "deepObject",
+              "explode": true,
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "user": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "$ref": "#/components/schemas/user"
+                    }
+                  },
+                  "campaign": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "$ref": "#/components/schemas/campaign"
+                    }
+                  },
+                  "post": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "$ref": "#/components/schemas/post"
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "$ref": "#/components/parameters/id"
+            },
+            {
+              "$ref": "#/components/parameters/userAgent"
+            }
+          ],
+          "responses": {
+            "200": {
+              "$ref": "#/components/responses/postResponse"
+            },
+            "400": {
+              "$ref": "#/components/responses/400"
+            },
+            "401": {
+              "$ref": "#/components/responses/401"
+            },
+            "403": {
+              "$ref": "#/components/responses/403"
+            },
+            "404": {
+              "$ref": "#/components/responses/404"
+            },
+            "405": {
+              "$ref": "#/components/responses/405"
+            },
+            "406": {
+              "$ref": "#/components/responses/406"
+            },
+            "410": {
+              "$ref": "#/components/responses/410"
+            },
+            "429": {
+              "$ref": "#/components/responses/429"
+            },
+            "500": {
+              "$ref": "#/components/responses/500"
+            },
+            "503": {
+              "$ref": "#/components/responses/503"
+            }
+          },
+          "security": [
+            {
+              "Oauth2": [
+                "campaigns.posts"
+              ]
+            }
+          ]
+        }
+      },
+      "/api/oauth/v2/webhooks/{id}": {
+        "summary": "",
+        "description": "",
+        "patch": {
+          "tags": [
+            "Webhooks"
+          ],
+          "operationId": "editWebhook",
+          "description": "",
+          "summary": "Edit webhook",
+          "deprecated": false,
+          "externalDocs": {
+            "description": "Official documentation",
+            "url": "https://docs.patreon.com/#patch-api-oauth2-v2-webhooks-id"
+          },
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "required": [
+                        "attributes",
+                        "type",
+                        "id"
+                      ],
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "enum": [
+                            "webhook"
+                          ]
+                        },
+                        "id": {
+                          "type": "string",
+                          "examples": [
+                            "webhook-id"
+                          ]
+                        },
+                        "attributes": {
+                          "required": [],
+                          "properties": {
+                            "triggers": {
+                              "$ref": "#/components/schemas/webhookTrigger"
+                            },
+                            "uri": {
+                              "type": "string",
+                              "description": "Fully qualified uri where webhook will be sent",
+                              "examples": [
+                                "https://www.example.com/webhooks/incoming"
+                              ]
+                            },
+                            "paused": {
+                              "type": "boolean",
+                              "examples": [
+                                false
+                              ]
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "parameters": [
+            {
+              "$ref": "#/components/parameters/id"
+            },
+            {
+              "$ref": "#/components/parameters/userAgent"
+            }
+          ],
+          "responses": {
+            "200": {
+              "$ref": "#/components/responses/webhookResponse"
+            },
+            "400": {
+              "$ref": "#/components/responses/400"
+            },
+            "401": {
+              "$ref": "#/components/responses/401"
+            },
+            "403": {
+              "$ref": "#/components/responses/403"
+            },
+            "404": {
+              "$ref": "#/components/responses/404"
+            },
+            "405": {
+              "$ref": "#/components/responses/405"
+            },
+            "406": {
+              "$ref": "#/components/responses/406"
+            },
+            "410": {
+              "$ref": "#/components/responses/410"
+            },
+            "429": {
+              "$ref": "#/components/responses/429"
+            },
+            "500": {
+              "$ref": "#/components/responses/500"
+            },
+            "503": {
+              "$ref": "#/components/responses/503"
+            }
+          },
+          "security": [
+            {
+              "Oauth2": [
+                "w:campaigns.webhook"
+              ]
+            }
+          ]
+        }
+      },
+      "/api/oauth/v2/webhooks": {
+        "summary": "",
+        "description": "",
+        "get": {
+          "tags": [
+            "Webhooks"
+          ],
+          "operationId": "getWebhooks",
+          "description": "",
+          "summary": "Get webhooks",
+          "deprecated": false,
+          "externalDocs": {
+            "description": "Official documentation",
+            "url": "https://docs.patreon.com/#get-api-oauth2-v2-webhooks"
+          },
+          "parameters": [
+            {
+              "name": "include",
+              "in": "query",
+              "required": false,
+              "style": "form",
+              "explode": false,
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "campaign",
+                    "client"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "fields",
+              "in": "query",
+              "required": false,
+              "style": "deepObject",
+              "explode": true,
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "campaign": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "$ref": "#/components/schemas/campaign"
+                    }
+                  },
+                  "client": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "$ref": "#/components/schemas/client"
+                    }
+                  },
+                  "webhook": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "$ref": "#/components/schemas/webhook"
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "name": "sort",
+              "in": "query",
+              "required": false,
+              "style": "form",
+              "explode": false,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "page",
+              "in": "query",
+              "required": false,
+              "style": "deepObject",
+              "explode": true,
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "cursor": {
+                    "type": "string"
+                  },
+                  "count": {
+                    "type": "number"
+                  }
+                }
+              }
+            },
+            {
+              "$ref": "#/components/parameters/userAgent"
+            }
+          ],
+          "responses": {
+            "200": {
+              "$ref": "#/components/responses/webhooksResponse"
+            },
+            "400": {
+              "$ref": "#/components/responses/400"
+            },
+            "401": {
+              "$ref": "#/components/responses/401"
+            },
+            "403": {
+              "$ref": "#/components/responses/403"
+            },
+            "404": {
+              "$ref": "#/components/responses/404"
+            },
+            "405": {
+              "$ref": "#/components/responses/405"
+            },
+            "406": {
+              "$ref": "#/components/responses/406"
+            },
+            "410": {
+              "$ref": "#/components/responses/410"
+            },
+            "429": {
+              "$ref": "#/components/responses/429"
+            },
+            "500": {
+              "$ref": "#/components/responses/500"
+            },
+            "503": {
+              "$ref": "#/components/responses/503"
+            }
+          },
+          "security": [
+            {
+              "Oauth2": [
+                "w:campaigns.webhook"
+              ]
+            }
+          ]
+        },
+        "post": {
+          "tags": [
+            "Webhooks"
+          ],
+          "operationId": "createWebhook",
+          "description": "",
+          "summary": "Create webhook",
+          "deprecated": false,
+          "externalDocs": {
+            "description": "Official documentation",
+            "url": "https://docs.patreon.com/#post-api-oauth2-v2-webhooks"
+          },
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "required": [
+                        "type",
+                        "attributes",
+                        "relationships"
+                      ],
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "enum": [
+                            "webhook"
+                          ]
+                        },
+                        "attributes": {
+                          "required": [
+                            "triggers",
+                            "uri"
+                          ],
+                          "properties": {
+                            "triggers": {
+                              "$ref": "#/components/schemas/webhookTrigger"
+                            },
+                            "uri": {
+                              "type": "string",
+                              "description": "Fully qualified uri where webhook will be sent",
+                              "examples": [
+                                "https://www.example.com/webhooks/incoming"
+                              ]
+                            }
+                          }
+                        },
+                        "relationships": {
+                          "properties": {
+                            "campaign": {
+                              "properties": {
+                                "data": {
+                                  "required": [
+                                    "type",
+                                    "id"
+                                  ],
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "enum": [
+                                        "campaign"
+                                      ]
+                                    },
+                                    "id": {
+                                      "type": "string",
+                                      "examples": [
+                                        "campaign-id"
+                                      ]
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "parameters": [
+            {
+              "$ref": "#/components/parameters/userAgent"
+            }
+          ],
+          "responses": {
+            "200": {
+              "$ref": "#/components/responses/webhooksResponse"
+            },
+            "400": {
+              "$ref": "#/components/responses/400"
+            },
+            "401": {
+              "$ref": "#/components/responses/401"
+            },
+            "403": {
+              "$ref": "#/components/responses/403"
+            },
+            "404": {
+              "$ref": "#/components/responses/404"
+            },
+            "405": {
+              "$ref": "#/components/responses/405"
+            },
+            "406": {
+              "$ref": "#/components/responses/406"
+            },
+            "410": {
+              "$ref": "#/components/responses/410"
+            },
+            "429": {
+              "$ref": "#/components/responses/429"
+            },
+            "500": {
+              "$ref": "#/components/responses/500"
+            },
+            "503": {
+              "$ref": "#/components/responses/503"
+            }
+          },
+          "security": [
+            {
+              "Oauth2": [
+                "w:campaigns.webhook"
+              ]
+            }
+          ]
+        }
+      }
+    }
+  }

@@ -740,9 +740,13 @@ toRequestFunctions server effectTypes method pathUrl operation =
                     CliMonad.succeed [ ( Common.UnsafeName "body", Gen.Bytes.annotation_.bytes ) ]
                         |> CliMonad.withRequiredPackage "elm/bytes"
 
-        headersFromList : (Elm.Expression -> Elm.Expression -> Elm.Expression) -> AuthorizationInfo -> Elm.Expression -> List ( Elm.Expression, Elm.Expression, Bool ) -> Elm.Expression
-        headersFromList f auth config headerParams =
+        headersFromList : (Elm.Expression -> Elm.Expression -> Elm.Expression) -> AuthorizationInfo -> Elm.Expression -> List (Elm.Expression -> ( Elm.Expression, Elm.Expression, Bool )) -> Elm.Expression
+        headersFromList f auth config headerFunctions =
             let
+                headerParams : List ( Elm.Expression, Elm.Expression, Bool )
+                headerParams =
+                    List.map (\toHeader -> toHeader config) headerFunctions
+
                 hasMaybes : Bool
                 hasMaybes =
                     List.any (\( _, _, isMaybe ) -> isMaybe) headerParams
@@ -883,9 +887,7 @@ toRequestFunctions server effectTypes method pathUrl operation =
                                         [ ( "url", replaced config )
                                         , ( "method", Elm.string method )
                                         , ( "headers"
-                                          , toHeaderParams
-                                                |> List.map (\f -> f config)
-                                                |> headersFromList Gen.Http.call_.header auth config
+                                          , headersFromList Gen.Http.call_.header auth config toHeaderParams
                                           )
                                         , ( "expect", (expect <| toMsg config).core )
                                         , ( "body", (toBody config).core )
@@ -954,9 +956,7 @@ toRequestFunctions server effectTypes method pathUrl operation =
                                         [ ( "url", replaced config )
                                         , ( "method", Elm.string method )
                                         , ( "headers"
-                                          , toHeaderParams
-                                                |> List.map (\f -> f config)
-                                                |> headersFromList Gen.Http.call_.header auth config
+                                          , headersFromList Gen.Http.call_.header auth config toHeaderParams
                                           )
                                         , ( "resolver", resolver.core )
                                         , ( "body", (toBody config).core )
@@ -1030,9 +1030,7 @@ toRequestFunctions server effectTypes method pathUrl operation =
                                         [ ( "url", replaced config )
                                         , ( "method", Elm.string method )
                                         , ( "headers"
-                                          , toHeaderParams
-                                                |> List.map (\f -> f config)
-                                                |> headersFromList Gen.Http.call_.header auth config
+                                          , headersFromList Elm.tuple auth config toHeaderParams
                                           )
                                         , ( "body", (toBody config).elmPages )
                                         , ( "retries", Gen.Maybe.make_.nothing )
@@ -1101,9 +1099,7 @@ toRequestFunctions server effectTypes method pathUrl operation =
                                         [ ( "url", replaced config )
                                         , ( "method", Elm.string method )
                                         , ( "headers"
-                                          , toHeaderParams
-                                                |> List.map (\f -> f config)
-                                                |> headersFromList Gen.Effect.Http.call_.header auth config
+                                          , headersFromList Gen.Effect.Http.call_.header auth config toHeaderParams
                                           )
                                         , ( "expect", (expect <| toMsg config).lamderaProgramTest )
                                         , ( "body", (toBody config).lamderaProgramTest )
@@ -1153,9 +1149,7 @@ toRequestFunctions server effectTypes method pathUrl operation =
                                         [ ( "url", replaced config )
                                         , ( "method", Elm.string method )
                                         , ( "headers"
-                                          , toHeaderParams
-                                                |> List.map (\f -> f config)
-                                                |> headersFromList Gen.Effect.Http.call_.header auth config
+                                          , headersFromList Gen.Effect.Http.call_.header auth config toHeaderParams
                                           )
                                         , ( "resolver", resolver.lamderaProgramTest )
                                         , ( "body", (toBody config).lamderaProgramTest )

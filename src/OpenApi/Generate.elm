@@ -768,10 +768,10 @@ toRequestFunctions server effectTypes method pathUrl operation =
                                 Gen.Maybe.map (f k) v
 
                             else if hasMaybes then
-                                f k v
+                                Elm.just (f k v)
 
                             else
-                                Elm.just (f k v)
+                                f k v
                         )
                         headerParams
             in

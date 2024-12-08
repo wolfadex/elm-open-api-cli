@@ -1475,39 +1475,38 @@ replacedUrl server authInfo pathUrl operation =
                 toConcreteParam param
                     |> CliMonad.andThen
                         (\concreteParam ->
-                            paramToType True concreteParam
-                                |> CliMonad.andThen
-                                    (\( paramName, type_ ) ->
-                                        paramToString True type_
-                                            |> CliMonad.map
-                                                (\{ inputToString, alwaysJust } ->
-                                                    { concreteParam = concreteParam
-                                                    , paramName = paramName
-                                                    , inputToString = inputToString
-                                                    , alwaysJust = alwaysJust
-                                                    }
-                                                )
-                                    )
-                        )
-                    |> CliMonad.andThen
-                        (\{ concreteParam, paramName, inputToString, alwaysJust } ->
                             case OpenApi.Parameter.in_ concreteParam of
                                 "path" ->
-                                    if OpenApi.Parameter.required concreteParam && alwaysJust then
-                                        CliMonad.succeed
-                                            ( Just
-                                                ( "{" ++ Common.toValueName paramName ++ "}"
-                                                , \config ->
-                                                    config
-                                                        |> Elm.get "params"
-                                                        |> Elm.get (Common.toValueName paramName)
-                                                        |> inputToStringToFunction inputToString
-                                                )
-                                            , []
+                                    paramToType True concreteParam
+                                        |> CliMonad.andThen
+                                            (\( paramName, type_ ) ->
+                                                paramToString True type_
+                                                    |> CliMonad.map
+                                                        (\{ inputToString, alwaysJust } ->
+                                                            { paramName = paramName
+                                                            , inputToString = inputToString
+                                                            , alwaysJust = alwaysJust
+                                                            }
+                                                        )
                                             )
+                                        |> CliMonad.andThen
+                                            (\{ paramName, inputToString, alwaysJust } ->
+                                                if OpenApi.Parameter.required concreteParam && alwaysJust then
+                                                    ( Just
+                                                        ( "{" ++ Common.toValueName paramName ++ "}"
+                                                        , \config ->
+                                                            config
+                                                                |> Elm.get "params"
+                                                                |> Elm.get (Common.toValueName paramName)
+                                                                |> inputToStringToFunction inputToString
+                                                        )
+                                                    , []
+                                                    )
+                                                        |> CliMonad.succeed
 
-                                    else
-                                        CliMonad.fail "Optional parameters in path"
+                                                else
+                                                    CliMonad.fail "Optional parameters in path"
+                                            )
 
                                 "query" ->
                                     CliMonad.succeed ( Nothing, [ concreteParam ] )

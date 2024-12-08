@@ -1325,23 +1325,6 @@ operationToHeaderParams operation =
                 toConcreteParam param
                     |> CliMonad.andThen
                         (\concreteParam ->
-                            paramToType True concreteParam
-                                |> CliMonad.andThen
-                                    (\( paramName, type_ ) ->
-                                        paramToString True type_
-                                            |> CliMonad.map
-                                                (\{ inputToString, alwaysJust, isMaybe } ->
-                                                    { concreteParam = concreteParam
-                                                    , paramName = paramName
-                                                    , inputToString = inputToString
-                                                    , alwaysJust = alwaysJust
-                                                    , isMaybe = isMaybe
-                                                    }
-                                                )
-                                    )
-                        )
-                    |> CliMonad.andThen
-                        (\{ concreteParam, paramName, inputToString, isMaybe } ->
                             case OpenApi.Parameter.in_ concreteParam of
                                 "path" ->
                                     -- NOTE: This is handled in `replacedUrl`
@@ -1352,20 +1335,26 @@ operationToHeaderParams operation =
                                     CliMonad.succeed Nothing
 
                                 "header" ->
-                                    CliMonad.succeed
-                                        (Just
-                                            (\config ->
-                                                ( paramName
-                                                    |> Common.unwrapUnsafe
-                                                    |> Elm.string
-                                                , config
-                                                    |> Elm.get "params"
-                                                    |> Elm.get (Common.toValueName paramName)
-                                                    |> inputToStringToFunction inputToString
-                                                , isMaybe
-                                                )
+                                    paramToType True concreteParam
+                                        |> CliMonad.andThen
+                                            (\( paramName, type_ ) ->
+                                                paramToString True type_
+                                                    |> CliMonad.map
+                                                        (\{ inputToString, isMaybe } ->
+                                                            (\config ->
+                                                                ( paramName
+                                                                    |> Common.unwrapUnsafe
+                                                                    |> Elm.string
+                                                                , config
+                                                                    |> Elm.get "params"
+                                                                    |> Elm.get (Common.toValueName paramName)
+                                                                    |> inputToStringToFunction inputToString
+                                                                , isMaybe
+                                                                )
+                                                            )
+                                                                |> Just
+                                                        )
                                             )
-                                        )
 
                                 _ ->
                                     -- NOTE: The warning for this is handled in `replacedUrl`

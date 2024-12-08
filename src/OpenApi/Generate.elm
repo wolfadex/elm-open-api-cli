@@ -1355,6 +1355,7 @@ operationToHeaderParams operation =
                                                                 |> Just
                                                         )
                                             )
+                                        |> CliMonad.withPath (Common.UnsafeName "header params")
 
                                 _ ->
                                     -- NOTE: The warning for this is handled in `replacedUrl`
@@ -1507,6 +1508,7 @@ replacedUrl server authInfo pathUrl operation =
                                                 else
                                                     CliMonad.fail "Optional parameters in path"
                                             )
+                                        |> CliMonad.withPath (Common.UnsafeName "path params")
 
                                 "query" ->
                                     CliMonad.succeed ( Nothing, [ concreteParam ] )
@@ -1525,11 +1527,14 @@ replacedUrl server authInfo pathUrl operation =
                     ( replacements, queryParams ) =
                         List.unzip pairs
                             |> Tuple.mapBoth (List.filterMap identity) List.concat
+
+                    queryParamsBuilders : CliMonad (List (Elm.Expression -> Elm.Expression))
+                    queryParamsBuilders =
+                        queryParams
+                            |> CliMonad.combineMap (queryParameterToUrlBuilderArgument True)
+                            |> CliMonad.map List.concat
                 in
-                (queryParams
-                    |> CliMonad.combineMap (queryParameterToUrlBuilderArgument True)
-                )
-                    |> CliMonad.andThen (initialUrl replacements)
+                CliMonad.andThen (initialUrl replacements) queryParamsBuilders
             )
 
 
@@ -1981,36 +1986,88 @@ operationToUrlParams operation =
                 (\types -> [ ( Common.UnsafeName "params", SchemaUtils.recordType types ) ])
 
 
-queryParameterToUrlBuilderArgument : Bool -> OpenApi.Parameter.Parameter -> CliMonad (Elm.Expression -> Elm.Expression)
+queryParameterToUrlBuilderArgument : Bool -> OpenApi.Parameter.Parameter -> CliMonad (List (Elm.Expression -> Elm.Expression))
 queryParameterToUrlBuilderArgument qualify param =
+    let
+        paramToBuilder : InputToString -> Bool -> List ( Common.UnsafeName, Bool ) -> Elm.Expression -> Elm.Expression
+        paramToBuilder inputToString alwaysJust fullName config =
+            let
+                name : Elm.Expression
+                name =
+                    fullName
+                        |> List.map (\( component, _ ) -> Common.unwrapUnsafe component)
+                        |> String.join "."
+                        |> Elm.string
+
+                value : Elm.Expression
+                value =
+                    List.foldl
+                        (\( component, nullable ) ( acc, wasNullable ) ->
+                            ( if nullable then
+                                acc
+                                    |> Gen.Maybe.andThen (Elm.get (Common.toValueName component))
+
+                              else if wasNullable then
+                                acc
+                                    |> Gen.Maybe.map (Elm.get (Common.toValueName component))
+
+                              else
+                                acc
+                                    |> Elm.get (Common.toValueName component)
+                            , wasNullable || nullable
+                            )
+                        )
+                        ( config |> Elm.get "params", False )
+                        fullName
+                        |> Tuple.first
+                        |> inputToStringToFunction inputToString
+
+                build : Elm.Expression -> Elm.Expression
+                build =
+                    Gen.Url.Builder.call_.string name
+            in
+            if alwaysJust then
+                Gen.Maybe.make_.just (build value)
+
+            else
+                Gen.Maybe.map build value
+    in
     paramToType qualify param
         |> CliMonad.andThen
             (\( paramName, type_ ) ->
-                paramToString qualify type_
-                    |> CliMonad.map
-                        (\{ inputToString, alwaysJust } config ->
-                            let
-                                name : Elm.Expression
-                                name =
-                                    Elm.string (Common.unwrapUnsafe paramName)
+                case type_ of
+                    Common.Nullable (Common.Object fields) ->
+                        fields
+                            |> CliMonad.combineMap
+                                (\( fieldName, field ) ->
+                                    paramToString qualify (Common.Nullable field.type_)
+                                        |> CliMonad.map
+                                            (\{ inputToString, alwaysJust } ->
+                                                paramToBuilder inputToString alwaysJust [ ( paramName, False ), ( fieldName, True ) ]
+                                            )
+                                        |> CliMonad.withPath (Common.UnsafeName "query params (object)")
+                                )
 
-                                value : Elm.Expression
-                                value =
-                                    config
-                                        |> Elm.get "params"
-                                        |> Elm.get (Common.toValueName paramName)
-                                        |> inputToStringToFunction inputToString
+                    Common.Object fields ->
+                        fields
+                            |> CliMonad.combineMap
+                                (\( fieldName, field ) ->
+                                    paramToString qualify field.type_
+                                        |> CliMonad.map
+                                            (\{ inputToString, alwaysJust } ->
+                                                paramToBuilder inputToString alwaysJust [ ( paramName, False ), ( fieldName, False ) ]
+                                            )
+                                        |> CliMonad.withPath (Common.UnsafeName "query params (object)")
+                                )
 
-                                build : Elm.Expression -> Elm.Expression
-                                build =
-                                    Gen.Url.Builder.call_.string name
-                            in
-                            if alwaysJust then
-                                Gen.Maybe.make_.just (build value)
-
-                            else
-                                Gen.Maybe.map build value
-                        )
+                    _ ->
+                        paramToString qualify type_
+                            |> CliMonad.map
+                                (\{ inputToString, alwaysJust } ->
+                                    [ paramToBuilder inputToString alwaysJust [ ( paramName, False ) ]
+                                    ]
+                                )
+                            |> CliMonad.withPath (Common.UnsafeName "query params")
             )
 
 

@@ -30,5 +30,5 @@ nullableType : Elm.Declare.CustomType NullableDeclaration
 nullableType =
     Elm.Declare.customTypeAdvanced "Nullable" { exposeConstructor = True } NullableDeclaration
         |> Elm.Declare.variant0 "Null" .null
-        |> Elm.Declare.variant1 "Present" (Elm.Annotation.var "value") .present
+        |> Elm.Declare.variant1 "Present" .present (Elm.Annotation.var "value")
         |> Elm.Declare.finishCustomType

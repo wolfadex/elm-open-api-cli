@@ -198,14 +198,14 @@ files { namespace, generateTodos, effectTypes, server } apiSpec =
                                                     _ ->
                                                         5
                                             )
-                                        |> List.map
+                                        |> List.concatMap
                                             (\( { group } as groupHead, groupTail ) ->
-                                                (groupHead :: groupTail)
-                                                    |> List.map .declaration
-                                                    |> Elm.group
-                                                        { title = group
-                                                        , docs = ""
-                                                        }
+                                                Elm.docs ("## " ++ group)
+                                                    :: ((groupHead :: groupTail)
+                                                            |> List.map .declaration
+                                                            |> List.Extra.greedyGroupsOf 50
+                                                            |> List.map Elm.group
+                                                       )
                                             )
                                         |> Elm.file (Common.moduleToNamespace namespace module_)
                                 )
@@ -2438,13 +2438,13 @@ type alias CustomErrorCase =
 customHttpError : Elm.Declare.CustomType CustomErrorCase
 customHttpError =
     Elm.Declare.customTypeAdvanced "Error" { exposeConstructor = True } CustomErrorCase
-        |> Elm.Declare.variant1 "BadUrl" Elm.Annotation.string .badUrl
+        |> Elm.Declare.variant1 "BadUrl" .badUrl Elm.Annotation.string
         |> Elm.Declare.variant0 "Timeout" .timeout
         |> Elm.Declare.variant0 "NetworkError" .networkError
-        |> Elm.Declare.variant2 "KnownBadStatus" Elm.Annotation.int (Elm.Annotation.var "err") .knownBadStatus
-        |> Elm.Declare.variant2 "UnknownBadStatus" Gen.Http.annotation_.metadata (Elm.Annotation.var "body") .unknownBadStatus
-        |> Elm.Declare.variant2 "BadErrorBody" Gen.Http.annotation_.metadata (Elm.Annotation.var "body") .badErrorBody
-        |> Elm.Declare.variant2 "BadBody" Gen.Http.annotation_.metadata (Elm.Annotation.var "body") .badBody
+        |> Elm.Declare.variant2 "KnownBadStatus" .knownBadStatus Elm.Annotation.int (Elm.Annotation.var "err")
+        |> Elm.Declare.variant2 "UnknownBadStatus" .unknownBadStatus Gen.Http.annotation_.metadata (Elm.Annotation.var "body")
+        |> Elm.Declare.variant2 "BadErrorBody" .badErrorBody Gen.Http.annotation_.metadata (Elm.Annotation.var "body")
+        |> Elm.Declare.variant2 "BadBody" .badBody Gen.Http.annotation_.metadata (Elm.Annotation.var "body")
         |> Elm.Declare.finishCustomType
 
 

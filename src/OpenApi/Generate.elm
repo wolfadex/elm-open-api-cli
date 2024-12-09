@@ -1313,23 +1313,6 @@ operationToHeaderParams operation =
                 toConcreteParam param
                     |> CliMonad.andThen
                         (\concreteParam ->
-                            paramToType True concreteParam
-                                |> CliMonad.andThen
-                                    (\( paramName, type_ ) ->
-                                        paramToString True type_
-                                            |> CliMonad.map
-                                                (\{ inputToString, alwaysJust, isMaybe } ->
-                                                    { concreteParam = concreteParam
-                                                    , paramName = paramName
-                                                    , inputToString = inputToString
-                                                    , alwaysJust = alwaysJust
-                                                    , isMaybe = isMaybe
-                                                    }
-                                                )
-                                    )
-                        )
-                    |> CliMonad.andThen
-                        (\{ concreteParam, paramName, inputToString, isMaybe } ->
                             case OpenApi.Parameter.in_ concreteParam of
                                 "path" ->
                                     -- NOTE: This is handled in `replacedUrl`
@@ -1340,20 +1323,27 @@ operationToHeaderParams operation =
                                     CliMonad.succeed Nothing
 
                                 "header" ->
-                                    CliMonad.succeed
-                                        (Just
-                                            (\config ->
-                                                ( paramName
-                                                    |> Common.unwrapUnsafe
-                                                    |> Elm.string
-                                                , config
-                                                    |> Elm.get "params"
-                                                    |> Elm.get (Common.toValueName paramName)
-                                                    |> inputToStringToFunction inputToString
-                                                , isMaybe
-                                                )
+                                    paramToType True concreteParam
+                                        |> CliMonad.andThen
+                                            (\( paramName, type_ ) ->
+                                                paramToString True type_
+                                                    |> CliMonad.map
+                                                        (\{ inputToString, isMaybe } ->
+                                                            (\config ->
+                                                                ( paramName
+                                                                    |> Common.unwrapUnsafe
+                                                                    |> Elm.string
+                                                                , config
+                                                                    |> Elm.get "params"
+                                                                    |> Elm.get (Common.toValueName paramName)
+                                                                    |> inputToStringToFunction inputToString
+                                                                , isMaybe
+                                                                )
+                                                            )
+                                                                |> Just
+                                                        )
                                             )
-                                        )
+                                        |> CliMonad.withPath (Common.UnsafeName "header params")
 
                                 _ ->
                                     -- NOTE: The warning for this is handled in `replacedUrl`
@@ -1474,39 +1464,39 @@ replacedUrl server authInfo pathUrl operation =
                 toConcreteParam param
                     |> CliMonad.andThen
                         (\concreteParam ->
-                            paramToType True concreteParam
-                                |> CliMonad.andThen
-                                    (\( paramName, type_ ) ->
-                                        paramToString True type_
-                                            |> CliMonad.map
-                                                (\{ inputToString, alwaysJust } ->
-                                                    { concreteParam = concreteParam
-                                                    , paramName = paramName
-                                                    , inputToString = inputToString
-                                                    , alwaysJust = alwaysJust
-                                                    }
-                                                )
-                                    )
-                        )
-                    |> CliMonad.andThen
-                        (\{ concreteParam, paramName, inputToString, alwaysJust } ->
                             case OpenApi.Parameter.in_ concreteParam of
                                 "path" ->
-                                    if OpenApi.Parameter.required concreteParam && alwaysJust then
-                                        CliMonad.succeed
-                                            ( Just
-                                                ( "{" ++ Common.toValueName paramName ++ "}"
-                                                , \config ->
-                                                    config
-                                                        |> Elm.get "params"
-                                                        |> Elm.get (Common.toValueName paramName)
-                                                        |> inputToStringToFunction inputToString
-                                                )
-                                            , []
+                                    paramToType True concreteParam
+                                        |> CliMonad.andThen
+                                            (\( paramName, type_ ) ->
+                                                paramToString True type_
+                                                    |> CliMonad.map
+                                                        (\{ inputToString, alwaysJust } ->
+                                                            { paramName = paramName
+                                                            , inputToString = inputToString
+                                                            , alwaysJust = alwaysJust
+                                                            }
+                                                        )
                                             )
+                                        |> CliMonad.andThen
+                                            (\{ paramName, inputToString, alwaysJust } ->
+                                                if OpenApi.Parameter.required concreteParam && alwaysJust then
+                                                    ( Just
+                                                        ( "{" ++ Common.toValueName paramName ++ "}"
+                                                        , \config ->
+                                                            config
+                                                                |> Elm.get "params"
+                                                                |> Elm.get (Common.toValueName paramName)
+                                                                |> inputToStringToFunction inputToString
+                                                        )
+                                                    , []
+                                                    )
+                                                        |> CliMonad.succeed
 
-                                    else
-                                        CliMonad.fail "Optional parameters in path"
+                                                else
+                                                    CliMonad.fail "Optional parameters in path"
+                                            )
+                                        |> CliMonad.withPath (Common.UnsafeName "path params")
 
                                 "query" ->
                                     CliMonad.succeed ( Nothing, [ concreteParam ] )
@@ -1525,11 +1515,14 @@ replacedUrl server authInfo pathUrl operation =
                     ( replacements, queryParams ) =
                         List.unzip pairs
                             |> Tuple.mapBoth (List.filterMap identity) List.concat
+
+                    queryParamsBuilders : CliMonad (List (Elm.Expression -> Elm.Expression))
+                    queryParamsBuilders =
+                        queryParams
+                            |> CliMonad.combineMap (queryParameterToUrlBuilderArgument True)
+                            |> CliMonad.map List.concat
                 in
-                (queryParams
-                    |> CliMonad.combineMap (queryParameterToUrlBuilderArgument True)
-                )
-                    |> CliMonad.andThen (initialUrl replacements)
+                CliMonad.andThen (initialUrl replacements) queryParamsBuilders
             )
 
 
@@ -2010,36 +2003,98 @@ operationToUrlParams operation =
                 (\types -> [ ( Common.UnsafeName "params", SchemaUtils.recordType types ) ])
 
 
-queryParameterToUrlBuilderArgument : Bool -> OpenApi.Parameter.Parameter -> CliMonad (Elm.Expression -> Elm.Expression)
+queryParameterToUrlBuilderArgument : Bool -> OpenApi.Parameter.Parameter -> CliMonad (List (Elm.Expression -> Elm.Expression))
 queryParameterToUrlBuilderArgument qualify param =
     paramToType qualify param
         |> CliMonad.andThen
             (\( paramName, type_ ) ->
-                paramToString qualify type_
-                    |> CliMonad.map
-                        (\{ inputToString, alwaysJust } config ->
-                            let
-                                name : Elm.Expression
-                                name =
-                                    Elm.string (Common.unwrapUnsafe paramName)
+                let
+                    paramToBuilder : InputToString -> Bool -> List ( Common.UnsafeName, Bool ) -> Elm.Expression -> Elm.Expression
+                    paramToBuilder inputToString alwaysJust components config =
+                        let
+                            name : Elm.Expression
+                            name =
+                                components
+                                    |> List.foldl
+                                        (\( component, _ ) acc ->
+                                            acc
+                                                ++ "["
+                                                ++ Common.unwrapUnsafe component
+                                                ++ "]"
+                                        )
+                                        (Common.unwrapUnsafe paramName)
+                                    |> Elm.string
 
-                                value : Elm.Expression
-                                value =
-                                    config
+                            value : Elm.Expression
+                            value =
+                                List.foldl
+                                    (\( component, nullable ) ( acc, wasNullable ) ->
+                                        ( if nullable then
+                                            acc
+                                                |> Gen.Maybe.andThen (Elm.get (Common.toValueName component))
+
+                                          else if wasNullable then
+                                            acc
+                                                |> Gen.Maybe.map (Elm.get (Common.toValueName component))
+
+                                          else
+                                            acc
+                                                |> Elm.get (Common.toValueName component)
+                                        , wasNullable || nullable
+                                        )
+                                    )
+                                    ( config
                                         |> Elm.get "params"
                                         |> Elm.get (Common.toValueName paramName)
-                                        |> inputToStringToFunction inputToString
+                                    , False
+                                    )
+                                    components
+                                    |> Tuple.first
+                                    |> inputToStringToFunction inputToString
 
-                                build : Elm.Expression -> Elm.Expression
-                                build =
-                                    Gen.Url.Builder.call_.string name
-                            in
-                            if alwaysJust then
-                                Gen.Maybe.make_.just (build value)
+                            build : Elm.Expression -> Elm.Expression
+                            build =
+                                Gen.Url.Builder.call_.string name
+                        in
+                        if alwaysJust then
+                            Gen.Maybe.make_.just (build value)
 
-                            else
-                                Gen.Maybe.map build value
-                        )
+                        else
+                            Gen.Maybe.map build value
+                in
+                case type_ of
+                    Common.Nullable (Common.Object fields) ->
+                        fields
+                            |> CliMonad.combineMap
+                                (\( fieldName, field ) ->
+                                    paramToString qualify (Common.Nullable field.type_)
+                                        |> CliMonad.map
+                                            (\{ inputToString, alwaysJust } ->
+                                                paramToBuilder inputToString alwaysJust [ ( fieldName, True ) ]
+                                            )
+                                        |> CliMonad.withPath (Common.UnsafeName "query params (object)")
+                                )
+
+                    Common.Object fields ->
+                        fields
+                            |> CliMonad.combineMap
+                                (\( fieldName, field ) ->
+                                    paramToString qualify field.type_
+                                        |> CliMonad.map
+                                            (\{ inputToString, alwaysJust } ->
+                                                paramToBuilder inputToString alwaysJust [ ( fieldName, False ) ]
+                                            )
+                                        |> CliMonad.withPath (Common.UnsafeName "query params (object)")
+                                )
+
+                    _ ->
+                        paramToString qualify type_
+                            |> CliMonad.map
+                                (\{ inputToString, alwaysJust } ->
+                                    [ paramToBuilder inputToString alwaysJust []
+                                    ]
+                                )
+                            |> CliMonad.withPath (Common.UnsafeName "query params")
             )
 
 

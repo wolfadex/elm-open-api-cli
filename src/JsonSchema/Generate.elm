@@ -14,7 +14,7 @@ import Json.Schema.Definitions
 import SchemaUtils
 
 
-schemaToDeclarations : Common.UnsafeName -> Json.Schema.Definitions.Schema -> CliMonad (List ( Common.Module, Elm.Declaration ))
+schemaToDeclarations : Common.UnsafeName -> Json.Schema.Definitions.Schema -> CliMonad (List ( Common.Module, String, Elm.Declaration ))
 schemaToDeclarations name schema =
     SchemaUtils.schemaToType False schema
         |> CliMonad.andThen
@@ -27,6 +27,7 @@ schemaToDeclarations name schema =
                 case type_ of
                     Common.Enum enumVariants ->
                         [ ( Common.Types
+                          , typeName
                           , enumVariants
                                 |> List.map (\variantName -> Elm.variant (SchemaUtils.toVariantName typeName variantName))
                                 |> Elm.customType typeName
@@ -44,6 +45,7 @@ schemaToDeclarations name schema =
                           )
                             |> CliMonad.succeed
                         , ( Common.Types
+                          , Common.toValueName name ++ "ToString"
                           , Elm.fn ( "value", Nothing )
                                 (\value ->
                                     enumVariants
@@ -64,6 +66,7 @@ schemaToDeclarations name schema =
                           )
                             |> CliMonad.succeed
                         , ( Common.Types
+                          , Common.toValueName name ++ "FromString"
                           , Elm.fn ( "value", Just Elm.Annotation.string )
                                 (\value ->
                                     Elm.Case.string value
@@ -93,6 +96,7 @@ schemaToDeclarations name schema =
                           )
                             |> CliMonad.succeed
                         , ( Common.Types
+                          , Common.toValueName name ++ "Variants"
                           , enumVariants
                                 |> List.map
                                     (\variant ->
@@ -113,6 +117,7 @@ schemaToDeclarations name schema =
                         , CliMonad.map
                             (\typesNamespace ->
                                 ( Common.Json
+                                , "decode" ++ typeName
                                 , Elm.declaration
                                     ("decode" ++ typeName)
                                     (Gen.Json.Decode.string
@@ -149,6 +154,7 @@ schemaToDeclarations name schema =
                         , CliMonad.map
                             (\typesNamespace ->
                                 ( Common.Json
+                                , "encode" ++ typeName
                                 , Elm.declaration ("encode" ++ typeName)
                                     (Elm.functionReduced "rec"
                                         (\value ->
@@ -184,6 +190,7 @@ schemaToDeclarations name schema =
 
                                     else
                                         [ ( Common.Types
+                                          , typeName
                                           , Elm.alias typeName annotation
                                                 |> (case documentation of
                                                         Nothing ->
@@ -201,6 +208,7 @@ schemaToDeclarations name schema =
                                         , CliMonad.map2
                                             (\typesNamespace schemaDecoder ->
                                                 ( Common.Json
+                                                , "decode" ++ typeName
                                                 , Elm.declaration
                                                     ("decode" ++ typeName)
                                                     (schemaDecoder
@@ -217,6 +225,7 @@ schemaToDeclarations name schema =
                                         , CliMonad.map2
                                             (\typesNamespace encoder ->
                                                 ( Common.Json
+                                                , "encode" ++ typeName
                                                 , Elm.declaration ("encode" ++ typeName)
                                                     (Elm.functionReduced "rec" encoder
                                                         |> Elm.withType (Elm.Annotation.function [ Elm.Annotation.named typesNamespace typeName ] Gen.Json.Encode.annotation_.value)

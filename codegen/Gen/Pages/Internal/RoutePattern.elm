@@ -1,12 +1,21 @@
-module Gen.Pages.Internal.RoutePattern exposing (annotation_, call_, caseOf_, fromModuleName, hasRouteParams, make_, moduleName_, repeatWithoutOptionalEnding, routeToBranch, toModuleName, toRouteParamTypes, toRouteParamsRecord, toVariant, toVariantName, values_, view)
+module Gen.Pages.Internal.RoutePattern exposing
+    ( moduleName_, view, toVariant, routeToBranch, fromModuleName, hasRouteParams
+    , repeatWithoutOptionalEnding, toModuleName, toRouteParamTypes, toRouteParamsRecord, toVariantName, annotation_, make_
+    , caseOf_, call_, values_
+    )
 
-{-| 
-@docs moduleName_, view, toVariant, routeToBranch, fromModuleName, hasRouteParams, repeatWithoutOptionalEnding, toModuleName, toRouteParamTypes, toRouteParamsRecord, toVariantName, annotation_, make_, caseOf_, call_, values_
+{-|
+# Generated bindings for Pages.Internal.RoutePattern
+
+@docs moduleName_, view, toVariant, routeToBranch, fromModuleName, hasRouteParams
+@docs repeatWithoutOptionalEnding, toModuleName, toRouteParamTypes, toRouteParamsRecord, toVariantName, annotation_
+@docs make_, caseOf_, call_, values_
 -}
 
 
 import Elm
 import Elm.Annotation as Type
+import Elm.Arg
 import Elm.Case
 
 
@@ -18,7 +27,7 @@ moduleName_ =
 
 {-| view: Pages.Internal.RoutePattern.RoutePattern -> Html.Html msg -}
 view : Elm.Expression -> Elm.Expression
-view viewArg =
+view viewArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Pages", "Internal", "RoutePattern" ]
@@ -35,12 +44,12 @@ view viewArg =
                      )
              }
         )
-        [ viewArg ]
+        [ viewArg_ ]
 
 
 {-| toVariant: Pages.Internal.RoutePattern.RoutePattern -> Elm.Variant -}
 toVariant : Elm.Expression -> Elm.Expression
-toVariant toVariantArg =
+toVariant toVariantArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Pages", "Internal", "RoutePattern" ]
@@ -57,7 +66,7 @@ toVariant toVariantArg =
                      )
              }
         )
-        [ toVariantArg ]
+        [ toVariantArg_ ]
 
 
 {-| routeToBranch: 
@@ -65,7 +74,7 @@ toVariant toVariantArg =
     -> List ( Elm.CodeGen.Pattern, Elm.CodeGen.Expression )
 -}
 routeToBranch : Elm.Expression -> Elm.Expression
-routeToBranch routeToBranchArg =
+routeToBranch routeToBranchArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Pages", "Internal", "RoutePattern" ]
@@ -95,12 +104,12 @@ routeToBranch routeToBranchArg =
                      )
              }
         )
-        [ routeToBranchArg ]
+        [ routeToBranchArg_ ]
 
 
 {-| fromModuleName: List String -> Maybe Pages.Internal.RoutePattern.RoutePattern -}
 fromModuleName : List String -> Elm.Expression
-fromModuleName fromModuleNameArg =
+fromModuleName fromModuleNameArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Pages", "Internal", "RoutePattern" ]
@@ -119,12 +128,12 @@ fromModuleName fromModuleNameArg =
                      )
              }
         )
-        [ Elm.list (List.map Elm.string fromModuleNameArg) ]
+        [ Elm.list (List.map Elm.string fromModuleNameArg_) ]
 
 
 {-| hasRouteParams: Pages.Internal.RoutePattern.RoutePattern -> Bool -}
 hasRouteParams : Elm.Expression -> Elm.Expression
-hasRouteParams hasRouteParamsArg =
+hasRouteParams hasRouteParamsArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Pages", "Internal", "RoutePattern" ]
@@ -141,7 +150,7 @@ hasRouteParams hasRouteParamsArg =
                      )
              }
         )
-        [ hasRouteParamsArg ]
+        [ hasRouteParamsArg_ ]
 
 
 {-| repeatWithoutOptionalEnding: 
@@ -149,7 +158,7 @@ hasRouteParams hasRouteParamsArg =
     -> Maybe (List Pages.Internal.RoutePattern.RouteParam)
 -}
 repeatWithoutOptionalEnding : List Elm.Expression -> Elm.Expression
-repeatWithoutOptionalEnding repeatWithoutOptionalEndingArg =
+repeatWithoutOptionalEnding repeatWithoutOptionalEndingArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Pages", "Internal", "RoutePattern" ]
@@ -176,12 +185,12 @@ repeatWithoutOptionalEnding repeatWithoutOptionalEndingArg =
                      )
              }
         )
-        [ Elm.list repeatWithoutOptionalEndingArg ]
+        [ Elm.list repeatWithoutOptionalEndingArg_ ]
 
 
 {-| toModuleName: Pages.Internal.RoutePattern.RoutePattern -> List String -}
 toModuleName : Elm.Expression -> Elm.Expression
-toModuleName toModuleNameArg =
+toModuleName toModuleNameArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Pages", "Internal", "RoutePattern" ]
@@ -198,7 +207,7 @@ toModuleName toModuleNameArg =
                      )
              }
         )
-        [ toModuleNameArg ]
+        [ toModuleNameArg_ ]
 
 
 {-| toRouteParamTypes: 
@@ -206,7 +215,7 @@ toModuleName toModuleNameArg =
     -> List ( String, Pages.Internal.RoutePattern.Param )
 -}
 toRouteParamTypes : Elm.Expression -> Elm.Expression
-toRouteParamTypes toRouteParamTypesArg =
+toRouteParamTypes toRouteParamTypesArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Pages", "Internal", "RoutePattern" ]
@@ -232,7 +241,7 @@ toRouteParamTypes toRouteParamTypesArg =
                      )
              }
         )
-        [ toRouteParamTypesArg ]
+        [ toRouteParamTypesArg_ ]
 
 
 {-| toRouteParamsRecord: 
@@ -240,7 +249,7 @@ toRouteParamTypes toRouteParamTypesArg =
     -> List ( String, Elm.Annotation.Annotation )
 -}
 toRouteParamsRecord : Elm.Expression -> Elm.Expression
-toRouteParamsRecord toRouteParamsRecordArg =
+toRouteParamsRecord toRouteParamsRecordArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Pages", "Internal", "RoutePattern" ]
@@ -266,7 +275,7 @@ toRouteParamsRecord toRouteParamsRecordArg =
                      )
              }
         )
-        [ toRouteParamsRecordArg ]
+        [ toRouteParamsRecordArg_ ]
 
 
 {-| toVariantName: 
@@ -276,7 +285,7 @@ toRouteParamsRecord toRouteParamsRecordArg =
     }
 -}
 toVariantName : Elm.Expression -> Elm.Expression
-toVariantName toVariantNameArg =
+toVariantName toVariantNameArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Pages", "Internal", "RoutePattern" ]
@@ -307,7 +316,7 @@ toVariantName toVariantNameArg =
                      )
              }
         )
-        [ toVariantNameArg ]
+        [ toVariantNameArg_ ]
 
 
 annotation_ :
@@ -517,36 +526,32 @@ make_ =
 caseOf_ :
     { ending :
         Elm.Expression
-        -> { endingTags_0_0
-            | optional : Elm.Expression -> Elm.Expression
-            , requiredSplat : Elm.Expression
-            , optionalSplat : Elm.Expression
+        -> { optional : Elm.Expression -> Elm.Expression
+        , requiredSplat : Elm.Expression
+        , optionalSplat : Elm.Expression
         }
         -> Elm.Expression
     , segment :
         Elm.Expression
-        -> { segmentTags_1_0
-            | staticSegment : Elm.Expression -> Elm.Expression
-            , dynamicSegment : Elm.Expression -> Elm.Expression
+        -> { staticSegment : Elm.Expression -> Elm.Expression
+        , dynamicSegment : Elm.Expression -> Elm.Expression
         }
         -> Elm.Expression
     , param :
         Elm.Expression
-        -> { paramTags_2_0
-            | requiredParam : Elm.Expression
-            , optionalParam : Elm.Expression
-            , requiredSplatParam : Elm.Expression
-            , optionalSplatParam : Elm.Expression
+        -> { requiredParam : Elm.Expression
+        , optionalParam : Elm.Expression
+        , requiredSplatParam : Elm.Expression
+        , optionalSplatParam : Elm.Expression
         }
         -> Elm.Expression
     , routeParam :
         Elm.Expression
-        -> { routeParamTags_3_0
-            | staticParam : Elm.Expression -> Elm.Expression
-            , dynamicParam : Elm.Expression -> Elm.Expression
-            , optionalParam2 : Elm.Expression -> Elm.Expression
-            , requiredSplatParam2 : Elm.Expression
-            , optionalSplatParam2 : Elm.Expression
+        -> { staticParam : Elm.Expression -> Elm.Expression
+        , dynamicParam : Elm.Expression -> Elm.Expression
+        , optionalParam2 : Elm.Expression -> Elm.Expression
+        , requiredSplatParam2 : Elm.Expression
+        , optionalSplatParam2 : Elm.Expression
         }
         -> Elm.Expression
     }
@@ -560,12 +565,24 @@ caseOf_ =
                      "Ending"
                      []
                 )
-                [ Elm.Case.branch1
-                    "Optional"
-                    ( "stringString", Type.string )
-                    endingTags.optional
-                , Elm.Case.branch0 "RequiredSplat" endingTags.requiredSplat
-                , Elm.Case.branch0 "OptionalSplat" endingTags.optionalSplat
+                [ Elm.Case.branch
+                    (Elm.Arg.customType
+                       "Optional"
+                       endingTags.optional |> Elm.Arg.item
+                                                    (Elm.Arg.varWith
+                                                           "arg_0"
+                                                           Type.string
+                                                    )
+                    )
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType "RequiredSplat" endingTags.requiredSplat
+                    )
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType "OptionalSplat" endingTags.optionalSplat
+                    )
+                    Basics.identity
                 ]
     , segment =
         \segmentExpression segmentTags ->
@@ -576,14 +593,26 @@ caseOf_ =
                      "Segment"
                      []
                 )
-                [ Elm.Case.branch1
-                    "StaticSegment"
-                    ( "stringString", Type.string )
-                    segmentTags.staticSegment
-                , Elm.Case.branch1
-                    "DynamicSegment"
-                    ( "stringString", Type.string )
-                    segmentTags.dynamicSegment
+                [ Elm.Case.branch
+                    (Elm.Arg.customType
+                       "StaticSegment"
+                       segmentTags.staticSegment |> Elm.Arg.item
+                                                          (Elm.Arg.varWith
+                                                                 "arg_0"
+                                                                 Type.string
+                                                          )
+                    )
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType
+                       "DynamicSegment"
+                       segmentTags.dynamicSegment |> Elm.Arg.item
+                                                           (Elm.Arg.varWith
+                                                                  "arg_0"
+                                                                  Type.string
+                                                           )
+                    )
+                    Basics.identity
                 ]
     , param =
         \paramExpression paramTags ->
@@ -594,14 +623,24 @@ caseOf_ =
                      "Param"
                      []
                 )
-                [ Elm.Case.branch0 "RequiredParam" paramTags.requiredParam
-                , Elm.Case.branch0 "OptionalParam" paramTags.optionalParam
-                , Elm.Case.branch0
-                    "RequiredSplatParam"
-                    paramTags.requiredSplatParam
-                , Elm.Case.branch0
-                    "OptionalSplatParam"
-                    paramTags.optionalSplatParam
+                [ Elm.Case.branch
+                    (Elm.Arg.customType "RequiredParam" paramTags.requiredParam)
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType "OptionalParam" paramTags.optionalParam)
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType
+                       "RequiredSplatParam"
+                       paramTags.requiredSplatParam
+                    )
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType
+                       "OptionalSplatParam"
+                       paramTags.optionalSplatParam
+                    )
+                    Basics.identity
                 ]
     , routeParam =
         \routeParamExpression routeParamTags ->
@@ -612,24 +651,48 @@ caseOf_ =
                      "RouteParam"
                      []
                 )
-                [ Elm.Case.branch1
-                    "StaticParam"
-                    ( "stringString", Type.string )
-                    routeParamTags.staticParam
-                , Elm.Case.branch1
-                    "DynamicParam"
-                    ( "stringString", Type.string )
-                    routeParamTags.dynamicParam
-                , Elm.Case.branch1
-                    "OptionalParam2"
-                    ( "stringString", Type.string )
-                    routeParamTags.optionalParam2
-                , Elm.Case.branch0
-                    "RequiredSplatParam2"
-                    routeParamTags.requiredSplatParam2
-                , Elm.Case.branch0
-                    "OptionalSplatParam2"
-                    routeParamTags.optionalSplatParam2
+                [ Elm.Case.branch
+                    (Elm.Arg.customType
+                       "StaticParam"
+                       routeParamTags.staticParam |> Elm.Arg.item
+                                                           (Elm.Arg.varWith
+                                                                  "arg_0"
+                                                                  Type.string
+                                                           )
+                    )
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType
+                       "DynamicParam"
+                       routeParamTags.dynamicParam |> Elm.Arg.item
+                                                            (Elm.Arg.varWith
+                                                                   "arg_0"
+                                                                   Type.string
+                                                            )
+                    )
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType
+                       "OptionalParam2"
+                       routeParamTags.optionalParam2 |> Elm.Arg.item
+                                                              (Elm.Arg.varWith
+                                                                     "arg_0"
+                                                                     Type.string
+                                                              )
+                    )
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType
+                       "RequiredSplatParam2"
+                       routeParamTags.requiredSplatParam2
+                    )
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType
+                       "OptionalSplatParam2"
+                       routeParamTags.optionalSplatParam2
+                    )
+                    Basics.identity
                 ]
     }
 
@@ -648,7 +711,7 @@ call_ :
     }
 call_ =
     { view =
-        \viewArg ->
+        \viewArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Pages", "Internal", "RoutePattern" ]
@@ -669,9 +732,9 @@ call_ =
                              )
                      }
                 )
-                [ viewArg ]
+                [ viewArg_ ]
     , toVariant =
-        \toVariantArg ->
+        \toVariantArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Pages", "Internal", "RoutePattern" ]
@@ -688,9 +751,9 @@ call_ =
                              )
                      }
                 )
-                [ toVariantArg ]
+                [ toVariantArg_ ]
     , routeToBranch =
-        \routeToBranchArg ->
+        \routeToBranchArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Pages", "Internal", "RoutePattern" ]
@@ -720,9 +783,9 @@ call_ =
                              )
                      }
                 )
-                [ routeToBranchArg ]
+                [ routeToBranchArg_ ]
     , fromModuleName =
-        \fromModuleNameArg ->
+        \fromModuleNameArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Pages", "Internal", "RoutePattern" ]
@@ -744,9 +807,9 @@ call_ =
                              )
                      }
                 )
-                [ fromModuleNameArg ]
+                [ fromModuleNameArg_ ]
     , hasRouteParams =
-        \hasRouteParamsArg ->
+        \hasRouteParamsArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Pages", "Internal", "RoutePattern" ]
@@ -763,9 +826,9 @@ call_ =
                              )
                      }
                 )
-                [ hasRouteParamsArg ]
+                [ hasRouteParamsArg_ ]
     , repeatWithoutOptionalEnding =
-        \repeatWithoutOptionalEndingArg ->
+        \repeatWithoutOptionalEndingArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Pages", "Internal", "RoutePattern" ]
@@ -795,9 +858,9 @@ call_ =
                              )
                      }
                 )
-                [ repeatWithoutOptionalEndingArg ]
+                [ repeatWithoutOptionalEndingArg_ ]
     , toModuleName =
-        \toModuleNameArg ->
+        \toModuleNameArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Pages", "Internal", "RoutePattern" ]
@@ -814,9 +877,9 @@ call_ =
                              )
                      }
                 )
-                [ toModuleNameArg ]
+                [ toModuleNameArg_ ]
     , toRouteParamTypes =
-        \toRouteParamTypesArg ->
+        \toRouteParamTypesArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Pages", "Internal", "RoutePattern" ]
@@ -845,9 +908,9 @@ call_ =
                              )
                      }
                 )
-                [ toRouteParamTypesArg ]
+                [ toRouteParamTypesArg_ ]
     , toRouteParamsRecord =
-        \toRouteParamsRecordArg ->
+        \toRouteParamsRecordArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Pages", "Internal", "RoutePattern" ]
@@ -873,9 +936,9 @@ call_ =
                              )
                      }
                 )
-                [ toRouteParamsRecordArg ]
+                [ toRouteParamsRecordArg_ ]
     , toVariantName =
-        \toVariantNameArg ->
+        \toVariantNameArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Pages", "Internal", "RoutePattern" ]
@@ -906,7 +969,7 @@ call_ =
                              )
                      }
                 )
-                [ toVariantNameArg ]
+                [ toVariantNameArg_ ]
     }
 
 

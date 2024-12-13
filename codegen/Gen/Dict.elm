@@ -1,7 +1,18 @@
-module Gen.Dict exposing (annotation_, call_, diff, empty, filter, foldl, foldr, fromList, get, insert, intersect, isEmpty, keys, map, member, merge, moduleName_, partition, remove, singleton, size, toList, union, update, values, values_)
+module Gen.Dict exposing
+    ( moduleName_, empty, singleton, insert, update, remove
+    , isEmpty, member, get, size, keys, values, toList
+    , fromList, map, foldl, foldr, filter, partition, union
+    , intersect, diff, merge, annotation_, call_, values_
+    )
 
-{-| 
-@docs moduleName_, empty, singleton, insert, update, remove, isEmpty, member, get, size, keys, values, toList, fromList, map, foldl, foldr, filter, partition, union, intersect, diff, merge, annotation_, call_, values_
+{-|
+# Generated bindings for Dict
+
+@docs moduleName_, empty, singleton, insert, update, remove
+@docs isEmpty, member, get, size, keys, values
+@docs toList, fromList, map, foldl, foldr, filter
+@docs partition, union, intersect, diff, merge, annotation_
+@docs call_, values_
 -}
 
 
@@ -36,7 +47,7 @@ empty =
 singleton: comparable -> v -> Dict.Dict comparable v
 -}
 singleton : Elm.Expression -> Elm.Expression -> Elm.Expression
-singleton singletonArg singletonArg0 =
+singleton singletonArg_ singletonArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Dict" ]
@@ -53,7 +64,7 @@ singleton singletonArg singletonArg0 =
                      )
              }
         )
-        [ singletonArg, singletonArg0 ]
+        [ singletonArg_, singletonArg_0 ]
 
 
 {-| Insert a key-value pair into a dictionary. Replaces value when there is
@@ -62,7 +73,7 @@ a collision.
 insert: comparable -> v -> Dict.Dict comparable v -> Dict.Dict comparable v
 -}
 insert : Elm.Expression -> Elm.Expression -> Elm.Expression -> Elm.Expression
-insert insertArg insertArg0 insertArg1 =
+insert insertArg_ insertArg_0 insertArg_1 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Dict" ]
@@ -85,7 +96,7 @@ insert insertArg insertArg0 insertArg1 =
                      )
              }
         )
-        [ insertArg, insertArg0, insertArg1 ]
+        [ insertArg_, insertArg_0, insertArg_1 ]
 
 
 {-| Update the value of a dictionary for a specific key with a given function.
@@ -101,7 +112,7 @@ update :
     -> (Elm.Expression -> Elm.Expression)
     -> Elm.Expression
     -> Elm.Expression
-update updateArg updateArg0 updateArg1 =
+update updateArg_ updateArg_0 updateArg_1 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Dict" ]
@@ -126,7 +137,10 @@ update updateArg updateArg0 updateArg1 =
                      )
              }
         )
-        [ updateArg, Elm.functionReduced "updateUnpack" updateArg0, updateArg1 ]
+        [ updateArg_
+        , Elm.functionReduced "updateUnpack" updateArg_0
+        , updateArg_1
+        ]
 
 
 {-| Remove a key-value pair from a dictionary. If the key is not found,
@@ -135,7 +149,7 @@ no changes are made.
 remove: comparable -> Dict.Dict comparable v -> Dict.Dict comparable v
 -}
 remove : Elm.Expression -> Elm.Expression -> Elm.Expression
-remove removeArg removeArg0 =
+remove removeArg_ removeArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Dict" ]
@@ -157,7 +171,7 @@ remove removeArg removeArg0 =
                      )
              }
         )
-        [ removeArg, removeArg0 ]
+        [ removeArg_, removeArg_0 ]
 
 
 {-| Determine if a dictionary is empty.
@@ -167,7 +181,7 @@ remove removeArg removeArg0 =
 isEmpty: Dict.Dict k v -> Bool
 -}
 isEmpty : Elm.Expression -> Elm.Expression
-isEmpty isEmptyArg =
+isEmpty isEmptyArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Dict" ]
@@ -184,7 +198,7 @@ isEmpty isEmptyArg =
                      )
              }
         )
-        [ isEmptyArg ]
+        [ isEmptyArg_ ]
 
 
 {-| Determine if a key is in a dictionary.
@@ -192,7 +206,7 @@ isEmpty isEmptyArg =
 member: comparable -> Dict.Dict comparable v -> Bool
 -}
 member : Elm.Expression -> Elm.Expression -> Elm.Expression
-member memberArg memberArg0 =
+member memberArg_ memberArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Dict" ]
@@ -210,7 +224,7 @@ member memberArg memberArg0 =
                      )
              }
         )
-        [ memberArg, memberArg0 ]
+        [ memberArg_, memberArg_0 ]
 
 
 {-| Get the value associated with a key. If the key is not found, return
@@ -226,7 +240,7 @@ dictionary.
 get: comparable -> Dict.Dict comparable v -> Maybe v
 -}
 get : Elm.Expression -> Elm.Expression -> Elm.Expression
-get getArg getArg0 =
+get getArg_ getArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Dict" ]
@@ -244,7 +258,7 @@ get getArg getArg0 =
                      )
              }
         )
-        [ getArg, getArg0 ]
+        [ getArg_, getArg_0 ]
 
 
 {-| Determine the number of key-value pairs in the dictionary.
@@ -252,7 +266,7 @@ get getArg getArg0 =
 size: Dict.Dict k v -> Int
 -}
 size : Elm.Expression -> Elm.Expression
-size sizeArg =
+size sizeArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Dict" ]
@@ -269,7 +283,7 @@ size sizeArg =
                      )
              }
         )
-        [ sizeArg ]
+        [ sizeArg_ ]
 
 
 {-| Get all of the keys in a dictionary, sorted from lowest to highest.
@@ -279,7 +293,7 @@ size sizeArg =
 keys: Dict.Dict k v -> List k
 -}
 keys : Elm.Expression -> Elm.Expression
-keys keysArg =
+keys keysArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Dict" ]
@@ -296,7 +310,7 @@ keys keysArg =
                      )
              }
         )
-        [ keysArg ]
+        [ keysArg_ ]
 
 
 {-| Get all of the values in a dictionary, in the order of their keys.
@@ -306,7 +320,7 @@ keys keysArg =
 values: Dict.Dict k v -> List v
 -}
 values : Elm.Expression -> Elm.Expression
-values valuesArg =
+values valuesArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Dict" ]
@@ -323,7 +337,7 @@ values valuesArg =
                      )
              }
         )
-        [ valuesArg ]
+        [ valuesArg_ ]
 
 
 {-| Convert a dictionary into an association list of key-value pairs, sorted by keys.
@@ -331,7 +345,7 @@ values valuesArg =
 toList: Dict.Dict k v -> List ( k, v )
 -}
 toList : Elm.Expression -> Elm.Expression
-toList toListArg =
+toList toListArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Dict" ]
@@ -348,7 +362,7 @@ toList toListArg =
                      )
              }
         )
-        [ toListArg ]
+        [ toListArg_ ]
 
 
 {-| Convert an association list into a dictionary.
@@ -356,7 +370,7 @@ toList toListArg =
 fromList: List ( comparable, v ) -> Dict.Dict comparable v
 -}
 fromList : List Elm.Expression -> Elm.Expression
-fromList fromListArg =
+fromList fromListArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Dict" ]
@@ -376,7 +390,7 @@ fromList fromListArg =
                      )
              }
         )
-        [ Elm.list fromListArg ]
+        [ Elm.list fromListArg_ ]
 
 
 {-| Apply a function to all values in a dictionary.
@@ -387,7 +401,7 @@ map :
     (Elm.Expression -> Elm.Expression -> Elm.Expression)
     -> Elm.Expression
     -> Elm.Expression
-map mapArg mapArg0 =
+map mapArg_ mapArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Dict" ]
@@ -414,9 +428,9 @@ map mapArg mapArg0 =
         [ Elm.functionReduced
             "mapUnpack"
             (\functionReducedUnpack ->
-               Elm.functionReduced "unpack" (mapArg functionReducedUnpack)
+               Elm.functionReduced "unpack" (mapArg_ functionReducedUnpack)
             )
-        , mapArg0
+        , mapArg_0
         ]
 
 
@@ -441,7 +455,7 @@ foldl :
     -> Elm.Expression
     -> Elm.Expression
     -> Elm.Expression
-foldl foldlArg foldlArg0 foldlArg1 =
+foldl foldlArg_ foldlArg_0 foldlArg_1 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Dict" ]
@@ -470,13 +484,13 @@ foldl foldlArg foldlArg0 foldlArg1 =
                    (\functionReducedUnpack0 ->
                         Elm.functionReduced
                             "unpack"
-                            ((foldlArg functionReducedUnpack)
+                            ((foldlArg_ functionReducedUnpack)
                                  functionReducedUnpack0
                             )
                    )
             )
-        , foldlArg0
-        , foldlArg1
+        , foldlArg_0
+        , foldlArg_1
         ]
 
 
@@ -501,7 +515,7 @@ foldr :
     -> Elm.Expression
     -> Elm.Expression
     -> Elm.Expression
-foldr foldrArg foldrArg0 foldrArg1 =
+foldr foldrArg_ foldrArg_0 foldrArg_1 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Dict" ]
@@ -530,13 +544,13 @@ foldr foldrArg foldrArg0 foldrArg1 =
                    (\functionReducedUnpack0 ->
                         Elm.functionReduced
                             "unpack"
-                            ((foldrArg functionReducedUnpack)
+                            ((foldrArg_ functionReducedUnpack)
                                  functionReducedUnpack0
                             )
                    )
             )
-        , foldrArg0
-        , foldrArg1
+        , foldrArg_0
+        , foldrArg_1
         ]
 
 
@@ -548,7 +562,7 @@ filter :
     (Elm.Expression -> Elm.Expression -> Elm.Expression)
     -> Elm.Expression
     -> Elm.Expression
-filter filterArg filterArg0 =
+filter filterArg_ filterArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Dict" ]
@@ -575,9 +589,9 @@ filter filterArg filterArg0 =
         [ Elm.functionReduced
             "filterUnpack"
             (\functionReducedUnpack ->
-               Elm.functionReduced "unpack" (filterArg functionReducedUnpack)
+               Elm.functionReduced "unpack" (filterArg_ functionReducedUnpack)
             )
-        , filterArg0
+        , filterArg_0
         ]
 
 
@@ -594,7 +608,7 @@ partition :
     (Elm.Expression -> Elm.Expression -> Elm.Expression)
     -> Elm.Expression
     -> Elm.Expression
-partition partitionArg partitionArg0 =
+partition partitionArg_ partitionArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Dict" ]
@@ -628,9 +642,11 @@ partition partitionArg partitionArg0 =
         [ Elm.functionReduced
             "partitionUnpack"
             (\functionReducedUnpack ->
-               Elm.functionReduced "unpack" (partitionArg functionReducedUnpack)
+               Elm.functionReduced
+                   "unpack"
+                   (partitionArg_ functionReducedUnpack)
             )
-        , partitionArg0
+        , partitionArg_0
         ]
 
 
@@ -640,7 +656,7 @@ to the first dictionary.
 union: Dict.Dict comparable v -> Dict.Dict comparable v -> Dict.Dict comparable v
 -}
 union : Elm.Expression -> Elm.Expression -> Elm.Expression
-union unionArg unionArg0 =
+union unionArg_ unionArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Dict" ]
@@ -665,7 +681,7 @@ union unionArg unionArg0 =
                      )
              }
         )
-        [ unionArg, unionArg0 ]
+        [ unionArg_, unionArg_0 ]
 
 
 {-| Keep a key-value pair when its key appears in the second dictionary.
@@ -674,7 +690,7 @@ Preference is given to values in the first dictionary.
 intersect: Dict.Dict comparable v -> Dict.Dict comparable v -> Dict.Dict comparable v
 -}
 intersect : Elm.Expression -> Elm.Expression -> Elm.Expression
-intersect intersectArg intersectArg0 =
+intersect intersectArg_ intersectArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Dict" ]
@@ -699,7 +715,7 @@ intersect intersectArg intersectArg0 =
                      )
              }
         )
-        [ intersectArg, intersectArg0 ]
+        [ intersectArg_, intersectArg_0 ]
 
 
 {-| Keep a key-value pair when its key does not appear in the second dictionary.
@@ -707,7 +723,7 @@ intersect intersectArg intersectArg0 =
 diff: Dict.Dict comparable a -> Dict.Dict comparable b -> Dict.Dict comparable a
 -}
 diff : Elm.Expression -> Elm.Expression -> Elm.Expression
-diff diffArg diffArg0 =
+diff diffArg_ diffArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Dict" ]
@@ -732,7 +748,7 @@ diff diffArg diffArg0 =
                      )
              }
         )
-        [ diffArg, diffArg0 ]
+        [ diffArg_, diffArg_0 ]
 
 
 {-| The most general way of combining two dictionaries. You provide three
@@ -766,7 +782,7 @@ merge :
     -> Elm.Expression
     -> Elm.Expression
     -> Elm.Expression
-merge mergeArg mergeArg0 mergeArg1 mergeArg2 mergeArg3 mergeArg4 =
+merge mergeArg_ mergeArg_0 mergeArg_1 mergeArg_2 mergeArg_3 mergeArg_4 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Dict" ]
@@ -815,7 +831,7 @@ merge mergeArg mergeArg0 mergeArg1 mergeArg2 mergeArg3 mergeArg4 =
                    (\functionReducedUnpack0 ->
                         Elm.functionReduced
                             "unpack"
-                            ((mergeArg functionReducedUnpack)
+                            ((mergeArg_ functionReducedUnpack)
                                  functionReducedUnpack0
                             )
                    )
@@ -831,7 +847,7 @@ merge mergeArg mergeArg0 mergeArg1 mergeArg2 mergeArg3 mergeArg4 =
                             (\functionReducedUnpack_2_1_2_0_2_1_2_0_0 ->
                                  Elm.functionReduced
                                      "unpack"
-                                     (((mergeArg0 functionReducedUnpack)
+                                     (((mergeArg_0 functionReducedUnpack)
                                            functionReducedUnpack0
                                       )
                                           functionReducedUnpack_2_1_2_0_2_1_2_0_0
@@ -847,14 +863,14 @@ merge mergeArg mergeArg0 mergeArg1 mergeArg2 mergeArg3 mergeArg4 =
                    (\functionReducedUnpack0 ->
                         Elm.functionReduced
                             "unpack"
-                            ((mergeArg1 functionReducedUnpack)
+                            ((mergeArg_1 functionReducedUnpack)
                                  functionReducedUnpack0
                             )
                    )
             )
-        , mergeArg2
-        , mergeArg3
-        , mergeArg4
+        , mergeArg_2
+        , mergeArg_3
+        , mergeArg_4
         ]
 
 
@@ -902,7 +918,7 @@ call_ :
     }
 call_ =
     { singleton =
-        \singletonArg singletonArg0 ->
+        \singletonArg_ singletonArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Dict" ]
@@ -919,9 +935,9 @@ call_ =
                              )
                      }
                 )
-                [ singletonArg, singletonArg0 ]
+                [ singletonArg_, singletonArg_0 ]
     , insert =
-        \insertArg insertArg0 insertArg1 ->
+        \insertArg_ insertArg_0 insertArg_1 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Dict" ]
@@ -944,9 +960,9 @@ call_ =
                              )
                      }
                 )
-                [ insertArg, insertArg0, insertArg1 ]
+                [ insertArg_, insertArg_0, insertArg_1 ]
     , update =
-        \updateArg updateArg0 updateArg1 ->
+        \updateArg_ updateArg_0 updateArg_1 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Dict" ]
@@ -971,9 +987,9 @@ call_ =
                              )
                      }
                 )
-                [ updateArg, updateArg0, updateArg1 ]
+                [ updateArg_, updateArg_0, updateArg_1 ]
     , remove =
-        \removeArg removeArg0 ->
+        \removeArg_ removeArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Dict" ]
@@ -995,9 +1011,9 @@ call_ =
                              )
                      }
                 )
-                [ removeArg, removeArg0 ]
+                [ removeArg_, removeArg_0 ]
     , isEmpty =
-        \isEmptyArg ->
+        \isEmptyArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Dict" ]
@@ -1014,9 +1030,9 @@ call_ =
                              )
                      }
                 )
-                [ isEmptyArg ]
+                [ isEmptyArg_ ]
     , member =
-        \memberArg memberArg0 ->
+        \memberArg_ memberArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Dict" ]
@@ -1034,9 +1050,9 @@ call_ =
                              )
                      }
                 )
-                [ memberArg, memberArg0 ]
+                [ memberArg_, memberArg_0 ]
     , get =
-        \getArg getArg0 ->
+        \getArg_ getArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Dict" ]
@@ -1054,9 +1070,9 @@ call_ =
                              )
                      }
                 )
-                [ getArg, getArg0 ]
+                [ getArg_, getArg_0 ]
     , size =
-        \sizeArg ->
+        \sizeArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Dict" ]
@@ -1073,9 +1089,9 @@ call_ =
                              )
                      }
                 )
-                [ sizeArg ]
+                [ sizeArg_ ]
     , keys =
-        \keysArg ->
+        \keysArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Dict" ]
@@ -1092,9 +1108,9 @@ call_ =
                              )
                      }
                 )
-                [ keysArg ]
+                [ keysArg_ ]
     , values =
-        \valuesArg ->
+        \valuesArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Dict" ]
@@ -1111,9 +1127,9 @@ call_ =
                              )
                      }
                 )
-                [ valuesArg ]
+                [ valuesArg_ ]
     , toList =
-        \toListArg ->
+        \toListArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Dict" ]
@@ -1133,9 +1149,9 @@ call_ =
                              )
                      }
                 )
-                [ toListArg ]
+                [ toListArg_ ]
     , fromList =
-        \fromListArg ->
+        \fromListArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Dict" ]
@@ -1157,9 +1173,9 @@ call_ =
                              )
                      }
                 )
-                [ fromListArg ]
+                [ fromListArg_ ]
     , map =
-        \mapArg mapArg0 ->
+        \mapArg_ mapArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Dict" ]
@@ -1183,9 +1199,9 @@ call_ =
                              )
                      }
                 )
-                [ mapArg, mapArg0 ]
+                [ mapArg_, mapArg_0 ]
     , foldl =
-        \foldlArg foldlArg0 foldlArg1 ->
+        \foldlArg_ foldlArg_0 foldlArg_1 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Dict" ]
@@ -1209,9 +1225,9 @@ call_ =
                              )
                      }
                 )
-                [ foldlArg, foldlArg0, foldlArg1 ]
+                [ foldlArg_, foldlArg_0, foldlArg_1 ]
     , foldr =
-        \foldrArg foldrArg0 foldrArg1 ->
+        \foldrArg_ foldrArg_0 foldrArg_1 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Dict" ]
@@ -1235,9 +1251,9 @@ call_ =
                              )
                      }
                 )
-                [ foldrArg, foldrArg0, foldrArg1 ]
+                [ foldrArg_, foldrArg_0, foldrArg_1 ]
     , filter =
-        \filterArg filterArg0 ->
+        \filterArg_ filterArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Dict" ]
@@ -1261,9 +1277,9 @@ call_ =
                              )
                      }
                 )
-                [ filterArg, filterArg0 ]
+                [ filterArg_, filterArg_0 ]
     , partition =
-        \partitionArg partitionArg0 ->
+        \partitionArg_ partitionArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Dict" ]
@@ -1298,9 +1314,9 @@ call_ =
                              )
                      }
                 )
-                [ partitionArg, partitionArg0 ]
+                [ partitionArg_, partitionArg_0 ]
     , union =
-        \unionArg unionArg0 ->
+        \unionArg_ unionArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Dict" ]
@@ -1325,9 +1341,9 @@ call_ =
                              )
                      }
                 )
-                [ unionArg, unionArg0 ]
+                [ unionArg_, unionArg_0 ]
     , intersect =
-        \intersectArg intersectArg0 ->
+        \intersectArg_ intersectArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Dict" ]
@@ -1352,9 +1368,9 @@ call_ =
                              )
                      }
                 )
-                [ intersectArg, intersectArg0 ]
+                [ intersectArg_, intersectArg_0 ]
     , diff =
-        \diffArg diffArg0 ->
+        \diffArg_ diffArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Dict" ]
@@ -1379,9 +1395,9 @@ call_ =
                              )
                      }
                 )
-                [ diffArg, diffArg0 ]
+                [ diffArg_, diffArg_0 ]
     , merge =
-        \mergeArg mergeArg0 mergeArg1 mergeArg2 mergeArg3 mergeArg4 ->
+        \mergeArg_ mergeArg_0 mergeArg_1 mergeArg_2 mergeArg_3 mergeArg_4 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Dict" ]
@@ -1422,12 +1438,12 @@ call_ =
                              )
                      }
                 )
-                [ mergeArg
-                , mergeArg0
-                , mergeArg1
-                , mergeArg2
-                , mergeArg3
-                , mergeArg4
+                [ mergeArg_
+                , mergeArg_0
+                , mergeArg_1
+                , mergeArg_2
+                , mergeArg_3
+                , mergeArg_4
                 ]
     }
 

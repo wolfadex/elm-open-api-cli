@@ -1,7 +1,13 @@
-module Gen.Platform.Cmd exposing (annotation_, batch, call_, map, moduleName_, none, values_)
+module Gen.Platform.Cmd exposing
+    ( moduleName_, none, batch, map, annotation_, call_
+    , values_
+    )
 
-{-| 
-@docs moduleName_, none, batch, map, annotation_, call_, values_
+{-|
+# Generated bindings for Cmd
+
+@docs moduleName_, none, batch, map, annotation_, call_
+@docs values_
 -}
 
 
@@ -39,7 +45,7 @@ all do the same thing.
 batch: List (Platform.Cmd.Cmd msg) -> Platform.Cmd.Cmd msg
 -}
 batch : List Elm.Expression -> Elm.Expression
-batch batchArg =
+batch batchArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Cmd" ]
@@ -54,7 +60,7 @@ batch batchArg =
                      )
              }
         )
-        [ Elm.list batchArg ]
+        [ Elm.list batchArg_ ]
 
 
 {-| Transform the messages produced by a command.
@@ -68,7 +74,7 @@ section on [structure][] in the guide before reaching for this!
 map: (a -> msg) -> Platform.Cmd.Cmd a -> Platform.Cmd.Cmd msg
 -}
 map : (Elm.Expression -> Elm.Expression) -> Elm.Expression -> Elm.Expression
-map mapArg mapArg0 =
+map mapArg_ mapArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Cmd" ]
@@ -83,7 +89,7 @@ map mapArg mapArg0 =
                      )
              }
         )
-        [ Elm.functionReduced "mapUnpack" mapArg, mapArg0 ]
+        [ Elm.functionReduced "mapUnpack" mapArg_, mapArg_0 ]
 
 
 annotation_ : { cmd : Type.Annotation -> Type.Annotation }
@@ -97,7 +103,7 @@ call_ :
     }
 call_ =
     { batch =
-        \batchArg ->
+        \batchArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Cmd" ]
@@ -116,9 +122,9 @@ call_ =
                              )
                      }
                 )
-                [ batchArg ]
+                [ batchArg_ ]
     , map =
-        \mapArg mapArg0 ->
+        \mapArg_ mapArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Cmd" ]
@@ -135,7 +141,7 @@ call_ =
                              )
                      }
                 )
-                [ mapArg, mapArg0 ]
+                [ mapArg_, mapArg_0 ]
     }
 
 

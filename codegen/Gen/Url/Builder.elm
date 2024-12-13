@@ -1,12 +1,20 @@
-module Gen.Url.Builder exposing (absolute, annotation_, call_, caseOf_, crossOrigin, custom, int, make_, moduleName_, relative, string, toQuery, values_)
+module Gen.Url.Builder exposing
+    ( moduleName_, absolute, relative, crossOrigin, custom, string
+    , int, toQuery, annotation_, make_, caseOf_, call_, values_
+    )
 
-{-| 
-@docs moduleName_, absolute, relative, crossOrigin, custom, string, int, toQuery, annotation_, make_, caseOf_, call_, values_
+{-|
+# Generated bindings for Url.Builder
+
+@docs moduleName_, absolute, relative, crossOrigin, custom, string
+@docs int, toQuery, annotation_, make_, caseOf_, call_
+@docs values_
 -}
 
 
 import Elm
 import Elm.Annotation as Type
+import Elm.Arg
 import Elm.Case
 
 
@@ -35,7 +43,7 @@ Notice that the URLs start with a slash!
 absolute: List String -> List Url.Builder.QueryParameter -> String
 -}
 absolute : List String -> List Elm.Expression -> Elm.Expression
-absolute absoluteArg absoluteArg0 =
+absolute absoluteArg_ absoluteArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Url", "Builder" ]
@@ -55,7 +63,7 @@ absolute absoluteArg absoluteArg0 =
                      )
              }
         )
-        [ Elm.list (List.map Elm.string absoluteArg), Elm.list absoluteArg0 ]
+        [ Elm.list (List.map Elm.string absoluteArg_), Elm.list absoluteArg_0 ]
 
 
 {-| Create a relative URL:
@@ -77,7 +85,7 @@ Notice that the URLs **do not** start with a slash!
 relative: List String -> List Url.Builder.QueryParameter -> String
 -}
 relative : List String -> List Elm.Expression -> Elm.Expression
-relative relativeArg relativeArg0 =
+relative relativeArg_ relativeArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Url", "Builder" ]
@@ -97,7 +105,7 @@ relative relativeArg relativeArg0 =
                      )
              }
         )
-        [ Elm.list (List.map Elm.string relativeArg), Elm.list relativeArg0 ]
+        [ Elm.list (List.map Elm.string relativeArg_), Elm.list relativeArg_0 ]
 
 
 {-| Create a cross-origin URL.
@@ -125,7 +133,7 @@ so the appropriate `Access-Control-Allow-Origin` header must be enabled on the
 crossOrigin: String -> List String -> List Url.Builder.QueryParameter -> String
 -}
 crossOrigin : String -> List String -> List Elm.Expression -> Elm.Expression
-crossOrigin crossOriginArg crossOriginArg0 crossOriginArg1 =
+crossOrigin crossOriginArg_ crossOriginArg_0 crossOriginArg_1 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Url", "Builder" ]
@@ -146,9 +154,9 @@ crossOrigin crossOriginArg crossOriginArg0 crossOriginArg1 =
                      )
              }
         )
-        [ Elm.string crossOriginArg
-        , Elm.list (List.map Elm.string crossOriginArg0)
-        , Elm.list crossOriginArg1
+        [ Elm.string crossOriginArg_
+        , Elm.list (List.map Elm.string crossOriginArg_0)
+        , Elm.list crossOriginArg_1
         ]
 
 
@@ -183,7 +191,7 @@ custom :
     -> List Elm.Expression
     -> Elm.Expression
     -> Elm.Expression
-custom customArg customArg0 customArg1 customArg2 =
+custom customArg_ customArg_0 customArg_1 customArg_2 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Url", "Builder" ]
@@ -205,10 +213,10 @@ custom customArg customArg0 customArg1 customArg2 =
                      )
              }
         )
-        [ customArg
-        , Elm.list (List.map Elm.string customArg0)
-        , Elm.list customArg1
-        , customArg2
+        [ customArg_
+        , Elm.list (List.map Elm.string customArg_0)
+        , Elm.list customArg_1
+        , customArg_2
         ]
 
 
@@ -223,7 +231,7 @@ custom customArg customArg0 customArg1 customArg2 =
 string: String -> String -> Url.Builder.QueryParameter
 -}
 string : String -> String -> Elm.Expression
-string stringArg stringArg0 =
+string stringArg_ stringArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Url", "Builder" ]
@@ -240,7 +248,7 @@ string stringArg stringArg0 =
                      )
              }
         )
-        [ Elm.string stringArg, Elm.string stringArg0 ]
+        [ Elm.string stringArg_, Elm.string stringArg_0 ]
 
 
 {-| Create a percent-encoded query parameter.
@@ -254,7 +262,7 @@ So this is just a convenience function, making your code a bit shorter!
 int: String -> Int -> Url.Builder.QueryParameter
 -}
 int : String -> Int -> Elm.Expression
-int intArg intArg0 =
+int intArg_ intArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Url", "Builder" ]
@@ -271,7 +279,7 @@ int intArg intArg0 =
                      )
              }
         )
-        [ Elm.string intArg, Elm.int intArg0 ]
+        [ Elm.string intArg_, Elm.int intArg_0 ]
 
 
 {-| Convert a list of query parameters to a percent-encoded query. This
@@ -292,7 +300,7 @@ function is used by `absolute`, `relative`, etc.
 toQuery: List Url.Builder.QueryParameter -> String
 -}
 toQuery : List Elm.Expression -> Elm.Expression
-toQuery toQueryArg =
+toQuery toQueryArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Url", "Builder" ]
@@ -311,7 +319,7 @@ toQuery toQueryArg =
                      )
              }
         )
-        [ Elm.list toQueryArg ]
+        [ Elm.list toQueryArg_ ]
 
 
 annotation_ : { root : Type.Annotation, queryParameter : Type.Annotation }
@@ -355,10 +363,9 @@ make_ =
 caseOf_ :
     { root :
         Elm.Expression
-        -> { rootTags_0_0
-            | absolute : Elm.Expression
-            , relative : Elm.Expression
-            , crossOrigin : Elm.Expression -> Elm.Expression
+        -> { absolute : Elm.Expression
+        , relative : Elm.Expression
+        , crossOrigin : Elm.Expression -> Elm.Expression
         }
         -> Elm.Expression
     }
@@ -368,12 +375,22 @@ caseOf_ =
             Elm.Case.custom
                 rootExpression
                 (Type.namedWith [ "Url", "Builder" ] "Root" [])
-                [ Elm.Case.branch0 "Absolute" rootTags.absolute
-                , Elm.Case.branch0 "Relative" rootTags.relative
-                , Elm.Case.branch1
-                    "CrossOrigin"
-                    ( "stringString", Type.string )
-                    rootTags.crossOrigin
+                [ Elm.Case.branch
+                    (Elm.Arg.customType "Absolute" rootTags.absolute)
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType "Relative" rootTags.relative)
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType
+                       "CrossOrigin"
+                       rootTags.crossOrigin |> Elm.Arg.item
+                                                     (Elm.Arg.varWith
+                                                            "arg_0"
+                                                            Type.string
+                                                     )
+                    )
+                    Basics.identity
                 ]
     }
 
@@ -395,7 +412,7 @@ call_ :
     }
 call_ =
     { absolute =
-        \absoluteArg absoluteArg0 ->
+        \absoluteArg_ absoluteArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Url", "Builder" ]
@@ -415,9 +432,9 @@ call_ =
                              )
                      }
                 )
-                [ absoluteArg, absoluteArg0 ]
+                [ absoluteArg_, absoluteArg_0 ]
     , relative =
-        \relativeArg relativeArg0 ->
+        \relativeArg_ relativeArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Url", "Builder" ]
@@ -437,9 +454,9 @@ call_ =
                              )
                      }
                 )
-                [ relativeArg, relativeArg0 ]
+                [ relativeArg_, relativeArg_0 ]
     , crossOrigin =
-        \crossOriginArg crossOriginArg0 crossOriginArg1 ->
+        \crossOriginArg_ crossOriginArg_0 crossOriginArg_1 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Url", "Builder" ]
@@ -460,9 +477,9 @@ call_ =
                              )
                      }
                 )
-                [ crossOriginArg, crossOriginArg0, crossOriginArg1 ]
+                [ crossOriginArg_, crossOriginArg_0, crossOriginArg_1 ]
     , custom =
-        \customArg customArg0 customArg1 customArg2 ->
+        \customArg_ customArg_0 customArg_1 customArg_2 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Url", "Builder" ]
@@ -487,9 +504,9 @@ call_ =
                              )
                      }
                 )
-                [ customArg, customArg0, customArg1, customArg2 ]
+                [ customArg_, customArg_0, customArg_1, customArg_2 ]
     , string =
-        \stringArg stringArg0 ->
+        \stringArg_ stringArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Url", "Builder" ]
@@ -506,9 +523,9 @@ call_ =
                              )
                      }
                 )
-                [ stringArg, stringArg0 ]
+                [ stringArg_, stringArg_0 ]
     , int =
-        \intArg intArg0 ->
+        \intArg_ intArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Url", "Builder" ]
@@ -525,9 +542,9 @@ call_ =
                              )
                      }
                 )
-                [ intArg, intArg0 ]
+                [ intArg_, intArg_0 ]
     , toQuery =
-        \toQueryArg ->
+        \toQueryArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Url", "Builder" ]
@@ -546,7 +563,7 @@ call_ =
                              )
                      }
                 )
-                [ toQueryArg ]
+                [ toQueryArg_ ]
     }
 
 

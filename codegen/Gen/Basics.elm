@@ -1,12 +1,29 @@
-module Gen.Basics exposing (abs, acos, always, annotation_, asin, atan, atan2, call_, caseOf_, ceiling, clamp, compare, cos, degrees, e, floor, fromPolar, identity, isInfinite, isNaN, logBase, make_, max, min, modBy, moduleName_, negate, never, not, pi, radians, remainderBy, round, sin, sqrt, tan, toFloat, toPolar, truncate, turns, values_, xor)
+module Gen.Basics exposing
+    ( moduleName_, toFloat, round, floor, ceiling, truncate
+    , max, min, compare, not, xor, modBy, remainderBy
+    , negate, abs, clamp, sqrt, logBase, e, degrees
+    , radians, turns, pi, cos, sin, tan, acos
+    , asin, atan, atan2, toPolar, fromPolar, isNaN, isInfinite
+    , identity, always, never, annotation_, make_, caseOf_, call_
+    , values_
+    )
 
-{-| 
-@docs moduleName_, toFloat, round, floor, ceiling, truncate, max, min, compare, not, xor, modBy, remainderBy, negate, abs, clamp, sqrt, logBase, e, degrees, radians, turns, pi, cos, sin, tan, acos, asin, atan, atan2, toPolar, fromPolar, isNaN, isInfinite, identity, always, never, annotation_, make_, caseOf_, call_, values_
+{-|
+# Generated bindings for Basics
+
+@docs moduleName_, toFloat, round, floor, ceiling, truncate
+@docs max, min, compare, not, xor, modBy
+@docs remainderBy, negate, abs, clamp, sqrt, logBase
+@docs e, degrees, radians, turns, pi, cos
+@docs sin, tan, acos, asin, atan, atan2
+@docs toPolar, fromPolar, isNaN, isInfinite, identity, always
+@docs never, annotation_, make_, caseOf_, call_, values_
 -}
 
 
 import Elm
 import Elm.Annotation as Type
+import Elm.Arg
 import Elm.Case
 
 
@@ -26,7 +43,7 @@ values like this:
 toFloat: Int -> Float
 -}
 toFloat : Int -> Elm.Expression
-toFloat toFloatArg =
+toFloat toFloatArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Basics" ]
@@ -34,7 +51,7 @@ toFloat toFloatArg =
              , annotation = Just (Type.function [ Type.int ] Type.float)
              }
         )
-        [ Elm.int toFloatArg ]
+        [ Elm.int toFloatArg_ ]
 
 
 {-| Round a number to the nearest integer.
@@ -51,7 +68,7 @@ toFloat toFloatArg =
 round: Float -> Int
 -}
 round : Float -> Elm.Expression
-round roundArg =
+round roundArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Basics" ]
@@ -59,7 +76,7 @@ round roundArg =
              , annotation = Just (Type.function [ Type.float ] Type.int)
              }
         )
-        [ Elm.float roundArg ]
+        [ Elm.float roundArg_ ]
 
 
 {-| Floor function, rounding down.
@@ -76,7 +93,7 @@ round roundArg =
 floor: Float -> Int
 -}
 floor : Float -> Elm.Expression
-floor floorArg =
+floor floorArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Basics" ]
@@ -84,7 +101,7 @@ floor floorArg =
              , annotation = Just (Type.function [ Type.float ] Type.int)
              }
         )
-        [ Elm.float floorArg ]
+        [ Elm.float floorArg_ ]
 
 
 {-| Ceiling function, rounding up.
@@ -101,7 +118,7 @@ floor floorArg =
 ceiling: Float -> Int
 -}
 ceiling : Float -> Elm.Expression
-ceiling ceilingArg =
+ceiling ceilingArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Basics" ]
@@ -109,7 +126,7 @@ ceiling ceilingArg =
              , annotation = Just (Type.function [ Type.float ] Type.int)
              }
         )
-        [ Elm.float ceilingArg ]
+        [ Elm.float ceilingArg_ ]
 
 
 {-| Truncate a number, rounding towards zero.
@@ -126,7 +143,7 @@ ceiling ceilingArg =
 truncate: Float -> Int
 -}
 truncate : Float -> Elm.Expression
-truncate truncateArg =
+truncate truncateArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Basics" ]
@@ -134,7 +151,7 @@ truncate truncateArg =
              , annotation = Just (Type.function [ Type.float ] Type.int)
              }
         )
-        [ Elm.float truncateArg ]
+        [ Elm.float truncateArg_ ]
 
 
 {-| Find the larger of two comparables.
@@ -145,7 +162,7 @@ truncate truncateArg =
 max: comparable -> comparable -> comparable
 -}
 max : Elm.Expression -> Elm.Expression -> Elm.Expression
-max maxArg maxArg0 =
+max maxArg_ maxArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Basics" ]
@@ -158,7 +175,7 @@ max maxArg maxArg0 =
                      )
              }
         )
-        [ maxArg, maxArg0 ]
+        [ maxArg_, maxArg_0 ]
 
 
 {-| Find the smaller of two comparables.
@@ -169,7 +186,7 @@ max maxArg maxArg0 =
 min: comparable -> comparable -> comparable
 -}
 min : Elm.Expression -> Elm.Expression -> Elm.Expression
-min minArg minArg0 =
+min minArg_ minArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Basics" ]
@@ -182,7 +199,7 @@ min minArg minArg0 =
                      )
              }
         )
-        [ minArg, minArg0 ]
+        [ minArg_, minArg_0 ]
 
 
 {-| Compare any two comparable values. Comparable values include `String`,
@@ -196,7 +213,7 @@ are also the only values that work as `Dict` keys or `Set` members.
 compare: comparable -> comparable -> Basics.Order
 -}
 compare : Elm.Expression -> Elm.Expression -> Elm.Expression
-compare compareArg compareArg0 =
+compare compareArg_ compareArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Basics" ]
@@ -209,7 +226,7 @@ compare compareArg compareArg0 =
                      )
              }
         )
-        [ compareArg, compareArg0 ]
+        [ compareArg_, compareArg_0 ]
 
 
 {-| Negate a boolean value.
@@ -220,7 +237,7 @@ compare compareArg compareArg0 =
 not: Bool -> Bool
 -}
 not : Bool -> Elm.Expression
-not notArg =
+not notArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Basics" ]
@@ -228,7 +245,7 @@ not notArg =
              , annotation = Just (Type.function [ Type.bool ] Type.bool)
              }
         )
-        [ Elm.bool notArg ]
+        [ Elm.bool notArg_ ]
 
 
 {-| The exclusive-or operator. `True` if exactly one input is `True`.
@@ -241,7 +258,7 @@ not notArg =
 xor: Bool -> Bool -> Bool
 -}
 xor : Bool -> Bool -> Elm.Expression
-xor xorArg xorArg0 =
+xor xorArg_ xorArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Basics" ]
@@ -250,7 +267,7 @@ xor xorArg xorArg0 =
                  Just (Type.function [ Type.bool, Type.bool ] Type.bool)
              }
         )
-        [ Elm.bool xorArg, Elm.bool xorArg0 ]
+        [ Elm.bool xorArg_, Elm.bool xorArg_0 ]
 
 
 {-| Perform [modular arithmetic](https://en.wikipedia.org/wiki/Modular_arithmetic).
@@ -276,7 +293,7 @@ information.
 modBy: Int -> Int -> Int
 -}
 modBy : Int -> Int -> Elm.Expression
-modBy modByArg modByArg0 =
+modBy modByArg_ modByArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Basics" ]
@@ -284,7 +301,7 @@ modBy modByArg modByArg0 =
              , annotation = Just (Type.function [ Type.int, Type.int ] Type.int)
              }
         )
-        [ Elm.int modByArg, Elm.int modByArg0 ]
+        [ Elm.int modByArg_, Elm.int modByArg_0 ]
 
 
 {-| Get the remainder after division. Here are bunch of examples of dividing by four:
@@ -301,7 +318,7 @@ information.
 remainderBy: Int -> Int -> Int
 -}
 remainderBy : Int -> Int -> Elm.Expression
-remainderBy remainderByArg remainderByArg0 =
+remainderBy remainderByArg_ remainderByArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Basics" ]
@@ -309,7 +326,7 @@ remainderBy remainderByArg remainderByArg0 =
              , annotation = Just (Type.function [ Type.int, Type.int ] Type.int)
              }
         )
-        [ Elm.int remainderByArg, Elm.int remainderByArg0 ]
+        [ Elm.int remainderByArg_, Elm.int remainderByArg_0 ]
 
 
 {-| Negate a number.
@@ -321,7 +338,7 @@ remainderBy remainderByArg remainderByArg0 =
 negate: number -> number
 -}
 negate : Elm.Expression -> Elm.Expression
-negate negateArg =
+negate negateArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Basics" ]
@@ -330,7 +347,7 @@ negate negateArg =
                  Just (Type.function [ Type.var "number" ] (Type.var "number"))
              }
         )
-        [ negateArg ]
+        [ negateArg_ ]
 
 
 {-| Get the [absolute value][abs] of a number.
@@ -345,7 +362,7 @@ negate negateArg =
 abs: number -> number
 -}
 abs : Elm.Expression -> Elm.Expression
-abs absArg =
+abs absArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Basics" ]
@@ -354,7 +371,7 @@ abs absArg =
                  Just (Type.function [ Type.var "number" ] (Type.var "number"))
              }
         )
-        [ absArg ]
+        [ absArg_ ]
 
 
 {-| Clamps a number within a given range. With the expression
@@ -367,7 +384,7 @@ abs absArg =
 clamp: number -> number -> number -> number
 -}
 clamp : Elm.Expression -> Elm.Expression -> Elm.Expression -> Elm.Expression
-clamp clampArg clampArg0 clampArg1 =
+clamp clampArg_ clampArg_0 clampArg_1 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Basics" ]
@@ -383,7 +400,7 @@ clamp clampArg clampArg0 clampArg1 =
                      )
              }
         )
-        [ clampArg, clampArg0, clampArg1 ]
+        [ clampArg_, clampArg_0, clampArg_1 ]
 
 
 {-| Take the square root of a number.
@@ -396,7 +413,7 @@ clamp clampArg clampArg0 clampArg1 =
 sqrt: Float -> Float
 -}
 sqrt : Float -> Elm.Expression
-sqrt sqrtArg =
+sqrt sqrtArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Basics" ]
@@ -404,7 +421,7 @@ sqrt sqrtArg =
              , annotation = Just (Type.function [ Type.float ] Type.float)
              }
         )
-        [ Elm.float sqrtArg ]
+        [ Elm.float sqrtArg_ ]
 
 
 {-| Calculate the logarithm of a number with a given base.
@@ -415,7 +432,7 @@ sqrt sqrtArg =
 logBase: Float -> Float -> Float
 -}
 logBase : Float -> Float -> Elm.Expression
-logBase logBaseArg logBaseArg0 =
+logBase logBaseArg_ logBaseArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Basics" ]
@@ -424,7 +441,7 @@ logBase logBaseArg logBaseArg0 =
                  Just (Type.function [ Type.float, Type.float ] Type.float)
              }
         )
-        [ Elm.float logBaseArg, Elm.float logBaseArg0 ]
+        [ Elm.float logBaseArg_, Elm.float logBaseArg_0 ]
 
 
 {-| An approximation of e.
@@ -444,7 +461,7 @@ e =
 degrees: Float -> Float
 -}
 degrees : Float -> Elm.Expression
-degrees degreesArg =
+degrees degreesArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Basics" ]
@@ -452,7 +469,7 @@ degrees degreesArg =
              , annotation = Just (Type.function [ Type.float ] Type.float)
              }
         )
-        [ Elm.float degreesArg ]
+        [ Elm.float degreesArg_ ]
 
 
 {-| Convert radians to standard Elm angles (radians).
@@ -462,7 +479,7 @@ degrees degreesArg =
 radians: Float -> Float
 -}
 radians : Float -> Elm.Expression
-radians radiansArg =
+radians radiansArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Basics" ]
@@ -470,7 +487,7 @@ radians radiansArg =
              , annotation = Just (Type.function [ Type.float ] Type.float)
              }
         )
-        [ Elm.float radiansArg ]
+        [ Elm.float radiansArg_ ]
 
 
 {-| Convert turns to standard Elm angles (radians). One turn is equal to 360°.
@@ -480,7 +497,7 @@ radians radiansArg =
 turns: Float -> Float
 -}
 turns : Float -> Elm.Expression
-turns turnsArg =
+turns turnsArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Basics" ]
@@ -488,7 +505,7 @@ turns turnsArg =
              , annotation = Just (Type.function [ Type.float ] Type.float)
              }
         )
-        [ Elm.float turnsArg ]
+        [ Elm.float turnsArg_ ]
 
 
 {-| An approximation of pi.
@@ -511,7 +528,7 @@ pi =
 cos: Float -> Float
 -}
 cos : Float -> Elm.Expression
-cos cosArg =
+cos cosArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Basics" ]
@@ -519,7 +536,7 @@ cos cosArg =
              , annotation = Just (Type.function [ Type.float ] Type.float)
              }
         )
-        [ Elm.float cosArg ]
+        [ Elm.float cosArg_ ]
 
 
 {-| Figure out the sine given an angle in radians.
@@ -532,7 +549,7 @@ cos cosArg =
 sin: Float -> Float
 -}
 sin : Float -> Elm.Expression
-sin sinArg =
+sin sinArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Basics" ]
@@ -540,7 +557,7 @@ sin sinArg =
              , annotation = Just (Type.function [ Type.float ] Type.float)
              }
         )
-        [ Elm.float sinArg ]
+        [ Elm.float sinArg_ ]
 
 
 {-| Figure out the tangent given an angle in radians.
@@ -553,7 +570,7 @@ sin sinArg =
 tan: Float -> Float
 -}
 tan : Float -> Elm.Expression
-tan tanArg =
+tan tanArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Basics" ]
@@ -561,7 +578,7 @@ tan tanArg =
              , annotation = Just (Type.function [ Type.float ] Type.float)
              }
         )
-        [ Elm.float tanArg ]
+        [ Elm.float tanArg_ ]
 
 
 {-| Figure out the arccosine for `adjacent / hypotenuse` in radians:
@@ -571,7 +588,7 @@ tan tanArg =
 acos: Float -> Float
 -}
 acos : Float -> Elm.Expression
-acos acosArg =
+acos acosArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Basics" ]
@@ -579,7 +596,7 @@ acos acosArg =
              , annotation = Just (Type.function [ Type.float ] Type.float)
              }
         )
-        [ Elm.float acosArg ]
+        [ Elm.float acosArg_ ]
 
 
 {-| Figure out the arcsine for `opposite / hypotenuse` in radians:
@@ -589,7 +606,7 @@ acos acosArg =
 asin: Float -> Float
 -}
 asin : Float -> Elm.Expression
-asin asinArg =
+asin asinArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Basics" ]
@@ -597,7 +614,7 @@ asin asinArg =
              , annotation = Just (Type.function [ Type.float ] Type.float)
              }
         )
-        [ Elm.float asinArg ]
+        [ Elm.float asinArg_ ]
 
 
 {-| This helps you find the angle (in radians) to an `(x,y)` coordinate, but
@@ -621,7 +638,7 @@ for figuring out angles in any sort of visualization, so again, check out
 atan: Float -> Float
 -}
 atan : Float -> Elm.Expression
-atan atanArg =
+atan atanArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Basics" ]
@@ -629,7 +646,7 @@ atan atanArg =
              , annotation = Just (Type.function [ Type.float ] Type.float)
              }
         )
-        [ Elm.float atanArg ]
+        [ Elm.float atanArg_ ]
 
 
 {-| This helps you find the angle (in radians) to an `(x,y)` coordinate.
@@ -644,7 +661,7 @@ range of angles:
 atan2: Float -> Float -> Float
 -}
 atan2 : Float -> Float -> Elm.Expression
-atan2 atan2Arg atan2Arg0 =
+atan2 atan2Arg_ atan2Arg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Basics" ]
@@ -653,7 +670,7 @@ atan2 atan2Arg atan2Arg0 =
                  Just (Type.function [ Type.float, Type.float ] Type.float)
              }
         )
-        [ Elm.float atan2Arg, Elm.float atan2Arg0 ]
+        [ Elm.float atan2Arg_, Elm.float atan2Arg_0 ]
 
 
 {-| Convert Cartesian coordinates (x,y) to polar coordinates (r,&theta;).
@@ -664,7 +681,7 @@ atan2 atan2Arg atan2Arg0 =
 toPolar: ( Float, Float ) -> ( Float, Float )
 -}
 toPolar : Elm.Expression -> Elm.Expression
-toPolar toPolarArg =
+toPolar toPolarArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Basics" ]
@@ -677,7 +694,7 @@ toPolar toPolarArg =
                      )
              }
         )
-        [ toPolarArg ]
+        [ toPolarArg_ ]
 
 
 {-| Convert polar coordinates (r,&theta;) to Cartesian coordinates (x,y).
@@ -687,7 +704,7 @@ toPolar toPolarArg =
 fromPolar: ( Float, Float ) -> ( Float, Float )
 -}
 fromPolar : Elm.Expression -> Elm.Expression
-fromPolar fromPolarArg =
+fromPolar fromPolarArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Basics" ]
@@ -700,7 +717,7 @@ fromPolar fromPolarArg =
                      )
              }
         )
-        [ fromPolarArg ]
+        [ fromPolarArg_ ]
 
 
 {-| Determine whether a float is an undefined or unrepresentable number.
@@ -715,7 +732,7 @@ numbers](https://en.wikipedia.org/wiki/NaN).
 isNaN: Float -> Bool
 -}
 isNaN : Float -> Elm.Expression
-isNaN isNaNArg =
+isNaN isNaNArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Basics" ]
@@ -723,7 +740,7 @@ isNaN isNaNArg =
              , annotation = Just (Type.function [ Type.float ] Type.bool)
              }
         )
-        [ Elm.float isNaNArg ]
+        [ Elm.float isNaNArg_ ]
 
 
 {-| Determine whether a float is positive or negative infinity.
@@ -739,7 +756,7 @@ Notice that NaN is not infinite! For float `n` to be finite implies that
 isInfinite: Float -> Bool
 -}
 isInfinite : Float -> Elm.Expression
-isInfinite isInfiniteArg =
+isInfinite isInfiniteArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Basics" ]
@@ -747,7 +764,7 @@ isInfinite isInfiniteArg =
              , annotation = Just (Type.function [ Type.float ] Type.bool)
              }
         )
-        [ Elm.float isInfiniteArg ]
+        [ Elm.float isInfiniteArg_ ]
 
 
 {-| Given a value, returns exactly the same value. This is called
@@ -756,7 +773,7 @@ isInfinite isInfiniteArg =
 identity: a -> a
 -}
 identity : Elm.Expression -> Elm.Expression
-identity identityArg =
+identity identityArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Basics" ]
@@ -764,7 +781,7 @@ identity identityArg =
              , annotation = Just (Type.function [ Type.var "a" ] (Type.var "a"))
              }
         )
-        [ identityArg ]
+        [ identityArg_ ]
 
 
 {-| Create a function that *always* returns the same value. Useful with
@@ -778,7 +795,7 @@ functions like `map`:
 always: a -> b -> a
 -}
 always : Elm.Expression -> Elm.Expression -> Elm.Expression
-always alwaysArg alwaysArg0 =
+always alwaysArg_ alwaysArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Basics" ]
@@ -791,7 +808,7 @@ always alwaysArg alwaysArg0 =
                      )
              }
         )
-        [ alwaysArg, alwaysArg0 ]
+        [ alwaysArg_, alwaysArg_0 ]
 
 
 {-| A function that can never be called. Seems extremely pointless, but it
@@ -814,7 +831,7 @@ ever calls me!
 never: Basics.Never -> a
 -}
 never : Elm.Expression -> Elm.Expression
-never neverArg =
+never neverArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Basics" ]
@@ -827,7 +844,7 @@ never neverArg =
                      )
              }
         )
-        [ neverArg ]
+        [ neverArg_ ]
 
 
 annotation_ :
@@ -890,15 +907,11 @@ make_ =
 caseOf_ :
     { order :
         Elm.Expression
-        -> { orderTags_0_0
-            | lT : Elm.Expression
-            , eQ : Elm.Expression
-            , gT : Elm.Expression
-        }
+        -> { lT : Elm.Expression, eQ : Elm.Expression, gT : Elm.Expression }
         -> Elm.Expression
     , bool :
         Elm.Expression
-        -> { boolTags_1_0 | true : Elm.Expression, false : Elm.Expression }
+        -> { true : Elm.Expression, false : Elm.Expression }
         -> Elm.Expression
     }
 caseOf_ =
@@ -907,17 +920,27 @@ caseOf_ =
             Elm.Case.custom
                 orderExpression
                 (Type.namedWith [ "Basics" ] "Order" [])
-                [ Elm.Case.branch0 "LT" orderTags.lT
-                , Elm.Case.branch0 "EQ" orderTags.eQ
-                , Elm.Case.branch0 "GT" orderTags.gT
+                [ Elm.Case.branch
+                    (Elm.Arg.customType "LT" orderTags.lT)
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType "EQ" orderTags.eQ)
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType "GT" orderTags.gT)
+                    Basics.identity
                 ]
     , bool =
         \boolExpression boolTags ->
             Elm.Case.custom
                 boolExpression
                 (Type.namedWith [ "Basics" ] "Bool" [])
-                [ Elm.Case.branch0 "True" boolTags.true
-                , Elm.Case.branch0 "False" boolTags.false
+                [ Elm.Case.branch
+                    (Elm.Arg.customType "True" boolTags.true)
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType "False" boolTags.false)
+                    Basics.identity
                 ]
     }
 
@@ -961,7 +984,7 @@ call_ :
     }
 call_ =
     { toFloat =
-        \toFloatArg ->
+        \toFloatArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Basics" ]
@@ -969,9 +992,9 @@ call_ =
                      , annotation = Just (Type.function [ Type.int ] Type.float)
                      }
                 )
-                [ toFloatArg ]
+                [ toFloatArg_ ]
     , round =
-        \roundArg ->
+        \roundArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Basics" ]
@@ -979,9 +1002,9 @@ call_ =
                      , annotation = Just (Type.function [ Type.float ] Type.int)
                      }
                 )
-                [ roundArg ]
+                [ roundArg_ ]
     , floor =
-        \floorArg ->
+        \floorArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Basics" ]
@@ -989,9 +1012,9 @@ call_ =
                      , annotation = Just (Type.function [ Type.float ] Type.int)
                      }
                 )
-                [ floorArg ]
+                [ floorArg_ ]
     , ceiling =
-        \ceilingArg ->
+        \ceilingArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Basics" ]
@@ -999,9 +1022,9 @@ call_ =
                      , annotation = Just (Type.function [ Type.float ] Type.int)
                      }
                 )
-                [ ceilingArg ]
+                [ ceilingArg_ ]
     , truncate =
-        \truncateArg ->
+        \truncateArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Basics" ]
@@ -1009,9 +1032,9 @@ call_ =
                      , annotation = Just (Type.function [ Type.float ] Type.int)
                      }
                 )
-                [ truncateArg ]
+                [ truncateArg_ ]
     , max =
-        \maxArg maxArg0 ->
+        \maxArg_ maxArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Basics" ]
@@ -1026,9 +1049,9 @@ call_ =
                              )
                      }
                 )
-                [ maxArg, maxArg0 ]
+                [ maxArg_, maxArg_0 ]
     , min =
-        \minArg minArg0 ->
+        \minArg_ minArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Basics" ]
@@ -1043,9 +1066,9 @@ call_ =
                              )
                      }
                 )
-                [ minArg, minArg0 ]
+                [ minArg_, minArg_0 ]
     , compare =
-        \compareArg compareArg0 ->
+        \compareArg_ compareArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Basics" ]
@@ -1060,9 +1083,9 @@ call_ =
                              )
                      }
                 )
-                [ compareArg, compareArg0 ]
+                [ compareArg_, compareArg_0 ]
     , not =
-        \notArg ->
+        \notArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Basics" ]
@@ -1070,9 +1093,9 @@ call_ =
                      , annotation = Just (Type.function [ Type.bool ] Type.bool)
                      }
                 )
-                [ notArg ]
+                [ notArg_ ]
     , xor =
-        \xorArg xorArg0 ->
+        \xorArg_ xorArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Basics" ]
@@ -1081,9 +1104,9 @@ call_ =
                          Just (Type.function [ Type.bool, Type.bool ] Type.bool)
                      }
                 )
-                [ xorArg, xorArg0 ]
+                [ xorArg_, xorArg_0 ]
     , modBy =
-        \modByArg modByArg0 ->
+        \modByArg_ modByArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Basics" ]
@@ -1092,9 +1115,9 @@ call_ =
                          Just (Type.function [ Type.int, Type.int ] Type.int)
                      }
                 )
-                [ modByArg, modByArg0 ]
+                [ modByArg_, modByArg_0 ]
     , remainderBy =
-        \remainderByArg remainderByArg0 ->
+        \remainderByArg_ remainderByArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Basics" ]
@@ -1103,9 +1126,9 @@ call_ =
                          Just (Type.function [ Type.int, Type.int ] Type.int)
                      }
                 )
-                [ remainderByArg, remainderByArg0 ]
+                [ remainderByArg_, remainderByArg_0 ]
     , negate =
-        \negateArg ->
+        \negateArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Basics" ]
@@ -1118,9 +1141,9 @@ call_ =
                              )
                      }
                 )
-                [ negateArg ]
+                [ negateArg_ ]
     , abs =
-        \absArg ->
+        \absArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Basics" ]
@@ -1133,9 +1156,9 @@ call_ =
                              )
                      }
                 )
-                [ absArg ]
+                [ absArg_ ]
     , clamp =
-        \clampArg clampArg0 clampArg1 ->
+        \clampArg_ clampArg_0 clampArg_1 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Basics" ]
@@ -1151,9 +1174,9 @@ call_ =
                              )
                      }
                 )
-                [ clampArg, clampArg0, clampArg1 ]
+                [ clampArg_, clampArg_0, clampArg_1 ]
     , sqrt =
-        \sqrtArg ->
+        \sqrtArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Basics" ]
@@ -1162,9 +1185,9 @@ call_ =
                          Just (Type.function [ Type.float ] Type.float)
                      }
                 )
-                [ sqrtArg ]
+                [ sqrtArg_ ]
     , logBase =
-        \logBaseArg logBaseArg0 ->
+        \logBaseArg_ logBaseArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Basics" ]
@@ -1177,9 +1200,9 @@ call_ =
                              )
                      }
                 )
-                [ logBaseArg, logBaseArg0 ]
+                [ logBaseArg_, logBaseArg_0 ]
     , degrees =
-        \degreesArg ->
+        \degreesArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Basics" ]
@@ -1188,9 +1211,9 @@ call_ =
                          Just (Type.function [ Type.float ] Type.float)
                      }
                 )
-                [ degreesArg ]
+                [ degreesArg_ ]
     , radians =
-        \radiansArg ->
+        \radiansArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Basics" ]
@@ -1199,9 +1222,9 @@ call_ =
                          Just (Type.function [ Type.float ] Type.float)
                      }
                 )
-                [ radiansArg ]
+                [ radiansArg_ ]
     , turns =
-        \turnsArg ->
+        \turnsArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Basics" ]
@@ -1210,9 +1233,9 @@ call_ =
                          Just (Type.function [ Type.float ] Type.float)
                      }
                 )
-                [ turnsArg ]
+                [ turnsArg_ ]
     , cos =
-        \cosArg ->
+        \cosArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Basics" ]
@@ -1221,9 +1244,9 @@ call_ =
                          Just (Type.function [ Type.float ] Type.float)
                      }
                 )
-                [ cosArg ]
+                [ cosArg_ ]
     , sin =
-        \sinArg ->
+        \sinArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Basics" ]
@@ -1232,9 +1255,9 @@ call_ =
                          Just (Type.function [ Type.float ] Type.float)
                      }
                 )
-                [ sinArg ]
+                [ sinArg_ ]
     , tan =
-        \tanArg ->
+        \tanArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Basics" ]
@@ -1243,9 +1266,9 @@ call_ =
                          Just (Type.function [ Type.float ] Type.float)
                      }
                 )
-                [ tanArg ]
+                [ tanArg_ ]
     , acos =
-        \acosArg ->
+        \acosArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Basics" ]
@@ -1254,9 +1277,9 @@ call_ =
                          Just (Type.function [ Type.float ] Type.float)
                      }
                 )
-                [ acosArg ]
+                [ acosArg_ ]
     , asin =
-        \asinArg ->
+        \asinArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Basics" ]
@@ -1265,9 +1288,9 @@ call_ =
                          Just (Type.function [ Type.float ] Type.float)
                      }
                 )
-                [ asinArg ]
+                [ asinArg_ ]
     , atan =
-        \atanArg ->
+        \atanArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Basics" ]
@@ -1276,9 +1299,9 @@ call_ =
                          Just (Type.function [ Type.float ] Type.float)
                      }
                 )
-                [ atanArg ]
+                [ atanArg_ ]
     , atan2 =
-        \atan2Arg atan2Arg0 ->
+        \atan2Arg_ atan2Arg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Basics" ]
@@ -1291,9 +1314,9 @@ call_ =
                              )
                      }
                 )
-                [ atan2Arg, atan2Arg0 ]
+                [ atan2Arg_, atan2Arg_0 ]
     , toPolar =
-        \toPolarArg ->
+        \toPolarArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Basics" ]
@@ -1306,9 +1329,9 @@ call_ =
                              )
                      }
                 )
-                [ toPolarArg ]
+                [ toPolarArg_ ]
     , fromPolar =
-        \fromPolarArg ->
+        \fromPolarArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Basics" ]
@@ -1321,9 +1344,9 @@ call_ =
                              )
                      }
                 )
-                [ fromPolarArg ]
+                [ fromPolarArg_ ]
     , isNaN =
-        \isNaNArg ->
+        \isNaNArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Basics" ]
@@ -1332,9 +1355,9 @@ call_ =
                          Just (Type.function [ Type.float ] Type.bool)
                      }
                 )
-                [ isNaNArg ]
+                [ isNaNArg_ ]
     , isInfinite =
-        \isInfiniteArg ->
+        \isInfiniteArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Basics" ]
@@ -1343,9 +1366,9 @@ call_ =
                          Just (Type.function [ Type.float ] Type.bool)
                      }
                 )
-                [ isInfiniteArg ]
+                [ isInfiniteArg_ ]
     , identity =
-        \identityArg ->
+        \identityArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Basics" ]
@@ -1354,9 +1377,9 @@ call_ =
                          Just (Type.function [ Type.var "a" ] (Type.var "a"))
                      }
                 )
-                [ identityArg ]
+                [ identityArg_ ]
     , always =
-        \alwaysArg alwaysArg0 ->
+        \alwaysArg_ alwaysArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Basics" ]
@@ -1369,9 +1392,9 @@ call_ =
                              )
                      }
                 )
-                [ alwaysArg, alwaysArg0 ]
+                [ alwaysArg_, alwaysArg_0 ]
     , never =
-        \neverArg ->
+        \neverArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Basics" ]
@@ -1384,7 +1407,7 @@ call_ =
                              )
                      }
                 )
-                [ neverArg ]
+                [ neverArg_ ]
     }
 
 

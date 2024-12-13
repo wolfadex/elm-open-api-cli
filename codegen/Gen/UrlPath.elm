@@ -1,7 +1,13 @@
-module Gen.UrlPath exposing (annotation_, call_, fromString, join, moduleName_, toAbsolute, toRelative, toSegments, values_)
+module Gen.UrlPath exposing
+    ( moduleName_, join, fromString, toAbsolute, toRelative, toSegments
+    , annotation_, call_, values_
+    )
 
-{-| 
-@docs moduleName_, join, fromString, toAbsolute, toRelative, toSegments, annotation_, call_, values_
+{-|
+# Generated bindings for UrlPath
+
+@docs moduleName_, join, fromString, toAbsolute, toRelative, toSegments
+@docs annotation_, call_, values_
 -}
 
 
@@ -20,7 +26,7 @@ moduleName_ =
 join: UrlPath.UrlPath -> UrlPath.UrlPath
 -}
 join : Elm.Expression -> Elm.Expression
-join joinArg =
+join joinArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "UrlPath" ]
@@ -33,7 +39,7 @@ join joinArg =
                      )
              }
         )
-        [ joinArg ]
+        [ joinArg_ ]
 
 
 {-| Create a UrlPath from a path String.
@@ -45,7 +51,7 @@ join joinArg =
 fromString: String -> UrlPath.UrlPath
 -}
 fromString : String -> Elm.Expression
-fromString fromStringArg =
+fromString fromStringArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "UrlPath" ]
@@ -58,7 +64,7 @@ fromString fromStringArg =
                      )
              }
         )
-        [ Elm.string fromStringArg ]
+        [ Elm.string fromStringArg_ ]
 
 
 {-| Turn a UrlPath to an absolute URL (with no trailing slash).
@@ -66,7 +72,7 @@ fromString fromStringArg =
 toAbsolute: UrlPath.UrlPath -> String
 -}
 toAbsolute : Elm.Expression -> Elm.Expression
-toAbsolute toAbsoluteArg =
+toAbsolute toAbsoluteArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "UrlPath" ]
@@ -79,7 +85,7 @@ toAbsolute toAbsoluteArg =
                      )
              }
         )
-        [ toAbsoluteArg ]
+        [ toAbsoluteArg_ ]
 
 
 {-| Turn a UrlPath to a relative URL.
@@ -87,7 +93,7 @@ toAbsolute toAbsoluteArg =
 toRelative: UrlPath.UrlPath -> String
 -}
 toRelative : Elm.Expression -> Elm.Expression
-toRelative toRelativeArg =
+toRelative toRelativeArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "UrlPath" ]
@@ -100,12 +106,12 @@ toRelative toRelativeArg =
                      )
              }
         )
-        [ toRelativeArg ]
+        [ toRelativeArg_ ]
 
 
 {-| toSegments: String -> List String -}
 toSegments : String -> Elm.Expression
-toSegments toSegmentsArg =
+toSegments toSegmentsArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "UrlPath" ]
@@ -114,7 +120,7 @@ toSegments toSegmentsArg =
                  Just (Type.function [ Type.string ] (Type.list Type.string))
              }
         )
-        [ Elm.string toSegmentsArg ]
+        [ Elm.string toSegmentsArg_ ]
 
 
 annotation_ : { urlPath : Type.Annotation }
@@ -131,7 +137,7 @@ call_ :
     }
 call_ =
     { join =
-        \joinArg ->
+        \joinArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "UrlPath" ]
@@ -144,9 +150,9 @@ call_ =
                              )
                      }
                 )
-                [ joinArg ]
+                [ joinArg_ ]
     , fromString =
-        \fromStringArg ->
+        \fromStringArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "UrlPath" ]
@@ -159,9 +165,9 @@ call_ =
                              )
                      }
                 )
-                [ fromStringArg ]
+                [ fromStringArg_ ]
     , toAbsolute =
-        \toAbsoluteArg ->
+        \toAbsoluteArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "UrlPath" ]
@@ -174,9 +180,9 @@ call_ =
                              )
                      }
                 )
-                [ toAbsoluteArg ]
+                [ toAbsoluteArg_ ]
     , toRelative =
-        \toRelativeArg ->
+        \toRelativeArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "UrlPath" ]
@@ -189,9 +195,9 @@ call_ =
                              )
                      }
                 )
-                [ toRelativeArg ]
+                [ toRelativeArg_ ]
     , toSegments =
-        \toSegmentsArg ->
+        \toSegmentsArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "UrlPath" ]
@@ -204,7 +210,7 @@ call_ =
                              )
                      }
                 )
-                [ toSegmentsArg ]
+                [ toSegmentsArg_ ]
     }
 
 

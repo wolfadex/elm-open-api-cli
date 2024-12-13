@@ -1,7 +1,16 @@
-module Gen.Head exposing (annotation_, appleTouchIcon, call_, canonicalLink, currentPageFullUrl, icon, manifestLink, metaName, metaProperty, metaRedirect, moduleName_, nonLoadingNode, raw, rootLanguage, rssLink, sitemapLink, structuredData, toJson, urlAttribute, values_)
+module Gen.Head exposing
+    ( moduleName_, metaName, metaProperty, metaRedirect, rssLink, sitemapLink
+    , rootLanguage, manifestLink, nonLoadingNode, structuredData, currentPageFullUrl, urlAttribute, raw
+    , appleTouchIcon, icon, toJson, canonicalLink, annotation_, call_, values_
+    )
 
-{-| 
-@docs moduleName_, metaName, metaProperty, metaRedirect, rssLink, sitemapLink, rootLanguage, manifestLink, nonLoadingNode, structuredData, currentPageFullUrl, urlAttribute, raw, appleTouchIcon, icon, toJson, canonicalLink, annotation_, call_, values_
+{-|
+# Generated bindings for Head
+
+@docs moduleName_, metaName, metaProperty, metaRedirect, rssLink, sitemapLink
+@docs rootLanguage, manifestLink, nonLoadingNode, structuredData, currentPageFullUrl, urlAttribute
+@docs raw, appleTouchIcon, icon, toJson, canonicalLink, annotation_
+@docs call_, values_
 -}
 
 
@@ -24,7 +33,7 @@ Results in `<meta name="twitter:card" content="summary_large_image" />`
 metaName: String -> Head.AttributeValue -> Head.Tag
 -}
 metaName : String -> Elm.Expression -> Elm.Expression
-metaName metaNameArg metaNameArg0 =
+metaName metaNameArg_ metaNameArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Head" ]
@@ -39,7 +48,7 @@ metaName metaNameArg metaNameArg0 =
                      )
              }
         )
-        [ Elm.string metaNameArg, metaNameArg0 ]
+        [ Elm.string metaNameArg_, metaNameArg_0 ]
 
 
 {-| Example:
@@ -51,7 +60,7 @@ Results in `<meta property="fb:app_id" content="123456789" />`
 metaProperty: String -> Head.AttributeValue -> Head.Tag
 -}
 metaProperty : String -> Elm.Expression -> Elm.Expression
-metaProperty metaPropertyArg metaPropertyArg0 =
+metaProperty metaPropertyArg_ metaPropertyArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Head" ]
@@ -66,7 +75,7 @@ metaProperty metaPropertyArg metaPropertyArg0 =
                      )
              }
         )
-        [ Elm.string metaPropertyArg, metaPropertyArg0 ]
+        [ Elm.string metaPropertyArg_, metaPropertyArg_0 ]
 
 
 {-| Example:
@@ -78,7 +87,7 @@ Results in `<meta http-equiv="refresh" content="0; url=https://google.com" />`
 metaRedirect: Head.AttributeValue -> Head.Tag
 -}
 metaRedirect : Elm.Expression -> Elm.Expression
-metaRedirect metaRedirectArg =
+metaRedirect metaRedirectArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Head" ]
@@ -91,7 +100,7 @@ metaRedirect metaRedirectArg =
                      )
              }
         )
-        [ metaRedirectArg ]
+        [ metaRedirectArg_ ]
 
 
 {-| Add a link to the site's RSS feed.
@@ -107,7 +116,7 @@ Example:
 rssLink: String -> Head.Tag
 -}
 rssLink : String -> Elm.Expression
-rssLink rssLinkArg =
+rssLink rssLinkArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Head" ]
@@ -120,7 +129,7 @@ rssLink rssLinkArg =
                      )
              }
         )
-        [ Elm.string rssLinkArg ]
+        [ Elm.string rssLinkArg_ ]
 
 
 {-| Add a link to the site's RSS feed.
@@ -136,7 +145,7 @@ Example:
 sitemapLink: String -> Head.Tag
 -}
 sitemapLink : String -> Elm.Expression
-sitemapLink sitemapLinkArg =
+sitemapLink sitemapLinkArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Head" ]
@@ -149,7 +158,7 @@ sitemapLink sitemapLinkArg =
                      )
              }
         )
-        [ Elm.string sitemapLinkArg ]
+        [ Elm.string sitemapLinkArg_ ]
 
 
 {-| Set the language for a page.
@@ -175,7 +184,7 @@ This results pre-rendered HTML with a global lang tag set.
 rootLanguage: LanguageTag.LanguageTag -> Head.Tag
 -}
 rootLanguage : Elm.Expression -> Elm.Expression
-rootLanguage rootLanguageArg =
+rootLanguage rootLanguageArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Head" ]
@@ -188,7 +197,7 @@ rootLanguage rootLanguageArg =
                      )
              }
         )
-        [ rootLanguageArg ]
+        [ rootLanguageArg_ ]
 
 
 {-| Let's you link to your manifest.json file, see <https://developer.mozilla.org/en-US/docs/Web/Manifest#deploying_a_manifest>.
@@ -196,7 +205,7 @@ rootLanguage rootLanguageArg =
 manifestLink: String -> Head.Tag
 -}
 manifestLink : String -> Elm.Expression
-manifestLink manifestLinkArg =
+manifestLink manifestLinkArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Head" ]
@@ -209,7 +218,7 @@ manifestLink manifestLinkArg =
                      )
              }
         )
-        [ Elm.string manifestLinkArg ]
+        [ Elm.string manifestLinkArg_ ]
 
 
 {-| Escape hatch for any head tags that don't have high-level helpers. This lets you build arbitrary head nodes as long as they
@@ -241,7 +250,7 @@ Renders the head tag:
 nonLoadingNode: String -> List ( String, Head.AttributeValue ) -> Head.Tag
 -}
 nonLoadingNode : String -> List Elm.Expression -> Elm.Expression
-nonLoadingNode nonLoadingNodeArg nonLoadingNodeArg0 =
+nonLoadingNode nonLoadingNodeArg_ nonLoadingNodeArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Head" ]
@@ -260,7 +269,7 @@ nonLoadingNode nonLoadingNodeArg nonLoadingNodeArg0 =
                      )
              }
         )
-        [ Elm.string nonLoadingNodeArg, Elm.list nonLoadingNodeArg0 ]
+        [ Elm.string nonLoadingNodeArg_, Elm.list nonLoadingNodeArg_0 ]
 
 
 {-| You can learn more about structured data in [Google's intro to structured data](https://developers.google.com/search/docs/guides/intro-structured-data).
@@ -354,7 +363,7 @@ for the right API design to evolve. In the meantime, this allows you to make use
 structuredData: Json.Encode.Value -> Head.Tag
 -}
 structuredData : Elm.Expression -> Elm.Expression
-structuredData structuredDataArg =
+structuredData structuredDataArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Head" ]
@@ -367,7 +376,7 @@ structuredData structuredDataArg =
                      )
              }
         )
-        [ structuredDataArg ]
+        [ structuredDataArg_ ]
 
 
 {-| Create an `AttributeValue` representing the current page's full url.
@@ -388,7 +397,7 @@ currentPageFullUrl =
 urlAttribute: Pages.Url.Url -> Head.AttributeValue
 -}
 urlAttribute : Elm.Expression -> Elm.Expression
-urlAttribute urlAttributeArg =
+urlAttribute urlAttributeArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Head" ]
@@ -401,7 +410,7 @@ urlAttribute urlAttributeArg =
                      )
              }
         )
-        [ urlAttributeArg ]
+        [ urlAttributeArg_ ]
 
 
 {-| Create a raw `AttributeValue` (as opposed to some kind of absolute URL).
@@ -409,7 +418,7 @@ urlAttribute urlAttributeArg =
 raw: String -> Head.AttributeValue
 -}
 raw : String -> Elm.Expression
-raw rawArg =
+raw rawArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Head" ]
@@ -422,7 +431,7 @@ raw rawArg =
                      )
              }
         )
-        [ Elm.string rawArg ]
+        [ Elm.string rawArg_ ]
 
 
 {-| Note: the type must be png.
@@ -435,7 +444,7 @@ Images must be png's, and non-transparent images are recommended. Current recomm
 appleTouchIcon: Maybe Int -> Pages.Url.Url -> Head.Tag
 -}
 appleTouchIcon : Elm.Expression -> Elm.Expression -> Elm.Expression
-appleTouchIcon appleTouchIconArg appleTouchIconArg0 =
+appleTouchIcon appleTouchIconArg_ appleTouchIconArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Head" ]
@@ -450,12 +459,12 @@ appleTouchIcon appleTouchIconArg appleTouchIconArg0 =
                      )
              }
         )
-        [ appleTouchIconArg, appleTouchIconArg0 ]
+        [ appleTouchIconArg_, appleTouchIconArg_0 ]
 
 
 {-| icon: List ( Int, Int ) -> MimeType.MimeImage -> Pages.Url.Url -> Head.Tag -}
 icon : List Elm.Expression -> Elm.Expression -> Elm.Expression -> Elm.Expression
-icon iconArg iconArg0 iconArg1 =
+icon iconArg_ iconArg_0 iconArg_1 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Head" ]
@@ -471,7 +480,7 @@ icon iconArg iconArg0 iconArg1 =
                      )
              }
         )
-        [ Elm.list iconArg, iconArg0, iconArg1 ]
+        [ Elm.list iconArg_, iconArg_0, iconArg_1 ]
 
 
 {-| Feel free to use this, but in 99% of cases you won't need it. The generated
@@ -480,7 +489,7 @@ code will run this for you to generate your `manifest.json` file automatically!
 toJson: String -> String -> Head.Tag -> Json.Encode.Value
 -}
 toJson : String -> String -> Elm.Expression -> Elm.Expression
-toJson toJsonArg toJsonArg0 toJsonArg1 =
+toJson toJsonArg_ toJsonArg_0 toJsonArg_1 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Head" ]
@@ -496,7 +505,7 @@ toJson toJsonArg toJsonArg0 toJsonArg1 =
                      )
              }
         )
-        [ Elm.string toJsonArg, Elm.string toJsonArg0, toJsonArg1 ]
+        [ Elm.string toJsonArg_, Elm.string toJsonArg_0, toJsonArg_1 ]
 
 
 {-| It's recommended that you use the `Seo` module helpers, which will provide this
@@ -509,7 +518,7 @@ Example:
 canonicalLink: Maybe String -> Head.Tag
 -}
 canonicalLink : Elm.Expression -> Elm.Expression
-canonicalLink canonicalLinkArg =
+canonicalLink canonicalLinkArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Head" ]
@@ -522,7 +531,7 @@ canonicalLink canonicalLinkArg =
                      )
              }
         )
-        [ canonicalLinkArg ]
+        [ canonicalLinkArg_ ]
 
 
 annotation_ : { tag : Type.Annotation, attributeValue : Type.Annotation }
@@ -553,7 +562,7 @@ call_ :
     }
 call_ =
     { metaName =
-        \metaNameArg metaNameArg0 ->
+        \metaNameArg_ metaNameArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Head" ]
@@ -571,9 +580,9 @@ call_ =
                              )
                      }
                 )
-                [ metaNameArg, metaNameArg0 ]
+                [ metaNameArg_, metaNameArg_0 ]
     , metaProperty =
-        \metaPropertyArg metaPropertyArg0 ->
+        \metaPropertyArg_ metaPropertyArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Head" ]
@@ -591,9 +600,9 @@ call_ =
                              )
                      }
                 )
-                [ metaPropertyArg, metaPropertyArg0 ]
+                [ metaPropertyArg_, metaPropertyArg_0 ]
     , metaRedirect =
-        \metaRedirectArg ->
+        \metaRedirectArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Head" ]
@@ -610,9 +619,9 @@ call_ =
                              )
                      }
                 )
-                [ metaRedirectArg ]
+                [ metaRedirectArg_ ]
     , rssLink =
-        \rssLinkArg ->
+        \rssLinkArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Head" ]
@@ -625,9 +634,9 @@ call_ =
                              )
                      }
                 )
-                [ rssLinkArg ]
+                [ rssLinkArg_ ]
     , sitemapLink =
-        \sitemapLinkArg ->
+        \sitemapLinkArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Head" ]
@@ -640,9 +649,9 @@ call_ =
                              )
                      }
                 )
-                [ sitemapLinkArg ]
+                [ sitemapLinkArg_ ]
     , rootLanguage =
-        \rootLanguageArg ->
+        \rootLanguageArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Head" ]
@@ -659,9 +668,9 @@ call_ =
                              )
                      }
                 )
-                [ rootLanguageArg ]
+                [ rootLanguageArg_ ]
     , manifestLink =
-        \manifestLinkArg ->
+        \manifestLinkArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Head" ]
@@ -674,9 +683,9 @@ call_ =
                              )
                      }
                 )
-                [ manifestLinkArg ]
+                [ manifestLinkArg_ ]
     , nonLoadingNode =
-        \nonLoadingNodeArg nonLoadingNodeArg0 ->
+        \nonLoadingNodeArg_ nonLoadingNodeArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Head" ]
@@ -699,9 +708,9 @@ call_ =
                              )
                      }
                 )
-                [ nonLoadingNodeArg, nonLoadingNodeArg0 ]
+                [ nonLoadingNodeArg_, nonLoadingNodeArg_0 ]
     , structuredData =
-        \structuredDataArg ->
+        \structuredDataArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Head" ]
@@ -718,9 +727,9 @@ call_ =
                              )
                      }
                 )
-                [ structuredDataArg ]
+                [ structuredDataArg_ ]
     , urlAttribute =
-        \urlAttributeArg ->
+        \urlAttributeArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Head" ]
@@ -734,9 +743,9 @@ call_ =
                              )
                      }
                 )
-                [ urlAttributeArg ]
+                [ urlAttributeArg_ ]
     , raw =
-        \rawArg ->
+        \rawArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Head" ]
@@ -750,9 +759,9 @@ call_ =
                              )
                      }
                 )
-                [ rawArg ]
+                [ rawArg_ ]
     , appleTouchIcon =
-        \appleTouchIconArg appleTouchIconArg0 ->
+        \appleTouchIconArg_ appleTouchIconArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Head" ]
@@ -767,9 +776,9 @@ call_ =
                              )
                      }
                 )
-                [ appleTouchIconArg, appleTouchIconArg0 ]
+                [ appleTouchIconArg_, appleTouchIconArg_0 ]
     , icon =
-        \iconArg iconArg0 iconArg1 ->
+        \iconArg_ iconArg_0 iconArg_1 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Head" ]
@@ -785,9 +794,9 @@ call_ =
                              )
                      }
                 )
-                [ iconArg, iconArg0, iconArg1 ]
+                [ iconArg_, iconArg_0, iconArg_1 ]
     , toJson =
-        \toJsonArg toJsonArg0 toJsonArg1 ->
+        \toJsonArg_ toJsonArg_0 toJsonArg_1 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Head" ]
@@ -807,9 +816,9 @@ call_ =
                              )
                      }
                 )
-                [ toJsonArg, toJsonArg0, toJsonArg1 ]
+                [ toJsonArg_, toJsonArg_0, toJsonArg_1 ]
     , canonicalLink =
-        \canonicalLinkArg ->
+        \canonicalLinkArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Head" ]
@@ -822,7 +831,7 @@ call_ =
                              )
                      }
                 )
-                [ canonicalLinkArg ]
+                [ canonicalLinkArg_ ]
     }
 
 

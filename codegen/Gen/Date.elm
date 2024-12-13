@@ -1,12 +1,29 @@
-module Gen.Date exposing (add, annotation_, call_, caseOf_, ceiling, clamp, compare, day, diff, floor, format, formatWithLanguage, fromCalendarDate, fromIsoString, fromOrdinalDate, fromPosix, fromRataDie, fromWeekDate, isBetween, make_, max, min, moduleName_, month, monthNumber, monthToNumber, numberToMonth, numberToWeekday, ordinalDay, quarter, range, toIsoString, toRataDie, today, values_, weekNumber, weekYear, weekday, weekdayNumber, weekdayToNumber, withOrdinalSuffix, year)
+module Gen.Date exposing
+    ( moduleName_, today, fromPosix, fromCalendarDate, fromWeekDate, fromOrdinalDate
+    , fromIsoString, fromRataDie, toIsoString, toRataDie, year, month, day
+    , weekYear, weekNumber, weekday, ordinalDay, quarter, monthNumber, weekdayNumber
+    , format, withOrdinalSuffix, formatWithLanguage, add, diff, ceiling, floor
+    , range, compare, isBetween, min, max, clamp, monthToNumber
+    , numberToMonth, weekdayToNumber, numberToWeekday, annotation_, make_, caseOf_, call_
+    , values_
+    )
 
-{-| 
-@docs moduleName_, today, fromPosix, fromCalendarDate, fromWeekDate, fromOrdinalDate, fromIsoString, fromRataDie, toIsoString, toRataDie, year, month, day, weekYear, weekNumber, weekday, ordinalDay, quarter, monthNumber, weekdayNumber, format, withOrdinalSuffix, formatWithLanguage, add, diff, ceiling, floor, range, compare, isBetween, min, max, clamp, monthToNumber, numberToMonth, weekdayToNumber, numberToWeekday, annotation_, make_, caseOf_, call_, values_
+{-|
+# Generated bindings for Date
+
+@docs moduleName_, today, fromPosix, fromCalendarDate, fromWeekDate, fromOrdinalDate
+@docs fromIsoString, fromRataDie, toIsoString, toRataDie, year, month
+@docs day, weekYear, weekNumber, weekday, ordinalDay, quarter
+@docs monthNumber, weekdayNumber, format, withOrdinalSuffix, formatWithLanguage, add
+@docs diff, ceiling, floor, range, compare, isBetween
+@docs min, max, clamp, monthToNumber, numberToMonth, weekdayToNumber
+@docs numberToWeekday, annotation_, make_, caseOf_, call_, values_
 -}
 
 
 import Elm
 import Elm.Annotation as Type
+import Elm.Arg
 import Elm.Case
 
 
@@ -52,7 +69,7 @@ conversion loses the time information associated with the `Posix` value.
 fromPosix: Time.Zone -> Time.Posix -> Date.Date
 -}
 fromPosix : Elm.Expression -> Elm.Expression -> Elm.Expression
-fromPosix fromPosixArg fromPosixArg0 =
+fromPosix fromPosixArg_ fromPosixArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Date" ]
@@ -67,7 +84,7 @@ fromPosix fromPosixArg fromPosixArg0 =
                      )
              }
         )
-        [ fromPosixArg, fromPosixArg0 ]
+        [ fromPosixArg_, fromPosixArg_0 ]
 
 
 {-| Create a date from a [calendar date][gregorian]: a year, month, and day of
@@ -83,7 +100,7 @@ the month. Out-of-range day values will be clamped.
 fromCalendarDate: Int -> Date.Month -> Int -> Date.Date
 -}
 fromCalendarDate : Int -> Elm.Expression -> Int -> Elm.Expression
-fromCalendarDate fromCalendarDateArg fromCalendarDateArg0 fromCalendarDateArg1 =
+fromCalendarDate fromCalendarDateArg_ fromCalendarDateArg_0 fromCalendarDateArg_1 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Date" ]
@@ -99,9 +116,9 @@ fromCalendarDate fromCalendarDateArg fromCalendarDateArg0 fromCalendarDateArg1 =
                      )
              }
         )
-        [ Elm.int fromCalendarDateArg
-        , fromCalendarDateArg0
-        , Elm.int fromCalendarDateArg1
+        [ Elm.int fromCalendarDateArg_
+        , fromCalendarDateArg_0
+        , Elm.int fromCalendarDateArg_1
         ]
 
 
@@ -118,7 +135,7 @@ week number, and weekday. Out-of-range week number values will be clamped.
 fromWeekDate: Int -> Int -> Date.Weekday -> Date.Date
 -}
 fromWeekDate : Int -> Int -> Elm.Expression -> Elm.Expression
-fromWeekDate fromWeekDateArg fromWeekDateArg0 fromWeekDateArg1 =
+fromWeekDate fromWeekDateArg_ fromWeekDateArg_0 fromWeekDateArg_1 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Date" ]
@@ -134,7 +151,10 @@ fromWeekDate fromWeekDateArg fromWeekDateArg0 fromWeekDateArg1 =
                      )
              }
         )
-        [ Elm.int fromWeekDateArg, Elm.int fromWeekDateArg0, fromWeekDateArg1 ]
+        [ Elm.int fromWeekDateArg_
+        , Elm.int fromWeekDateArg_0
+        , fromWeekDateArg_1
+        ]
 
 
 {-| Create a date from an [ordinal date][ordinaldate]: a year and day of the
@@ -149,7 +169,7 @@ year. Out-of-range day values will be clamped.
 fromOrdinalDate: Int -> Int -> Date.Date
 -}
 fromOrdinalDate : Int -> Int -> Elm.Expression
-fromOrdinalDate fromOrdinalDateArg fromOrdinalDateArg0 =
+fromOrdinalDate fromOrdinalDateArg_ fromOrdinalDateArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Date" ]
@@ -162,7 +182,7 @@ fromOrdinalDate fromOrdinalDateArg fromOrdinalDateArg0 =
                      )
              }
         )
-        [ Elm.int fromOrdinalDateArg, Elm.int fromOrdinalDateArg0 ]
+        [ Elm.int fromOrdinalDateArg_, Elm.int fromOrdinalDateArg_0 ]
 
 
 {-| Attempt to create a date from a string in [ISO 8601][iso8601] format.
@@ -197,7 +217,7 @@ friends, any out-of-range values will fail to produce a date.
 fromIsoString: String -> Result.Result String Date.Date
 -}
 fromIsoString : String -> Elm.Expression
-fromIsoString fromIsoStringArg =
+fromIsoString fromIsoStringArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Date" ]
@@ -216,7 +236,7 @@ fromIsoString fromIsoStringArg =
                      )
              }
         )
-        [ Elm.string fromIsoStringArg ]
+        [ Elm.string fromIsoStringArg_ ]
 
 
 {-| [Rata Die][ratadie] is a system for assigning numbers to calendar days,
@@ -234,7 +254,7 @@ or using them as comparables. For all date values:
 fromRataDie: Int -> Date.Date
 -}
 fromRataDie : Int -> Elm.Expression
-fromRataDie fromRataDieArg =
+fromRataDie fromRataDieArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Date" ]
@@ -247,7 +267,7 @@ fromRataDie fromRataDieArg =
                      )
              }
         )
-        [ Elm.int fromRataDieArg ]
+        [ Elm.int fromRataDieArg_ ]
 
 
 {-| Convert a date to a string in ISO 8601 extended format.
@@ -260,7 +280,7 @@ fromRataDie fromRataDieArg =
 toIsoString: Date.Date -> String
 -}
 toIsoString : Elm.Expression -> Elm.Expression
-toIsoString toIsoStringArg =
+toIsoString toIsoStringArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Date" ]
@@ -273,7 +293,7 @@ toIsoString toIsoStringArg =
                      )
              }
         )
-        [ toIsoStringArg ]
+        [ toIsoStringArg_ ]
 
 
 {-| Convert a date to its number representation in Rata Die (see
@@ -285,7 +305,7 @@ toIsoString toIsoStringArg =
 toRataDie: Date.Date -> Int
 -}
 toRataDie : Elm.Expression -> Elm.Expression
-toRataDie toRataDieArg =
+toRataDie toRataDieArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Date" ]
@@ -298,7 +318,7 @@ toRataDie toRataDieArg =
                      )
              }
         )
-        [ toRataDieArg ]
+        [ toRataDieArg_ ]
 
 
 {-| The calendar year.
@@ -306,7 +326,7 @@ toRataDie toRataDieArg =
 year: Date.Date -> Int
 -}
 year : Elm.Expression -> Elm.Expression
-year yearArg =
+year yearArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Date" ]
@@ -319,7 +339,7 @@ year yearArg =
                      )
              }
         )
-        [ yearArg ]
+        [ yearArg_ ]
 
 
 {-| The month as a [`Month`](https://package.elm-lang.org/packages/elm/time/latest/Time#Month)
@@ -328,7 +348,7 @@ value (`Jan`–`Dec`).
 month: Date.Date -> Date.Month
 -}
 month : Elm.Expression -> Elm.Expression
-month monthArg =
+month monthArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Date" ]
@@ -341,7 +361,7 @@ month monthArg =
                      )
              }
         )
-        [ monthArg ]
+        [ monthArg_ ]
 
 
 {-| The day of the month (1–31).
@@ -349,7 +369,7 @@ month monthArg =
 day: Date.Date -> Int
 -}
 day : Elm.Expression -> Elm.Expression
-day dayArg =
+day dayArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Date" ]
@@ -362,7 +382,7 @@ day dayArg =
                      )
              }
         )
-        [ dayArg ]
+        [ dayArg_ ]
 
 
 {-| The ISO week-numbering year. This is not always the same as the
@@ -371,7 +391,7 @@ calendar year.
 weekYear: Date.Date -> Int
 -}
 weekYear : Elm.Expression -> Elm.Expression
-weekYear weekYearArg =
+weekYear weekYearArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Date" ]
@@ -384,7 +404,7 @@ weekYear weekYearArg =
                      )
              }
         )
-        [ weekYearArg ]
+        [ weekYearArg_ ]
 
 
 {-| The ISO week number of the year (1–53).
@@ -392,7 +412,7 @@ weekYear weekYearArg =
 weekNumber: Date.Date -> Int
 -}
 weekNumber : Elm.Expression -> Elm.Expression
-weekNumber weekNumberArg =
+weekNumber weekNumberArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Date" ]
@@ -405,7 +425,7 @@ weekNumber weekNumberArg =
                      )
              }
         )
-        [ weekNumberArg ]
+        [ weekNumberArg_ ]
 
 
 {-| The weekday as a [`Weekday`](https://package.elm-lang.org/packages/elm/time/latest/Time#Weekday)
@@ -414,7 +434,7 @@ value (`Mon`–`Sun`).
 weekday: Date.Date -> Date.Weekday
 -}
 weekday : Elm.Expression -> Elm.Expression
-weekday weekdayArg =
+weekday weekdayArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Date" ]
@@ -427,7 +447,7 @@ weekday weekdayArg =
                      )
              }
         )
-        [ weekdayArg ]
+        [ weekdayArg_ ]
 
 
 {-| The day of the year (1–366).
@@ -435,7 +455,7 @@ weekday weekdayArg =
 ordinalDay: Date.Date -> Int
 -}
 ordinalDay : Elm.Expression -> Elm.Expression
-ordinalDay ordinalDayArg =
+ordinalDay ordinalDayArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Date" ]
@@ -448,7 +468,7 @@ ordinalDay ordinalDayArg =
                      )
              }
         )
-        [ ordinalDayArg ]
+        [ ordinalDayArg_ ]
 
 
 {-| The quarter of the year (1–4).
@@ -456,7 +476,7 @@ ordinalDay ordinalDayArg =
 quarter: Date.Date -> Int
 -}
 quarter : Elm.Expression -> Elm.Expression
-quarter quarterArg =
+quarter quarterArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Date" ]
@@ -469,7 +489,7 @@ quarter quarterArg =
                      )
              }
         )
-        [ quarterArg ]
+        [ quarterArg_ ]
 
 
 {-| The month number (1–12).
@@ -477,7 +497,7 @@ quarter quarterArg =
 monthNumber: Date.Date -> Int
 -}
 monthNumber : Elm.Expression -> Elm.Expression
-monthNumber monthNumberArg =
+monthNumber monthNumberArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Date" ]
@@ -490,7 +510,7 @@ monthNumber monthNumberArg =
                      )
              }
         )
-        [ monthNumberArg ]
+        [ monthNumberArg_ ]
 
 
 {-| The weekday number (1–7), beginning with Monday.
@@ -498,7 +518,7 @@ monthNumber monthNumberArg =
 weekdayNumber: Date.Date -> Int
 -}
 weekdayNumber : Elm.Expression -> Elm.Expression
-weekdayNumber weekdayNumberArg =
+weekdayNumber weekdayNumberArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Date" ]
@@ -511,7 +531,7 @@ weekdayNumber weekdayNumberArg =
                      )
              }
         )
-        [ weekdayNumberArg ]
+        [ weekdayNumberArg_ ]
 
 
 {-| Format a date using a string as a template.
@@ -563,7 +583,7 @@ does not include such a field.
 format: String -> Date.Date -> String
 -}
 format : String -> Elm.Expression -> Elm.Expression
-format formatArg formatArg0 =
+format formatArg_ formatArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Date" ]
@@ -576,7 +596,7 @@ format formatArg formatArg0 =
                      )
              }
         )
-        [ Elm.string formatArg, formatArg0 ]
+        [ Elm.string formatArg_, formatArg_0 ]
 
 
 {-| Convert an integer into an English ordinal number string (like `"4th"`).
@@ -592,7 +612,7 @@ format formatArg formatArg0 =
 withOrdinalSuffix: Int -> String
 -}
 withOrdinalSuffix : Int -> Elm.Expression
-withOrdinalSuffix withOrdinalSuffixArg =
+withOrdinalSuffix withOrdinalSuffixArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Date" ]
@@ -600,7 +620,7 @@ withOrdinalSuffix withOrdinalSuffixArg =
              , annotation = Just (Type.function [ Type.int ] Type.string)
              }
         )
-        [ Elm.int withOrdinalSuffixArg ]
+        [ Elm.int withOrdinalSuffixArg_ ]
 
 
 {-| Format a date in a custom language using a string as a template.
@@ -616,7 +636,7 @@ formatWithLanguage: Date.Language -> String -> Date.Date -> String
 -}
 formatWithLanguage :
     Elm.Expression -> String -> Elm.Expression -> Elm.Expression
-formatWithLanguage formatWithLanguageArg formatWithLanguageArg0 formatWithLanguageArg1 =
+formatWithLanguage formatWithLanguageArg_ formatWithLanguageArg_0 formatWithLanguageArg_1 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Date" ]
@@ -632,9 +652,9 @@ formatWithLanguage formatWithLanguageArg formatWithLanguageArg0 formatWithLangua
                      )
              }
         )
-        [ formatWithLanguageArg
-        , Elm.string formatWithLanguageArg0
-        , formatWithLanguageArg1
+        [ formatWithLanguageArg_
+        , Elm.string formatWithLanguageArg_0
+        , formatWithLanguageArg_1
         ]
 
 
@@ -655,7 +675,7 @@ month if necessary.
 add: Date.Unit -> Int -> Date.Date -> Date.Date
 -}
 add : Elm.Expression -> Int -> Elm.Expression -> Elm.Expression
-add addArg addArg0 addArg1 =
+add addArg_ addArg_0 addArg_1 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Date" ]
@@ -671,7 +691,7 @@ add addArg addArg0 addArg1 =
                      )
              }
         )
-        [ addArg, Elm.int addArg0, addArg1 ]
+        [ addArg_, Elm.int addArg_0, addArg_1 ]
 
 
 {-| Get the difference, as a number of whole units, between two dates.
@@ -687,7 +707,7 @@ add addArg addArg0 addArg1 =
 diff: Date.Unit -> Date.Date -> Date.Date -> Int
 -}
 diff : Elm.Expression -> Elm.Expression -> Elm.Expression -> Elm.Expression
-diff diffArg diffArg0 diffArg1 =
+diff diffArg_ diffArg_0 diffArg_1 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Date" ]
@@ -703,7 +723,7 @@ diff diffArg diffArg0 diffArg1 =
                      )
              }
         )
-        [ diffArg, diffArg0, diffArg1 ]
+        [ diffArg_, diffArg_0, diffArg_1 ]
 
 
 {-| Round up a date to the beginning of the closest interval. The resulting
@@ -718,7 +738,7 @@ date will be greater than or equal to the one provided.
 ceiling: Date.Interval -> Date.Date -> Date.Date
 -}
 ceiling : Elm.Expression -> Elm.Expression -> Elm.Expression
-ceiling ceilingArg ceilingArg0 =
+ceiling ceilingArg_ ceilingArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Date" ]
@@ -733,7 +753,7 @@ ceiling ceilingArg ceilingArg0 =
                      )
              }
         )
-        [ ceilingArg, ceilingArg0 ]
+        [ ceilingArg_, ceilingArg_0 ]
 
 
 {-| Round down a date to the beginning of the closest interval. The resulting
@@ -748,7 +768,7 @@ date will be less than or equal to the one provided.
 floor: Date.Interval -> Date.Date -> Date.Date
 -}
 floor : Elm.Expression -> Elm.Expression -> Elm.Expression
-floor floorArg floorArg0 =
+floor floorArg_ floorArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Date" ]
@@ -763,7 +783,7 @@ floor floorArg floorArg0 =
                      )
              }
         )
-        [ floorArg, floorArg0 ]
+        [ floorArg_, floorArg_0 ]
 
 
 {-| Create a list of dates, at rounded intervals, increasing by a step value,
@@ -786,7 +806,7 @@ range: Date.Interval -> Int -> Date.Date -> Date.Date -> List Date.Date
 -}
 range :
     Elm.Expression -> Int -> Elm.Expression -> Elm.Expression -> Elm.Expression
-range rangeArg rangeArg0 rangeArg1 rangeArg2 =
+range rangeArg_ rangeArg_0 rangeArg_1 rangeArg_2 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Date" ]
@@ -803,7 +823,7 @@ range rangeArg rangeArg0 rangeArg1 rangeArg2 =
                      )
              }
         )
-        [ rangeArg, Elm.int rangeArg0, rangeArg1, rangeArg2 ]
+        [ rangeArg_, Elm.int rangeArg_0, rangeArg_1, rangeArg_2 ]
 
 
 {-| Compare two dates. This can be used as the compare function for
@@ -817,7 +837,7 @@ range rangeArg rangeArg0 rangeArg1 rangeArg2 =
 compare: Date.Date -> Date.Date -> Basics.Order
 -}
 compare : Elm.Expression -> Elm.Expression -> Elm.Expression
-compare compareArg compareArg0 =
+compare compareArg_ compareArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Date" ]
@@ -832,7 +852,7 @@ compare compareArg compareArg0 =
                      )
              }
         )
-        [ compareArg, compareArg0 ]
+        [ compareArg_, compareArg_0 ]
 
 
 {-| Test if a date is within a range, inclusive of the range values.
@@ -848,7 +868,7 @@ compare compareArg compareArg0 =
 isBetween: Date.Date -> Date.Date -> Date.Date -> Bool
 -}
 isBetween : Elm.Expression -> Elm.Expression -> Elm.Expression -> Elm.Expression
-isBetween isBetweenArg isBetweenArg0 isBetweenArg1 =
+isBetween isBetweenArg_ isBetweenArg_0 isBetweenArg_1 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Date" ]
@@ -864,7 +884,7 @@ isBetween isBetweenArg isBetweenArg0 isBetweenArg1 =
                      )
              }
         )
-        [ isBetweenArg, isBetweenArg0, isBetweenArg1 ]
+        [ isBetweenArg_, isBetweenArg_0, isBetweenArg_1 ]
 
 
 {-| Find the lesser of two dates.
@@ -877,7 +897,7 @@ isBetween isBetweenArg isBetweenArg0 isBetweenArg1 =
 min: Date.Date -> Date.Date -> Date.Date
 -}
 min : Elm.Expression -> Elm.Expression -> Elm.Expression
-min minArg minArg0 =
+min minArg_ minArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Date" ]
@@ -892,7 +912,7 @@ min minArg minArg0 =
                      )
              }
         )
-        [ minArg, minArg0 ]
+        [ minArg_, minArg_0 ]
 
 
 {-| Find the greater of two dates.
@@ -905,7 +925,7 @@ min minArg minArg0 =
 max: Date.Date -> Date.Date -> Date.Date
 -}
 max : Elm.Expression -> Elm.Expression -> Elm.Expression
-max maxArg maxArg0 =
+max maxArg_ maxArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Date" ]
@@ -920,7 +940,7 @@ max maxArg maxArg0 =
                      )
              }
         )
-        [ maxArg, maxArg0 ]
+        [ maxArg_, maxArg_0 ]
 
 
 {-| Clamp a date within a range.
@@ -936,7 +956,7 @@ max maxArg maxArg0 =
 clamp: Date.Date -> Date.Date -> Date.Date -> Date.Date
 -}
 clamp : Elm.Expression -> Elm.Expression -> Elm.Expression -> Elm.Expression
-clamp clampArg clampArg0 clampArg1 =
+clamp clampArg_ clampArg_0 clampArg_1 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Date" ]
@@ -952,7 +972,7 @@ clamp clampArg clampArg0 clampArg1 =
                      )
              }
         )
-        [ clampArg, clampArg0, clampArg1 ]
+        [ clampArg_, clampArg_0, clampArg_1 ]
 
 
 {-| Maps `Jan`–`Dec` to 1–12.
@@ -960,7 +980,7 @@ clamp clampArg clampArg0 clampArg1 =
 monthToNumber: Date.Month -> Int
 -}
 monthToNumber : Elm.Expression -> Elm.Expression
-monthToNumber monthToNumberArg =
+monthToNumber monthToNumberArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Date" ]
@@ -973,7 +993,7 @@ monthToNumber monthToNumberArg =
                      )
              }
         )
-        [ monthToNumberArg ]
+        [ monthToNumberArg_ ]
 
 
 {-| Maps 1–12 to `Jan`–`Dec`.
@@ -981,7 +1001,7 @@ monthToNumber monthToNumberArg =
 numberToMonth: Int -> Date.Month
 -}
 numberToMonth : Int -> Elm.Expression
-numberToMonth numberToMonthArg =
+numberToMonth numberToMonthArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Date" ]
@@ -994,7 +1014,7 @@ numberToMonth numberToMonthArg =
                      )
              }
         )
-        [ Elm.int numberToMonthArg ]
+        [ Elm.int numberToMonthArg_ ]
 
 
 {-| Maps `Mon`–`Sun` to 1-7.
@@ -1002,7 +1022,7 @@ numberToMonth numberToMonthArg =
 weekdayToNumber: Date.Weekday -> Int
 -}
 weekdayToNumber : Elm.Expression -> Elm.Expression
-weekdayToNumber weekdayToNumberArg =
+weekdayToNumber weekdayToNumberArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Date" ]
@@ -1015,7 +1035,7 @@ weekdayToNumber weekdayToNumberArg =
                      )
              }
         )
-        [ weekdayToNumberArg ]
+        [ weekdayToNumberArg_ ]
 
 
 {-| Maps 1-7 to `Mon`–`Sun`.
@@ -1023,7 +1043,7 @@ weekdayToNumber weekdayToNumberArg =
 numberToWeekday: Int -> Date.Weekday
 -}
 numberToWeekday : Int -> Elm.Expression
-numberToWeekday numberToWeekdayArg =
+numberToWeekday numberToWeekdayArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Date" ]
@@ -1036,7 +1056,7 @@ numberToWeekday numberToWeekdayArg =
                      )
              }
         )
-        [ Elm.int numberToWeekdayArg ]
+        [ Elm.int numberToWeekdayArg_ ]
 
 
 annotation_ :
@@ -1264,28 +1284,26 @@ make_ =
 caseOf_ :
     { unit :
         Elm.Expression
-        -> { unitTags_0_0
-            | years : Elm.Expression
-            , months : Elm.Expression
-            , weeks : Elm.Expression
-            , days : Elm.Expression
+        -> { years : Elm.Expression
+        , months : Elm.Expression
+        , weeks : Elm.Expression
+        , days : Elm.Expression
         }
         -> Elm.Expression
     , interval :
         Elm.Expression
-        -> { intervalTags_1_0
-            | year : Elm.Expression
-            , quarter : Elm.Expression
-            , month : Elm.Expression
-            , week : Elm.Expression
-            , monday : Elm.Expression
-            , tuesday : Elm.Expression
-            , wednesday : Elm.Expression
-            , thursday : Elm.Expression
-            , friday : Elm.Expression
-            , saturday : Elm.Expression
-            , sunday : Elm.Expression
-            , day : Elm.Expression
+        -> { year : Elm.Expression
+        , quarter : Elm.Expression
+        , month : Elm.Expression
+        , week : Elm.Expression
+        , monday : Elm.Expression
+        , tuesday : Elm.Expression
+        , wednesday : Elm.Expression
+        , thursday : Elm.Expression
+        , friday : Elm.Expression
+        , saturday : Elm.Expression
+        , sunday : Elm.Expression
+        , day : Elm.Expression
         }
         -> Elm.Expression
     }
@@ -1295,28 +1313,60 @@ caseOf_ =
             Elm.Case.custom
                 unitExpression
                 (Type.namedWith [ "Date" ] "Unit" [])
-                [ Elm.Case.branch0 "Years" unitTags.years
-                , Elm.Case.branch0 "Months" unitTags.months
-                , Elm.Case.branch0 "Weeks" unitTags.weeks
-                , Elm.Case.branch0 "Days" unitTags.days
+                [ Elm.Case.branch
+                    (Elm.Arg.customType "Years" unitTags.years)
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType "Months" unitTags.months)
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType "Weeks" unitTags.weeks)
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType "Days" unitTags.days)
+                    Basics.identity
                 ]
     , interval =
         \intervalExpression intervalTags ->
             Elm.Case.custom
                 intervalExpression
                 (Type.namedWith [ "Date" ] "Interval" [])
-                [ Elm.Case.branch0 "Year" intervalTags.year
-                , Elm.Case.branch0 "Quarter" intervalTags.quarter
-                , Elm.Case.branch0 "Month" intervalTags.month
-                , Elm.Case.branch0 "Week" intervalTags.week
-                , Elm.Case.branch0 "Monday" intervalTags.monday
-                , Elm.Case.branch0 "Tuesday" intervalTags.tuesday
-                , Elm.Case.branch0 "Wednesday" intervalTags.wednesday
-                , Elm.Case.branch0 "Thursday" intervalTags.thursday
-                , Elm.Case.branch0 "Friday" intervalTags.friday
-                , Elm.Case.branch0 "Saturday" intervalTags.saturday
-                , Elm.Case.branch0 "Sunday" intervalTags.sunday
-                , Elm.Case.branch0 "Day" intervalTags.day
+                [ Elm.Case.branch
+                    (Elm.Arg.customType "Year" intervalTags.year)
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType "Quarter" intervalTags.quarter)
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType "Month" intervalTags.month)
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType "Week" intervalTags.week)
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType "Monday" intervalTags.monday)
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType "Tuesday" intervalTags.tuesday)
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType "Wednesday" intervalTags.wednesday)
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType "Thursday" intervalTags.thursday)
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType "Friday" intervalTags.friday)
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType "Saturday" intervalTags.saturday)
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType "Sunday" intervalTags.sunday)
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType "Day" intervalTags.day)
+                    Basics.identity
                 ]
     }
 
@@ -1371,7 +1421,7 @@ call_ :
     }
 call_ =
     { fromPosix =
-        \fromPosixArg fromPosixArg0 ->
+        \fromPosixArg_ fromPosixArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Date" ]
@@ -1386,9 +1436,9 @@ call_ =
                              )
                      }
                 )
-                [ fromPosixArg, fromPosixArg0 ]
+                [ fromPosixArg_, fromPosixArg_0 ]
     , fromCalendarDate =
-        \fromCalendarDateArg fromCalendarDateArg0 fromCalendarDateArg1 ->
+        \fromCalendarDateArg_ fromCalendarDateArg_0 fromCalendarDateArg_1 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Date" ]
@@ -1404,12 +1454,12 @@ call_ =
                              )
                      }
                 )
-                [ fromCalendarDateArg
-                , fromCalendarDateArg0
-                , fromCalendarDateArg1
+                [ fromCalendarDateArg_
+                , fromCalendarDateArg_0
+                , fromCalendarDateArg_1
                 ]
     , fromWeekDate =
-        \fromWeekDateArg fromWeekDateArg0 fromWeekDateArg1 ->
+        \fromWeekDateArg_ fromWeekDateArg_0 fromWeekDateArg_1 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Date" ]
@@ -1425,9 +1475,9 @@ call_ =
                              )
                      }
                 )
-                [ fromWeekDateArg, fromWeekDateArg0, fromWeekDateArg1 ]
+                [ fromWeekDateArg_, fromWeekDateArg_0, fromWeekDateArg_1 ]
     , fromOrdinalDate =
-        \fromOrdinalDateArg fromOrdinalDateArg0 ->
+        \fromOrdinalDateArg_ fromOrdinalDateArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Date" ]
@@ -1440,9 +1490,9 @@ call_ =
                              )
                      }
                 )
-                [ fromOrdinalDateArg, fromOrdinalDateArg0 ]
+                [ fromOrdinalDateArg_, fromOrdinalDateArg_0 ]
     , fromIsoString =
-        \fromIsoStringArg ->
+        \fromIsoStringArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Date" ]
@@ -1461,9 +1511,9 @@ call_ =
                              )
                      }
                 )
-                [ fromIsoStringArg ]
+                [ fromIsoStringArg_ ]
     , fromRataDie =
-        \fromRataDieArg ->
+        \fromRataDieArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Date" ]
@@ -1476,9 +1526,9 @@ call_ =
                              )
                      }
                 )
-                [ fromRataDieArg ]
+                [ fromRataDieArg_ ]
     , toIsoString =
-        \toIsoStringArg ->
+        \toIsoStringArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Date" ]
@@ -1491,9 +1541,9 @@ call_ =
                              )
                      }
                 )
-                [ toIsoStringArg ]
+                [ toIsoStringArg_ ]
     , toRataDie =
-        \toRataDieArg ->
+        \toRataDieArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Date" ]
@@ -1506,9 +1556,9 @@ call_ =
                              )
                      }
                 )
-                [ toRataDieArg ]
+                [ toRataDieArg_ ]
     , year =
-        \yearArg ->
+        \yearArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Date" ]
@@ -1521,9 +1571,9 @@ call_ =
                              )
                      }
                 )
-                [ yearArg ]
+                [ yearArg_ ]
     , month =
-        \monthArg ->
+        \monthArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Date" ]
@@ -1536,9 +1586,9 @@ call_ =
                              )
                      }
                 )
-                [ monthArg ]
+                [ monthArg_ ]
     , day =
-        \dayArg ->
+        \dayArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Date" ]
@@ -1551,9 +1601,9 @@ call_ =
                              )
                      }
                 )
-                [ dayArg ]
+                [ dayArg_ ]
     , weekYear =
-        \weekYearArg ->
+        \weekYearArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Date" ]
@@ -1566,9 +1616,9 @@ call_ =
                              )
                      }
                 )
-                [ weekYearArg ]
+                [ weekYearArg_ ]
     , weekNumber =
-        \weekNumberArg ->
+        \weekNumberArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Date" ]
@@ -1581,9 +1631,9 @@ call_ =
                              )
                      }
                 )
-                [ weekNumberArg ]
+                [ weekNumberArg_ ]
     , weekday =
-        \weekdayArg ->
+        \weekdayArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Date" ]
@@ -1596,9 +1646,9 @@ call_ =
                              )
                      }
                 )
-                [ weekdayArg ]
+                [ weekdayArg_ ]
     , ordinalDay =
-        \ordinalDayArg ->
+        \ordinalDayArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Date" ]
@@ -1611,9 +1661,9 @@ call_ =
                              )
                      }
                 )
-                [ ordinalDayArg ]
+                [ ordinalDayArg_ ]
     , quarter =
-        \quarterArg ->
+        \quarterArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Date" ]
@@ -1626,9 +1676,9 @@ call_ =
                              )
                      }
                 )
-                [ quarterArg ]
+                [ quarterArg_ ]
     , monthNumber =
-        \monthNumberArg ->
+        \monthNumberArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Date" ]
@@ -1641,9 +1691,9 @@ call_ =
                              )
                      }
                 )
-                [ monthNumberArg ]
+                [ monthNumberArg_ ]
     , weekdayNumber =
-        \weekdayNumberArg ->
+        \weekdayNumberArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Date" ]
@@ -1656,9 +1706,9 @@ call_ =
                              )
                      }
                 )
-                [ weekdayNumberArg ]
+                [ weekdayNumberArg_ ]
     , format =
-        \formatArg formatArg0 ->
+        \formatArg_ formatArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Date" ]
@@ -1673,9 +1723,9 @@ call_ =
                              )
                      }
                 )
-                [ formatArg, formatArg0 ]
+                [ formatArg_, formatArg_0 ]
     , withOrdinalSuffix =
-        \withOrdinalSuffixArg ->
+        \withOrdinalSuffixArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Date" ]
@@ -1684,9 +1734,9 @@ call_ =
                          Just (Type.function [ Type.int ] Type.string)
                      }
                 )
-                [ withOrdinalSuffixArg ]
+                [ withOrdinalSuffixArg_ ]
     , formatWithLanguage =
-        \formatWithLanguageArg formatWithLanguageArg0 formatWithLanguageArg1 ->
+        \formatWithLanguageArg_ formatWithLanguageArg_0 formatWithLanguageArg_1 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Date" ]
@@ -1702,12 +1752,12 @@ call_ =
                              )
                      }
                 )
-                [ formatWithLanguageArg
-                , formatWithLanguageArg0
-                , formatWithLanguageArg1
+                [ formatWithLanguageArg_
+                , formatWithLanguageArg_0
+                , formatWithLanguageArg_1
                 ]
     , add =
-        \addArg addArg0 addArg1 ->
+        \addArg_ addArg_0 addArg_1 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Date" ]
@@ -1723,9 +1773,9 @@ call_ =
                              )
                      }
                 )
-                [ addArg, addArg0, addArg1 ]
+                [ addArg_, addArg_0, addArg_1 ]
     , diff =
-        \diffArg diffArg0 diffArg1 ->
+        \diffArg_ diffArg_0 diffArg_1 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Date" ]
@@ -1741,9 +1791,9 @@ call_ =
                              )
                      }
                 )
-                [ diffArg, diffArg0, diffArg1 ]
+                [ diffArg_, diffArg_0, diffArg_1 ]
     , ceiling =
-        \ceilingArg ceilingArg0 ->
+        \ceilingArg_ ceilingArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Date" ]
@@ -1758,9 +1808,9 @@ call_ =
                              )
                      }
                 )
-                [ ceilingArg, ceilingArg0 ]
+                [ ceilingArg_, ceilingArg_0 ]
     , floor =
-        \floorArg floorArg0 ->
+        \floorArg_ floorArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Date" ]
@@ -1775,9 +1825,9 @@ call_ =
                              )
                      }
                 )
-                [ floorArg, floorArg0 ]
+                [ floorArg_, floorArg_0 ]
     , range =
-        \rangeArg rangeArg0 rangeArg1 rangeArg2 ->
+        \rangeArg_ rangeArg_0 rangeArg_1 rangeArg_2 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Date" ]
@@ -1796,9 +1846,9 @@ call_ =
                              )
                      }
                 )
-                [ rangeArg, rangeArg0, rangeArg1, rangeArg2 ]
+                [ rangeArg_, rangeArg_0, rangeArg_1, rangeArg_2 ]
     , compare =
-        \compareArg compareArg0 ->
+        \compareArg_ compareArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Date" ]
@@ -1813,9 +1863,9 @@ call_ =
                              )
                      }
                 )
-                [ compareArg, compareArg0 ]
+                [ compareArg_, compareArg_0 ]
     , isBetween =
-        \isBetweenArg isBetweenArg0 isBetweenArg1 ->
+        \isBetweenArg_ isBetweenArg_0 isBetweenArg_1 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Date" ]
@@ -1831,9 +1881,9 @@ call_ =
                              )
                      }
                 )
-                [ isBetweenArg, isBetweenArg0, isBetweenArg1 ]
+                [ isBetweenArg_, isBetweenArg_0, isBetweenArg_1 ]
     , min =
-        \minArg minArg0 ->
+        \minArg_ minArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Date" ]
@@ -1848,9 +1898,9 @@ call_ =
                              )
                      }
                 )
-                [ minArg, minArg0 ]
+                [ minArg_, minArg_0 ]
     , max =
-        \maxArg maxArg0 ->
+        \maxArg_ maxArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Date" ]
@@ -1865,9 +1915,9 @@ call_ =
                              )
                      }
                 )
-                [ maxArg, maxArg0 ]
+                [ maxArg_, maxArg_0 ]
     , clamp =
-        \clampArg clampArg0 clampArg1 ->
+        \clampArg_ clampArg_0 clampArg_1 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Date" ]
@@ -1883,9 +1933,9 @@ call_ =
                              )
                      }
                 )
-                [ clampArg, clampArg0, clampArg1 ]
+                [ clampArg_, clampArg_0, clampArg_1 ]
     , monthToNumber =
-        \monthToNumberArg ->
+        \monthToNumberArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Date" ]
@@ -1898,9 +1948,9 @@ call_ =
                              )
                      }
                 )
-                [ monthToNumberArg ]
+                [ monthToNumberArg_ ]
     , numberToMonth =
-        \numberToMonthArg ->
+        \numberToMonthArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Date" ]
@@ -1913,9 +1963,9 @@ call_ =
                              )
                      }
                 )
-                [ numberToMonthArg ]
+                [ numberToMonthArg_ ]
     , weekdayToNumber =
-        \weekdayToNumberArg ->
+        \weekdayToNumberArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Date" ]
@@ -1928,9 +1978,9 @@ call_ =
                              )
                      }
                 )
-                [ weekdayToNumberArg ]
+                [ weekdayToNumberArg_ ]
     , numberToWeekday =
-        \numberToWeekdayArg ->
+        \numberToWeekdayArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Date" ]
@@ -1943,7 +1993,7 @@ call_ =
                              )
                      }
                 )
-                [ numberToWeekdayArg ]
+                [ numberToWeekdayArg_ ]
     }
 
 

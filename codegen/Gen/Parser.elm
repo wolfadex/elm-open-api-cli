@@ -1,12 +1,29 @@
-module Gen.Parser exposing (andThen, annotation_, backtrackable, call_, caseOf_, chompIf, chompUntil, chompUntilEndOr, chompWhile, commit, deadEndsToString, end, float, getChompedString, getCol, getIndent, getOffset, getPosition, getRow, getSource, int, keyword, lazy, lineComment, loop, make_, map, mapChompedString, moduleName_, multiComment, number, oneOf, problem, run, sequence, spaces, succeed, symbol, token, values_, variable, withIndent)
+module Gen.Parser exposing
+    ( moduleName_, run, int, float, number, symbol
+    , keyword, variable, end, succeed, lazy, andThen, problem
+    , oneOf, map, backtrackable, commit, token, sequence, loop
+    , spaces, lineComment, multiComment, getChompedString, chompIf, chompWhile, chompUntil
+    , chompUntilEndOr, mapChompedString, deadEndsToString, withIndent, getIndent, getPosition, getRow
+    , getCol, getOffset, getSource, annotation_, make_, caseOf_, call_
+    , values_
+    )
 
-{-| 
-@docs moduleName_, run, int, float, number, symbol, keyword, variable, end, succeed, lazy, andThen, problem, oneOf, map, backtrackable, commit, token, sequence, loop, spaces, lineComment, multiComment, getChompedString, chompIf, chompWhile, chompUntil, chompUntilEndOr, mapChompedString, deadEndsToString, withIndent, getIndent, getPosition, getRow, getCol, getOffset, getSource, annotation_, make_, caseOf_, call_, values_
+{-|
+# Generated bindings for Parser
+
+@docs moduleName_, run, int, float, number, symbol
+@docs keyword, variable, end, succeed, lazy, andThen
+@docs problem, oneOf, map, backtrackable, commit, token
+@docs sequence, loop, spaces, lineComment, multiComment, getChompedString
+@docs chompIf, chompWhile, chompUntil, chompUntilEndOr, mapChompedString, deadEndsToString
+@docs withIndent, getIndent, getPosition, getRow, getCol, getOffset
+@docs getSource, annotation_, make_, caseOf_, call_, values_
 -}
 
 
 import Elm
 import Elm.Annotation as Type
+import Elm.Arg
 import Elm.Case
 
 
@@ -31,7 +48,7 @@ of the string!
 run: Parser.Parser a -> String -> Result.Result (List Parser.DeadEnd) a
 -}
 run : Elm.Expression -> String -> Elm.Expression
-run runArg runArg0 =
+run runArg_ runArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Parser" ]
@@ -56,7 +73,7 @@ run runArg runArg0 =
                      )
              }
         )
-        [ runArg, Elm.string runArg0 ]
+        [ runArg_, Elm.string runArg_0 ]
 
 
 {-| Parse integers.
@@ -195,7 +212,7 @@ number :
     , float : Elm.Expression
     }
     -> Elm.Expression
-number numberArg =
+number numberArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Parser" ]
@@ -233,11 +250,11 @@ number numberArg =
              }
         )
         [ Elm.record
-            [ Tuple.pair "int" numberArg.int
-            , Tuple.pair "hex" numberArg.hex
-            , Tuple.pair "octal" numberArg.octal
-            , Tuple.pair "binary" numberArg.binary
-            , Tuple.pair "float" numberArg.float
+            [ Tuple.pair "int" numberArg_.int
+            , Tuple.pair "hex" numberArg_.hex
+            , Tuple.pair "octal" numberArg_.octal
+            , Tuple.pair "binary" numberArg_.binary
+            , Tuple.pair "float" numberArg_.float
             ]
         ]
 
@@ -256,7 +273,7 @@ operator it is afterwards.
 symbol: String -> Parser.Parser ()
 -}
 symbol : String -> Elm.Expression
-symbol symbolArg =
+symbol symbolArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Parser" ]
@@ -269,7 +286,7 @@ symbol symbolArg =
                      )
              }
         )
-        [ Elm.string symbolArg ]
+        [ Elm.string symbolArg_ ]
 
 
 {-| Parse keywords like `let`, `case`, and `type`.
@@ -297,7 +314,7 @@ be parsed as `let ters` and then wonder where the equals sign is! Check out the
 keyword: String -> Parser.Parser ()
 -}
 keyword : String -> Elm.Expression
-keyword keywordArg =
+keyword keywordArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Parser" ]
@@ -310,7 +327,7 @@ keyword keywordArg =
                      )
              }
         )
-        [ Elm.string keywordArg ]
+        [ Elm.string keywordArg_ ]
 
 
 {-| Create a parser for variables. If we wanted to parse type variables in Elm,
@@ -345,7 +362,7 @@ variable :
     , reserved : Elm.Expression
     }
     -> Elm.Expression
-variable variableArg =
+variable variableArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Parser" ]
@@ -372,11 +389,11 @@ variable variableArg =
         [ Elm.record
             [ Tuple.pair
                   "start"
-                  (Elm.functionReduced "variableUnpack" variableArg.start)
+                  (Elm.functionReduced "variableUnpack" variableArg_.start)
             , Tuple.pair
                   "inner"
-                  (Elm.functionReduced "variableUnpack" variableArg.inner)
-            , Tuple.pair "reserved" variableArg.reserved
+                  (Elm.functionReduced "variableUnpack" variableArg_.inner)
+            , Tuple.pair "reserved" variableArg_.reserved
             ]
         ]
 
@@ -421,7 +438,7 @@ examples.
 succeed: a -> Parser.Parser a
 -}
 succeed : Elm.Expression -> Elm.Expression
-succeed succeedArg =
+succeed succeedArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Parser" ]
@@ -435,7 +452,7 @@ succeed succeedArg =
                      )
              }
         )
-        [ succeedArg ]
+        [ succeedArg_ ]
 
 
 {-| Helper to define recursive parsers. Say we want a parser for simple
@@ -481,7 +498,7 @@ for this as well!)
 lazy: (() -> Parser.Parser a) -> Parser.Parser a
 -}
 lazy : (Elm.Expression -> Elm.Expression) -> Elm.Expression
-lazy lazyArg =
+lazy lazyArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Parser" ]
@@ -502,7 +519,7 @@ lazy lazyArg =
                      )
              }
         )
-        [ Elm.functionReduced "lazyUnpack" lazyArg ]
+        [ Elm.functionReduced "lazyUnpack" lazyArg_ ]
 
 
 {-| Parse one thing `andThen` parse another thing. This is useful when you want
@@ -534,7 +551,7 @@ out the [`loop`](#loop) function to limit stack usage.
 andThen: (a -> Parser.Parser b) -> Parser.Parser a -> Parser.Parser b
 -}
 andThen : (Elm.Expression -> Elm.Expression) -> Elm.Expression -> Elm.Expression
-andThen andThenArg andThenArg0 =
+andThen andThenArg_ andThenArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Parser" ]
@@ -559,7 +576,7 @@ andThen andThenArg andThenArg0 =
                      )
              }
         )
-        [ Elm.functionReduced "andThenUnpack" andThenArg, andThenArg0 ]
+        [ Elm.functionReduced "andThenUnpack" andThenArg_, andThenArg_0 ]
 
 
 {-| Indicate that a parser has reached a dead end. "Everything was going fine
@@ -569,7 +586,7 @@ an example usage.
 problem: String -> Parser.Parser a
 -}
 problem : String -> Elm.Expression
-problem problemArg =
+problem problemArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Parser" ]
@@ -583,7 +600,7 @@ problem problemArg =
                      )
              }
         )
-        [ Elm.string problemArg ]
+        [ Elm.string problemArg_ ]
 
 
 {-| If you are parsing JSON, the values can be strings, floats, booleans,
@@ -615,7 +632,7 @@ characters. Once a path is chosen, it does not come back and try the others.
 oneOf: List (Parser.Parser a) -> Parser.Parser a
 -}
 oneOf : List Elm.Expression -> Elm.Expression
-oneOf oneOfArg =
+oneOf oneOfArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Parser" ]
@@ -635,7 +652,7 @@ oneOf oneOfArg =
                      )
              }
         )
-        [ Elm.list oneOfArg ]
+        [ Elm.list oneOfArg_ ]
 
 
 {-| Transform the result of a parser. Maybe you have a value that is
@@ -656,7 +673,7 @@ an integer or `null`:
 map: (a -> b) -> Parser.Parser a -> Parser.Parser b
 -}
 map : (Elm.Expression -> Elm.Expression) -> Elm.Expression -> Elm.Expression
-map mapArg mapArg0 =
+map mapArg_ mapArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Parser" ]
@@ -675,7 +692,7 @@ map mapArg mapArg0 =
                      )
              }
         )
-        [ Elm.functionReduced "mapUnpack" mapArg, mapArg0 ]
+        [ Elm.functionReduced "mapUnpack" mapArg_, mapArg_0 ]
 
 
 {-| It is quite tricky to use `backtrackable` well! It can be very useful, but
@@ -688,7 +705,7 @@ each other. It is subtle and important!
 backtrackable: Parser.Parser a -> Parser.Parser a
 -}
 backtrackable : Elm.Expression -> Elm.Expression
-backtrackable backtrackableArg =
+backtrackable backtrackableArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Parser" ]
@@ -706,7 +723,7 @@ backtrackable backtrackableArg =
                      )
              }
         )
-        [ backtrackableArg ]
+        [ backtrackableArg_ ]
 
 
 {-| `commit` is almost always paired with `backtrackable` in some way, and it
@@ -719,7 +736,7 @@ each other. It is subtle and important!
 commit: a -> Parser.Parser a
 -}
 commit : Elm.Expression -> Elm.Expression
-commit commitArg =
+commit commitArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Parser" ]
@@ -733,7 +750,7 @@ commit commitArg =
                      )
              }
         )
-        [ commitArg ]
+        [ commitArg_ ]
 
 
 {-| Parse exactly the given string, without any regard to what comes next.
@@ -773,7 +790,7 @@ you would not get (1) anymore.
 token: String -> Parser.Parser ()
 -}
 token : String -> Elm.Expression
-token tokenArg =
+token tokenArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Parser" ]
@@ -786,7 +803,7 @@ token tokenArg =
                      )
              }
         )
-        [ Elm.string tokenArg ]
+        [ Elm.string tokenArg_ ]
 
 
 {-| Handle things like lists and records, but you can customize the details
@@ -831,7 +848,7 @@ sequence :
     , trailing : Elm.Expression
     }
     -> Elm.Expression
-sequence sequenceArg =
+sequence sequenceArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Parser" ]
@@ -869,12 +886,12 @@ sequence sequenceArg =
              }
         )
         [ Elm.record
-            [ Tuple.pair "start" (Elm.string sequenceArg.start)
-            , Tuple.pair "separator" (Elm.string sequenceArg.separator)
-            , Tuple.pair "end" (Elm.string sequenceArg.end)
-            , Tuple.pair "spaces" sequenceArg.spaces
-            , Tuple.pair "item" sequenceArg.item
-            , Tuple.pair "trailing" sequenceArg.trailing
+            [ Tuple.pair "start" (Elm.string sequenceArg_.start)
+            , Tuple.pair "separator" (Elm.string sequenceArg_.separator)
+            , Tuple.pair "end" (Elm.string sequenceArg_.end)
+            , Tuple.pair "spaces" sequenceArg_.spaces
+            , Tuple.pair "item" sequenceArg_.item
+            , Tuple.pair "trailing" sequenceArg_.trailing
             ]
         ]
 
@@ -920,7 +937,7 @@ elimination, allowing you to parse however many repeats you want.
 loop: state -> (state -> Parser.Parser (Parser.Step state a)) -> Parser.Parser a
 -}
 loop : Elm.Expression -> (Elm.Expression -> Elm.Expression) -> Elm.Expression
-loop loopArg loopArg0 =
+loop loopArg_ loopArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Parser" ]
@@ -946,7 +963,7 @@ loop loopArg loopArg0 =
                      )
              }
         )
-        [ loopArg, Elm.functionReduced "loopUnpack" loopArg0 ]
+        [ loopArg_, Elm.functionReduced "loopUnpack" loopArg_0 ]
 
 
 {-| Parse zero or more `' '`, `'\n'`, and `'\r'` characters.
@@ -999,7 +1016,7 @@ a newline, that is fine too.
 lineComment: String -> Parser.Parser ()
 -}
 lineComment : String -> Elm.Expression
-lineComment lineCommentArg =
+lineComment lineCommentArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Parser" ]
@@ -1012,7 +1029,7 @@ lineComment lineCommentArg =
                      )
              }
         )
-        [ Elm.string lineCommentArg ]
+        [ Elm.string lineCommentArg_ ]
 
 
 {-| Parse multi-line comments. So if you wanted to parse Elm whitespace or
@@ -1053,7 +1070,7 @@ to consume.
 multiComment: String -> String -> Parser.Nestable -> Parser.Parser ()
 -}
 multiComment : String -> String -> Elm.Expression -> Elm.Expression
-multiComment multiCommentArg multiCommentArg0 multiCommentArg1 =
+multiComment multiCommentArg_ multiCommentArg_0 multiCommentArg_1 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Parser" ]
@@ -1069,9 +1086,9 @@ multiComment multiCommentArg multiCommentArg0 multiCommentArg1 =
                      )
              }
         )
-        [ Elm.string multiCommentArg
-        , Elm.string multiCommentArg0
-        , multiCommentArg1
+        [ Elm.string multiCommentArg_
+        , Elm.string multiCommentArg_0
+        , multiCommentArg_1
         ]
 
 
@@ -1106,7 +1123,7 @@ and [`getSource`](#getSource) to implement this function:
 getChompedString: Parser.Parser a -> Parser.Parser String
 -}
 getChompedString : Elm.Expression -> Elm.Expression
-getChompedString getChompedStringArg =
+getChompedString getChompedStringArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Parser" ]
@@ -1123,7 +1140,7 @@ getChompedString getChompedStringArg =
                      )
              }
         )
-        [ getChompedStringArg ]
+        [ getChompedStringArg_ ]
 
 
 {-| Chomp one character if it passes the test.
@@ -1137,7 +1154,7 @@ So this can chomp a character like `T` and produces a `()` value.
 chompIf: (Char.Char -> Bool) -> Parser.Parser ()
 -}
 chompIf : (Elm.Expression -> Elm.Expression) -> Elm.Expression
-chompIf chompIfArg =
+chompIf chompIfArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Parser" ]
@@ -1150,7 +1167,7 @@ chompIf chompIfArg =
                      )
              }
         )
-        [ Elm.functionReduced "chompIfUnpack" chompIfArg ]
+        [ Elm.functionReduced "chompIfUnpack" chompIfArg_ ]
 
 
 {-| Chomp zero or more characters if they pass the test. This is commonly
@@ -1176,7 +1193,7 @@ parsers peek ahead, making sure they are not followed by anything unexpected.
 chompWhile: (Char.Char -> Bool) -> Parser.Parser ()
 -}
 chompWhile : (Elm.Expression -> Elm.Expression) -> Elm.Expression
-chompWhile chompWhileArg =
+chompWhile chompWhileArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Parser" ]
@@ -1189,7 +1206,7 @@ chompWhile chompWhileArg =
                      )
              }
         )
-        [ Elm.functionReduced "chompWhileUnpack" chompWhileArg ]
+        [ Elm.functionReduced "chompWhileUnpack" chompWhileArg_ ]
 
 
 {-| Chomp until you see a certain string. You could define C-style multi-line
@@ -1206,7 +1223,7 @@ though. It can be trickier than it looks!
 chompUntil: String -> Parser.Parser ()
 -}
 chompUntil : String -> Elm.Expression
-chompUntil chompUntilArg =
+chompUntil chompUntilArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Parser" ]
@@ -1219,7 +1236,7 @@ chompUntil chompUntilArg =
                      )
              }
         )
-        [ Elm.string chompUntilArg ]
+        [ Elm.string chompUntilArg_ ]
 
 
 {-| Chomp until you see a certain string or until you run out of characters to
@@ -1239,7 +1256,7 @@ scenario.
 chompUntilEndOr: String -> Parser.Parser ()
 -}
 chompUntilEndOr : String -> Elm.Expression
-chompUntilEndOr chompUntilEndOrArg =
+chompUntilEndOr chompUntilEndOrArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Parser" ]
@@ -1252,7 +1269,7 @@ chompUntilEndOr chompUntilEndOrArg =
                      )
              }
         )
-        [ Elm.string chompUntilEndOrArg ]
+        [ Elm.string chompUntilEndOrArg_ ]
 
 
 {-| This works just like [`getChompedString`](#getChompedString) but gives
@@ -1275,7 +1292,7 @@ mapChompedString :
     (Elm.Expression -> Elm.Expression -> Elm.Expression)
     -> Elm.Expression
     -> Elm.Expression
-mapChompedString mapChompedStringArg mapChompedStringArg0 =
+mapChompedString mapChompedStringArg_ mapChompedStringArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Parser" ]
@@ -1301,9 +1318,9 @@ mapChompedString mapChompedStringArg mapChompedStringArg0 =
             (\functionReducedUnpack ->
                Elm.functionReduced
                    "unpack"
-                   (mapChompedStringArg functionReducedUnpack)
+                   (mapChompedStringArg_ functionReducedUnpack)
             )
-        , mapChompedStringArg0
+        , mapChompedStringArg_0
         ]
 
 
@@ -1322,7 +1339,7 @@ _thinks_ is happening can be really helpful!
 deadEndsToString: List Parser.DeadEnd -> String
 -}
 deadEndsToString : List Elm.Expression -> Elm.Expression
-deadEndsToString deadEndsToStringArg =
+deadEndsToString deadEndsToStringArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Parser" ]
@@ -1336,7 +1353,7 @@ deadEndsToString deadEndsToStringArg =
                      )
              }
         )
-        [ Elm.list deadEndsToStringArg ]
+        [ Elm.list deadEndsToStringArg_ ]
 
 
 {-| Some languages are indentation sensitive. Python cares about tabs. Elm
@@ -1346,7 +1363,7 @@ cares about spaces sometimes. `withIndent` and `getIndent` allow you to manage
 withIndent: Int -> Parser.Parser a -> Parser.Parser a
 -}
 withIndent : Int -> Elm.Expression -> Elm.Expression
-withIndent withIndentArg withIndentArg0 =
+withIndent withIndentArg_ withIndentArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Parser" ]
@@ -1365,7 +1382,7 @@ withIndent withIndentArg withIndentArg0 =
                      )
              }
         )
-        [ Elm.int withIndentArg, withIndentArg0 ]
+        [ Elm.int withIndentArg_, withIndentArg_0 ]
 
 
 {-| When someone said `withIndent` earlier, what number did they put in there?
@@ -1809,43 +1826,37 @@ make_ =
 caseOf_ :
     { trailing :
         Elm.Expression
-        -> { trailingTags_0_0
-            | forbidden : Elm.Expression
-            , optional : Elm.Expression
-            , mandatory : Elm.Expression
+        -> { forbidden : Elm.Expression
+        , optional : Elm.Expression
+        , mandatory : Elm.Expression
         }
         -> Elm.Expression
     , step :
         Elm.Expression
-        -> { stepTags_1_0
-            | loop : Elm.Expression -> Elm.Expression
-            , done : Elm.Expression -> Elm.Expression
+        -> { loop : Elm.Expression -> Elm.Expression
+        , done : Elm.Expression -> Elm.Expression
         }
         -> Elm.Expression
     , nestable :
         Elm.Expression
-        -> { nestableTags_2_0
-            | notNestable : Elm.Expression
-            , nestable : Elm.Expression
-        }
+        -> { notNestable : Elm.Expression, nestable : Elm.Expression }
         -> Elm.Expression
     , problem :
         Elm.Expression
-        -> { problemTags_3_0
-            | expecting : Elm.Expression -> Elm.Expression
-            , expectingInt : Elm.Expression
-            , expectingHex : Elm.Expression
-            , expectingOctal : Elm.Expression
-            , expectingBinary : Elm.Expression
-            , expectingFloat : Elm.Expression
-            , expectingNumber : Elm.Expression
-            , expectingVariable : Elm.Expression
-            , expectingSymbol : Elm.Expression -> Elm.Expression
-            , expectingKeyword : Elm.Expression -> Elm.Expression
-            , expectingEnd : Elm.Expression
-            , unexpectedChar : Elm.Expression
-            , problem : Elm.Expression -> Elm.Expression
-            , badRepeat : Elm.Expression
+        -> { expecting : Elm.Expression -> Elm.Expression
+        , expectingInt : Elm.Expression
+        , expectingHex : Elm.Expression
+        , expectingOctal : Elm.Expression
+        , expectingBinary : Elm.Expression
+        , expectingFloat : Elm.Expression
+        , expectingNumber : Elm.Expression
+        , expectingVariable : Elm.Expression
+        , expectingSymbol : Elm.Expression -> Elm.Expression
+        , expectingKeyword : Elm.Expression -> Elm.Expression
+        , expectingEnd : Elm.Expression
+        , unexpectedChar : Elm.Expression
+        , problem : Elm.Expression -> Elm.Expression
+        , badRepeat : Elm.Expression
         }
         -> Elm.Expression
     }
@@ -1855,9 +1866,15 @@ caseOf_ =
             Elm.Case.custom
                 trailingExpression
                 (Type.namedWith [ "Parser" ] "Trailing" [])
-                [ Elm.Case.branch0 "Forbidden" trailingTags.forbidden
-                , Elm.Case.branch0 "Optional" trailingTags.optional
-                , Elm.Case.branch0 "Mandatory" trailingTags.mandatory
+                [ Elm.Case.branch
+                    (Elm.Arg.customType "Forbidden" trailingTags.forbidden)
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType "Optional" trailingTags.optional)
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType "Mandatory" trailingTags.mandatory)
+                    Basics.identity
                 ]
     , step =
         \stepExpression stepTags ->
@@ -1868,53 +1885,132 @@ caseOf_ =
                      "Step"
                      [ Type.var "state", Type.var "a" ]
                 )
-                [ Elm.Case.branch1
-                    "Loop"
-                    ( "state", Type.var "state" )
-                    stepTags.loop
-                , Elm.Case.branch1 "Done" ( "a", Type.var "a" ) stepTags.done
+                [ Elm.Case.branch
+                    (Elm.Arg.customType "Loop" stepTags.loop |> Elm.Arg.item
+                                                                      (Elm.Arg.varWith
+                                                                             "state"
+                                                                             (Type.var
+                                                                                    "state"
+                                                                             )
+                                                                      )
+                    )
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType "Done" stepTags.done |> Elm.Arg.item
+                                                                      (Elm.Arg.varWith
+                                                                             "a"
+                                                                             (Type.var
+                                                                                    "a"
+                                                                             )
+                                                                      )
+                    )
+                    Basics.identity
                 ]
     , nestable =
         \nestableExpression nestableTags ->
             Elm.Case.custom
                 nestableExpression
                 (Type.namedWith [ "Parser" ] "Nestable" [])
-                [ Elm.Case.branch0 "NotNestable" nestableTags.notNestable
-                , Elm.Case.branch0 "Nestable" nestableTags.nestable
+                [ Elm.Case.branch
+                    (Elm.Arg.customType "NotNestable" nestableTags.notNestable)
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType "Nestable" nestableTags.nestable)
+                    Basics.identity
                 ]
     , problem =
         \problemExpression problemTags ->
             Elm.Case.custom
                 problemExpression
                 (Type.namedWith [ "Parser" ] "Problem" [])
-                [ Elm.Case.branch1
-                    "Expecting"
-                    ( "stringString", Type.string )
-                    problemTags.expecting
-                , Elm.Case.branch0 "ExpectingInt" problemTags.expectingInt
-                , Elm.Case.branch0 "ExpectingHex" problemTags.expectingHex
-                , Elm.Case.branch0 "ExpectingOctal" problemTags.expectingOctal
-                , Elm.Case.branch0 "ExpectingBinary" problemTags.expectingBinary
-                , Elm.Case.branch0 "ExpectingFloat" problemTags.expectingFloat
-                , Elm.Case.branch0 "ExpectingNumber" problemTags.expectingNumber
-                , Elm.Case.branch0
-                    "ExpectingVariable"
-                    problemTags.expectingVariable
-                , Elm.Case.branch1
-                    "ExpectingSymbol"
-                    ( "stringString", Type.string )
-                    problemTags.expectingSymbol
-                , Elm.Case.branch1
-                    "ExpectingKeyword"
-                    ( "stringString", Type.string )
-                    problemTags.expectingKeyword
-                , Elm.Case.branch0 "ExpectingEnd" problemTags.expectingEnd
-                , Elm.Case.branch0 "UnexpectedChar" problemTags.unexpectedChar
-                , Elm.Case.branch1
-                    "Problem"
-                    ( "stringString", Type.string )
-                    problemTags.problem
-                , Elm.Case.branch0 "BadRepeat" problemTags.badRepeat
+                [ Elm.Case.branch
+                    (Elm.Arg.customType
+                       "Expecting"
+                       problemTags.expecting |> Elm.Arg.item
+                                                      (Elm.Arg.varWith
+                                                             "arg_0"
+                                                             Type.string
+                                                      )
+                    )
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType "ExpectingInt" problemTags.expectingInt)
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType "ExpectingHex" problemTags.expectingHex)
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType
+                       "ExpectingOctal"
+                       problemTags.expectingOctal
+                    )
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType
+                       "ExpectingBinary"
+                       problemTags.expectingBinary
+                    )
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType
+                       "ExpectingFloat"
+                       problemTags.expectingFloat
+                    )
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType
+                       "ExpectingNumber"
+                       problemTags.expectingNumber
+                    )
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType
+                       "ExpectingVariable"
+                       problemTags.expectingVariable
+                    )
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType
+                       "ExpectingSymbol"
+                       problemTags.expectingSymbol |> Elm.Arg.item
+                                                            (Elm.Arg.varWith
+                                                                   "arg_0"
+                                                                   Type.string
+                                                            )
+                    )
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType
+                       "ExpectingKeyword"
+                       problemTags.expectingKeyword |> Elm.Arg.item
+                                                             (Elm.Arg.varWith
+                                                                    "arg_0"
+                                                                    Type.string
+                                                             )
+                    )
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType "ExpectingEnd" problemTags.expectingEnd)
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType
+                       "UnexpectedChar"
+                       problemTags.unexpectedChar
+                    )
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType
+                       "Problem"
+                       problemTags.problem |> Elm.Arg.item
+                                                    (Elm.Arg.varWith
+                                                           "arg_0"
+                                                           Type.string
+                                                    )
+                    )
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType "BadRepeat" problemTags.badRepeat)
+                    Basics.identity
                 ]
     }
 
@@ -1950,7 +2046,7 @@ call_ :
     }
 call_ =
     { run =
-        \runArg runArg0 ->
+        \runArg_ runArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Parser" ]
@@ -1979,9 +2075,9 @@ call_ =
                              )
                      }
                 )
-                [ runArg, runArg0 ]
+                [ runArg_, runArg_0 ]
     , number =
-        \numberArg ->
+        \numberArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Parser" ]
@@ -2035,9 +2131,9 @@ call_ =
                              )
                      }
                 )
-                [ numberArg ]
+                [ numberArg_ ]
     , symbol =
-        \symbolArg ->
+        \symbolArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Parser" ]
@@ -2054,9 +2150,9 @@ call_ =
                              )
                      }
                 )
-                [ symbolArg ]
+                [ symbolArg_ ]
     , keyword =
-        \keywordArg ->
+        \keywordArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Parser" ]
@@ -2073,9 +2169,9 @@ call_ =
                              )
                      }
                 )
-                [ keywordArg ]
+                [ keywordArg_ ]
     , variable =
-        \variableArg ->
+        \variableArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Parser" ]
@@ -2106,9 +2202,9 @@ call_ =
                              )
                      }
                 )
-                [ variableArg ]
+                [ variableArg_ ]
     , succeed =
-        \succeedArg ->
+        \succeedArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Parser" ]
@@ -2125,9 +2221,9 @@ call_ =
                              )
                      }
                 )
-                [ succeedArg ]
+                [ succeedArg_ ]
     , lazy =
-        \lazyArg ->
+        \lazyArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Parser" ]
@@ -2151,9 +2247,9 @@ call_ =
                              )
                      }
                 )
-                [ lazyArg ]
+                [ lazyArg_ ]
     , andThen =
-        \andThenArg andThenArg0 ->
+        \andThenArg_ andThenArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Parser" ]
@@ -2181,9 +2277,9 @@ call_ =
                              )
                      }
                 )
-                [ andThenArg, andThenArg0 ]
+                [ andThenArg_, andThenArg_0 ]
     , problem =
-        \problemArg ->
+        \problemArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Parser" ]
@@ -2200,9 +2296,9 @@ call_ =
                              )
                      }
                 )
-                [ problemArg ]
+                [ problemArg_ ]
     , oneOf =
-        \oneOfArg ->
+        \oneOfArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Parser" ]
@@ -2225,9 +2321,9 @@ call_ =
                              )
                      }
                 )
-                [ oneOfArg ]
+                [ oneOfArg_ ]
     , map =
-        \mapArg mapArg0 ->
+        \mapArg_ mapArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Parser" ]
@@ -2251,9 +2347,9 @@ call_ =
                              )
                      }
                 )
-                [ mapArg, mapArg0 ]
+                [ mapArg_, mapArg_0 ]
     , backtrackable =
-        \backtrackableArg ->
+        \backtrackableArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Parser" ]
@@ -2274,9 +2370,9 @@ call_ =
                              )
                      }
                 )
-                [ backtrackableArg ]
+                [ backtrackableArg_ ]
     , commit =
-        \commitArg ->
+        \commitArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Parser" ]
@@ -2293,9 +2389,9 @@ call_ =
                              )
                      }
                 )
-                [ commitArg ]
+                [ commitArg_ ]
     , token =
-        \tokenArg ->
+        \tokenArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Parser" ]
@@ -2312,9 +2408,9 @@ call_ =
                              )
                      }
                 )
-                [ tokenArg ]
+                [ tokenArg_ ]
     , sequence =
-        \sequenceArg ->
+        \sequenceArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Parser" ]
@@ -2354,9 +2450,9 @@ call_ =
                              )
                      }
                 )
-                [ sequenceArg ]
+                [ sequenceArg_ ]
     , loop =
-        \loopArg loopArg0 ->
+        \loopArg_ loopArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Parser" ]
@@ -2387,9 +2483,9 @@ call_ =
                              )
                      }
                 )
-                [ loopArg, loopArg0 ]
+                [ loopArg_, loopArg_0 ]
     , lineComment =
-        \lineCommentArg ->
+        \lineCommentArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Parser" ]
@@ -2406,9 +2502,9 @@ call_ =
                              )
                      }
                 )
-                [ lineCommentArg ]
+                [ lineCommentArg_ ]
     , multiComment =
-        \multiCommentArg multiCommentArg0 multiCommentArg1 ->
+        \multiCommentArg_ multiCommentArg_0 multiCommentArg_1 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Parser" ]
@@ -2428,9 +2524,9 @@ call_ =
                              )
                      }
                 )
-                [ multiCommentArg, multiCommentArg0, multiCommentArg1 ]
+                [ multiCommentArg_, multiCommentArg_0, multiCommentArg_1 ]
     , getChompedString =
-        \getChompedStringArg ->
+        \getChompedStringArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Parser" ]
@@ -2451,9 +2547,9 @@ call_ =
                              )
                      }
                 )
-                [ getChompedStringArg ]
+                [ getChompedStringArg_ ]
     , chompIf =
-        \chompIfArg ->
+        \chompIfArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Parser" ]
@@ -2470,9 +2566,9 @@ call_ =
                              )
                      }
                 )
-                [ chompIfArg ]
+                [ chompIfArg_ ]
     , chompWhile =
-        \chompWhileArg ->
+        \chompWhileArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Parser" ]
@@ -2489,9 +2585,9 @@ call_ =
                              )
                      }
                 )
-                [ chompWhileArg ]
+                [ chompWhileArg_ ]
     , chompUntil =
-        \chompUntilArg ->
+        \chompUntilArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Parser" ]
@@ -2508,9 +2604,9 @@ call_ =
                              )
                      }
                 )
-                [ chompUntilArg ]
+                [ chompUntilArg_ ]
     , chompUntilEndOr =
-        \chompUntilEndOrArg ->
+        \chompUntilEndOrArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Parser" ]
@@ -2527,9 +2623,9 @@ call_ =
                              )
                      }
                 )
-                [ chompUntilEndOrArg ]
+                [ chompUntilEndOrArg_ ]
     , mapChompedString =
-        \mapChompedStringArg mapChompedStringArg0 ->
+        \mapChompedStringArg_ mapChompedStringArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Parser" ]
@@ -2553,9 +2649,9 @@ call_ =
                              )
                      }
                 )
-                [ mapChompedStringArg, mapChompedStringArg0 ]
+                [ mapChompedStringArg_, mapChompedStringArg_0 ]
     , deadEndsToString =
-        \deadEndsToStringArg ->
+        \deadEndsToStringArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Parser" ]
@@ -2570,9 +2666,9 @@ call_ =
                              )
                      }
                 )
-                [ deadEndsToStringArg ]
+                [ deadEndsToStringArg_ ]
     , withIndent =
-        \withIndentArg withIndentArg0 ->
+        \withIndentArg_ withIndentArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Parser" ]
@@ -2594,7 +2690,7 @@ call_ =
                              )
                      }
                 )
-                [ withIndentArg, withIndentArg0 ]
+                [ withIndentArg_, withIndentArg_0 ]
     }
 
 

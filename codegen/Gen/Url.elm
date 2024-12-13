@@ -1,12 +1,19 @@
-module Gen.Url exposing (annotation_, call_, caseOf_, fromString, make_, moduleName_, percentDecode, percentEncode, toString, values_)
+module Gen.Url exposing
+    ( moduleName_, toString, fromString, percentEncode, percentDecode, annotation_
+    , make_, caseOf_, call_, values_
+    )
 
-{-| 
-@docs moduleName_, toString, fromString, percentEncode, percentDecode, annotation_, make_, caseOf_, call_, values_
+{-|
+# Generated bindings for Url
+
+@docs moduleName_, toString, fromString, percentEncode, percentDecode, annotation_
+@docs make_, caseOf_, call_, values_
 -}
 
 
 import Elm
 import Elm.Annotation as Type
+import Elm.Arg
 import Elm.Case
 
 
@@ -21,7 +28,7 @@ moduleName_ =
 toString: Url.Url -> String
 -}
 toString : Elm.Expression -> Elm.Expression
-toString toStringArg =
+toString toStringArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Url" ]
@@ -34,7 +41,7 @@ toString toStringArg =
                      )
              }
         )
-        [ toStringArg ]
+        [ toStringArg_ ]
 
 
 {-| Attempt to break a URL up into [`Url`](#Url). This is useful in
@@ -85,7 +92,7 @@ and `&` characters!
 fromString: String -> Maybe Url.Url
 -}
 fromString : String -> Elm.Expression
-fromString fromStringArg =
+fromString fromStringArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Url" ]
@@ -98,7 +105,7 @@ fromString fromStringArg =
                      )
              }
         )
-        [ Elm.string fromStringArg ]
+        [ Elm.string fromStringArg_ ]
 
 
 {-| **Use [Url.Builder](Url-Builder) instead!** Functions like `absolute`,
@@ -134,7 +141,7 @@ notes about Unicode [here][wiki].
 percentEncode: String -> String
 -}
 percentEncode : String -> Elm.Expression
-percentEncode percentEncodeArg =
+percentEncode percentEncodeArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Url" ]
@@ -142,7 +149,7 @@ percentEncode percentEncodeArg =
              , annotation = Just (Type.function [ Type.string ] Type.string)
              }
         )
-        [ Elm.string percentEncodeArg ]
+        [ Elm.string percentEncodeArg_ ]
 
 
 {-| **Use [Url.Parser](Url-Parser) instead!** It will decode query
@@ -176,7 +183,7 @@ This is the same behavior as JavaScript's [`decodeURIComponent`][js] function.
 percentDecode: String -> Maybe String
 -}
 percentDecode : String -> Elm.Expression
-percentDecode percentDecodeArg =
+percentDecode percentDecodeArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Url" ]
@@ -185,7 +192,7 @@ percentDecode percentDecodeArg =
                  Just (Type.function [ Type.string ] (Type.maybe Type.string))
              }
         )
-        [ Elm.string percentDecodeArg ]
+        [ Elm.string percentDecodeArg_ ]
 
 
 annotation_ : { url : Type.Annotation, protocol : Type.Annotation }
@@ -268,7 +275,7 @@ make_ =
 caseOf_ :
     { protocol :
         Elm.Expression
-        -> { protocolTags_0_0 | http : Elm.Expression, https : Elm.Expression }
+        -> { http : Elm.Expression, https : Elm.Expression }
         -> Elm.Expression
     }
 caseOf_ =
@@ -277,8 +284,12 @@ caseOf_ =
             Elm.Case.custom
                 protocolExpression
                 (Type.namedWith [ "Url" ] "Protocol" [])
-                [ Elm.Case.branch0 "Http" protocolTags.http
-                , Elm.Case.branch0 "Https" protocolTags.https
+                [ Elm.Case.branch
+                    (Elm.Arg.customType "Http" protocolTags.http)
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType "Https" protocolTags.https)
+                    Basics.identity
                 ]
     }
 
@@ -291,7 +302,7 @@ call_ :
     }
 call_ =
     { toString =
-        \toStringArg ->
+        \toStringArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Url" ]
@@ -304,9 +315,9 @@ call_ =
                              )
                      }
                 )
-                [ toStringArg ]
+                [ toStringArg_ ]
     , fromString =
-        \fromStringArg ->
+        \fromStringArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Url" ]
@@ -321,9 +332,9 @@ call_ =
                              )
                      }
                 )
-                [ fromStringArg ]
+                [ fromStringArg_ ]
     , percentEncode =
-        \percentEncodeArg ->
+        \percentEncodeArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Url" ]
@@ -332,9 +343,9 @@ call_ =
                          Just (Type.function [ Type.string ] Type.string)
                      }
                 )
-                [ percentEncodeArg ]
+                [ percentEncodeArg_ ]
     , percentDecode =
-        \percentDecodeArg ->
+        \percentDecodeArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Url" ]
@@ -347,7 +358,7 @@ call_ =
                              )
                      }
                 )
-                [ percentDecodeArg ]
+                [ percentDecodeArg_ ]
     }
 
 

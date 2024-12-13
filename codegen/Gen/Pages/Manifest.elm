@@ -1,12 +1,21 @@
-module Gen.Pages.Manifest exposing (annotation_, call_, caseOf_, generator, init, make_, moduleName_, toJson, values_, withBackgroundColor, withCategories, withDisplayMode, withField, withIarcRatingId, withLang, withOrientation, withShortName, withThemeColor)
+module Gen.Pages.Manifest exposing
+    ( moduleName_, init, withBackgroundColor, withCategories, withDisplayMode, withIarcRatingId
+    , withLang, withOrientation, withShortName, withThemeColor, withField, generator, toJson
+    , annotation_, make_, caseOf_, call_, values_
+    )
 
-{-| 
-@docs moduleName_, init, withBackgroundColor, withCategories, withDisplayMode, withIarcRatingId, withLang, withOrientation, withShortName, withThemeColor, withField, generator, toJson, annotation_, make_, caseOf_, call_, values_
+{-|
+# Generated bindings for Pages.Manifest
+
+@docs moduleName_, init, withBackgroundColor, withCategories, withDisplayMode, withIarcRatingId
+@docs withLang, withOrientation, withShortName, withThemeColor, withField, generator
+@docs toJson, annotation_, make_, caseOf_, call_, values_
 -}
 
 
 import Elm
 import Elm.Annotation as Type
+import Elm.Arg
 import Elm.Case
 
 
@@ -33,7 +42,7 @@ init :
     , icons : List Elm.Expression
     }
     -> Elm.Expression
-init initArg =
+init initArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Pages", "Manifest" ]
@@ -62,10 +71,10 @@ init initArg =
              }
         )
         [ Elm.record
-            [ Tuple.pair "description" (Elm.string initArg.description)
-            , Tuple.pair "name" (Elm.string initArg.name)
-            , Tuple.pair "startUrl" initArg.startUrl
-            , Tuple.pair "icons" (Elm.list initArg.icons)
+            [ Tuple.pair "description" (Elm.string initArg_.description)
+            , Tuple.pair "name" (Elm.string initArg_.name)
+            , Tuple.pair "startUrl" initArg_.startUrl
+            , Tuple.pair "icons" (Elm.list initArg_.icons)
             ]
         ]
 
@@ -75,7 +84,7 @@ init initArg =
 withBackgroundColor: Color.Color -> Pages.Manifest.Config -> Pages.Manifest.Config
 -}
 withBackgroundColor : Elm.Expression -> Elm.Expression -> Elm.Expression
-withBackgroundColor withBackgroundColorArg withBackgroundColorArg0 =
+withBackgroundColor withBackgroundColorArg_ withBackgroundColorArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Pages", "Manifest" ]
@@ -90,7 +99,7 @@ withBackgroundColor withBackgroundColorArg withBackgroundColorArg0 =
                      )
              }
         )
-        [ withBackgroundColorArg, withBackgroundColorArg0 ]
+        [ withBackgroundColorArg_, withBackgroundColorArg_0 ]
 
 
 {-| Set <https://developer.mozilla.org/en-US/docs/Web/Manifest/categories>.
@@ -101,7 +110,7 @@ withCategories:
     -> Pages.Manifest.Config
 -}
 withCategories : List Elm.Expression -> Elm.Expression -> Elm.Expression
-withCategories withCategoriesArg withCategoriesArg0 =
+withCategories withCategoriesArg_ withCategoriesArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Pages", "Manifest" ]
@@ -121,7 +130,7 @@ withCategories withCategoriesArg withCategoriesArg0 =
                      )
              }
         )
-        [ Elm.list withCategoriesArg, withCategoriesArg0 ]
+        [ Elm.list withCategoriesArg_, withCategoriesArg_0 ]
 
 
 {-| Set <https://developer.mozilla.org/en-US/docs/Web/Manifest/display>.
@@ -129,7 +138,7 @@ withCategories withCategoriesArg withCategoriesArg0 =
 withDisplayMode: Pages.Manifest.DisplayMode -> Pages.Manifest.Config -> Pages.Manifest.Config
 -}
 withDisplayMode : Elm.Expression -> Elm.Expression -> Elm.Expression
-withDisplayMode withDisplayModeArg withDisplayModeArg0 =
+withDisplayMode withDisplayModeArg_ withDisplayModeArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Pages", "Manifest" ]
@@ -147,7 +156,7 @@ withDisplayMode withDisplayModeArg withDisplayModeArg0 =
                      )
              }
         )
-        [ withDisplayModeArg, withDisplayModeArg0 ]
+        [ withDisplayModeArg_, withDisplayModeArg_0 ]
 
 
 {-| Set <https://developer.mozilla.org/en-US/docs/Web/Manifest/iarc_rating_id>.
@@ -155,7 +164,7 @@ withDisplayMode withDisplayModeArg withDisplayModeArg0 =
 withIarcRatingId: String -> Pages.Manifest.Config -> Pages.Manifest.Config
 -}
 withIarcRatingId : String -> Elm.Expression -> Elm.Expression
-withIarcRatingId withIarcRatingIdArg withIarcRatingIdArg0 =
+withIarcRatingId withIarcRatingIdArg_ withIarcRatingIdArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Pages", "Manifest" ]
@@ -170,7 +179,7 @@ withIarcRatingId withIarcRatingIdArg withIarcRatingIdArg0 =
                      )
              }
         )
-        [ Elm.string withIarcRatingIdArg, withIarcRatingIdArg0 ]
+        [ Elm.string withIarcRatingIdArg_, withIarcRatingIdArg_0 ]
 
 
 {-| Set <https://developer.mozilla.org/en-US/docs/Web/Manifest/lang>.
@@ -178,7 +187,7 @@ withIarcRatingId withIarcRatingIdArg withIarcRatingIdArg0 =
 withLang: LanguageTag.LanguageTag -> Pages.Manifest.Config -> Pages.Manifest.Config
 -}
 withLang : Elm.Expression -> Elm.Expression -> Elm.Expression
-withLang withLangArg withLangArg0 =
+withLang withLangArg_ withLangArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Pages", "Manifest" ]
@@ -193,7 +202,7 @@ withLang withLangArg withLangArg0 =
                      )
              }
         )
-        [ withLangArg, withLangArg0 ]
+        [ withLangArg_, withLangArg_0 ]
 
 
 {-| Set <https://developer.mozilla.org/en-US/docs/Web/Manifest/orientation>.
@@ -201,7 +210,7 @@ withLang withLangArg withLangArg0 =
 withOrientation: Pages.Manifest.Orientation -> Pages.Manifest.Config -> Pages.Manifest.Config
 -}
 withOrientation : Elm.Expression -> Elm.Expression -> Elm.Expression
-withOrientation withOrientationArg withOrientationArg0 =
+withOrientation withOrientationArg_ withOrientationArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Pages", "Manifest" ]
@@ -219,7 +228,7 @@ withOrientation withOrientationArg withOrientationArg0 =
                      )
              }
         )
-        [ withOrientationArg, withOrientationArg0 ]
+        [ withOrientationArg_, withOrientationArg_0 ]
 
 
 {-| Set <https://developer.mozilla.org/en-US/docs/Web/Manifest/short_name>.
@@ -227,7 +236,7 @@ withOrientation withOrientationArg withOrientationArg0 =
 withShortName: String -> Pages.Manifest.Config -> Pages.Manifest.Config
 -}
 withShortName : String -> Elm.Expression -> Elm.Expression
-withShortName withShortNameArg withShortNameArg0 =
+withShortName withShortNameArg_ withShortNameArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Pages", "Manifest" ]
@@ -242,7 +251,7 @@ withShortName withShortNameArg withShortNameArg0 =
                      )
              }
         )
-        [ Elm.string withShortNameArg, withShortNameArg0 ]
+        [ Elm.string withShortNameArg_, withShortNameArg_0 ]
 
 
 {-| Set <https://developer.mozilla.org/en-US/docs/Web/Manifest/theme_color>.
@@ -250,7 +259,7 @@ withShortName withShortNameArg withShortNameArg0 =
 withThemeColor: Color.Color -> Pages.Manifest.Config -> Pages.Manifest.Config
 -}
 withThemeColor : Elm.Expression -> Elm.Expression -> Elm.Expression
-withThemeColor withThemeColorArg withThemeColorArg0 =
+withThemeColor withThemeColorArg_ withThemeColorArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Pages", "Manifest" ]
@@ -265,7 +274,7 @@ withThemeColor withThemeColorArg withThemeColorArg0 =
                      )
              }
         )
-        [ withThemeColorArg, withThemeColorArg0 ]
+        [ withThemeColorArg_, withThemeColorArg_0 ]
 
 
 {-| Escape hatch for specifying fields that aren't exposed through this module otherwise. The possible supported properties
@@ -275,7 +284,7 @@ for a full listing of the current supported properties.
 withField: String -> Json.Encode.Value -> Pages.Manifest.Config -> Pages.Manifest.Config
 -}
 withField : String -> Elm.Expression -> Elm.Expression -> Elm.Expression
-withField withFieldArg withFieldArg0 withFieldArg1 =
+withField withFieldArg_ withFieldArg_0 withFieldArg_1 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Pages", "Manifest" ]
@@ -291,7 +300,7 @@ withField withFieldArg withFieldArg0 withFieldArg1 =
                      )
              }
         )
-        [ Elm.string withFieldArg, withFieldArg0, withFieldArg1 ]
+        [ Elm.string withFieldArg_, withFieldArg_0, withFieldArg_1 ]
 
 
 {-| A generator for `Api.elm` to include a manifest.json. The String argument is the canonical URL of the site.
@@ -317,7 +326,7 @@ generator:
     -> ApiRoute.ApiRoute ApiRoute.Response
 -}
 generator : String -> Elm.Expression -> Elm.Expression
-generator generatorArg generatorArg0 =
+generator generatorArg_ generatorArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Pages", "Manifest" ]
@@ -344,7 +353,7 @@ generator generatorArg generatorArg0 =
                      )
              }
         )
-        [ Elm.string generatorArg, generatorArg0 ]
+        [ Elm.string generatorArg_, generatorArg_0 ]
 
 
 {-| Feel free to use this, but in 99% of cases you won't need it. The generated
@@ -353,7 +362,7 @@ code will run this for you to generate your `manifest.json` file automatically!
 toJson: String -> Pages.Manifest.Config -> Json.Encode.Value
 -}
 toJson : String -> Elm.Expression -> Elm.Expression
-toJson toJsonArg toJsonArg0 =
+toJson toJsonArg_ toJsonArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Pages", "Manifest" ]
@@ -368,7 +377,7 @@ toJson toJsonArg toJsonArg0 =
                      )
              }
         )
-        [ Elm.string toJsonArg, toJsonArg0 ]
+        [ Elm.string toJsonArg_, toJsonArg_0 ]
 
 
 annotation_ :
@@ -707,32 +716,29 @@ make_ =
 caseOf_ :
     { displayMode :
         Elm.Expression
-        -> { displayModeTags_0_0
-            | fullscreen : Elm.Expression
-            , standalone : Elm.Expression
-            , minimalUi : Elm.Expression
-            , browser : Elm.Expression
+        -> { fullscreen : Elm.Expression
+        , standalone : Elm.Expression
+        , minimalUi : Elm.Expression
+        , browser : Elm.Expression
         }
         -> Elm.Expression
     , orientation :
         Elm.Expression
-        -> { orientationTags_1_0
-            | any : Elm.Expression
-            , natural : Elm.Expression
-            , landscape : Elm.Expression
-            , landscapePrimary : Elm.Expression
-            , landscapeSecondary : Elm.Expression
-            , portrait : Elm.Expression
-            , portraitPrimary : Elm.Expression
-            , portraitSecondary : Elm.Expression
+        -> { any : Elm.Expression
+        , natural : Elm.Expression
+        , landscape : Elm.Expression
+        , landscapePrimary : Elm.Expression
+        , landscapeSecondary : Elm.Expression
+        , portrait : Elm.Expression
+        , portraitPrimary : Elm.Expression
+        , portraitSecondary : Elm.Expression
         }
         -> Elm.Expression
     , iconPurpose :
         Elm.Expression
-        -> { iconPurposeTags_2_0
-            | iconPurposeMonochrome : Elm.Expression
-            , iconPurposeMaskable : Elm.Expression
-            , iconPurposeAny : Elm.Expression
+        -> { iconPurposeMonochrome : Elm.Expression
+        , iconPurposeMaskable : Elm.Expression
+        , iconPurposeAny : Elm.Expression
         }
         -> Elm.Expression
     }
@@ -742,47 +748,84 @@ caseOf_ =
             Elm.Case.custom
                 displayModeExpression
                 (Type.namedWith [ "Pages", "Manifest" ] "DisplayMode" [])
-                [ Elm.Case.branch0 "Fullscreen" displayModeTags.fullscreen
-                , Elm.Case.branch0 "Standalone" displayModeTags.standalone
-                , Elm.Case.branch0 "MinimalUi" displayModeTags.minimalUi
-                , Elm.Case.branch0 "Browser" displayModeTags.browser
+                [ Elm.Case.branch
+                    (Elm.Arg.customType "Fullscreen" displayModeTags.fullscreen)
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType "Standalone" displayModeTags.standalone)
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType "MinimalUi" displayModeTags.minimalUi)
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType "Browser" displayModeTags.browser)
+                    Basics.identity
                 ]
     , orientation =
         \orientationExpression orientationTags ->
             Elm.Case.custom
                 orientationExpression
                 (Type.namedWith [ "Pages", "Manifest" ] "Orientation" [])
-                [ Elm.Case.branch0 "Any" orientationTags.any
-                , Elm.Case.branch0 "Natural" orientationTags.natural
-                , Elm.Case.branch0 "Landscape" orientationTags.landscape
-                , Elm.Case.branch0
-                    "LandscapePrimary"
-                    orientationTags.landscapePrimary
-                , Elm.Case.branch0
-                    "LandscapeSecondary"
-                    orientationTags.landscapeSecondary
-                , Elm.Case.branch0 "Portrait" orientationTags.portrait
-                , Elm.Case.branch0
-                    "PortraitPrimary"
-                    orientationTags.portraitPrimary
-                , Elm.Case.branch0
-                    "PortraitSecondary"
-                    orientationTags.portraitSecondary
+                [ Elm.Case.branch
+                    (Elm.Arg.customType "Any" orientationTags.any)
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType "Natural" orientationTags.natural)
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType "Landscape" orientationTags.landscape)
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType
+                       "LandscapePrimary"
+                       orientationTags.landscapePrimary
+                    )
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType
+                       "LandscapeSecondary"
+                       orientationTags.landscapeSecondary
+                    )
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType "Portrait" orientationTags.portrait)
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType
+                       "PortraitPrimary"
+                       orientationTags.portraitPrimary
+                    )
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType
+                       "PortraitSecondary"
+                       orientationTags.portraitSecondary
+                    )
+                    Basics.identity
                 ]
     , iconPurpose =
         \iconPurposeExpression iconPurposeTags ->
             Elm.Case.custom
                 iconPurposeExpression
                 (Type.namedWith [ "Pages", "Manifest" ] "IconPurpose" [])
-                [ Elm.Case.branch0
-                    "IconPurposeMonochrome"
-                    iconPurposeTags.iconPurposeMonochrome
-                , Elm.Case.branch0
-                    "IconPurposeMaskable"
-                    iconPurposeTags.iconPurposeMaskable
-                , Elm.Case.branch0
-                    "IconPurposeAny"
-                    iconPurposeTags.iconPurposeAny
+                [ Elm.Case.branch
+                    (Elm.Arg.customType
+                       "IconPurposeMonochrome"
+                       iconPurposeTags.iconPurposeMonochrome
+                    )
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType
+                       "IconPurposeMaskable"
+                       iconPurposeTags.iconPurposeMaskable
+                    )
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType
+                       "IconPurposeAny"
+                       iconPurposeTags.iconPurposeAny
+                    )
+                    Basics.identity
                 ]
     }
 
@@ -804,7 +847,7 @@ call_ :
     }
 call_ =
     { init =
-        \initArg ->
+        \initArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Pages", "Manifest" ]
@@ -839,9 +882,9 @@ call_ =
                              )
                      }
                 )
-                [ initArg ]
+                [ initArg_ ]
     , withBackgroundColor =
-        \withBackgroundColorArg withBackgroundColorArg0 ->
+        \withBackgroundColorArg_ withBackgroundColorArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Pages", "Manifest" ]
@@ -863,9 +906,9 @@ call_ =
                              )
                      }
                 )
-                [ withBackgroundColorArg, withBackgroundColorArg0 ]
+                [ withBackgroundColorArg_, withBackgroundColorArg_0 ]
     , withCategories =
-        \withCategoriesArg withCategoriesArg0 ->
+        \withCategoriesArg_ withCategoriesArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Pages", "Manifest" ]
@@ -892,9 +935,9 @@ call_ =
                              )
                      }
                 )
-                [ withCategoriesArg, withCategoriesArg0 ]
+                [ withCategoriesArg_, withCategoriesArg_0 ]
     , withDisplayMode =
-        \withDisplayModeArg withDisplayModeArg0 ->
+        \withDisplayModeArg_ withDisplayModeArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Pages", "Manifest" ]
@@ -919,9 +962,9 @@ call_ =
                              )
                      }
                 )
-                [ withDisplayModeArg, withDisplayModeArg0 ]
+                [ withDisplayModeArg_, withDisplayModeArg_0 ]
     , withIarcRatingId =
-        \withIarcRatingIdArg withIarcRatingIdArg0 ->
+        \withIarcRatingIdArg_ withIarcRatingIdArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Pages", "Manifest" ]
@@ -943,9 +986,9 @@ call_ =
                              )
                      }
                 )
-                [ withIarcRatingIdArg, withIarcRatingIdArg0 ]
+                [ withIarcRatingIdArg_, withIarcRatingIdArg_0 ]
     , withLang =
-        \withLangArg withLangArg0 ->
+        \withLangArg_ withLangArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Pages", "Manifest" ]
@@ -970,9 +1013,9 @@ call_ =
                              )
                      }
                 )
-                [ withLangArg, withLangArg0 ]
+                [ withLangArg_, withLangArg_0 ]
     , withOrientation =
-        \withOrientationArg withOrientationArg0 ->
+        \withOrientationArg_ withOrientationArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Pages", "Manifest" ]
@@ -997,9 +1040,9 @@ call_ =
                              )
                      }
                 )
-                [ withOrientationArg, withOrientationArg0 ]
+                [ withOrientationArg_, withOrientationArg_0 ]
     , withShortName =
-        \withShortNameArg withShortNameArg0 ->
+        \withShortNameArg_ withShortNameArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Pages", "Manifest" ]
@@ -1021,9 +1064,9 @@ call_ =
                              )
                      }
                 )
-                [ withShortNameArg, withShortNameArg0 ]
+                [ withShortNameArg_, withShortNameArg_0 ]
     , withThemeColor =
-        \withThemeColorArg withThemeColorArg0 ->
+        \withThemeColorArg_ withThemeColorArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Pages", "Manifest" ]
@@ -1045,9 +1088,9 @@ call_ =
                              )
                      }
                 )
-                [ withThemeColorArg, withThemeColorArg0 ]
+                [ withThemeColorArg_, withThemeColorArg_0 ]
     , withField =
-        \withFieldArg withFieldArg0 withFieldArg1 ->
+        \withFieldArg_ withFieldArg_0 withFieldArg_1 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Pages", "Manifest" ]
@@ -1073,9 +1116,9 @@ call_ =
                              )
                      }
                 )
-                [ withFieldArg, withFieldArg0, withFieldArg1 ]
+                [ withFieldArg_, withFieldArg_0, withFieldArg_1 ]
     , generator =
-        \generatorArg generatorArg0 ->
+        \generatorArg_ generatorArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Pages", "Manifest" ]
@@ -1109,9 +1152,9 @@ call_ =
                              )
                      }
                 )
-                [ generatorArg, generatorArg0 ]
+                [ generatorArg_, generatorArg_0 ]
     , toJson =
-        \toJsonArg toJsonArg0 ->
+        \toJsonArg_ toJsonArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Pages", "Manifest" ]
@@ -1133,7 +1176,7 @@ call_ =
                              )
                      }
                 )
-                [ toJsonArg, toJsonArg0 ]
+                [ toJsonArg_, toJsonArg_0 ]
     }
 
 

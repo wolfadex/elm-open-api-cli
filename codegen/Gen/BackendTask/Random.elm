@@ -1,6 +1,10 @@
-module Gen.BackendTask.Random exposing (call_, generate, int32, moduleName_, values_)
+module Gen.BackendTask.Random exposing
+    ( moduleName_, generate, int32, call_, values_
+    )
 
-{-| 
+{-|
+# Generated bindings for BackendTask.Random
+
 @docs moduleName_, generate, int32, call_, values_
 -}
 
@@ -46,7 +50,7 @@ steps through new seeds while running a single `Random.Generator`.
 generate: Random.Generator value -> BackendTask.BackendTask error value
 -}
 generate : Elm.Expression -> Elm.Expression
-generate generateArg =
+generate generateArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "BackendTask", "Random" ]
@@ -67,7 +71,7 @@ generate generateArg =
                      )
              }
         )
-        [ generateArg ]
+        [ generateArg_ ]
 
 
 {-| Gives a random 32-bit Int. This can be useful if you want to do low-level things with a cryptographically sound
@@ -101,7 +105,7 @@ int32 =
 call_ : { generate : Elm.Expression -> Elm.Expression }
 call_ =
     { generate =
-        \generateArg ->
+        \generateArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "BackendTask", "Random" ]
@@ -122,7 +126,7 @@ call_ =
                              )
                      }
                 )
-                [ generateArg ]
+                [ generateArg_ ]
     }
 
 

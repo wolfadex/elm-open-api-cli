@@ -1,12 +1,19 @@
-module Gen.BackendTask.File exposing (annotation_, bodyWithFrontmatter, bodyWithoutFrontmatter, call_, caseOf_, jsonFile, make_, moduleName_, onlyFrontmatter, rawFile, values_)
+module Gen.BackendTask.File exposing
+    ( moduleName_, bodyWithFrontmatter, bodyWithoutFrontmatter, onlyFrontmatter, jsonFile, rawFile
+    , annotation_, make_, caseOf_, call_, values_
+    )
 
-{-| 
-@docs moduleName_, bodyWithFrontmatter, bodyWithoutFrontmatter, onlyFrontmatter, jsonFile, rawFile, annotation_, make_, caseOf_, call_, values_
+{-|
+# Generated bindings for BackendTask.File
+
+@docs moduleName_, bodyWithFrontmatter, bodyWithoutFrontmatter, onlyFrontmatter, jsonFile, rawFile
+@docs annotation_, make_, caseOf_, call_, values_
 -}
 
 
 import Elm
 import Elm.Annotation as Type
+import Elm.Arg
 import Elm.Case
 
 
@@ -107,7 +114,7 @@ bodyWithFrontmatter:
 -}
 bodyWithFrontmatter :
     (Elm.Expression -> Elm.Expression) -> String -> Elm.Expression
-bodyWithFrontmatter bodyWithFrontmatterArg bodyWithFrontmatterArg0 =
+bodyWithFrontmatter bodyWithFrontmatterArg_ bodyWithFrontmatterArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "BackendTask", "File" ]
@@ -151,8 +158,10 @@ bodyWithFrontmatter bodyWithFrontmatterArg bodyWithFrontmatterArg0 =
                      )
              }
         )
-        [ Elm.functionReduced "bodyWithFrontmatterUnpack" bodyWithFrontmatterArg
-        , Elm.string bodyWithFrontmatterArg0
+        [ Elm.functionReduced
+            "bodyWithFrontmatterUnpack"
+            bodyWithFrontmatterArg_
+        , Elm.string bodyWithFrontmatterArg_0
         ]
 
 
@@ -186,7 +195,7 @@ bodyWithoutFrontmatter:
     } String
 -}
 bodyWithoutFrontmatter : String -> Elm.Expression
-bodyWithoutFrontmatter bodyWithoutFrontmatterArg =
+bodyWithoutFrontmatter bodyWithoutFrontmatterArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "BackendTask", "File" ]
@@ -218,7 +227,7 @@ bodyWithoutFrontmatter bodyWithoutFrontmatterArg =
                      )
              }
         )
-        [ Elm.string bodyWithoutFrontmatterArg ]
+        [ Elm.string bodyWithoutFrontmatterArg_ ]
 
 
 {-| Same as `bodyWithFrontmatter` except it doesn't include the body.
@@ -284,7 +293,7 @@ onlyFrontmatter:
     } frontmatter
 -}
 onlyFrontmatter : Elm.Expression -> String -> Elm.Expression
-onlyFrontmatter onlyFrontmatterArg onlyFrontmatterArg0 =
+onlyFrontmatter onlyFrontmatterArg_ onlyFrontmatterArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "BackendTask", "File" ]
@@ -325,7 +334,7 @@ onlyFrontmatter onlyFrontmatterArg onlyFrontmatterArg0 =
                      )
              }
         )
-        [ onlyFrontmatterArg, Elm.string onlyFrontmatterArg0 ]
+        [ onlyFrontmatterArg_, Elm.string onlyFrontmatterArg_0 ]
 
 
 {-| Read a file as JSON.
@@ -355,7 +364,7 @@ jsonFile:
     } a
 -}
 jsonFile : Elm.Expression -> String -> Elm.Expression
-jsonFile jsonFileArg jsonFileArg0 =
+jsonFile jsonFileArg_ jsonFileArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "BackendTask", "File" ]
@@ -396,7 +405,7 @@ jsonFile jsonFileArg jsonFileArg0 =
                      )
              }
         )
-        [ jsonFileArg, Elm.string jsonFileArg0 ]
+        [ jsonFileArg_, Elm.string jsonFileArg_0 ]
 
 
 {-| Get the raw file content. Unlike the frontmatter helpers in this module, this function will not strip off frontmatter if there is any.
@@ -425,7 +434,7 @@ rawFile:
     } String
 -}
 rawFile : String -> Elm.Expression
-rawFile rawFileArg =
+rawFile rawFileArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "BackendTask", "File" ]
@@ -457,7 +466,7 @@ rawFile rawFileArg =
                      )
              }
         )
-        [ Elm.string rawFileArg ]
+        [ Elm.string rawFileArg_ ]
 
 
 annotation_ : { fileReadError : Type.Annotation -> Type.Annotation }
@@ -522,10 +531,9 @@ make_ =
 caseOf_ :
     { fileReadError :
         Elm.Expression
-        -> { fileReadErrorTags_0_0
-            | fileDoesntExist : Elm.Expression
-            , fileReadError : Elm.Expression -> Elm.Expression
-            , decodingError : Elm.Expression -> Elm.Expression
+        -> { fileDoesntExist : Elm.Expression
+        , fileReadError : Elm.Expression -> Elm.Expression
+        , decodingError : Elm.Expression -> Elm.Expression
         }
         -> Elm.Expression
     }
@@ -539,17 +547,34 @@ caseOf_ =
                      "FileReadError"
                      [ Type.var "decoding" ]
                 )
-                [ Elm.Case.branch0
-                    "FileDoesntExist"
-                    fileReadErrorTags.fileDoesntExist
-                , Elm.Case.branch1
-                    "FileReadError"
-                    ( "stringString", Type.string )
-                    fileReadErrorTags.fileReadError
-                , Elm.Case.branch1
-                    "DecodingError"
-                    ( "decoding", Type.var "decoding" )
-                    fileReadErrorTags.decodingError
+                [ Elm.Case.branch
+                    (Elm.Arg.customType
+                       "FileDoesntExist"
+                       fileReadErrorTags.fileDoesntExist
+                    )
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType
+                       "FileReadError"
+                       fileReadErrorTags.fileReadError |> Elm.Arg.item
+                                                                (Elm.Arg.varWith
+                                                                       "arg_0"
+                                                                       Type.string
+                                                                )
+                    )
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType
+                       "DecodingError"
+                       fileReadErrorTags.decodingError |> Elm.Arg.item
+                                                                (Elm.Arg.varWith
+                                                                       "decoding"
+                                                                       (Type.var
+                                                                              "decoding"
+                                                                       )
+                                                                )
+                    )
+                    Basics.identity
                 ]
     }
 
@@ -563,7 +588,7 @@ call_ :
     }
 call_ =
     { bodyWithFrontmatter =
-        \bodyWithFrontmatterArg bodyWithFrontmatterArg0 ->
+        \bodyWithFrontmatterArg_ bodyWithFrontmatterArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "BackendTask", "File" ]
@@ -607,9 +632,9 @@ call_ =
                              )
                      }
                 )
-                [ bodyWithFrontmatterArg, bodyWithFrontmatterArg0 ]
+                [ bodyWithFrontmatterArg_, bodyWithFrontmatterArg_0 ]
     , bodyWithoutFrontmatter =
-        \bodyWithoutFrontmatterArg ->
+        \bodyWithoutFrontmatterArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "BackendTask", "File" ]
@@ -641,9 +666,9 @@ call_ =
                              )
                      }
                 )
-                [ bodyWithoutFrontmatterArg ]
+                [ bodyWithoutFrontmatterArg_ ]
     , onlyFrontmatter =
-        \onlyFrontmatterArg onlyFrontmatterArg0 ->
+        \onlyFrontmatterArg_ onlyFrontmatterArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "BackendTask", "File" ]
@@ -684,9 +709,9 @@ call_ =
                              )
                      }
                 )
-                [ onlyFrontmatterArg, onlyFrontmatterArg0 ]
+                [ onlyFrontmatterArg_, onlyFrontmatterArg_0 ]
     , jsonFile =
-        \jsonFileArg jsonFileArg0 ->
+        \jsonFileArg_ jsonFileArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "BackendTask", "File" ]
@@ -727,9 +752,9 @@ call_ =
                              )
                      }
                 )
-                [ jsonFileArg, jsonFileArg0 ]
+                [ jsonFileArg_, jsonFileArg_0 ]
     , rawFile =
-        \rawFileArg ->
+        \rawFileArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "BackendTask", "File" ]
@@ -761,7 +786,7 @@ call_ =
                              )
                      }
                 )
-                [ rawFileArg ]
+                [ rawFileArg_ ]
     }
 
 

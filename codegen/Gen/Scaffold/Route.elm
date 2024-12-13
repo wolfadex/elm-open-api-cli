@@ -1,12 +1,21 @@
-module Gen.Scaffold.Route exposing (addDeclarations, annotation_, buildNoState, buildWithLocalState, buildWithSharedState, call_, caseOf_, make_, moduleNameCliArg, moduleName_, preRender, serverRender, single, values_)
+module Gen.Scaffold.Route exposing
+    ( moduleName_, buildWithLocalState, buildWithSharedState, buildNoState, serverRender, preRender
+    , single, addDeclarations, moduleNameCliArg, annotation_, make_, caseOf_, call_
+    , values_
+    )
 
-{-| 
-@docs moduleName_, buildWithLocalState, buildWithSharedState, buildNoState, serverRender, preRender, single, addDeclarations, moduleNameCliArg, annotation_, make_, caseOf_, call_, values_
+{-|
+# Generated bindings for Scaffold.Route
+
+@docs moduleName_, buildWithLocalState, buildWithSharedState, buildNoState, serverRender, preRender
+@docs single, addDeclarations, moduleNameCliArg, annotation_, make_, caseOf_
+@docs call_, values_
 -}
 
 
 import Elm
 import Elm.Annotation as Type
+import Elm.Arg
 import Elm.Case
 
 
@@ -51,7 +60,7 @@ buildWithLocalState :
     }
     -> Elm.Expression
     -> Elm.Expression
-buildWithLocalState buildWithLocalStateArg buildWithLocalStateArg0 =
+buildWithLocalState buildWithLocalStateArg_ buildWithLocalStateArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Scaffold", "Route" ]
@@ -194,30 +203,30 @@ buildWithLocalState buildWithLocalStateArg buildWithLocalStateArg0 =
                   "view"
                   (Elm.functionReduced
                        "buildWithLocalStateUnpack"
-                       buildWithLocalStateArg.view
+                       buildWithLocalStateArg_.view
                   )
             , Tuple.pair
                   "update"
                   (Elm.functionReduced
                        "buildWithLocalStateUnpack"
-                       buildWithLocalStateArg.update
+                       buildWithLocalStateArg_.update
                   )
             , Tuple.pair
                   "init"
                   (Elm.functionReduced
                        "buildWithLocalStateUnpack"
-                       buildWithLocalStateArg.init
+                       buildWithLocalStateArg_.init
                   )
             , Tuple.pair
                   "subscriptions"
                   (Elm.functionReduced
                        "buildWithLocalStateUnpack"
-                       buildWithLocalStateArg.subscriptions
+                       buildWithLocalStateArg_.subscriptions
                   )
-            , Tuple.pair "msg" buildWithLocalStateArg.msg
-            , Tuple.pair "model" buildWithLocalStateArg.model
+            , Tuple.pair "msg" buildWithLocalStateArg_.msg
+            , Tuple.pair "model" buildWithLocalStateArg_.model
             ]
-        , buildWithLocalStateArg0
+        , buildWithLocalStateArg_0
         ]
 
 
@@ -256,7 +265,7 @@ buildWithSharedState :
     }
     -> Elm.Expression
     -> Elm.Expression
-buildWithSharedState buildWithSharedStateArg buildWithSharedStateArg0 =
+buildWithSharedState buildWithSharedStateArg_ buildWithSharedStateArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Scaffold", "Route" ]
@@ -399,30 +408,30 @@ buildWithSharedState buildWithSharedStateArg buildWithSharedStateArg0 =
                   "view"
                   (Elm.functionReduced
                        "buildWithSharedStateUnpack"
-                       buildWithSharedStateArg.view
+                       buildWithSharedStateArg_.view
                   )
             , Tuple.pair
                   "update"
                   (Elm.functionReduced
                        "buildWithSharedStateUnpack"
-                       buildWithSharedStateArg.update
+                       buildWithSharedStateArg_.update
                   )
             , Tuple.pair
                   "init"
                   (Elm.functionReduced
                        "buildWithSharedStateUnpack"
-                       buildWithSharedStateArg.init
+                       buildWithSharedStateArg_.init
                   )
             , Tuple.pair
                   "subscriptions"
                   (Elm.functionReduced
                        "buildWithSharedStateUnpack"
-                       buildWithSharedStateArg.subscriptions
+                       buildWithSharedStateArg_.subscriptions
                   )
-            , Tuple.pair "msg" buildWithSharedStateArg.msg
-            , Tuple.pair "model" buildWithSharedStateArg.model
+            , Tuple.pair "msg" buildWithSharedStateArg_.msg
+            , Tuple.pair "model" buildWithSharedStateArg_.model
             ]
-        , buildWithSharedStateArg0
+        , buildWithSharedStateArg_0
         ]
 
 
@@ -435,7 +444,7 @@ buildNoState :
     { view : Elm.Expression -> Elm.Expression }
     -> Elm.Expression
     -> Elm.Expression
-buildNoState buildNoStateArg buildNoStateArg0 =
+buildNoState buildNoStateArg_ buildNoStateArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Scaffold", "Route" ]
@@ -477,10 +486,12 @@ buildNoState buildNoStateArg buildNoStateArg0 =
         [ Elm.record
             [ Tuple.pair
                   "view"
-                  (Elm.functionReduced "buildNoStateUnpack" buildNoStateArg.view
+                  (Elm.functionReduced
+                       "buildNoStateUnpack"
+                       buildNoStateArg_.view
                   )
             ]
-        , buildNoStateArg0
+        , buildNoStateArg_0
         ]
 
 
@@ -501,7 +512,7 @@ serverRender :
     , moduleName : List String
     }
     -> Elm.Expression
-serverRender serverRenderArg =
+serverRender serverRenderArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Scaffold", "Route" ]
@@ -565,15 +576,17 @@ serverRender serverRenderArg =
              }
         )
         [ Elm.record
-            [ Tuple.pair "data" serverRenderArg.data
-            , Tuple.pair "action" serverRenderArg.action
+            [ Tuple.pair "data" serverRenderArg_.data
+            , Tuple.pair "action" serverRenderArg_.action
             , Tuple.pair
                   "head"
-                  (Elm.functionReduced "serverRenderUnpack" serverRenderArg.head
+                  (Elm.functionReduced
+                       "serverRenderUnpack"
+                       serverRenderArg_.head
                   )
             , Tuple.pair
                   "moduleName"
-                  (Elm.list (List.map Elm.string serverRenderArg.moduleName))
+                  (Elm.list (List.map Elm.string serverRenderArg_.moduleName))
             ]
         ]
 
@@ -601,7 +614,7 @@ preRender :
     , moduleName : List String
     }
     -> Elm.Expression
-preRender preRenderArg =
+preRender preRenderArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Scaffold", "Route" ]
@@ -643,14 +656,14 @@ preRender preRenderArg =
              }
         )
         [ Elm.record
-            [ Tuple.pair "data" preRenderArg.data
-            , Tuple.pair "pages" preRenderArg.pages
+            [ Tuple.pair "data" preRenderArg_.data
+            , Tuple.pair "pages" preRenderArg_.pages
             , Tuple.pair
                   "head"
-                  (Elm.functionReduced "preRenderUnpack" preRenderArg.head)
+                  (Elm.functionReduced "preRenderUnpack" preRenderArg_.head)
             , Tuple.pair
                   "moduleName"
-                  (Elm.list (List.map Elm.string preRenderArg.moduleName))
+                  (Elm.list (List.map Elm.string preRenderArg_.moduleName))
             ]
         ]
 
@@ -672,7 +685,7 @@ single :
     , moduleName : List String
     }
     -> Elm.Expression
-single singleArg =
+single singleArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Scaffold", "Route" ]
@@ -703,13 +716,13 @@ single singleArg =
              }
         )
         [ Elm.record
-            [ Tuple.pair "data" singleArg.data
+            [ Tuple.pair "data" singleArg_.data
             , Tuple.pair
                   "head"
-                  (Elm.functionReduced "singleUnpack" singleArg.head)
+                  (Elm.functionReduced "singleUnpack" singleArg_.head)
             , Tuple.pair
                   "moduleName"
-                  (Elm.list (List.map Elm.string singleArg.moduleName))
+                  (Elm.list (List.map Elm.string singleArg_.moduleName))
             ]
         ]
 
@@ -721,7 +734,7 @@ You can also define additional top-level declarations in the generated Route mod
 addDeclarations: List Elm.Declaration -> Scaffold.Route.Builder -> Scaffold.Route.Builder
 -}
 addDeclarations : List Elm.Expression -> Elm.Expression -> Elm.Expression
-addDeclarations addDeclarationsArg addDeclarationsArg0 =
+addDeclarations addDeclarationsArg_ addDeclarationsArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Scaffold", "Route" ]
@@ -737,7 +750,7 @@ addDeclarations addDeclarationsArg addDeclarationsArg0 =
                      )
              }
         )
-        [ Elm.list addDeclarationsArg, addDeclarationsArg0 ]
+        [ Elm.list addDeclarationsArg_, addDeclarationsArg_0 ]
 
 
 {-| A positional argument for elm-cli-options-parser that does a Regex validation to check that the module name is a valid Elm Route module name.
@@ -747,7 +760,7 @@ moduleNameCliArg:
     -> Cli.Option.Option from (List String) builderState
 -}
 moduleNameCliArg : Elm.Expression -> Elm.Expression
-moduleNameCliArg moduleNameCliArgArg =
+moduleNameCliArg moduleNameCliArgArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Scaffold", "Route" ]
@@ -774,7 +787,7 @@ moduleNameCliArg moduleNameCliArgArg =
                      )
              }
         )
-        [ moduleNameCliArgArg ]
+        [ moduleNameCliArgArg_ ]
 
 
 annotation_ : { builder : Type.Annotation, type_ : Type.Annotation }
@@ -812,33 +825,41 @@ make_ =
     }
 
 
-caseOf_ :
-    { type_ :
-        Elm.Expression
-        -> { typeTags_0_0
-            | alias : Elm.Expression -> Elm.Expression
-            , custom : Elm.Expression -> Elm.Expression
-        }
-        -> Elm.Expression
-    }
 caseOf_ =
     { type_ =
         \typeExpression typeTags ->
             Elm.Case.custom
                 typeExpression
                 (Type.namedWith [ "Scaffold", "Route" ] "Type" [])
-                [ Elm.Case.branch1
-                    "Alias"
-                    ( "elmAnnotationAnnotation"
-                    , Type.namedWith [ "Elm", "Annotation" ] "Annotation" []
+                [ Elm.Case.branch
+                    (Elm.Arg.customType "Alias" typeTags.alias |> Elm.Arg.item
+                                                                        (Elm.Arg.varWith
+                                                                               "elmAnnotationAnnotation"
+                                                                               (Type.namedWith
+                                                                                      [ "Elm"
+                                                                                      , "Annotation"
+                                                                                      ]
+                                                                                      "Annotation"
+                                                                                      []
+                                                                               )
+                                                                        )
                     )
-                    typeTags.alias
-                , Elm.Case.branch1
-                    "Custom"
-                    ( "listList"
-                    , Type.list (Type.namedWith [ "Elm" ] "Variant" [])
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType "Custom" typeTags.custom |> Elm.Arg.item
+                                                                          (Elm.Arg.varWith
+                                                                                 "arg_0"
+                                                                                 (Type.list
+                                                                                        (Type.namedWith
+                                                                                               [ "Elm"
+                                                                                               ]
+                                                                                               "Variant"
+                                                                                               []
+                                                                                        )
+                                                                                 )
+                                                                          )
                     )
-                    typeTags.custom
+                    Basics.identity
                 ]
     }
 
@@ -855,7 +876,7 @@ call_ :
     }
 call_ =
     { buildWithLocalState =
-        \buildWithLocalStateArg buildWithLocalStateArg0 ->
+        \buildWithLocalStateArg_ buildWithLocalStateArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Scaffold", "Route" ]
@@ -1012,9 +1033,9 @@ call_ =
                              )
                      }
                 )
-                [ buildWithLocalStateArg, buildWithLocalStateArg0 ]
+                [ buildWithLocalStateArg_, buildWithLocalStateArg_0 ]
     , buildWithSharedState =
-        \buildWithSharedStateArg buildWithSharedStateArg0 ->
+        \buildWithSharedStateArg_ buildWithSharedStateArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Scaffold", "Route" ]
@@ -1171,9 +1192,9 @@ call_ =
                              )
                      }
                 )
-                [ buildWithSharedStateArg, buildWithSharedStateArg0 ]
+                [ buildWithSharedStateArg_, buildWithSharedStateArg_0 ]
     , buildNoState =
-        \buildNoStateArg buildNoStateArg0 ->
+        \buildNoStateArg_ buildNoStateArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Scaffold", "Route" ]
@@ -1219,9 +1240,9 @@ call_ =
                              )
                      }
                 )
-                [ buildNoStateArg, buildNoStateArg0 ]
+                [ buildNoStateArg_, buildNoStateArg_0 ]
     , serverRender =
-        \serverRenderArg ->
+        \serverRenderArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Scaffold", "Route" ]
@@ -1302,9 +1323,9 @@ call_ =
                              )
                      }
                 )
-                [ serverRenderArg ]
+                [ serverRenderArg_ ]
     , preRender =
-        \preRenderArg ->
+        \preRenderArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Scaffold", "Route" ]
@@ -1363,9 +1384,9 @@ call_ =
                              )
                      }
                 )
-                [ preRenderArg ]
+                [ preRenderArg_ ]
     , single =
-        \singleArg ->
+        \singleArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Scaffold", "Route" ]
@@ -1411,9 +1432,9 @@ call_ =
                              )
                      }
                 )
-                [ singleArg ]
+                [ singleArg_ ]
     , addDeclarations =
-        \addDeclarationsArg addDeclarationsArg0 ->
+        \addDeclarationsArg_ addDeclarationsArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Scaffold", "Route" ]
@@ -1437,9 +1458,9 @@ call_ =
                              )
                      }
                 )
-                [ addDeclarationsArg, addDeclarationsArg0 ]
+                [ addDeclarationsArg_, addDeclarationsArg_0 ]
     , moduleNameCliArg =
-        \moduleNameCliArgArg ->
+        \moduleNameCliArgArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Scaffold", "Route" ]
@@ -1466,7 +1487,7 @@ call_ =
                              )
                      }
                 )
-                [ moduleNameCliArgArg ]
+                [ moduleNameCliArgArg_ ]
     }
 
 

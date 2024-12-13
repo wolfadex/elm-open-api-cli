@@ -1,12 +1,22 @@
-module Gen.BackendTask.Http exposing (annotation_, bytesBody, call_, caseOf_, emptyBody, expectBytes, expectJson, expectString, expectWhatever, get, getJson, getWithOptions, jsonBody, make_, moduleName_, post, request, stringBody, values_, withMetadata)
+module Gen.BackendTask.Http exposing
+    ( moduleName_, get, getJson, post, expectString, expectJson
+    , expectBytes, expectWhatever, request, emptyBody, stringBody, jsonBody, bytesBody
+    , getWithOptions, withMetadata, annotation_, make_, caseOf_, call_, values_
+    )
 
-{-| 
-@docs moduleName_, get, getJson, post, expectString, expectJson, expectBytes, expectWhatever, request, emptyBody, stringBody, jsonBody, bytesBody, getWithOptions, withMetadata, annotation_, make_, caseOf_, call_, values_
+{-|
+# Generated bindings for BackendTask.Http
+
+@docs moduleName_, get, getJson, post, expectString, expectJson
+@docs expectBytes, expectWhatever, request, emptyBody, stringBody, jsonBody
+@docs bytesBody, getWithOptions, withMetadata, annotation_, make_, caseOf_
+@docs call_, values_
 -}
 
 
 import Elm
 import Elm.Annotation as Type
+import Elm.Arg
 import Elm.Case
 
 
@@ -38,7 +48,7 @@ get:
     } a
 -}
 get : String -> Elm.Expression -> Elm.Expression
-get getArg getArg0 =
+get getArg_ getArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "BackendTask", "Http" ]
@@ -75,7 +85,7 @@ get getArg getArg0 =
                      )
              }
         )
-        [ Elm.string getArg, getArg0 ]
+        [ Elm.string getArg_, getArg_0 ]
 
 
 {-| A simplified helper around [`BackendTask.Http.get`](#get), which builds up a BackendTask.Http GET request with `expectJson`.
@@ -99,7 +109,7 @@ getJson:
     } a
 -}
 getJson : String -> Elm.Expression -> Elm.Expression
-getJson getJsonArg getJsonArg0 =
+getJson getJsonArg_ getJsonArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "BackendTask", "Http" ]
@@ -136,7 +146,7 @@ getJson getJsonArg getJsonArg0 =
                      )
              }
         )
-        [ Elm.string getJsonArg, getJsonArg0 ]
+        [ Elm.string getJsonArg_, getJsonArg_0 ]
 
 
 {-| post: 
@@ -148,7 +158,7 @@ getJson getJsonArg getJsonArg0 =
     } a
 -}
 post : String -> Elm.Expression -> Elm.Expression -> Elm.Expression
-post postArg postArg0 postArg1 =
+post postArg_ postArg_0 postArg_1 =
     Elm.apply
         (Elm.value
              { importFrom = [ "BackendTask", "Http" ]
@@ -186,7 +196,7 @@ post postArg postArg0 postArg1 =
                      )
              }
         )
-        [ Elm.string postArg, postArg0, postArg1 ]
+        [ Elm.string postArg_, postArg_0, postArg_1 ]
 
 
 {-| Gives the HTTP response body as a raw String.
@@ -232,7 +242,7 @@ fail your `elm-pages` build and print out the String from the `Err`.
 expectJson: Json.Decode.Decoder value -> BackendTask.Http.Expect value
 -}
 expectJson : Elm.Expression -> Elm.Expression
-expectJson expectJsonArg =
+expectJson expectJsonArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "BackendTask", "Http" ]
@@ -253,12 +263,12 @@ expectJson expectJsonArg =
                      )
              }
         )
-        [ expectJsonArg ]
+        [ expectJsonArg_ ]
 
 
 {-| expectBytes: Bytes.Decode.Decoder value -> BackendTask.Http.Expect value -}
 expectBytes : Elm.Expression -> Elm.Expression
-expectBytes expectBytesArg =
+expectBytes expectBytesArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "BackendTask", "Http" ]
@@ -279,12 +289,12 @@ expectBytes expectBytesArg =
                      )
              }
         )
-        [ expectBytesArg ]
+        [ expectBytesArg_ ]
 
 
 {-| expectWhatever: value -> BackendTask.Http.Expect value -}
 expectWhatever : Elm.Expression -> Elm.Expression
-expectWhatever expectWhateverArg =
+expectWhatever expectWhateverArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "BackendTask", "Http" ]
@@ -301,7 +311,7 @@ expectWhatever expectWhateverArg =
                      )
              }
         )
-        [ expectWhateverArg ]
+        [ expectWhateverArg_ ]
 
 
 {-| request: 
@@ -327,7 +337,7 @@ request :
     }
     -> Elm.Expression
     -> Elm.Expression
-request requestArg requestArg0 =
+request requestArg_ requestArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "BackendTask", "Http" ]
@@ -379,14 +389,14 @@ request requestArg requestArg0 =
              }
         )
         [ Elm.record
-            [ Tuple.pair "url" (Elm.string requestArg.url)
-            , Tuple.pair "method" (Elm.string requestArg.method)
-            , Tuple.pair "headers" (Elm.list requestArg.headers)
-            , Tuple.pair "body" requestArg.body
-            , Tuple.pair "retries" requestArg.retries
-            , Tuple.pair "timeoutInMs" requestArg.timeoutInMs
+            [ Tuple.pair "url" (Elm.string requestArg_.url)
+            , Tuple.pair "method" (Elm.string requestArg_.method)
+            , Tuple.pair "headers" (Elm.list requestArg_.headers)
+            , Tuple.pair "body" requestArg_.body
+            , Tuple.pair "retries" requestArg_.retries
+            , Tuple.pair "timeoutInMs" requestArg_.timeoutInMs
             ]
-        , requestArg0
+        , requestArg_0
         ]
 
 
@@ -412,7 +422,7 @@ Note from the `elm/http` docs:
 stringBody: String -> String -> BackendTask.Http.Body
 -}
 stringBody : String -> String -> Elm.Expression
-stringBody stringBodyArg stringBodyArg0 =
+stringBody stringBodyArg_ stringBodyArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "BackendTask", "Http" ]
@@ -425,7 +435,7 @@ stringBody stringBodyArg stringBodyArg0 =
                      )
              }
         )
-        [ Elm.string stringBodyArg, Elm.string stringBodyArg0 ]
+        [ Elm.string stringBodyArg_, Elm.string stringBodyArg_0 ]
 
 
 {-| Builds a JSON body for a BackendTask.Http request. See [elm/http's `Http.jsonBody`](https://package.elm-lang.org/packages/elm/http/latest/Http#jsonBody).
@@ -433,7 +443,7 @@ stringBody stringBodyArg stringBodyArg0 =
 jsonBody: Json.Encode.Value -> BackendTask.Http.Body
 -}
 jsonBody : Elm.Expression -> Elm.Expression
-jsonBody jsonBodyArg =
+jsonBody jsonBodyArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "BackendTask", "Http" ]
@@ -446,7 +456,7 @@ jsonBody jsonBodyArg =
                      )
              }
         )
-        [ jsonBodyArg ]
+        [ jsonBodyArg_ ]
 
 
 {-| Build a body from `Bytes` for a BackendTask.Http request. See [elm/http's `Http.bytesBody`](https://package.elm-lang.org/packages/elm/http/latest/Http#bytesBody).
@@ -454,7 +464,7 @@ jsonBody jsonBodyArg =
 bytesBody: String -> Bytes.Bytes -> BackendTask.Http.Body
 -}
 bytesBody : String -> Elm.Expression -> Elm.Expression
-bytesBody bytesBodyArg bytesBodyArg0 =
+bytesBody bytesBodyArg_ bytesBodyArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "BackendTask", "Http" ]
@@ -467,7 +477,7 @@ bytesBody bytesBodyArg bytesBodyArg0 =
                      )
              }
         )
-        [ Elm.string bytesBodyArg, bytesBodyArg0 ]
+        [ Elm.string bytesBodyArg_, bytesBodyArg_0 ]
 
 
 {-| Perform a GET request, with some additional options for the HTTP request, including options for caching behavior.
@@ -500,7 +510,7 @@ getWithOptions :
     , cachePath : Elm.Expression
     }
     -> Elm.Expression
-getWithOptions getWithOptionsArg =
+getWithOptions getWithOptionsArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "BackendTask", "Http" ]
@@ -556,13 +566,13 @@ getWithOptions getWithOptionsArg =
              }
         )
         [ Elm.record
-            [ Tuple.pair "url" (Elm.string getWithOptionsArg.url)
-            , Tuple.pair "expect" getWithOptionsArg.expect
-            , Tuple.pair "headers" (Elm.list getWithOptionsArg.headers)
-            , Tuple.pair "cacheStrategy" getWithOptionsArg.cacheStrategy
-            , Tuple.pair "retries" getWithOptionsArg.retries
-            , Tuple.pair "timeoutInMs" getWithOptionsArg.timeoutInMs
-            , Tuple.pair "cachePath" getWithOptionsArg.cachePath
+            [ Tuple.pair "url" (Elm.string getWithOptionsArg_.url)
+            , Tuple.pair "expect" getWithOptionsArg_.expect
+            , Tuple.pair "headers" (Elm.list getWithOptionsArg_.headers)
+            , Tuple.pair "cacheStrategy" getWithOptionsArg_.cacheStrategy
+            , Tuple.pair "retries" getWithOptionsArg_.retries
+            , Tuple.pair "timeoutInMs" getWithOptionsArg_.timeoutInMs
+            , Tuple.pair "cachePath" getWithOptionsArg_.cachePath
             ]
         ]
 
@@ -576,7 +586,7 @@ withMetadata :
     (Elm.Expression -> Elm.Expression -> Elm.Expression)
     -> Elm.Expression
     -> Elm.Expression
-withMetadata withMetadataArg withMetadataArg0 =
+withMetadata withMetadataArg_ withMetadataArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "BackendTask", "Http" ]
@@ -610,9 +620,9 @@ withMetadata withMetadataArg withMetadataArg0 =
             (\functionReducedUnpack ->
                Elm.functionReduced
                    "unpack"
-                   (withMetadataArg functionReducedUnpack)
+                   (withMetadataArg_ functionReducedUnpack)
             )
-        , withMetadataArg0
+        , withMetadataArg_0
         ]
 
 
@@ -778,70 +788,106 @@ make_ =
     }
 
 
-caseOf_ :
-    { error :
-        Elm.Expression
-        -> { errorTags_0_0
-            | badUrl : Elm.Expression -> Elm.Expression
-            , timeout : Elm.Expression
-            , networkError : Elm.Expression
-            , badStatus : Elm.Expression -> Elm.Expression -> Elm.Expression
-            , badBody : Elm.Expression -> Elm.Expression -> Elm.Expression
-        }
-        -> Elm.Expression
-    , cacheStrategy :
-        Elm.Expression
-        -> { cacheStrategyTags_1_0
-            | ignoreCache : Elm.Expression
-            , forceRevalidate : Elm.Expression
-            , forceReload : Elm.Expression
-            , forceCache : Elm.Expression
-            , errorUnlessCached : Elm.Expression
-        }
-        -> Elm.Expression
-    }
 caseOf_ =
     { error =
         \errorExpression errorTags ->
             Elm.Case.custom
                 errorExpression
                 (Type.namedWith [ "BackendTask", "Http" ] "Error" [])
-                [ Elm.Case.branch1
-                    "BadUrl"
-                    ( "stringString", Type.string )
-                    errorTags.badUrl
-                , Elm.Case.branch0 "Timeout" errorTags.timeout
-                , Elm.Case.branch0 "NetworkError" errorTags.networkError
-                , Elm.Case.branch2
-                    "BadStatus"
-                    ( "backendTaskHttpMetadata"
-                    , Type.namedWith [ "BackendTask", "Http" ] "Metadata" []
+                [ Elm.Case.branch
+                    (Elm.Arg.customType
+                       "BadUrl"
+                       errorTags.badUrl |> Elm.Arg.item
+                                                 (Elm.Arg.varWith
+                                                        "arg_0"
+                                                        Type.string
+                                                 )
                     )
-                    ( "stringString", Type.string )
-                    errorTags.badStatus
-                , Elm.Case.branch2
-                    "BadBody"
-                    ( "maybeMaybe"
-                    , Type.maybe
-                          (Type.namedWith [ "Json", "Decode" ] "Error" [])
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType "Timeout" errorTags.timeout)
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType "NetworkError" errorTags.networkError)
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType
+                       "BadStatus"
+                       errorTags.badStatus |> Elm.Arg.item
+                                                    (Elm.Arg.varWith
+                                                           "backendTaskHttpMetadata"
+                                                           (Type.namedWith
+                                                                  [ "BackendTask"
+                                                                  , "Http"
+                                                                  ]
+                                                                  "Metadata"
+                                                                  []
+                                                           )
+                                                    ) |> Elm.Arg.item
+                                                               (Elm.Arg.varWith
+                                                                      "arg_1"
+                                                                      Type.string
+                                                               )
                     )
-                    ( "stringString", Type.string )
-                    errorTags.badBody
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType
+                       "BadBody"
+                       errorTags.badBody |> Elm.Arg.item
+                                                  (Elm.Arg.varWith
+                                                         "maybeMaybe"
+                                                         (Type.maybe
+                                                                (Type.namedWith
+                                                                       [ "Json"
+                                                                       , "Decode"
+                                                                       ]
+                                                                       "Error"
+                                                                       []
+                                                                )
+                                                         )
+                                                  ) |> Elm.Arg.item
+                                                             (Elm.Arg.varWith
+                                                                    "arg_1"
+                                                                    Type.string
+                                                             )
+                    )
+                    Basics.identity
                 ]
     , cacheStrategy =
         \cacheStrategyExpression cacheStrategyTags ->
             Elm.Case.custom
                 cacheStrategyExpression
                 (Type.namedWith [ "BackendTask", "Http" ] "CacheStrategy" [])
-                [ Elm.Case.branch0 "IgnoreCache" cacheStrategyTags.ignoreCache
-                , Elm.Case.branch0
-                    "ForceRevalidate"
-                    cacheStrategyTags.forceRevalidate
-                , Elm.Case.branch0 "ForceReload" cacheStrategyTags.forceReload
-                , Elm.Case.branch0 "ForceCache" cacheStrategyTags.forceCache
-                , Elm.Case.branch0
-                    "ErrorUnlessCached"
-                    cacheStrategyTags.errorUnlessCached
+                [ Elm.Case.branch
+                    (Elm.Arg.customType
+                       "IgnoreCache"
+                       cacheStrategyTags.ignoreCache
+                    )
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType
+                       "ForceRevalidate"
+                       cacheStrategyTags.forceRevalidate
+                    )
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType
+                       "ForceReload"
+                       cacheStrategyTags.forceReload
+                    )
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType
+                       "ForceCache"
+                       cacheStrategyTags.forceCache
+                    )
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType
+                       "ErrorUnlessCached"
+                       cacheStrategyTags.errorUnlessCached
+                    )
+                    Basics.identity
                 ]
     }
 
@@ -863,7 +909,7 @@ call_ :
     }
 call_ =
     { get =
-        \getArg getArg0 ->
+        \getArg_ getArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "BackendTask", "Http" ]
@@ -900,9 +946,9 @@ call_ =
                              )
                      }
                 )
-                [ getArg, getArg0 ]
+                [ getArg_, getArg_0 ]
     , getJson =
-        \getJsonArg getJsonArg0 ->
+        \getJsonArg_ getJsonArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "BackendTask", "Http" ]
@@ -939,9 +985,9 @@ call_ =
                              )
                      }
                 )
-                [ getJsonArg, getJsonArg0 ]
+                [ getJsonArg_, getJsonArg_0 ]
     , post =
-        \postArg postArg0 postArg1 ->
+        \postArg_ postArg_0 postArg_1 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "BackendTask", "Http" ]
@@ -982,9 +1028,9 @@ call_ =
                              )
                      }
                 )
-                [ postArg, postArg0, postArg1 ]
+                [ postArg_, postArg_0, postArg_1 ]
     , expectJson =
-        \expectJsonArg ->
+        \expectJsonArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "BackendTask", "Http" ]
@@ -1005,9 +1051,9 @@ call_ =
                              )
                      }
                 )
-                [ expectJsonArg ]
+                [ expectJsonArg_ ]
     , expectBytes =
-        \expectBytesArg ->
+        \expectBytesArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "BackendTask", "Http" ]
@@ -1028,9 +1074,9 @@ call_ =
                              )
                      }
                 )
-                [ expectBytesArg ]
+                [ expectBytesArg_ ]
     , expectWhatever =
-        \expectWhateverArg ->
+        \expectWhateverArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "BackendTask", "Http" ]
@@ -1047,9 +1093,9 @@ call_ =
                              )
                      }
                 )
-                [ expectWhateverArg ]
+                [ expectWhateverArg_ ]
     , request =
-        \requestArg requestArg0 ->
+        \requestArg_ requestArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "BackendTask", "Http" ]
@@ -1101,9 +1147,9 @@ call_ =
                              )
                      }
                 )
-                [ requestArg, requestArg0 ]
+                [ requestArg_, requestArg_0 ]
     , stringBody =
-        \stringBodyArg stringBodyArg0 ->
+        \stringBodyArg_ stringBodyArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "BackendTask", "Http" ]
@@ -1120,9 +1166,9 @@ call_ =
                              )
                      }
                 )
-                [ stringBodyArg, stringBodyArg0 ]
+                [ stringBodyArg_, stringBodyArg_0 ]
     , jsonBody =
-        \jsonBodyArg ->
+        \jsonBodyArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "BackendTask", "Http" ]
@@ -1143,9 +1189,9 @@ call_ =
                              )
                      }
                 )
-                [ jsonBodyArg ]
+                [ jsonBodyArg_ ]
     , bytesBody =
-        \bytesBodyArg bytesBodyArg0 ->
+        \bytesBodyArg_ bytesBodyArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "BackendTask", "Http" ]
@@ -1164,9 +1210,9 @@ call_ =
                              )
                      }
                 )
-                [ bytesBodyArg, bytesBodyArg0 ]
+                [ bytesBodyArg_, bytesBodyArg_0 ]
     , getWithOptions =
-        \getWithOptionsArg ->
+        \getWithOptionsArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "BackendTask", "Http" ]
@@ -1222,9 +1268,9 @@ call_ =
                              )
                      }
                 )
-                [ getWithOptionsArg ]
+                [ getWithOptionsArg_ ]
     , withMetadata =
-        \withMetadataArg withMetadataArg0 ->
+        \withMetadataArg_ withMetadataArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "BackendTask", "Http" ]
@@ -1253,7 +1299,7 @@ call_ =
                              )
                      }
                 )
-                [ withMetadataArg, withMetadataArg0 ]
+                [ withMetadataArg_, withMetadataArg_0 ]
     }
 
 

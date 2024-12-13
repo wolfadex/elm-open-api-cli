@@ -1,12 +1,23 @@
-module Gen.Time exposing (annotation_, call_, caseOf_, customZone, every, getZoneName, here, make_, millisToPosix, moduleName_, now, posixToMillis, toDay, toHour, toMillis, toMinute, toMonth, toSecond, toWeekday, toYear, utc, values_)
+module Gen.Time exposing
+    ( moduleName_, now, every, posixToMillis, millisToPosix, utc
+    , here, toYear, toMonth, toDay, toWeekday, toHour, toMinute
+    , toSecond, toMillis, customZone, getZoneName, annotation_, make_, caseOf_
+    , call_, values_
+    )
 
-{-| 
-@docs moduleName_, now, every, posixToMillis, millisToPosix, utc, here, toYear, toMonth, toDay, toWeekday, toHour, toMinute, toSecond, toMillis, customZone, getZoneName, annotation_, make_, caseOf_, call_, values_
+{-|
+# Generated bindings for Time
+
+@docs moduleName_, now, every, posixToMillis, millisToPosix, utc
+@docs here, toYear, toMonth, toDay, toWeekday, toHour
+@docs toMinute, toSecond, toMillis, customZone, getZoneName, annotation_
+@docs make_, caseOf_, call_, values_
 -}
 
 
 import Elm
 import Elm.Annotation as Type
+import Elm.Arg
 import Elm.Case
 
 
@@ -51,7 +62,7 @@ being much smoother for any moving visuals.
 every: Float -> (Time.Posix -> msg) -> Platform.Sub.Sub msg
 -}
 every : Float -> (Elm.Expression -> Elm.Expression) -> Elm.Expression
-every everyArg everyArg0 =
+every everyArg_ everyArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Time" ]
@@ -68,7 +79,7 @@ every everyArg everyArg0 =
                      )
              }
         )
-        [ Elm.float everyArg, Elm.functionReduced "everyUnpack" everyArg0 ]
+        [ Elm.float everyArg_, Elm.functionReduced "everyUnpack" everyArg_0 ]
 
 
 {-| Turn a `Posix` time into the number of milliseconds since 1970 January 1
@@ -77,7 +88,7 @@ at 00:00:00 UTC. It was a Thursday.
 posixToMillis: Time.Posix -> Int
 -}
 posixToMillis : Elm.Expression -> Elm.Expression
-posixToMillis posixToMillisArg =
+posixToMillis posixToMillisArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Time" ]
@@ -90,7 +101,7 @@ posixToMillis posixToMillisArg =
                      )
              }
         )
-        [ posixToMillisArg ]
+        [ posixToMillisArg_ ]
 
 
 {-| Turn milliseconds into a `Posix` time.
@@ -98,7 +109,7 @@ posixToMillis posixToMillisArg =
 millisToPosix: Int -> Time.Posix
 -}
 millisToPosix : Int -> Elm.Expression
-millisToPosix millisToPosixArg =
+millisToPosix millisToPosixArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Time" ]
@@ -111,7 +122,7 @@ millisToPosix millisToPosixArg =
                      )
              }
         )
-        [ Elm.int millisToPosixArg ]
+        [ Elm.int millisToPosixArg_ ]
 
 
 {-| The time zone for Coordinated Universal Time ([UTC][])
@@ -192,7 +203,7 @@ here =
 toYear: Time.Zone -> Time.Posix -> Int
 -}
 toYear : Elm.Expression -> Elm.Expression -> Elm.Expression
-toYear toYearArg toYearArg0 =
+toYear toYearArg_ toYearArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Time" ]
@@ -207,7 +218,7 @@ toYear toYearArg toYearArg0 =
                      )
              }
         )
-        [ toYearArg, toYearArg0 ]
+        [ toYearArg_, toYearArg_0 ]
 
 
 {-| What month is it?!
@@ -222,7 +233,7 @@ toYear toYearArg toYearArg0 =
 toMonth: Time.Zone -> Time.Posix -> Time.Month
 -}
 toMonth : Elm.Expression -> Elm.Expression -> Elm.Expression
-toMonth toMonthArg toMonthArg0 =
+toMonth toMonthArg_ toMonthArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Time" ]
@@ -237,7 +248,7 @@ toMonth toMonthArg toMonthArg0 =
                      )
              }
         )
-        [ toMonthArg, toMonthArg0 ]
+        [ toMonthArg_, toMonthArg_0 ]
 
 
 {-| What day is it?! (Days go from 1 to 31)
@@ -252,7 +263,7 @@ toMonth toMonthArg toMonthArg0 =
 toDay: Time.Zone -> Time.Posix -> Int
 -}
 toDay : Elm.Expression -> Elm.Expression -> Elm.Expression
-toDay toDayArg toDayArg0 =
+toDay toDayArg_ toDayArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Time" ]
@@ -267,7 +278,7 @@ toDay toDayArg toDayArg0 =
                      )
              }
         )
-        [ toDayArg, toDayArg0 ]
+        [ toDayArg_, toDayArg_0 ]
 
 
 {-| What day of the week is it?
@@ -282,7 +293,7 @@ toDay toDayArg toDayArg0 =
 toWeekday: Time.Zone -> Time.Posix -> Time.Weekday
 -}
 toWeekday : Elm.Expression -> Elm.Expression -> Elm.Expression
-toWeekday toWeekdayArg toWeekdayArg0 =
+toWeekday toWeekdayArg_ toWeekdayArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Time" ]
@@ -297,7 +308,7 @@ toWeekday toWeekdayArg toWeekdayArg0 =
                      )
              }
         )
-        [ toWeekdayArg, toWeekdayArg0 ]
+        [ toWeekdayArg_, toWeekdayArg_0 ]
 
 
 {-| What hour is it? (From 0 to 23)
@@ -312,7 +323,7 @@ toWeekday toWeekdayArg toWeekdayArg0 =
 toHour: Time.Zone -> Time.Posix -> Int
 -}
 toHour : Elm.Expression -> Elm.Expression -> Elm.Expression
-toHour toHourArg toHourArg0 =
+toHour toHourArg_ toHourArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Time" ]
@@ -327,7 +338,7 @@ toHour toHourArg toHourArg0 =
                      )
              }
         )
-        [ toHourArg, toHourArg0 ]
+        [ toHourArg_, toHourArg_0 ]
 
 
 {-| What minute is it? (From 0 to 59)
@@ -342,7 +353,7 @@ by 30 or 45 minutes!
 toMinute: Time.Zone -> Time.Posix -> Int
 -}
 toMinute : Elm.Expression -> Elm.Expression -> Elm.Expression
-toMinute toMinuteArg toMinuteArg0 =
+toMinute toMinuteArg_ toMinuteArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Time" ]
@@ -357,7 +368,7 @@ toMinute toMinuteArg toMinuteArg0 =
                      )
              }
         )
-        [ toMinuteArg, toMinuteArg0 ]
+        [ toMinuteArg_, toMinuteArg_0 ]
 
 
 {-| What second is it?
@@ -371,7 +382,7 @@ toMinute toMinuteArg toMinuteArg0 =
 toSecond: Time.Zone -> Time.Posix -> Int
 -}
 toSecond : Elm.Expression -> Elm.Expression -> Elm.Expression
-toSecond toSecondArg toSecondArg0 =
+toSecond toSecondArg_ toSecondArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Time" ]
@@ -386,7 +397,7 @@ toSecond toSecondArg toSecondArg0 =
                      )
              }
         )
-        [ toSecondArg, toSecondArg0 ]
+        [ toSecondArg_, toSecondArg_0 ]
 
 
 {-| import Time exposing (toMillis, utc, millisToPosix)
@@ -398,7 +409,7 @@ toSecond toSecondArg toSecondArg0 =
 toMillis: Time.Zone -> Time.Posix -> Int
 -}
 toMillis : Elm.Expression -> Elm.Expression -> Elm.Expression
-toMillis toMillisArg toMillisArg0 =
+toMillis toMillisArg_ toMillisArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Time" ]
@@ -413,7 +424,7 @@ toMillis toMillisArg toMillisArg0 =
                      )
              }
         )
-        [ toMillisArg, toMillisArg0 ]
+        [ toMillisArg_, toMillisArg_0 ]
 
 
 {-| **Intended for package authors.**
@@ -440,7 +451,7 @@ help me and the any potential TC39 proposal.
 customZone: Int -> List { start : Int, offset : Int } -> Time.Zone
 -}
 customZone : Int -> List { start : Int, offset : Int } -> Elm.Expression
-customZone customZoneArg customZoneArg0 =
+customZone customZoneArg_ customZoneArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Time" ]
@@ -460,7 +471,7 @@ customZone customZoneArg customZoneArg0 =
                      )
              }
         )
-        [ Elm.int customZoneArg
+        [ Elm.int customZoneArg_
         , Elm.list
             (List.map
                (\unpack ->
@@ -469,7 +480,7 @@ customZone customZoneArg customZoneArg0 =
                       , Tuple.pair "offset" (Elm.int unpack.offset)
                       ]
                )
-               customZoneArg0
+               customZoneArg_0
             )
         ]
 
@@ -677,38 +688,35 @@ make_ =
 caseOf_ :
     { weekday :
         Elm.Expression
-        -> { weekdayTags_0_0
-            | mon : Elm.Expression
-            , tue : Elm.Expression
-            , wed : Elm.Expression
-            , thu : Elm.Expression
-            , fri : Elm.Expression
-            , sat : Elm.Expression
-            , sun : Elm.Expression
+        -> { mon : Elm.Expression
+        , tue : Elm.Expression
+        , wed : Elm.Expression
+        , thu : Elm.Expression
+        , fri : Elm.Expression
+        , sat : Elm.Expression
+        , sun : Elm.Expression
         }
         -> Elm.Expression
     , month :
         Elm.Expression
-        -> { monthTags_1_0
-            | jan : Elm.Expression
-            , feb : Elm.Expression
-            , mar : Elm.Expression
-            , apr : Elm.Expression
-            , may : Elm.Expression
-            , jun : Elm.Expression
-            , jul : Elm.Expression
-            , aug : Elm.Expression
-            , sep : Elm.Expression
-            , oct : Elm.Expression
-            , nov : Elm.Expression
-            , dec : Elm.Expression
+        -> { jan : Elm.Expression
+        , feb : Elm.Expression
+        , mar : Elm.Expression
+        , apr : Elm.Expression
+        , may : Elm.Expression
+        , jun : Elm.Expression
+        , jul : Elm.Expression
+        , aug : Elm.Expression
+        , sep : Elm.Expression
+        , oct : Elm.Expression
+        , nov : Elm.Expression
+        , dec : Elm.Expression
         }
         -> Elm.Expression
     , zoneName :
         Elm.Expression
-        -> { zoneNameTags_2_0
-            | name : Elm.Expression -> Elm.Expression
-            , offset : Elm.Expression -> Elm.Expression
+        -> { name : Elm.Expression -> Elm.Expression
+        , offset : Elm.Expression -> Elm.Expression
         }
         -> Elm.Expression
     }
@@ -718,45 +726,93 @@ caseOf_ =
             Elm.Case.custom
                 weekdayExpression
                 (Type.namedWith [ "Time" ] "Weekday" [])
-                [ Elm.Case.branch0 "Mon" weekdayTags.mon
-                , Elm.Case.branch0 "Tue" weekdayTags.tue
-                , Elm.Case.branch0 "Wed" weekdayTags.wed
-                , Elm.Case.branch0 "Thu" weekdayTags.thu
-                , Elm.Case.branch0 "Fri" weekdayTags.fri
-                , Elm.Case.branch0 "Sat" weekdayTags.sat
-                , Elm.Case.branch0 "Sun" weekdayTags.sun
+                [ Elm.Case.branch
+                    (Elm.Arg.customType "Mon" weekdayTags.mon)
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType "Tue" weekdayTags.tue)
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType "Wed" weekdayTags.wed)
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType "Thu" weekdayTags.thu)
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType "Fri" weekdayTags.fri)
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType "Sat" weekdayTags.sat)
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType "Sun" weekdayTags.sun)
+                    Basics.identity
                 ]
     , month =
         \monthExpression monthTags ->
             Elm.Case.custom
                 monthExpression
                 (Type.namedWith [ "Time" ] "Month" [])
-                [ Elm.Case.branch0 "Jan" monthTags.jan
-                , Elm.Case.branch0 "Feb" monthTags.feb
-                , Elm.Case.branch0 "Mar" monthTags.mar
-                , Elm.Case.branch0 "Apr" monthTags.apr
-                , Elm.Case.branch0 "May" monthTags.may
-                , Elm.Case.branch0 "Jun" monthTags.jun
-                , Elm.Case.branch0 "Jul" monthTags.jul
-                , Elm.Case.branch0 "Aug" monthTags.aug
-                , Elm.Case.branch0 "Sep" monthTags.sep
-                , Elm.Case.branch0 "Oct" monthTags.oct
-                , Elm.Case.branch0 "Nov" monthTags.nov
-                , Elm.Case.branch0 "Dec" monthTags.dec
+                [ Elm.Case.branch
+                    (Elm.Arg.customType "Jan" monthTags.jan)
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType "Feb" monthTags.feb)
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType "Mar" monthTags.mar)
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType "Apr" monthTags.apr)
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType "May" monthTags.may)
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType "Jun" monthTags.jun)
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType "Jul" monthTags.jul)
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType "Aug" monthTags.aug)
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType "Sep" monthTags.sep)
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType "Oct" monthTags.oct)
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType "Nov" monthTags.nov)
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType "Dec" monthTags.dec)
+                    Basics.identity
                 ]
     , zoneName =
         \zoneNameExpression zoneNameTags ->
             Elm.Case.custom
                 zoneNameExpression
                 (Type.namedWith [ "Time" ] "ZoneName" [])
-                [ Elm.Case.branch1
-                    "Name"
-                    ( "stringString", Type.string )
-                    zoneNameTags.name
-                , Elm.Case.branch1
-                    "Offset"
-                    ( "basicsInt", Type.int )
-                    zoneNameTags.offset
+                [ Elm.Case.branch
+                    (Elm.Arg.customType "Name" zoneNameTags.name |> Elm.Arg.item
+                                                                          (Elm.Arg.varWith
+                                                                                 "arg_0"
+                                                                                 Type.string
+                                                                          )
+                    )
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType
+                       "Offset"
+                       zoneNameTags.offset |> Elm.Arg.item
+                                                    (Elm.Arg.varWith
+                                                           "arg_0"
+                                                           Type.int
+                                                    )
+                    )
+                    Basics.identity
                 ]
     }
 
@@ -777,7 +833,7 @@ call_ :
     }
 call_ =
     { every =
-        \everyArg everyArg0 ->
+        \everyArg_ everyArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Time" ]
@@ -794,9 +850,9 @@ call_ =
                              )
                      }
                 )
-                [ everyArg, everyArg0 ]
+                [ everyArg_, everyArg_0 ]
     , posixToMillis =
-        \posixToMillisArg ->
+        \posixToMillisArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Time" ]
@@ -809,9 +865,9 @@ call_ =
                              )
                      }
                 )
-                [ posixToMillisArg ]
+                [ posixToMillisArg_ ]
     , millisToPosix =
-        \millisToPosixArg ->
+        \millisToPosixArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Time" ]
@@ -824,9 +880,9 @@ call_ =
                              )
                      }
                 )
-                [ millisToPosixArg ]
+                [ millisToPosixArg_ ]
     , toYear =
-        \toYearArg toYearArg0 ->
+        \toYearArg_ toYearArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Time" ]
@@ -841,9 +897,9 @@ call_ =
                              )
                      }
                 )
-                [ toYearArg, toYearArg0 ]
+                [ toYearArg_, toYearArg_0 ]
     , toMonth =
-        \toMonthArg toMonthArg0 ->
+        \toMonthArg_ toMonthArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Time" ]
@@ -858,9 +914,9 @@ call_ =
                              )
                      }
                 )
-                [ toMonthArg, toMonthArg0 ]
+                [ toMonthArg_, toMonthArg_0 ]
     , toDay =
-        \toDayArg toDayArg0 ->
+        \toDayArg_ toDayArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Time" ]
@@ -875,9 +931,9 @@ call_ =
                              )
                      }
                 )
-                [ toDayArg, toDayArg0 ]
+                [ toDayArg_, toDayArg_0 ]
     , toWeekday =
-        \toWeekdayArg toWeekdayArg0 ->
+        \toWeekdayArg_ toWeekdayArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Time" ]
@@ -892,9 +948,9 @@ call_ =
                              )
                      }
                 )
-                [ toWeekdayArg, toWeekdayArg0 ]
+                [ toWeekdayArg_, toWeekdayArg_0 ]
     , toHour =
-        \toHourArg toHourArg0 ->
+        \toHourArg_ toHourArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Time" ]
@@ -909,9 +965,9 @@ call_ =
                              )
                      }
                 )
-                [ toHourArg, toHourArg0 ]
+                [ toHourArg_, toHourArg_0 ]
     , toMinute =
-        \toMinuteArg toMinuteArg0 ->
+        \toMinuteArg_ toMinuteArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Time" ]
@@ -926,9 +982,9 @@ call_ =
                              )
                      }
                 )
-                [ toMinuteArg, toMinuteArg0 ]
+                [ toMinuteArg_, toMinuteArg_0 ]
     , toSecond =
-        \toSecondArg toSecondArg0 ->
+        \toSecondArg_ toSecondArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Time" ]
@@ -943,9 +999,9 @@ call_ =
                              )
                      }
                 )
-                [ toSecondArg, toSecondArg0 ]
+                [ toSecondArg_, toSecondArg_0 ]
     , toMillis =
-        \toMillisArg toMillisArg0 ->
+        \toMillisArg_ toMillisArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Time" ]
@@ -960,9 +1016,9 @@ call_ =
                              )
                      }
                 )
-                [ toMillisArg, toMillisArg0 ]
+                [ toMillisArg_, toMillisArg_0 ]
     , customZone =
-        \customZoneArg customZoneArg0 ->
+        \customZoneArg_ customZoneArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Time" ]
@@ -982,7 +1038,7 @@ call_ =
                              )
                      }
                 )
-                [ customZoneArg, customZoneArg0 ]
+                [ customZoneArg_, customZoneArg_0 ]
     }
 
 

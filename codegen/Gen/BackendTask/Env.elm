@@ -1,12 +1,19 @@
-module Gen.BackendTask.Env exposing (annotation_, call_, caseOf_, expect, get, make_, moduleName_, values_)
+module Gen.BackendTask.Env exposing
+    ( moduleName_, get, expect, annotation_, make_, caseOf_
+    , call_, values_
+    )
 
-{-| 
-@docs moduleName_, get, expect, annotation_, make_, caseOf_, call_, values_
+{-|
+# Generated bindings for BackendTask.Env
+
+@docs moduleName_, get, expect, annotation_, make_, caseOf_
+@docs call_, values_
 -}
 
 
 import Elm
 import Elm.Annotation as Type
+import Elm.Arg
 import Elm.Case
 
 
@@ -22,7 +29,7 @@ will never fail, but instead will return `Nothing` if the environment variable i
 get: String -> BackendTask.BackendTask error (Maybe String)
 -}
 get : String -> Elm.Expression
-get getArg =
+get getArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "BackendTask", "Env" ]
@@ -39,7 +46,7 @@ get getArg =
                      )
              }
         )
-        [ Elm.string getArg ]
+        [ Elm.string getArg_ ]
 
 
 {-| Get an environment variable, or a BackendTask FatalError if there is no environment variable matching that name.
@@ -51,7 +58,7 @@ expect:
     } String
 -}
 expect : String -> Elm.Expression
-expect expectArg =
+expect expectArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "BackendTask", "Env" ]
@@ -83,7 +90,7 @@ expect expectArg =
                      )
              }
         )
-        [ Elm.string expectArg ]
+        [ Elm.string expectArg_ ]
 
 
 annotation_ : { error : Type.Annotation }
@@ -109,9 +116,7 @@ make_ =
 caseOf_ :
     { error :
         Elm.Expression
-        -> { errorTags_0_0
-            | missingEnvVariable : Elm.Expression -> Elm.Expression
-        }
+        -> { missingEnvVariable : Elm.Expression -> Elm.Expression }
         -> Elm.Expression
     }
 caseOf_ =
@@ -120,10 +125,16 @@ caseOf_ =
             Elm.Case.custom
                 errorExpression
                 (Type.namedWith [ "BackendTask", "Env" ] "Error" [])
-                [ Elm.Case.branch1
-                    "MissingEnvVariable"
-                    ( "stringString", Type.string )
-                    errorTags.missingEnvVariable
+                [ Elm.Case.branch
+                    (Elm.Arg.customType
+                       "MissingEnvVariable"
+                       errorTags.missingEnvVariable |> Elm.Arg.item
+                                                             (Elm.Arg.varWith
+                                                                    "arg_0"
+                                                                    Type.string
+                                                             )
+                    )
+                    Basics.identity
                 ]
     }
 
@@ -134,7 +145,7 @@ call_ :
     }
 call_ =
     { get =
-        \getArg ->
+        \getArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "BackendTask", "Env" ]
@@ -153,9 +164,9 @@ call_ =
                              )
                      }
                 )
-                [ getArg ]
+                [ getArg_ ]
     , expect =
-        \expectArg ->
+        \expectArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "BackendTask", "Env" ]
@@ -187,7 +198,7 @@ call_ =
                              )
                      }
                 )
-                [ expectArg ]
+                [ expectArg_ ]
     }
 
 

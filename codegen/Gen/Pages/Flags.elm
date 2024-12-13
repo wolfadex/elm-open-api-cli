@@ -1,12 +1,15 @@
-module Gen.Pages.Flags exposing (annotation_, caseOf_, make_, moduleName_)
+module Gen.Pages.Flags exposing ( moduleName_, annotation_, make_, caseOf_ )
 
-{-| 
+{-|
+# Generated bindings for Pages.Flags
+
 @docs moduleName_, annotation_, make_, caseOf_
 -}
 
 
 import Elm
 import Elm.Annotation as Type
+import Elm.Arg
 import Elm.Case
 
 
@@ -45,27 +48,33 @@ make_ =
     }
 
 
-caseOf_ :
-    { flags :
-        Elm.Expression
-        -> { flagsTags_0_0
-            | browserFlags : Elm.Expression -> Elm.Expression
-            , preRenderFlags : Elm.Expression
-        }
-        -> Elm.Expression
-    }
 caseOf_ =
     { flags =
         \flagsExpression flagsTags ->
             Elm.Case.custom
                 flagsExpression
                 (Type.namedWith [ "Pages", "Flags" ] "Flags" [])
-                [ Elm.Case.branch1
-                    "BrowserFlags"
-                    ( "jsonDecodeValue"
-                    , Type.namedWith [ "Json", "Decode" ] "Value" []
+                [ Elm.Case.branch
+                    (Elm.Arg.customType
+                       "BrowserFlags"
+                       flagsTags.browserFlags |> Elm.Arg.item
+                                                       (Elm.Arg.varWith
+                                                              "jsonDecodeValue"
+                                                              (Type.namedWith
+                                                                     [ "Json"
+                                                                     , "Decode"
+                                                                     ]
+                                                                     "Value"
+                                                                     []
+                                                              )
+                                                       )
                     )
-                    flagsTags.browserFlags
-                , Elm.Case.branch0 "PreRenderFlags" flagsTags.preRenderFlags
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType
+                       "PreRenderFlags"
+                       flagsTags.preRenderFlags
+                    )
+                    Basics.identity
                 ]
     }

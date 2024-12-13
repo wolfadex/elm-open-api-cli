@@ -1,12 +1,24 @@
-module Gen.Bytes.Decode exposing (andThen, annotation_, bytes, call_, caseOf_, decode, fail, float32, float64, loop, make_, map, map2, map3, map4, map5, moduleName_, signedInt16, signedInt32, signedInt8, string, succeed, unsignedInt16, unsignedInt32, unsignedInt8, values_)
+module Gen.Bytes.Decode exposing
+    ( moduleName_, decode, signedInt8, signedInt16, signedInt32, unsignedInt8
+    , unsignedInt16, unsignedInt32, float32, float64, bytes, string, map
+    , map2, map3, map4, map5, andThen, succeed, fail
+    , loop, annotation_, make_, caseOf_, call_, values_
+    )
 
-{-| 
-@docs moduleName_, decode, signedInt8, signedInt16, signedInt32, unsignedInt8, unsignedInt16, unsignedInt32, float32, float64, bytes, string, map, map2, map3, map4, map5, andThen, succeed, fail, loop, annotation_, make_, caseOf_, call_, values_
+{-|
+# Generated bindings for Bytes.Decode
+
+@docs moduleName_, decode, signedInt8, signedInt16, signedInt32, unsignedInt8
+@docs unsignedInt16, unsignedInt32, float32, float64, bytes, string
+@docs map, map2, map3, map4, map5, andThen
+@docs succeed, fail, loop, annotation_, make_, caseOf_
+@docs call_, values_
 -}
 
 
 import Elm
 import Elm.Annotation as Type
+import Elm.Arg
 import Elm.Case
 
 
@@ -30,7 +42,7 @@ show a case where there are not enough bytes.
 decode: Bytes.Decode.Decoder a -> Bytes.Bytes -> Maybe a
 -}
 decode : Elm.Expression -> Elm.Expression -> Elm.Expression
-decode decodeArg decodeArg0 =
+decode decodeArg_ decodeArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Bytes", "Decode" ]
@@ -48,7 +60,7 @@ decode decodeArg decodeArg0 =
                      )
              }
         )
-        [ decodeArg, decodeArg0 ]
+        [ decodeArg_, decodeArg_0 ]
 
 
 {-| Decode one byte into an integer from `-128` to `127`.
@@ -70,7 +82,7 @@ signedInt8 =
 signedInt16: Bytes.Endianness -> Bytes.Decode.Decoder Int
 -}
 signedInt16 : Elm.Expression -> Elm.Expression
-signedInt16 signedInt16Arg =
+signedInt16 signedInt16Arg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Bytes", "Decode" ]
@@ -87,7 +99,7 @@ signedInt16 signedInt16Arg =
                      )
              }
         )
-        [ signedInt16Arg ]
+        [ signedInt16Arg_ ]
 
 
 {-| Decode four bytes into an integer from `-2147483648` to `2147483647`.
@@ -95,7 +107,7 @@ signedInt16 signedInt16Arg =
 signedInt32: Bytes.Endianness -> Bytes.Decode.Decoder Int
 -}
 signedInt32 : Elm.Expression -> Elm.Expression
-signedInt32 signedInt32Arg =
+signedInt32 signedInt32Arg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Bytes", "Decode" ]
@@ -112,7 +124,7 @@ signedInt32 signedInt32Arg =
                      )
              }
         )
-        [ signedInt32Arg ]
+        [ signedInt32Arg_ ]
 
 
 {-| Decode one byte into an integer from `0` to `255`.
@@ -134,7 +146,7 @@ unsignedInt8 =
 unsignedInt16: Bytes.Endianness -> Bytes.Decode.Decoder Int
 -}
 unsignedInt16 : Elm.Expression -> Elm.Expression
-unsignedInt16 unsignedInt16Arg =
+unsignedInt16 unsignedInt16Arg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Bytes", "Decode" ]
@@ -151,7 +163,7 @@ unsignedInt16 unsignedInt16Arg =
                      )
              }
         )
-        [ unsignedInt16Arg ]
+        [ unsignedInt16Arg_ ]
 
 
 {-| Decode four bytes into an integer from `0` to `4294967295`.
@@ -159,7 +171,7 @@ unsignedInt16 unsignedInt16Arg =
 unsignedInt32: Bytes.Endianness -> Bytes.Decode.Decoder Int
 -}
 unsignedInt32 : Elm.Expression -> Elm.Expression
-unsignedInt32 unsignedInt32Arg =
+unsignedInt32 unsignedInt32Arg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Bytes", "Decode" ]
@@ -176,7 +188,7 @@ unsignedInt32 unsignedInt32Arg =
                      )
              }
         )
-        [ unsignedInt32Arg ]
+        [ unsignedInt32Arg_ ]
 
 
 {-| Decode four bytes into a floating point number.
@@ -184,7 +196,7 @@ unsignedInt32 unsignedInt32Arg =
 float32: Bytes.Endianness -> Bytes.Decode.Decoder Float
 -}
 float32 : Elm.Expression -> Elm.Expression
-float32 float32Arg =
+float32 float32Arg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Bytes", "Decode" ]
@@ -201,7 +213,7 @@ float32 float32Arg =
                      )
              }
         )
-        [ float32Arg ]
+        [ float32Arg_ ]
 
 
 {-| Decode eight bytes into a floating point number.
@@ -209,7 +221,7 @@ float32 float32Arg =
 float64: Bytes.Endianness -> Bytes.Decode.Decoder Float
 -}
 float64 : Elm.Expression -> Elm.Expression
-float64 float64Arg =
+float64 float64Arg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Bytes", "Decode" ]
@@ -226,7 +238,7 @@ float64 float64Arg =
                      )
              }
         )
-        [ float64Arg ]
+        [ float64Arg_ ]
 
 
 {-| Copy a given number of bytes into a new `Bytes` sequence.
@@ -234,7 +246,7 @@ float64 float64Arg =
 bytes: Int -> Bytes.Decode.Decoder Bytes.Bytes
 -}
 bytes : Int -> Elm.Expression
-bytes bytesArg =
+bytes bytesArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Bytes", "Decode" ]
@@ -251,7 +263,7 @@ bytes bytesArg =
                      )
              }
         )
-        [ Elm.int bytesArg ]
+        [ Elm.int bytesArg_ ]
 
 
 {-| Decode a given number of UTF-8 bytes into a `String`.
@@ -277,7 +289,7 @@ leeway to read the width as a [Base 128 Varint][pb] for ProtoBuf, a
 string: Int -> Bytes.Decode.Decoder String
 -}
 string : Int -> Elm.Expression
-string stringArg =
+string stringArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Bytes", "Decode" ]
@@ -294,7 +306,7 @@ string stringArg =
                      )
              }
         )
-        [ Elm.int stringArg ]
+        [ Elm.int stringArg_ ]
 
 
 {-| Transform the value produced by a decoder. If you encode negative numbers
@@ -312,7 +324,7 @@ decreases the size of small negative numbers.
 map: (a -> b) -> Bytes.Decode.Decoder a -> Bytes.Decode.Decoder b
 -}
 map : (Elm.Expression -> Elm.Expression) -> Elm.Expression -> Elm.Expression
-map mapArg mapArg0 =
+map mapArg_ mapArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Bytes", "Decode" ]
@@ -334,7 +346,7 @@ map mapArg mapArg0 =
                      )
              }
         )
-        [ Elm.functionReduced "mapUnpack" mapArg, mapArg0 ]
+        [ Elm.functionReduced "mapUnpack" mapArg_, mapArg_0 ]
 
 
 {-| Combine two decoders.
@@ -361,7 +373,7 @@ map2 :
     -> Elm.Expression
     -> Elm.Expression
     -> Elm.Expression
-map2 map2Arg map2Arg0 map2Arg1 =
+map2 map2Arg_ map2Arg_0 map2Arg_1 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Bytes", "Decode" ]
@@ -392,10 +404,10 @@ map2 map2Arg map2Arg0 map2Arg1 =
         [ Elm.functionReduced
             "map2Unpack"
             (\functionReducedUnpack ->
-               Elm.functionReduced "unpack" (map2Arg functionReducedUnpack)
+               Elm.functionReduced "unpack" (map2Arg_ functionReducedUnpack)
             )
-        , map2Arg0
-        , map2Arg1
+        , map2Arg_0
+        , map2Arg_1
         ]
 
 
@@ -414,7 +426,7 @@ map3 :
     -> Elm.Expression
     -> Elm.Expression
     -> Elm.Expression
-map3 map3Arg map3Arg0 map3Arg1 map3Arg2 =
+map3 map3Arg_ map3Arg_0 map3Arg_1 map3Arg_2 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Bytes", "Decode" ]
@@ -454,14 +466,14 @@ map3 map3Arg map3Arg0 map3Arg1 map3Arg2 =
                    (\functionReducedUnpack0 ->
                         Elm.functionReduced
                             "unpack"
-                            ((map3Arg functionReducedUnpack)
+                            ((map3Arg_ functionReducedUnpack)
                                  functionReducedUnpack0
                             )
                    )
             )
-        , map3Arg0
-        , map3Arg1
-        , map3Arg2
+        , map3Arg_0
+        , map3Arg_1
+        , map3Arg_2
         ]
 
 
@@ -486,7 +498,7 @@ map4 :
     -> Elm.Expression
     -> Elm.Expression
     -> Elm.Expression
-map4 map4Arg map4Arg0 map4Arg1 map4Arg2 map4Arg3 =
+map4 map4Arg_ map4Arg_0 map4Arg_1 map4Arg_2 map4Arg_3 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Bytes", "Decode" ]
@@ -537,7 +549,7 @@ map4 map4Arg map4Arg0 map4Arg1 map4Arg2 map4Arg3 =
                             (\functionReducedUnpack_2_1_2_0_2_0_2_0_0 ->
                                  Elm.functionReduced
                                      "unpack"
-                                     (((map4Arg functionReducedUnpack)
+                                     (((map4Arg_ functionReducedUnpack)
                                            functionReducedUnpack0
                                       )
                                           functionReducedUnpack_2_1_2_0_2_0_2_0_0
@@ -545,10 +557,10 @@ map4 map4Arg map4Arg0 map4Arg1 map4Arg2 map4Arg3 =
                             )
                    )
             )
-        , map4Arg0
-        , map4Arg1
-        , map4Arg2
-        , map4Arg3
+        , map4Arg_0
+        , map4Arg_1
+        , map4Arg_2
+        , map4Arg_3
         ]
 
 
@@ -577,7 +589,7 @@ map5 :
     -> Elm.Expression
     -> Elm.Expression
     -> Elm.Expression
-map5 map5Arg map5Arg0 map5Arg1 map5Arg2 map5Arg3 map5Arg4 =
+map5 map5Arg_ map5Arg_0 map5Arg_1 map5Arg_2 map5Arg_3 map5Arg_4 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Bytes", "Decode" ]
@@ -636,7 +648,8 @@ map5 map5Arg map5Arg0 map5Arg1 map5Arg2 map5Arg3 map5Arg4 =
                                      (\functionReducedUnpack_2_1_2_1_2_0_2_0_2_0_0 ->
                                           Elm.functionReduced
                                               "unpack"
-                                              ((((map5Arg functionReducedUnpack)
+                                              ((((map5Arg_ functionReducedUnpack
+                                                 )
                                                      functionReducedUnpack0
                                                 )
                                                     functionReducedUnpack_2_1_2_0_2_0_2_0_0
@@ -647,11 +660,11 @@ map5 map5Arg map5Arg0 map5Arg1 map5Arg2 map5Arg3 map5Arg4 =
                             )
                    )
             )
-        , map5Arg0
-        , map5Arg1
-        , map5Arg2
-        , map5Arg3
-        , map5Arg4
+        , map5Arg_0
+        , map5Arg_1
+        , map5Arg_2
+        , map5Arg_3
+        , map5Arg_4
         ]
 
 
@@ -676,7 +689,7 @@ andThen:
     -> Bytes.Decode.Decoder b
 -}
 andThen : (Elm.Expression -> Elm.Expression) -> Elm.Expression -> Elm.Expression
-andThen andThenArg andThenArg0 =
+andThen andThenArg_ andThenArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Bytes", "Decode" ]
@@ -704,7 +717,7 @@ andThen andThenArg andThenArg0 =
                      )
              }
         )
-        [ Elm.functionReduced "andThenUnpack" andThenArg, andThenArg0 ]
+        [ Elm.functionReduced "andThenUnpack" andThenArg_, andThenArg_0 ]
 
 
 {-| A decoder that always succeeds with a certain value. Maybe we are making
@@ -730,7 +743,7 @@ decoding the value and put it in a `Just`.
 succeed: a -> Bytes.Decode.Decoder a
 -}
 succeed : Elm.Expression -> Elm.Expression
-succeed succeedArg =
+succeed succeedArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Bytes", "Decode" ]
@@ -747,7 +760,7 @@ succeed succeedArg =
                      )
              }
         )
-        [ succeedArg ]
+        [ succeedArg_ ]
 
 
 {-| A decoder that always fails. This can be useful when using `andThen` to
@@ -823,7 +836,7 @@ loop:
     -> Bytes.Decode.Decoder a
 -}
 loop : Elm.Expression -> (Elm.Expression -> Elm.Expression) -> Elm.Expression
-loop loopArg loopArg0 =
+loop loopArg_ loopArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Bytes", "Decode" ]
@@ -852,7 +865,7 @@ loop loopArg loopArg0 =
                      )
              }
         )
-        [ loopArg, Elm.functionReduced "loopUnpack" loopArg0 ]
+        [ loopArg_, Elm.functionReduced "loopUnpack" loopArg_0 ]
 
 
 annotation_ :
@@ -912,9 +925,8 @@ make_ =
 caseOf_ :
     { step :
         Elm.Expression
-        -> { stepTags_0_0
-            | loop : Elm.Expression -> Elm.Expression
-            , done : Elm.Expression -> Elm.Expression
+        -> { loop : Elm.Expression -> Elm.Expression
+        , done : Elm.Expression -> Elm.Expression
         }
         -> Elm.Expression
     }
@@ -928,11 +940,26 @@ caseOf_ =
                      "Step"
                      [ Type.var "state", Type.var "a" ]
                 )
-                [ Elm.Case.branch1
-                    "Loop"
-                    ( "state", Type.var "state" )
-                    stepTags.loop
-                , Elm.Case.branch1 "Done" ( "a", Type.var "a" ) stepTags.done
+                [ Elm.Case.branch
+                    (Elm.Arg.customType "Loop" stepTags.loop |> Elm.Arg.item
+                                                                      (Elm.Arg.varWith
+                                                                             "state"
+                                                                             (Type.var
+                                                                                    "state"
+                                                                             )
+                                                                      )
+                    )
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType "Done" stepTags.done |> Elm.Arg.item
+                                                                      (Elm.Arg.varWith
+                                                                             "a"
+                                                                             (Type.var
+                                                                                    "a"
+                                                                             )
+                                                                      )
+                    )
+                    Basics.identity
                 ]
     }
 
@@ -977,7 +1004,7 @@ call_ :
     }
 call_ =
     { decode =
-        \decodeArg decodeArg0 ->
+        \decodeArg_ decodeArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Bytes", "Decode" ]
@@ -995,9 +1022,9 @@ call_ =
                              )
                      }
                 )
-                [ decodeArg, decodeArg0 ]
+                [ decodeArg_, decodeArg_0 ]
     , signedInt16 =
-        \signedInt16Arg ->
+        \signedInt16Arg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Bytes", "Decode" ]
@@ -1014,9 +1041,9 @@ call_ =
                              )
                      }
                 )
-                [ signedInt16Arg ]
+                [ signedInt16Arg_ ]
     , signedInt32 =
-        \signedInt32Arg ->
+        \signedInt32Arg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Bytes", "Decode" ]
@@ -1033,9 +1060,9 @@ call_ =
                              )
                      }
                 )
-                [ signedInt32Arg ]
+                [ signedInt32Arg_ ]
     , unsignedInt16 =
-        \unsignedInt16Arg ->
+        \unsignedInt16Arg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Bytes", "Decode" ]
@@ -1052,9 +1079,9 @@ call_ =
                              )
                      }
                 )
-                [ unsignedInt16Arg ]
+                [ unsignedInt16Arg_ ]
     , unsignedInt32 =
-        \unsignedInt32Arg ->
+        \unsignedInt32Arg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Bytes", "Decode" ]
@@ -1071,9 +1098,9 @@ call_ =
                              )
                      }
                 )
-                [ unsignedInt32Arg ]
+                [ unsignedInt32Arg_ ]
     , float32 =
-        \float32Arg ->
+        \float32Arg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Bytes", "Decode" ]
@@ -1090,9 +1117,9 @@ call_ =
                              )
                      }
                 )
-                [ float32Arg ]
+                [ float32Arg_ ]
     , float64 =
-        \float64Arg ->
+        \float64Arg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Bytes", "Decode" ]
@@ -1109,9 +1136,9 @@ call_ =
                              )
                      }
                 )
-                [ float64Arg ]
+                [ float64Arg_ ]
     , bytes =
-        \bytesArg ->
+        \bytesArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Bytes", "Decode" ]
@@ -1128,9 +1155,9 @@ call_ =
                              )
                      }
                 )
-                [ bytesArg ]
+                [ bytesArg_ ]
     , string =
-        \stringArg ->
+        \stringArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Bytes", "Decode" ]
@@ -1147,9 +1174,9 @@ call_ =
                              )
                      }
                 )
-                [ stringArg ]
+                [ stringArg_ ]
     , map =
-        \mapArg mapArg0 ->
+        \mapArg_ mapArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Bytes", "Decode" ]
@@ -1173,9 +1200,9 @@ call_ =
                              )
                      }
                 )
-                [ mapArg, mapArg0 ]
+                [ mapArg_, mapArg_0 ]
     , map2 =
-        \map2Arg map2Arg0 map2Arg1 ->
+        \map2Arg_ map2Arg_0 map2Arg_1 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Bytes", "Decode" ]
@@ -1203,9 +1230,9 @@ call_ =
                              )
                      }
                 )
-                [ map2Arg, map2Arg0, map2Arg1 ]
+                [ map2Arg_, map2Arg_0, map2Arg_1 ]
     , map3 =
-        \map3Arg map3Arg0 map3Arg1 map3Arg2 ->
+        \map3Arg_ map3Arg_0 map3Arg_1 map3Arg_2 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Bytes", "Decode" ]
@@ -1240,9 +1267,9 @@ call_ =
                              )
                      }
                 )
-                [ map3Arg, map3Arg0, map3Arg1, map3Arg2 ]
+                [ map3Arg_, map3Arg_0, map3Arg_1, map3Arg_2 ]
     , map4 =
-        \map4Arg map4Arg0 map4Arg1 map4Arg2 map4Arg3 ->
+        \map4Arg_ map4Arg_0 map4Arg_1 map4Arg_2 map4Arg_3 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Bytes", "Decode" ]
@@ -1282,9 +1309,9 @@ call_ =
                              )
                      }
                 )
-                [ map4Arg, map4Arg0, map4Arg1, map4Arg2, map4Arg3 ]
+                [ map4Arg_, map4Arg_0, map4Arg_1, map4Arg_2, map4Arg_3 ]
     , map5 =
-        \map5Arg map5Arg0 map5Arg1 map5Arg2 map5Arg3 map5Arg4 ->
+        \map5Arg_ map5Arg_0 map5Arg_1 map5Arg_2 map5Arg_3 map5Arg_4 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Bytes", "Decode" ]
@@ -1329,9 +1356,15 @@ call_ =
                              )
                      }
                 )
-                [ map5Arg, map5Arg0, map5Arg1, map5Arg2, map5Arg3, map5Arg4 ]
+                [ map5Arg_
+                , map5Arg_0
+                , map5Arg_1
+                , map5Arg_2
+                , map5Arg_3
+                , map5Arg_4
+                ]
     , andThen =
-        \andThenArg andThenArg0 ->
+        \andThenArg_ andThenArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Bytes", "Decode" ]
@@ -1359,9 +1392,9 @@ call_ =
                              )
                      }
                 )
-                [ andThenArg, andThenArg0 ]
+                [ andThenArg_, andThenArg_0 ]
     , succeed =
-        \succeedArg ->
+        \succeedArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Bytes", "Decode" ]
@@ -1378,9 +1411,9 @@ call_ =
                              )
                      }
                 )
-                [ succeedArg ]
+                [ succeedArg_ ]
     , loop =
-        \loopArg loopArg0 ->
+        \loopArg_ loopArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Bytes", "Decode" ]
@@ -1411,7 +1444,7 @@ call_ =
                              )
                      }
                 )
-                [ loopArg, loopArg0 ]
+                [ loopArg_, loopArg_0 ]
     }
 
 

@@ -1,12 +1,21 @@
-module Gen.Time.Extra exposing (add, annotation_, call_, caseOf_, ceiling, compare, diff, floor, make_, moduleName_, partsToPosix, posixToParts, range, toOffset, values_)
+module Gen.Time.Extra exposing
+    ( moduleName_, partsToPosix, posixToParts, compare, diff, add
+    , floor, ceiling, range, toOffset, annotation_, make_, caseOf_
+    , call_, values_
+    )
 
-{-| 
-@docs moduleName_, partsToPosix, posixToParts, compare, diff, add, floor, ceiling, range, toOffset, annotation_, make_, caseOf_, call_, values_
+{-|
+# Generated bindings for Time.Extra
+
+@docs moduleName_, partsToPosix, posixToParts, compare, diff, add
+@docs floor, ceiling, range, toOffset, annotation_, make_
+@docs caseOf_, call_, values_
 -}
 
 
 import Elm
 import Elm.Annotation as Type
+import Elm.Arg
 import Elm.Case
 
 
@@ -31,7 +40,7 @@ Any out-of-range day or time values will be clamped within range.
 partsToPosix: Time.Zone -> Time.Extra.Parts -> Time.Posix
 -}
 partsToPosix : Elm.Expression -> Elm.Expression -> Elm.Expression
-partsToPosix partsToPosixArg partsToPosixArg0 =
+partsToPosix partsToPosixArg_ partsToPosixArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Time", "Extra" ]
@@ -46,7 +55,7 @@ partsToPosix partsToPosixArg partsToPosixArg0 =
                      )
              }
         )
-        [ partsToPosixArg, partsToPosixArg0 ]
+        [ partsToPosixArg_, partsToPosixArg_0 ]
 
 
 {-| Convert a `Posix` to a description of a time in a specific time zone. This
@@ -70,7 +79,7 @@ is a convenience function for extracting parts of a time into a single record.
 posixToParts: Time.Zone -> Time.Posix -> Time.Extra.Parts
 -}
 posixToParts : Elm.Expression -> Elm.Expression -> Elm.Expression
-posixToParts posixToPartsArg posixToPartsArg0 =
+posixToParts posixToPartsArg_ posixToPartsArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Time", "Extra" ]
@@ -85,7 +94,7 @@ posixToParts posixToPartsArg posixToPartsArg0 =
                      )
              }
         )
-        [ posixToPartsArg, posixToPartsArg0 ]
+        [ posixToPartsArg_, posixToPartsArg_0 ]
 
 
 {-| Compare the first time to the second time.
@@ -99,7 +108,7 @@ posixToParts posixToPartsArg posixToPartsArg0 =
 compare: Time.Posix -> Time.Posix -> Basics.Order
 -}
 compare : Elm.Expression -> Elm.Expression -> Elm.Expression
-compare compareArg compareArg0 =
+compare compareArg_ compareArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Time", "Extra" ]
@@ -114,7 +123,7 @@ compare compareArg compareArg0 =
                      )
              }
         )
-        [ compareArg, compareArg0 ]
+        [ compareArg_, compareArg_0 ]
 
 
 {-| Get the difference, as a number of whole intervals, between two times.
@@ -135,7 +144,7 @@ diff :
     -> Elm.Expression
     -> Elm.Expression
     -> Elm.Expression
-diff diffArg diffArg0 diffArg1 diffArg2 =
+diff diffArg_ diffArg_0 diffArg_1 diffArg_2 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Time", "Extra" ]
@@ -152,7 +161,7 @@ diff diffArg diffArg0 diffArg1 diffArg2 =
                      )
              }
         )
-        [ diffArg, diffArg0, diffArg1, diffArg2 ]
+        [ diffArg_, diffArg_0, diffArg_1, diffArg_2 ]
 
 
 {-| Shift a time into the past or future by adding a number of whole intervals.
@@ -173,7 +182,7 @@ add: Time.Extra.Interval -> Int -> Time.Zone -> Time.Posix -> Time.Posix
 -}
 add :
     Elm.Expression -> Int -> Elm.Expression -> Elm.Expression -> Elm.Expression
-add addArg addArg0 addArg1 addArg2 =
+add addArg_ addArg_0 addArg_1 addArg_2 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Time", "Extra" ]
@@ -190,7 +199,7 @@ add addArg addArg0 addArg1 addArg2 =
                      )
              }
         )
-        [ addArg, Elm.int addArg0, addArg1, addArg2 ]
+        [ addArg_, Elm.int addArg_0, addArg_1, addArg_2 ]
 
 
 {-| Round down a time to the beginning of the closest interval. The resulting
@@ -206,7 +215,7 @@ time will be less than or equal to the one provided.
 floor: Time.Extra.Interval -> Time.Zone -> Time.Posix -> Time.Posix
 -}
 floor : Elm.Expression -> Elm.Expression -> Elm.Expression -> Elm.Expression
-floor floorArg floorArg0 floorArg1 =
+floor floorArg_ floorArg_0 floorArg_1 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Time", "Extra" ]
@@ -222,7 +231,7 @@ floor floorArg floorArg0 floorArg1 =
                      )
              }
         )
-        [ floorArg, floorArg0, floorArg1 ]
+        [ floorArg_, floorArg_0, floorArg_1 ]
 
 
 {-| Round up a time to the beginning of the closest interval. The resulting
@@ -238,7 +247,7 @@ time will be greater than or equal to the one provided.
 ceiling: Time.Extra.Interval -> Time.Zone -> Time.Posix -> Time.Posix
 -}
 ceiling : Elm.Expression -> Elm.Expression -> Elm.Expression -> Elm.Expression
-ceiling ceilingArg ceilingArg0 ceilingArg1 =
+ceiling ceilingArg_ ceilingArg_0 ceilingArg_1 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Time", "Extra" ]
@@ -254,7 +263,7 @@ ceiling ceilingArg ceilingArg0 ceilingArg1 =
                      )
              }
         )
-        [ ceilingArg, ceilingArg0, ceilingArg1 ]
+        [ ceilingArg_, ceilingArg_0, ceilingArg_1 ]
 
 
 {-| Create a list of times, at rounded intervals, increasing by a step value,
@@ -289,7 +298,7 @@ range :
     -> Elm.Expression
     -> Elm.Expression
     -> Elm.Expression
-range rangeArg rangeArg0 rangeArg1 rangeArg2 rangeArg3 =
+range rangeArg_ rangeArg_0 rangeArg_1 rangeArg_2 rangeArg_3 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Time", "Extra" ]
@@ -307,7 +316,7 @@ range rangeArg rangeArg0 rangeArg1 rangeArg2 rangeArg3 =
                      )
              }
         )
-        [ rangeArg, Elm.int rangeArg0, rangeArg1, rangeArg2, rangeArg3 ]
+        [ rangeArg_, Elm.int rangeArg_0, rangeArg_1, rangeArg_2, rangeArg_3 ]
 
 
 {-| What is the offset from UTC, in minutes, for this `Zone` at this
@@ -335,7 +344,7 @@ from the package [justinmimbs/timezone-data][tzdata] to define `nyc`:
 toOffset: Time.Zone -> Time.Posix -> Int
 -}
 toOffset : Elm.Expression -> Elm.Expression -> Elm.Expression
-toOffset toOffsetArg toOffsetArg0 =
+toOffset toOffsetArg_ toOffsetArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Time", "Extra" ]
@@ -350,7 +359,7 @@ toOffset toOffsetArg toOffsetArg0 =
                      )
              }
         )
-        [ toOffsetArg, toOffsetArg0 ]
+        [ toOffsetArg_, toOffsetArg_0 ]
 
 
 annotation_ : { parts : Type.Annotation, interval : Type.Annotation }
@@ -533,23 +542,22 @@ make_ =
 caseOf_ :
     { interval :
         Elm.Expression
-        -> { intervalTags_0_0
-            | year : Elm.Expression
-            , quarter : Elm.Expression
-            , month : Elm.Expression
-            , week : Elm.Expression
-            , monday : Elm.Expression
-            , tuesday : Elm.Expression
-            , wednesday : Elm.Expression
-            , thursday : Elm.Expression
-            , friday : Elm.Expression
-            , saturday : Elm.Expression
-            , sunday : Elm.Expression
-            , day : Elm.Expression
-            , hour : Elm.Expression
-            , minute : Elm.Expression
-            , second : Elm.Expression
-            , millisecond : Elm.Expression
+        -> { year : Elm.Expression
+        , quarter : Elm.Expression
+        , month : Elm.Expression
+        , week : Elm.Expression
+        , monday : Elm.Expression
+        , tuesday : Elm.Expression
+        , wednesday : Elm.Expression
+        , thursday : Elm.Expression
+        , friday : Elm.Expression
+        , saturday : Elm.Expression
+        , sunday : Elm.Expression
+        , day : Elm.Expression
+        , hour : Elm.Expression
+        , minute : Elm.Expression
+        , second : Elm.Expression
+        , millisecond : Elm.Expression
         }
         -> Elm.Expression
     }
@@ -559,22 +567,54 @@ caseOf_ =
             Elm.Case.custom
                 intervalExpression
                 (Type.namedWith [ "Time", "Extra" ] "Interval" [])
-                [ Elm.Case.branch0 "Year" intervalTags.year
-                , Elm.Case.branch0 "Quarter" intervalTags.quarter
-                , Elm.Case.branch0 "Month" intervalTags.month
-                , Elm.Case.branch0 "Week" intervalTags.week
-                , Elm.Case.branch0 "Monday" intervalTags.monday
-                , Elm.Case.branch0 "Tuesday" intervalTags.tuesday
-                , Elm.Case.branch0 "Wednesday" intervalTags.wednesday
-                , Elm.Case.branch0 "Thursday" intervalTags.thursday
-                , Elm.Case.branch0 "Friday" intervalTags.friday
-                , Elm.Case.branch0 "Saturday" intervalTags.saturday
-                , Elm.Case.branch0 "Sunday" intervalTags.sunday
-                , Elm.Case.branch0 "Day" intervalTags.day
-                , Elm.Case.branch0 "Hour" intervalTags.hour
-                , Elm.Case.branch0 "Minute" intervalTags.minute
-                , Elm.Case.branch0 "Second" intervalTags.second
-                , Elm.Case.branch0 "Millisecond" intervalTags.millisecond
+                [ Elm.Case.branch
+                    (Elm.Arg.customType "Year" intervalTags.year)
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType "Quarter" intervalTags.quarter)
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType "Month" intervalTags.month)
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType "Week" intervalTags.week)
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType "Monday" intervalTags.monday)
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType "Tuesday" intervalTags.tuesday)
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType "Wednesday" intervalTags.wednesday)
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType "Thursday" intervalTags.thursday)
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType "Friday" intervalTags.friday)
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType "Saturday" intervalTags.saturday)
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType "Sunday" intervalTags.sunday)
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType "Day" intervalTags.day)
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType "Hour" intervalTags.hour)
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType "Minute" intervalTags.minute)
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType "Second" intervalTags.second)
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType "Millisecond" intervalTags.millisecond)
+                    Basics.identity
                 ]
     }
 
@@ -610,7 +650,7 @@ call_ :
     }
 call_ =
     { partsToPosix =
-        \partsToPosixArg partsToPosixArg0 ->
+        \partsToPosixArg_ partsToPosixArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Time", "Extra" ]
@@ -628,9 +668,9 @@ call_ =
                              )
                      }
                 )
-                [ partsToPosixArg, partsToPosixArg0 ]
+                [ partsToPosixArg_, partsToPosixArg_0 ]
     , posixToParts =
-        \posixToPartsArg posixToPartsArg0 ->
+        \posixToPartsArg_ posixToPartsArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Time", "Extra" ]
@@ -646,9 +686,9 @@ call_ =
                              )
                      }
                 )
-                [ posixToPartsArg, posixToPartsArg0 ]
+                [ posixToPartsArg_, posixToPartsArg_0 ]
     , compare =
-        \compareArg compareArg0 ->
+        \compareArg_ compareArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Time", "Extra" ]
@@ -663,9 +703,9 @@ call_ =
                              )
                      }
                 )
-                [ compareArg, compareArg0 ]
+                [ compareArg_, compareArg_0 ]
     , diff =
-        \diffArg diffArg0 diffArg1 diffArg2 ->
+        \diffArg_ diffArg_0 diffArg_1 diffArg_2 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Time", "Extra" ]
@@ -685,9 +725,9 @@ call_ =
                              )
                      }
                 )
-                [ diffArg, diffArg0, diffArg1, diffArg2 ]
+                [ diffArg_, diffArg_0, diffArg_1, diffArg_2 ]
     , add =
-        \addArg addArg0 addArg1 addArg2 ->
+        \addArg_ addArg_0 addArg_1 addArg_2 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Time", "Extra" ]
@@ -707,9 +747,9 @@ call_ =
                              )
                      }
                 )
-                [ addArg, addArg0, addArg1, addArg2 ]
+                [ addArg_, addArg_0, addArg_1, addArg_2 ]
     , floor =
-        \floorArg floorArg0 floorArg1 ->
+        \floorArg_ floorArg_0 floorArg_1 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Time", "Extra" ]
@@ -728,9 +768,9 @@ call_ =
                              )
                      }
                 )
-                [ floorArg, floorArg0, floorArg1 ]
+                [ floorArg_, floorArg_0, floorArg_1 ]
     , ceiling =
-        \ceilingArg ceilingArg0 ceilingArg1 ->
+        \ceilingArg_ ceilingArg_0 ceilingArg_1 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Time", "Extra" ]
@@ -749,9 +789,9 @@ call_ =
                              )
                      }
                 )
-                [ ceilingArg, ceilingArg0, ceilingArg1 ]
+                [ ceilingArg_, ceilingArg_0, ceilingArg_1 ]
     , range =
-        \rangeArg rangeArg0 rangeArg1 rangeArg2 rangeArg3 ->
+        \rangeArg_ rangeArg_0 rangeArg_1 rangeArg_2 rangeArg_3 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Time", "Extra" ]
@@ -774,9 +814,9 @@ call_ =
                              )
                      }
                 )
-                [ rangeArg, rangeArg0, rangeArg1, rangeArg2, rangeArg3 ]
+                [ rangeArg_, rangeArg_0, rangeArg_1, rangeArg_2, rangeArg_3 ]
     , toOffset =
-        \toOffsetArg toOffsetArg0 ->
+        \toOffsetArg_ toOffsetArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Time", "Extra" ]
@@ -791,7 +831,7 @@ call_ =
                              )
                      }
                 )
-                [ toOffsetArg, toOffsetArg0 ]
+                [ toOffsetArg_, toOffsetArg_0 ]
     }
 
 

@@ -1,12 +1,19 @@
-module Gen.Pages.Internal.Platform.Cli exposing (annotation_, call_, caseOf_, cliApplication, currentCompatibilityKey, init, make_, moduleName_, requestDecoder, update, values_)
+module Gen.Pages.Internal.Platform.Cli exposing
+    ( moduleName_, cliApplication, init, requestDecoder, update, currentCompatibilityKey
+    , annotation_, make_, caseOf_, call_, values_
+    )
 
-{-| 
-@docs moduleName_, cliApplication, init, requestDecoder, update, currentCompatibilityKey, annotation_, make_, caseOf_, call_, values_
+{-|
+# Generated bindings for Pages.Internal.Platform.Cli
+
+@docs moduleName_, cliApplication, init, requestDecoder, update, currentCompatibilityKey
+@docs annotation_, make_, caseOf_, call_, values_
 -}
 
 
 import Elm
 import Elm.Annotation as Type
+import Elm.Arg
 import Elm.Case
 
 
@@ -21,7 +28,7 @@ moduleName_ =
     -> Pages.Internal.Platform.Cli.Program (Maybe route)
 -}
 cliApplication : Elm.Expression -> Elm.Expression
-cliApplication cliApplicationArg =
+cliApplication cliApplicationArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Pages", "Internal", "Platform", "Cli" ]
@@ -51,7 +58,7 @@ cliApplication cliApplicationArg =
                      )
              }
         )
-        [ cliApplicationArg ]
+        [ cliApplicationArg_ ]
 
 
 {-| init: 
@@ -67,7 +74,7 @@ init :
     -> Elm.Expression
     -> Elm.Expression
     -> Elm.Expression
-init initArg initArg0 initArg1 initArg2 =
+init initArg_ initArg_0 initArg_1 initArg_2 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Pages", "Internal", "Platform", "Cli" ]
@@ -117,7 +124,7 @@ init initArg initArg0 initArg1 initArg2 =
                      )
              }
         )
-        [ initArg, initArg0, initArg1, initArg2 ]
+        [ initArg_, initArg_0, initArg_1, initArg_2 ]
 
 
 {-| requestDecoder: Json.Decode.Decoder Pages.StaticHttp.Request.Request -}
@@ -146,7 +153,7 @@ requestDecoder =
     -> ( Pages.Internal.Platform.Cli.Model route, Pages.Internal.Platform.Effect.Effect )
 -}
 update : Elm.Expression -> Elm.Expression -> Elm.Expression
-update updateArg updateArg0 =
+update updateArg_ updateArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Pages", "Internal", "Platform", "Cli" ]
@@ -182,7 +189,7 @@ update updateArg updateArg0 =
                      )
              }
         )
-        [ updateArg, updateArg0 ]
+        [ updateArg_, updateArg_0 ]
 
 
 {-| currentCompatibilityKey: Int -}
@@ -352,15 +359,6 @@ make_ =
     }
 
 
-caseOf_ :
-    { msg :
-        Elm.Expression
-        -> { msgTags_0_0
-            | gotDataBatch : Elm.Expression -> Elm.Expression
-            , gotBuildError : Elm.Expression -> Elm.Expression
-        }
-        -> Elm.Expression
-    }
 caseOf_ =
     { msg =
         \msgExpression msgTags ->
@@ -371,18 +369,37 @@ caseOf_ =
                      "Msg"
                      []
                 )
-                [ Elm.Case.branch1
-                    "GotDataBatch"
-                    ( "jsonDecodeValue"
-                    , Type.namedWith [ "Json", "Decode" ] "Value" []
+                [ Elm.Case.branch
+                    (Elm.Arg.customType
+                       "GotDataBatch"
+                       msgTags.gotDataBatch |> Elm.Arg.item
+                                                     (Elm.Arg.varWith
+                                                            "jsonDecodeValue"
+                                                            (Type.namedWith
+                                                                   [ "Json"
+                                                                   , "Decode"
+                                                                   ]
+                                                                   "Value"
+                                                                   []
+                                                            )
+                                                     )
                     )
-                    msgTags.gotDataBatch
-                , Elm.Case.branch1
-                    "GotBuildError"
-                    ( "buildErrorBuildError"
-                    , Type.namedWith [ "BuildError" ] "BuildError" []
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType
+                       "GotBuildError"
+                       msgTags.gotBuildError |> Elm.Arg.item
+                                                      (Elm.Arg.varWith
+                                                             "buildErrorBuildError"
+                                                             (Type.namedWith
+                                                                    [ "BuildError"
+                                                                    ]
+                                                                    "BuildError"
+                                                                    []
+                                                             )
+                                                      )
                     )
-                    msgTags.gotBuildError
+                    Basics.identity
                 ]
     }
 
@@ -399,7 +416,7 @@ call_ :
     }
 call_ =
     { cliApplication =
-        \cliApplicationArg ->
+        \cliApplicationArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Pages", "Internal", "Platform", "Cli" ]
@@ -433,9 +450,9 @@ call_ =
                              )
                      }
                 )
-                [ cliApplicationArg ]
+                [ cliApplicationArg_ ]
     , init =
-        \initArg initArg0 initArg1 initArg2 ->
+        \initArg_ initArg_0 initArg_1 initArg_2 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Pages", "Internal", "Platform", "Cli" ]
@@ -492,9 +509,9 @@ call_ =
                              )
                      }
                 )
-                [ initArg, initArg0, initArg1, initArg2 ]
+                [ initArg_, initArg_0, initArg_1, initArg_2 ]
     , update =
-        \updateArg updateArg0 ->
+        \updateArg_ updateArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Pages", "Internal", "Platform", "Cli" ]
@@ -534,7 +551,7 @@ call_ =
                              )
                      }
                 )
-                [ updateArg, updateArg0 ]
+                [ updateArg_, updateArg_0 ]
     }
 
 

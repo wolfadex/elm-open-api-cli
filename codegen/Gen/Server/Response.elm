@@ -1,7 +1,17 @@
-module Gen.Server.Response exposing (annotation_, base64Body, body, bytesBody, call_, emptyBody, errorPage, json, map, mapError, moduleName_, permanentRedirect, plainText, render, temporaryRedirect, toJson, values_, withHeader, withHeaders, withSetCookieHeader, withStatusCode)
+module Gen.Server.Response exposing
+    ( moduleName_, render, map, errorPage, mapError, temporaryRedirect
+    , permanentRedirect, json, plainText, emptyBody, body, bytesBody, base64Body
+    , withHeader, withHeaders, withStatusCode, withSetCookieHeader, toJson, annotation_, call_
+    , values_
+    )
 
-{-| 
-@docs moduleName_, render, map, errorPage, mapError, temporaryRedirect, permanentRedirect, json, plainText, emptyBody, body, bytesBody, base64Body, withHeader, withHeaders, withStatusCode, withSetCookieHeader, toJson, annotation_, call_, values_
+{-|
+# Generated bindings for Server.Response
+
+@docs moduleName_, render, map, errorPage, mapError, temporaryRedirect
+@docs permanentRedirect, json, plainText, emptyBody, body, bytesBody
+@docs base64Body, withHeader, withHeaders, withStatusCode, withSetCookieHeader, toJson
+@docs annotation_, call_, values_
 -}
 
 
@@ -22,7 +32,7 @@ moduleName_ =
 render: data -> Server.Response.Response data error
 -}
 render : Elm.Expression -> Elm.Expression
-render renderArg =
+render renderArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Server", "Response" ]
@@ -39,7 +49,7 @@ render renderArg =
                      )
              }
         )
-        [ renderArg ]
+        [ renderArg_ ]
 
 
 {-| Maps the `data` for a Render response. Usually not needed, but always good to have the option.
@@ -50,7 +60,7 @@ map:
     -> Server.Response.Response mappedData error
 -}
 map : (Elm.Expression -> Elm.Expression) -> Elm.Expression -> Elm.Expression
-map mapArg mapArg0 =
+map mapArg_ mapArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Server", "Response" ]
@@ -74,7 +84,7 @@ map mapArg mapArg0 =
                      )
              }
         )
-        [ Elm.functionReduced "mapUnpack" mapArg, mapArg0 ]
+        [ Elm.functionReduced "mapUnpack" mapArg_, mapArg_0 ]
 
 
 {-| Instead of rendering the current Route Module, you can render an `ErrorPage` such as a 404 page or a 500 error page.
@@ -85,7 +95,7 @@ defining and rendering your custom ErrorPage type.
 errorPage: errorPage -> Server.Response.Response data errorPage
 -}
 errorPage : Elm.Expression -> Elm.Expression
-errorPage errorPageArg =
+errorPage errorPageArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Server", "Response" ]
@@ -102,7 +112,7 @@ errorPage errorPageArg =
                      )
              }
         )
-        [ errorPageArg ]
+        [ errorPageArg_ ]
 
 
 {-| Maps the `error` for an ErrorPage response. Usually not needed, but always good to have the option.
@@ -114,7 +124,7 @@ mapError:
 -}
 mapError :
     (Elm.Expression -> Elm.Expression) -> Elm.Expression -> Elm.Expression
-mapError mapErrorArg mapErrorArg0 =
+mapError mapErrorArg_ mapErrorArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Server", "Response" ]
@@ -138,12 +148,12 @@ mapError mapErrorArg mapErrorArg0 =
                      )
              }
         )
-        [ Elm.functionReduced "mapErrorUnpack" mapErrorArg, mapErrorArg0 ]
+        [ Elm.functionReduced "mapErrorUnpack" mapErrorArg_, mapErrorArg_0 ]
 
 
 {-| temporaryRedirect: String -> Server.Response.Response data error -}
 temporaryRedirect : String -> Elm.Expression
-temporaryRedirect temporaryRedirectArg =
+temporaryRedirect temporaryRedirectArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Server", "Response" ]
@@ -160,7 +170,7 @@ temporaryRedirect temporaryRedirectArg =
                      )
              }
         )
-        [ Elm.string temporaryRedirectArg ]
+        [ Elm.string temporaryRedirectArg_ ]
 
 
 {-| Build a 308 permanent redirect response.
@@ -177,7 +187,7 @@ use `customResponse` instead.
 permanentRedirect: String -> Server.Response.Response data error
 -}
 permanentRedirect : String -> Elm.Expression
-permanentRedirect permanentRedirectArg =
+permanentRedirect permanentRedirectArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Server", "Response" ]
@@ -194,7 +204,7 @@ permanentRedirect permanentRedirectArg =
                      )
              }
         )
-        [ Elm.string permanentRedirectArg ]
+        [ Elm.string permanentRedirectArg_ ]
 
 
 {-| Build a JSON body from a `Json.Encode.Value`.
@@ -208,7 +218,7 @@ Sets the `Content-Type` to `application/json`.
 json: Json.Encode.Value -> Server.Response.Response data error
 -}
 json : Elm.Expression -> Elm.Expression
-json jsonArg =
+json jsonArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Server", "Response" ]
@@ -225,7 +235,7 @@ json jsonArg =
                      )
              }
         )
-        [ jsonArg ]
+        [ jsonArg_ ]
 
 
 {-| Build a `Response` with a String body. Sets the `Content-Type` to `text/plain`.
@@ -235,7 +245,7 @@ json jsonArg =
 plainText: String -> Server.Response.Response data error
 -}
 plainText : String -> Elm.Expression
-plainText plainTextArg =
+plainText plainTextArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Server", "Response" ]
@@ -252,7 +262,7 @@ plainText plainTextArg =
                      )
              }
         )
-        [ Elm.string plainTextArg ]
+        [ Elm.string plainTextArg_ ]
 
 
 {-| Build a `Response` with no HTTP response body.
@@ -279,7 +289,7 @@ emptyBody =
 body: String -> Server.Response.Response data error
 -}
 body : String -> Elm.Expression
-body bodyArg =
+body bodyArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Server", "Response" ]
@@ -296,7 +306,7 @@ body bodyArg =
                      )
              }
         )
-        [ Elm.string bodyArg ]
+        [ Elm.string bodyArg_ ]
 
 
 {-| Build a `Response` with a `Bytes`.
@@ -307,7 +317,7 @@ Your adapter will need to handle `isBase64Encoded` to turn it into the appropria
 bytesBody: Bytes.Bytes -> Server.Response.Response data error
 -}
 bytesBody : Elm.Expression -> Elm.Expression
-bytesBody bytesBodyArg =
+bytesBody bytesBodyArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Server", "Response" ]
@@ -324,7 +334,7 @@ bytesBody bytesBodyArg =
                      )
              }
         )
-        [ bytesBodyArg ]
+        [ bytesBodyArg_ ]
 
 
 {-| Build a `Response` with a String that should represent a base64 encoded value.
@@ -336,7 +346,7 @@ Your adapter will need to handle `isBase64Encoded` to turn it into the appropria
 base64Body: String -> Server.Response.Response data error
 -}
 base64Body : String -> Elm.Expression
-base64Body base64BodyArg =
+base64Body base64BodyArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Server", "Response" ]
@@ -353,7 +363,7 @@ base64Body base64BodyArg =
                      )
              }
         )
-        [ Elm.string base64BodyArg ]
+        [ Elm.string base64BodyArg_ ]
 
 
 {-| Add a header to the response.
@@ -370,7 +380,7 @@ withHeader:
     -> Server.Response.Response data error
 -}
 withHeader : String -> String -> Elm.Expression -> Elm.Expression
-withHeader withHeaderArg withHeaderArg0 withHeaderArg1 =
+withHeader withHeaderArg_ withHeaderArg_0 withHeaderArg_1 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Server", "Response" ]
@@ -393,7 +403,10 @@ withHeader withHeaderArg withHeaderArg0 withHeaderArg1 =
                      )
              }
         )
-        [ Elm.string withHeaderArg, Elm.string withHeaderArg0, withHeaderArg1 ]
+        [ Elm.string withHeaderArg_
+        , Elm.string withHeaderArg_0
+        , withHeaderArg_1
+        ]
 
 
 {-| Same as [`withHeader`](#withHeader), but allows you to add multiple headers at once.
@@ -411,7 +424,7 @@ withHeaders:
     -> Server.Response.Response data error
 -}
 withHeaders : List Elm.Expression -> Elm.Expression -> Elm.Expression
-withHeaders withHeadersArg withHeadersArg0 =
+withHeaders withHeadersArg_ withHeadersArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Server", "Response" ]
@@ -433,7 +446,7 @@ withHeaders withHeadersArg withHeadersArg0 =
                      )
              }
         )
-        [ Elm.list withHeadersArg, withHeadersArg0 ]
+        [ Elm.list withHeadersArg_, withHeadersArg_0 ]
 
 
 {-| Set the [HTTP Response status code](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status) for the `Response`.
@@ -447,7 +460,7 @@ withStatusCode:
     -> Server.Response.Response data Basics.Never
 -}
 withStatusCode : Int -> Elm.Expression -> Elm.Expression
-withStatusCode withStatusCodeArg withStatusCodeArg0 =
+withStatusCode withStatusCodeArg_ withStatusCodeArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Server", "Response" ]
@@ -473,7 +486,7 @@ withStatusCode withStatusCodeArg withStatusCodeArg0 =
                      )
              }
         )
-        [ Elm.int withStatusCodeArg, withStatusCodeArg0 ]
+        [ Elm.int withStatusCodeArg_, withStatusCodeArg_0 ]
 
 
 {-| Set a [`Server.SetCookie`](Server-SetCookie) value on the response.
@@ -487,7 +500,7 @@ withSetCookieHeader:
     -> Server.Response.Response data error
 -}
 withSetCookieHeader : Elm.Expression -> Elm.Expression -> Elm.Expression
-withSetCookieHeader withSetCookieHeaderArg withSetCookieHeaderArg0 =
+withSetCookieHeader withSetCookieHeaderArg_ withSetCookieHeaderArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Server", "Response" ]
@@ -512,7 +525,7 @@ withSetCookieHeader withSetCookieHeaderArg withSetCookieHeaderArg0 =
                      )
              }
         )
-        [ withSetCookieHeaderArg, withSetCookieHeaderArg0 ]
+        [ withSetCookieHeaderArg_, withSetCookieHeaderArg_0 ]
 
 
 {-| For internal use or more advanced use cases for meta frameworks.
@@ -520,7 +533,7 @@ withSetCookieHeader withSetCookieHeaderArg withSetCookieHeaderArg0 =
 toJson: Server.Response.Response Basics.Never Basics.Never -> Json.Encode.Value
 -}
 toJson : Elm.Expression -> Elm.Expression
-toJson toJsonArg =
+toJson toJsonArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Server", "Response" ]
@@ -539,7 +552,7 @@ toJson toJsonArg =
                      )
              }
         )
-        [ toJsonArg ]
+        [ toJsonArg_ ]
 
 
 annotation_ :
@@ -580,7 +593,7 @@ call_ :
     }
 call_ =
     { render =
-        \renderArg ->
+        \renderArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Server", "Response" ]
@@ -597,9 +610,9 @@ call_ =
                              )
                      }
                 )
-                [ renderArg ]
+                [ renderArg_ ]
     , map =
-        \mapArg mapArg0 ->
+        \mapArg_ mapArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Server", "Response" ]
@@ -625,9 +638,9 @@ call_ =
                              )
                      }
                 )
-                [ mapArg, mapArg0 ]
+                [ mapArg_, mapArg_0 ]
     , errorPage =
-        \errorPageArg ->
+        \errorPageArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Server", "Response" ]
@@ -644,9 +657,9 @@ call_ =
                              )
                      }
                 )
-                [ errorPageArg ]
+                [ errorPageArg_ ]
     , mapError =
-        \mapErrorArg mapErrorArg0 ->
+        \mapErrorArg_ mapErrorArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Server", "Response" ]
@@ -672,9 +685,9 @@ call_ =
                              )
                      }
                 )
-                [ mapErrorArg, mapErrorArg0 ]
+                [ mapErrorArg_, mapErrorArg_0 ]
     , temporaryRedirect =
-        \temporaryRedirectArg ->
+        \temporaryRedirectArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Server", "Response" ]
@@ -691,9 +704,9 @@ call_ =
                              )
                      }
                 )
-                [ temporaryRedirectArg ]
+                [ temporaryRedirectArg_ ]
     , permanentRedirect =
-        \permanentRedirectArg ->
+        \permanentRedirectArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Server", "Response" ]
@@ -710,9 +723,9 @@ call_ =
                              )
                      }
                 )
-                [ permanentRedirectArg ]
+                [ permanentRedirectArg_ ]
     , json =
-        \jsonArg ->
+        \jsonArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Server", "Response" ]
@@ -733,9 +746,9 @@ call_ =
                              )
                      }
                 )
-                [ jsonArg ]
+                [ jsonArg_ ]
     , plainText =
-        \plainTextArg ->
+        \plainTextArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Server", "Response" ]
@@ -752,9 +765,9 @@ call_ =
                              )
                      }
                 )
-                [ plainTextArg ]
+                [ plainTextArg_ ]
     , body =
-        \bodyArg ->
+        \bodyArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Server", "Response" ]
@@ -771,9 +784,9 @@ call_ =
                              )
                      }
                 )
-                [ bodyArg ]
+                [ bodyArg_ ]
     , bytesBody =
-        \bytesBodyArg ->
+        \bytesBodyArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Server", "Response" ]
@@ -790,9 +803,9 @@ call_ =
                              )
                      }
                 )
-                [ bytesBodyArg ]
+                [ bytesBodyArg_ ]
     , base64Body =
-        \base64BodyArg ->
+        \base64BodyArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Server", "Response" ]
@@ -809,9 +822,9 @@ call_ =
                              )
                      }
                 )
-                [ base64BodyArg ]
+                [ base64BodyArg_ ]
     , withHeader =
-        \withHeaderArg withHeaderArg0 withHeaderArg1 ->
+        \withHeaderArg_ withHeaderArg_0 withHeaderArg_1 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Server", "Response" ]
@@ -834,9 +847,9 @@ call_ =
                              )
                      }
                 )
-                [ withHeaderArg, withHeaderArg0, withHeaderArg1 ]
+                [ withHeaderArg_, withHeaderArg_0, withHeaderArg_1 ]
     , withHeaders =
-        \withHeadersArg withHeadersArg0 ->
+        \withHeadersArg_ withHeadersArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Server", "Response" ]
@@ -859,9 +872,9 @@ call_ =
                              )
                      }
                 )
-                [ withHeadersArg, withHeadersArg0 ]
+                [ withHeadersArg_, withHeadersArg_0 ]
     , withStatusCode =
-        \withStatusCodeArg withStatusCodeArg0 ->
+        \withStatusCodeArg_ withStatusCodeArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Server", "Response" ]
@@ -887,9 +900,9 @@ call_ =
                              )
                      }
                 )
-                [ withStatusCodeArg, withStatusCodeArg0 ]
+                [ withStatusCodeArg_, withStatusCodeArg_0 ]
     , withSetCookieHeader =
-        \withSetCookieHeaderArg withSetCookieHeaderArg0 ->
+        \withSetCookieHeaderArg_ withSetCookieHeaderArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Server", "Response" ]
@@ -914,9 +927,9 @@ call_ =
                              )
                      }
                 )
-                [ withSetCookieHeaderArg, withSetCookieHeaderArg0 ]
+                [ withSetCookieHeaderArg_, withSetCookieHeaderArg_0 ]
     , toJson =
-        \toJsonArg ->
+        \toJsonArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Server", "Response" ]
@@ -939,7 +952,7 @@ call_ =
                              )
                      }
                 )
-                [ toJsonArg ]
+                [ toJsonArg_ ]
     }
 
 

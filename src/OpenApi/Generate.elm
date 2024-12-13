@@ -12,6 +12,7 @@ import Dict
 import Dict.Extra
 import Elm
 import Elm.Annotation
+import Elm.Arg
 import Elm.Case
 import Elm.Declare
 import Elm.Op
@@ -104,7 +105,7 @@ files :
             CliMonad.Message
             ( List
                 { moduleName : List String
-                , declarations : FastDict.Dict String Elm.Declaration
+                , declarations : FastDict.Dict String { group : String, declaration : Elm.Declaration }
                 }
             , { warnings : List CliMonad.Message
               , requiredPackages : FastSet.Set String
@@ -134,57 +135,60 @@ files { namespace, generateTodos, effectTypes, server, formats } apiSpec =
                 |> Result.map
                     (\{ declarations, warnings, requiredPackages } ->
                         let
-                            allDecls : List ( Common.Module, String, Elm.Declaration )
+                            allDecls : List CliMonad.Declaration
                             allDecls =
                                 declarations
                                     ++ elmHttpCommonDeclarations effectTypes
                                     ++ lamderaProgramTestCommonDeclarations effectTypes
-                                    ++ [ ( Common.Common
-                                         , "decodeOptionalField"
-                                         , SchemaUtils.decodeOptionalField.declaration
-                                            |> Elm.withDocumentation SchemaUtils.decodeOptionalFieldDocumentation
-                                            |> Elm.exposeWith
-                                                { exposeConstructor = False
-                                                , group = Just "Decoders"
-                                                }
-                                         )
-                                       , ( Common.Common
-                                         , "jsonDecodeAndMap"
-                                         , jsonDecodeAndMap
-                                            |> Elm.withDocumentation "Chain JSON decoders, when `Json.Decode.map8` isn't enough."
-                                            |> Elm.exposeWith
-                                                { exposeConstructor = False
-                                                , group = Just "Decoders"
-                                                }
-                                         )
-                                       , ( Common.Common
-                                         , "Error"
-                                         , errorType
-                                            |> Elm.exposeWith
-                                                { exposeConstructor = True
-                                                , group = Just "Http"
-                                                }
-                                         )
-                                       , ( Common.Common
-                                         , "Nullable"
-                                         , nullableType
-                                            |> Elm.exposeWith
-                                                { exposeConstructor = True
-                                                , group = Just "Types"
-                                                }
-                                         )
+                                    ++ [ { moduleName = Common.Common
+                                         , name = "decodeOptionalField"
+                                         , declaration =
+                                            SchemaUtils.decodeOptionalField.declaration
+                                                |> Elm.withDocumentation SchemaUtils.decodeOptionalFieldDocumentation
+                                                |> Elm.expose
+                                         , group = "Decoders"
+                                         }
+                                       , { moduleName = Common.Common
+                                         , name = "jsonDecodeAndMap"
+                                         , declaration =
+                                            jsonDecodeAndMap
+                                                |> Elm.withDocumentation "Chain JSON decoders, when `Json.Decode.map8` isn't enough."
+                                                |> Elm.expose
+                                         , group = "Decoders"
+                                         }
+                                       , { moduleName = Common.Common
+                                         , name = "Error"
+                                         , declaration =
+                                            errorType
+                                                |> Elm.exposeConstructor
+                                         , group = "Http"
+                                         }
+                                       , { moduleName = Common.Common
+                                         , name = "Nullable"
+                                         , declaration =
+                                            nullableType
+                                                |> Elm.exposeConstructor
+                                         , group = "Types"
+                                         }
                                        ]
                                     ++ serverDecls apiSpec server
                         in
                         ( allDecls
-                            |> Dict.Extra.groupBy (\( module_, _, _ ) -> Common.moduleToNamespace namespace module_)
+                            |> Dict.Extra.groupBy (\{ moduleName } -> Common.moduleToNamespace namespace moduleName)
                             |> Dict.toList
                             |> List.map
                                 (\( moduleName, group ) ->
                                     { moduleName = moduleName
                                     , declarations =
                                         group
-                                            |> List.map (\( _, name, decl ) -> ( name, decl ))
+                                            |> List.map
+                                                (\declaration ->
+                                                    ( declaration.name
+                                                    , { group = declaration.group
+                                                      , declaration = declaration.declaration
+                                                      }
+                                                    )
+                                                )
                                             |> FastDict.fromList
                                     }
                                 )
@@ -195,114 +199,78 @@ files { namespace, generateTodos, effectTypes, server, formats } apiSpec =
                     )
 
 
-elmHttpCommonDeclarations : List OpenApi.Config.EffectType -> List ( Common.Module, String, Elm.Declaration )
+elmHttpCommonDeclarations : List OpenApi.Config.EffectType -> List CliMonad.Declaration
 elmHttpCommonDeclarations effectTypes =
     if List.any (\effectType -> effectTypeToPackage effectType == Common.ElmHttp) effectTypes then
-        [ ( Common.Common
-          , "expectJsonCustom"
-          , expectJsonCustom.declaration
-                |> Elm.exposeWith
-                    { exposeConstructor = False
-                    , group = Just "Http"
-                    }
-          )
-        , ( Common.Common
-          , "jsonResolverCustom"
-          , jsonResolverCustom.declaration
-                |> Elm.exposeWith
-                    { exposeConstructor = False
-                    , group = Just "Http"
-                    }
-          )
-        , ( Common.Common
-          , "expectStringCustom"
-          , expectStringCustom.declaration
-                |> Elm.exposeWith
-                    { exposeConstructor = False
-                    , group = Just "Http"
-                    }
-          )
-        , ( Common.Common
-          , "stringResolverCustom"
-          , stringResolverCustom.declaration
-                |> Elm.exposeWith
-                    { exposeConstructor = False
-                    , group = Just "Http"
-                    }
-          )
-        , ( Common.Common
-          , "expectBytesCustom"
-          , expectBytesCustom.declaration
-                |> Elm.exposeWith
-                    { exposeConstructor = False
-                    , group = Just "Http"
-                    }
-          )
-        , ( Common.Common
-          , "bytesResolverCustom"
-          , bytesResolverCustom.declaration
-                |> Elm.exposeWith
-                    { exposeConstructor = False
-                    , group = Just "Http"
-                    }
-          )
+        [ { moduleName = Common.Common
+          , name = "expectJsonCustom"
+          , declaration = Elm.expose expectJsonCustom.declaration
+          , group = "Http"
+          }
+        , { moduleName = Common.Common
+          , name = "jsonResolverCustom"
+          , declaration = Elm.expose jsonResolverCustom.declaration
+          , group = "Http"
+          }
+        , { moduleName = Common.Common
+          , name = "expectStringCustom"
+          , declaration = Elm.expose expectStringCustom.declaration
+          , group = "Http"
+          }
+        , { moduleName = Common.Common
+          , name = "stringResolverCustom"
+          , declaration = Elm.expose stringResolverCustom.declaration
+          , group = "Http"
+          }
+        , { moduleName = Common.Common
+          , name = "expectBytesCustom"
+          , declaration = Elm.expose expectBytesCustom.declaration
+          , group = "Http"
+          }
+        , { moduleName = Common.Common
+          , name = "bytesResolverCustom"
+          , declaration = Elm.expose bytesResolverCustom.declaration
+          , group = "Http"
+          }
         ]
 
     else
         []
 
 
-lamderaProgramTestCommonDeclarations : List OpenApi.Config.EffectType -> List ( Common.Module, String, Elm.Declaration )
+lamderaProgramTestCommonDeclarations : List OpenApi.Config.EffectType -> List CliMonad.Declaration
 lamderaProgramTestCommonDeclarations effectTypes =
     if List.any (\effectType -> effectTypeToPackage effectType == Common.LamderaProgramTest) effectTypes then
-        [ ( Common.Common
-          , "expectJsonCustomEffect"
-          , expectJsonCustomEffect.declaration
-                |> Elm.exposeWith
-                    { exposeConstructor = False
-                    , group = Just "Http"
-                    }
-          )
-        , ( Common.Common
-          , "jsonResolverCustomEffect"
-          , jsonResolverCustomEffect.declaration
-                |> Elm.exposeWith
-                    { exposeConstructor = False
-                    , group = Just "Http"
-                    }
-          )
-        , ( Common.Common
-          , "expectStringCustomEffect"
-          , expectStringCustomEffect.declaration
-                |> Elm.exposeWith
-                    { exposeConstructor = False
-                    , group = Just "Http"
-                    }
-          )
-        , ( Common.Common
-          , "stringResolverCustomEffect"
-          , stringResolverCustomEffect.declaration
-                |> Elm.exposeWith
-                    { exposeConstructor = False
-                    , group = Just "Http"
-                    }
-          )
-        , ( Common.Common
-          , "expectBytesCustomEffect"
-          , expectBytesCustomEffect.declaration
-                |> Elm.exposeWith
-                    { exposeConstructor = False
-                    , group = Just "Http"
-                    }
-          )
-        , ( Common.Common
-          , "bytesResolverCustomEffect"
-          , bytesResolverCustomEffect.declaration
-                |> Elm.exposeWith
-                    { exposeConstructor = False
-                    , group = Just "Http"
-                    }
-          )
+        [ { moduleName = Common.Common
+          , name = "expectJsonCustomEffect"
+          , declaration = Elm.expose expectJsonCustomEffect.declaration
+          , group = "Http"
+          }
+        , { moduleName = Common.Common
+          , name = "jsonResolverCustomEffect"
+          , declaration = Elm.expose jsonResolverCustomEffect.declaration
+          , group = "Http"
+          }
+        , { moduleName = Common.Common
+          , name = "expectStringCustomEffect"
+          , declaration = Elm.expose expectStringCustomEffect.declaration
+          , group = "Http"
+          }
+        , { moduleName = Common.Common
+          , name = "stringResolverCustomEffect"
+          , declaration = Elm.expose stringResolverCustomEffect.declaration
+          , group = "Http"
+          }
+        , { moduleName = Common.Common
+          , name = "expectBytesCustomEffect"
+          , declaration = Elm.expose expectBytesCustomEffect.declaration
+          , group = "Http"
+          }
+        , { moduleName = Common.Common
+          , name = "bytesResolverCustomEffect"
+          , declaration = Elm.expose bytesResolverCustomEffect.declaration
+          , group = "Http"
+          }
         ]
 
     else
@@ -366,7 +334,7 @@ extractEnums openApi =
             (Ok FastDict.empty)
 
 
-serverDecls : OpenApi.OpenApi -> OpenApi.Config.Server -> List ( Common.Module, String, Elm.Declaration )
+serverDecls : OpenApi.OpenApi -> OpenApi.Config.Server -> List CliMonad.Declaration
 serverDecls apiSpec server =
     case server of
         OpenApi.Config.Multiple servers ->
@@ -374,15 +342,14 @@ serverDecls apiSpec server =
                 |> Dict.toList
                 |> List.map
                     (\( key, value ) ->
-                        ( Common.Servers
-                        , key
-                        , Elm.string value
-                            |> Elm.declaration key
-                            |> Elm.exposeWith
-                                { exposeConstructor = True
-                                , group = Just "Servers"
-                                }
-                        )
+                        { moduleName = Common.Servers
+                        , name = key
+                        , declaration =
+                            Elm.string value
+                                |> Elm.declaration key
+                                |> Elm.exposeConstructor
+                        , group = "Servers"
+                        }
                     )
 
         OpenApi.Config.Single _ ->
@@ -410,26 +377,25 @@ serverDecls apiSpec server =
                                             Just description ->
                                                 description
                                 in
-                                ( Common.Servers
-                                , key
-                                , Elm.string (OpenApi.Server.url value)
-                                    |> Elm.declaration key
-                                    |> (case OpenApi.Server.description value of
-                                            Nothing ->
-                                                identity
+                                { moduleName = Common.Servers
+                                , name = key
+                                , declaration =
+                                    Elm.string (OpenApi.Server.url value)
+                                        |> Elm.declaration key
+                                        |> (case OpenApi.Server.description value of
+                                                Nothing ->
+                                                    identity
 
-                                            Just description ->
-                                                Elm.withDocumentation description
-                                       )
-                                    |> Elm.exposeWith
-                                        { exposeConstructor = True
-                                        , group = Just "Servers"
-                                        }
-                                )
+                                                Just description ->
+                                                    Elm.withDocumentation description
+                                           )
+                                        |> Elm.exposeConstructor
+                                , group = "Servers"
+                                }
                             )
 
 
-pathDeclarations : OpenApi.Config.Server -> List OpenApi.Config.EffectType -> CliMonad (List ( Common.Module, String, Elm.Declaration ))
+pathDeclarations : OpenApi.Config.Server -> List OpenApi.Config.EffectType -> CliMonad (List CliMonad.Declaration)
 pathDeclarations server effectTypes =
     CliMonad.fromApiSpec OpenApi.paths
         |> CliMonad.andThen
@@ -458,12 +424,14 @@ pathDeclarations server effectTypes =
             )
 
 
-responsesDeclarations : CliMonad (List ( Common.Module, String, Elm.Declaration ))
+responsesDeclarations : CliMonad (List CliMonad.Declaration)
 responsesDeclarations =
     CliMonad.fromApiSpec
-        (OpenApi.components
-            >> Maybe.map OpenApi.Components.responses
-            >> Maybe.withDefault Dict.empty
+        (\spec ->
+            spec
+                |> OpenApi.components
+                |> Maybe.map OpenApi.Components.responses
+                |> Maybe.withDefault Dict.empty
         )
         |> CliMonad.andThen
             (Dict.foldl
@@ -476,7 +444,7 @@ responsesDeclarations =
         |> CliMonad.map List.concat
 
 
-requestBodiesDeclarations : CliMonad (List ( Common.Module, String, Elm.Declaration ))
+requestBodiesDeclarations : CliMonad (List CliMonad.Declaration)
 requestBodiesDeclarations =
     CliMonad.fromApiSpec
         (OpenApi.components
@@ -494,12 +462,14 @@ requestBodiesDeclarations =
         |> CliMonad.map List.concat
 
 
-schemasDeclarations : CliMonad (List ( Common.Module, String, Elm.Declaration ))
+schemasDeclarations : CliMonad (List CliMonad.Declaration)
 schemasDeclarations =
     CliMonad.fromApiSpec
-        (OpenApi.components
-            >> Maybe.map OpenApi.Components.schemas
-            >> Maybe.withDefault Dict.empty
+        (\spec ->
+            spec
+                |> OpenApi.components
+                |> Maybe.map OpenApi.Components.schemas
+                |> Maybe.withDefault Dict.empty
         )
         |> CliMonad.andThen
             (Dict.foldl
@@ -512,7 +482,7 @@ schemasDeclarations =
             )
 
 
-unitDeclarations : Common.UnsafeName -> CliMonad (List ( Common.Module, String, Elm.Declaration ))
+unitDeclarations : Common.UnsafeName -> CliMonad (List CliMonad.Declaration)
 unitDeclarations name =
     let
         typeName : Common.TypeName
@@ -520,51 +490,48 @@ unitDeclarations name =
             Common.toTypeName name
     in
     CliMonad.combine
-        [ ( Common.Types
-          , typeName
-          , Elm.alias typeName Elm.Annotation.unit
-                |> Elm.exposeWith
-                    { exposeConstructor = False
-                    , group = Just "Aliases"
-                    }
-          )
+        [ { moduleName = Common.Types
+          , name = typeName
+          , declaration =
+                Elm.alias typeName Elm.Annotation.unit
+                    |> Elm.expose
+          , group = "Aliases"
+          }
             |> CliMonad.succeed
         , CliMonad.map2
             (\typesNamespace schemaDecoder ->
-                ( Common.Json
-                , "decode" ++ typeName
-                , Elm.declaration ("decode" ++ typeName)
-                    (schemaDecoder
-                        |> Elm.withType (Gen.Json.Decode.annotation_.decoder (Elm.Annotation.named typesNamespace typeName))
-                    )
-                    |> Elm.exposeWith
-                        { exposeConstructor = False
-                        , group = Just "Decoders"
-                        }
-                )
+                { moduleName = Common.Json
+                , name = "decode" ++ typeName
+                , declaration =
+                    Elm.declaration ("decode" ++ typeName)
+                        (schemaDecoder
+                            |> Elm.withType (Gen.Json.Decode.annotation_.decoder (Elm.Annotation.named typesNamespace typeName))
+                        )
+                        |> Elm.exposeConstructor
+                , group = "Decoders"
+                }
             )
             (CliMonad.moduleToNamespace Common.Types)
             (SchemaUtils.typeToDecoder False Common.Unit)
         , CliMonad.map2
             (\typesNamespace encoder ->
-                ( Common.Json
-                , "encode" ++ typeName
-                , Elm.declaration ("encode" ++ typeName)
-                    (Elm.functionReduced "rec" encoder
-                        |> Elm.withType (Elm.Annotation.function [ Elm.Annotation.named typesNamespace typeName ] Gen.Json.Encode.annotation_.value)
-                    )
-                    |> Elm.exposeWith
-                        { exposeConstructor = False
-                        , group = Just "Encoders"
-                        }
-                )
+                { moduleName = Common.Json
+                , name = "encode" ++ typeName
+                , declaration =
+                    Elm.declaration ("encode" ++ typeName)
+                        (Elm.functionReduced "rec" encoder
+                            |> Elm.withType (Elm.Annotation.function [ Elm.Annotation.named typesNamespace typeName ] Gen.Json.Encode.annotation_.value)
+                        )
+                        |> Elm.expose
+                , group = "Encoders"
+                }
             )
             (CliMonad.moduleToNamespace Common.Types)
             (SchemaUtils.typeToEncoder False Common.Unit)
         ]
 
 
-responseToDeclarations : Common.UnsafeName -> OpenApi.Reference.ReferenceOr OpenApi.Response.Response -> CliMonad (List ( Common.Module, String, Elm.Declaration ))
+responseToDeclarations : Common.UnsafeName -> OpenApi.Reference.ReferenceOr OpenApi.Response.Response -> CliMonad (List CliMonad.Declaration)
 responseToDeclarations name reference =
     case OpenApi.Reference.toConcrete reference of
         Just response ->
@@ -587,7 +554,7 @@ responseToDeclarations name reference =
                 |> CliMonad.withPath name
 
 
-requestBodyToDeclarations : Common.UnsafeName -> OpenApi.Reference.ReferenceOr OpenApi.RequestBody.RequestBody -> CliMonad (List ( Common.Module, String, Elm.Declaration ))
+requestBodyToDeclarations : Common.UnsafeName -> OpenApi.Reference.ReferenceOr OpenApi.RequestBody.RequestBody -> CliMonad (List CliMonad.Declaration)
 requestBodyToDeclarations name reference =
     case OpenApi.Reference.toConcrete reference of
         Just requestBody ->
@@ -610,7 +577,7 @@ requestBodyToDeclarations name reference =
                 |> CliMonad.withPath name
 
 
-toRequestFunctions : OpenApi.Config.Server -> List OpenApi.Config.EffectType -> String -> String -> OpenApi.Operation.Operation -> CliMonad (List ( Common.Module, String, Elm.Declaration ))
+toRequestFunctions : OpenApi.Config.Server -> List OpenApi.Config.EffectType -> String -> String -> OpenApi.Operation.Operation -> CliMonad (List CliMonad.Declaration)
 toRequestFunctions server effectTypes method pathUrl operation =
     let
         functionName : String
@@ -795,14 +762,14 @@ toRequestFunctions server effectTypes method pathUrl operation =
                 |> List.filterMap identity
                 |> String.join "\n\n"
 
-        step : OperationUtils -> CliMonad (List ( Common.Module, String, Elm.Declaration ))
+        step : OperationUtils -> CliMonad (List CliMonad.Declaration)
         step { successType, bodyTypeAnnotation, errorTypeDeclaration, errorTypeAnnotation, expect, resolver } =
             let
                 declarationGroup :
                     AuthorizationInfo
                     -> (() -> a)
                     -> List ( OpenApi.Config.EffectType, a -> ( String, Elm.Expression ) )
-                    -> List ( Common.Module, String, Elm.Declaration )
+                    -> List CliMonad.Declaration
                 declarationGroup auth sharedData list =
                     if List.any (\( effectType, _ ) -> List.member effectType effectTypes) list then
                         let
@@ -817,23 +784,21 @@ toRequestFunctions server effectTypes method pathUrl operation =
                                         ( name, expr ) =
                                             toDeclaration shared
                                     in
-                                    ( if isSinglePackage then
-                                        Common.Api Nothing
+                                    { moduleName =
+                                        if isSinglePackage then
+                                            Common.Api Nothing
 
-                                      else
-                                        Common.Api (Just (effectTypeToPackage effectType))
-                                    , name
-                                    , expr
-                                        |> Elm.declaration name
-                                        |> Elm.withDocumentation (documentation auth)
-                                        |> Elm.exposeWith
-                                            { exposeConstructor = False
-                                            , group =
-                                                operation
-                                                    |> operationToGroup
-                                                    |> Just
-                                            }
-                                    )
+                                        else
+                                            Common.Api (Just (effectTypeToPackage effectType))
+                                    , name = name
+                                    , declaration =
+                                        expr
+                                            |> Elm.declaration name
+                                            |> Elm.withDocumentation (documentation auth)
+                                            |> Elm.expose
+                                    , group =
+                                        operationToGroup operation
+                                    }
                                         |> Just
 
                                 else
@@ -851,7 +816,7 @@ toRequestFunctions server effectTypes method pathUrl operation =
                     -> (Elm.Expression -> PerPackage Elm.Expression)
                     -> (Elm.Expression -> Elm.Expression)
                     -> ({ requireToMsg : Bool } -> PerPackage Elm.Annotation.Annotation)
-                    -> List ( Common.Module, String, Elm.Declaration )
+                    -> List CliMonad.Declaration
                 elmHttpCommands auth toHeaderParams _ toBody replaced paramType =
                     declarationGroup auth
                         (\_ ->
@@ -891,7 +856,7 @@ toRequestFunctions server effectTypes method pathUrl operation =
                           , \{ cmdArg, cmdAnnotation } ->
                                 ( functionName
                                 , Elm.fn
-                                    ( "config", Nothing )
+                                    (Elm.Arg.var "config")
                                     (\config -> Gen.Http.call_.request (cmdArg config))
                                     |> Elm.withType cmdAnnotation
                                 )
@@ -900,7 +865,7 @@ toRequestFunctions server effectTypes method pathUrl operation =
                           , \{ cmdArg, cmdAnnotation } ->
                                 ( functionName ++ "Risky"
                                 , Elm.fn
-                                    ( "config", Nothing )
+                                    (Elm.Arg.var "config")
                                     (\config -> Gen.Http.call_.riskyRequest (cmdArg config))
                                     |> Elm.withType cmdAnnotation
                                 )
@@ -909,7 +874,7 @@ toRequestFunctions server effectTypes method pathUrl operation =
                           , \{ cmdArg, recordAnnotation } ->
                                 ( functionName ++ "Record"
                                 , Elm.fn
-                                    ( "config", Nothing )
+                                    (Elm.Arg.var "config")
                                     cmdArg
                                     |> Elm.withType recordAnnotation
                                 )
@@ -923,7 +888,7 @@ toRequestFunctions server effectTypes method pathUrl operation =
                     -> (Elm.Expression -> PerPackage Elm.Expression)
                     -> (Elm.Expression -> Elm.Expression)
                     -> ({ requireToMsg : Bool } -> PerPackage Elm.Annotation.Annotation)
-                    -> List ( Common.Module, String, Elm.Declaration )
+                    -> List CliMonad.Declaration
                 elmHttpTasks auth toHeaderParams successAnnotation toBody replaced paramType =
                     declarationGroup auth
                         (\_ ->
@@ -968,7 +933,7 @@ toRequestFunctions server effectTypes method pathUrl operation =
                           , \{ taskArg, taskAnnotation } ->
                                 ( functionName ++ "Task"
                                 , Elm.fn
-                                    ( "config", Nothing )
+                                    (Elm.Arg.var "config")
                                     (\config -> Gen.Http.call_.task (taskArg config))
                                     |> Elm.withType taskAnnotation
                                 )
@@ -977,7 +942,7 @@ toRequestFunctions server effectTypes method pathUrl operation =
                           , \{ taskArg, taskAnnotation } ->
                                 ( functionName ++ "TaskRisky"
                                 , Elm.fn
-                                    ( "config", Nothing )
+                                    (Elm.Arg.var "config")
                                     (\config -> Gen.Http.call_.riskyTask (taskArg config))
                                     |> Elm.withType taskAnnotation
                                 )
@@ -986,7 +951,7 @@ toRequestFunctions server effectTypes method pathUrl operation =
                           , \{ taskArg, recordAnnotation } ->
                                 ( functionName ++ "TaskRecord"
                                 , Elm.fn
-                                    ( "config", Nothing )
+                                    (Elm.Arg.var "config")
                                     taskArg
                                     |> Elm.withType recordAnnotation
                                 )
@@ -1000,7 +965,7 @@ toRequestFunctions server effectTypes method pathUrl operation =
                     -> (Elm.Expression -> PerPackage Elm.Expression)
                     -> (Elm.Expression -> Elm.Expression)
                     -> ({ requireToMsg : Bool } -> PerPackage Elm.Annotation.Annotation)
-                    -> List ( Common.Module, String, Elm.Declaration )
+                    -> List CliMonad.Declaration
                 dillonkearnsElmPagesBackendTask auth toHeaderParams successAnnotation toBody replaced paramType =
                     declarationGroup auth
                         (\_ ->
@@ -1048,7 +1013,7 @@ toRequestFunctions server effectTypes method pathUrl operation =
                           , \{ taskArg, taskAnnotation } ->
                                 ( functionName
                                 , Elm.fn
-                                    ( "config", Nothing )
+                                    (Elm.Arg.var "config")
                                     (\config -> Gen.BackendTask.Http.call_.request (taskArg config) (expect <| toMsg config).elmPages)
                                     |> Elm.withType taskAnnotation
                                 )
@@ -1057,7 +1022,7 @@ toRequestFunctions server effectTypes method pathUrl operation =
                           , \{ taskArg, recordAnnotation } ->
                                 ( functionName
                                 , Elm.fn
-                                    ( "config", Nothing )
+                                    (Elm.Arg.var "config")
                                     (\config -> Elm.tuple (taskArg config) (expect <| toMsg config).elmPages)
                                     |> Elm.withType recordAnnotation
                                 )
@@ -1071,7 +1036,7 @@ toRequestFunctions server effectTypes method pathUrl operation =
                     -> (Elm.Expression -> PerPackage Elm.Expression)
                     -> (Elm.Expression -> Elm.Expression)
                     -> ({ requireToMsg : Bool } -> PerPackage Elm.Annotation.Annotation)
-                    -> List ( Common.Module, String, Elm.Declaration )
+                    -> List CliMonad.Declaration
                 lamderaProgramTestCommands auth toHeaderParams _ toBody replaced paramType =
                     declarationGroup auth
                         (\_ ->
@@ -1095,7 +1060,7 @@ toRequestFunctions server effectTypes method pathUrl operation =
                           , \{ cmdArg, cmdParam } ->
                                 ( functionName
                                 , Elm.fn
-                                    ( "config", Just cmdParam )
+                                    (Elm.Arg.varWith "config" cmdParam)
                                     (\config -> Gen.Effect.Http.call_.request (cmdArg config))
                                 )
                           )
@@ -1103,7 +1068,7 @@ toRequestFunctions server effectTypes method pathUrl operation =
                           , \{ cmdArg, cmdParam } ->
                                 ( functionName ++ "Risky"
                                 , Elm.fn
-                                    ( "config", Just cmdParam )
+                                    (Elm.Arg.varWith "config" cmdParam)
                                     (\config -> Gen.Effect.Http.call_.riskyRequest (cmdArg config))
                                 )
                           )
@@ -1111,7 +1076,7 @@ toRequestFunctions server effectTypes method pathUrl operation =
                           , \{ cmdArg, cmdParam } ->
                                 ( functionName ++ "Record"
                                 , Elm.fn
-                                    ( "config", Just cmdParam )
+                                    (Elm.Arg.varWith "config" cmdParam)
                                     cmdArg
                                 )
                           )
@@ -1124,7 +1089,7 @@ toRequestFunctions server effectTypes method pathUrl operation =
                     -> (Elm.Expression -> PerPackage Elm.Expression)
                     -> (Elm.Expression -> Elm.Expression)
                     -> ({ requireToMsg : Bool } -> PerPackage Elm.Annotation.Annotation)
-                    -> List ( Common.Module, String, Elm.Declaration )
+                    -> List CliMonad.Declaration
                 lamderaProgramTestTasks auth toHeaderParams successAnnotation toBody replaced paramType =
                     declarationGroup auth
                         (\_ ->
@@ -1171,7 +1136,7 @@ toRequestFunctions server effectTypes method pathUrl operation =
                           , \{ taskArg, taskAnnotation } ->
                                 ( functionName ++ "Task"
                                 , Elm.fn
-                                    ( "config", Nothing )
+                                    (Elm.Arg.var "config")
                                     (\config -> Gen.Effect.Http.call_.task (taskArg config))
                                     |> Elm.withType taskAnnotation
                                 )
@@ -1180,7 +1145,7 @@ toRequestFunctions server effectTypes method pathUrl operation =
                           , \{ taskArg, taskAnnotation } ->
                                 ( functionName ++ "TaskRisky"
                                 , Elm.fn
-                                    ( "config", Nothing )
+                                    (Elm.Arg.var "config")
                                     (\config -> Gen.Effect.Http.call_.riskyTask (taskArg config))
                                     |> Elm.withType taskAnnotation
                                 )
@@ -1189,7 +1154,7 @@ toRequestFunctions server effectTypes method pathUrl operation =
                           , \{ taskArg, recordAnnotation } ->
                                 ( functionName ++ "TaskRecord"
                                 , Elm.fn
-                                    ( "config", Nothing )
+                                    (Elm.Arg.var "config")
                                     taskArg
                                     |> Elm.withType recordAnnotation
                                 )
@@ -1207,8 +1172,13 @@ toRequestFunctions server effectTypes method pathUrl operation =
                                     )
                             )
                                 ++ (case errorTypeDeclaration of
-                                        Just ( name, decl ) ->
-                                            [ ( Common.Types, name, decl ) ]
+                                        Just { name, declaration, group } ->
+                                            [ { moduleName = Common.Types
+                                              , name = name
+                                              , declaration = declaration
+                                              , group = group
+                                              }
+                                            ]
 
                                         Nothing ->
                                             []
@@ -2248,7 +2218,13 @@ paramToString qualify type_ =
                                     CliMonad.fail "Nullable alternative"
 
                                 else
-                                    Elm.Case.branch1 (SchemaUtils.toVariantName name alternative.name) ( "alternative", annotation ) (inputToStringToFunction inputToString)
+                                    Elm.Case.branch
+                                        (Elm.Arg.customType
+                                            (SchemaUtils.toVariantName name alternative.name)
+                                            identity
+                                            |> Elm.Arg.item (Elm.Arg.varWith "alternative" annotation)
+                                        )
+                                        (inputToStringToFunction inputToString)
                                         |> CliMonad.succeed
                             )
                             (paramToString qualify alternative.type_)
@@ -2401,7 +2377,7 @@ toConcreteParam param =
 type alias OperationUtils =
     { successType : Common.Type
     , bodyTypeAnnotation : Elm.Annotation.Annotation
-    , errorTypeDeclaration : Maybe ( String, Elm.Declaration )
+    , errorTypeDeclaration : Maybe { name : String, declaration : Elm.Declaration, group : String }
     , errorTypeAnnotation : Elm.Annotation.Annotation
     , expect : (Elm.Expression -> Elm.Expression) -> PerPackage Elm.Expression
     , resolver :
@@ -2558,7 +2534,7 @@ operationToTypesExpectAndResolver functionName operation =
                                                 |> Gen.Dict.call_.fromList
                                         )
 
-                    errorTypeDeclaration : CliMonad ( Maybe ( String, Elm.Declaration ), Elm.Annotation.Annotation )
+                    errorTypeDeclaration : CliMonad ( Maybe { name : String, declaration : Elm.Declaration, group : String }, Elm.Annotation.Annotation )
                     errorTypeDeclaration =
                         errorResponses
                             |> Dict.map
@@ -2632,15 +2608,14 @@ operationToTypesExpectAndResolver functionName operation =
                                                 errorName =
                                                     String.Extra.toSentenceCase functionName ++ "_Error"
                                             in
-                                            ( ( errorName
-                                              , errorList
-                                                    |> List.map (\( statusCode, ( localAnnotation, _ ) ) -> Elm.variantWith (toErrorVariant statusCode) [ localAnnotation ])
-                                                    |> Elm.customType errorName
-                                                    |> Elm.exposeWith
-                                                        { exposeConstructor = True
-                                                        , group = Just "Errors"
-                                                        }
-                                              )
+                                            ( { name = errorName
+                                              , declaration =
+                                                    errorList
+                                                        |> List.map (\( statusCode, ( localAnnotation, _ ) ) -> Elm.variantWith (toErrorVariant statusCode) [ localAnnotation ])
+                                                        |> Elm.customType errorName
+                                                        |> Elm.exposeConstructor
+                                              , group = "Errors"
+                                              }
                                                 |> Just
                                             , Elm.Annotation.named typesNamespace errorName
                                             )
@@ -2787,31 +2762,24 @@ errorType =
 outerExpectJsonCustom :
     String
     -> (Elm.Expression -> Elm.Expression -> Elm.Expression -> Elm.Expression)
-    ->
-        { declaration : Elm.Declaration
-        , call : Elm.Expression -> Elm.Expression -> Elm.Expression -> Elm.Expression
-        , callFrom : List String -> Elm.Expression -> Elm.Expression -> Elm.Expression -> Elm.Expression
-        , value : List String -> Elm.Expression
-        }
+    -> Elm.Declare.Function (Elm.Expression -> Elm.Expression -> Elm.Expression -> Elm.Expression)
 outerExpectJsonCustom name f =
     Elm.Declare.fn3 name
-        ( "toMsg"
-        , Just
+        (Elm.Arg.varWith "toMsg"
             (Elm.Annotation.function
                 [ Gen.Result.annotation_.result errorAnnotation (Elm.Annotation.var "success")
                 ]
                 (Elm.Annotation.var "msg")
             )
         )
-        ( "errorDecoders"
-        , Just
+        (Elm.Arg.varWith "errorDecoders"
             (Gen.Dict.annotation_.dict
                 Gen.String.annotation_.string
                 (Gen.Json.Decode.annotation_.decoder (Elm.Annotation.var "err"))
             )
         )
-        ( "successDecoder"
-        , Just (Gen.Json.Decode.annotation_.decoder (Elm.Annotation.var "success"))
+        (Elm.Arg.varWith "successDecoder"
+            (Gen.Json.Decode.annotation_.decoder (Elm.Annotation.var "success"))
         )
         f
 
@@ -2824,23 +2792,16 @@ errorAnnotation =
 outerExpectStringCustom :
     String
     -> (Elm.Expression -> Elm.Expression -> Elm.Expression)
-    ->
-        { declaration : Elm.Declaration
-        , call : Elm.Expression -> Elm.Expression -> Elm.Expression
-        , callFrom : List String -> Elm.Expression -> Elm.Expression -> Elm.Expression
-        , value : List String -> Elm.Expression
-        }
+    -> Elm.Declare.Function (Elm.Expression -> Elm.Expression -> Elm.Expression)
 outerExpectStringCustom name f =
     Elm.Declare.fn2 name
-        ( "toMsg"
-        , Just
+        (Elm.Arg.varWith "toMsg"
             (Elm.Annotation.function
                 [ Gen.Result.annotation_.result errorAnnotation Elm.Annotation.string ]
                 (Elm.Annotation.var "msg")
             )
         )
-        ( "errorDecoders"
-        , Just
+        (Elm.Arg.varWith "errorDecoders"
             (Gen.Dict.annotation_.dict
                 Gen.String.annotation_.string
                 (Gen.Json.Decode.annotation_.decoder (Elm.Annotation.var "err"))
@@ -2852,16 +2813,10 @@ outerExpectStringCustom name f =
 outerExpectBytesCustom :
     String
     -> (Elm.Expression -> Elm.Expression -> Elm.Expression)
-    ->
-        { declaration : Elm.Declaration
-        , call : Elm.Expression -> Elm.Expression -> Elm.Expression
-        , callFrom : List String -> Elm.Expression -> Elm.Expression -> Elm.Expression
-        , value : List String -> Elm.Expression
-        }
+    -> Elm.Declare.Function (Elm.Expression -> Elm.Expression -> Elm.Expression)
 outerExpectBytesCustom name f =
     Elm.Declare.fn2 name
-        ( "toMsg"
-        , Just
+        (Elm.Arg.varWith "toMsg"
             (Elm.Annotation.function
                 [ Gen.Result.annotation_.result
                     (Elm.Annotation.namedWith [] "Error" [ Elm.Annotation.var "err", Gen.Bytes.annotation_.bytes ])
@@ -2870,8 +2825,7 @@ outerExpectBytesCustom name f =
                 (Elm.Annotation.var "msg")
             )
         )
-        ( "errorDecoders"
-        , Just
+        (Elm.Arg.varWith "errorDecoders"
             (Gen.Dict.annotation_.dict
                 Gen.String.annotation_.string
                 (Gen.Json.Decode.annotation_.decoder (Elm.Annotation.var "err"))
@@ -2883,23 +2837,16 @@ outerExpectBytesCustom name f =
 outerJsonResolverCustom :
     String
     -> (Elm.Expression -> Elm.Expression -> Elm.Expression)
-    ->
-        { declaration : Elm.Declaration
-        , call : Elm.Expression -> Elm.Expression -> Elm.Expression
-        , callFrom : List String -> Elm.Expression -> Elm.Expression -> Elm.Expression
-        , value : List String -> Elm.Expression
-        }
+    -> Elm.Declare.Function (Elm.Expression -> Elm.Expression -> Elm.Expression)
 outerJsonResolverCustom name f =
     Elm.Declare.fn2 name
-        ( "errorDecoders"
-        , Just
+        (Elm.Arg.varWith "errorDecoders"
             (Gen.Dict.annotation_.dict
                 Gen.String.annotation_.string
                 (Gen.Json.Decode.annotation_.decoder (Elm.Annotation.var "err"))
             )
         )
-        ( "successDecoder"
-        , Just
+        (Elm.Arg.varWith "successDecoder"
             (Gen.Json.Decode.annotation_.decoder (Elm.Annotation.var "success"))
         )
         f
@@ -2908,16 +2855,10 @@ outerJsonResolverCustom name f =
 outerRawResolverCustom :
     String
     -> (Elm.Expression -> Elm.Expression)
-    ->
-        { declaration : Elm.Declaration
-        , call : Elm.Expression -> Elm.Expression
-        , callFrom : List String -> Elm.Expression -> Elm.Expression
-        , value : List String -> Elm.Expression
-        }
+    -> Elm.Declare.Function (Elm.Expression -> Elm.Expression)
 outerRawResolverCustom name f =
     Elm.Declare.fn name
-        ( "errorDecoders"
-        , Just
+        (Elm.Arg.varWith "errorDecoders"
             (Gen.Dict.annotation_.dict
                 Gen.String.annotation_.string
                 (Gen.Json.Decode.annotation_.decoder (Elm.Annotation.var "err"))
@@ -2926,12 +2867,7 @@ outerRawResolverCustom name f =
         f
 
 
-expectJsonCustom :
-    { declaration : Elm.Declaration
-    , call : Elm.Expression -> Elm.Expression -> Elm.Expression -> Elm.Expression
-    , callFrom : List String -> Elm.Expression -> Elm.Expression -> Elm.Expression -> Elm.Expression
-    , value : List String -> Elm.Expression
-    }
+expectJsonCustom : Elm.Declare.Function (Elm.Expression -> Elm.Expression -> Elm.Expression -> Elm.Expression)
 expectJsonCustom =
     outerExpectJsonCustom "expectJsonCustom"
         (\toMsg errorDecoders successDecoder ->
@@ -2945,12 +2881,7 @@ expectJsonCustom =
         )
 
 
-expectJsonCustomEffect :
-    { declaration : Elm.Declaration
-    , call : Elm.Expression -> Elm.Expression -> Elm.Expression -> Elm.Expression
-    , callFrom : List String -> Elm.Expression -> Elm.Expression -> Elm.Expression -> Elm.Expression
-    , value : List String -> Elm.Expression
-    }
+expectJsonCustomEffect : Elm.Declare.Function (Elm.Expression -> Elm.Expression -> Elm.Expression -> Elm.Expression)
 expectJsonCustomEffect =
     outerExpectJsonCustom "expectJsonCustomEffect"
         (\toMsg errorDecoders successDecoder ->
@@ -2964,12 +2895,7 @@ expectJsonCustomEffect =
         )
 
 
-expectBytesCustom :
-    { declaration : Elm.Declaration
-    , call : Elm.Expression -> Elm.Expression -> Elm.Expression
-    , callFrom : List String -> Elm.Expression -> Elm.Expression -> Elm.Expression
-    , value : List String -> Elm.Expression
-    }
+expectBytesCustom : Elm.Declare.Function (Elm.Expression -> Elm.Expression -> Elm.Expression)
 expectBytesCustom =
     outerExpectBytesCustom "expectBytesCustom"
         (\toMsg errorDecoders ->
@@ -2983,12 +2909,7 @@ expectBytesCustom =
         )
 
 
-expectBytesCustomEffect :
-    { declaration : Elm.Declaration
-    , call : Elm.Expression -> Elm.Expression -> Elm.Expression
-    , callFrom : List String -> Elm.Expression -> Elm.Expression -> Elm.Expression
-    , value : List String -> Elm.Expression
-    }
+expectBytesCustomEffect : Elm.Declare.Function (Elm.Expression -> Elm.Expression -> Elm.Expression)
 expectBytesCustomEffect =
     outerExpectBytesCustom "expectBytesCustomEffect"
         (\toMsg errorDecoders ->
@@ -3002,12 +2923,7 @@ expectBytesCustomEffect =
         )
 
 
-expectStringCustom :
-    { declaration : Elm.Declaration
-    , call : Elm.Expression -> Elm.Expression -> Elm.Expression
-    , callFrom : List String -> Elm.Expression -> Elm.Expression -> Elm.Expression
-    , value : List String -> Elm.Expression
-    }
+expectStringCustom : Elm.Declare.Function (Elm.Expression -> Elm.Expression -> Elm.Expression)
 expectStringCustom =
     outerExpectStringCustom "expectStringCustom"
         (\toMsg errorDecoders ->
@@ -3021,12 +2937,7 @@ expectStringCustom =
         )
 
 
-expectStringCustomEffect :
-    { declaration : Elm.Declaration
-    , call : Elm.Expression -> Elm.Expression -> Elm.Expression
-    , callFrom : List String -> Elm.Expression -> Elm.Expression -> Elm.Expression
-    , value : List String -> Elm.Expression
-    }
+expectStringCustomEffect : Elm.Declare.Function (Elm.Expression -> Elm.Expression -> Elm.Expression)
 expectStringCustomEffect =
     outerExpectStringCustom "expectStringCustomEffect"
         (\toMsg errorDecoders ->
@@ -3040,12 +2951,7 @@ expectStringCustomEffect =
         )
 
 
-jsonResolverCustom :
-    { declaration : Elm.Declaration
-    , call : Elm.Expression -> Elm.Expression -> Elm.Expression
-    , callFrom : List String -> Elm.Expression -> Elm.Expression -> Elm.Expression
-    , value : List String -> Elm.Expression
-    }
+jsonResolverCustom : Elm.Declare.Function (Elm.Expression -> Elm.Expression -> Elm.Expression)
 jsonResolverCustom =
     outerJsonResolverCustom "jsonResolverCustom" <|
         \errorDecoders successDecoder ->
@@ -3059,12 +2965,7 @@ jsonResolverCustom =
                 |> Elm.withType (Gen.Http.annotation_.resolver errorAnnotation (Elm.Annotation.var "success"))
 
 
-jsonResolverCustomEffect :
-    { declaration : Elm.Declaration
-    , call : Elm.Expression -> Elm.Expression -> Elm.Expression
-    , callFrom : List String -> Elm.Expression -> Elm.Expression -> Elm.Expression
-    , value : List String -> Elm.Expression
-    }
+jsonResolverCustomEffect : Elm.Declare.Function (Elm.Expression -> Elm.Expression -> Elm.Expression)
 jsonResolverCustomEffect =
     outerJsonResolverCustom "jsonResolverCustomEffect" <|
         \errorDecoders successDecoder ->
@@ -3078,12 +2979,7 @@ jsonResolverCustomEffect =
                 |> Elm.withType (Gen.Effect.Http.annotation_.resolver (Elm.Annotation.var "restrictions") errorAnnotation (Elm.Annotation.var "success"))
 
 
-bytesResolverCustom :
-    { declaration : Elm.Declaration
-    , call : Elm.Expression -> Elm.Expression
-    , callFrom : List String -> Elm.Expression -> Elm.Expression
-    , value : List String -> Elm.Expression
-    }
+bytesResolverCustom : Elm.Declare.Function (Elm.Expression -> Elm.Expression)
 bytesResolverCustom =
     outerRawResolverCustom "bytesResolverCustom" <|
         \errorDecoders ->
@@ -3097,12 +2993,7 @@ bytesResolverCustom =
                 |> Elm.withType (Gen.Http.annotation_.resolver (Elm.Annotation.namedWith [] "Error" [ Elm.Annotation.var "err", Gen.Bytes.annotation_.bytes ]) Gen.Bytes.annotation_.bytes)
 
 
-bytesResolverCustomEffect :
-    { declaration : Elm.Declaration
-    , call : Elm.Expression -> Elm.Expression
-    , callFrom : List String -> Elm.Expression -> Elm.Expression
-    , value : List String -> Elm.Expression
-    }
+bytesResolverCustomEffect : Elm.Declare.Function (Elm.Expression -> Elm.Expression)
 bytesResolverCustomEffect =
     outerRawResolverCustom "bytesResolverCustomEffect" <|
         \errorDecoders ->
@@ -3116,12 +3007,7 @@ bytesResolverCustomEffect =
                 |> Elm.withType (Gen.Effect.Http.annotation_.resolver (Elm.Annotation.var "restrictions") (Elm.Annotation.namedWith [] "Error" [ Elm.Annotation.var "err", Gen.Bytes.annotation_.bytes ]) Gen.Bytes.annotation_.bytes)
 
 
-stringResolverCustom :
-    { declaration : Elm.Declaration
-    , call : Elm.Expression -> Elm.Expression
-    , callFrom : List String -> Elm.Expression -> Elm.Expression
-    , value : List String -> Elm.Expression
-    }
+stringResolverCustom : Elm.Declare.Function (Elm.Expression -> Elm.Expression)
 stringResolverCustom =
     outerRawResolverCustom "stringResolverCustom" <|
         \errorDecoders ->
@@ -3135,12 +3021,7 @@ stringResolverCustom =
                 |> Elm.withType (Gen.Http.annotation_.resolver errorAnnotation Elm.Annotation.string)
 
 
-stringResolverCustomEffect :
-    { declaration : Elm.Declaration
-    , call : Elm.Expression -> Elm.Expression
-    , callFrom : List String -> Elm.Expression -> Elm.Expression
-    , value : List String -> Elm.Expression
-    }
+stringResolverCustomEffect : Elm.Declare.Function (Elm.Expression -> Elm.Expression)
 stringResolverCustomEffect =
     outerRawResolverCustom "stringResolverCustomEffect" <|
         \errorDecoders ->

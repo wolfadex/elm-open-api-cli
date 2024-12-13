@@ -1,5 +1,5 @@
 module CliMonad exposing
-    ( CliMonad, Message, OneOfName, Path
+    ( CliMonad, Message, OneOfName, Path, Declaration
     , run, stepOrFail
     , succeed, succeedWith, fail
     , map, map2, map3, map4
@@ -12,7 +12,7 @@ module CliMonad exposing
 
 {-|
 
-@docs CliMonad, Message, OneOfName, Path
+@docs CliMonad, Message, OneOfName, Path, Declaration
 @docs run, stepOrFail
 @docs succeed, succeedWith, fail
 @docs map, map2, map3, map4
@@ -63,7 +63,7 @@ type alias InternalFormat =
     , decoder : Elm.Expression
     , toParamString : Elm.Expression -> Elm.Expression
     , annotation : Elm.Annotation.Annotation
-    , sharedDeclarations : List ( String, Elm.Expression )
+    , sharedDeclarations : List ( String, { value : Elm.Expression, group : String } )
     , requiresPackages : List String
     }
 
@@ -84,7 +84,7 @@ type alias Output =
     { warnings : List Message
     , oneOfs : FastDict.Dict OneOfName Common.OneOfData
     , requiredPackages : FastSet.Set String
-    , sharedDeclarations : FastDict.Dict String Elm.Expression
+    , sharedDeclarations : FastDict.Dict String { value : Elm.Expression, group : String }
     }
 
 
@@ -256,13 +256,21 @@ andThen3 f x y z =
         |> andThen identity
 
 
+type alias Declaration =
+    { moduleName : Common.Module
+    , name : String
+    , declaration : Elm.Declaration
+    , group : String
+    }
+
+
 {-| Runs the transformation from OpenApi to declaration.
 
 Automatically appends the needed `oneOf` declarations.
 
 -}
 run :
-    (FastDict.Dict OneOfName Common.OneOfData -> CliMonad (List ( Common.Module, String, Elm.Declaration )))
+    (FastDict.Dict OneOfName Common.OneOfData -> CliMonad (List Declaration))
     ->
         { openApi : OpenApi
         , generateTodos : Bool
@@ -270,11 +278,11 @@ run :
         , namespace : List String
         , formats : List OpenApi.Config.Format
         }
-    -> CliMonad (List ( Common.Module, String, Elm.Declaration ))
+    -> CliMonad (List Declaration)
     ->
         Result
             Message
-            { declarations : List ( Common.Module, String, Elm.Declaration )
+            { declarations : List Declaration
             , warnings : List Message
             , requiredPackages : FastSet.Set String
             }
@@ -306,11 +314,18 @@ run oneOfDeclarations input (CliMonad x) =
                         oneOfDeclarations output.oneOfs
                             |> withPath (Common.UnsafeName "While generating `oneOf`s")
 
-                    declarationsForFormats : Output -> List ( Common.Module, String, Elm.Declaration )
+                    declarationsForFormats : Output -> List Declaration
                     declarationsForFormats out =
                         out.sharedDeclarations
                             |> FastDict.toList
-                            |> List.map (\( name, expr ) -> ( Common.Common, name, Elm.expose (Elm.declaration name expr) ))
+                            |> List.map
+                                (\( name, { value, group } ) ->
+                                    { moduleName = Common.Common
+                                    , name = name
+                                    , declaration = Elm.expose (Elm.declaration name value)
+                                    , group = group
+                                    }
+                                )
                 in
                 h internalInput
                     |> Result.map
@@ -565,9 +580,9 @@ withFormat basicType maybeFormatName getter default =
                                 , sharedDeclarations =
                                     format.sharedDeclarations
                                         |> FastDict.fromList
-                                        |> FastDict.insert ("encode" ++ name) encoder
-                                        |> FastDict.insert ("decode" ++ name) decoder
-                                        |> FastDict.insert ("toParamString" ++ name) toParamString
+                                        |> FastDict.insert ("encode" ++ name) { value = encoder, group = "Encoders" }
+                                        |> FastDict.insert ("decode" ++ name) { value = decoder, group = "Decoders" }
+                                        |> FastDict.insert ("toParamString" ++ name) { value = toParamString, group = "Encoders" }
                               }
                             )
                                 |> Ok

@@ -1,12 +1,28 @@
-module Gen.Json.Decode exposing (andThen, annotation_, array, at, bool, call_, caseOf_, decodeString, decodeValue, dict, errorToString, fail, field, float, index, int, keyValuePairs, lazy, list, make_, map, map2, map3, map4, map5, map6, map7, map8, maybe, moduleName_, null, nullable, oneOf, oneOrMore, string, succeed, value, values_)
+module Gen.Json.Decode exposing
+    ( moduleName_, string, bool, int, float, nullable
+    , list, array, dict, keyValuePairs, oneOrMore, field, at
+    , index, maybe, oneOf, decodeString, decodeValue, errorToString, map
+    , map2, map3, map4, map5, map6, map7, map8
+    , lazy, value, null, succeed, fail, andThen, annotation_
+    , make_, caseOf_, call_, values_
+    )
 
-{-| 
-@docs moduleName_, string, bool, int, float, nullable, list, array, dict, keyValuePairs, oneOrMore, field, at, index, maybe, oneOf, decodeString, decodeValue, errorToString, map, map2, map3, map4, map5, map6, map7, map8, lazy, value, null, succeed, fail, andThen, annotation_, make_, caseOf_, call_, values_
+{-|
+# Generated bindings for Json.Decode
+
+@docs moduleName_, string, bool, int, float, nullable
+@docs list, array, dict, keyValuePairs, oneOrMore, field
+@docs at, index, maybe, oneOf, decodeString, decodeValue
+@docs errorToString, map, map2, map3, map4, map5
+@docs map6, map7, map8, lazy, value, null
+@docs succeed, fail, andThen, annotation_, make_, caseOf_
+@docs call_, values_
 -}
 
 
 import Elm
 import Elm.Annotation as Type
+import Elm.Arg
 import Elm.Case
 
 
@@ -106,7 +122,7 @@ float =
 nullable: Json.Decode.Decoder a -> Json.Decode.Decoder (Maybe a)
 -}
 nullable : Elm.Expression -> Elm.Expression
-nullable nullableArg =
+nullable nullableArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Json", "Decode" ]
@@ -127,7 +143,7 @@ nullable nullableArg =
                      )
              }
         )
-        [ nullableArg ]
+        [ nullableArg_ ]
 
 
 {-| Decode a JSON array into an Elm `List`.
@@ -138,7 +154,7 @@ nullable nullableArg =
 list: Json.Decode.Decoder a -> Json.Decode.Decoder (List a)
 -}
 list : Elm.Expression -> Elm.Expression
-list listArg =
+list listArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Json", "Decode" ]
@@ -159,7 +175,7 @@ list listArg =
                      )
              }
         )
-        [ listArg ]
+        [ listArg_ ]
 
 
 {-| Decode a JSON array into an Elm `Array`.
@@ -170,7 +186,7 @@ list listArg =
 array: Json.Decode.Decoder a -> Json.Decode.Decoder (Array.Array a)
 -}
 array : Elm.Expression -> Elm.Expression
-array arrayArg =
+array arrayArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Json", "Decode" ]
@@ -195,7 +211,7 @@ array arrayArg =
                      )
              }
         )
-        [ arrayArg ]
+        [ arrayArg_ ]
 
 
 {-| Decode a JSON object into an Elm `Dict`.
@@ -244,7 +260,7 @@ you need that.
 dict: Json.Decode.Decoder a -> Json.Decode.Decoder (Dict.Dict String a)
 -}
 dict : Elm.Expression -> Elm.Expression
-dict dictArg =
+dict dictArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Json", "Decode" ]
@@ -269,7 +285,7 @@ dict dictArg =
                      )
              }
         )
-        [ dictArg ]
+        [ dictArg_ ]
 
 
 {-| Decode a JSON object into an Elm `List` of pairs.
@@ -280,7 +296,7 @@ dict dictArg =
 keyValuePairs: Json.Decode.Decoder a -> Json.Decode.Decoder (List ( String, a ))
 -}
 keyValuePairs : Elm.Expression -> Elm.Expression
-keyValuePairs keyValuePairsArg =
+keyValuePairs keyValuePairsArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Json", "Decode" ]
@@ -303,7 +319,7 @@ keyValuePairs keyValuePairsArg =
                      )
              }
         )
-        [ keyValuePairsArg ]
+        [ keyValuePairsArg_ ]
 
 
 {-| Decode a JSON array that has one or more elements. This comes up if you
@@ -328,7 +344,7 @@ oneOrMore :
     (Elm.Expression -> Elm.Expression -> Elm.Expression)
     -> Elm.Expression
     -> Elm.Expression
-oneOrMore oneOrMoreArg oneOrMoreArg0 =
+oneOrMore oneOrMoreArg_ oneOrMoreArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Json", "Decode" ]
@@ -355,9 +371,11 @@ oneOrMore oneOrMoreArg oneOrMoreArg0 =
         [ Elm.functionReduced
             "oneOrMoreUnpack"
             (\functionReducedUnpack ->
-               Elm.functionReduced "unpack" (oneOrMoreArg functionReducedUnpack)
+               Elm.functionReduced
+                   "unpack"
+                   (oneOrMoreArg_ functionReducedUnpack)
             )
-        , oneOrMoreArg0
+        , oneOrMoreArg_0
         ]
 
 
@@ -378,7 +396,7 @@ Check out [`map2`](#map2) to see how to decode multiple fields!
 field: String -> Json.Decode.Decoder a -> Json.Decode.Decoder a
 -}
 field : String -> Elm.Expression -> Elm.Expression
-field fieldArg fieldArg0 =
+field fieldArg_ fieldArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Json", "Decode" ]
@@ -400,7 +418,7 @@ field fieldArg fieldArg0 =
                      )
              }
         )
-        [ Elm.string fieldArg, fieldArg0 ]
+        [ Elm.string fieldArg_, fieldArg_0 ]
 
 
 {-| Decode a nested JSON object, requiring certain fields.
@@ -417,7 +435,7 @@ This is really just a shorthand for saying things like:
 at: List String -> Json.Decode.Decoder a -> Json.Decode.Decoder a
 -}
 at : List String -> Elm.Expression -> Elm.Expression
-at atArg atArg0 =
+at atArg_ atArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Json", "Decode" ]
@@ -439,7 +457,7 @@ at atArg atArg0 =
                      )
              }
         )
-        [ Elm.list (List.map Elm.string atArg), atArg0 ]
+        [ Elm.list (List.map Elm.string atArg_), atArg_0 ]
 
 
 {-| Decode a JSON array, requiring a particular index.
@@ -454,7 +472,7 @@ at atArg atArg0 =
 index: Int -> Json.Decode.Decoder a -> Json.Decode.Decoder a
 -}
 index : Int -> Elm.Expression -> Elm.Expression
-index indexArg indexArg0 =
+index indexArg_ indexArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Json", "Decode" ]
@@ -476,7 +494,7 @@ index indexArg indexArg0 =
                      )
              }
         )
-        [ Elm.int indexArg, indexArg0 ]
+        [ Elm.int indexArg_, indexArg_0 ]
 
 
 {-| Helpful for dealing with optional fields. Here are a few slightly different
@@ -501,7 +519,7 @@ fields, this means you probably want it *outside* a use of `field` or `at`.
 maybe: Json.Decode.Decoder a -> Json.Decode.Decoder (Maybe a)
 -}
 maybe : Elm.Expression -> Elm.Expression
-maybe maybeArg =
+maybe maybeArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Json", "Decode" ]
@@ -522,7 +540,7 @@ maybe maybeArg =
                      )
              }
         )
-        [ maybeArg ]
+        [ maybeArg_ ]
 
 
 {-| Try a bunch of different decoders. This can be useful if the JSON may come
@@ -548,7 +566,7 @@ even more particular if you wanted.
 oneOf: List (Json.Decode.Decoder a) -> Json.Decode.Decoder a
 -}
 oneOf : List Elm.Expression -> Elm.Expression
-oneOf oneOfArg =
+oneOf oneOfArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Json", "Decode" ]
@@ -571,7 +589,7 @@ oneOf oneOfArg =
                      )
              }
         )
-        [ Elm.list oneOfArg ]
+        [ Elm.list oneOfArg_ ]
 
 
 {-| Parse the given string into a JSON value and then run the `Decoder` on it.
@@ -584,7 +602,7 @@ fails for some reason.
 decodeString: Json.Decode.Decoder a -> String -> Result.Result Json.Decode.Error a
 -}
 decodeString : Elm.Expression -> String -> Elm.Expression
-decodeString decodeStringArg decodeStringArg0 =
+decodeString decodeStringArg_ decodeStringArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Json", "Decode" ]
@@ -608,7 +626,7 @@ decodeString decodeStringArg decodeStringArg0 =
                      )
              }
         )
-        [ decodeStringArg, Elm.string decodeStringArg0 ]
+        [ decodeStringArg_, Elm.string decodeStringArg_0 ]
 
 
 {-| Run a `Decoder` on some JSON `Value`. You can send these JSON values
@@ -617,7 +635,7 @@ through ports, so that is probably the main time you would use this function.
 decodeValue: Json.Decode.Decoder a -> Json.Decode.Value -> Result.Result Json.Decode.Error a
 -}
 decodeValue : Elm.Expression -> Elm.Expression -> Elm.Expression
-decodeValue decodeValueArg decodeValueArg0 =
+decodeValue decodeValueArg_ decodeValueArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Json", "Decode" ]
@@ -641,7 +659,7 @@ decodeValue decodeValueArg decodeValueArg0 =
                      )
              }
         )
-        [ decodeValueArg, decodeValueArg0 ]
+        [ decodeValueArg_, decodeValueArg_0 ]
 
 
 {-| Convert a decoding error into a `String` that is nice for debugging.
@@ -663,7 +681,7 @@ crawl the `Error` structure and create this separately though!
 errorToString: Json.Decode.Error -> String
 -}
 errorToString : Elm.Expression -> Elm.Expression
-errorToString errorToStringArg =
+errorToString errorToStringArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Json", "Decode" ]
@@ -676,7 +694,7 @@ errorToString errorToStringArg =
                      )
              }
         )
-        [ errorToStringArg ]
+        [ errorToStringArg_ ]
 
 
 {-| Transform a decoder. Maybe you just want to know the length of a string:
@@ -699,7 +717,7 @@ It is often helpful to use `map` with `oneOf`, like when defining `nullable`:
 map: (a -> value) -> Json.Decode.Decoder a -> Json.Decode.Decoder value
 -}
 map : (Elm.Expression -> Elm.Expression) -> Elm.Expression -> Elm.Expression
-map mapArg mapArg0 =
+map mapArg_ mapArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Json", "Decode" ]
@@ -721,7 +739,7 @@ map mapArg mapArg0 =
                      )
              }
         )
-        [ Elm.functionReduced "mapUnpack" mapArg, mapArg0 ]
+        [ Elm.functionReduced "mapUnpack" mapArg_, mapArg_0 ]
 
 
 {-| Try two decoders and then combine the result. We can use this to decode
@@ -751,7 +769,7 @@ map2 :
     -> Elm.Expression
     -> Elm.Expression
     -> Elm.Expression
-map2 map2Arg map2Arg0 map2Arg1 =
+map2 map2Arg_ map2Arg_0 map2Arg_1 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Json", "Decode" ]
@@ -782,10 +800,10 @@ map2 map2Arg map2Arg0 map2Arg1 =
         [ Elm.functionReduced
             "map2Unpack"
             (\functionReducedUnpack ->
-               Elm.functionReduced "unpack" (map2Arg functionReducedUnpack)
+               Elm.functionReduced "unpack" (map2Arg_ functionReducedUnpack)
             )
-        , map2Arg0
-        , map2Arg1
+        , map2Arg_0
+        , map2Arg_1
         ]
 
 
@@ -820,7 +838,7 @@ map3 :
     -> Elm.Expression
     -> Elm.Expression
     -> Elm.Expression
-map3 map3Arg map3Arg0 map3Arg1 map3Arg2 =
+map3 map3Arg_ map3Arg_0 map3Arg_1 map3Arg_2 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Json", "Decode" ]
@@ -860,14 +878,14 @@ map3 map3Arg map3Arg0 map3Arg1 map3Arg2 =
                    (\functionReducedUnpack0 ->
                         Elm.functionReduced
                             "unpack"
-                            ((map3Arg functionReducedUnpack)
+                            ((map3Arg_ functionReducedUnpack)
                                  functionReducedUnpack0
                             )
                    )
             )
-        , map3Arg0
-        , map3Arg1
-        , map3Arg2
+        , map3Arg_0
+        , map3Arg_1
+        , map3Arg_2
         ]
 
 
@@ -890,7 +908,7 @@ map4 :
     -> Elm.Expression
     -> Elm.Expression
     -> Elm.Expression
-map4 map4Arg map4Arg0 map4Arg1 map4Arg2 map4Arg3 =
+map4 map4Arg_ map4Arg_0 map4Arg_1 map4Arg_2 map4Arg_3 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Json", "Decode" ]
@@ -941,7 +959,7 @@ map4 map4Arg map4Arg0 map4Arg1 map4Arg2 map4Arg3 =
                             (\functionReducedUnpack_2_1_2_0_2_0_2_0_0 ->
                                  Elm.functionReduced
                                      "unpack"
-                                     (((map4Arg functionReducedUnpack)
+                                     (((map4Arg_ functionReducedUnpack)
                                            functionReducedUnpack0
                                       )
                                           functionReducedUnpack_2_1_2_0_2_0_2_0_0
@@ -949,10 +967,10 @@ map4 map4Arg map4Arg0 map4Arg1 map4Arg2 map4Arg3 =
                             )
                    )
             )
-        , map4Arg0
-        , map4Arg1
-        , map4Arg2
-        , map4Arg3
+        , map4Arg_0
+        , map4Arg_1
+        , map4Arg_2
+        , map4Arg_3
         ]
 
 
@@ -978,7 +996,7 @@ map5 :
     -> Elm.Expression
     -> Elm.Expression
     -> Elm.Expression
-map5 map5Arg map5Arg0 map5Arg1 map5Arg2 map5Arg3 map5Arg4 =
+map5 map5Arg_ map5Arg_0 map5Arg_1 map5Arg_2 map5Arg_3 map5Arg_4 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Json", "Decode" ]
@@ -1037,7 +1055,8 @@ map5 map5Arg map5Arg0 map5Arg1 map5Arg2 map5Arg3 map5Arg4 =
                                      (\functionReducedUnpack_2_1_2_1_2_0_2_0_2_0_0 ->
                                           Elm.functionReduced
                                               "unpack"
-                                              ((((map5Arg functionReducedUnpack)
+                                              ((((map5Arg_ functionReducedUnpack
+                                                 )
                                                      functionReducedUnpack0
                                                 )
                                                     functionReducedUnpack_2_1_2_0_2_0_2_0_0
@@ -1048,11 +1067,11 @@ map5 map5Arg map5Arg0 map5Arg1 map5Arg2 map5Arg3 map5Arg4 =
                             )
                    )
             )
-        , map5Arg0
-        , map5Arg1
-        , map5Arg2
-        , map5Arg3
-        , map5Arg4
+        , map5Arg_0
+        , map5Arg_1
+        , map5Arg_2
+        , map5Arg_3
+        , map5Arg_4
         ]
 
 
@@ -1081,7 +1100,7 @@ map6 :
     -> Elm.Expression
     -> Elm.Expression
     -> Elm.Expression
-map6 map6Arg map6Arg0 map6Arg1 map6Arg2 map6Arg3 map6Arg4 map6Arg5 =
+map6 map6Arg_ map6Arg_0 map6Arg_1 map6Arg_2 map6Arg_3 map6Arg_4 map6Arg_5 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Json", "Decode" ]
@@ -1148,7 +1167,7 @@ map6 map6Arg map6Arg0 map6Arg1 map6Arg2 map6Arg3 map6Arg4 map6Arg5 =
                                               (\functionReducedUnpack_2_1_2_1_2_1_2_0_2_0_2_0_0 ->
                                                    Elm.functionReduced
                                                        "unpack"
-                                                       (((((map6Arg
+                                                       (((((map6Arg_
                                                                 functionReducedUnpack
                                                            )
                                                                functionReducedUnpack0
@@ -1164,12 +1183,12 @@ map6 map6Arg map6Arg0 map6Arg1 map6Arg2 map6Arg3 map6Arg4 map6Arg5 =
                             )
                    )
             )
-        , map6Arg0
-        , map6Arg1
-        , map6Arg2
-        , map6Arg3
-        , map6Arg4
-        , map6Arg5
+        , map6Arg_0
+        , map6Arg_1
+        , map6Arg_2
+        , map6Arg_3
+        , map6Arg_4
+        , map6Arg_5
         ]
 
 
@@ -1201,7 +1220,7 @@ map7 :
     -> Elm.Expression
     -> Elm.Expression
     -> Elm.Expression
-map7 map7Arg map7Arg0 map7Arg1 map7Arg2 map7Arg3 map7Arg4 map7Arg5 map7Arg6 =
+map7 map7Arg_ map7Arg_0 map7Arg_1 map7Arg_2 map7Arg_3 map7Arg_4 map7Arg_5 map7Arg_6 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Json", "Decode" ]
@@ -1276,7 +1295,7 @@ map7 map7Arg map7Arg0 map7Arg1 map7Arg2 map7Arg3 map7Arg4 map7Arg5 map7Arg6 =
                                                        (\functionReducedUnpack_2_1_2_1_2_1_2_1_2_0_2_0_2_0_0 ->
                                                             Elm.functionReduced
                                                                 "unpack"
-                                                                ((((((map7Arg
+                                                                ((((((map7Arg_
                                                                           functionReducedUnpack
                                                                      )
                                                                          functionReducedUnpack0
@@ -1295,13 +1314,13 @@ map7 map7Arg map7Arg0 map7Arg1 map7Arg2 map7Arg3 map7Arg4 map7Arg5 map7Arg6 =
                             )
                    )
             )
-        , map7Arg0
-        , map7Arg1
-        , map7Arg2
-        , map7Arg3
-        , map7Arg4
-        , map7Arg5
-        , map7Arg6
+        , map7Arg_0
+        , map7Arg_1
+        , map7Arg_2
+        , map7Arg_3
+        , map7Arg_4
+        , map7Arg_5
+        , map7Arg_6
         ]
 
 
@@ -1336,7 +1355,7 @@ map8 :
     -> Elm.Expression
     -> Elm.Expression
     -> Elm.Expression
-map8 map8Arg map8Arg0 map8Arg1 map8Arg2 map8Arg3 map8Arg4 map8Arg5 map8Arg6 map8Arg7 =
+map8 map8Arg_ map8Arg_0 map8Arg_1 map8Arg_2 map8Arg_3 map8Arg_4 map8Arg_5 map8Arg_6 map8Arg_7 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Json", "Decode" ]
@@ -1419,7 +1438,7 @@ map8 map8Arg map8Arg0 map8Arg1 map8Arg2 map8Arg3 map8Arg4 map8Arg5 map8Arg6 map8
                                                                 (\functionReducedUnpack_2_1_2_1_2_1_2_1_2_1_2_0_2_0_2_0_0 ->
                                                                      Elm.functionReduced
                                                                          "unpack"
-                                                                         (((((((map8Arg
+                                                                         (((((((map8Arg_
                                                                                     functionReducedUnpack
                                                                                )
                                                                                    functionReducedUnpack0
@@ -1441,14 +1460,14 @@ map8 map8Arg map8Arg0 map8Arg1 map8Arg2 map8Arg3 map8Arg4 map8Arg5 map8Arg6 map8
                             )
                    )
             )
-        , map8Arg0
-        , map8Arg1
-        , map8Arg2
-        , map8Arg3
-        , map8Arg4
-        , map8Arg5
-        , map8Arg6
-        , map8Arg7
+        , map8Arg_0
+        , map8Arg_1
+        , map8Arg_2
+        , map8Arg_3
+        , map8Arg_4
+        , map8Arg_5
+        , map8Arg_6
+        , map8Arg_7
         ]
 
 
@@ -1481,7 +1500,7 @@ structures [here][].
 lazy: (() -> Json.Decode.Decoder a) -> Json.Decode.Decoder a
 -}
 lazy : (Elm.Expression -> Elm.Expression) -> Elm.Expression
-lazy lazyArg =
+lazy lazyArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Json", "Decode" ]
@@ -1505,7 +1524,7 @@ lazy lazyArg =
                      )
              }
         )
-        [ Elm.functionReduced "lazyUnpack" lazyArg ]
+        [ Elm.functionReduced "lazyUnpack" lazyArg_ ]
 
 
 {-| Do not do anything with a JSON value, just bring it into Elm as a `Value`.
@@ -1542,7 +1561,7 @@ So if you ever see a `null`, this will return whatever value you specified.
 null: a -> Json.Decode.Decoder a
 -}
 null : Elm.Expression -> Elm.Expression
-null nullArg =
+null nullArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Json", "Decode" ]
@@ -1559,7 +1578,7 @@ null nullArg =
                      )
              }
         )
-        [ nullArg ]
+        [ nullArg_ ]
 
 
 {-| Ignore the JSON and produce a certain Elm value.
@@ -1573,7 +1592,7 @@ This is handy when used with `oneOf` or `andThen`.
 succeed: a -> Json.Decode.Decoder a
 -}
 succeed : Elm.Expression -> Elm.Expression
-succeed succeedArg =
+succeed succeedArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Json", "Decode" ]
@@ -1590,7 +1609,7 @@ succeed succeedArg =
                      )
              }
         )
-        [ succeedArg ]
+        [ succeedArg_ ]
 
 
 {-| Ignore the JSON and make the decoder fail. This is handy when used with
@@ -1602,7 +1621,7 @@ See the [`andThen`](#andThen) docs for an example.
 fail: String -> Json.Decode.Decoder a
 -}
 fail : String -> Elm.Expression
-fail failArg =
+fail failArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Json", "Decode" ]
@@ -1619,7 +1638,7 @@ fail failArg =
                      )
              }
         )
-        [ Elm.string failArg ]
+        [ Elm.string failArg_ ]
 
 
 {-| Create decoders that depend on previous results. If you are creating
@@ -1650,7 +1669,7 @@ versioned data, you might do something like this:
 andThen: (a -> Json.Decode.Decoder b) -> Json.Decode.Decoder a -> Json.Decode.Decoder b
 -}
 andThen : (Elm.Expression -> Elm.Expression) -> Elm.Expression -> Elm.Expression
-andThen andThenArg andThenArg0 =
+andThen andThenArg_ andThenArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Json", "Decode" ]
@@ -1678,7 +1697,7 @@ andThen andThenArg andThenArg0 =
                      )
              }
         )
-        [ Elm.functionReduced "andThenUnpack" andThenArg, andThenArg0 ]
+        [ Elm.functionReduced "andThenUnpack" andThenArg_, andThenArg_0 ]
 
 
 annotation_ :
@@ -1750,50 +1769,84 @@ make_ =
     }
 
 
-caseOf_ :
-    { error :
-        Elm.Expression
-        -> { errorTags_0_0
-            | field : Elm.Expression -> Elm.Expression -> Elm.Expression
-            , index : Elm.Expression -> Elm.Expression -> Elm.Expression
-            , oneOf : Elm.Expression -> Elm.Expression
-            , failure : Elm.Expression -> Elm.Expression -> Elm.Expression
-        }
-        -> Elm.Expression
-    }
 caseOf_ =
     { error =
         \errorExpression errorTags ->
             Elm.Case.custom
                 errorExpression
                 (Type.namedWith [ "Json", "Decode" ] "Error" [])
-                [ Elm.Case.branch2
-                    "Field"
-                    ( "stringString", Type.string )
-                    ( "jsonDecodeError"
-                    , Type.namedWith [ "Json", "Decode" ] "Error" []
+                [ Elm.Case.branch
+                    (Elm.Arg.customType "Field" errorTags.field |> Elm.Arg.item
+                                                                         (Elm.Arg.varWith
+                                                                                "arg_0"
+                                                                                Type.string
+                                                                         ) |> Elm.Arg.item
+                                                                                    (Elm.Arg.varWith
+                                                                                           "jsonDecodeError"
+                                                                                           (Type.namedWith
+                                                                                                  [ "Json"
+                                                                                                  , "Decode"
+                                                                                                  ]
+                                                                                                  "Error"
+                                                                                                  []
+                                                                                           )
+                                                                                    )
                     )
-                    errorTags.field
-                , Elm.Case.branch2
-                    "Index"
-                    ( "basicsInt", Type.int )
-                    ( "jsonDecodeError"
-                    , Type.namedWith [ "Json", "Decode" ] "Error" []
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType "Index" errorTags.index |> Elm.Arg.item
+                                                                         (Elm.Arg.varWith
+                                                                                "arg_0"
+                                                                                Type.int
+                                                                         ) |> Elm.Arg.item
+                                                                                    (Elm.Arg.varWith
+                                                                                           "jsonDecodeError"
+                                                                                           (Type.namedWith
+                                                                                                  [ "Json"
+                                                                                                  , "Decode"
+                                                                                                  ]
+                                                                                                  "Error"
+                                                                                                  []
+                                                                                           )
+                                                                                    )
                     )
-                    errorTags.index
-                , Elm.Case.branch1
-                    "OneOf"
-                    ( "listList"
-                    , Type.list (Type.namedWith [ "Json", "Decode" ] "Error" [])
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType "OneOf" errorTags.oneOf |> Elm.Arg.item
+                                                                         (Elm.Arg.varWith
+                                                                                "arg_0"
+                                                                                (Type.list
+                                                                                       (Type.namedWith
+                                                                                              [ "Json"
+                                                                                              , "Decode"
+                                                                                              ]
+                                                                                              "Error"
+                                                                                              []
+                                                                                       )
+                                                                                )
+                                                                         )
                     )
-                    errorTags.oneOf
-                , Elm.Case.branch2
-                    "Failure"
-                    ( "stringString", Type.string )
-                    ( "jsonDecodeValue"
-                    , Type.namedWith [ "Json", "Decode" ] "Value" []
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType
+                       "Failure"
+                       errorTags.failure |> Elm.Arg.item
+                                                  (Elm.Arg.varWith
+                                                         "arg_0"
+                                                         Type.string
+                                                  ) |> Elm.Arg.item
+                                                             (Elm.Arg.varWith
+                                                                    "jsonDecodeValue"
+                                                                    (Type.namedWith
+                                                                           [ "Json"
+                                                                           , "Decode"
+                                                                           ]
+                                                                           "Value"
+                                                                           []
+                                                                    )
+                                                             )
                     )
-                    errorTags.failure
+                    Basics.identity
                 ]
     }
 
@@ -1875,7 +1928,7 @@ call_ :
     }
 call_ =
     { nullable =
-        \nullableArg ->
+        \nullableArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Json", "Decode" ]
@@ -1896,9 +1949,9 @@ call_ =
                              )
                      }
                 )
-                [ nullableArg ]
+                [ nullableArg_ ]
     , list =
-        \listArg ->
+        \listArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Json", "Decode" ]
@@ -1919,9 +1972,9 @@ call_ =
                              )
                      }
                 )
-                [ listArg ]
+                [ listArg_ ]
     , array =
-        \arrayArg ->
+        \arrayArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Json", "Decode" ]
@@ -1946,9 +1999,9 @@ call_ =
                              )
                      }
                 )
-                [ arrayArg ]
+                [ arrayArg_ ]
     , dict =
-        \dictArg ->
+        \dictArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Json", "Decode" ]
@@ -1973,9 +2026,9 @@ call_ =
                              )
                      }
                 )
-                [ dictArg ]
+                [ dictArg_ ]
     , keyValuePairs =
-        \keyValuePairsArg ->
+        \keyValuePairsArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Json", "Decode" ]
@@ -2001,9 +2054,9 @@ call_ =
                              )
                      }
                 )
-                [ keyValuePairsArg ]
+                [ keyValuePairsArg_ ]
     , oneOrMore =
-        \oneOrMoreArg oneOrMoreArg0 ->
+        \oneOrMoreArg_ oneOrMoreArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Json", "Decode" ]
@@ -2027,9 +2080,9 @@ call_ =
                              )
                      }
                 )
-                [ oneOrMoreArg, oneOrMoreArg0 ]
+                [ oneOrMoreArg_, oneOrMoreArg_0 ]
     , field =
-        \fieldArg fieldArg0 ->
+        \fieldArg_ fieldArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Json", "Decode" ]
@@ -2051,9 +2104,9 @@ call_ =
                              )
                      }
                 )
-                [ fieldArg, fieldArg0 ]
+                [ fieldArg_, fieldArg_0 ]
     , at =
-        \atArg atArg0 ->
+        \atArg_ atArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Json", "Decode" ]
@@ -2075,9 +2128,9 @@ call_ =
                              )
                      }
                 )
-                [ atArg, atArg0 ]
+                [ atArg_, atArg_0 ]
     , index =
-        \indexArg indexArg0 ->
+        \indexArg_ indexArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Json", "Decode" ]
@@ -2099,9 +2152,9 @@ call_ =
                              )
                      }
                 )
-                [ indexArg, indexArg0 ]
+                [ indexArg_, indexArg_0 ]
     , maybe =
-        \maybeArg ->
+        \maybeArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Json", "Decode" ]
@@ -2122,9 +2175,9 @@ call_ =
                              )
                      }
                 )
-                [ maybeArg ]
+                [ maybeArg_ ]
     , oneOf =
-        \oneOfArg ->
+        \oneOfArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Json", "Decode" ]
@@ -2147,9 +2200,9 @@ call_ =
                              )
                      }
                 )
-                [ oneOfArg ]
+                [ oneOfArg_ ]
     , decodeString =
-        \decodeStringArg decodeStringArg0 ->
+        \decodeStringArg_ decodeStringArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Json", "Decode" ]
@@ -2176,9 +2229,9 @@ call_ =
                              )
                      }
                 )
-                [ decodeStringArg, decodeStringArg0 ]
+                [ decodeStringArg_, decodeStringArg_0 ]
     , decodeValue =
-        \decodeValueArg decodeValueArg0 ->
+        \decodeValueArg_ decodeValueArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Json", "Decode" ]
@@ -2208,9 +2261,9 @@ call_ =
                              )
                      }
                 )
-                [ decodeValueArg, decodeValueArg0 ]
+                [ decodeValueArg_, decodeValueArg_0 ]
     , errorToString =
-        \errorToStringArg ->
+        \errorToStringArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Json", "Decode" ]
@@ -2227,9 +2280,9 @@ call_ =
                              )
                      }
                 )
-                [ errorToStringArg ]
+                [ errorToStringArg_ ]
     , map =
-        \mapArg mapArg0 ->
+        \mapArg_ mapArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Json", "Decode" ]
@@ -2253,9 +2306,9 @@ call_ =
                              )
                      }
                 )
-                [ mapArg, mapArg0 ]
+                [ mapArg_, mapArg_0 ]
     , map2 =
-        \map2Arg map2Arg0 map2Arg1 ->
+        \map2Arg_ map2Arg_0 map2Arg_1 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Json", "Decode" ]
@@ -2283,9 +2336,9 @@ call_ =
                              )
                      }
                 )
-                [ map2Arg, map2Arg0, map2Arg1 ]
+                [ map2Arg_, map2Arg_0, map2Arg_1 ]
     , map3 =
-        \map3Arg map3Arg0 map3Arg1 map3Arg2 ->
+        \map3Arg_ map3Arg_0 map3Arg_1 map3Arg_2 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Json", "Decode" ]
@@ -2320,9 +2373,9 @@ call_ =
                              )
                      }
                 )
-                [ map3Arg, map3Arg0, map3Arg1, map3Arg2 ]
+                [ map3Arg_, map3Arg_0, map3Arg_1, map3Arg_2 ]
     , map4 =
-        \map4Arg map4Arg0 map4Arg1 map4Arg2 map4Arg3 ->
+        \map4Arg_ map4Arg_0 map4Arg_1 map4Arg_2 map4Arg_3 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Json", "Decode" ]
@@ -2362,9 +2415,9 @@ call_ =
                              )
                      }
                 )
-                [ map4Arg, map4Arg0, map4Arg1, map4Arg2, map4Arg3 ]
+                [ map4Arg_, map4Arg_0, map4Arg_1, map4Arg_2, map4Arg_3 ]
     , map5 =
-        \map5Arg map5Arg0 map5Arg1 map5Arg2 map5Arg3 map5Arg4 ->
+        \map5Arg_ map5Arg_0 map5Arg_1 map5Arg_2 map5Arg_3 map5Arg_4 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Json", "Decode" ]
@@ -2409,9 +2462,15 @@ call_ =
                              )
                      }
                 )
-                [ map5Arg, map5Arg0, map5Arg1, map5Arg2, map5Arg3, map5Arg4 ]
+                [ map5Arg_
+                , map5Arg_0
+                , map5Arg_1
+                , map5Arg_2
+                , map5Arg_3
+                , map5Arg_4
+                ]
     , map6 =
-        \map6Arg map6Arg0 map6Arg1 map6Arg2 map6Arg3 map6Arg4 map6Arg5 ->
+        \map6Arg_ map6Arg_0 map6Arg_1 map6Arg_2 map6Arg_3 map6Arg_4 map6Arg_5 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Json", "Decode" ]
@@ -2461,16 +2520,16 @@ call_ =
                              )
                      }
                 )
-                [ map6Arg
-                , map6Arg0
-                , map6Arg1
-                , map6Arg2
-                , map6Arg3
-                , map6Arg4
-                , map6Arg5
+                [ map6Arg_
+                , map6Arg_0
+                , map6Arg_1
+                , map6Arg_2
+                , map6Arg_3
+                , map6Arg_4
+                , map6Arg_5
                 ]
     , map7 =
-        \map7Arg map7Arg0 map7Arg1 map7Arg2 map7Arg3 map7Arg4 map7Arg5 map7Arg6 ->
+        \map7Arg_ map7Arg_0 map7Arg_1 map7Arg_2 map7Arg_3 map7Arg_4 map7Arg_5 map7Arg_6 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Json", "Decode" ]
@@ -2525,17 +2584,17 @@ call_ =
                              )
                      }
                 )
-                [ map7Arg
-                , map7Arg0
-                , map7Arg1
-                , map7Arg2
-                , map7Arg3
-                , map7Arg4
-                , map7Arg5
-                , map7Arg6
+                [ map7Arg_
+                , map7Arg_0
+                , map7Arg_1
+                , map7Arg_2
+                , map7Arg_3
+                , map7Arg_4
+                , map7Arg_5
+                , map7Arg_6
                 ]
     , map8 =
-        \map8Arg map8Arg0 map8Arg1 map8Arg2 map8Arg3 map8Arg4 map8Arg5 map8Arg6 map8Arg7 ->
+        \map8Arg_ map8Arg_0 map8Arg_1 map8Arg_2 map8Arg_3 map8Arg_4 map8Arg_5 map8Arg_6 map8Arg_7 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Json", "Decode" ]
@@ -2595,18 +2654,18 @@ call_ =
                              )
                      }
                 )
-                [ map8Arg
-                , map8Arg0
-                , map8Arg1
-                , map8Arg2
-                , map8Arg3
-                , map8Arg4
-                , map8Arg5
-                , map8Arg6
-                , map8Arg7
+                [ map8Arg_
+                , map8Arg_0
+                , map8Arg_1
+                , map8Arg_2
+                , map8Arg_3
+                , map8Arg_4
+                , map8Arg_5
+                , map8Arg_6
+                , map8Arg_7
                 ]
     , lazy =
-        \lazyArg ->
+        \lazyArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Json", "Decode" ]
@@ -2630,9 +2689,9 @@ call_ =
                              )
                      }
                 )
-                [ lazyArg ]
+                [ lazyArg_ ]
     , null =
-        \nullArg ->
+        \nullArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Json", "Decode" ]
@@ -2649,9 +2708,9 @@ call_ =
                              )
                      }
                 )
-                [ nullArg ]
+                [ nullArg_ ]
     , succeed =
-        \succeedArg ->
+        \succeedArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Json", "Decode" ]
@@ -2668,9 +2727,9 @@ call_ =
                              )
                      }
                 )
-                [ succeedArg ]
+                [ succeedArg_ ]
     , fail =
-        \failArg ->
+        \failArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Json", "Decode" ]
@@ -2687,9 +2746,9 @@ call_ =
                              )
                      }
                 )
-                [ failArg ]
+                [ failArg_ ]
     , andThen =
-        \andThenArg andThenArg0 ->
+        \andThenArg_ andThenArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Json", "Decode" ]
@@ -2717,7 +2776,7 @@ call_ =
                              )
                      }
                 )
-                [ andThenArg, andThenArg0 ]
+                [ andThenArg_, andThenArg_0 ]
     }
 
 

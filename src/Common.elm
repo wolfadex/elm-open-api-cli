@@ -47,8 +47,8 @@ type UnsafeName
 
 
 moduleToNamespace : List String -> Module -> List String
-moduleToNamespace namespace module_ =
-    case module_ of
+moduleToNamespace namespace moduleName =
+    case moduleName of
         Json ->
             namespace ++ [ "Json" ]
 

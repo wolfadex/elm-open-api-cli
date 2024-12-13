@@ -75,7 +75,7 @@ suite =
                                     |> Maybe.withDefault "Carl"
                                     |> List.singleton
 
-                            genFiles : Result CliMonad.Message ( List { moduleName : List String, declarations : FastDict.Dict String Elm.Declaration }, { warnings : List CliMonad.Message, requiredPackages : FastSet.Set String } )
+                            genFiles : Result CliMonad.Message ( List { moduleName : List String, declarations : FastDict.Dict String { group : String, declaration : Elm.Declaration } }, { warnings : List CliMonad.Message, requiredPackages : FastSet.Set String } )
                             genFiles =
                                 OpenApi.Generate.files
                                     { namespace = namespace

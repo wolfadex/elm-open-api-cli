@@ -119,7 +119,7 @@ type alias Format =
     , decoder : Elm.Expression
     , toParamString : Elm.Expression -> Elm.Expression
     , annotation : Elm.Annotation.Annotation
-    , sharedDeclarations : List ( String, Elm.Expression )
+    , sharedDeclarations : List ( String, { value : Elm.Expression, group : String } )
     , requiresPackages : List String
     }
 

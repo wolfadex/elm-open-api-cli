@@ -865,7 +865,12 @@ generateFilesFromOpenApiSpecs configs =
         |> BackendTask.Extra.combineMap
             (\( config, apiSpec ) ->
                 OpenApi.Generate.files config apiSpec
-                    |> Result.mapError (messageToString >> FatalError.fromString)
+                    |> Result.mapError
+                        (\err ->
+                            err
+                                |> messageToString
+                                |> FatalError.fromString
+                        )
                     |> BackendTask.fromResult
             )
         |> BackendTask.map
@@ -874,25 +879,19 @@ generateFilesFromOpenApiSpecs configs =
                     ( files, messages ) =
                         List.unzip result
 
-                    formatDocs : List { members : List String, group : Maybe String } -> List String
-                    formatDocs docs =
-                        docs
-                            |> List.sortBy groupOrder
-                            |> formatModuleDocs
-
-                    groupOrder : { members : List String, group : Maybe String } -> Int
-                    groupOrder { group } =
+                    groupOrder : String -> Int
+                    groupOrder group =
                         case group of
-                            Just "Request functions" ->
+                            "Request functions" ->
                                 1
 
-                            Just "Types" ->
+                            "Types" ->
                                 2
 
-                            Just "Encoders" ->
+                            "Encoders" ->
                                 3
 
-                            Just "Decoders" ->
+                            "Decoders" ->
                                 4
 
                             _ ->
@@ -903,14 +902,19 @@ generateFilesFromOpenApiSpecs configs =
                     |> Dict.Extra.groupBy .moduleName
                     |> Dict.toList
                     |> List.map
-                        (\( moduleName, group ) ->
-                            group
-                                |> List.foldl (\{ declarations } acc -> FastDict.union declarations acc) FastDict.empty
+                        (\( moduleName, declarations ) ->
+                            declarations
+                                |> List.foldl (\e acc -> FastDict.union e.declarations acc) FastDict.empty
                                 |> FastDict.values
-                                |> Elm.fileWith moduleName
-                                    { docs = formatDocs
-                                    , aliases = []
-                                    }
+                                |> Dict.Extra.groupBy (\{ group } -> ( groupOrder group, group ))
+                                |> Dict.toList
+                                |> List.concatMap
+                                    (\( ( _, group ), decls ) ->
+                                        [ Elm.docs ("# " ++ group)
+                                        , Elm.group (List.map .declaration decls)
+                                        ]
+                                    )
+                                |> Elm.file moduleName
                         )
                 , { warnings = List.concatMap .warnings messages
                   , requiredPackages =
@@ -921,41 +925,6 @@ generateFilesFromOpenApiSpecs configs =
                   }
                 )
             )
-
-
-formatModuleDocs : List { group : Maybe String, members : List String } -> List String
-formatModuleDocs =
-    List.map
-        (\{ group, members } ->
-            "## "
-                ++ Maybe.withDefault "Other" group
-                ++ "\n\n\n"
-                ++ (members
-                        |> List.sort
-                        |> List.foldl
-                            (\member memberLines ->
-                                case memberLines of
-                                    [] ->
-                                        [ [ member ] ]
-
-                                    memberLine :: restOfLines ->
-                                        let
-                                            groupSize : Int
-                                            groupSize =
-                                                String.length (String.join ", " memberLine)
-                                        in
-                                        if String.length member + groupSize < 105 then
-                                            (member :: memberLine) :: restOfLines
-
-                                        else
-                                            [ member ] :: memberLines
-                            )
-                            []
-                        |> List.map (\memberLine -> "@docs " ++ String.join ", " (List.reverse memberLine))
-                        |> List.reverse
-                        |> String.join "\n"
-                   )
-        )
 
 
 {-| Check to see if `elm-format` is available, and if so format the files

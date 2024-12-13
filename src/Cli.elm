@@ -910,7 +910,7 @@ generateFilesFromOpenApiSpecs configs =
                                 |> Dict.toList
                                 |> List.concatMap
                                     (\( ( _, group ), decls ) ->
-                                        [ Elm.docs ("# " ++ group)
+                                        [ Elm.docs ("## " ++ group)
                                         , Elm.group (List.map .declaration decls)
                                         ]
                                     )

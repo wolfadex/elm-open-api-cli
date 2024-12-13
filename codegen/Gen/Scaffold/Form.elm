@@ -1,12 +1,19 @@
-module Gen.Scaffold.Form exposing (annotation_, call_, caseOf_, fieldEncoder, make_, moduleName_, provide, recordEncoder, restArgsParser, values_)
+module Gen.Scaffold.Form exposing
+    ( moduleName_, provide, restArgsParser, recordEncoder, fieldEncoder, annotation_
+    , make_, caseOf_, call_, values_
+    )
 
-{-| 
-@docs moduleName_, provide, restArgsParser, recordEncoder, fieldEncoder, annotation_, make_, caseOf_, call_, values_
+{-|
+# Generated bindings for Scaffold.Form
+
+@docs moduleName_, provide, restArgsParser, recordEncoder, fieldEncoder, annotation_
+@docs make_, caseOf_, call_, values_
 -}
 
 
 import Elm
 import Elm.Annotation as Type
+import Elm.Arg
 import Elm.Case
 
 
@@ -40,7 +47,7 @@ provide :
     , view : Elm.Expression -> Elm.Expression
     }
     -> Elm.Expression
-provide provideArg =
+provide provideArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Scaffold", "Form" ]
@@ -120,11 +127,11 @@ provide provideArg =
              }
         )
         [ Elm.record
-            [ Tuple.pair "fields" (Elm.list provideArg.fields)
-            , Tuple.pair "elmCssView" (Elm.bool provideArg.elmCssView)
+            [ Tuple.pair "fields" (Elm.list provideArg_.fields)
+            , Tuple.pair "elmCssView" (Elm.bool provideArg_.elmCssView)
             , Tuple.pair
                   "view"
-                  (Elm.functionReduced "provideUnpack" provideArg.view)
+                  (Elm.functionReduced "provideUnpack" provideArg_.view)
             ]
         ]
 
@@ -170,7 +177,7 @@ BackendTask.Custom or to an external API from your scaffolded Route Module code.
 recordEncoder: Elm.Expression -> List ( String, Scaffold.Form.Kind ) -> Elm.Expression
 -}
 recordEncoder : Elm.Expression -> List Elm.Expression -> Elm.Expression
-recordEncoder recordEncoderArg recordEncoderArg0 =
+recordEncoder recordEncoderArg_ recordEncoderArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Scaffold", "Form" ]
@@ -193,7 +200,7 @@ recordEncoder recordEncoderArg recordEncoderArg0 =
                      )
              }
         )
-        [ recordEncoderArg, Elm.list recordEncoderArg0 ]
+        [ recordEncoderArg_, Elm.list recordEncoderArg_0 ]
 
 
 {-| A lower-level, more granular version of `recordEncoder` - lets you generate a JSON Encoder `Expression` for an individual Field rather than a group of Fields.
@@ -201,7 +208,7 @@ recordEncoder recordEncoderArg recordEncoderArg0 =
 fieldEncoder: Elm.Expression -> String -> Scaffold.Form.Kind -> Elm.Expression
 -}
 fieldEncoder : Elm.Expression -> String -> Elm.Expression -> Elm.Expression
-fieldEncoder fieldEncoderArg fieldEncoderArg0 fieldEncoderArg1 =
+fieldEncoder fieldEncoderArg_ fieldEncoderArg_0 fieldEncoderArg_1 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Scaffold", "Form" ]
@@ -217,7 +224,7 @@ fieldEncoder fieldEncoderArg fieldEncoderArg0 fieldEncoderArg1 =
                      )
              }
         )
-        [ fieldEncoderArg, Elm.string fieldEncoderArg0, fieldEncoderArg1 ]
+        [ fieldEncoderArg_, Elm.string fieldEncoderArg_0, fieldEncoderArg_1 ]
 
 
 annotation_ : { kind : Type.Annotation, context : Type.Annotation }
@@ -339,14 +346,13 @@ make_ =
 caseOf_ :
     { kind :
         Elm.Expression
-        -> { kindTags_0_0
-            | fieldInt : Elm.Expression
-            , fieldText : Elm.Expression
-            , fieldTextarea : Elm.Expression
-            , fieldFloat : Elm.Expression
-            , fieldTime : Elm.Expression
-            , fieldDate : Elm.Expression
-            , fieldCheckbox : Elm.Expression
+        -> { fieldInt : Elm.Expression
+        , fieldText : Elm.Expression
+        , fieldTextarea : Elm.Expression
+        , fieldFloat : Elm.Expression
+        , fieldTime : Elm.Expression
+        , fieldDate : Elm.Expression
+        , fieldCheckbox : Elm.Expression
         }
         -> Elm.Expression
     }
@@ -356,13 +362,27 @@ caseOf_ =
             Elm.Case.custom
                 kindExpression
                 (Type.namedWith [ "Scaffold", "Form" ] "Kind" [])
-                [ Elm.Case.branch0 "FieldInt" kindTags.fieldInt
-                , Elm.Case.branch0 "FieldText" kindTags.fieldText
-                , Elm.Case.branch0 "FieldTextarea" kindTags.fieldTextarea
-                , Elm.Case.branch0 "FieldFloat" kindTags.fieldFloat
-                , Elm.Case.branch0 "FieldTime" kindTags.fieldTime
-                , Elm.Case.branch0 "FieldDate" kindTags.fieldDate
-                , Elm.Case.branch0 "FieldCheckbox" kindTags.fieldCheckbox
+                [ Elm.Case.branch
+                    (Elm.Arg.customType "FieldInt" kindTags.fieldInt)
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType "FieldText" kindTags.fieldText)
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType "FieldTextarea" kindTags.fieldTextarea)
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType "FieldFloat" kindTags.fieldFloat)
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType "FieldTime" kindTags.fieldTime)
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType "FieldDate" kindTags.fieldDate)
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType "FieldCheckbox" kindTags.fieldCheckbox)
+                    Basics.identity
                 ]
     }
 
@@ -375,7 +395,7 @@ call_ :
     }
 call_ =
     { provide =
-        \provideArg ->
+        \provideArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Scaffold", "Form" ]
@@ -466,9 +486,9 @@ call_ =
                              )
                      }
                 )
-                [ provideArg ]
+                [ provideArg_ ]
     , recordEncoder =
-        \recordEncoderArg recordEncoderArg0 ->
+        \recordEncoderArg_ recordEncoderArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Scaffold", "Form" ]
@@ -491,9 +511,9 @@ call_ =
                              )
                      }
                 )
-                [ recordEncoderArg, recordEncoderArg0 ]
+                [ recordEncoderArg_, recordEncoderArg_0 ]
     , fieldEncoder =
-        \fieldEncoderArg fieldEncoderArg0 fieldEncoderArg1 ->
+        \fieldEncoderArg_ fieldEncoderArg_0 fieldEncoderArg_1 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Scaffold", "Form" ]
@@ -512,7 +532,7 @@ call_ =
                              )
                      }
                 )
-                [ fieldEncoderArg, fieldEncoderArg0, fieldEncoderArg1 ]
+                [ fieldEncoderArg_, fieldEncoderArg_0, fieldEncoderArg_1 ]
     }
 
 

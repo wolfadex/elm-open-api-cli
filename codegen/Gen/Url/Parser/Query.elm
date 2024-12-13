@@ -1,7 +1,15 @@
-module Gen.Url.Parser.Query exposing (annotation_, call_, custom, enum, int, map, map2, map3, map4, map5, map6, map7, map8, moduleName_, string, values_)
+module Gen.Url.Parser.Query exposing
+    ( moduleName_, string, int, enum, custom, map
+    , map2, map3, map4, map5, map6, map7, map8
+    , annotation_, call_, values_
+    )
 
-{-| 
-@docs moduleName_, string, int, enum, custom, map, map2, map3, map4, map5, map6, map7, map8, annotation_, call_, values_
+{-|
+# Generated bindings for Url.Parser.Query
+
+@docs moduleName_, string, int, enum, custom, map
+@docs map2, map3, map4, map5, map6, map7
+@docs map8, annotation_, call_, values_
 -}
 
 
@@ -32,7 +40,7 @@ parameters for some reason.
 string: String -> Url.Parser.Query.Parser (Maybe String)
 -}
 string : String -> Elm.Expression
-string stringArg =
+string stringArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Url", "Parser", "Query" ]
@@ -49,7 +57,7 @@ string stringArg =
                      )
              }
         )
-        [ Elm.string stringArg ]
+        [ Elm.string stringArg_ ]
 
 
 {-| Handle `Int` parameters. Maybe you want to show paginated search results:
@@ -70,7 +78,7 @@ or something like that.
 int: String -> Url.Parser.Query.Parser (Maybe Int)
 -}
 int : String -> Elm.Expression
-int intArg =
+int intArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Url", "Parser", "Query" ]
@@ -87,7 +95,7 @@ int intArg =
                      )
              }
         )
-        [ Elm.string intArg ]
+        [ Elm.string intArg_ ]
 
 
 {-| Handle enumerated parameters. Maybe you want a true-or-false parameter:
@@ -115,7 +123,7 @@ to get a parser of type `Parser Bool` that swallows any errors and defaults to
 enum: String -> Dict.Dict String a -> Url.Parser.Query.Parser (Maybe a)
 -}
 enum : String -> Elm.Expression -> Elm.Expression
-enum enumArg enumArg0 =
+enum enumArg_ enumArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Url", "Parser", "Query" ]
@@ -137,7 +145,7 @@ enum enumArg enumArg0 =
                      )
              }
         )
-        [ Elm.string enumArg, enumArg0 ]
+        [ Elm.string enumArg_, enumArg_0 ]
 
 
 {-| Create a custom query parser. The [`string`](#string), [`int`](#int), and
@@ -159,7 +167,7 @@ posts on screen at once. You could say:
 custom: String -> (List String -> a) -> Url.Parser.Query.Parser a
 -}
 custom : String -> (Elm.Expression -> Elm.Expression) -> Elm.Expression
-custom customArg customArg0 =
+custom customArg_ customArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Url", "Parser", "Query" ]
@@ -180,7 +188,9 @@ custom customArg customArg0 =
                      )
              }
         )
-        [ Elm.string customArg, Elm.functionReduced "customUnpack" customArg0 ]
+        [ Elm.string customArg_
+        , Elm.functionReduced "customUnpack" customArg_0
+        ]
 
 
 {-| Transform a parser in some way. Maybe you want your `page` query parser to
@@ -193,7 +203,7 @@ default to `1` if there is any problem?
 map: (a -> b) -> Url.Parser.Query.Parser a -> Url.Parser.Query.Parser b
 -}
 map : (Elm.Expression -> Elm.Expression) -> Elm.Expression -> Elm.Expression
-map mapArg mapArg0 =
+map mapArg_ mapArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Url", "Parser", "Query" ]
@@ -215,7 +225,7 @@ map mapArg mapArg0 =
                      )
              }
         )
-        [ Elm.functionReduced "mapUnpack" mapArg, mapArg0 ]
+        [ Elm.functionReduced "mapUnpack" mapArg_, mapArg_0 ]
 
 
 {-| Combine two parsers. A query like `?search=hats&page=2` could be parsed
@@ -241,7 +251,7 @@ map2 :
     -> Elm.Expression
     -> Elm.Expression
     -> Elm.Expression
-map2 map2Arg map2Arg0 map2Arg1 =
+map2 map2Arg_ map2Arg_0 map2Arg_1 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Url", "Parser", "Query" ]
@@ -272,10 +282,10 @@ map2 map2Arg map2Arg0 map2Arg1 =
         [ Elm.functionReduced
             "map2Unpack"
             (\functionReducedUnpack ->
-               Elm.functionReduced "unpack" (map2Arg functionReducedUnpack)
+               Elm.functionReduced "unpack" (map2Arg_ functionReducedUnpack)
             )
-        , map2Arg0
-        , map2Arg1
+        , map2Arg_0
+        , map2Arg_1
         ]
 
 
@@ -316,7 +326,7 @@ map3 :
     -> Elm.Expression
     -> Elm.Expression
     -> Elm.Expression
-map3 map3Arg map3Arg0 map3Arg1 map3Arg2 =
+map3 map3Arg_ map3Arg_0 map3Arg_1 map3Arg_2 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Url", "Parser", "Query" ]
@@ -356,14 +366,14 @@ map3 map3Arg map3Arg0 map3Arg1 map3Arg2 =
                    (\functionReducedUnpack0 ->
                         Elm.functionReduced
                             "unpack"
-                            ((map3Arg functionReducedUnpack)
+                            ((map3Arg_ functionReducedUnpack)
                                  functionReducedUnpack0
                             )
                    )
             )
-        , map3Arg0
-        , map3Arg1
-        , map3Arg2
+        , map3Arg_0
+        , map3Arg_1
+        , map3Arg_2
         ]
 
 
@@ -386,7 +396,7 @@ map4 :
     -> Elm.Expression
     -> Elm.Expression
     -> Elm.Expression
-map4 map4Arg map4Arg0 map4Arg1 map4Arg2 map4Arg3 =
+map4 map4Arg_ map4Arg_0 map4Arg_1 map4Arg_2 map4Arg_3 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Url", "Parser", "Query" ]
@@ -437,7 +447,7 @@ map4 map4Arg map4Arg0 map4Arg1 map4Arg2 map4Arg3 =
                             (\functionReducedUnpack_2_1_2_0_2_0_2_0_0 ->
                                  Elm.functionReduced
                                      "unpack"
-                                     (((map4Arg functionReducedUnpack)
+                                     (((map4Arg_ functionReducedUnpack)
                                            functionReducedUnpack0
                                       )
                                           functionReducedUnpack_2_1_2_0_2_0_2_0_0
@@ -445,10 +455,10 @@ map4 map4Arg map4Arg0 map4Arg1 map4Arg2 map4Arg3 =
                             )
                    )
             )
-        , map4Arg0
-        , map4Arg1
-        , map4Arg2
-        , map4Arg3
+        , map4Arg_0
+        , map4Arg_1
+        , map4Arg_2
+        , map4Arg_3
         ]
 
 
@@ -474,7 +484,7 @@ map5 :
     -> Elm.Expression
     -> Elm.Expression
     -> Elm.Expression
-map5 map5Arg map5Arg0 map5Arg1 map5Arg2 map5Arg3 map5Arg4 =
+map5 map5Arg_ map5Arg_0 map5Arg_1 map5Arg_2 map5Arg_3 map5Arg_4 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Url", "Parser", "Query" ]
@@ -533,7 +543,8 @@ map5 map5Arg map5Arg0 map5Arg1 map5Arg2 map5Arg3 map5Arg4 =
                                      (\functionReducedUnpack_2_1_2_1_2_0_2_0_2_0_0 ->
                                           Elm.functionReduced
                                               "unpack"
-                                              ((((map5Arg functionReducedUnpack)
+                                              ((((map5Arg_ functionReducedUnpack
+                                                 )
                                                      functionReducedUnpack0
                                                 )
                                                     functionReducedUnpack_2_1_2_0_2_0_2_0_0
@@ -544,11 +555,11 @@ map5 map5Arg map5Arg0 map5Arg1 map5Arg2 map5Arg3 map5Arg4 =
                             )
                    )
             )
-        , map5Arg0
-        , map5Arg1
-        , map5Arg2
-        , map5Arg3
-        , map5Arg4
+        , map5Arg_0
+        , map5Arg_1
+        , map5Arg_2
+        , map5Arg_3
+        , map5Arg_4
         ]
 
 
@@ -577,7 +588,7 @@ map6 :
     -> Elm.Expression
     -> Elm.Expression
     -> Elm.Expression
-map6 map6Arg map6Arg0 map6Arg1 map6Arg2 map6Arg3 map6Arg4 map6Arg5 =
+map6 map6Arg_ map6Arg_0 map6Arg_1 map6Arg_2 map6Arg_3 map6Arg_4 map6Arg_5 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Url", "Parser", "Query" ]
@@ -644,7 +655,7 @@ map6 map6Arg map6Arg0 map6Arg1 map6Arg2 map6Arg3 map6Arg4 map6Arg5 =
                                               (\functionReducedUnpack_2_1_2_1_2_1_2_0_2_0_2_0_0 ->
                                                    Elm.functionReduced
                                                        "unpack"
-                                                       (((((map6Arg
+                                                       (((((map6Arg_
                                                                 functionReducedUnpack
                                                            )
                                                                functionReducedUnpack0
@@ -660,12 +671,12 @@ map6 map6Arg map6Arg0 map6Arg1 map6Arg2 map6Arg3 map6Arg4 map6Arg5 =
                             )
                    )
             )
-        , map6Arg0
-        , map6Arg1
-        , map6Arg2
-        , map6Arg3
-        , map6Arg4
-        , map6Arg5
+        , map6Arg_0
+        , map6Arg_1
+        , map6Arg_2
+        , map6Arg_3
+        , map6Arg_4
+        , map6Arg_5
         ]
 
 
@@ -697,7 +708,7 @@ map7 :
     -> Elm.Expression
     -> Elm.Expression
     -> Elm.Expression
-map7 map7Arg map7Arg0 map7Arg1 map7Arg2 map7Arg3 map7Arg4 map7Arg5 map7Arg6 =
+map7 map7Arg_ map7Arg_0 map7Arg_1 map7Arg_2 map7Arg_3 map7Arg_4 map7Arg_5 map7Arg_6 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Url", "Parser", "Query" ]
@@ -772,7 +783,7 @@ map7 map7Arg map7Arg0 map7Arg1 map7Arg2 map7Arg3 map7Arg4 map7Arg5 map7Arg6 =
                                                        (\functionReducedUnpack_2_1_2_1_2_1_2_1_2_0_2_0_2_0_0 ->
                                                             Elm.functionReduced
                                                                 "unpack"
-                                                                ((((((map7Arg
+                                                                ((((((map7Arg_
                                                                           functionReducedUnpack
                                                                      )
                                                                          functionReducedUnpack0
@@ -791,13 +802,13 @@ map7 map7Arg map7Arg0 map7Arg1 map7Arg2 map7Arg3 map7Arg4 map7Arg5 map7Arg6 =
                             )
                    )
             )
-        , map7Arg0
-        , map7Arg1
-        , map7Arg2
-        , map7Arg3
-        , map7Arg4
-        , map7Arg5
-        , map7Arg6
+        , map7Arg_0
+        , map7Arg_1
+        , map7Arg_2
+        , map7Arg_3
+        , map7Arg_4
+        , map7Arg_5
+        , map7Arg_6
         ]
 
 
@@ -844,7 +855,7 @@ map8 :
     -> Elm.Expression
     -> Elm.Expression
     -> Elm.Expression
-map8 map8Arg map8Arg0 map8Arg1 map8Arg2 map8Arg3 map8Arg4 map8Arg5 map8Arg6 map8Arg7 =
+map8 map8Arg_ map8Arg_0 map8Arg_1 map8Arg_2 map8Arg_3 map8Arg_4 map8Arg_5 map8Arg_6 map8Arg_7 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Url", "Parser", "Query" ]
@@ -927,7 +938,7 @@ map8 map8Arg map8Arg0 map8Arg1 map8Arg2 map8Arg3 map8Arg4 map8Arg5 map8Arg6 map8
                                                                 (\functionReducedUnpack_2_1_2_1_2_1_2_1_2_1_2_0_2_0_2_0_0 ->
                                                                      Elm.functionReduced
                                                                          "unpack"
-                                                                         (((((((map8Arg
+                                                                         (((((((map8Arg_
                                                                                     functionReducedUnpack
                                                                                )
                                                                                    functionReducedUnpack0
@@ -949,14 +960,14 @@ map8 map8Arg map8Arg0 map8Arg1 map8Arg2 map8Arg3 map8Arg4 map8Arg5 map8Arg6 map8
                             )
                    )
             )
-        , map8Arg0
-        , map8Arg1
-        , map8Arg2
-        , map8Arg3
-        , map8Arg4
-        , map8Arg5
-        , map8Arg6
-        , map8Arg7
+        , map8Arg_0
+        , map8Arg_1
+        , map8Arg_2
+        , map8Arg_3
+        , map8Arg_4
+        , map8Arg_5
+        , map8Arg_6
+        , map8Arg_7
         ]
 
 
@@ -1038,7 +1049,7 @@ call_ :
     }
 call_ =
     { string =
-        \stringArg ->
+        \stringArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Url", "Parser", "Query" ]
@@ -1055,9 +1066,9 @@ call_ =
                              )
                      }
                 )
-                [ stringArg ]
+                [ stringArg_ ]
     , int =
-        \intArg ->
+        \intArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Url", "Parser", "Query" ]
@@ -1074,9 +1085,9 @@ call_ =
                              )
                      }
                 )
-                [ intArg ]
+                [ intArg_ ]
     , enum =
-        \enumArg enumArg0 ->
+        \enumArg_ enumArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Url", "Parser", "Query" ]
@@ -1098,9 +1109,9 @@ call_ =
                              )
                      }
                 )
-                [ enumArg, enumArg0 ]
+                [ enumArg_, enumArg_0 ]
     , custom =
-        \customArg customArg0 ->
+        \customArg_ customArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Url", "Parser", "Query" ]
@@ -1121,9 +1132,9 @@ call_ =
                              )
                      }
                 )
-                [ customArg, customArg0 ]
+                [ customArg_, customArg_0 ]
     , map =
-        \mapArg mapArg0 ->
+        \mapArg_ mapArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Url", "Parser", "Query" ]
@@ -1147,9 +1158,9 @@ call_ =
                              )
                      }
                 )
-                [ mapArg, mapArg0 ]
+                [ mapArg_, mapArg_0 ]
     , map2 =
-        \map2Arg map2Arg0 map2Arg1 ->
+        \map2Arg_ map2Arg_0 map2Arg_1 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Url", "Parser", "Query" ]
@@ -1177,9 +1188,9 @@ call_ =
                              )
                      }
                 )
-                [ map2Arg, map2Arg0, map2Arg1 ]
+                [ map2Arg_, map2Arg_0, map2Arg_1 ]
     , map3 =
-        \map3Arg map3Arg0 map3Arg1 map3Arg2 ->
+        \map3Arg_ map3Arg_0 map3Arg_1 map3Arg_2 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Url", "Parser", "Query" ]
@@ -1214,9 +1225,9 @@ call_ =
                              )
                      }
                 )
-                [ map3Arg, map3Arg0, map3Arg1, map3Arg2 ]
+                [ map3Arg_, map3Arg_0, map3Arg_1, map3Arg_2 ]
     , map4 =
-        \map4Arg map4Arg0 map4Arg1 map4Arg2 map4Arg3 ->
+        \map4Arg_ map4Arg_0 map4Arg_1 map4Arg_2 map4Arg_3 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Url", "Parser", "Query" ]
@@ -1256,9 +1267,9 @@ call_ =
                              )
                      }
                 )
-                [ map4Arg, map4Arg0, map4Arg1, map4Arg2, map4Arg3 ]
+                [ map4Arg_, map4Arg_0, map4Arg_1, map4Arg_2, map4Arg_3 ]
     , map5 =
-        \map5Arg map5Arg0 map5Arg1 map5Arg2 map5Arg3 map5Arg4 ->
+        \map5Arg_ map5Arg_0 map5Arg_1 map5Arg_2 map5Arg_3 map5Arg_4 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Url", "Parser", "Query" ]
@@ -1303,9 +1314,15 @@ call_ =
                              )
                      }
                 )
-                [ map5Arg, map5Arg0, map5Arg1, map5Arg2, map5Arg3, map5Arg4 ]
+                [ map5Arg_
+                , map5Arg_0
+                , map5Arg_1
+                , map5Arg_2
+                , map5Arg_3
+                , map5Arg_4
+                ]
     , map6 =
-        \map6Arg map6Arg0 map6Arg1 map6Arg2 map6Arg3 map6Arg4 map6Arg5 ->
+        \map6Arg_ map6Arg_0 map6Arg_1 map6Arg_2 map6Arg_3 map6Arg_4 map6Arg_5 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Url", "Parser", "Query" ]
@@ -1355,16 +1372,16 @@ call_ =
                              )
                      }
                 )
-                [ map6Arg
-                , map6Arg0
-                , map6Arg1
-                , map6Arg2
-                , map6Arg3
-                , map6Arg4
-                , map6Arg5
+                [ map6Arg_
+                , map6Arg_0
+                , map6Arg_1
+                , map6Arg_2
+                , map6Arg_3
+                , map6Arg_4
+                , map6Arg_5
                 ]
     , map7 =
-        \map7Arg map7Arg0 map7Arg1 map7Arg2 map7Arg3 map7Arg4 map7Arg5 map7Arg6 ->
+        \map7Arg_ map7Arg_0 map7Arg_1 map7Arg_2 map7Arg_3 map7Arg_4 map7Arg_5 map7Arg_6 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Url", "Parser", "Query" ]
@@ -1419,17 +1436,17 @@ call_ =
                              )
                      }
                 )
-                [ map7Arg
-                , map7Arg0
-                , map7Arg1
-                , map7Arg2
-                , map7Arg3
-                , map7Arg4
-                , map7Arg5
-                , map7Arg6
+                [ map7Arg_
+                , map7Arg_0
+                , map7Arg_1
+                , map7Arg_2
+                , map7Arg_3
+                , map7Arg_4
+                , map7Arg_5
+                , map7Arg_6
                 ]
     , map8 =
-        \map8Arg map8Arg0 map8Arg1 map8Arg2 map8Arg3 map8Arg4 map8Arg5 map8Arg6 map8Arg7 ->
+        \map8Arg_ map8Arg_0 map8Arg_1 map8Arg_2 map8Arg_3 map8Arg_4 map8Arg_5 map8Arg_6 map8Arg_7 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Url", "Parser", "Query" ]
@@ -1489,15 +1506,15 @@ call_ =
                              )
                      }
                 )
-                [ map8Arg
-                , map8Arg0
-                , map8Arg1
-                , map8Arg2
-                , map8Arg3
-                , map8Arg4
-                , map8Arg5
-                , map8Arg6
-                , map8Arg7
+                [ map8Arg_
+                , map8Arg_0
+                , map8Arg_1
+                , map8Arg_2
+                , map8Arg_3
+                , map8Arg_4
+                , map8Arg_5
+                , map8Arg_6
+                , map8Arg_7
                 ]
     }
 

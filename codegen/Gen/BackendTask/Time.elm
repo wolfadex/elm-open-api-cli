@@ -1,6 +1,8 @@
-module Gen.BackendTask.Time exposing (moduleName_, now, values_)
+module Gen.BackendTask.Time exposing ( moduleName_, now, values_ )
 
-{-| 
+{-|
+# Generated bindings for BackendTask.Time
+
 @docs moduleName_, now, values_
 -}
 

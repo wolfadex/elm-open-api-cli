@@ -1,12 +1,21 @@
-module Gen.Server.SetCookie exposing (annotation_, call_, caseOf_, makeVisibleToJavaScript, make_, moduleName_, nonSecure, options, setCookie, toString, values_, withDomain, withExpiration, withImmediateExpiration, withMaxAge, withPath, withSameSite, withoutPath)
+module Gen.Server.SetCookie exposing
+    ( moduleName_, setCookie, options, withSameSite, withImmediateExpiration, makeVisibleToJavaScript
+    , nonSecure, withDomain, withExpiration, withMaxAge, withPath, withoutPath, toString
+    , annotation_, make_, caseOf_, call_, values_
+    )
 
-{-| 
-@docs moduleName_, setCookie, options, withSameSite, withImmediateExpiration, makeVisibleToJavaScript, nonSecure, withDomain, withExpiration, withMaxAge, withPath, withoutPath, toString, annotation_, make_, caseOf_, call_, values_
+{-|
+# Generated bindings for Server.SetCookie
+
+@docs moduleName_, setCookie, options, withSameSite, withImmediateExpiration, makeVisibleToJavaScript
+@docs nonSecure, withDomain, withExpiration, withMaxAge, withPath, withoutPath
+@docs toString, annotation_, make_, caseOf_, call_, values_
 -}
 
 
 import Elm
 import Elm.Annotation as Type
+import Elm.Arg
 import Elm.Case
 
 
@@ -23,7 +32,7 @@ uses you can stringify the value manually with [`toString`](#toString).
 setCookie: String -> String -> Server.SetCookie.Options -> Server.SetCookie.SetCookie
 -}
 setCookie : String -> String -> Elm.Expression -> Elm.Expression
-setCookie setCookieArg setCookieArg0 setCookieArg1 =
+setCookie setCookieArg_ setCookieArg_0 setCookieArg_1 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Server", "SetCookie" ]
@@ -46,7 +55,7 @@ setCookie setCookieArg setCookieArg0 setCookieArg1 =
                      )
              }
         )
-        [ Elm.string setCookieArg, Elm.string setCookieArg0, setCookieArg1 ]
+        [ Elm.string setCookieArg_, Elm.string setCookieArg_0, setCookieArg_1 ]
 
 
 {-| Initialize the default `SetCookie` `Options`. Can be configured directly through a record update, or with `withExpiration`, etc.
@@ -71,7 +80,7 @@ withSameSite:
     -> Server.SetCookie.Options
 -}
 withSameSite : Elm.Expression -> Elm.Expression -> Elm.Expression
-withSameSite withSameSiteArg withSameSiteArg0 =
+withSameSite withSameSiteArg_ withSameSiteArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Server", "SetCookie" ]
@@ -93,7 +102,7 @@ withSameSite withSameSiteArg withSameSiteArg0 =
                      )
              }
         )
-        [ withSameSiteArg, withSameSiteArg0 ]
+        [ withSameSiteArg_, withSameSiteArg_0 ]
 
 
 {-| Sets [`Expires`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie#expiresdate) to `Time.millisToPosix 0`,
@@ -102,7 +111,7 @@ which effectively tells the browser to delete the cookie immediately (by giving 
 withImmediateExpiration: Server.SetCookie.Options -> Server.SetCookie.Options
 -}
 withImmediateExpiration : Elm.Expression -> Elm.Expression
-withImmediateExpiration withImmediateExpirationArg =
+withImmediateExpiration withImmediateExpirationArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Server", "SetCookie" ]
@@ -120,7 +129,7 @@ withImmediateExpiration withImmediateExpirationArg =
                      )
              }
         )
-        [ withImmediateExpirationArg ]
+        [ withImmediateExpirationArg_ ]
 
 
 {-| The default option in this API is for HttpOnly cookies <https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie#httponly>.
@@ -136,7 +145,7 @@ in session data from cookies in a `BackendTask` (which is resolved server-side b
 makeVisibleToJavaScript: Server.SetCookie.Options -> Server.SetCookie.Options
 -}
 makeVisibleToJavaScript : Elm.Expression -> Elm.Expression
-makeVisibleToJavaScript makeVisibleToJavaScriptArg =
+makeVisibleToJavaScript makeVisibleToJavaScriptArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Server", "SetCookie" ]
@@ -154,7 +163,7 @@ makeVisibleToJavaScript makeVisibleToJavaScriptArg =
                      )
              }
         )
-        [ makeVisibleToJavaScriptArg ]
+        [ makeVisibleToJavaScriptArg_ ]
 
 
 {-| Secure (only sent over https, or localhost on http) is the default. This overrides that and
@@ -163,7 +172,7 @@ removes the `Secure` attribute from the cookie.
 nonSecure: Server.SetCookie.Options -> Server.SetCookie.Options
 -}
 nonSecure : Elm.Expression -> Elm.Expression
-nonSecure nonSecureArg =
+nonSecure nonSecureArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Server", "SetCookie" ]
@@ -181,7 +190,7 @@ nonSecure nonSecureArg =
                      )
              }
         )
-        [ nonSecureArg ]
+        [ nonSecureArg_ ]
 
 
 {-| Sets the `Set-Cookie`'s [`Domain`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie#domaindomain-value).
@@ -189,7 +198,7 @@ nonSecure nonSecureArg =
 withDomain: String -> Server.SetCookie.Options -> Server.SetCookie.Options
 -}
 withDomain : String -> Elm.Expression -> Elm.Expression
-withDomain withDomainArg withDomainArg0 =
+withDomain withDomainArg_ withDomainArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Server", "SetCookie" ]
@@ -208,12 +217,12 @@ withDomain withDomainArg withDomainArg0 =
                      )
              }
         )
-        [ Elm.string withDomainArg, withDomainArg0 ]
+        [ Elm.string withDomainArg_, withDomainArg_0 ]
 
 
 {-| withExpiration: Time.Posix -> Server.SetCookie.Options -> Server.SetCookie.Options -}
 withExpiration : Elm.Expression -> Elm.Expression -> Elm.Expression
-withExpiration withExpirationArg withExpirationArg0 =
+withExpiration withExpirationArg_ withExpirationArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Server", "SetCookie" ]
@@ -232,7 +241,7 @@ withExpiration withExpirationArg withExpirationArg0 =
                      )
              }
         )
-        [ withExpirationArg, withExpirationArg0 ]
+        [ withExpirationArg_, withExpirationArg_0 ]
 
 
 {-| Sets the `Set-Cookie`'s [`Max-Age`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie#max-agenumber).
@@ -240,7 +249,7 @@ withExpiration withExpirationArg withExpirationArg0 =
 withMaxAge: Int -> Server.SetCookie.Options -> Server.SetCookie.Options
 -}
 withMaxAge : Int -> Elm.Expression -> Elm.Expression
-withMaxAge withMaxAgeArg withMaxAgeArg0 =
+withMaxAge withMaxAgeArg_ withMaxAgeArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Server", "SetCookie" ]
@@ -259,7 +268,7 @@ withMaxAge withMaxAgeArg withMaxAgeArg0 =
                      )
              }
         )
-        [ Elm.int withMaxAgeArg, withMaxAgeArg0 ]
+        [ Elm.int withMaxAgeArg_, withMaxAgeArg_0 ]
 
 
 {-| Sets the `Set-Cookie`'s [`Path`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie#pathpath-value).
@@ -269,7 +278,7 @@ The default value is `/`, which will match any sub-directories or the root direc
 withPath: String -> Server.SetCookie.Options -> Server.SetCookie.Options
 -}
 withPath : String -> Elm.Expression -> Elm.Expression
-withPath withPathArg withPathArg0 =
+withPath withPathArg_ withPathArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Server", "SetCookie" ]
@@ -288,7 +297,7 @@ withPath withPathArg withPathArg0 =
                      )
              }
         )
-        [ Elm.string withPathArg, withPathArg0 ]
+        [ Elm.string withPathArg_, withPathArg_0 ]
 
 
 {-| > If the server omits the Path attribute, the user agent will use the "directory" of the request-uri's path component as the default value.
@@ -298,7 +307,7 @@ Source: <https://www.rfc-editor.org/rfc/rfc6265>. See <https://stackoverflow.com
 withoutPath: Server.SetCookie.Options -> Server.SetCookie.Options
 -}
 withoutPath : Elm.Expression -> Elm.Expression
-withoutPath withoutPathArg =
+withoutPath withoutPathArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Server", "SetCookie" ]
@@ -316,7 +325,7 @@ withoutPath withoutPathArg =
                      )
              }
         )
-        [ withoutPathArg ]
+        [ withoutPathArg_ ]
 
 
 {-| Usually you'll want to use [`Server.Response.withSetCookieHeader`](Server-Response#withSetCookieHeader) instead.
@@ -326,7 +335,7 @@ This is a low-level helper that's there in case you want it but most users will 
 toString: Server.SetCookie.SetCookie -> String
 -}
 toString : Elm.Expression -> Elm.Expression
-toString toStringArg =
+toString toStringArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Server", "SetCookie" ]
@@ -343,7 +352,7 @@ toString toStringArg =
                      )
              }
         )
-        [ toStringArg ]
+        [ toStringArg_ ]
 
 
 annotation_ :
@@ -500,10 +509,9 @@ make_ =
 caseOf_ :
     { sameSite :
         Elm.Expression
-        -> { sameSiteTags_0_0
-            | strict : Elm.Expression
-            , lax : Elm.Expression
-            , none : Elm.Expression
+        -> { strict : Elm.Expression
+        , lax : Elm.Expression
+        , none : Elm.Expression
         }
         -> Elm.Expression
     }
@@ -513,9 +521,15 @@ caseOf_ =
             Elm.Case.custom
                 sameSiteExpression
                 (Type.namedWith [ "Server", "SetCookie" ] "SameSite" [])
-                [ Elm.Case.branch0 "Strict" sameSiteTags.strict
-                , Elm.Case.branch0 "Lax" sameSiteTags.lax
-                , Elm.Case.branch0 "None" sameSiteTags.none
+                [ Elm.Case.branch
+                    (Elm.Arg.customType "Strict" sameSiteTags.strict)
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType "Lax" sameSiteTags.lax)
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType "None" sameSiteTags.none)
+                    Basics.identity
                 ]
     }
 
@@ -536,7 +550,7 @@ call_ :
     }
 call_ =
     { setCookie =
-        \setCookieArg setCookieArg0 setCookieArg1 ->
+        \setCookieArg_ setCookieArg_0 setCookieArg_1 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Server", "SetCookie" ]
@@ -559,9 +573,9 @@ call_ =
                              )
                      }
                 )
-                [ setCookieArg, setCookieArg0, setCookieArg1 ]
+                [ setCookieArg_, setCookieArg_0, setCookieArg_1 ]
     , withSameSite =
-        \withSameSiteArg withSameSiteArg0 ->
+        \withSameSiteArg_ withSameSiteArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Server", "SetCookie" ]
@@ -586,9 +600,9 @@ call_ =
                              )
                      }
                 )
-                [ withSameSiteArg, withSameSiteArg0 ]
+                [ withSameSiteArg_, withSameSiteArg_0 ]
     , withImmediateExpiration =
-        \withImmediateExpirationArg ->
+        \withImmediateExpirationArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Server", "SetCookie" ]
@@ -609,9 +623,9 @@ call_ =
                              )
                      }
                 )
-                [ withImmediateExpirationArg ]
+                [ withImmediateExpirationArg_ ]
     , makeVisibleToJavaScript =
-        \makeVisibleToJavaScriptArg ->
+        \makeVisibleToJavaScriptArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Server", "SetCookie" ]
@@ -632,9 +646,9 @@ call_ =
                              )
                      }
                 )
-                [ makeVisibleToJavaScriptArg ]
+                [ makeVisibleToJavaScriptArg_ ]
     , nonSecure =
-        \nonSecureArg ->
+        \nonSecureArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Server", "SetCookie" ]
@@ -655,9 +669,9 @@ call_ =
                              )
                      }
                 )
-                [ nonSecureArg ]
+                [ nonSecureArg_ ]
     , withDomain =
-        \withDomainArg withDomainArg0 ->
+        \withDomainArg_ withDomainArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Server", "SetCookie" ]
@@ -679,9 +693,9 @@ call_ =
                              )
                      }
                 )
-                [ withDomainArg, withDomainArg0 ]
+                [ withDomainArg_, withDomainArg_0 ]
     , withExpiration =
-        \withExpirationArg withExpirationArg0 ->
+        \withExpirationArg_ withExpirationArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Server", "SetCookie" ]
@@ -703,9 +717,9 @@ call_ =
                              )
                      }
                 )
-                [ withExpirationArg, withExpirationArg0 ]
+                [ withExpirationArg_, withExpirationArg_0 ]
     , withMaxAge =
-        \withMaxAgeArg withMaxAgeArg0 ->
+        \withMaxAgeArg_ withMaxAgeArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Server", "SetCookie" ]
@@ -727,9 +741,9 @@ call_ =
                              )
                      }
                 )
-                [ withMaxAgeArg, withMaxAgeArg0 ]
+                [ withMaxAgeArg_, withMaxAgeArg_0 ]
     , withPath =
-        \withPathArg withPathArg0 ->
+        \withPathArg_ withPathArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Server", "SetCookie" ]
@@ -751,9 +765,9 @@ call_ =
                              )
                      }
                 )
-                [ withPathArg, withPathArg0 ]
+                [ withPathArg_, withPathArg_0 ]
     , withoutPath =
-        \withoutPathArg ->
+        \withoutPathArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Server", "SetCookie" ]
@@ -774,9 +788,9 @@ call_ =
                              )
                      }
                 )
-                [ withoutPathArg ]
+                [ withoutPathArg_ ]
     , toString =
-        \toStringArg ->
+        \toStringArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Server", "SetCookie" ]
@@ -793,7 +807,7 @@ call_ =
                              )
                      }
                 )
-                [ toStringArg ]
+                [ toStringArg_ ]
     }
 
 

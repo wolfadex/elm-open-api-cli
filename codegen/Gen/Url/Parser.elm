@@ -1,7 +1,15 @@
-module Gen.Url.Parser exposing (annotation_, call_, custom, fragment, int, map, moduleName_, oneOf, parse, query, s, string, top, values_)
+module Gen.Url.Parser exposing
+    ( moduleName_, string, int, s, map, oneOf
+    , top, custom, query, fragment, parse, annotation_, call_
+    , values_
+    )
 
-{-| 
-@docs moduleName_, string, int, s, map, oneOf, top, custom, query, fragment, parse, annotation_, call_, values_
+{-|
+# Generated bindings for Url.Parser
+
+@docs moduleName_, string, int, s, map, oneOf
+@docs top, custom, query, fragment, parse, annotation_
+@docs call_, values_
 -}
 
 
@@ -80,7 +88,7 @@ The path segment must be an exact match!
 s: String -> Url.Parser.Parser a a
 -}
 s : String -> Elm.Expression
-s sArg =
+s sArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Url", "Parser" ]
@@ -97,7 +105,7 @@ s sArg =
                      )
              }
         )
-        [ Elm.string sArg ]
+        [ Elm.string sArg_ ]
 
 
 {-| Transform a path parser.
@@ -119,7 +127,7 @@ s sArg =
 map: a -> Url.Parser.Parser a b -> Url.Parser.Parser (b -> c) c
 -}
 map : Elm.Expression -> Elm.Expression -> Elm.Expression
-map mapArg mapArg0 =
+map mapArg_ mapArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Url", "Parser" ]
@@ -143,7 +151,7 @@ map mapArg mapArg0 =
                      )
              }
         )
-        [ mapArg, mapArg0 ]
+        [ mapArg_, mapArg_0 ]
 
 
 {-| Try a bunch of different path parsers.
@@ -179,7 +187,7 @@ If there are multiple parsers that could succeed, the first one wins.
 oneOf: List (Url.Parser.Parser a b) -> Url.Parser.Parser a b
 -}
 oneOf : List Elm.Expression -> Elm.Expression
-oneOf oneOfArg =
+oneOf oneOfArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Url", "Parser" ]
@@ -202,7 +210,7 @@ oneOf oneOfArg =
                      )
              }
         )
-        [ Elm.list oneOfArg ]
+        [ Elm.list oneOfArg_ ]
 
 
 {-| A parser that does not consume any path segments.
@@ -257,7 +265,7 @@ You can use it to define something like “only CSS files” like this:
 custom: String -> (String -> Maybe a) -> Url.Parser.Parser (a -> b) b
 -}
 custom : String -> (Elm.Expression -> Elm.Expression) -> Elm.Expression
-custom customArg customArg0 =
+custom customArg_ customArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Url", "Parser" ]
@@ -280,7 +288,9 @@ custom customArg customArg0 =
                      )
              }
         )
-        [ Elm.string customArg, Elm.functionReduced "customUnpack" customArg0 ]
+        [ Elm.string customArg_
+        , Elm.functionReduced "customUnpack" customArg_0
+        ]
 
 
 {-| The [`Url.Parser.Query`](Url-Parser-Query) module defines its own
@@ -300,7 +310,7 @@ segments.
 query: Url.Parser.Query.Parser query -> Url.Parser.Parser (query -> a) a
 -}
 query : Elm.Expression -> Elm.Expression
-query queryArg =
+query queryArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Url", "Parser" ]
@@ -325,7 +335,7 @@ query queryArg =
                      )
              }
         )
-        [ queryArg ]
+        [ queryArg_ ]
 
 
 {-| Create a parser for the URL fragment, the stuff after the `#`. This can
@@ -348,7 +358,7 @@ be handy for handling links to DOM elements within a page. Pages like this one!
 fragment: (Maybe String -> fragment) -> Url.Parser.Parser (fragment -> a) a
 -}
 fragment : (Elm.Expression -> Elm.Expression) -> Elm.Expression
-fragment fragmentArg =
+fragment fragmentArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Url", "Parser" ]
@@ -372,7 +382,7 @@ fragment fragmentArg =
                      )
              }
         )
-        [ Elm.functionReduced "fragmentUnpack" fragmentArg ]
+        [ Elm.functionReduced "fragmentUnpack" fragmentArg_ ]
 
 
 {-| Actually run a parser! You provide some [`Url`](Url#Url) that
@@ -418,7 +428,7 @@ the initial URL and any changes.
 parse: Url.Parser.Parser (a -> a) a -> Url.Url -> Maybe a
 -}
 parse : Elm.Expression -> Elm.Expression -> Elm.Expression
-parse parseArg parseArg0 =
+parse parseArg_ parseArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Url", "Parser" ]
@@ -438,7 +448,7 @@ parse parseArg parseArg0 =
                      )
              }
         )
-        [ parseArg, parseArg0 ]
+        [ parseArg_, parseArg_0 ]
 
 
 annotation_ : { parser : Type.Annotation -> Type.Annotation -> Type.Annotation }
@@ -463,7 +473,7 @@ call_ :
     }
 call_ =
     { s =
-        \sArg ->
+        \sArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Url", "Parser" ]
@@ -480,9 +490,9 @@ call_ =
                              )
                      }
                 )
-                [ sArg ]
+                [ sArg_ ]
     , map =
-        \mapArg mapArg0 ->
+        \mapArg_ mapArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Url", "Parser" ]
@@ -508,9 +518,9 @@ call_ =
                              )
                      }
                 )
-                [ mapArg, mapArg0 ]
+                [ mapArg_, mapArg_0 ]
     , oneOf =
-        \oneOfArg ->
+        \oneOfArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Url", "Parser" ]
@@ -533,9 +543,9 @@ call_ =
                              )
                      }
                 )
-                [ oneOfArg ]
+                [ oneOfArg_ ]
     , custom =
-        \customArg customArg0 ->
+        \customArg_ customArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Url", "Parser" ]
@@ -560,9 +570,9 @@ call_ =
                              )
                      }
                 )
-                [ customArg, customArg0 ]
+                [ customArg_, customArg_0 ]
     , query =
-        \queryArg ->
+        \queryArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Url", "Parser" ]
@@ -587,9 +597,9 @@ call_ =
                              )
                      }
                 )
-                [ queryArg ]
+                [ queryArg_ ]
     , fragment =
-        \fragmentArg ->
+        \fragmentArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Url", "Parser" ]
@@ -613,9 +623,9 @@ call_ =
                              )
                      }
                 )
-                [ fragmentArg ]
+                [ fragmentArg_ ]
     , parse =
-        \parseArg parseArg0 ->
+        \parseArg_ parseArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Url", "Parser" ]
@@ -637,7 +647,7 @@ call_ =
                              )
                      }
                 )
-                [ parseArg, parseArg0 ]
+                [ parseArg_, parseArg_0 ]
     }
 
 

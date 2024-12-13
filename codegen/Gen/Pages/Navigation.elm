@@ -1,12 +1,15 @@
-module Gen.Pages.Navigation exposing (annotation_, caseOf_, make_, moduleName_)
+module Gen.Pages.Navigation exposing ( moduleName_, annotation_, make_, caseOf_ )
 
-{-| 
+{-|
+# Generated bindings for Pages.Navigation
+
 @docs moduleName_, annotation_, make_, caseOf_
 -}
 
 
 import Elm
 import Elm.Annotation as Type
+import Elm.Arg
 import Elm.Case
 
 
@@ -84,71 +87,108 @@ make_ =
     }
 
 
-caseOf_ :
-    { navigation :
-        Elm.Expression
-        -> { navigationTags_0_0
-            | submitting : Elm.Expression -> Elm.Expression
-            , loadAfterSubmit :
-                Elm.Expression
-                -> Elm.Expression
-                -> Elm.Expression
-                -> Elm.Expression
-            , loading : Elm.Expression -> Elm.Expression -> Elm.Expression
-        }
-        -> Elm.Expression
-    , loadingState :
-        Elm.Expression
-        -> { loadingStateTags_1_0
-            | redirecting : Elm.Expression
-            , load : Elm.Expression
-            , actionRedirect : Elm.Expression
-        }
-        -> Elm.Expression
-    }
 caseOf_ =
     { navigation =
         \navigationExpression navigationTags ->
             Elm.Case.custom
                 navigationExpression
                 (Type.namedWith [ "Pages", "Navigation" ] "Navigation" [])
-                [ Elm.Case.branch1
-                    "Submitting"
-                    ( "pagesFormDataFormData"
-                    , Type.namedWith [ "Pages", "FormData" ] "FormData" []
+                [ Elm.Case.branch
+                    (Elm.Arg.customType
+                       "Submitting"
+                       navigationTags.submitting |> Elm.Arg.item
+                                                          (Elm.Arg.varWith
+                                                                 "pagesFormDataFormData"
+                                                                 (Type.namedWith
+                                                                        [ "Pages"
+                                                                        , "FormData"
+                                                                        ]
+                                                                        "FormData"
+                                                                        []
+                                                                 )
+                                                          )
                     )
-                    navigationTags.submitting
-                , Elm.Case.branch3
-                    "LoadAfterSubmit"
-                    ( "pagesFormDataFormData"
-                    , Type.namedWith [ "Pages", "FormData" ] "FormData" []
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType
+                       "LoadAfterSubmit"
+                       navigationTags.loadAfterSubmit |> Elm.Arg.item
+                                                               (Elm.Arg.varWith
+                                                                      "pagesFormDataFormData"
+                                                                      (Type.namedWith
+                                                                             [ "Pages"
+                                                                             , "FormData"
+                                                                             ]
+                                                                             "FormData"
+                                                                             []
+                                                                      )
+                                                               ) |> Elm.Arg.item
+                                                                          (Elm.Arg.varWith
+                                                                                 "urlPathUrlPath"
+                                                                                 (Type.namedWith
+                                                                                        [ "UrlPath"
+                                                                                        ]
+                                                                                        "UrlPath"
+                                                                                        []
+                                                                                 )
+                                                                          ) |> Elm.Arg.item
+                                                                                     (Elm.Arg.varWith
+                                                                                            "pagesNavigationLoadingState"
+                                                                                            (Type.namedWith
+                                                                                                   [ "Pages"
+                                                                                                   , "Navigation"
+                                                                                                   ]
+                                                                                                   "LoadingState"
+                                                                                                   []
+                                                                                            )
+                                                                                     )
                     )
-                    ( "urlPathUrlPath"
-                    , Type.namedWith [ "UrlPath" ] "UrlPath" []
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType
+                       "Loading"
+                       navigationTags.loading |> Elm.Arg.item
+                                                       (Elm.Arg.varWith
+                                                              "urlPathUrlPath"
+                                                              (Type.namedWith
+                                                                     [ "UrlPath"
+                                                                     ]
+                                                                     "UrlPath"
+                                                                     []
+                                                              )
+                                                       ) |> Elm.Arg.item
+                                                                  (Elm.Arg.varWith
+                                                                         "pagesNavigationLoadingState"
+                                                                         (Type.namedWith
+                                                                                [ "Pages"
+                                                                                , "Navigation"
+                                                                                ]
+                                                                                "LoadingState"
+                                                                                []
+                                                                         )
+                                                                  )
                     )
-                    ( "pagesNavigationLoadingState"
-                    , Type.namedWith [ "Pages", "Navigation" ] "LoadingState" []
-                    )
-                    navigationTags.loadAfterSubmit
-                , Elm.Case.branch2
-                    "Loading"
-                    ( "urlPathUrlPath"
-                    , Type.namedWith [ "UrlPath" ] "UrlPath" []
-                    )
-                    ( "pagesNavigationLoadingState"
-                    , Type.namedWith [ "Pages", "Navigation" ] "LoadingState" []
-                    )
-                    navigationTags.loading
+                    Basics.identity
                 ]
     , loadingState =
         \loadingStateExpression loadingStateTags ->
             Elm.Case.custom
                 loadingStateExpression
                 (Type.namedWith [ "Pages", "Navigation" ] "LoadingState" [])
-                [ Elm.Case.branch0 "Redirecting" loadingStateTags.redirecting
-                , Elm.Case.branch0 "Load" loadingStateTags.load
-                , Elm.Case.branch0
-                    "ActionRedirect"
-                    loadingStateTags.actionRedirect
+                [ Elm.Case.branch
+                    (Elm.Arg.customType
+                       "Redirecting"
+                       loadingStateTags.redirecting
+                    )
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType "Load" loadingStateTags.load)
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType
+                       "ActionRedirect"
+                       loadingStateTags.actionRedirect
+                    )
+                    Basics.identity
                 ]
     }

@@ -1,12 +1,26 @@
-module Gen.Http exposing (annotation_, bytesBody, bytesPart, bytesResolver, call_, cancel, caseOf_, emptyBody, expectBytes, expectBytesResponse, expectJson, expectString, expectStringResponse, expectWhatever, fileBody, filePart, fractionReceived, fractionSent, get, header, jsonBody, make_, moduleName_, multipartBody, post, request, riskyRequest, riskyTask, stringBody, stringPart, stringResolver, task, track, values_)
+module Gen.Http exposing
+    ( moduleName_, get, post, request, header, emptyBody
+    , stringBody, jsonBody, fileBody, bytesBody, multipartBody, stringPart, filePart
+    , bytesPart, expectString, expectJson, expectBytes, expectWhatever, track, fractionSent
+    , fractionReceived, cancel, riskyRequest, expectStringResponse, expectBytesResponse, task, stringResolver
+    , bytesResolver, riskyTask, annotation_, make_, caseOf_, call_, values_
+    )
 
-{-| 
-@docs moduleName_, get, post, request, header, emptyBody, stringBody, jsonBody, fileBody, bytesBody, multipartBody, stringPart, filePart, bytesPart, expectString, expectJson, expectBytes, expectWhatever, track, fractionSent, fractionReceived, cancel, riskyRequest, expectStringResponse, expectBytesResponse, task, stringResolver, bytesResolver, riskyTask, annotation_, make_, caseOf_, call_, values_
+{-|
+# Generated bindings for Http
+
+@docs moduleName_, get, post, request, header, emptyBody
+@docs stringBody, jsonBody, fileBody, bytesBody, multipartBody, stringPart
+@docs filePart, bytesPart, expectString, expectJson, expectBytes, expectWhatever
+@docs track, fractionSent, fractionReceived, cancel, riskyRequest, expectStringResponse
+@docs expectBytesResponse, task, stringResolver, bytesResolver, riskyTask, annotation_
+@docs make_, caseOf_, call_, values_
 -}
 
 
 import Elm
 import Elm.Annotation as Type
+import Elm.Arg
 import Elm.Case
 
 
@@ -40,7 +54,7 @@ the full text of _Public Opinion_ by Walter Lippmann.
 get: { url : String, expect : Http.Expect msg } -> Platform.Cmd.Cmd msg
 -}
 get : { url : String, expect : Elm.Expression } -> Elm.Expression
-get getArg =
+get getArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Http" ]
@@ -63,8 +77,8 @@ get getArg =
              }
         )
         [ Elm.record
-            [ Tuple.pair "url" (Elm.string getArg.url)
-            , Tuple.pair "expect" getArg.expect
+            [ Tuple.pair "url" (Elm.string getArg_.url)
+            , Tuple.pair "expect" getArg_.expect
             ]
         ]
 
@@ -102,7 +116,7 @@ post:
 post :
     { url : String, body : Elm.Expression, expect : Elm.Expression }
     -> Elm.Expression
-post postArg =
+post postArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Http" ]
@@ -126,9 +140,9 @@ post postArg =
              }
         )
         [ Elm.record
-            [ Tuple.pair "url" (Elm.string postArg.url)
-            , Tuple.pair "body" postArg.body
-            , Tuple.pair "expect" postArg.expect
+            [ Tuple.pair "url" (Elm.string postArg_.url)
+            , Tuple.pair "body" postArg_.body
+            , Tuple.pair "expect" postArg_.expect
             ]
         ]
 
@@ -177,7 +191,7 @@ request :
     , tracker : Elm.Expression
     }
     -> Elm.Expression
-request requestArg =
+request requestArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Http" ]
@@ -208,13 +222,13 @@ request requestArg =
              }
         )
         [ Elm.record
-            [ Tuple.pair "method" (Elm.string requestArg.method)
-            , Tuple.pair "headers" (Elm.list requestArg.headers)
-            , Tuple.pair "url" (Elm.string requestArg.url)
-            , Tuple.pair "body" requestArg.body
-            , Tuple.pair "expect" requestArg.expect
-            , Tuple.pair "timeout" requestArg.timeout
-            , Tuple.pair "tracker" requestArg.tracker
+            [ Tuple.pair "method" (Elm.string requestArg_.method)
+            , Tuple.pair "headers" (Elm.list requestArg_.headers)
+            , Tuple.pair "url" (Elm.string requestArg_.url)
+            , Tuple.pair "body" requestArg_.body
+            , Tuple.pair "expect" requestArg_.expect
+            , Tuple.pair "timeout" requestArg_.timeout
+            , Tuple.pair "tracker" requestArg_.tracker
             ]
         ]
 
@@ -228,7 +242,7 @@ request requestArg =
 header: String -> String -> Http.Header
 -}
 header : String -> String -> Elm.Expression
-header headerArg headerArg0 =
+header headerArg_ headerArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Http" ]
@@ -241,7 +255,7 @@ header headerArg headerArg0 =
                      )
              }
         )
-        [ Elm.string headerArg, Elm.string headerArg0 ]
+        [ Elm.string headerArg_, Elm.string headerArg_0 ]
 
 
 {-| Create an empty body for your `Request`. This is useful for GET requests
@@ -273,7 +287,7 @@ of the body. Some servers are strict about this!
 stringBody: String -> String -> Http.Body
 -}
 stringBody : String -> String -> Elm.Expression
-stringBody stringBodyArg stringBodyArg0 =
+stringBody stringBodyArg_ stringBodyArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Http" ]
@@ -286,7 +300,7 @@ stringBody stringBodyArg stringBodyArg0 =
                      )
              }
         )
-        [ Elm.string stringBodyArg, Elm.string stringBodyArg0 ]
+        [ Elm.string stringBodyArg_, Elm.string stringBodyArg_0 ]
 
 
 {-| Put some JSON value in the body of your `Request`. This will automatically
@@ -295,7 +309,7 @@ add the `Content-Type: application/json` header.
 jsonBody: Json.Encode.Value -> Http.Body
 -}
 jsonBody : Elm.Expression -> Elm.Expression
-jsonBody jsonBodyArg =
+jsonBody jsonBodyArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Http" ]
@@ -308,7 +322,7 @@ jsonBody jsonBodyArg =
                      )
              }
         )
-        [ jsonBodyArg ]
+        [ jsonBodyArg_ ]
 
 
 {-| Use a file as the body of your `Request`. When someone uploads an image
@@ -322,7 +336,7 @@ This will automatically set the `Content-Type` to the MIME type of the file.
 fileBody: File.File -> Http.Body
 -}
 fileBody : Elm.Expression -> Elm.Expression
-fileBody fileBodyArg =
+fileBody fileBodyArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Http" ]
@@ -335,7 +349,7 @@ fileBody fileBodyArg =
                      )
              }
         )
-        [ fileBodyArg ]
+        [ fileBodyArg_ ]
 
 
 {-| Put some `Bytes` in the body of your `Request`. This allows you to use
@@ -358,7 +372,7 @@ or `image/jpeg` instead.
 bytesBody: String -> Bytes.Bytes -> Http.Body
 -}
 bytesBody : String -> Elm.Expression -> Elm.Expression
-bytesBody bytesBodyArg bytesBodyArg0 =
+bytesBody bytesBodyArg_ bytesBodyArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Http" ]
@@ -371,7 +385,7 @@ bytesBody bytesBodyArg bytesBodyArg0 =
                      )
              }
         )
-        [ Elm.string bytesBodyArg, bytesBodyArg0 ]
+        [ Elm.string bytesBodyArg_, bytesBodyArg_0 ]
 
 
 {-| When someone clicks submit on the `<form>`, browsers send a special HTTP
@@ -418,7 +432,7 @@ creating a body this way.
 multipartBody: List Http.Part -> Http.Body
 -}
 multipartBody : List Elm.Expression -> Elm.Expression
-multipartBody multipartBodyArg =
+multipartBody multipartBodyArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Http" ]
@@ -431,7 +445,7 @@ multipartBody multipartBodyArg =
                      )
              }
         )
-        [ Elm.list multipartBodyArg ]
+        [ Elm.list multipartBodyArg_ ]
 
 
 {-| A part that contains `String` data.
@@ -444,7 +458,7 @@ multipartBody multipartBodyArg =
 stringPart: String -> String -> Http.Part
 -}
 stringPart : String -> String -> Elm.Expression
-stringPart stringPartArg stringPartArg0 =
+stringPart stringPartArg_ stringPartArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Http" ]
@@ -457,7 +471,7 @@ stringPart stringPartArg stringPartArg0 =
                      )
              }
         )
-        [ Elm.string stringPartArg, Elm.string stringPartArg0 ]
+        [ Elm.string stringPartArg_, Elm.string stringPartArg_0 ]
 
 
 {-| A part that contains a file. You can use
@@ -475,7 +489,7 @@ browser. From there, you can send it along to a server like this:
 filePart: String -> File.File -> Http.Part
 -}
 filePart : String -> Elm.Expression -> Elm.Expression
-filePart filePartArg filePartArg0 =
+filePart filePartArg_ filePartArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Http" ]
@@ -488,7 +502,7 @@ filePart filePartArg filePartArg0 =
                      )
              }
         )
-        [ Elm.string filePartArg, filePartArg0 ]
+        [ Elm.string filePartArg_, filePartArg_0 ]
 
 
 {-| A part that contains bytes, allowing you to use
@@ -506,7 +520,7 @@ how to interpret the bytes.
 bytesPart: String -> String -> Bytes.Bytes -> Http.Part
 -}
 bytesPart : String -> String -> Elm.Expression -> Elm.Expression
-bytesPart bytesPartArg bytesPartArg0 bytesPartArg1 =
+bytesPart bytesPartArg_ bytesPartArg_0 bytesPartArg_1 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Http" ]
@@ -522,7 +536,7 @@ bytesPart bytesPartArg bytesPartArg0 bytesPartArg1 =
                      )
              }
         )
-        [ Elm.string bytesPartArg, Elm.string bytesPartArg0, bytesPartArg1 ]
+        [ Elm.string bytesPartArg_, Elm.string bytesPartArg_0, bytesPartArg_1 ]
 
 
 {-| Expect the response body to be a `String`. Like when getting the full text
@@ -546,7 +560,7 @@ expect it to be UTF-8 encoded text that can be turned into a `String`.
 expectString: (Result.Result Http.Error String -> msg) -> Http.Expect msg
 -}
 expectString : (Elm.Expression -> Elm.Expression) -> Elm.Expression
-expectString expectStringArg =
+expectString expectStringArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Http" ]
@@ -569,7 +583,7 @@ expectString expectStringArg =
                      )
              }
         )
-        [ Elm.functionReduced "expectStringUnpack" expectStringArg ]
+        [ Elm.functionReduced "expectStringUnpack" expectStringArg_ ]
 
 
 {-| Expect the response body to be JSON. Like if you want to get a random cat
@@ -606,7 +620,7 @@ expectJson: (Result.Result Http.Error a -> msg) -> Json.Decode.Decoder a -> Http
 -}
 expectJson :
     (Elm.Expression -> Elm.Expression) -> Elm.Expression -> Elm.Expression
-expectJson expectJsonArg expectJsonArg0 =
+expectJson expectJsonArg_ expectJsonArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Http" ]
@@ -633,7 +647,9 @@ expectJson expectJsonArg expectJsonArg0 =
                      )
              }
         )
-        [ Elm.functionReduced "expectJsonUnpack" expectJsonArg, expectJsonArg0 ]
+        [ Elm.functionReduced "expectJsonUnpack" expectJsonArg_
+        , expectJsonArg_0
+        ]
 
 
 {-| Expect the response body to be binary data. For example, maybe you are
@@ -665,7 +681,7 @@ expectBytes: (Result.Result Http.Error a -> msg) -> Bytes.Decode.Decoder a -> Ht
 -}
 expectBytes :
     (Elm.Expression -> Elm.Expression) -> Elm.Expression -> Elm.Expression
-expectBytes expectBytesArg expectBytesArg0 =
+expectBytes expectBytesArg_ expectBytesArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Http" ]
@@ -692,8 +708,8 @@ expectBytes expectBytesArg expectBytesArg0 =
                      )
              }
         )
-        [ Elm.functionReduced "expectBytesUnpack" expectBytesArg
-        , expectBytesArg0
+        [ Elm.functionReduced "expectBytesUnpack" expectBytesArg_
+        , expectBytesArg_0
         ]
 
 
@@ -718,7 +734,7 @@ The server may be giving back a response body, but we do not care about it.
 expectWhatever: (Result.Result Http.Error () -> msg) -> Http.Expect msg
 -}
 expectWhatever : (Elm.Expression -> Elm.Expression) -> Elm.Expression
-expectWhatever expectWhateverArg =
+expectWhatever expectWhateverArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Http" ]
@@ -741,7 +757,7 @@ expectWhatever expectWhateverArg =
                      )
              }
         )
-        [ Elm.functionReduced "expectWhateverUnpack" expectWhateverArg ]
+        [ Elm.functionReduced "expectWhateverUnpack" expectWhateverArg_ ]
 
 
 {-| Track the progress of a request. Create a [`request`](#request) where
@@ -751,7 +767,7 @@ expectWhatever expectWhateverArg =
 track: String -> (Http.Progress -> msg) -> Platform.Sub.Sub msg
 -}
 track : String -> (Elm.Expression -> Elm.Expression) -> Elm.Expression
-track trackArg trackArg0 =
+track trackArg_ trackArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Http" ]
@@ -768,7 +784,7 @@ track trackArg trackArg0 =
                      )
              }
         )
-        [ Elm.string trackArg, Elm.functionReduced "trackUnpack" trackArg0 ]
+        [ Elm.string trackArg_, Elm.functionReduced "trackUnpack" trackArg_0 ]
 
 
 {-| Turn `Sending` progress into a useful fraction.
@@ -791,7 +807,7 @@ for divide-by-zero errors!
 fractionSent: { sent : Int, size : Int } -> Float
 -}
 fractionSent : { sent : Int, size : Int } -> Elm.Expression
-fractionSent fractionSentArg =
+fractionSent fractionSentArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Http" ]
@@ -807,8 +823,8 @@ fractionSent fractionSentArg =
              }
         )
         [ Elm.record
-            [ Tuple.pair "sent" (Elm.int fractionSentArg.sent)
-            , Tuple.pair "size" (Elm.int fractionSentArg.size)
+            [ Tuple.pair "sent" (Elm.int fractionSentArg_.sent)
+            , Tuple.pair "size" (Elm.int fractionSentArg_.size)
             ]
         ]
 
@@ -842,7 +858,7 @@ divide-by-zero errors because `size` can always be zero!
 fractionReceived: { received : Int, size : Maybe Int } -> Float
 -}
 fractionReceived : { received : Int, size : Elm.Expression } -> Elm.Expression
-fractionReceived fractionReceivedArg =
+fractionReceived fractionReceivedArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Http" ]
@@ -860,8 +876,8 @@ fractionReceived fractionReceivedArg =
              }
         )
         [ Elm.record
-            [ Tuple.pair "received" (Elm.int fractionReceivedArg.received)
-            , Tuple.pair "size" fractionReceivedArg.size
+            [ Tuple.pair "received" (Elm.int fractionReceivedArg_.received)
+            , Tuple.pair "size" fractionReceivedArg_.size
             ]
         ]
 
@@ -871,7 +887,7 @@ fractionReceived fractionReceivedArg =
 cancel: String -> Platform.Cmd.Cmd msg
 -}
 cancel : String -> Elm.Expression
-cancel cancelArg =
+cancel cancelArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Http" ]
@@ -884,7 +900,7 @@ cancel cancelArg =
                      )
              }
         )
-        [ Elm.string cancelArg ]
+        [ Elm.string cancelArg_ ]
 
 
 {-| Create a request with a risky security policy. Things like:
@@ -938,7 +954,7 @@ riskyRequest :
     , tracker : Elm.Expression
     }
     -> Elm.Expression
-riskyRequest riskyRequestArg =
+riskyRequest riskyRequestArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Http" ]
@@ -969,13 +985,13 @@ riskyRequest riskyRequestArg =
              }
         )
         [ Elm.record
-            [ Tuple.pair "method" (Elm.string riskyRequestArg.method)
-            , Tuple.pair "headers" (Elm.list riskyRequestArg.headers)
-            , Tuple.pair "url" (Elm.string riskyRequestArg.url)
-            , Tuple.pair "body" riskyRequestArg.body
-            , Tuple.pair "expect" riskyRequestArg.expect
-            , Tuple.pair "timeout" riskyRequestArg.timeout
-            , Tuple.pair "tracker" riskyRequestArg.tracker
+            [ Tuple.pair "method" (Elm.string riskyRequestArg_.method)
+            , Tuple.pair "headers" (Elm.list riskyRequestArg_.headers)
+            , Tuple.pair "url" (Elm.string riskyRequestArg_.url)
+            , Tuple.pair "body" riskyRequestArg_.body
+            , Tuple.pair "expect" riskyRequestArg_.expect
+            , Tuple.pair "timeout" riskyRequestArg_.timeout
+            , Tuple.pair "tracker" riskyRequestArg_.tracker
             ]
         ]
 
@@ -1027,7 +1043,7 @@ expectStringResponse :
     (Elm.Expression -> Elm.Expression)
     -> (Elm.Expression -> Elm.Expression)
     -> Elm.Expression
-expectStringResponse expectStringResponseArg expectStringResponseArg0 =
+expectStringResponse expectStringResponseArg_ expectStringResponseArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Http" ]
@@ -1061,10 +1077,10 @@ expectStringResponse expectStringResponseArg expectStringResponseArg0 =
         )
         [ Elm.functionReduced
             "expectStringResponseUnpack"
-            expectStringResponseArg
+            expectStringResponseArg_
         , Elm.functionReduced
             "expectStringResponseUnpack"
-            expectStringResponseArg0
+            expectStringResponseArg_0
         ]
 
 
@@ -1082,7 +1098,7 @@ expectBytesResponse :
     (Elm.Expression -> Elm.Expression)
     -> (Elm.Expression -> Elm.Expression)
     -> Elm.Expression
-expectBytesResponse expectBytesResponseArg expectBytesResponseArg0 =
+expectBytesResponse expectBytesResponseArg_ expectBytesResponseArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Http" ]
@@ -1114,10 +1130,12 @@ expectBytesResponse expectBytesResponseArg expectBytesResponseArg0 =
                      )
              }
         )
-        [ Elm.functionReduced "expectBytesResponseUnpack" expectBytesResponseArg
+        [ Elm.functionReduced
+            "expectBytesResponseUnpack"
+            expectBytesResponseArg_
         , Elm.functionReduced
             "expectBytesResponseUnpack"
-            expectBytesResponseArg0
+            expectBytesResponseArg_0
         ]
 
 
@@ -1144,7 +1162,7 @@ task :
     , timeout : Elm.Expression
     }
     -> Elm.Expression
-task taskArg =
+task taskArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Http" ]
@@ -1178,12 +1196,12 @@ task taskArg =
              }
         )
         [ Elm.record
-            [ Tuple.pair "method" (Elm.string taskArg.method)
-            , Tuple.pair "headers" (Elm.list taskArg.headers)
-            , Tuple.pair "url" (Elm.string taskArg.url)
-            , Tuple.pair "body" taskArg.body
-            , Tuple.pair "resolver" taskArg.resolver
-            , Tuple.pair "timeout" taskArg.timeout
+            [ Tuple.pair "method" (Elm.string taskArg_.method)
+            , Tuple.pair "headers" (Elm.list taskArg_.headers)
+            , Tuple.pair "url" (Elm.string taskArg_.url)
+            , Tuple.pair "body" taskArg_.body
+            , Tuple.pair "resolver" taskArg_.resolver
+            , Tuple.pair "timeout" taskArg_.timeout
             ]
         ]
 
@@ -1194,7 +1212,7 @@ Similar to [`expectStringResponse`](#expectStringResponse).
 stringResolver: (Http.Response String -> Result.Result x a) -> Http.Resolver x a
 -}
 stringResolver : (Elm.Expression -> Elm.Expression) -> Elm.Expression
-stringResolver stringResolverArg =
+stringResolver stringResolverArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Http" ]
@@ -1222,7 +1240,7 @@ stringResolver stringResolverArg =
                      )
              }
         )
-        [ Elm.functionReduced "stringResolverUnpack" stringResolverArg ]
+        [ Elm.functionReduced "stringResolverUnpack" stringResolverArg_ ]
 
 
 {-| Turn a response with a `Bytes` body into a result.
@@ -1231,7 +1249,7 @@ Similar to [`expectBytesResponse`](#expectBytesResponse).
 bytesResolver: (Http.Response Bytes.Bytes -> Result.Result x a) -> Http.Resolver x a
 -}
 bytesResolver : (Elm.Expression -> Elm.Expression) -> Elm.Expression
-bytesResolver bytesResolverArg =
+bytesResolver bytesResolverArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Http" ]
@@ -1259,7 +1277,7 @@ bytesResolver bytesResolverArg =
                      )
              }
         )
-        [ Elm.functionReduced "bytesResolverUnpack" bytesResolverArg ]
+        [ Elm.functionReduced "bytesResolverUnpack" bytesResolverArg_ ]
 
 
 {-| Just like [`riskyRequest`](#riskyRequest), but it creates a `Task`. **Use
@@ -1284,7 +1302,7 @@ riskyTask :
     , timeout : Elm.Expression
     }
     -> Elm.Expression
-riskyTask riskyTaskArg =
+riskyTask riskyTaskArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Http" ]
@@ -1318,12 +1336,12 @@ riskyTask riskyTaskArg =
              }
         )
         [ Elm.record
-            [ Tuple.pair "method" (Elm.string riskyTaskArg.method)
-            , Tuple.pair "headers" (Elm.list riskyTaskArg.headers)
-            , Tuple.pair "url" (Elm.string riskyTaskArg.url)
-            , Tuple.pair "body" riskyTaskArg.body
-            , Tuple.pair "resolver" riskyTaskArg.resolver
-            , Tuple.pair "timeout" riskyTaskArg.timeout
+            [ Tuple.pair "method" (Elm.string riskyTaskArg_.method)
+            , Tuple.pair "headers" (Elm.list riskyTaskArg_.headers)
+            , Tuple.pair "url" (Elm.string riskyTaskArg_.url)
+            , Tuple.pair "body" riskyTaskArg_.body
+            , Tuple.pair "resolver" riskyTaskArg_.resolver
+            , Tuple.pair "timeout" riskyTaskArg_.timeout
             ]
         ]
 
@@ -1532,98 +1550,157 @@ make_ =
     }
 
 
-caseOf_ :
-    { error :
-        Elm.Expression
-        -> { errorTags_0_0
-            | badUrl : Elm.Expression -> Elm.Expression
-            , timeout : Elm.Expression
-            , networkError : Elm.Expression
-            , badStatus : Elm.Expression -> Elm.Expression
-            , badBody : Elm.Expression -> Elm.Expression
-        }
-        -> Elm.Expression
-    , progress :
-        Elm.Expression
-        -> { progressTags_1_0
-            | sending : Elm.Expression -> Elm.Expression
-            , receiving : Elm.Expression -> Elm.Expression
-        }
-        -> Elm.Expression
-    , response :
-        Elm.Expression
-        -> { responseTags_2_0
-            | badUrl_ : Elm.Expression -> Elm.Expression
-            , timeout_ : Elm.Expression
-            , networkError_ : Elm.Expression
-            , badStatus_ : Elm.Expression -> Elm.Expression -> Elm.Expression
-            , goodStatus_ : Elm.Expression -> Elm.Expression -> Elm.Expression
-        }
-        -> Elm.Expression
-    }
 caseOf_ =
     { error =
         \errorExpression errorTags ->
             Elm.Case.custom
                 errorExpression
                 (Type.namedWith [ "Http" ] "Error" [])
-                [ Elm.Case.branch1
-                    "BadUrl"
-                    ( "stringString", Type.string )
-                    errorTags.badUrl
-                , Elm.Case.branch0 "Timeout" errorTags.timeout
-                , Elm.Case.branch0 "NetworkError" errorTags.networkError
-                , Elm.Case.branch1
-                    "BadStatus"
-                    ( "basicsInt", Type.int )
-                    errorTags.badStatus
-                , Elm.Case.branch1
-                    "BadBody"
-                    ( "stringString", Type.string )
-                    errorTags.badBody
+                [ Elm.Case.branch
+                    (Elm.Arg.customType
+                       "BadUrl"
+                       errorTags.badUrl |> Elm.Arg.item
+                                                 (Elm.Arg.varWith
+                                                        "arg_0"
+                                                        Type.string
+                                                 )
+                    )
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType "Timeout" errorTags.timeout)
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType "NetworkError" errorTags.networkError)
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType
+                       "BadStatus"
+                       errorTags.badStatus |> Elm.Arg.item
+                                                    (Elm.Arg.varWith
+                                                           "arg_0"
+                                                           Type.int
+                                                    )
+                    )
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType
+                       "BadBody"
+                       errorTags.badBody |> Elm.Arg.item
+                                                  (Elm.Arg.varWith
+                                                         "arg_0"
+                                                         Type.string
+                                                  )
+                    )
+                    Basics.identity
                 ]
     , progress =
         \progressExpression progressTags ->
             Elm.Case.custom
                 progressExpression
                 (Type.namedWith [ "Http" ] "Progress" [])
-                [ Elm.Case.branch1
-                    "Sending"
-                    ( "one"
-                    , Type.record [ ( "sent", Type.int ), ( "size", Type.int ) ]
+                [ Elm.Case.branch
+                    (Elm.Arg.customType
+                       "Sending"
+                       progressTags.sending |> Elm.Arg.item
+                                                     (Elm.Arg.varWith
+                                                            "arg_0"
+                                                            (Type.record
+                                                                   [ ( "sent"
+                                                                     , Type.int
+                                                                     )
+                                                                   , ( "size"
+                                                                     , Type.int
+                                                                     )
+                                                                   ]
+                                                            )
+                                                     )
                     )
-                    progressTags.sending
-                , Elm.Case.branch1
-                    "Receiving"
-                    ( "one"
-                    , Type.record
-                          [ ( "received", Type.int )
-                          , ( "size", Type.maybe Type.int )
-                          ]
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType
+                       "Receiving"
+                       progressTags.receiving |> Elm.Arg.item
+                                                       (Elm.Arg.varWith
+                                                              "arg_0"
+                                                              (Type.record
+                                                                     [ ( "received"
+                                                                       , Type.int
+                                                                       )
+                                                                     , ( "size"
+                                                                       , Type.maybe
+                                                                           Type.int
+                                                                       )
+                                                                     ]
+                                                              )
+                                                       )
                     )
-                    progressTags.receiving
+                    Basics.identity
                 ]
     , response =
         \responseExpression responseTags ->
             Elm.Case.custom
                 responseExpression
                 (Type.namedWith [ "Http" ] "Response" [ Type.var "body" ])
-                [ Elm.Case.branch1
-                    "BadUrl_"
-                    ( "stringString", Type.string )
-                    responseTags.badUrl_
-                , Elm.Case.branch0 "Timeout_" responseTags.timeout_
-                , Elm.Case.branch0 "NetworkError_" responseTags.networkError_
-                , Elm.Case.branch2
-                    "BadStatus_"
-                    ( "httpMetadata", Type.namedWith [ "Http" ] "Metadata" [] )
-                    ( "body", Type.var "body" )
-                    responseTags.badStatus_
-                , Elm.Case.branch2
-                    "GoodStatus_"
-                    ( "httpMetadata", Type.namedWith [ "Http" ] "Metadata" [] )
-                    ( "body", Type.var "body" )
-                    responseTags.goodStatus_
+                [ Elm.Case.branch
+                    (Elm.Arg.customType
+                       "BadUrl_"
+                       responseTags.badUrl_ |> Elm.Arg.item
+                                                     (Elm.Arg.varWith
+                                                            "arg_0"
+                                                            Type.string
+                                                     )
+                    )
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType "Timeout_" responseTags.timeout_)
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType
+                       "NetworkError_"
+                       responseTags.networkError_
+                    )
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType
+                       "BadStatus_"
+                       responseTags.badStatus_ |> Elm.Arg.item
+                                                        (Elm.Arg.varWith
+                                                               "httpMetadata"
+                                                               (Type.namedWith
+                                                                      [ "Http" ]
+                                                                      "Metadata"
+                                                                      []
+                                                               )
+                                                        ) |> Elm.Arg.item
+                                                                   (Elm.Arg.varWith
+                                                                          "body"
+                                                                          (Type.var
+                                                                                 "body"
+                                                                          )
+                                                                   )
+                    )
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType
+                       "GoodStatus_"
+                       responseTags.goodStatus_ |> Elm.Arg.item
+                                                         (Elm.Arg.varWith
+                                                                "httpMetadata"
+                                                                (Type.namedWith
+                                                                       [ "Http"
+                                                                       ]
+                                                                       "Metadata"
+                                                                       []
+                                                                )
+                                                         ) |> Elm.Arg.item
+                                                                    (Elm.Arg.varWith
+                                                                           "body"
+                                                                           (Type.var
+                                                                                  "body"
+                                                                           )
+                                                                    )
+                    )
+                    Basics.identity
                 ]
     }
 
@@ -1660,7 +1737,7 @@ call_ :
     }
 call_ =
     { get =
-        \getArg ->
+        \getArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Http" ]
@@ -1682,9 +1759,9 @@ call_ =
                              )
                      }
                 )
-                [ getArg ]
+                [ getArg_ ]
     , post =
-        \postArg ->
+        \postArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Http" ]
@@ -1709,9 +1786,9 @@ call_ =
                              )
                      }
                 )
-                [ postArg ]
+                [ postArg_ ]
     , request =
-        \requestArg ->
+        \requestArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Http" ]
@@ -1747,9 +1824,9 @@ call_ =
                              )
                      }
                 )
-                [ requestArg ]
+                [ requestArg_ ]
     , header =
-        \headerArg headerArg0 ->
+        \headerArg_ headerArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Http" ]
@@ -1762,9 +1839,9 @@ call_ =
                              )
                      }
                 )
-                [ headerArg, headerArg0 ]
+                [ headerArg_, headerArg_0 ]
     , stringBody =
-        \stringBodyArg stringBodyArg0 ->
+        \stringBodyArg_ stringBodyArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Http" ]
@@ -1777,9 +1854,9 @@ call_ =
                              )
                      }
                 )
-                [ stringBodyArg, stringBodyArg0 ]
+                [ stringBodyArg_, stringBodyArg_0 ]
     , jsonBody =
-        \jsonBodyArg ->
+        \jsonBodyArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Http" ]
@@ -1796,9 +1873,9 @@ call_ =
                              )
                      }
                 )
-                [ jsonBodyArg ]
+                [ jsonBodyArg_ ]
     , fileBody =
-        \fileBodyArg ->
+        \fileBodyArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Http" ]
@@ -1811,9 +1888,9 @@ call_ =
                              )
                      }
                 )
-                [ fileBodyArg ]
+                [ fileBodyArg_ ]
     , bytesBody =
-        \bytesBodyArg bytesBodyArg0 ->
+        \bytesBodyArg_ bytesBodyArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Http" ]
@@ -1828,9 +1905,9 @@ call_ =
                              )
                      }
                 )
-                [ bytesBodyArg, bytesBodyArg0 ]
+                [ bytesBodyArg_, bytesBodyArg_0 ]
     , multipartBody =
-        \multipartBodyArg ->
+        \multipartBodyArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Http" ]
@@ -1845,9 +1922,9 @@ call_ =
                              )
                      }
                 )
-                [ multipartBodyArg ]
+                [ multipartBodyArg_ ]
     , stringPart =
-        \stringPartArg stringPartArg0 ->
+        \stringPartArg_ stringPartArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Http" ]
@@ -1860,9 +1937,9 @@ call_ =
                              )
                      }
                 )
-                [ stringPartArg, stringPartArg0 ]
+                [ stringPartArg_, stringPartArg_0 ]
     , filePart =
-        \filePartArg filePartArg0 ->
+        \filePartArg_ filePartArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Http" ]
@@ -1877,9 +1954,9 @@ call_ =
                              )
                      }
                 )
-                [ filePartArg, filePartArg0 ]
+                [ filePartArg_, filePartArg_0 ]
     , bytesPart =
-        \bytesPartArg bytesPartArg0 bytesPartArg1 ->
+        \bytesPartArg_ bytesPartArg_0 bytesPartArg_1 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Http" ]
@@ -1895,9 +1972,9 @@ call_ =
                              )
                      }
                 )
-                [ bytesPartArg, bytesPartArg0, bytesPartArg1 ]
+                [ bytesPartArg_, bytesPartArg_0, bytesPartArg_1 ]
     , expectString =
-        \expectStringArg ->
+        \expectStringArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Http" ]
@@ -1926,9 +2003,9 @@ call_ =
                              )
                      }
                 )
-                [ expectStringArg ]
+                [ expectStringArg_ ]
     , expectJson =
-        \expectJsonArg expectJsonArg0 ->
+        \expectJsonArg_ expectJsonArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Http" ]
@@ -1961,9 +2038,9 @@ call_ =
                              )
                      }
                 )
-                [ expectJsonArg, expectJsonArg0 ]
+                [ expectJsonArg_, expectJsonArg_0 ]
     , expectBytes =
-        \expectBytesArg expectBytesArg0 ->
+        \expectBytesArg_ expectBytesArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Http" ]
@@ -1996,9 +2073,9 @@ call_ =
                              )
                      }
                 )
-                [ expectBytesArg, expectBytesArg0 ]
+                [ expectBytesArg_, expectBytesArg_0 ]
     , expectWhatever =
-        \expectWhateverArg ->
+        \expectWhateverArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Http" ]
@@ -2027,9 +2104,9 @@ call_ =
                              )
                      }
                 )
-                [ expectWhateverArg ]
+                [ expectWhateverArg_ ]
     , track =
-        \trackArg trackArg0 ->
+        \trackArg_ trackArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Http" ]
@@ -2047,9 +2124,9 @@ call_ =
                              )
                      }
                 )
-                [ trackArg, trackArg0 ]
+                [ trackArg_, trackArg_0 ]
     , fractionSent =
-        \fractionSentArg ->
+        \fractionSentArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Http" ]
@@ -2066,9 +2143,9 @@ call_ =
                              )
                      }
                 )
-                [ fractionSentArg ]
+                [ fractionSentArg_ ]
     , fractionReceived =
-        \fractionReceivedArg ->
+        \fractionReceivedArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Http" ]
@@ -2085,9 +2162,9 @@ call_ =
                              )
                      }
                 )
-                [ fractionReceivedArg ]
+                [ fractionReceivedArg_ ]
     , cancel =
-        \cancelArg ->
+        \cancelArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Http" ]
@@ -2100,9 +2177,9 @@ call_ =
                              )
                      }
                 )
-                [ cancelArg ]
+                [ cancelArg_ ]
     , riskyRequest =
-        \riskyRequestArg ->
+        \riskyRequestArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Http" ]
@@ -2138,9 +2215,9 @@ call_ =
                              )
                      }
                 )
-                [ riskyRequestArg ]
+                [ riskyRequestArg_ ]
     , expectStringResponse =
-        \expectStringResponseArg expectStringResponseArg0 ->
+        \expectStringResponseArg_ expectStringResponseArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Http" ]
@@ -2175,9 +2252,9 @@ call_ =
                              )
                      }
                 )
-                [ expectStringResponseArg, expectStringResponseArg0 ]
+                [ expectStringResponseArg_, expectStringResponseArg_0 ]
     , expectBytesResponse =
-        \expectBytesResponseArg expectBytesResponseArg0 ->
+        \expectBytesResponseArg_ expectBytesResponseArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Http" ]
@@ -2216,9 +2293,9 @@ call_ =
                              )
                      }
                 )
-                [ expectBytesResponseArg, expectBytesResponseArg0 ]
+                [ expectBytesResponseArg_, expectBytesResponseArg_0 ]
     , task =
-        \taskArg ->
+        \taskArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Http" ]
@@ -2257,9 +2334,9 @@ call_ =
                              )
                      }
                 )
-                [ taskArg ]
+                [ taskArg_ ]
     , stringResolver =
-        \stringResolverArg ->
+        \stringResolverArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Http" ]
@@ -2287,9 +2364,9 @@ call_ =
                              )
                      }
                 )
-                [ stringResolverArg ]
+                [ stringResolverArg_ ]
     , bytesResolver =
-        \bytesResolverArg ->
+        \bytesResolverArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Http" ]
@@ -2321,9 +2398,9 @@ call_ =
                              )
                      }
                 )
-                [ bytesResolverArg ]
+                [ bytesResolverArg_ ]
     , riskyTask =
-        \riskyTaskArg ->
+        \riskyTaskArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Http" ]
@@ -2362,7 +2439,7 @@ call_ =
                              )
                      }
                 )
-                [ riskyTaskArg ]
+                [ riskyTaskArg_ ]
     }
 
 

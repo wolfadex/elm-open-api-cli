@@ -1,12 +1,26 @@
-module Gen.BackendTask.Stream exposing (allowNon0Status, annotation_, call_, caseOf_, command, commandWithOptions, customDuplex, customRead, customReadWithMeta, customTransformWithMeta, customWrite, customWriteWithMeta, defaultCommandOptions, fileRead, fileWrite, fromString, gzip, http, httpWithInput, make_, moduleName_, pipe, read, readJson, readMetadata, run, stderr, stdin, stdout, unzip, values_, withOutput, withTimeout)
+module Gen.BackendTask.Stream exposing
+    ( moduleName_, pipe, fileRead, fileWrite, fromString, http
+    , httpWithInput, stdin, stdout, stderr, read, readJson, readMetadata
+    , run, command, commandWithOptions, defaultCommandOptions, allowNon0Status, withOutput, withTimeout
+    , gzip, unzip, customRead, customWrite, customDuplex, customReadWithMeta, customTransformWithMeta
+    , customWriteWithMeta, annotation_, make_, caseOf_, call_, values_
+    )
 
-{-| 
-@docs moduleName_, pipe, fileRead, fileWrite, fromString, http, httpWithInput, stdin, stdout, stderr, read, readJson, readMetadata, run, command, commandWithOptions, defaultCommandOptions, allowNon0Status, withOutput, withTimeout, gzip, unzip, customRead, customWrite, customDuplex, customReadWithMeta, customTransformWithMeta, customWriteWithMeta, annotation_, make_, caseOf_, call_, values_
+{-|
+# Generated bindings for BackendTask.Stream
+
+@docs moduleName_, pipe, fileRead, fileWrite, fromString, http
+@docs httpWithInput, stdin, stdout, stderr, read, readJson
+@docs readMetadata, run, command, commandWithOptions, defaultCommandOptions, allowNon0Status
+@docs withOutput, withTimeout, gzip, unzip, customRead, customWrite
+@docs customDuplex, customReadWithMeta, customTransformWithMeta, customWriteWithMeta, annotation_, make_
+@docs caseOf_, call_, values_
 -}
 
 
 import Elm
 import Elm.Annotation as Type
+import Elm.Arg
 import Elm.Case
 
 
@@ -45,7 +59,7 @@ pipe:
     }
 -}
 pipe : Elm.Expression -> Elm.Expression -> Elm.Expression
-pipe pipeArg pipeArg0 =
+pipe pipeArg_ pipeArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "BackendTask", "Stream" ]
@@ -88,7 +102,7 @@ pipe pipeArg pipeArg0 =
                      )
              }
         )
-        [ pipeArg, pipeArg0 ]
+        [ pipeArg_, pipeArg_0 ]
 
 
 {-| Open a file's contents as a Stream.
@@ -119,7 +133,7 @@ If you want to read a file but don't need to use any of the other Stream functio
 fileRead: String -> BackendTask.Stream.Stream () () { read : (), write : Basics.Never }
 -}
 fileRead : String -> Elm.Expression
-fileRead fileReadArg =
+fileRead fileReadArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "BackendTask", "Stream" ]
@@ -144,7 +158,7 @@ fileRead fileReadArg =
                      )
              }
         )
-        [ Elm.string fileReadArg ]
+        [ Elm.string fileReadArg_ ]
 
 
 {-| Write a Stream to a file.
@@ -166,7 +180,7 @@ fileRead fileReadArg =
 fileWrite: String -> BackendTask.Stream.Stream () () { read : Basics.Never, write : () }
 -}
 fileWrite : String -> Elm.Expression
-fileWrite fileWriteArg =
+fileWrite fileWriteArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "BackendTask", "Stream" ]
@@ -191,7 +205,7 @@ fileWrite fileWriteArg =
                      )
              }
         )
-        [ Elm.string fileWriteArg ]
+        [ Elm.string fileWriteArg_ ]
 
 
 {-| A handy way to turn either a hardcoded String, or any other value from Elm into a Stream.
@@ -236,7 +250,7 @@ A more programmatic use of `fromString` to use the result of a previous `Backend
 fromString: String -> BackendTask.Stream.Stream () () { read : (), write : Basics.Never }
 -}
 fromString : String -> Elm.Expression
-fromString fromStringArg =
+fromString fromStringArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "BackendTask", "Stream" ]
@@ -261,7 +275,7 @@ fromString fromStringArg =
                      )
              }
         )
-        [ Elm.string fromStringArg ]
+        [ Elm.string fromStringArg_ ]
 
 
 {-| Uses a regular HTTP request body (not a `Stream`). Streams the HTTP response body.
@@ -292,7 +306,7 @@ http :
     , timeoutInMs : Elm.Expression
     }
     -> Elm.Expression
-http httpArg =
+http httpArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "BackendTask", "Stream" ]
@@ -339,12 +353,12 @@ http httpArg =
              }
         )
         [ Elm.record
-            [ Tuple.pair "url" (Elm.string httpArg.url)
-            , Tuple.pair "method" (Elm.string httpArg.method)
-            , Tuple.pair "headers" (Elm.list httpArg.headers)
-            , Tuple.pair "body" httpArg.body
-            , Tuple.pair "retries" httpArg.retries
-            , Tuple.pair "timeoutInMs" httpArg.timeoutInMs
+            [ Tuple.pair "url" (Elm.string httpArg_.url)
+            , Tuple.pair "method" (Elm.string httpArg_.method)
+            , Tuple.pair "headers" (Elm.list httpArg_.headers)
+            , Tuple.pair "body" httpArg_.body
+            , Tuple.pair "retries" httpArg_.retries
+            , Tuple.pair "timeoutInMs" httpArg_.timeoutInMs
             ]
         ]
 
@@ -371,7 +385,7 @@ httpWithInput :
     , timeoutInMs : Elm.Expression
     }
     -> Elm.Expression
-httpWithInput httpWithInputArg =
+httpWithInput httpWithInputArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "BackendTask", "Stream" ]
@@ -410,11 +424,11 @@ httpWithInput httpWithInputArg =
              }
         )
         [ Elm.record
-            [ Tuple.pair "url" (Elm.string httpWithInputArg.url)
-            , Tuple.pair "method" (Elm.string httpWithInputArg.method)
-            , Tuple.pair "headers" (Elm.list httpWithInputArg.headers)
-            , Tuple.pair "retries" httpWithInputArg.retries
-            , Tuple.pair "timeoutInMs" httpWithInputArg.timeoutInMs
+            [ Tuple.pair "url" (Elm.string httpWithInputArg_.url)
+            , Tuple.pair "method" (Elm.string httpWithInputArg_.method)
+            , Tuple.pair "headers" (Elm.list httpWithInputArg_.headers)
+            , Tuple.pair "retries" httpWithInputArg_.retries
+            , Tuple.pair "timeoutInMs" httpWithInputArg_.timeoutInMs
             ]
         ]
 
@@ -555,7 +569,7 @@ read:
     } { metadata : metadata, body : String }
 -}
 read : Elm.Expression -> Elm.Expression
-read readArg =
+read readArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "BackendTask", "Stream" ]
@@ -600,7 +614,7 @@ read readArg =
                      )
              }
         )
-        [ readArg ]
+        [ readArg_ ]
 
 
 {-| Read the body of the `Stream` as JSON.
@@ -632,7 +646,7 @@ readJson:
     } { metadata : metadata, body : value }
 -}
 readJson : Elm.Expression -> Elm.Expression -> Elm.Expression
-readJson readJsonArg readJsonArg0 =
+readJson readJsonArg_ readJsonArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "BackendTask", "Stream" ]
@@ -681,7 +695,7 @@ readJson readJsonArg readJsonArg0 =
                      )
              }
         )
-        [ readJsonArg, readJsonArg0 ]
+        [ readJsonArg_, readJsonArg_0 ]
 
 
 {-| Ignore the body of the `Stream`, while capturing the metadata from the final part of the Stream.
@@ -693,7 +707,7 @@ readMetadata:
     } metadata
 -}
 readMetadata : Elm.Expression -> Elm.Expression
-readMetadata readMetadataArg =
+readMetadata readMetadataArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "BackendTask", "Stream" ]
@@ -735,7 +749,7 @@ readMetadata readMetadataArg =
                      )
              }
         )
-        [ readMetadataArg ]
+        [ readMetadataArg_ ]
 
 
 {-| Gives a `BackendTask` to execute the `Stream`, ignoring its body and metadata.
@@ -754,7 +768,7 @@ run:
     -> BackendTask.BackendTask FatalError.FatalError ()
 -}
 run : Elm.Expression -> Elm.Expression
-run runArg =
+run runArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "BackendTask", "Stream" ]
@@ -780,7 +794,7 @@ run runArg =
                      )
              }
         )
-        [ runArg ]
+        [ runArg_ ]
 
 
 {-| Run a command (or `child_process`). The command's output becomes the body of the `Stream`.
@@ -791,7 +805,7 @@ command:
     -> BackendTask.Stream.Stream Int () { read : read, write : write }
 -}
 command : String -> List String -> Elm.Expression
-command commandArg commandArg0 =
+command commandArg_ commandArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "BackendTask", "Stream" ]
@@ -814,7 +828,7 @@ command commandArg commandArg0 =
                      )
              }
         )
-        [ Elm.string commandArg, Elm.list (List.map Elm.string commandArg0) ]
+        [ Elm.string commandArg_, Elm.list (List.map Elm.string commandArg_0) ]
 
 
 {-| Pass in custom [`CommandOptions`](#CommandOptions) to configure the behavior of the command.
@@ -849,7 +863,7 @@ commandWithOptions:
     -> BackendTask.Stream.Stream Int () { read : read, write : write }
 -}
 commandWithOptions : Elm.Expression -> String -> List String -> Elm.Expression
-commandWithOptions commandWithOptionsArg commandWithOptionsArg0 commandWithOptionsArg1 =
+commandWithOptions commandWithOptionsArg_ commandWithOptionsArg_0 commandWithOptionsArg_1 =
     Elm.apply
         (Elm.value
              { importFrom = [ "BackendTask", "Stream" ]
@@ -878,9 +892,9 @@ commandWithOptions commandWithOptionsArg commandWithOptionsArg0 commandWithOptio
                      )
              }
         )
-        [ commandWithOptionsArg
-        , Elm.string commandWithOptionsArg0
-        , Elm.list (List.map Elm.string commandWithOptionsArg1)
+        [ commandWithOptionsArg_
+        , Elm.string commandWithOptionsArg_0
+        , Elm.list (List.map Elm.string commandWithOptionsArg_1)
         ]
 
 
@@ -907,7 +921,7 @@ With `allowNon0Status`, the stream will continue without an error if the command
 allowNon0Status: BackendTask.Stream.CommandOptions -> BackendTask.Stream.CommandOptions
 -}
 allowNon0Status : Elm.Expression -> Elm.Expression
-allowNon0Status allowNon0StatusArg =
+allowNon0Status allowNon0StatusArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "BackendTask", "Stream" ]
@@ -928,7 +942,7 @@ allowNon0Status allowNon0StatusArg =
                      )
              }
         )
-        [ allowNon0StatusArg ]
+        [ allowNon0StatusArg_ ]
 
 
 {-| Configure the [`StderrOutput`](#StderrOutput) behavior.
@@ -939,7 +953,7 @@ withOutput:
     -> BackendTask.Stream.CommandOptions
 -}
 withOutput : Elm.Expression -> Elm.Expression -> Elm.Expression
-withOutput withOutputArg withOutputArg0 =
+withOutput withOutputArg_ withOutputArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "BackendTask", "Stream" ]
@@ -964,7 +978,7 @@ withOutput withOutputArg withOutputArg0 =
                      )
              }
         )
-        [ withOutputArg, withOutputArg0 ]
+        [ withOutputArg_, withOutputArg_0 ]
 
 
 {-| By default, commands do not have a timeout. This will set the timeout, in milliseconds, for the given command. If that duration is exceeded,
@@ -973,7 +987,7 @@ the `Stream` will fail with an error.
 withTimeout: Int -> BackendTask.Stream.CommandOptions -> BackendTask.Stream.CommandOptions
 -}
 withTimeout : Int -> Elm.Expression -> Elm.Expression
-withTimeout withTimeoutArg withTimeoutArg0 =
+withTimeout withTimeoutArg_ withTimeoutArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "BackendTask", "Stream" ]
@@ -995,7 +1009,7 @@ withTimeout withTimeoutArg withTimeoutArg0 =
                      )
              }
         )
-        [ Elm.int withTimeoutArg, withTimeoutArg0 ]
+        [ Elm.int withTimeoutArg_, withTimeoutArg_0 ]
 
 
 {-| Transforms the input with gzip compression.
@@ -1056,7 +1070,7 @@ customRead:
     -> BackendTask.Stream.Stream () () { read : (), write : Basics.Never }
 -}
 customRead : String -> Elm.Expression -> Elm.Expression
-customRead customReadArg customReadArg0 =
+customRead customReadArg_ customReadArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "BackendTask", "Stream" ]
@@ -1083,7 +1097,7 @@ customRead customReadArg customReadArg0 =
                      )
              }
         )
-        [ Elm.string customReadArg, customReadArg0 ]
+        [ Elm.string customReadArg_, customReadArg_0 ]
 
 
 {-| Calls an async function from your `custom-backend-task` definitions and uses the NodeJS `WritableStream` it returns.
@@ -1094,7 +1108,7 @@ customWrite:
     -> BackendTask.Stream.Stream () () { read : Basics.Never, write : () }
 -}
 customWrite : String -> Elm.Expression -> Elm.Expression
-customWrite customWriteArg customWriteArg0 =
+customWrite customWriteArg_ customWriteArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "BackendTask", "Stream" ]
@@ -1121,7 +1135,7 @@ customWrite customWriteArg customWriteArg0 =
                      )
              }
         )
-        [ Elm.string customWriteArg, customWriteArg0 ]
+        [ Elm.string customWriteArg_, customWriteArg_0 ]
 
 
 {-| Calls an async function from your `custom-backend-task` definitions and uses the NodeJS `DuplexStream` it returns.
@@ -1132,7 +1146,7 @@ customDuplex:
     -> BackendTask.Stream.Stream () () { read : (), write : () }
 -}
 customDuplex : String -> Elm.Expression -> Elm.Expression
-customDuplex customDuplexArg customDuplexArg0 =
+customDuplex customDuplexArg_ customDuplexArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "BackendTask", "Stream" ]
@@ -1157,7 +1171,7 @@ customDuplex customDuplexArg customDuplexArg0 =
                      )
              }
         )
-        [ Elm.string customDuplexArg, customDuplexArg0 ]
+        [ Elm.string customDuplexArg_, customDuplexArg_0 ]
 
 
 {-| Calls an async function from your `custom-backend-task` definitions and uses the NodeJS `DuplexStream` it returns.
@@ -1172,7 +1186,7 @@ customReadWithMeta:
 -}
 customReadWithMeta :
     String -> Elm.Expression -> Elm.Expression -> Elm.Expression
-customReadWithMeta customReadWithMetaArg customReadWithMetaArg0 customReadWithMetaArg1 =
+customReadWithMeta customReadWithMetaArg_ customReadWithMetaArg_0 customReadWithMetaArg_1 =
     Elm.apply
         (Elm.value
              { importFrom = [ "BackendTask", "Stream" ]
@@ -1217,9 +1231,9 @@ customReadWithMeta customReadWithMetaArg customReadWithMetaArg0 customReadWithMe
                      )
              }
         )
-        [ Elm.string customReadWithMetaArg
-        , customReadWithMetaArg0
-        , customReadWithMetaArg1
+        [ Elm.string customReadWithMetaArg_
+        , customReadWithMetaArg_0
+        , customReadWithMetaArg_1
         ]
 
 
@@ -1235,7 +1249,7 @@ customTransformWithMeta:
 -}
 customTransformWithMeta :
     String -> Elm.Expression -> Elm.Expression -> Elm.Expression
-customTransformWithMeta customTransformWithMetaArg customTransformWithMetaArg0 customTransformWithMetaArg1 =
+customTransformWithMeta customTransformWithMetaArg_ customTransformWithMetaArg_0 customTransformWithMetaArg_1 =
     Elm.apply
         (Elm.value
              { importFrom = [ "BackendTask", "Stream" ]
@@ -1278,9 +1292,9 @@ customTransformWithMeta customTransformWithMetaArg customTransformWithMetaArg0 c
                      )
              }
         )
-        [ Elm.string customTransformWithMetaArg
-        , customTransformWithMetaArg0
-        , customTransformWithMetaArg1
+        [ Elm.string customTransformWithMetaArg_
+        , customTransformWithMetaArg_0
+        , customTransformWithMetaArg_1
         ]
 
 
@@ -1296,7 +1310,7 @@ customWriteWithMeta:
 -}
 customWriteWithMeta :
     String -> Elm.Expression -> Elm.Expression -> Elm.Expression
-customWriteWithMeta customWriteWithMetaArg customWriteWithMetaArg0 customWriteWithMetaArg1 =
+customWriteWithMeta customWriteWithMetaArg_ customWriteWithMetaArg_0 customWriteWithMetaArg_1 =
     Elm.apply
         (Elm.value
              { importFrom = [ "BackendTask", "Stream" ]
@@ -1341,9 +1355,9 @@ customWriteWithMeta customWriteWithMetaArg customWriteWithMetaArg0 customWriteWi
                      )
              }
         )
-        [ Elm.string customWriteWithMetaArg
-        , customWriteWithMetaArg0
-        , customWriteWithMetaArg1
+        [ Elm.string customWriteWithMetaArg_
+        , customWriteWithMetaArg_0
+        , customWriteWithMetaArg_1
         ]
 
 
@@ -1442,24 +1456,6 @@ make_ =
     }
 
 
-caseOf_ :
-    { error :
-        Elm.Expression
-        -> { errorTags_0_0
-            | streamError : Elm.Expression -> Elm.Expression
-            , customError : Elm.Expression -> Elm.Expression -> Elm.Expression
-        }
-        -> Elm.Expression
-    , stderrOutput :
-        Elm.Expression
-        -> { stderrOutputTags_1_0
-            | printStderr : Elm.Expression
-            , ignoreStderr : Elm.Expression
-            , mergeStderrAndStdout : Elm.Expression
-            , stderrInsteadOfStdout : Elm.Expression
-        }
-        -> Elm.Expression
-    }
 caseOf_ =
     { error =
         \errorExpression errorTags ->
@@ -1470,29 +1466,64 @@ caseOf_ =
                      "Error"
                      [ Type.var "error", Type.var "body" ]
                 )
-                [ Elm.Case.branch1
-                    "StreamError"
-                    ( "stringString", Type.string )
-                    errorTags.streamError
-                , Elm.Case.branch2
-                    "CustomError"
-                    ( "error", Type.var "error" )
-                    ( "maybeMaybe", Type.maybe (Type.var "body") )
-                    errorTags.customError
+                [ Elm.Case.branch
+                    (Elm.Arg.customType
+                       "StreamError"
+                       errorTags.streamError |> Elm.Arg.item
+                                                      (Elm.Arg.varWith
+                                                             "arg_0"
+                                                             Type.string
+                                                      )
+                    )
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType
+                       "CustomError"
+                       errorTags.customError |> Elm.Arg.item
+                                                      (Elm.Arg.varWith
+                                                             "error"
+                                                             (Type.var "error")
+                                                      ) |> Elm.Arg.item
+                                                                 (Elm.Arg.varWith
+                                                                        "maybeMaybe"
+                                                                        (Type.maybe
+                                                                               (Type.var
+                                                                                      "body"
+                                                                               )
+                                                                        )
+                                                                 )
+                    )
+                    Basics.identity
                 ]
     , stderrOutput =
         \stderrOutputExpression stderrOutputTags ->
             Elm.Case.custom
                 stderrOutputExpression
                 (Type.namedWith [ "BackendTask", "Stream" ] "StderrOutput" [])
-                [ Elm.Case.branch0 "PrintStderr" stderrOutputTags.printStderr
-                , Elm.Case.branch0 "IgnoreStderr" stderrOutputTags.ignoreStderr
-                , Elm.Case.branch0
-                    "MergeStderrAndStdout"
-                    stderrOutputTags.mergeStderrAndStdout
-                , Elm.Case.branch0
-                    "StderrInsteadOfStdout"
-                    stderrOutputTags.stderrInsteadOfStdout
+                [ Elm.Case.branch
+                    (Elm.Arg.customType
+                       "PrintStderr"
+                       stderrOutputTags.printStderr
+                    )
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType
+                       "IgnoreStderr"
+                       stderrOutputTags.ignoreStderr
+                    )
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType
+                       "MergeStderrAndStdout"
+                       stderrOutputTags.mergeStderrAndStdout
+                    )
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType
+                       "StderrInsteadOfStdout"
+                       stderrOutputTags.stderrInsteadOfStdout
+                    )
+                    Basics.identity
                 ]
     }
 
@@ -1526,7 +1557,7 @@ call_ :
     }
 call_ =
     { pipe =
-        \pipeArg pipeArg0 ->
+        \pipeArg_ pipeArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "BackendTask", "Stream" ]
@@ -1573,9 +1604,9 @@ call_ =
                              )
                      }
                 )
-                [ pipeArg, pipeArg0 ]
+                [ pipeArg_, pipeArg_0 ]
     , fileRead =
-        \fileReadArg ->
+        \fileReadArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "BackendTask", "Stream" ]
@@ -1603,9 +1634,9 @@ call_ =
                              )
                      }
                 )
-                [ fileReadArg ]
+                [ fileReadArg_ ]
     , fileWrite =
-        \fileWriteArg ->
+        \fileWriteArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "BackendTask", "Stream" ]
@@ -1633,9 +1664,9 @@ call_ =
                              )
                      }
                 )
-                [ fileWriteArg ]
+                [ fileWriteArg_ ]
     , fromString =
-        \fromStringArg ->
+        \fromStringArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "BackendTask", "Stream" ]
@@ -1663,9 +1694,9 @@ call_ =
                              )
                      }
                 )
-                [ fromStringArg ]
+                [ fromStringArg_ ]
     , http =
-        \httpArg ->
+        \httpArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "BackendTask", "Stream" ]
@@ -1715,9 +1746,9 @@ call_ =
                              )
                      }
                 )
-                [ httpArg ]
+                [ httpArg_ ]
     , httpWithInput =
-        \httpWithInputArg ->
+        \httpWithInputArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "BackendTask", "Stream" ]
@@ -1756,9 +1787,9 @@ call_ =
                              )
                      }
                 )
-                [ httpWithInputArg ]
+                [ httpWithInputArg_ ]
     , read =
-        \readArg ->
+        \readArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "BackendTask", "Stream" ]
@@ -1805,9 +1836,9 @@ call_ =
                              )
                      }
                 )
-                [ readArg ]
+                [ readArg_ ]
     , readJson =
-        \readJsonArg readJsonArg0 ->
+        \readJsonArg_ readJsonArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "BackendTask", "Stream" ]
@@ -1858,9 +1889,9 @@ call_ =
                              )
                      }
                 )
-                [ readJsonArg, readJsonArg0 ]
+                [ readJsonArg_, readJsonArg_0 ]
     , readMetadata =
-        \readMetadataArg ->
+        \readMetadataArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "BackendTask", "Stream" ]
@@ -1904,9 +1935,9 @@ call_ =
                              )
                      }
                 )
-                [ readMetadataArg ]
+                [ readMetadataArg_ ]
     , run =
-        \runArg ->
+        \runArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "BackendTask", "Stream" ]
@@ -1935,9 +1966,9 @@ call_ =
                              )
                      }
                 )
-                [ runArg ]
+                [ runArg_ ]
     , command =
-        \commandArg commandArg0 ->
+        \commandArg_ commandArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "BackendTask", "Stream" ]
@@ -1960,9 +1991,9 @@ call_ =
                              )
                      }
                 )
-                [ commandArg, commandArg0 ]
+                [ commandArg_, commandArg_0 ]
     , commandWithOptions =
-        \commandWithOptionsArg commandWithOptionsArg0 commandWithOptionsArg1 ->
+        \commandWithOptionsArg_ commandWithOptionsArg_0 commandWithOptionsArg_1 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "BackendTask", "Stream" ]
@@ -1991,12 +2022,12 @@ call_ =
                              )
                      }
                 )
-                [ commandWithOptionsArg
-                , commandWithOptionsArg0
-                , commandWithOptionsArg1
+                [ commandWithOptionsArg_
+                , commandWithOptionsArg_0
+                , commandWithOptionsArg_1
                 ]
     , allowNon0Status =
-        \allowNon0StatusArg ->
+        \allowNon0StatusArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "BackendTask", "Stream" ]
@@ -2017,9 +2048,9 @@ call_ =
                              )
                      }
                 )
-                [ allowNon0StatusArg ]
+                [ allowNon0StatusArg_ ]
     , withOutput =
-        \withOutputArg withOutputArg0 ->
+        \withOutputArg_ withOutputArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "BackendTask", "Stream" ]
@@ -2044,9 +2075,9 @@ call_ =
                              )
                      }
                 )
-                [ withOutputArg, withOutputArg0 ]
+                [ withOutputArg_, withOutputArg_0 ]
     , withTimeout =
-        \withTimeoutArg withTimeoutArg0 ->
+        \withTimeoutArg_ withTimeoutArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "BackendTask", "Stream" ]
@@ -2068,9 +2099,9 @@ call_ =
                              )
                      }
                 )
-                [ withTimeoutArg, withTimeoutArg0 ]
+                [ withTimeoutArg_, withTimeoutArg_0 ]
     , customRead =
-        \customReadArg customReadArg0 ->
+        \customReadArg_ customReadArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "BackendTask", "Stream" ]
@@ -2103,9 +2134,9 @@ call_ =
                              )
                      }
                 )
-                [ customReadArg, customReadArg0 ]
+                [ customReadArg_, customReadArg_0 ]
     , customWrite =
-        \customWriteArg customWriteArg0 ->
+        \customWriteArg_ customWriteArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "BackendTask", "Stream" ]
@@ -2138,9 +2169,9 @@ call_ =
                              )
                      }
                 )
-                [ customWriteArg, customWriteArg0 ]
+                [ customWriteArg_, customWriteArg_0 ]
     , customDuplex =
-        \customDuplexArg customDuplexArg0 ->
+        \customDuplexArg_ customDuplexArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "BackendTask", "Stream" ]
@@ -2168,9 +2199,9 @@ call_ =
                              )
                      }
                 )
-                [ customDuplexArg, customDuplexArg0 ]
+                [ customDuplexArg_, customDuplexArg_0 ]
     , customReadWithMeta =
-        \customReadWithMetaArg customReadWithMetaArg0 customReadWithMetaArg1 ->
+        \customReadWithMetaArg_ customReadWithMetaArg_0 customReadWithMetaArg_1 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "BackendTask", "Stream" ]
@@ -2223,12 +2254,12 @@ call_ =
                              )
                      }
                 )
-                [ customReadWithMetaArg
-                , customReadWithMetaArg0
-                , customReadWithMetaArg1
+                [ customReadWithMetaArg_
+                , customReadWithMetaArg_0
+                , customReadWithMetaArg_1
                 ]
     , customTransformWithMeta =
-        \customTransformWithMetaArg customTransformWithMetaArg0 customTransformWithMetaArg1 ->
+        \customTransformWithMetaArg_ customTransformWithMetaArg_0 customTransformWithMetaArg_1 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "BackendTask", "Stream" ]
@@ -2276,12 +2307,12 @@ call_ =
                              )
                      }
                 )
-                [ customTransformWithMetaArg
-                , customTransformWithMetaArg0
-                , customTransformWithMetaArg1
+                [ customTransformWithMetaArg_
+                , customTransformWithMetaArg_0
+                , customTransformWithMetaArg_1
                 ]
     , customWriteWithMeta =
-        \customWriteWithMetaArg customWriteWithMetaArg0 customWriteWithMetaArg1 ->
+        \customWriteWithMetaArg_ customWriteWithMetaArg_0 customWriteWithMetaArg_1 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "BackendTask", "Stream" ]
@@ -2334,9 +2365,9 @@ call_ =
                              )
                      }
                 )
-                [ customWriteWithMetaArg
-                , customWriteWithMetaArg0
-                , customWriteWithMetaArg1
+                [ customWriteWithMetaArg_
+                , customWriteWithMetaArg_0
+                , customWriteWithMetaArg_1
                 ]
     }
 

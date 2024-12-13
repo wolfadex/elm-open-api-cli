@@ -1,12 +1,19 @@
-module Gen.Rfc3339 exposing (annotation_, call_, caseOf_, dateLocalParser, dateTimeLocalParser, dateTimeOffsetParser, make_, moduleName_, parse, timeLocalParser, toString, values_)
+module Gen.Rfc3339 exposing
+    ( moduleName_, parse, toString, dateTimeOffsetParser, dateTimeLocalParser, dateLocalParser
+    , timeLocalParser, annotation_, make_, caseOf_, call_, values_
+    )
 
-{-| 
-@docs moduleName_, parse, toString, dateTimeOffsetParser, dateTimeLocalParser, dateLocalParser, timeLocalParser, annotation_, make_, caseOf_, call_, values_
+{-|
+# Generated bindings for Rfc3339
+
+@docs moduleName_, parse, toString, dateTimeOffsetParser, dateTimeLocalParser, dateLocalParser
+@docs timeLocalParser, annotation_, make_, caseOf_, call_, values_
 -}
 
 
 import Elm
 import Elm.Annotation as Type
+import Elm.Arg
 import Elm.Case
 
 
@@ -21,7 +28,7 @@ moduleName_ =
 parse: String -> Result.Result (List Rfc3339.Error) Rfc3339.DateTime
 -}
 parse : String -> Elm.Expression
-parse parseArg =
+parse parseArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Rfc3339" ]
@@ -41,7 +48,7 @@ parse parseArg =
                      )
              }
         )
-        [ Elm.string parseArg ]
+        [ Elm.string parseArg_ ]
 
 
 {-| Prints an RFC3339 formatted String, using `T` as the date time separator and `Z` for an offset of 0 hours and 0 minutes.
@@ -49,7 +56,7 @@ parse parseArg =
 toString: Rfc3339.DateTime -> String
 -}
 toString : Elm.Expression -> Elm.Expression
-toString toStringArg =
+toString toStringArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Rfc3339" ]
@@ -62,7 +69,7 @@ toString toStringArg =
                      )
              }
         )
-        [ toStringArg ]
+        [ toStringArg_ ]
 
 
 {-| Parser for a **date time with offset**: e.g. 1970-11-21T09:15:22+01:00.
@@ -345,120 +352,180 @@ make_ =
     }
 
 
-caseOf_ :
-    { dateTime :
-        Elm.Expression
-        -> { dateTimeTags_0_0
-            | dateTimeOffset : Elm.Expression -> Elm.Expression
-            , dateTimeLocal : Elm.Expression -> Elm.Expression
-            , dateLocal : Elm.Expression -> Elm.Expression
-            , timeLocal : Elm.Expression -> Elm.Expression
-        }
-        -> Elm.Expression
-    , error :
-        Elm.Expression
-        -> { errorTags_1_0
-            | expectedDateSeparator : Elm.Expression
-            , expectedDateTimeSeparator : Elm.Expression
-            , expectedTimeSeparator : Elm.Expression
-            , expectedOffsetSeparator : Elm.Expression
-            , invalidMonth : Elm.Expression
-            , dayTooLarge : Elm.Expression -> Elm.Expression
-            , expectedZuluOffset : Elm.Expression
-            , expectedOffsetSign : Elm.Expression
-            , expectedFractionalSecondSeparator : Elm.Expression
-            , expectedDigit : Elm.Expression
-            , expectedAnInt : Elm.Expression
-            , invalidNegativeDigits : Elm.Expression
-            , invalidHour : Elm.Expression
-            , invalidMinute : Elm.Expression
-            , invalidSecond : Elm.Expression
-            , invalidDay : Elm.Expression
-        }
-        -> Elm.Expression
-    }
 caseOf_ =
     { dateTime =
         \dateTimeExpression dateTimeTags ->
             Elm.Case.custom
                 dateTimeExpression
                 (Type.namedWith [ "Rfc3339" ] "DateTime" [])
-                [ Elm.Case.branch1
-                    "DateTimeOffset"
-                    ( "one"
-                    , Type.record
-                          [ ( "instant", Type.namedWith [ "Time" ] "Posix" [] )
-                          , ( "offset"
-                            , Type.record
-                                  [ ( "hour", Type.int )
-                                  , ( "minute", Type.int )
-                                  ]
-                            )
-                          ]
+                [ Elm.Case.branch
+                    (Elm.Arg.customType
+                       "DateTimeOffset"
+                       dateTimeTags.dateTimeOffset |> Elm.Arg.item
+                                                            (Elm.Arg.varWith
+                                                                   "arg_0"
+                                                                   (Type.record
+                                                                          [ ( "instant"
+                                                                            , Type.namedWith
+                                                                                [ "Time"
+                                                                                ]
+                                                                                "Posix"
+                                                                                []
+                                                                            )
+                                                                          , ( "offset"
+                                                                            , Type.record
+                                                                                [ ( "hour"
+                                                                                  , Type.int
+                                                                                  )
+                                                                                , ( "minute"
+                                                                                  , Type.int
+                                                                                  )
+                                                                                ]
+                                                                            )
+                                                                          ]
+                                                                   )
+                                                            )
                     )
-                    dateTimeTags.dateTimeOffset
-                , Elm.Case.branch1
-                    "DateTimeLocal"
-                    ( "timeExtraParts"
-                    , Type.namedWith [ "Time", "Extra" ] "Parts" []
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType
+                       "DateTimeLocal"
+                       dateTimeTags.dateTimeLocal |> Elm.Arg.item
+                                                           (Elm.Arg.varWith
+                                                                  "timeExtraParts"
+                                                                  (Type.namedWith
+                                                                         [ "Time"
+                                                                         , "Extra"
+                                                                         ]
+                                                                         "Parts"
+                                                                         []
+                                                                  )
+                                                           )
                     )
-                    dateTimeTags.dateTimeLocal
-                , Elm.Case.branch1
-                    "DateLocal"
-                    ( "dateDate", Type.namedWith [ "Date" ] "Date" [] )
-                    dateTimeTags.dateLocal
-                , Elm.Case.branch1
-                    "TimeLocal"
-                    ( "one"
-                    , Type.record
-                          [ ( "hour", Type.int )
-                          , ( "minute", Type.int )
-                          , ( "second", Type.int )
-                          , ( "millisecond", Type.int )
-                          ]
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType
+                       "DateLocal"
+                       dateTimeTags.dateLocal |> Elm.Arg.item
+                                                       (Elm.Arg.varWith
+                                                              "dateDate"
+                                                              (Type.namedWith
+                                                                     [ "Date" ]
+                                                                     "Date"
+                                                                     []
+                                                              )
+                                                       )
                     )
-                    dateTimeTags.timeLocal
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType
+                       "TimeLocal"
+                       dateTimeTags.timeLocal |> Elm.Arg.item
+                                                       (Elm.Arg.varWith
+                                                              "arg_0"
+                                                              (Type.record
+                                                                     [ ( "hour"
+                                                                       , Type.int
+                                                                       )
+                                                                     , ( "minute"
+                                                                       , Type.int
+                                                                       )
+                                                                     , ( "second"
+                                                                       , Type.int
+                                                                       )
+                                                                     , ( "millisecond"
+                                                                       , Type.int
+                                                                       )
+                                                                     ]
+                                                              )
+                                                       )
+                    )
+                    Basics.identity
                 ]
     , error =
         \errorExpression errorTags ->
             Elm.Case.custom
                 errorExpression
                 (Type.namedWith [ "Rfc3339" ] "Error" [])
-                [ Elm.Case.branch0
-                    "ExpectedDateSeparator"
-                    errorTags.expectedDateSeparator
-                , Elm.Case.branch0
-                    "ExpectedDateTimeSeparator"
-                    errorTags.expectedDateTimeSeparator
-                , Elm.Case.branch0
-                    "ExpectedTimeSeparator"
-                    errorTags.expectedTimeSeparator
-                , Elm.Case.branch0
-                    "ExpectedOffsetSeparator"
-                    errorTags.expectedOffsetSeparator
-                , Elm.Case.branch0 "InvalidMonth" errorTags.invalidMonth
-                , Elm.Case.branch1
-                    "DayTooLarge"
-                    ( "basicsInt", Type.int )
-                    errorTags.dayTooLarge
-                , Elm.Case.branch0
-                    "ExpectedZuluOffset"
-                    errorTags.expectedZuluOffset
-                , Elm.Case.branch0
-                    "ExpectedOffsetSign"
-                    errorTags.expectedOffsetSign
-                , Elm.Case.branch0
-                    "ExpectedFractionalSecondSeparator"
-                    errorTags.expectedFractionalSecondSeparator
-                , Elm.Case.branch0 "ExpectedDigit" errorTags.expectedDigit
-                , Elm.Case.branch0 "ExpectedAnInt" errorTags.expectedAnInt
-                , Elm.Case.branch0
-                    "InvalidNegativeDigits"
-                    errorTags.invalidNegativeDigits
-                , Elm.Case.branch0 "InvalidHour" errorTags.invalidHour
-                , Elm.Case.branch0 "InvalidMinute" errorTags.invalidMinute
-                , Elm.Case.branch0 "InvalidSecond" errorTags.invalidSecond
-                , Elm.Case.branch0 "InvalidDay" errorTags.invalidDay
+                [ Elm.Case.branch
+                    (Elm.Arg.customType
+                       "ExpectedDateSeparator"
+                       errorTags.expectedDateSeparator
+                    )
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType
+                       "ExpectedDateTimeSeparator"
+                       errorTags.expectedDateTimeSeparator
+                    )
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType
+                       "ExpectedTimeSeparator"
+                       errorTags.expectedTimeSeparator
+                    )
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType
+                       "ExpectedOffsetSeparator"
+                       errorTags.expectedOffsetSeparator
+                    )
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType "InvalidMonth" errorTags.invalidMonth)
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType
+                       "DayTooLarge"
+                       errorTags.dayTooLarge |> Elm.Arg.item
+                                                      (Elm.Arg.varWith
+                                                             "arg_0"
+                                                             Type.int
+                                                      )
+                    )
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType
+                       "ExpectedZuluOffset"
+                       errorTags.expectedZuluOffset
+                    )
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType
+                       "ExpectedOffsetSign"
+                       errorTags.expectedOffsetSign
+                    )
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType
+                       "ExpectedFractionalSecondSeparator"
+                       errorTags.expectedFractionalSecondSeparator
+                    )
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType "ExpectedDigit" errorTags.expectedDigit)
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType "ExpectedAnInt" errorTags.expectedAnInt)
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType
+                       "InvalidNegativeDigits"
+                       errorTags.invalidNegativeDigits
+                    )
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType "InvalidHour" errorTags.invalidHour)
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType "InvalidMinute" errorTags.invalidMinute)
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType "InvalidSecond" errorTags.invalidSecond)
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType "InvalidDay" errorTags.invalidDay)
+                    Basics.identity
                 ]
     }
 
@@ -469,7 +536,7 @@ call_ :
     }
 call_ =
     { parse =
-        \parseArg ->
+        \parseArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Rfc3339" ]
@@ -496,9 +563,9 @@ call_ =
                              )
                      }
                 )
-                [ parseArg ]
+                [ parseArg_ ]
     , toString =
-        \toStringArg ->
+        \toStringArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Rfc3339" ]
@@ -511,7 +578,7 @@ call_ =
                              )
                      }
                 )
-                [ toStringArg ]
+                [ toStringArg_ ]
     }
 
 

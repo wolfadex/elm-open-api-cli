@@ -1,12 +1,19 @@
-module Gen.Pages.Internal.Platform exposing (annotation_, application, call_, caseOf_, init, make_, moduleName_, update, values_, view)
+module Gen.Pages.Internal.Platform exposing
+    ( moduleName_, application, init, update, view, annotation_
+    , make_, caseOf_, call_, values_
+    )
 
-{-| 
-@docs moduleName_, application, init, update, view, annotation_, make_, caseOf_, call_, values_
+{-|
+# Generated bindings for Pages.Internal.Platform
+
+@docs moduleName_, application, init, update, view, annotation_
+@docs make_, caseOf_, call_, values_
 -}
 
 
 import Elm
 import Elm.Annotation as Type
+import Elm.Arg
 import Elm.Case
 
 
@@ -21,7 +28,7 @@ moduleName_ =
     -> Platform.Program Pages.Internal.Platform.Flags (Pages.Internal.Platform.Model userModel pageData actionData sharedData) (Pages.Internal.Platform.Msg userMsg pageData actionData sharedData errorPage)
 -}
 application : Elm.Expression -> Elm.Expression
-application applicationArg =
+application applicationArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Pages", "Internal", "Platform" ]
@@ -80,7 +87,7 @@ application applicationArg =
                      )
              }
         )
-        [ applicationArg ]
+        [ applicationArg_ ]
 
 
 {-| init: 
@@ -96,7 +103,7 @@ init :
     -> Elm.Expression
     -> Elm.Expression
     -> Elm.Expression
-init initArg initArg0 initArg1 initArg2 =
+init initArg_ initArg_0 initArg_1 initArg_2 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Pages", "Internal", "Platform" ]
@@ -162,7 +169,7 @@ init initArg initArg0 initArg1 initArg2 =
                      )
              }
         )
-        [ initArg, initArg0, initArg1, initArg2 ]
+        [ initArg_, initArg_0, initArg_1, initArg_2 ]
 
 
 {-| update: 
@@ -172,7 +179,7 @@ init initArg initArg0 initArg1 initArg2 =
     -> ( Pages.Internal.Platform.Model userModel pageData actionData sharedData, Pages.Internal.Platform.Effect userMsg pageData actionData sharedData userEffect errorPage )
 -}
 update : Elm.Expression -> Elm.Expression -> Elm.Expression -> Elm.Expression
-update updateArg updateArg0 updateArg1 =
+update updateArg_ updateArg_0 updateArg_1 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Pages", "Internal", "Platform" ]
@@ -244,7 +251,7 @@ update updateArg updateArg0 updateArg1 =
                      )
              }
         )
-        [ updateArg, updateArg0, updateArg1 ]
+        [ updateArg_, updateArg_0, updateArg_1 ]
 
 
 {-| view: 
@@ -253,7 +260,7 @@ update updateArg updateArg0 updateArg1 =
     -> Browser.Document (Pages.Internal.Platform.Msg userMsg pageData actionData sharedData errorPage)
 -}
 view : Elm.Expression -> Elm.Expression -> Elm.Expression
-view viewArg viewArg0 =
+view viewArg_ viewArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Pages", "Internal", "Platform" ]
@@ -308,7 +315,7 @@ view viewArg viewArg0 =
                      )
              }
         )
-        [ viewArg, viewArg0 ]
+        [ viewArg_, viewArg_0 ]
 
 
 annotation_ :
@@ -1182,68 +1189,6 @@ make_ =
     }
 
 
-caseOf_ :
-    { msg :
-        Elm.Expression
-        -> { msgTags_0_0
-            | linkClicked : Elm.Expression -> Elm.Expression
-            , urlChanged : Elm.Expression -> Elm.Expression
-            , userMsg : Elm.Expression -> Elm.Expression
-            , formMsg : Elm.Expression -> Elm.Expression
-            , updateCacheAndUrlNew :
-                Elm.Expression
-                -> Elm.Expression
-                -> Elm.Expression
-                -> Elm.Expression
-                -> Elm.Expression
-            , fetcherComplete :
-                Elm.Expression
-                -> Elm.Expression
-                -> Elm.Expression
-                -> Elm.Expression
-                -> Elm.Expression
-            , fetcherStarted :
-                Elm.Expression
-                -> Elm.Expression
-                -> Elm.Expression
-                -> Elm.Expression
-                -> Elm.Expression
-            , pageScrollComplete : Elm.Expression
-            , hotReloadCompleteNew : Elm.Expression -> Elm.Expression
-            , processFetchResponse :
-                Elm.Expression
-                -> Elm.Expression
-                -> Elm.Expression
-                -> Elm.Expression
-        }
-        -> Elm.Expression
-    , effect :
-        Elm.Expression
-        -> { effectTags_1_0
-            | scrollToTop : Elm.Expression
-            , noEffect : Elm.Expression
-            , browserLoadUrl : Elm.Expression -> Elm.Expression
-            , browserPushUrl : Elm.Expression -> Elm.Expression
-            , browserReplaceUrl : Elm.Expression -> Elm.Expression
-            , fetchPageData :
-                Elm.Expression
-                -> Elm.Expression
-                -> Elm.Expression
-                -> Elm.Expression
-                -> Elm.Expression
-            , submit : Elm.Expression -> Elm.Expression
-            , submitFetcher :
-                Elm.Expression
-                -> Elm.Expression
-                -> Elm.Expression
-                -> Elm.Expression
-            , batch : Elm.Expression -> Elm.Expression
-            , userCmd : Elm.Expression -> Elm.Expression
-            , cancelRequest : Elm.Expression -> Elm.Expression
-            , runCmd : Elm.Expression -> Elm.Expression
-        }
-        -> Elm.Expression
-    }
 caseOf_ =
     { msg =
         \msgExpression msgTags ->
@@ -1259,158 +1204,346 @@ caseOf_ =
                      , Type.var "errorPage"
                      ]
                 )
-                [ Elm.Case.branch1
-                    "LinkClicked"
-                    ( "browserUrlRequest"
-                    , Type.namedWith [ "Browser" ] "UrlRequest" []
+                [ Elm.Case.branch
+                    (Elm.Arg.customType
+                       "LinkClicked"
+                       msgTags.linkClicked |> Elm.Arg.item
+                                                    (Elm.Arg.varWith
+                                                           "browserUrlRequest"
+                                                           (Type.namedWith
+                                                                  [ "Browser" ]
+                                                                  "UrlRequest"
+                                                                  []
+                                                           )
+                                                    )
                     )
-                    msgTags.linkClicked
-                , Elm.Case.branch1
-                    "UrlChanged"
-                    ( "urlUrl", Type.namedWith [ "Url" ] "Url" [] )
-                    msgTags.urlChanged
-                , Elm.Case.branch1
-                    "UserMsg"
-                    ( "pagesMsgPagesMsg"
-                    , Type.namedWith
-                          [ "PagesMsg" ]
-                          "PagesMsg"
-                          [ Type.var "userMsg" ]
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType
+                       "UrlChanged"
+                       msgTags.urlChanged |> Elm.Arg.item
+                                                   (Elm.Arg.varWith
+                                                          "urlUrl"
+                                                          (Type.namedWith
+                                                                 [ "Url" ]
+                                                                 "Url"
+                                                                 []
+                                                          )
+                                                   )
                     )
-                    msgTags.userMsg
-                , Elm.Case.branch1
-                    "FormMsg"
-                    ( "formMsg"
-                    , Type.namedWith
-                          [ "Form" ]
-                          "Msg"
-                          [ Type.namedWith
-                              [ "Pages", "Internal", "Platform" ]
-                              "Msg"
-                              [ Type.var "userMsg"
-                              , Type.var "pageData"
-                              , Type.var "actionData"
-                              , Type.var "sharedData"
-                              , Type.var "errorPage"
-                              ]
-                          ]
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType
+                       "UserMsg"
+                       msgTags.userMsg |> Elm.Arg.item
+                                                (Elm.Arg.varWith
+                                                       "pagesMsgPagesMsg"
+                                                       (Type.namedWith
+                                                              [ "PagesMsg" ]
+                                                              "PagesMsg"
+                                                              [ Type.var
+                                                                    "userMsg"
+                                                              ]
+                                                       )
+                                                )
                     )
-                    msgTags.formMsg
-                , Elm.Case.branch4
-                    "UpdateCacheAndUrlNew"
-                    ( "basicsBool", Type.bool )
-                    ( "urlUrl", Type.namedWith [ "Url" ] "Url" [] )
-                    ( "maybeMaybe", Type.maybe (Type.var "userMsg") )
-                    ( "resultResult"
-                    , Type.namedWith
-                          [ "Result" ]
-                          "Result"
-                          [ Type.namedWith [ "Http" ] "Error" []
-                          , Type.tuple
-                              (Type.namedWith [ "Url" ] "Url" [])
-                              (Type.namedWith
-                                 [ "Pages", "Internal", "ResponseSketch" ]
-                                 "ResponseSketch"
-                                 [ Type.var "pageData"
-                                 , Type.var "actionData"
-                                 , Type.var "sharedData"
-                                 ]
-                              )
-                          ]
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType
+                       "FormMsg"
+                       msgTags.formMsg |> Elm.Arg.item
+                                                (Elm.Arg.varWith
+                                                       "formMsg"
+                                                       (Type.namedWith
+                                                              [ "Form" ]
+                                                              "Msg"
+                                                              [ Type.namedWith
+                                                                    [ "Pages"
+                                                                    , "Internal"
+                                                                    , "Platform"
+                                                                    ]
+                                                                    "Msg"
+                                                                    [ Type.var
+                                                                        "userMsg"
+                                                                    , Type.var
+                                                                        "pageData"
+                                                                    , Type.var
+                                                                        "actionData"
+                                                                    , Type.var
+                                                                        "sharedData"
+                                                                    , Type.var
+                                                                        "errorPage"
+                                                                    ]
+                                                              ]
+                                                       )
+                                                )
                     )
-                    msgTags.updateCacheAndUrlNew
-                , Elm.Case.branch4
-                    "FetcherComplete"
-                    ( "basicsBool", Type.bool )
-                    ( "stringString", Type.string )
-                    ( "basicsInt", Type.int )
-                    ( "resultResult"
-                    , Type.namedWith
-                          [ "Result" ]
-                          "Result"
-                          [ Type.namedWith [ "Http" ] "Error" []
-                          , Type.tuple
-                              (Type.maybe (Type.var "userMsg"))
-                              (Type.namedWith
-                                 [ "Pages", "Internal", "Platform" ]
-                                 "ActionDataOrRedirect"
-                                 [ Type.var "actionData" ]
-                              )
-                          ]
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType
+                       "UpdateCacheAndUrlNew"
+                       msgTags.updateCacheAndUrlNew |> Elm.Arg.item
+                                                             (Elm.Arg.varWith
+                                                                    "arg_0"
+                                                                    Type.bool
+                                                             ) |> Elm.Arg.item
+                                                                        (Elm.Arg.varWith
+                                                                               "urlUrl"
+                                                                               (Type.namedWith
+                                                                                      [ "Url"
+                                                                                      ]
+                                                                                      "Url"
+                                                                                      []
+                                                                               )
+                                                                        ) |> Elm.Arg.item
+                                                                                   (Elm.Arg.varWith
+                                                                                          "maybeMaybe"
+                                                                                          (Type.maybe
+                                                                                                 (Type.var
+                                                                                                        "userMsg"
+                                                                                                 )
+                                                                                          )
+                                                                                   ) |> Elm.Arg.item
+                                                                                              (Elm.Arg.varWith
+                                                                                                     "resultResult"
+                                                                                                     (Type.namedWith
+                                                                                                            [ "Result"
+                                                                                                            ]
+                                                                                                            "Result"
+                                                                                                            [ Type.namedWith
+                                                                                                                  [ "Http"
+                                                                                                                  ]
+                                                                                                                  "Error"
+                                                                                                                  []
+                                                                                                            , Type.tuple
+                                                                                                                  (Type.namedWith
+                                                                                                                       [ "Url"
+                                                                                                                       ]
+                                                                                                                       "Url"
+                                                                                                                       []
+                                                                                                                  )
+                                                                                                                  (Type.namedWith
+                                                                                                                       [ "Pages"
+                                                                                                                       , "Internal"
+                                                                                                                       , "ResponseSketch"
+                                                                                                                       ]
+                                                                                                                       "ResponseSketch"
+                                                                                                                       [ Type.var
+                                                                                                                           "pageData"
+                                                                                                                       , Type.var
+                                                                                                                           "actionData"
+                                                                                                                       , Type.var
+                                                                                                                           "sharedData"
+                                                                                                                       ]
+                                                                                                                  )
+                                                                                                            ]
+                                                                                                     )
+                                                                                              )
                     )
-                    msgTags.fetcherComplete
-                , Elm.Case.branch4
-                    "FetcherStarted"
-                    ( "stringString", Type.string )
-                    ( "basicsInt", Type.int )
-                    ( "pagesInternalPlatformFormData"
-                    , Type.namedWith
-                          [ "Pages", "Internal", "Platform" ]
-                          "FormData"
-                          []
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType
+                       "FetcherComplete"
+                       msgTags.fetcherComplete |> Elm.Arg.item
+                                                        (Elm.Arg.varWith
+                                                               "arg_0"
+                                                               Type.bool
+                                                        ) |> Elm.Arg.item
+                                                                   (Elm.Arg.varWith
+                                                                          "arg_1"
+                                                                          Type.string
+                                                                   ) |> Elm.Arg.item
+                                                                              (Elm.Arg.varWith
+                                                                                     "arg_2"
+                                                                                     Type.int
+                                                                              ) |> Elm.Arg.item
+                                                                                         (Elm.Arg.varWith
+                                                                                                "resultResult"
+                                                                                                (Type.namedWith
+                                                                                                       [ "Result"
+                                                                                                       ]
+                                                                                                       "Result"
+                                                                                                       [ Type.namedWith
+                                                                                                             [ "Http"
+                                                                                                             ]
+                                                                                                             "Error"
+                                                                                                             []
+                                                                                                       , Type.tuple
+                                                                                                             (Type.maybe
+                                                                                                                  (Type.var
+                                                                                                                       "userMsg"
+                                                                                                                  )
+                                                                                                             )
+                                                                                                             (Type.namedWith
+                                                                                                                  [ "Pages"
+                                                                                                                  , "Internal"
+                                                                                                                  , "Platform"
+                                                                                                                  ]
+                                                                                                                  "ActionDataOrRedirect"
+                                                                                                                  [ Type.var
+                                                                                                                      "actionData"
+                                                                                                                  ]
+                                                                                                             )
+                                                                                                       ]
+                                                                                                )
+                                                                                         )
                     )
-                    ( "timePosix", Type.namedWith [ "Time" ] "Posix" [] )
-                    msgTags.fetcherStarted
-                , Elm.Case.branch0
-                    "PageScrollComplete"
-                    msgTags.pageScrollComplete
-                , Elm.Case.branch1
-                    "HotReloadCompleteNew"
-                    ( "bytesBytes", Type.namedWith [ "Bytes" ] "Bytes" [] )
-                    msgTags.hotReloadCompleteNew
-                , Elm.Case.branch3
-                    "ProcessFetchResponse"
-                    ( "basicsInt", Type.int )
-                    ( "resultResult"
-                    , Type.namedWith
-                          [ "Result" ]
-                          "Result"
-                          [ Type.namedWith [ "Http" ] "Error" []
-                          , Type.tuple
-                              (Type.namedWith [ "Url" ] "Url" [])
-                              (Type.namedWith
-                                 [ "Pages", "Internal", "ResponseSketch" ]
-                                 "ResponseSketch"
-                                 [ Type.var "pageData"
-                                 , Type.var "actionData"
-                                 , Type.var "sharedData"
-                                 ]
-                              )
-                          ]
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType
+                       "FetcherStarted"
+                       msgTags.fetcherStarted |> Elm.Arg.item
+                                                       (Elm.Arg.varWith
+                                                              "arg_0"
+                                                              Type.string
+                                                       ) |> Elm.Arg.item
+                                                                  (Elm.Arg.varWith
+                                                                         "arg_1"
+                                                                         Type.int
+                                                                  ) |> Elm.Arg.item
+                                                                             (Elm.Arg.varWith
+                                                                                    "pagesInternalPlatformFormData"
+                                                                                    (Type.namedWith
+                                                                                           [ "Pages"
+                                                                                           , "Internal"
+                                                                                           , "Platform"
+                                                                                           ]
+                                                                                           "FormData"
+                                                                                           []
+                                                                                    )
+                                                                             ) |> Elm.Arg.item
+                                                                                        (Elm.Arg.varWith
+                                                                                               "timePosix"
+                                                                                               (Type.namedWith
+                                                                                                      [ "Time"
+                                                                                                      ]
+                                                                                                      "Posix"
+                                                                                                      []
+                                                                                               )
+                                                                                        )
                     )
-                    ( "three"
-                    , Type.function
-                          [ Type.namedWith
-                              [ "Result" ]
-                              "Result"
-                              [ Type.namedWith [ "Http" ] "Error" []
-                              , Type.tuple
-                                    (Type.namedWith [ "Url" ] "Url" [])
-                                    (Type.namedWith
-                                         [ "Pages"
-                                         , "Internal"
-                                         , "ResponseSketch"
-                                         ]
-                                         "ResponseSketch"
-                                         [ Type.var "pageData"
-                                         , Type.var "actionData"
-                                         , Type.var "sharedData"
-                                         ]
-                                    )
-                              ]
-                          ]
-                          (Type.namedWith
-                               [ "Pages", "Internal", "Platform" ]
-                               "Msg"
-                               [ Type.var "userMsg"
-                               , Type.var "pageData"
-                               , Type.var "actionData"
-                               , Type.var "sharedData"
-                               , Type.var "errorPage"
-                               ]
-                          )
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType
+                       "PageScrollComplete"
+                       msgTags.pageScrollComplete
                     )
-                    msgTags.processFetchResponse
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType
+                       "HotReloadCompleteNew"
+                       msgTags.hotReloadCompleteNew |> Elm.Arg.item
+                                                             (Elm.Arg.varWith
+                                                                    "bytesBytes"
+                                                                    (Type.namedWith
+                                                                           [ "Bytes"
+                                                                           ]
+                                                                           "Bytes"
+                                                                           []
+                                                                    )
+                                                             )
+                    )
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType
+                       "ProcessFetchResponse"
+                       msgTags.processFetchResponse |> Elm.Arg.item
+                                                             (Elm.Arg.varWith
+                                                                    "arg_0"
+                                                                    Type.int
+                                                             ) |> Elm.Arg.item
+                                                                        (Elm.Arg.varWith
+                                                                               "resultResult"
+                                                                               (Type.namedWith
+                                                                                      [ "Result"
+                                                                                      ]
+                                                                                      "Result"
+                                                                                      [ Type.namedWith
+                                                                                            [ "Http"
+                                                                                            ]
+                                                                                            "Error"
+                                                                                            []
+                                                                                      , Type.tuple
+                                                                                            (Type.namedWith
+                                                                                                 [ "Url"
+                                                                                                 ]
+                                                                                                 "Url"
+                                                                                                 []
+                                                                                            )
+                                                                                            (Type.namedWith
+                                                                                                 [ "Pages"
+                                                                                                 , "Internal"
+                                                                                                 , "ResponseSketch"
+                                                                                                 ]
+                                                                                                 "ResponseSketch"
+                                                                                                 [ Type.var
+                                                                                                     "pageData"
+                                                                                                 , Type.var
+                                                                                                     "actionData"
+                                                                                                 , Type.var
+                                                                                                     "sharedData"
+                                                                                                 ]
+                                                                                            )
+                                                                                      ]
+                                                                               )
+                                                                        ) |> Elm.Arg.item
+                                                                                   (Elm.Arg.varWith
+                                                                                          "arg_2"
+                                                                                          (Type.function
+                                                                                                 [ Type.namedWith
+                                                                                                       [ "Result"
+                                                                                                       ]
+                                                                                                       "Result"
+                                                                                                       [ Type.namedWith
+                                                                                                           [ "Http"
+                                                                                                           ]
+                                                                                                           "Error"
+                                                                                                           []
+                                                                                                       , Type.tuple
+                                                                                                           (Type.namedWith
+                                                                                                              [ "Url"
+                                                                                                              ]
+                                                                                                              "Url"
+                                                                                                              []
+                                                                                                           )
+                                                                                                           (Type.namedWith
+                                                                                                              [ "Pages"
+                                                                                                              , "Internal"
+                                                                                                              , "ResponseSketch"
+                                                                                                              ]
+                                                                                                              "ResponseSketch"
+                                                                                                              [ Type.var
+                                                                                                                    "pageData"
+                                                                                                              , Type.var
+                                                                                                                    "actionData"
+                                                                                                              , Type.var
+                                                                                                                    "sharedData"
+                                                                                                              ]
+                                                                                                           )
+                                                                                                       ]
+                                                                                                 ]
+                                                                                                 (Type.namedWith
+                                                                                                        [ "Pages"
+                                                                                                        , "Internal"
+                                                                                                        , "Platform"
+                                                                                                        ]
+                                                                                                        "Msg"
+                                                                                                        [ Type.var
+                                                                                                              "userMsg"
+                                                                                                        , Type.var
+                                                                                                              "pageData"
+                                                                                                        , Type.var
+                                                                                                              "actionData"
+                                                                                                        , Type.var
+                                                                                                              "sharedData"
+                                                                                                        , Type.var
+                                                                                                              "errorPage"
+                                                                                                        ]
+                                                                                                 )
+                                                                                          )
+                                                                                   )
+                    )
+                    Basics.identity
                 ]
     , effect =
         \effectExpression effectTags ->
@@ -1427,128 +1560,252 @@ caseOf_ =
                      , Type.var "errorPage"
                      ]
                 )
-                [ Elm.Case.branch0 "ScrollToTop" effectTags.scrollToTop
-                , Elm.Case.branch0 "NoEffect" effectTags.noEffect
-                , Elm.Case.branch1
-                    "BrowserLoadUrl"
-                    ( "stringString", Type.string )
-                    effectTags.browserLoadUrl
-                , Elm.Case.branch1
-                    "BrowserPushUrl"
-                    ( "stringString", Type.string )
-                    effectTags.browserPushUrl
-                , Elm.Case.branch1
-                    "BrowserReplaceUrl"
-                    ( "stringString", Type.string )
-                    effectTags.browserReplaceUrl
-                , Elm.Case.branch4
-                    "FetchPageData"
-                    ( "basicsInt", Type.int )
-                    ( "maybeMaybe"
-                    , Type.maybe
-                          (Type.namedWith
-                               [ "Pages", "Internal", "Platform" ]
-                               "FormData"
-                               []
-                          )
+                [ Elm.Case.branch
+                    (Elm.Arg.customType "ScrollToTop" effectTags.scrollToTop)
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType "NoEffect" effectTags.noEffect)
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType
+                       "BrowserLoadUrl"
+                       effectTags.browserLoadUrl |> Elm.Arg.item
+                                                          (Elm.Arg.varWith
+                                                                 "arg_0"
+                                                                 Type.string
+                                                          )
                     )
-                    ( "urlUrl", Type.namedWith [ "Url" ] "Url" [] )
-                    ( "four"
-                    , Type.function
-                          [ Type.namedWith
-                              [ "Result" ]
-                              "Result"
-                              [ Type.namedWith [ "Http" ] "Error" []
-                              , Type.tuple
-                                    (Type.namedWith [ "Url" ] "Url" [])
-                                    (Type.namedWith
-                                         [ "Pages"
-                                         , "Internal"
-                                         , "ResponseSketch"
-                                         ]
-                                         "ResponseSketch"
-                                         [ Type.var "pageData"
-                                         , Type.var "actionData"
-                                         , Type.var "sharedData"
-                                         ]
-                                    )
-                              ]
-                          ]
-                          (Type.namedWith
-                               [ "Pages", "Internal", "Platform" ]
-                               "Msg"
-                               [ Type.var "userMsg"
-                               , Type.var "pageData"
-                               , Type.var "actionData"
-                               , Type.var "sharedData"
-                               , Type.var "errorPage"
-                               ]
-                          )
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType
+                       "BrowserPushUrl"
+                       effectTags.browserPushUrl |> Elm.Arg.item
+                                                          (Elm.Arg.varWith
+                                                                 "arg_0"
+                                                                 Type.string
+                                                          )
                     )
-                    effectTags.fetchPageData
-                , Elm.Case.branch1
-                    "Submit"
-                    ( "pagesInternalPlatformFormData"
-                    , Type.namedWith
-                          [ "Pages", "Internal", "Platform" ]
-                          "FormData"
-                          []
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType
+                       "BrowserReplaceUrl"
+                       effectTags.browserReplaceUrl |> Elm.Arg.item
+                                                             (Elm.Arg.varWith
+                                                                    "arg_0"
+                                                                    Type.string
+                                                             )
                     )
-                    effectTags.submit
-                , Elm.Case.branch3
-                    "SubmitFetcher"
-                    ( "stringString", Type.string )
-                    ( "basicsInt", Type.int )
-                    ( "pagesInternalPlatformFormData"
-                    , Type.namedWith
-                          [ "Pages", "Internal", "Platform" ]
-                          "FormData"
-                          []
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType
+                       "FetchPageData"
+                       effectTags.fetchPageData |> Elm.Arg.item
+                                                         (Elm.Arg.varWith
+                                                                "arg_0"
+                                                                Type.int
+                                                         ) |> Elm.Arg.item
+                                                                    (Elm.Arg.varWith
+                                                                           "maybeMaybe"
+                                                                           (Type.maybe
+                                                                                  (Type.namedWith
+                                                                                         [ "Pages"
+                                                                                         , "Internal"
+                                                                                         , "Platform"
+                                                                                         ]
+                                                                                         "FormData"
+                                                                                         []
+                                                                                  )
+                                                                           )
+                                                                    ) |> Elm.Arg.item
+                                                                               (Elm.Arg.varWith
+                                                                                      "urlUrl"
+                                                                                      (Type.namedWith
+                                                                                             [ "Url"
+                                                                                             ]
+                                                                                             "Url"
+                                                                                             []
+                                                                                      )
+                                                                               ) |> Elm.Arg.item
+                                                                                          (Elm.Arg.varWith
+                                                                                                 "arg_3"
+                                                                                                 (Type.function
+                                                                                                        [ Type.namedWith
+                                                                                                              [ "Result"
+                                                                                                              ]
+                                                                                                              "Result"
+                                                                                                              [ Type.namedWith
+                                                                                                                  [ "Http"
+                                                                                                                  ]
+                                                                                                                  "Error"
+                                                                                                                  []
+                                                                                                              , Type.tuple
+                                                                                                                  (Type.namedWith
+                                                                                                                     [ "Url"
+                                                                                                                     ]
+                                                                                                                     "Url"
+                                                                                                                     []
+                                                                                                                  )
+                                                                                                                  (Type.namedWith
+                                                                                                                     [ "Pages"
+                                                                                                                     , "Internal"
+                                                                                                                     , "ResponseSketch"
+                                                                                                                     ]
+                                                                                                                     "ResponseSketch"
+                                                                                                                     [ Type.var
+                                                                                                                           "pageData"
+                                                                                                                     , Type.var
+                                                                                                                           "actionData"
+                                                                                                                     , Type.var
+                                                                                                                           "sharedData"
+                                                                                                                     ]
+                                                                                                                  )
+                                                                                                              ]
+                                                                                                        ]
+                                                                                                        (Type.namedWith
+                                                                                                               [ "Pages"
+                                                                                                               , "Internal"
+                                                                                                               , "Platform"
+                                                                                                               ]
+                                                                                                               "Msg"
+                                                                                                               [ Type.var
+                                                                                                                     "userMsg"
+                                                                                                               , Type.var
+                                                                                                                     "pageData"
+                                                                                                               , Type.var
+                                                                                                                     "actionData"
+                                                                                                               , Type.var
+                                                                                                                     "sharedData"
+                                                                                                               , Type.var
+                                                                                                                     "errorPage"
+                                                                                                               ]
+                                                                                                        )
+                                                                                                 )
+                                                                                          )
                     )
-                    effectTags.submitFetcher
-                , Elm.Case.branch1
-                    "Batch"
-                    ( "listList"
-                    , Type.list
-                          (Type.namedWith
-                               [ "Pages", "Internal", "Platform" ]
-                               "Effect"
-                               [ Type.var "userMsg"
-                               , Type.var "pageData"
-                               , Type.var "actionData"
-                               , Type.var "sharedData"
-                               , Type.var "userEffect"
-                               , Type.var "errorPage"
-                               ]
-                          )
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType
+                       "Submit"
+                       effectTags.submit |> Elm.Arg.item
+                                                  (Elm.Arg.varWith
+                                                         "pagesInternalPlatformFormData"
+                                                         (Type.namedWith
+                                                                [ "Pages"
+                                                                , "Internal"
+                                                                , "Platform"
+                                                                ]
+                                                                "FormData"
+                                                                []
+                                                         )
+                                                  )
                     )
-                    effectTags.batch
-                , Elm.Case.branch1
-                    "UserCmd"
-                    ( "userEffect", Type.var "userEffect" )
-                    effectTags.userCmd
-                , Elm.Case.branch1
-                    "CancelRequest"
-                    ( "basicsInt", Type.int )
-                    effectTags.cancelRequest
-                , Elm.Case.branch1
-                    "RunCmd"
-                    ( "platformCmdCmd"
-                    , Type.namedWith
-                          []
-                          "Cmd"
-                          [ Type.namedWith
-                              [ "Pages", "Internal", "Platform" ]
-                              "Msg"
-                              [ Type.var "userMsg"
-                              , Type.var "pageData"
-                              , Type.var "actionData"
-                              , Type.var "sharedData"
-                              , Type.var "errorPage"
-                              ]
-                          ]
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType
+                       "SubmitFetcher"
+                       effectTags.submitFetcher |> Elm.Arg.item
+                                                         (Elm.Arg.varWith
+                                                                "arg_0"
+                                                                Type.string
+                                                         ) |> Elm.Arg.item
+                                                                    (Elm.Arg.varWith
+                                                                           "arg_1"
+                                                                           Type.int
+                                                                    ) |> Elm.Arg.item
+                                                                               (Elm.Arg.varWith
+                                                                                      "pagesInternalPlatformFormData"
+                                                                                      (Type.namedWith
+                                                                                             [ "Pages"
+                                                                                             , "Internal"
+                                                                                             , "Platform"
+                                                                                             ]
+                                                                                             "FormData"
+                                                                                             []
+                                                                                      )
+                                                                               )
                     )
-                    effectTags.runCmd
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType "Batch" effectTags.batch |> Elm.Arg.item
+                                                                          (Elm.Arg.varWith
+                                                                                 "arg_0"
+                                                                                 (Type.list
+                                                                                        (Type.namedWith
+                                                                                               [ "Pages"
+                                                                                               , "Internal"
+                                                                                               , "Platform"
+                                                                                               ]
+                                                                                               "Effect"
+                                                                                               [ Type.var
+                                                                                                     "userMsg"
+                                                                                               , Type.var
+                                                                                                     "pageData"
+                                                                                               , Type.var
+                                                                                                     "actionData"
+                                                                                               , Type.var
+                                                                                                     "sharedData"
+                                                                                               , Type.var
+                                                                                                     "userEffect"
+                                                                                               , Type.var
+                                                                                                     "errorPage"
+                                                                                               ]
+                                                                                        )
+                                                                                 )
+                                                                          )
+                    )
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType
+                       "UserCmd"
+                       effectTags.userCmd |> Elm.Arg.item
+                                                   (Elm.Arg.varWith
+                                                          "userEffect"
+                                                          (Type.var "userEffect"
+                                                          )
+                                                   )
+                    )
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType
+                       "CancelRequest"
+                       effectTags.cancelRequest |> Elm.Arg.item
+                                                         (Elm.Arg.varWith
+                                                                "arg_0"
+                                                                Type.int
+                                                         )
+                    )
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType
+                       "RunCmd"
+                       effectTags.runCmd |> Elm.Arg.item
+                                                  (Elm.Arg.varWith
+                                                         "platformCmdCmd"
+                                                         (Type.namedWith
+                                                                []
+                                                                "Cmd"
+                                                                [ Type.namedWith
+                                                                      [ "Pages"
+                                                                      , "Internal"
+                                                                      , "Platform"
+                                                                      ]
+                                                                      "Msg"
+                                                                      [ Type.var
+                                                                          "userMsg"
+                                                                      , Type.var
+                                                                          "pageData"
+                                                                      , Type.var
+                                                                          "actionData"
+                                                                      , Type.var
+                                                                          "sharedData"
+                                                                      , Type.var
+                                                                          "errorPage"
+                                                                      ]
+                                                                ]
+                                                         )
+                                                  )
+                    )
+                    Basics.identity
                 ]
     }
 
@@ -1567,7 +1824,7 @@ call_ :
     }
 call_ =
     { application =
-        \applicationArg ->
+        \applicationArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Pages", "Internal", "Platform" ]
@@ -1626,9 +1883,9 @@ call_ =
                              )
                      }
                 )
-                [ applicationArg ]
+                [ applicationArg_ ]
     , init =
-        \initArg initArg0 initArg1 initArg2 ->
+        \initArg_ initArg_0 initArg_1 initArg_2 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Pages", "Internal", "Platform" ]
@@ -1694,9 +1951,9 @@ call_ =
                              )
                      }
                 )
-                [ initArg, initArg0, initArg1, initArg2 ]
+                [ initArg_, initArg_0, initArg_1, initArg_2 ]
     , update =
-        \updateArg updateArg0 updateArg1 ->
+        \updateArg_ updateArg_0 updateArg_1 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Pages", "Internal", "Platform" ]
@@ -1768,9 +2025,9 @@ call_ =
                              )
                      }
                 )
-                [ updateArg, updateArg0, updateArg1 ]
+                [ updateArg_, updateArg_0, updateArg_1 ]
     , view =
-        \viewArg viewArg0 ->
+        \viewArg_ viewArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Pages", "Internal", "Platform" ]
@@ -1825,7 +2082,7 @@ call_ =
                              )
                      }
                 )
-                [ viewArg, viewArg0 ]
+                [ viewArg_, viewArg_0 ]
     }
 
 

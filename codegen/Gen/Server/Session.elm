@@ -1,12 +1,21 @@
-module Gen.Server.Session exposing (annotation_, call_, caseOf_, empty, get, insert, make_, moduleName_, remove, update, values_, withFlash, withSession, withSessionResult)
+module Gen.Server.Session exposing
+    ( moduleName_, withSession, withSessionResult, empty, get, insert
+    , remove, update, withFlash, annotation_, make_, caseOf_, call_
+    , values_
+    )
 
-{-| 
-@docs moduleName_, withSession, withSessionResult, empty, get, insert, remove, update, withFlash, annotation_, make_, caseOf_, call_, values_
+{-|
+# Generated bindings for Server.Session
+
+@docs moduleName_, withSession, withSessionResult, empty, get, insert
+@docs remove, update, withFlash, annotation_, make_, caseOf_
+@docs call_, values_
 -}
 
 
 import Elm
 import Elm.Annotation as Type
+import Elm.Arg
 import Elm.Case
 
 
@@ -34,7 +43,7 @@ withSession :
     -> (Elm.Expression -> Elm.Expression)
     -> Elm.Expression
     -> Elm.Expression
-withSession withSessionArg withSessionArg0 withSessionArg1 =
+withSession withSessionArg_ withSessionArg_0 withSessionArg_1 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Server", "Session" ]
@@ -100,12 +109,12 @@ withSession withSessionArg withSessionArg0 withSessionArg1 =
              }
         )
         [ Elm.record
-            [ Tuple.pair "name" (Elm.string withSessionArg.name)
-            , Tuple.pair "secrets" withSessionArg.secrets
-            , Tuple.pair "options" withSessionArg.options
+            [ Tuple.pair "name" (Elm.string withSessionArg_.name)
+            , Tuple.pair "secrets" withSessionArg_.secrets
+            , Tuple.pair "options" withSessionArg_.options
             ]
-        , Elm.functionReduced "withSessionUnpack" withSessionArg0
-        , withSessionArg1
+        , Elm.functionReduced "withSessionUnpack" withSessionArg_0
+        , withSessionArg_1
         ]
 
 
@@ -130,7 +139,7 @@ withSessionResult :
     -> (Elm.Expression -> Elm.Expression)
     -> Elm.Expression
     -> Elm.Expression
-withSessionResult withSessionResultArg withSessionResultArg0 withSessionResultArg1 =
+withSessionResult withSessionResultArg_ withSessionResultArg_0 withSessionResultArg_1 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Server", "Session" ]
@@ -204,12 +213,12 @@ withSessionResult withSessionResultArg withSessionResultArg0 withSessionResultAr
              }
         )
         [ Elm.record
-            [ Tuple.pair "name" (Elm.string withSessionResultArg.name)
-            , Tuple.pair "secrets" withSessionResultArg.secrets
-            , Tuple.pair "options" withSessionResultArg.options
+            [ Tuple.pair "name" (Elm.string withSessionResultArg_.name)
+            , Tuple.pair "secrets" withSessionResultArg_.secrets
+            , Tuple.pair "options" withSessionResultArg_.options
             ]
-        , Elm.functionReduced "withSessionResultUnpack" withSessionResultArg0
-        , withSessionResultArg1
+        , Elm.functionReduced "withSessionResultUnpack" withSessionResultArg_0
+        , withSessionResultArg_1
         ]
 
 
@@ -238,7 +247,7 @@ empty =
 get: String -> Server.Session.Session -> Maybe String
 -}
 get : String -> Elm.Expression -> Elm.Expression
-get getArg getArg0 =
+get getArg_ getArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Server", "Session" ]
@@ -253,7 +262,7 @@ get getArg getArg0 =
                      )
              }
         )
-        [ Elm.string getArg, getArg0 ]
+        [ Elm.string getArg_, getArg_0 ]
 
 
 {-| Insert a value under the given key in the `Session`.
@@ -264,7 +273,7 @@ get getArg getArg0 =
 insert: String -> String -> Server.Session.Session -> Server.Session.Session
 -}
 insert : String -> String -> Elm.Expression -> Elm.Expression
-insert insertArg insertArg0 insertArg1 =
+insert insertArg_ insertArg_0 insertArg_1 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Server", "Session" ]
@@ -280,7 +289,7 @@ insert insertArg insertArg0 insertArg1 =
                      )
              }
         )
-        [ Elm.string insertArg, Elm.string insertArg0, insertArg1 ]
+        [ Elm.string insertArg_, Elm.string insertArg_0, insertArg_1 ]
 
 
 {-| Remove a key from the `Session`.
@@ -288,7 +297,7 @@ insert insertArg insertArg0 insertArg1 =
 remove: String -> Server.Session.Session -> Server.Session.Session
 -}
 remove : String -> Elm.Expression -> Elm.Expression
-remove removeArg removeArg0 =
+remove removeArg_ removeArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Server", "Session" ]
@@ -303,7 +312,7 @@ remove removeArg removeArg0 =
                      )
              }
         )
-        [ Elm.string removeArg, removeArg0 ]
+        [ Elm.string removeArg_, removeArg_0 ]
 
 
 {-| Update the `Session`, given a `Maybe String` of the current value for the given key, and returning a `Maybe String`.
@@ -335,7 +344,7 @@ update :
     -> (Elm.Expression -> Elm.Expression)
     -> Elm.Expression
     -> Elm.Expression
-update updateArg updateArg0 updateArg1 =
+update updateArg_ updateArg_0 updateArg_1 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Server", "Session" ]
@@ -353,9 +362,9 @@ update updateArg updateArg0 updateArg1 =
                      )
              }
         )
-        [ Elm.string updateArg
-        , Elm.functionReduced "updateUnpack" updateArg0
-        , updateArg1
+        [ Elm.string updateArg_
+        , Elm.functionReduced "updateUnpack" updateArg_0
+        , updateArg_1
         ]
 
 
@@ -367,7 +376,7 @@ update updateArg updateArg0 updateArg1 =
 withFlash: String -> String -> Server.Session.Session -> Server.Session.Session
 -}
 withFlash : String -> String -> Elm.Expression -> Elm.Expression
-withFlash withFlashArg withFlashArg0 withFlashArg1 =
+withFlash withFlashArg_ withFlashArg_0 withFlashArg_1 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Server", "Session" ]
@@ -383,7 +392,7 @@ withFlash withFlashArg withFlashArg0 withFlashArg1 =
                      )
              }
         )
-        [ Elm.string withFlashArg, Elm.string withFlashArg0, withFlashArg1 ]
+        [ Elm.string withFlashArg_, Elm.string withFlashArg_0, withFlashArg_1 ]
 
 
 annotation_ : { notLoadedReason : Type.Annotation, session : Type.Annotation }
@@ -415,9 +424,8 @@ make_ =
 caseOf_ :
     { notLoadedReason :
         Elm.Expression
-        -> { notLoadedReasonTags_0_0
-            | noSessionCookie : Elm.Expression
-            , invalidSessionCookie : Elm.Expression
+        -> { noSessionCookie : Elm.Expression
+        , invalidSessionCookie : Elm.Expression
         }
         -> Elm.Expression
     }
@@ -427,12 +435,18 @@ caseOf_ =
             Elm.Case.custom
                 notLoadedReasonExpression
                 (Type.namedWith [ "Server", "Session" ] "NotLoadedReason" [])
-                [ Elm.Case.branch0
-                    "NoSessionCookie"
-                    notLoadedReasonTags.noSessionCookie
-                , Elm.Case.branch0
-                    "InvalidSessionCookie"
-                    notLoadedReasonTags.invalidSessionCookie
+                [ Elm.Case.branch
+                    (Elm.Arg.customType
+                       "NoSessionCookie"
+                       notLoadedReasonTags.noSessionCookie
+                    )
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType
+                       "InvalidSessionCookie"
+                       notLoadedReasonTags.invalidSessionCookie
+                    )
+                    Basics.identity
                 ]
     }
 
@@ -453,7 +467,7 @@ call_ :
     }
 call_ =
     { withSession =
-        \withSessionArg withSessionArg0 withSessionArg1 ->
+        \withSessionArg_ withSessionArg_0 withSessionArg_1 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Server", "Session" ]
@@ -525,9 +539,9 @@ call_ =
                              )
                      }
                 )
-                [ withSessionArg, withSessionArg0, withSessionArg1 ]
+                [ withSessionArg_, withSessionArg_0, withSessionArg_1 ]
     , withSessionResult =
-        \withSessionResultArg withSessionResultArg0 withSessionResultArg1 ->
+        \withSessionResultArg_ withSessionResultArg_0 withSessionResultArg_1 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Server", "Session" ]
@@ -607,12 +621,12 @@ call_ =
                              )
                      }
                 )
-                [ withSessionResultArg
-                , withSessionResultArg0
-                , withSessionResultArg1
+                [ withSessionResultArg_
+                , withSessionResultArg_0
+                , withSessionResultArg_1
                 ]
     , get =
-        \getArg getArg0 ->
+        \getArg_ getArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Server", "Session" ]
@@ -630,9 +644,9 @@ call_ =
                              )
                      }
                 )
-                [ getArg, getArg0 ]
+                [ getArg_, getArg_0 ]
     , insert =
-        \insertArg insertArg0 insertArg1 ->
+        \insertArg_ insertArg_0 insertArg_1 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Server", "Session" ]
@@ -655,9 +669,9 @@ call_ =
                              )
                      }
                 )
-                [ insertArg, insertArg0, insertArg1 ]
+                [ insertArg_, insertArg_0, insertArg_1 ]
     , remove =
-        \removeArg removeArg0 ->
+        \removeArg_ removeArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Server", "Session" ]
@@ -679,9 +693,9 @@ call_ =
                              )
                      }
                 )
-                [ removeArg, removeArg0 ]
+                [ removeArg_, removeArg_0 ]
     , update =
-        \updateArg updateArg0 updateArg1 ->
+        \updateArg_ updateArg_0 updateArg_1 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Server", "Session" ]
@@ -706,9 +720,9 @@ call_ =
                              )
                      }
                 )
-                [ updateArg, updateArg0, updateArg1 ]
+                [ updateArg_, updateArg_0, updateArg_1 ]
     , withFlash =
-        \withFlashArg withFlashArg0 withFlashArg1 ->
+        \withFlashArg_ withFlashArg_0 withFlashArg_1 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Server", "Session" ]
@@ -731,7 +745,7 @@ call_ =
                              )
                      }
                 )
-                [ withFlashArg, withFlashArg0, withFlashArg1 ]
+                [ withFlashArg_, withFlashArg_0, withFlashArg_1 ]
     }
 
 

@@ -1,6 +1,8 @@
-module Gen.Json.Encode.Extra exposing (call_, maybe, moduleName_, values_)
+module Gen.Json.Encode.Extra exposing ( moduleName_, maybe, call_, values_ )
 
-{-| 
+{-|
+# Generated bindings for Json.Encode.Extra
+
 @docs moduleName_, maybe, call_, values_
 -}
 
@@ -30,7 +32,7 @@ moduleName_ =
 maybe: (a -> Json.Encode.Value) -> Maybe a -> Json.Encode.Value
 -}
 maybe : (Elm.Expression -> Elm.Expression) -> Elm.Expression -> Elm.Expression
-maybe maybeArg maybeArg0 =
+maybe maybeArg_ maybeArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Json", "Encode", "Extra" ]
@@ -47,13 +49,13 @@ maybe maybeArg maybeArg0 =
                      )
              }
         )
-        [ Elm.functionReduced "maybeUnpack" maybeArg, maybeArg0 ]
+        [ Elm.functionReduced "maybeUnpack" maybeArg_, maybeArg_0 ]
 
 
 call_ : { maybe : Elm.Expression -> Elm.Expression -> Elm.Expression }
 call_ =
     { maybe =
-        \maybeArg maybeArg0 ->
+        \maybeArg_ maybeArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Json", "Encode", "Extra" ]
@@ -78,7 +80,7 @@ call_ =
                              )
                      }
                 )
-                [ maybeArg, maybeArg0 ]
+                [ maybeArg_, maybeArg_0 ]
     }
 
 

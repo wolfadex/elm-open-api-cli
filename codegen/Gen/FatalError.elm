@@ -1,7 +1,13 @@
-module Gen.FatalError exposing (annotation_, build, call_, fromString, moduleName_, recoverable, values_)
+module Gen.FatalError exposing
+    ( moduleName_, build, fromString, recoverable, annotation_, call_
+    , values_
+    )
 
-{-| 
-@docs moduleName_, build, fromString, recoverable, annotation_, call_, values_
+{-|
+# Generated bindings for FatalError
+
+@docs moduleName_, build, fromString, recoverable, annotation_, call_
+@docs values_
 -}
 
 
@@ -20,7 +26,7 @@ moduleName_ =
 build: { title : String, body : String } -> FatalError.FatalError
 -}
 build : { title : String, body : String } -> Elm.Expression
-build buildArg =
+build buildArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "FatalError" ]
@@ -38,15 +44,15 @@ build buildArg =
              }
         )
         [ Elm.record
-            [ Tuple.pair "title" (Elm.string buildArg.title)
-            , Tuple.pair "body" (Elm.string buildArg.body)
+            [ Tuple.pair "title" (Elm.string buildArg_.title)
+            , Tuple.pair "body" (Elm.string buildArg_.body)
             ]
         ]
 
 
 {-| fromString: String -> FatalError.FatalError -}
 fromString : String -> Elm.Expression
-fromString fromStringArg =
+fromString fromStringArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "FatalError" ]
@@ -59,7 +65,7 @@ fromString fromStringArg =
                      )
              }
         )
-        [ Elm.string fromStringArg ]
+        [ Elm.string fromStringArg_ ]
 
 
 {-| recoverable: 
@@ -69,7 +75,7 @@ fromString fromStringArg =
 -}
 recoverable :
     { title : String, body : String } -> Elm.Expression -> Elm.Expression
-recoverable recoverableArg recoverableArg0 =
+recoverable recoverableArg_ recoverableArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "FatalError" ]
@@ -97,10 +103,10 @@ recoverable recoverableArg recoverableArg0 =
              }
         )
         [ Elm.record
-            [ Tuple.pair "title" (Elm.string recoverableArg.title)
-            , Tuple.pair "body" (Elm.string recoverableArg.body)
+            [ Tuple.pair "title" (Elm.string recoverableArg_.title)
+            , Tuple.pair "body" (Elm.string recoverableArg_.body)
             ]
-        , recoverableArg0
+        , recoverableArg_0
         ]
 
 
@@ -126,7 +132,7 @@ call_ :
     }
 call_ =
     { build =
-        \buildArg ->
+        \buildArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "FatalError" ]
@@ -147,9 +153,9 @@ call_ =
                              )
                      }
                 )
-                [ buildArg ]
+                [ buildArg_ ]
     , fromString =
-        \fromStringArg ->
+        \fromStringArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "FatalError" ]
@@ -166,9 +172,9 @@ call_ =
                              )
                      }
                 )
-                [ fromStringArg ]
+                [ fromStringArg_ ]
     , recoverable =
-        \recoverableArg recoverableArg0 ->
+        \recoverableArg_ recoverableArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "FatalError" ]
@@ -195,7 +201,7 @@ call_ =
                              )
                      }
                 )
-                [ recoverableArg, recoverableArg0 ]
+                [ recoverableArg_, recoverableArg_0 ]
     }
 
 

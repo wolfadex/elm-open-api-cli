@@ -1,6 +1,8 @@
-module Gen.Pages.FormData exposing (annotation_, make_, moduleName_)
+module Gen.Pages.FormData exposing ( moduleName_, annotation_, make_ )
 
-{-| 
+{-|
+# Generated bindings for Pages.FormData
+
 @docs moduleName_, annotation_, make_
 -}
 

@@ -1,7 +1,14 @@
-module Gen.BackendTask.Do exposing (allowFatal, call_, command, do, each, env, exec, failIf, glob, log, moduleName_, noop, values_)
+module Gen.BackendTask.Do exposing
+    ( moduleName_, do, allowFatal, noop, exec, command
+    , glob, log, env, each, failIf, call_, values_
+    )
 
-{-| 
-@docs moduleName_, do, allowFatal, noop, exec, command, glob, log, env, each, failIf, call_, values_
+{-|
+# Generated bindings for BackendTask.Do
+
+@docs moduleName_, do, allowFatal, noop, exec, command
+@docs glob, log, env, each, failIf, call_
+@docs values_
 -}
 
 
@@ -32,7 +39,7 @@ do:
     -> BackendTask.BackendTask error b
 -}
 do : Elm.Expression -> (Elm.Expression -> Elm.Expression) -> Elm.Expression
-do doArg doArg0 =
+do doArg_ doArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "BackendTask", "Do" ]
@@ -60,7 +67,7 @@ do doArg doArg0 =
                      )
              }
         )
-        [ doArg, Elm.functionReduced "doUnpack" doArg0 ]
+        [ doArg_, Elm.functionReduced "doUnpack" doArg_0 ]
 
 
 {-| Same as [`do`](#do), but with a shorthand to call `BackendTask.allowFatal` on it.
@@ -85,7 +92,7 @@ allowFatal:
 -}
 allowFatal :
     Elm.Expression -> (Elm.Expression -> Elm.Expression) -> Elm.Expression
-allowFatal allowFatalArg allowFatalArg0 =
+allowFatal allowFatalArg_ allowFatalArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "BackendTask", "Do" ]
@@ -130,7 +137,9 @@ allowFatal allowFatalArg allowFatalArg0 =
                      )
              }
         )
-        [ allowFatalArg, Elm.functionReduced "allowFatalUnpack" allowFatalArg0 ]
+        [ allowFatalArg_
+        , Elm.functionReduced "allowFatalUnpack" allowFatalArg_0
+        ]
 
 
 {-| A `BackendTask` that does nothing. Defined as `BackendTask.succeed ()`.
@@ -175,7 +184,7 @@ exec :
     -> List String
     -> (Elm.Expression -> Elm.Expression)
     -> Elm.Expression
-exec execArg execArg0 execArg1 =
+exec execArg_ execArg_0 execArg_1 =
     Elm.apply
         (Elm.value
              { importFrom = [ "BackendTask", "Do" ]
@@ -208,9 +217,9 @@ exec execArg execArg0 execArg1 =
                      )
              }
         )
-        [ Elm.string execArg
-        , Elm.list (List.map Elm.string execArg0)
-        , Elm.functionReduced "execUnpack" execArg1
+        [ Elm.string execArg_
+        , Elm.list (List.map Elm.string execArg_0)
+        , Elm.functionReduced "execUnpack" execArg_1
         ]
 
 
@@ -227,7 +236,7 @@ command :
     -> List String
     -> (Elm.Expression -> Elm.Expression)
     -> Elm.Expression
-command commandArg commandArg0 commandArg1 =
+command commandArg_ commandArg_0 commandArg_1 =
     Elm.apply
         (Elm.value
              { importFrom = [ "BackendTask", "Do" ]
@@ -260,9 +269,9 @@ command commandArg commandArg0 commandArg1 =
                      )
              }
         )
-        [ Elm.string commandArg
-        , Elm.list (List.map Elm.string commandArg0)
-        , Elm.functionReduced "commandUnpack" commandArg1
+        [ Elm.string commandArg_
+        , Elm.list (List.map Elm.string commandArg_0)
+        , Elm.functionReduced "commandUnpack" commandArg_1
         ]
 
 
@@ -290,7 +299,7 @@ glob:
     -> BackendTask.BackendTask FatalError.FatalError a
 -}
 glob : String -> (Elm.Expression -> Elm.Expression) -> Elm.Expression
-glob globArg globArg0 =
+glob globArg_ globArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "BackendTask", "Do" ]
@@ -322,7 +331,7 @@ glob globArg globArg0 =
                      )
              }
         )
-        [ Elm.string globArg, Elm.functionReduced "globUnpack" globArg0 ]
+        [ Elm.string globArg_, Elm.functionReduced "globUnpack" globArg_0 ]
 
 
 {-| A do-style helper for [`Script.log`](Pages-Script#log).
@@ -342,7 +351,7 @@ log:
     -> BackendTask.BackendTask error b
 -}
 log : String -> (Elm.Expression -> Elm.Expression) -> Elm.Expression
-log logArg logArg0 =
+log logArg_ logArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "BackendTask", "Do" ]
@@ -367,7 +376,7 @@ log logArg logArg0 =
                      )
              }
         )
-        [ Elm.string logArg, Elm.functionReduced "logUnpack" logArg0 ]
+        [ Elm.string logArg_, Elm.functionReduced "logUnpack" logArg_0 ]
 
 
 {-| A do-style helper for [`Env.expect`](BackendTask-Env#expect).
@@ -386,7 +395,7 @@ env:
     -> BackendTask.BackendTask FatalError.FatalError b
 -}
 env : String -> (Elm.Expression -> Elm.Expression) -> Elm.Expression
-env envArg envArg0 =
+env envArg_ envArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "BackendTask", "Do" ]
@@ -418,7 +427,7 @@ env envArg envArg0 =
                      )
              }
         )
-        [ Elm.string envArg, Elm.functionReduced "envUnpack" envArg0 ]
+        [ Elm.string envArg_, Elm.functionReduced "envUnpack" envArg_0 ]
 
 
 {-| checkCompilationInDir : String -> BackendTask FatalError ()
@@ -445,7 +454,7 @@ each :
     -> (Elm.Expression -> Elm.Expression)
     -> (Elm.Expression -> Elm.Expression)
     -> Elm.Expression
-each eachArg eachArg0 eachArg1 =
+each eachArg_ eachArg_0 eachArg_1 =
     Elm.apply
         (Elm.value
              { importFrom = [ "BackendTask", "Do" ]
@@ -477,9 +486,9 @@ each eachArg eachArg0 eachArg1 =
                      )
              }
         )
-        [ Elm.list eachArg
-        , Elm.functionReduced "eachUnpack" eachArg0
-        , Elm.functionReduced "eachUnpack" eachArg1
+        [ Elm.list eachArg_
+        , Elm.functionReduced "eachUnpack" eachArg_0
+        , Elm.functionReduced "eachUnpack" eachArg_1
         ]
 
 
@@ -496,7 +505,7 @@ failIf :
     -> Elm.Expression
     -> (Elm.Expression -> Elm.Expression)
     -> Elm.Expression
-failIf failIfArg failIfArg0 failIfArg1 =
+failIf failIfArg_ failIfArg_0 failIfArg_1 =
     Elm.apply
         (Elm.value
              { importFrom = [ "BackendTask", "Do" ]
@@ -529,9 +538,9 @@ failIf failIfArg failIfArg0 failIfArg1 =
                      )
              }
         )
-        [ Elm.bool failIfArg
-        , failIfArg0
-        , Elm.functionReduced "failIfUnpack" failIfArg1
+        [ Elm.bool failIfArg_
+        , failIfArg_0
+        , Elm.functionReduced "failIfUnpack" failIfArg_1
         ]
 
 
@@ -552,7 +561,7 @@ call_ :
     }
 call_ =
     { do =
-        \doArg doArg0 ->
+        \doArg_ doArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "BackendTask", "Do" ]
@@ -580,9 +589,9 @@ call_ =
                              )
                      }
                 )
-                [ doArg, doArg0 ]
+                [ doArg_, doArg_0 ]
     , allowFatal =
-        \allowFatalArg allowFatalArg0 ->
+        \allowFatalArg_ allowFatalArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "BackendTask", "Do" ]
@@ -630,9 +639,9 @@ call_ =
                              )
                      }
                 )
-                [ allowFatalArg, allowFatalArg0 ]
+                [ allowFatalArg_, allowFatalArg_0 ]
     , exec =
-        \execArg execArg0 execArg1 ->
+        \execArg_ execArg_0 execArg_1 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "BackendTask", "Do" ]
@@ -668,9 +677,9 @@ call_ =
                              )
                      }
                 )
-                [ execArg, execArg0, execArg1 ]
+                [ execArg_, execArg_0, execArg_1 ]
     , command =
-        \commandArg commandArg0 commandArg1 ->
+        \commandArg_ commandArg_0 commandArg_1 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "BackendTask", "Do" ]
@@ -706,9 +715,9 @@ call_ =
                              )
                      }
                 )
-                [ commandArg, commandArg0, commandArg1 ]
+                [ commandArg_, commandArg_0, commandArg_1 ]
     , glob =
-        \globArg globArg0 ->
+        \globArg_ globArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "BackendTask", "Do" ]
@@ -743,9 +752,9 @@ call_ =
                              )
                      }
                 )
-                [ globArg, globArg0 ]
+                [ globArg_, globArg_0 ]
     , log =
-        \logArg logArg0 ->
+        \logArg_ logArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "BackendTask", "Do" ]
@@ -770,9 +779,9 @@ call_ =
                              )
                      }
                 )
-                [ logArg, logArg0 ]
+                [ logArg_, logArg_0 ]
     , env =
-        \envArg envArg0 ->
+        \envArg_ envArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "BackendTask", "Do" ]
@@ -807,9 +816,9 @@ call_ =
                              )
                      }
                 )
-                [ envArg, envArg0 ]
+                [ envArg_, envArg_0 ]
     , each =
-        \eachArg eachArg0 eachArg1 ->
+        \eachArg_ eachArg_0 eachArg_1 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "BackendTask", "Do" ]
@@ -841,9 +850,9 @@ call_ =
                              )
                      }
                 )
-                [ eachArg, eachArg0, eachArg1 ]
+                [ eachArg_, eachArg_0, eachArg_1 ]
     , failIf =
-        \failIfArg failIfArg0 failIfArg1 ->
+        \failIfArg_ failIfArg_0 failIfArg_1 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "BackendTask", "Do" ]
@@ -882,7 +891,7 @@ call_ =
                              )
                      }
                 )
-                [ failIfArg, failIfArg0, failIfArg1 ]
+                [ failIfArg_, failIfArg_0, failIfArg_1 ]
     }
 
 

@@ -1,12 +1,19 @@
-module Gen.Pages.ConcurrentSubmission exposing (annotation_, call_, caseOf_, make_, map, moduleName_, values_)
+module Gen.Pages.ConcurrentSubmission exposing
+    ( moduleName_, map, annotation_, make_, caseOf_, call_
+    , values_
+    )
 
-{-| 
-@docs moduleName_, map, annotation_, make_, caseOf_, call_, values_
+{-|
+# Generated bindings for Pages.ConcurrentSubmission
+
+@docs moduleName_, map, annotation_, make_, caseOf_, call_
+@docs values_
 -}
 
 
 import Elm
 import Elm.Annotation as Type
+import Elm.Arg
 import Elm.Case
 
 
@@ -24,7 +31,7 @@ map:
     -> Pages.ConcurrentSubmission.ConcurrentSubmission b
 -}
 map : (Elm.Expression -> Elm.Expression) -> Elm.Expression -> Elm.Expression
-map mapArg mapArg0 =
+map mapArg_ mapArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Pages", "ConcurrentSubmission" ]
@@ -46,7 +53,7 @@ map mapArg mapArg0 =
                      )
              }
         )
-        [ Elm.functionReduced "mapUnpack" mapArg, mapArg0 ]
+        [ Elm.functionReduced "mapUnpack" mapArg_, mapArg_0 ]
 
 
 annotation_ :
@@ -173,10 +180,9 @@ make_ =
 caseOf_ :
     { status :
         Elm.Expression
-        -> { statusTags_0_0
-            | submitting : Elm.Expression
-            , reloading : Elm.Expression -> Elm.Expression
-            , complete : Elm.Expression -> Elm.Expression
+        -> { submitting : Elm.Expression
+        , reloading : Elm.Expression -> Elm.Expression
+        , complete : Elm.Expression -> Elm.Expression
         }
         -> Elm.Expression
     }
@@ -190,15 +196,33 @@ caseOf_ =
                      "Status"
                      [ Type.var "actionData" ]
                 )
-                [ Elm.Case.branch0 "Submitting" statusTags.submitting
-                , Elm.Case.branch1
-                    "Reloading"
-                    ( "actionData", Type.var "actionData" )
-                    statusTags.reloading
-                , Elm.Case.branch1
-                    "Complete"
-                    ( "actionData", Type.var "actionData" )
-                    statusTags.complete
+                [ Elm.Case.branch
+                    (Elm.Arg.customType "Submitting" statusTags.submitting)
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType
+                       "Reloading"
+                       statusTags.reloading |> Elm.Arg.item
+                                                     (Elm.Arg.varWith
+                                                            "actionData"
+                                                            (Type.var
+                                                                   "actionData"
+                                                            )
+                                                     )
+                    )
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType
+                       "Complete"
+                       statusTags.complete |> Elm.Arg.item
+                                                    (Elm.Arg.varWith
+                                                           "actionData"
+                                                           (Type.var
+                                                                  "actionData"
+                                                           )
+                                                    )
+                    )
+                    Basics.identity
                 ]
     }
 
@@ -206,7 +230,7 @@ caseOf_ =
 call_ : { map : Elm.Expression -> Elm.Expression -> Elm.Expression }
 call_ =
     { map =
-        \mapArg mapArg0 ->
+        \mapArg_ mapArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Pages", "ConcurrentSubmission" ]
@@ -230,7 +254,7 @@ call_ =
                              )
                      }
                 )
-                [ mapArg, mapArg0 ]
+                [ mapArg_, mapArg_0 ]
     }
 
 

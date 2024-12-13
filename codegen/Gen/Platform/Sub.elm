@@ -1,7 +1,13 @@
-module Gen.Platform.Sub exposing (annotation_, batch, call_, map, moduleName_, none, values_)
+module Gen.Platform.Sub exposing
+    ( moduleName_, none, batch, map, annotation_, call_
+    , values_
+    )
 
-{-| 
-@docs moduleName_, none, batch, map, annotation_, call_, values_
+{-|
+# Generated bindings for Sub
+
+@docs moduleName_, none, batch, map, annotation_, call_
+@docs values_
 -}
 
 
@@ -37,7 +43,7 @@ subscriptions.
 batch: List (Platform.Sub.Sub msg) -> Platform.Sub.Sub msg
 -}
 batch : List Elm.Expression -> Elm.Expression
-batch batchArg =
+batch batchArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Sub" ]
@@ -52,7 +58,7 @@ batch batchArg =
                      )
              }
         )
-        [ Elm.list batchArg ]
+        [ Elm.list batchArg_ ]
 
 
 {-| Transform the messages produced by a subscription.
@@ -66,7 +72,7 @@ section on [structure][] in the guide before reaching for this!
 map: (a -> msg) -> Platform.Sub.Sub a -> Platform.Sub.Sub msg
 -}
 map : (Elm.Expression -> Elm.Expression) -> Elm.Expression -> Elm.Expression
-map mapArg mapArg0 =
+map mapArg_ mapArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Sub" ]
@@ -81,7 +87,7 @@ map mapArg mapArg0 =
                      )
              }
         )
-        [ Elm.functionReduced "mapUnpack" mapArg, mapArg0 ]
+        [ Elm.functionReduced "mapUnpack" mapArg_, mapArg_0 ]
 
 
 annotation_ : { sub : Type.Annotation -> Type.Annotation }
@@ -95,7 +101,7 @@ call_ :
     }
 call_ =
     { batch =
-        \batchArg ->
+        \batchArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Sub" ]
@@ -114,9 +120,9 @@ call_ =
                              )
                      }
                 )
-                [ batchArg ]
+                [ batchArg_ ]
     , map =
-        \mapArg mapArg0 ->
+        \mapArg_ mapArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Sub" ]
@@ -133,7 +139,7 @@ call_ =
                              )
                      }
                 )
-                [ mapArg, mapArg0 ]
+                [ mapArg_, mapArg_0 ]
     }
 
 

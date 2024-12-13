@@ -1,12 +1,22 @@
-module Gen.OpenApi.Common exposing (annotation_, bytesResolverCustom, bytesResolverCustomEffect, call_, caseOf_, decodeOptionalField, expectBytesCustom, expectBytesCustomEffect, expectJsonCustom, expectJsonCustomEffect, expectStringCustom, expectStringCustomEffect, jsonDecodeAndMap, jsonResolverCustom, jsonResolverCustomEffect, make_, moduleName_, stringResolverCustom, stringResolverCustomEffect, values_)
+module Gen.OpenApi.Common exposing
+    ( moduleName_, jsonDecodeAndMap, decodeOptionalField, bytesResolverCustomEffect, expectBytesCustomEffect, stringResolverCustomEffect
+    , expectStringCustomEffect, jsonResolverCustomEffect, expectJsonCustomEffect, bytesResolverCustom, expectBytesCustom, stringResolverCustom, expectStringCustom
+    , jsonResolverCustom, expectJsonCustom, annotation_, make_, caseOf_, call_, values_
+    )
 
-{-| 
-@docs moduleName_, jsonDecodeAndMap, decodeOptionalField, bytesResolverCustomEffect, expectBytesCustomEffect, stringResolverCustomEffect, expectStringCustomEffect, jsonResolverCustomEffect, expectJsonCustomEffect, bytesResolverCustom, expectBytesCustom, stringResolverCustom, expectStringCustom, jsonResolverCustom, expectJsonCustom, annotation_, make_, caseOf_, call_, values_
+{-|
+# Generated bindings for OpenApi.Common
+
+@docs moduleName_, jsonDecodeAndMap, decodeOptionalField, bytesResolverCustomEffect, expectBytesCustomEffect, stringResolverCustomEffect
+@docs expectStringCustomEffect, jsonResolverCustomEffect, expectJsonCustomEffect, bytesResolverCustom, expectBytesCustom, stringResolverCustom
+@docs expectStringCustom, jsonResolverCustom, expectJsonCustom, annotation_, make_, caseOf_
+@docs call_, values_
 -}
 
 
 import Elm
 import Elm.Annotation as Type
+import Elm.Arg
 import Elm.Case
 
 
@@ -25,7 +35,7 @@ jsonDecodeAndMap:
     -> Json.Decode.Decoder value
 -}
 jsonDecodeAndMap : Elm.Expression -> Elm.Expression -> Elm.Expression
-jsonDecodeAndMap jsonDecodeAndMapArg jsonDecodeAndMapArg0 =
+jsonDecodeAndMap jsonDecodeAndMapArg_ jsonDecodeAndMapArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "OpenApi", "Common" ]
@@ -53,7 +63,7 @@ jsonDecodeAndMap jsonDecodeAndMapArg jsonDecodeAndMapArg0 =
                      )
              }
         )
-        [ jsonDecodeAndMapArg, jsonDecodeAndMapArg0 ]
+        [ jsonDecodeAndMapArg_, jsonDecodeAndMapArg_0 ]
 
 
 {-| {-| Decode an optional field
@@ -72,7 +82,7 @@ jsonDecodeAndMap jsonDecodeAndMapArg jsonDecodeAndMapArg0 =
 decodeOptionalField: String -> Json.Decode.Decoder t -> Json.Decode.Decoder (Maybe t)
 -}
 decodeOptionalField : String -> Elm.Expression -> Elm.Expression
-decodeOptionalField decodeOptionalFieldArg decodeOptionalFieldArg0 =
+decodeOptionalField decodeOptionalFieldArg_ decodeOptionalFieldArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "OpenApi", "Common" ]
@@ -94,7 +104,7 @@ decodeOptionalField decodeOptionalFieldArg decodeOptionalFieldArg0 =
                      )
              }
         )
-        [ Elm.string decodeOptionalFieldArg, decodeOptionalFieldArg0 ]
+        [ Elm.string decodeOptionalFieldArg_, decodeOptionalFieldArg_0 ]
 
 
 {-| bytesResolverCustomEffect: 
@@ -102,7 +112,7 @@ decodeOptionalField decodeOptionalFieldArg decodeOptionalFieldArg0 =
     -> Effect.Http.Resolver restrictions (OpenApi.Common.Error err Bytes.Bytes) Bytes.Bytes
 -}
 bytesResolverCustomEffect : Elm.Expression -> Elm.Expression
-bytesResolverCustomEffect bytesResolverCustomEffectArg =
+bytesResolverCustomEffect bytesResolverCustomEffectArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "OpenApi", "Common" ]
@@ -136,7 +146,7 @@ bytesResolverCustomEffect bytesResolverCustomEffectArg =
                      )
              }
         )
-        [ bytesResolverCustomEffectArg ]
+        [ bytesResolverCustomEffectArg_ ]
 
 
 {-| expectBytesCustomEffect: 
@@ -146,7 +156,7 @@ bytesResolverCustomEffect bytesResolverCustomEffectArg =
 -}
 expectBytesCustomEffect :
     (Elm.Expression -> Elm.Expression) -> Elm.Expression -> Elm.Expression
-expectBytesCustomEffect expectBytesCustomEffectArg expectBytesCustomEffectArg0 =
+expectBytesCustomEffect expectBytesCustomEffectArg_ expectBytesCustomEffectArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "OpenApi", "Common" ]
@@ -188,8 +198,8 @@ expectBytesCustomEffect expectBytesCustomEffectArg expectBytesCustomEffectArg0 =
         )
         [ Elm.functionReduced
             "expectBytesCustomEffectUnpack"
-            expectBytesCustomEffectArg
-        , expectBytesCustomEffectArg0
+            expectBytesCustomEffectArg_
+        , expectBytesCustomEffectArg_0
         ]
 
 
@@ -198,7 +208,7 @@ expectBytesCustomEffect expectBytesCustomEffectArg expectBytesCustomEffectArg0 =
     -> Effect.Http.Resolver restrictions (OpenApi.Common.Error err String) String
 -}
 stringResolverCustomEffect : Elm.Expression -> Elm.Expression
-stringResolverCustomEffect stringResolverCustomEffectArg =
+stringResolverCustomEffect stringResolverCustomEffectArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "OpenApi", "Common" ]
@@ -230,7 +240,7 @@ stringResolverCustomEffect stringResolverCustomEffectArg =
                      )
              }
         )
-        [ stringResolverCustomEffectArg ]
+        [ stringResolverCustomEffectArg_ ]
 
 
 {-| expectStringCustomEffect: 
@@ -240,7 +250,7 @@ stringResolverCustomEffect stringResolverCustomEffectArg =
 -}
 expectStringCustomEffect :
     (Elm.Expression -> Elm.Expression) -> Elm.Expression -> Elm.Expression
-expectStringCustomEffect expectStringCustomEffectArg expectStringCustomEffectArg0 =
+expectStringCustomEffect expectStringCustomEffectArg_ expectStringCustomEffectArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "OpenApi", "Common" ]
@@ -280,8 +290,8 @@ expectStringCustomEffect expectStringCustomEffectArg expectStringCustomEffectArg
         )
         [ Elm.functionReduced
             "expectStringCustomEffectUnpack"
-            expectStringCustomEffectArg
-        , expectStringCustomEffectArg0
+            expectStringCustomEffectArg_
+        , expectStringCustomEffectArg_0
         ]
 
 
@@ -291,7 +301,7 @@ expectStringCustomEffect expectStringCustomEffectArg expectStringCustomEffectArg
     -> Effect.Http.Resolver restrictions (OpenApi.Common.Error err String) success
 -}
 jsonResolverCustomEffect : Elm.Expression -> Elm.Expression -> Elm.Expression
-jsonResolverCustomEffect jsonResolverCustomEffectArg jsonResolverCustomEffectArg0 =
+jsonResolverCustomEffect jsonResolverCustomEffectArg_ jsonResolverCustomEffectArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "OpenApi", "Common" ]
@@ -327,7 +337,7 @@ jsonResolverCustomEffect jsonResolverCustomEffectArg jsonResolverCustomEffectArg
                      )
              }
         )
-        [ jsonResolverCustomEffectArg, jsonResolverCustomEffectArg0 ]
+        [ jsonResolverCustomEffectArg_, jsonResolverCustomEffectArg_0 ]
 
 
 {-| expectJsonCustomEffect: 
@@ -341,7 +351,7 @@ expectJsonCustomEffect :
     -> Elm.Expression
     -> Elm.Expression
     -> Elm.Expression
-expectJsonCustomEffect expectJsonCustomEffectArg expectJsonCustomEffectArg0 expectJsonCustomEffectArg1 =
+expectJsonCustomEffect expectJsonCustomEffectArg_ expectJsonCustomEffectArg_0 expectJsonCustomEffectArg_1 =
     Elm.apply
         (Elm.value
              { importFrom = [ "OpenApi", "Common" ]
@@ -385,9 +395,9 @@ expectJsonCustomEffect expectJsonCustomEffectArg expectJsonCustomEffectArg0 expe
         )
         [ Elm.functionReduced
             "expectJsonCustomEffectUnpack"
-            expectJsonCustomEffectArg
-        , expectJsonCustomEffectArg0
-        , expectJsonCustomEffectArg1
+            expectJsonCustomEffectArg_
+        , expectJsonCustomEffectArg_0
+        , expectJsonCustomEffectArg_1
         ]
 
 
@@ -396,7 +406,7 @@ expectJsonCustomEffect expectJsonCustomEffectArg expectJsonCustomEffectArg0 expe
     -> Http.Resolver (OpenApi.Common.Error err Bytes.Bytes) Bytes.Bytes
 -}
 bytesResolverCustom : Elm.Expression -> Elm.Expression
-bytesResolverCustom bytesResolverCustomArg =
+bytesResolverCustom bytesResolverCustomArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "OpenApi", "Common" ]
@@ -429,7 +439,7 @@ bytesResolverCustom bytesResolverCustomArg =
                      )
              }
         )
-        [ bytesResolverCustomArg ]
+        [ bytesResolverCustomArg_ ]
 
 
 {-| expectBytesCustom: 
@@ -439,7 +449,7 @@ bytesResolverCustom bytesResolverCustomArg =
 -}
 expectBytesCustom :
     (Elm.Expression -> Elm.Expression) -> Elm.Expression -> Elm.Expression
-expectBytesCustom expectBytesCustomArg expectBytesCustomArg0 =
+expectBytesCustom expectBytesCustomArg_ expectBytesCustomArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "OpenApi", "Common" ]
@@ -476,8 +486,8 @@ expectBytesCustom expectBytesCustomArg expectBytesCustomArg0 =
                      )
              }
         )
-        [ Elm.functionReduced "expectBytesCustomUnpack" expectBytesCustomArg
-        , expectBytesCustomArg0
+        [ Elm.functionReduced "expectBytesCustomUnpack" expectBytesCustomArg_
+        , expectBytesCustomArg_0
         ]
 
 
@@ -486,7 +496,7 @@ expectBytesCustom expectBytesCustomArg expectBytesCustomArg0 =
     -> Http.Resolver (OpenApi.Common.Error err String) String
 -}
 stringResolverCustom : Elm.Expression -> Elm.Expression
-stringResolverCustom stringResolverCustomArg =
+stringResolverCustom stringResolverCustomArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "OpenApi", "Common" ]
@@ -517,7 +527,7 @@ stringResolverCustom stringResolverCustomArg =
                      )
              }
         )
-        [ stringResolverCustomArg ]
+        [ stringResolverCustomArg_ ]
 
 
 {-| expectStringCustom: 
@@ -527,7 +537,7 @@ stringResolverCustom stringResolverCustomArg =
 -}
 expectStringCustom :
     (Elm.Expression -> Elm.Expression) -> Elm.Expression -> Elm.Expression
-expectStringCustom expectStringCustomArg expectStringCustomArg0 =
+expectStringCustom expectStringCustomArg_ expectStringCustomArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "OpenApi", "Common" ]
@@ -562,8 +572,8 @@ expectStringCustom expectStringCustomArg expectStringCustomArg0 =
                      )
              }
         )
-        [ Elm.functionReduced "expectStringCustomUnpack" expectStringCustomArg
-        , expectStringCustomArg0
+        [ Elm.functionReduced "expectStringCustomUnpack" expectStringCustomArg_
+        , expectStringCustomArg_0
         ]
 
 
@@ -573,7 +583,7 @@ expectStringCustom expectStringCustomArg expectStringCustomArg0 =
     -> Http.Resolver (OpenApi.Common.Error err String) success
 -}
 jsonResolverCustom : Elm.Expression -> Elm.Expression -> Elm.Expression
-jsonResolverCustom jsonResolverCustomArg jsonResolverCustomArg0 =
+jsonResolverCustom jsonResolverCustomArg_ jsonResolverCustomArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "OpenApi", "Common" ]
@@ -608,7 +618,7 @@ jsonResolverCustom jsonResolverCustomArg jsonResolverCustomArg0 =
                      )
              }
         )
-        [ jsonResolverCustomArg, jsonResolverCustomArg0 ]
+        [ jsonResolverCustomArg_, jsonResolverCustomArg_0 ]
 
 
 {-| expectJsonCustom: 
@@ -622,7 +632,7 @@ expectJsonCustom :
     -> Elm.Expression
     -> Elm.Expression
     -> Elm.Expression
-expectJsonCustom expectJsonCustomArg expectJsonCustomArg0 expectJsonCustomArg1 =
+expectJsonCustom expectJsonCustomArg_ expectJsonCustomArg_0 expectJsonCustomArg_1 =
     Elm.apply
         (Elm.value
              { importFrom = [ "OpenApi", "Common" ]
@@ -661,9 +671,9 @@ expectJsonCustom expectJsonCustomArg expectJsonCustomArg0 expectJsonCustomArg1 =
                      )
              }
         )
-        [ Elm.functionReduced "expectJsonCustomUnpack" expectJsonCustomArg
-        , expectJsonCustomArg0
-        , expectJsonCustomArg1
+        [ Elm.functionReduced "expectJsonCustomUnpack" expectJsonCustomArg_
+        , expectJsonCustomArg_0
+        , expectJsonCustomArg_1
         ]
 
 
@@ -822,29 +832,6 @@ make_ =
     }
 
 
-caseOf_ :
-    { nullable :
-        Elm.Expression
-        -> { nullableTags_0_0
-            | null : Elm.Expression
-            , present : Elm.Expression -> Elm.Expression
-        }
-        -> Elm.Expression
-    , error :
-        Elm.Expression
-        -> { errorTags_1_0
-            | badUrl : Elm.Expression -> Elm.Expression
-            , timeout : Elm.Expression
-            , networkError : Elm.Expression
-            , knownBadStatus :
-                Elm.Expression -> Elm.Expression -> Elm.Expression
-            , unknownBadStatus :
-                Elm.Expression -> Elm.Expression -> Elm.Expression
-            , badErrorBody : Elm.Expression -> Elm.Expression -> Elm.Expression
-            , badBody : Elm.Expression -> Elm.Expression -> Elm.Expression
-        }
-        -> Elm.Expression
-    }
 caseOf_ =
     { nullable =
         \nullableExpression nullableTags ->
@@ -855,11 +842,19 @@ caseOf_ =
                      "Nullable"
                      [ Type.var "value" ]
                 )
-                [ Elm.Case.branch0 "Null" nullableTags.null
-                , Elm.Case.branch1
-                    "Present"
-                    ( "value", Type.var "value" )
-                    nullableTags.present
+                [ Elm.Case.branch
+                    (Elm.Arg.customType "Null" nullableTags.null)
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType
+                       "Present"
+                       nullableTags.present |> Elm.Arg.item
+                                                     (Elm.Arg.varWith
+                                                            "value"
+                                                            (Type.var "value")
+                                                     )
+                    )
+                    Basics.identity
                 ]
     , error =
         \errorExpression errorTags ->
@@ -870,32 +865,99 @@ caseOf_ =
                      "Error"
                      [ Type.var "err", Type.var "body" ]
                 )
-                [ Elm.Case.branch1
-                    "BadUrl"
-                    ( "stringString", Type.string )
-                    errorTags.badUrl
-                , Elm.Case.branch0 "Timeout" errorTags.timeout
-                , Elm.Case.branch0 "NetworkError" errorTags.networkError
-                , Elm.Case.branch2
-                    "KnownBadStatus"
-                    ( "basicsInt", Type.int )
-                    ( "err", Type.var "err" )
-                    errorTags.knownBadStatus
-                , Elm.Case.branch2
-                    "UnknownBadStatus"
-                    ( "httpMetadata", Type.namedWith [ "Http" ] "Metadata" [] )
-                    ( "body", Type.var "body" )
-                    errorTags.unknownBadStatus
-                , Elm.Case.branch2
-                    "BadErrorBody"
-                    ( "httpMetadata", Type.namedWith [ "Http" ] "Metadata" [] )
-                    ( "body", Type.var "body" )
-                    errorTags.badErrorBody
-                , Elm.Case.branch2
-                    "BadBody"
-                    ( "httpMetadata", Type.namedWith [ "Http" ] "Metadata" [] )
-                    ( "body", Type.var "body" )
-                    errorTags.badBody
+                [ Elm.Case.branch
+                    (Elm.Arg.customType
+                       "BadUrl"
+                       errorTags.badUrl |> Elm.Arg.item
+                                                 (Elm.Arg.varWith
+                                                        "arg_0"
+                                                        Type.string
+                                                 )
+                    )
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType "Timeout" errorTags.timeout)
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType "NetworkError" errorTags.networkError)
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType
+                       "KnownBadStatus"
+                       errorTags.knownBadStatus |> Elm.Arg.item
+                                                         (Elm.Arg.varWith
+                                                                "arg_0"
+                                                                Type.int
+                                                         ) |> Elm.Arg.item
+                                                                    (Elm.Arg.varWith
+                                                                           "err"
+                                                                           (Type.var
+                                                                                  "err"
+                                                                           )
+                                                                    )
+                    )
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType
+                       "UnknownBadStatus"
+                       errorTags.unknownBadStatus |> Elm.Arg.item
+                                                           (Elm.Arg.varWith
+                                                                  "httpMetadata"
+                                                                  (Type.namedWith
+                                                                         [ "Http"
+                                                                         ]
+                                                                         "Metadata"
+                                                                         []
+                                                                  )
+                                                           ) |> Elm.Arg.item
+                                                                      (Elm.Arg.varWith
+                                                                             "body"
+                                                                             (Type.var
+                                                                                    "body"
+                                                                             )
+                                                                      )
+                    )
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType
+                       "BadErrorBody"
+                       errorTags.badErrorBody |> Elm.Arg.item
+                                                       (Elm.Arg.varWith
+                                                              "httpMetadata"
+                                                              (Type.namedWith
+                                                                     [ "Http" ]
+                                                                     "Metadata"
+                                                                     []
+                                                              )
+                                                       ) |> Elm.Arg.item
+                                                                  (Elm.Arg.varWith
+                                                                         "body"
+                                                                         (Type.var
+                                                                                "body"
+                                                                         )
+                                                                  )
+                    )
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType
+                       "BadBody"
+                       errorTags.badBody |> Elm.Arg.item
+                                                  (Elm.Arg.varWith
+                                                         "httpMetadata"
+                                                         (Type.namedWith
+                                                                [ "Http" ]
+                                                                "Metadata"
+                                                                []
+                                                         )
+                                                  ) |> Elm.Arg.item
+                                                             (Elm.Arg.varWith
+                                                                    "body"
+                                                                    (Type.var
+                                                                           "body"
+                                                                    )
+                                                             )
+                    )
+                    Basics.identity
                 ]
     }
 
@@ -923,7 +985,7 @@ call_ :
     }
 call_ =
     { jsonDecodeAndMap =
-        \jsonDecodeAndMapArg jsonDecodeAndMapArg0 ->
+        \jsonDecodeAndMapArg_ jsonDecodeAndMapArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "OpenApi", "Common" ]
@@ -951,9 +1013,9 @@ call_ =
                              )
                      }
                 )
-                [ jsonDecodeAndMapArg, jsonDecodeAndMapArg0 ]
+                [ jsonDecodeAndMapArg_, jsonDecodeAndMapArg_0 ]
     , decodeOptionalField =
-        \decodeOptionalFieldArg decodeOptionalFieldArg0 ->
+        \decodeOptionalFieldArg_ decodeOptionalFieldArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "OpenApi", "Common" ]
@@ -975,9 +1037,9 @@ call_ =
                              )
                      }
                 )
-                [ decodeOptionalFieldArg, decodeOptionalFieldArg0 ]
+                [ decodeOptionalFieldArg_, decodeOptionalFieldArg_0 ]
     , bytesResolverCustomEffect =
-        \bytesResolverCustomEffectArg ->
+        \bytesResolverCustomEffectArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "OpenApi", "Common" ]
@@ -1014,9 +1076,9 @@ call_ =
                              )
                      }
                 )
-                [ bytesResolverCustomEffectArg ]
+                [ bytesResolverCustomEffectArg_ ]
     , expectBytesCustomEffect =
-        \expectBytesCustomEffectArg expectBytesCustomEffectArg0 ->
+        \expectBytesCustomEffectArg_ expectBytesCustomEffectArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "OpenApi", "Common" ]
@@ -1062,9 +1124,9 @@ call_ =
                              )
                      }
                 )
-                [ expectBytesCustomEffectArg, expectBytesCustomEffectArg0 ]
+                [ expectBytesCustomEffectArg_, expectBytesCustomEffectArg_0 ]
     , stringResolverCustomEffect =
-        \stringResolverCustomEffectArg ->
+        \stringResolverCustomEffectArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "OpenApi", "Common" ]
@@ -1096,9 +1158,9 @@ call_ =
                              )
                      }
                 )
-                [ stringResolverCustomEffectArg ]
+                [ stringResolverCustomEffectArg_ ]
     , expectStringCustomEffect =
-        \expectStringCustomEffectArg expectStringCustomEffectArg0 ->
+        \expectStringCustomEffectArg_ expectStringCustomEffectArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "OpenApi", "Common" ]
@@ -1136,9 +1198,9 @@ call_ =
                              )
                      }
                 )
-                [ expectStringCustomEffectArg, expectStringCustomEffectArg0 ]
+                [ expectStringCustomEffectArg_, expectStringCustomEffectArg_0 ]
     , jsonResolverCustomEffect =
-        \jsonResolverCustomEffectArg jsonResolverCustomEffectArg0 ->
+        \jsonResolverCustomEffectArg_ jsonResolverCustomEffectArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "OpenApi", "Common" ]
@@ -1174,9 +1236,9 @@ call_ =
                              )
                      }
                 )
-                [ jsonResolverCustomEffectArg, jsonResolverCustomEffectArg0 ]
+                [ jsonResolverCustomEffectArg_, jsonResolverCustomEffectArg_0 ]
     , expectJsonCustomEffect =
-        \expectJsonCustomEffectArg expectJsonCustomEffectArg0 expectJsonCustomEffectArg1 ->
+        \expectJsonCustomEffectArg_ expectJsonCustomEffectArg_0 expectJsonCustomEffectArg_1 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "OpenApi", "Common" ]
@@ -1218,12 +1280,12 @@ call_ =
                              )
                      }
                 )
-                [ expectJsonCustomEffectArg
-                , expectJsonCustomEffectArg0
-                , expectJsonCustomEffectArg1
+                [ expectJsonCustomEffectArg_
+                , expectJsonCustomEffectArg_0
+                , expectJsonCustomEffectArg_1
                 ]
     , bytesResolverCustom =
-        \bytesResolverCustomArg ->
+        \bytesResolverCustomArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "OpenApi", "Common" ]
@@ -1259,9 +1321,9 @@ call_ =
                              )
                      }
                 )
-                [ bytesResolverCustomArg ]
+                [ bytesResolverCustomArg_ ]
     , expectBytesCustom =
-        \expectBytesCustomArg expectBytesCustomArg0 ->
+        \expectBytesCustomArg_ expectBytesCustomArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "OpenApi", "Common" ]
@@ -1307,9 +1369,9 @@ call_ =
                              )
                      }
                 )
-                [ expectBytesCustomArg, expectBytesCustomArg0 ]
+                [ expectBytesCustomArg_, expectBytesCustomArg_0 ]
     , stringResolverCustom =
-        \stringResolverCustomArg ->
+        \stringResolverCustomArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "OpenApi", "Common" ]
@@ -1340,9 +1402,9 @@ call_ =
                              )
                      }
                 )
-                [ stringResolverCustomArg ]
+                [ stringResolverCustomArg_ ]
     , expectStringCustom =
-        \expectStringCustomArg expectStringCustomArg0 ->
+        \expectStringCustomArg_ expectStringCustomArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "OpenApi", "Common" ]
@@ -1380,9 +1442,9 @@ call_ =
                              )
                      }
                 )
-                [ expectStringCustomArg, expectStringCustomArg0 ]
+                [ expectStringCustomArg_, expectStringCustomArg_0 ]
     , jsonResolverCustom =
-        \jsonResolverCustomArg jsonResolverCustomArg0 ->
+        \jsonResolverCustomArg_ jsonResolverCustomArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "OpenApi", "Common" ]
@@ -1417,9 +1479,9 @@ call_ =
                              )
                      }
                 )
-                [ jsonResolverCustomArg, jsonResolverCustomArg0 ]
+                [ jsonResolverCustomArg_, jsonResolverCustomArg_0 ]
     , expectJsonCustom =
-        \expectJsonCustomArg expectJsonCustomArg0 expectJsonCustomArg1 ->
+        \expectJsonCustomArg_ expectJsonCustomArg_0 expectJsonCustomArg_1 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "OpenApi", "Common" ]
@@ -1461,9 +1523,9 @@ call_ =
                              )
                      }
                 )
-                [ expectJsonCustomArg
-                , expectJsonCustomArg0
-                , expectJsonCustomArg1
+                [ expectJsonCustomArg_
+                , expectJsonCustomArg_0
+                , expectJsonCustomArg_1
                 ]
     }
 

@@ -1,7 +1,13 @@
-module Gen.PagesMsg exposing (annotation_, call_, fromMsg, map, moduleName_, noOp, values_)
+module Gen.PagesMsg exposing
+    ( moduleName_, fromMsg, map, noOp, annotation_, call_
+    , values_
+    )
 
-{-| 
-@docs moduleName_, fromMsg, map, noOp, annotation_, call_, values_
+{-|
+# Generated bindings for PagesMsg
+
+@docs moduleName_, fromMsg, map, noOp, annotation_, call_
+@docs values_
 -}
 
 
@@ -50,7 +56,7 @@ moduleName_ =
 fromMsg: userMsg -> PagesMsg.PagesMsg userMsg
 -}
 fromMsg : Elm.Expression -> Elm.Expression
-fromMsg fromMsgArg =
+fromMsg fromMsgArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "PagesMsg" ]
@@ -67,12 +73,12 @@ fromMsg fromMsgArg =
                      )
              }
         )
-        [ fromMsgArg ]
+        [ fromMsgArg_ ]
 
 
 {-| map: (a -> b) -> PagesMsg.PagesMsg a -> PagesMsg.PagesMsg b -}
 map : (Elm.Expression -> Elm.Expression) -> Elm.Expression -> Elm.Expression
-map mapArg mapArg0 =
+map mapArg_ mapArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "PagesMsg" ]
@@ -94,7 +100,7 @@ map mapArg mapArg0 =
                      )
              }
         )
-        [ Elm.functionReduced "mapUnpack" mapArg, mapArg0 ]
+        [ Elm.functionReduced "mapUnpack" mapArg_, mapArg_0 ]
 
 
 {-| A Msg that is handled by the elm-pages framework and does nothing. Helpful for when you don't want to register a callback.
@@ -144,7 +150,7 @@ call_ :
     }
 call_ =
     { fromMsg =
-        \fromMsgArg ->
+        \fromMsgArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "PagesMsg" ]
@@ -161,9 +167,9 @@ call_ =
                              )
                      }
                 )
-                [ fromMsgArg ]
+                [ fromMsgArg_ ]
     , map =
-        \mapArg mapArg0 ->
+        \mapArg_ mapArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "PagesMsg" ]
@@ -187,7 +193,7 @@ call_ =
                              )
                      }
                 )
-                [ mapArg, mapArg0 ]
+                [ mapArg_, mapArg_0 ]
     }
 
 

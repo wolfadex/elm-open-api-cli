@@ -1,7 +1,13 @@
-module Gen.Pages.Url exposing (annotation_, call_, external, fromPath, moduleName_, toAbsoluteUrl, toString, values_)
+module Gen.Pages.Url exposing
+    ( moduleName_, external, fromPath, toAbsoluteUrl, toString, annotation_
+    , call_, values_
+    )
 
-{-| 
-@docs moduleName_, external, fromPath, toAbsoluteUrl, toString, annotation_, call_, values_
+{-|
+# Generated bindings for Pages.Url
+
+@docs moduleName_, external, fromPath, toAbsoluteUrl, toString, annotation_
+@docs call_, values_
 -}
 
 
@@ -17,7 +23,7 @@ moduleName_ =
 
 {-| external: String -> Pages.Url.Url -}
 external : String -> Elm.Expression
-external externalArg =
+external externalArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Pages", "Url" ]
@@ -30,12 +36,12 @@ external externalArg =
                      )
              }
         )
-        [ Elm.string externalArg ]
+        [ Elm.string externalArg_ ]
 
 
 {-| fromPath: UrlPath.UrlPath -> Pages.Url.Url -}
 fromPath : Elm.Expression -> Elm.Expression
-fromPath fromPathArg =
+fromPath fromPathArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Pages", "Url" ]
@@ -48,12 +54,12 @@ fromPath fromPathArg =
                      )
              }
         )
-        [ fromPathArg ]
+        [ fromPathArg_ ]
 
 
 {-| toAbsoluteUrl: String -> Pages.Url.Url -> String -}
 toAbsoluteUrl : String -> Elm.Expression -> Elm.Expression
-toAbsoluteUrl toAbsoluteUrlArg toAbsoluteUrlArg0 =
+toAbsoluteUrl toAbsoluteUrlArg_ toAbsoluteUrlArg_0 =
     Elm.apply
         (Elm.value
              { importFrom = [ "Pages", "Url" ]
@@ -68,12 +74,12 @@ toAbsoluteUrl toAbsoluteUrlArg toAbsoluteUrlArg0 =
                      )
              }
         )
-        [ Elm.string toAbsoluteUrlArg, toAbsoluteUrlArg0 ]
+        [ Elm.string toAbsoluteUrlArg_, toAbsoluteUrlArg_0 ]
 
 
 {-| toString: Pages.Url.Url -> String -}
 toString : Elm.Expression -> Elm.Expression
-toString toStringArg =
+toString toStringArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Pages", "Url" ]
@@ -86,7 +92,7 @@ toString toStringArg =
                      )
              }
         )
-        [ toStringArg ]
+        [ toStringArg_ ]
 
 
 annotation_ : { url : Type.Annotation }
@@ -102,7 +108,7 @@ call_ :
     }
 call_ =
     { external =
-        \externalArg ->
+        \externalArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Pages", "Url" ]
@@ -115,9 +121,9 @@ call_ =
                              )
                      }
                 )
-                [ externalArg ]
+                [ externalArg_ ]
     , fromPath =
-        \fromPathArg ->
+        \fromPathArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Pages", "Url" ]
@@ -130,9 +136,9 @@ call_ =
                              )
                      }
                 )
-                [ fromPathArg ]
+                [ fromPathArg_ ]
     , toAbsoluteUrl =
-        \toAbsoluteUrlArg toAbsoluteUrlArg0 ->
+        \toAbsoluteUrlArg_ toAbsoluteUrlArg_0 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Pages", "Url" ]
@@ -147,9 +153,9 @@ call_ =
                              )
                      }
                 )
-                [ toAbsoluteUrlArg, toAbsoluteUrlArg0 ]
+                [ toAbsoluteUrlArg_, toAbsoluteUrlArg_0 ]
     , toString =
-        \toStringArg ->
+        \toStringArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Pages", "Url" ]
@@ -162,7 +168,7 @@ call_ =
                              )
                      }
                 )
-                [ toStringArg ]
+                [ toStringArg_ ]
     }
 
 

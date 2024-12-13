@@ -1,7 +1,20 @@
-module Gen.Pages.Manifest.Category exposing (annotation_, books, business, call_, custom, education, entertainment, finance, fitness, food, games, government, health, kids, lifestyle, magazines, medical, moduleName_, music, navigation, news, personalization, photo, politics, productivity, security, shopping, social, sports, toString, travel, utilities, values_, weather)
+module Gen.Pages.Manifest.Category exposing
+    ( moduleName_, toString, books, business, education, entertainment
+    , finance, fitness, food, games, government, health, kids
+    , lifestyle, magazines, medical, music, navigation, news, personalization
+    , photo, politics, productivity, security, shopping, social, sports
+    , travel, utilities, weather, custom, annotation_, call_, values_
+    )
 
-{-| 
-@docs moduleName_, toString, books, business, education, entertainment, finance, fitness, food, games, government, health, kids, lifestyle, magazines, medical, music, navigation, news, personalization, photo, politics, productivity, security, shopping, social, sports, travel, utilities, weather, custom, annotation_, call_, values_
+{-|
+# Generated bindings for Pages.Manifest.Category
+
+@docs moduleName_, toString, books, business, education, entertainment
+@docs finance, fitness, food, games, government, health
+@docs kids, lifestyle, magazines, medical, music, navigation
+@docs news, personalization, photo, politics, productivity, security
+@docs shopping, social, sports, travel, utilities, weather
+@docs custom, annotation_, call_, values_
 -}
 
 
@@ -21,7 +34,7 @@ here: <https://github.com/w3c/manifest/wiki/Categories>.
 toString: Pages.Manifest.Category.Category -> String
 -}
 toString : Elm.Expression -> Elm.Expression
-toString toStringArg =
+toString toStringArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Pages", "Manifest", "Category" ]
@@ -38,7 +51,7 @@ toString toStringArg =
                      )
              }
         )
-        [ toStringArg ]
+        [ toStringArg_ ]
 
 
 {-| Creates the described category.
@@ -580,7 +593,7 @@ But, if you're confident about using a custom one, you can do so with `Pages.Man
 custom: String -> Pages.Manifest.Category.Category
 -}
 custom : String -> Elm.Expression
-custom customArg =
+custom customArg_ =
     Elm.apply
         (Elm.value
              { importFrom = [ "Pages", "Manifest", "Category" ]
@@ -597,7 +610,7 @@ custom customArg =
                      )
              }
         )
-        [ Elm.string customArg ]
+        [ Elm.string customArg_ ]
 
 
 annotation_ : { category : Type.Annotation }
@@ -613,7 +626,7 @@ call_ :
     }
 call_ =
     { toString =
-        \toStringArg ->
+        \toStringArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Pages", "Manifest", "Category" ]
@@ -630,9 +643,9 @@ call_ =
                              )
                      }
                 )
-                [ toStringArg ]
+                [ toStringArg_ ]
     , custom =
-        \customArg ->
+        \customArg_ ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "Pages", "Manifest", "Category" ]
@@ -649,7 +662,7 @@ call_ =
                              )
                      }
                 )
-                [ customArg ]
+                [ customArg_ ]
     }
 
 

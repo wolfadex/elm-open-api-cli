@@ -1,12 +1,19 @@
-module Gen.BackendTask.Custom exposing (annotation_, call_, caseOf_, dateDecoder, make_, moduleName_, run, timeDecoder, values_)
+module Gen.BackendTask.Custom exposing
+    ( moduleName_, run, timeDecoder, dateDecoder, annotation_, make_
+    , caseOf_, call_, values_
+    )
 
-{-| 
-@docs moduleName_, run, timeDecoder, dateDecoder, annotation_, make_, caseOf_, call_, values_
+{-|
+# Generated bindings for BackendTask.Custom
+
+@docs moduleName_, run, timeDecoder, dateDecoder, annotation_, make_
+@docs caseOf_, call_, values_
 -}
 
 
 import Elm
 import Elm.Annotation as Type
+import Elm.Arg
 import Elm.Case
 
 
@@ -25,7 +32,7 @@ moduleName_ =
     } b
 -}
 run : String -> Elm.Expression -> Elm.Expression -> Elm.Expression
-run runArg runArg0 runArg1 =
+run runArg_ runArg_0 runArg_1 =
     Elm.apply
         (Elm.value
              { importFrom = [ "BackendTask", "Custom" ]
@@ -63,7 +70,7 @@ run runArg runArg0 runArg1 =
                      )
              }
         )
-        [ Elm.string runArg, runArg0, runArg1 ]
+        [ Elm.string runArg_, runArg_0, runArg_1 ]
 
 
 {-| timeDecoder: Json.Decode.Decoder Time.Posix -}
@@ -187,57 +194,90 @@ make_ =
     }
 
 
-caseOf_ :
-    { error :
-        Elm.Expression
-        -> { errorTags_0_0
-            | error : Elm.Expression
-            , errorInCustomBackendTaskFile : Elm.Expression
-            , missingCustomBackendTaskFile : Elm.Expression
-            , customBackendTaskNotDefined : Elm.Expression -> Elm.Expression
-            , customBackendTaskException : Elm.Expression -> Elm.Expression
-            , nonJsonException : Elm.Expression -> Elm.Expression
-            , exportIsNotFunction : Elm.Expression
-            , decodeError : Elm.Expression -> Elm.Expression
-        }
-        -> Elm.Expression
-    }
 caseOf_ =
     { error =
         \errorExpression errorTags ->
             Elm.Case.custom
                 errorExpression
                 (Type.namedWith [ "BackendTask", "Custom" ] "Error" [])
-                [ Elm.Case.branch0 "Error" errorTags.error
-                , Elm.Case.branch0
-                    "ErrorInCustomBackendTaskFile"
-                    errorTags.errorInCustomBackendTaskFile
-                , Elm.Case.branch0
-                    "MissingCustomBackendTaskFile"
-                    errorTags.missingCustomBackendTaskFile
-                , Elm.Case.branch1
-                    "CustomBackendTaskNotDefined"
-                    ( "one", Type.record [ ( "name", Type.string ) ] )
-                    errorTags.customBackendTaskNotDefined
-                , Elm.Case.branch1
-                    "CustomBackendTaskException"
-                    ( "jsonDecodeValue"
-                    , Type.namedWith [ "Json", "Decode" ] "Value" []
+                [ Elm.Case.branch
+                    (Elm.Arg.customType "Error" errorTags.error)
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType
+                       "ErrorInCustomBackendTaskFile"
+                       errorTags.errorInCustomBackendTaskFile
                     )
-                    errorTags.customBackendTaskException
-                , Elm.Case.branch1
-                    "NonJsonException"
-                    ( "stringString", Type.string )
-                    errorTags.nonJsonException
-                , Elm.Case.branch0
-                    "ExportIsNotFunction"
-                    errorTags.exportIsNotFunction
-                , Elm.Case.branch1
-                    "DecodeError"
-                    ( "jsonDecodeError"
-                    , Type.namedWith [ "Json", "Decode" ] "Error" []
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType
+                       "MissingCustomBackendTaskFile"
+                       errorTags.missingCustomBackendTaskFile
                     )
-                    errorTags.decodeError
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType
+                       "CustomBackendTaskNotDefined"
+                       errorTags.customBackendTaskNotDefined |> Elm.Arg.item
+                                                                      (Elm.Arg.varWith
+                                                                             "arg_0"
+                                                                             (Type.record
+                                                                                    [ ( "name"
+                                                                                      , Type.string
+                                                                                      )
+                                                                                    ]
+                                                                             )
+                                                                      )
+                    )
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType
+                       "CustomBackendTaskException"
+                       errorTags.customBackendTaskException |> Elm.Arg.item
+                                                                     (Elm.Arg.varWith
+                                                                            "jsonDecodeValue"
+                                                                            (Type.namedWith
+                                                                                   [ "Json"
+                                                                                   , "Decode"
+                                                                                   ]
+                                                                                   "Value"
+                                                                                   []
+                                                                            )
+                                                                     )
+                    )
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType
+                       "NonJsonException"
+                       errorTags.nonJsonException |> Elm.Arg.item
+                                                           (Elm.Arg.varWith
+                                                                  "arg_0"
+                                                                  Type.string
+                                                           )
+                    )
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType
+                       "ExportIsNotFunction"
+                       errorTags.exportIsNotFunction
+                    )
+                    Basics.identity
+                , Elm.Case.branch
+                    (Elm.Arg.customType
+                       "DecodeError"
+                       errorTags.decodeError |> Elm.Arg.item
+                                                      (Elm.Arg.varWith
+                                                             "jsonDecodeError"
+                                                             (Type.namedWith
+                                                                    [ "Json"
+                                                                    , "Decode"
+                                                                    ]
+                                                                    "Error"
+                                                                    []
+                                                             )
+                                                      )
+                    )
+                    Basics.identity
                 ]
     }
 
@@ -247,7 +287,7 @@ call_ :
     }
 call_ =
     { run =
-        \runArg runArg0 runArg1 ->
+        \runArg_ runArg_0 runArg_1 ->
             Elm.apply
                 (Elm.value
                      { importFrom = [ "BackendTask", "Custom" ]
@@ -288,7 +328,7 @@ call_ =
                              )
                      }
                 )
-                [ runArg, runArg0, runArg1 ]
+                [ runArg_, runArg_0, runArg_1 ]
     }
 
 

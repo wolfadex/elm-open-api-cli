@@ -64,13 +64,26 @@ getAlias refUri =
             CliMonad.fail <| "Couldn't get the type ref (" ++ String.join "/" refUri ++ ") for the response"
 
 
+subSchemaAllOfToProperties : Bool -> Json.Schema.Definitions.SubSchema -> CliMonad (List ( Common.UnsafeName, Common.Field ))
+subSchemaAllOfToProperties qualify subSchema =
+    subSchema.allOf
+        |> Maybe.withDefault []
+        |> CliMonad.combineMap (schemaToProperties qualify)
+        |> CliMonad.map (List.foldl listUnion [])
+
+
 schemaToProperties : Bool -> Json.Schema.Definitions.Schema -> CliMonad (List ( Common.UnsafeName, Common.Field ))
 schemaToProperties qualify allOfItem =
     case allOfItem of
         Json.Schema.Definitions.ObjectSchema allOfItemSchema ->
-            CliMonad.map2 listUnion
+            CliMonad.map3
+                (\a b c ->
+                    listUnion a b
+                        |> listUnion c
+                )
                 (subSchemaToProperties qualify allOfItemSchema)
                 (subSchemaRefToProperties qualify allOfItemSchema)
+                (subSchemaAllOfToProperties qualify allOfItemSchema)
 
         Json.Schema.Definitions.BooleanSchema _ ->
             CliMonad.todoWithDefault [] "Boolean schema inside allOf"
@@ -457,14 +470,6 @@ oneOfType types =
 
 objectSchemaToType : Bool -> Json.Schema.Definitions.SubSchema -> CliMonad { type_ : Common.Type, documentation : Maybe String }
 objectSchemaToType qualify subSchema =
-    let
-        propertiesFromAllOf : CliMonad (List ( Common.UnsafeName, Common.Field ))
-        propertiesFromAllOf =
-            subSchema.allOf
-                |> Maybe.withDefault []
-                |> CliMonad.combineMap (schemaToProperties qualify)
-                |> CliMonad.map (List.foldl listUnion [])
-    in
     CliMonad.map2
         (\schemaProps allOfProps ->
             let
@@ -501,7 +506,7 @@ objectSchemaToType qualify subSchema =
             }
         )
         (subSchemaToProperties qualify subSchema)
-        propertiesFromAllOf
+        (subSchemaAllOfToProperties qualify subSchema)
 
 
 joinIfNotEmpty : String -> List (Maybe String) -> Maybe String

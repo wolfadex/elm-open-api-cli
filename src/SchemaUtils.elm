@@ -47,9 +47,9 @@ import Set exposing (Set)
 getSchema : String -> CliMonad Json.Schema.Definitions.Schema
 getSchema refName =
     CliMonad.fromApiSpec identity
-        |> CliMonad.stepOrFail ("Could not find components in the schema, while looking up" ++ refName)
+        |> CliMonad.stepOrFail ("Could not find components in the schema, while looking up " ++ refName)
             OpenApi.components
-        |> CliMonad.stepOrFail ("Could not find component's schema, while looking up" ++ refName)
+        |> CliMonad.stepOrFail ("Could not find component's schema, while looking up " ++ refName)
             (\components -> Dict.get refName (OpenApi.Components.schemas components))
         |> CliMonad.map OpenApi.Schema.get
 

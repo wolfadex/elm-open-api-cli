@@ -7,7 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unreleased]
 
+### Fixed
+
+-   [Missing fields with recursive `allOf.$ref` inheritance](https://github.com/wolfadex/elm-open-api-cli/pull/182). [Adam DiCarlo](https://github.com/adamdicarlo0)
+
 ### Added
+
 -   Support for params being passed in the header
 -   Support for `type : null`
 -   Support for `const : <value>`

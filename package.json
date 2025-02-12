@@ -12,7 +12,7 @@
         "review:watch": "elm-review --watch --fix",
         "format": "elm-format src tests --validate",
         "test": "elm-test",
-        "test:gen": "elm-pages run src/GenerateAll.elm",
+        "test:gen": "elm-pages run src/TestGenScript.elm",
         "test:watch": "elm-test --watch",
         "pub": "npm run build && npm publish"
     },

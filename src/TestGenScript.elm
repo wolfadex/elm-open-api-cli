@@ -16,6 +16,10 @@ import Pages.Script
 run : Pages.Script.Script
 run =
     let
+        additionalProperties : OpenApi.Config.Input
+        additionalProperties =
+            OpenApi.Config.inputFrom (OpenApi.Config.File "./example/additional-properties.yaml")
+
         recursiveAllofRefs : OpenApi.Config.Input
         recursiveAllofRefs =
             OpenApi.Config.inputFrom (OpenApi.Config.File "./example/recursive-allof-refs.yaml")
@@ -69,6 +73,7 @@ run =
         config =
             OpenApi.Config.init "./generated"
                 |> OpenApi.Config.withAutoConvertSwagger True
+                |> OpenApi.Config.withInput additionalProperties
                 |> OpenApi.Config.withInput recursiveAllofRefs
                 |> OpenApi.Config.withInput singleEnum
                 |> OpenApi.Config.withInput patreon

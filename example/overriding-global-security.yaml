@@ -1,0 +1,35 @@
+openapi: 3.0.1
+info:
+  title: "Overriding global security"
+  version: 1.0.0
+components:
+  schemas:
+    Data:
+      description: "Data"
+      type: string
+  securitySchemes:
+    Token:
+      type: apiKey
+      in: header
+      name: X-API-Key
+security:
+  - Token: []
+paths:
+  "/api/protected":
+    summary: Endpoint requiring token
+    description: Description of protected endpoint
+    get:
+      operationId: GetProtectedData
+      responses:
+        200:
+          $ref: "#/components/schemas/Data"
+
+  "/api/unprotected":
+    summary: Unprotected (public) endpoint
+    description: "Description of unprotected endpoint"
+    get:
+      security: []
+      operationId: GetUnprotectedData
+      responses:
+        200:
+          $ref: "#/components/schemas/Data"

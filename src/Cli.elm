@@ -653,6 +653,9 @@ overrideWith override original =
                             if overrideValue == Json.Value.NullValue then
                                 res
 
+                            else if key == "security" then
+                                Result.map (\acc -> ( key, overrideValue ) :: acc) res
+
                             else
                                 Result.map2
                                     (\acc newValue -> ( key, newValue ) :: acc)

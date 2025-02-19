@@ -23,6 +23,7 @@ run =
         overridingGlobalSecurity : OpenApi.Config.Input
         overridingGlobalSecurity =
             OpenApi.Config.inputFrom (OpenApi.Config.File "./example/overriding-global-security.yaml")
+                |> OpenApi.Config.withOverrides [ OpenApi.Config.File "./example/overriding-global-security-override.yaml" ]
 
         singleEnum : OpenApi.Config.Input
         singleEnum =

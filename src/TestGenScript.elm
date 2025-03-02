@@ -65,6 +65,10 @@ run =
         gitHub =
             OpenApi.Config.inputFrom (OpenApi.Config.File "./example/github-spec.json")
 
+        anyOfEnums : OpenApi.Config.Input
+        anyOfEnums =
+            OpenApi.Config.inputFrom (OpenApi.Config.File "./example/anyOfEnums.yaml")
+
         config : OpenApi.Config.Config
         config =
             OpenApi.Config.init "./generated"
@@ -80,6 +84,7 @@ run =
                 |> OpenApi.Config.withInput trustmark
                 |> OpenApi.Config.withInput trustmarkTradeCheck
                 |> OpenApi.Config.withInput gitHub
+                |> OpenApi.Config.withInput anyOfEnums
     in
     Pages.Script.withoutCliOptions
         (BackendTask.doEach

@@ -1494,7 +1494,9 @@ operationToAuthorizationInfo : OpenApi.Operation.Operation -> CliMonad Authoriza
 operationToAuthorizationInfo operation =
     CliMonad.andThen2
         (\globalSecurity components ->
-            (OpenApi.Operation.security operation ++ globalSecurity)
+            -- If present, the operation's security overrides globalSecurity.
+            OpenApi.Operation.security operation
+                |> Maybe.withDefault globalSecurity
                 |> List.concatMap
                     (Dict.toList << OpenApi.SecurityRequirement.requirements)
                 |> CliMonad.foldl

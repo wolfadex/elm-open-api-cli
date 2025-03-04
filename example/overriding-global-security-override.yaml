@@ -1,0 +1,8 @@
+paths:
+  "/api/unprotected":
+    post:
+      # Make sure override files can override global security, per-operation.
+      security: []
+    patch:
+      # Make sure override files can override operation-level security as well.
+      security: []

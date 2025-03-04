@@ -1,0 +1,55 @@
+openapi: 3.0.1
+info:
+  title: "Overriding global security"
+  version: 1.0.0
+components:
+  schemas:
+    Data:
+      description: "Data"
+      type: string
+  securitySchemes:
+    Token:
+      type: apiKey
+      in: header
+      name: X-API-Key
+security:
+  - Token: []
+paths:
+  "/api/protected":
+    get:
+      summary: Endpoint requiring token
+      description: Get secret data. Auth required!
+      operationId: GetProtectedData
+      responses:
+        200:
+          $ref: "#/components/schemas/Data"
+
+  "/api/unprotected":
+    get:
+      summary: Unprotected endpoint to get data
+      description: Get some data. No auth required.
+      operationId: GetUnprotectedData
+      security: []
+      responses:
+        200:
+          $ref: "#/components/schemas/Data"
+    post:
+      summary: Unprotected endpoint to store data
+      # Whoops! Security should be overridden here like for GET. Let's fix it
+      # with an override file; see ./overriding-global-security-override.yaml.
+      description: Store some data. No auth required.
+      operationId: PostUnprotectedData
+      responses:
+        200:
+          $ref: "#/components/schemas/Data"
+    patch:
+      summary: Unprotected endpoint to store data (again)
+      # Whoops! This is supposed to be unprotected, like GET. Let's fix it
+      # with an override file; see ./overriding-global-security-override.yaml.
+      security:
+        - Token: []
+      description: Store some data. No auth required.
+      operationId: PatchUnprotectedData
+      responses:
+        200:
+          $ref: "#/components/schemas/Data"

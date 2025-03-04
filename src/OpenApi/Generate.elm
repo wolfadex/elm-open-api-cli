@@ -1858,7 +1858,7 @@ contentToContentSchema qualify content =
                                     case Dict.get "application/x-www-form-urlencoded" content of
                                         Just urlEncodedSchema ->
                                             CliMonad.succeed urlEncodedSchema
-                                                |> CliMonad.stepOrFail "The request's application/x-www-form-urlencoded content option doesn't havea  schema"
+                                                |> CliMonad.stepOrFail "The request's application/x-www-form-urlencoded content option doesn't have a schema"
                                                     (OpenApi.MediaType.schema >> Maybe.map OpenApi.Schema.get)
                                                 |> CliMonad.andThen (SchemaUtils.schemaToType qualify)
                                                 |> CliMonad.map (\{ type_ } -> UrlEncodedContent type_)

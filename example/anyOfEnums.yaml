@@ -1,0 +1,31 @@
+openapi: 3.0.0
+info:
+    title: Single enum
+    version: 1.0.0
+paths:
+    "/":
+        responses:
+            200:
+                description: Ok
+                schema:
+                    "#ref": "#/components/schemas/ApiModule/$defs/MyEnums"
+components:
+    schemas:
+        Compact:
+            enum:
+                - VAR1
+                - VAR2
+                - VAR3
+        ApiModule:
+            "$defs":
+                MyEnums:
+                    anyOf:
+                        - type: string
+                          enum:
+                              - VAR1
+                        - type: string
+                          enum:
+                              - VAR2
+                        - type: string
+                          enum:
+                              - VAR3

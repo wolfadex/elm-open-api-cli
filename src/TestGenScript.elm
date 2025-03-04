@@ -16,6 +16,10 @@ import Pages.Script
 run : Pages.Script.Script
 run =
     let
+        additionalProperties : OpenApi.Config.Input
+        additionalProperties =
+            OpenApi.Config.inputFrom (OpenApi.Config.File "./example/additional-properties.yaml")
+
         recursiveAllofRefs : OpenApi.Config.Input
         recursiveAllofRefs =
             OpenApi.Config.inputFrom (OpenApi.Config.File "./example/recursive-allof-refs.yaml")
@@ -70,10 +74,15 @@ run =
         gitHub =
             OpenApi.Config.inputFrom (OpenApi.Config.File "./example/github-spec.json")
 
+        anyOfEnums : OpenApi.Config.Input
+        anyOfEnums =
+            OpenApi.Config.inputFrom (OpenApi.Config.File "./example/anyOfEnums.yaml")
+
         config : OpenApi.Config.Config
         config =
             OpenApi.Config.init "./generated"
                 |> OpenApi.Config.withAutoConvertSwagger True
+                |> OpenApi.Config.withInput additionalProperties
                 |> OpenApi.Config.withInput recursiveAllofRefs
                 |> OpenApi.Config.withInput overridingGlobalSecurity
                 |> OpenApi.Config.withInput singleEnum
@@ -86,6 +95,7 @@ run =
                 |> OpenApi.Config.withInput trustmark
                 |> OpenApi.Config.withInput trustmarkTradeCheck
                 |> OpenApi.Config.withInput gitHub
+                |> OpenApi.Config.withInput anyOfEnums
     in
     Pages.Script.withoutCliOptions
         (BackendTask.doEach

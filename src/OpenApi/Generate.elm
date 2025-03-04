@@ -672,8 +672,8 @@ toRequestFunctions server effectTypes method pathUrl operation =
                                             |> Gen.Result.withDefault (Elm.string "")
                                 in
                                 { core = Gen.Http.call_.stringBody (Elm.string "application/x-www-form-urlencoded") encoded
-                                , elmPages = Gen.BackendTask.Http.jsonBody encoded
-                                , lamderaProgramTest = Gen.Effect.Http.jsonBody encoded
+                                , elmPages = Gen.Http.call_.stringBody (Elm.string "application/x-www-form-urlencoded") encoded
+                                , lamderaProgramTest = Gen.Http.call_.stringBody (Elm.string "application/x-www-form-urlencoded") encoded
                                 }
                             )
 

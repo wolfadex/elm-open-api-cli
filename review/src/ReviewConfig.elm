@@ -9,6 +9,7 @@ import NoDebug.Log
 import NoDebug.TodoOrToString
 import NoExposingEverything
 import NoImportingEverything
+import NoMismatchedCliVersion
 import NoMissingTypeAnnotation
 import NoMissingTypeAnnotationInLetIn
 import NoMissingTypeExpose
@@ -64,6 +65,7 @@ exceptCodegenRules =
         |> Rule.ignoreErrorsForDirectories [ "src/Gen" ]
     , Review.ImportSimple.rule
         |> Rule.ignoreErrorsForDirectories [ "src/Gen" ]
+    , NoMismatchedCliVersion.rule
     ]
 
 

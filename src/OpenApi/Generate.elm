@@ -2,6 +2,7 @@ module OpenApi.Generate exposing
     ( Config
     , ContentSchema(..)
     , Mime
+    , commonDeclarations
     , files
     )
 
@@ -97,6 +98,66 @@ type alias Config =
     }
 
 
+commonDeclarations : List OpenApi.Config.EffectType -> List { declaration : Elm.Declaration, group : String }
+commonDeclarations effectTypes =
+    let
+        elmHttp : List { declaration : Elm.Declaration, group : String }
+        elmHttp =
+            if List.any (\effectType -> effectTypeToPackage effectType == Common.ElmHttp) effectTypes then
+                elmHttpCommonDeclarations.declarations
+                    |> List.map
+                        (\declaration ->
+                            { declaration = declaration
+                            , group = "Http"
+                            }
+                        )
+
+            else
+                []
+
+        lamderaProgramTest : List { declaration : Elm.Declaration, group : String }
+        lamderaProgramTest =
+            if List.any (\effectType -> effectTypeToPackage effectType == Common.LamderaProgramTest) effectTypes then
+                lamderaProgramTestCommonDeclarations.declarations
+                    |> List.map
+                        (\declaration ->
+                            { declaration = declaration
+                            , group = "Http"
+                            }
+                        )
+
+            else
+                []
+
+        common : List { declaration : Elm.Declaration, group : String }
+        common =
+            [ { declaration =
+                    SchemaUtils.decodeOptionalField.declaration
+                        |> Elm.withDocumentation SchemaUtils.decodeOptionalFieldDocumentation
+                        |> Elm.expose
+              , group = "Decoders"
+              }
+            , { declaration =
+                    jsonDecodeAndMap
+                        |> Elm.withDocumentation "Chain JSON decoders, when `Json.Decode.map8` isn't enough."
+                        |> Elm.expose
+              , group = "Decoders"
+              }
+            , { declaration =
+                    errorType
+                        |> Elm.exposeConstructor
+              , group = "Http"
+              }
+            , { declaration =
+                    nullableType
+                        |> Elm.exposeConstructor
+              , group = "Types"
+              }
+            ]
+    in
+    elmHttp ++ lamderaProgramTest ++ common
+
+
 files :
     Config
     -> OpenApi.OpenApi
@@ -138,39 +199,6 @@ files { namespace, generateTodos, effectTypes, server, formats } apiSpec =
                             allDecls : List CliMonad.Declaration
                             allDecls =
                                 declarations
-                                    ++ elmHttpCommonDeclarations effectTypes
-                                    ++ lamderaProgramTestCommonDeclarations effectTypes
-                                    ++ [ { moduleName = Common.Common
-                                         , name = "decodeOptionalField"
-                                         , declaration =
-                                            SchemaUtils.decodeOptionalField.declaration
-                                                |> Elm.withDocumentation SchemaUtils.decodeOptionalFieldDocumentation
-                                                |> Elm.expose
-                                         , group = "Decoders"
-                                         }
-                                       , { moduleName = Common.Common
-                                         , name = "jsonDecodeAndMap"
-                                         , declaration =
-                                            jsonDecodeAndMap
-                                                |> Elm.withDocumentation "Chain JSON decoders, when `Json.Decode.map8` isn't enough."
-                                                |> Elm.expose
-                                         , group = "Decoders"
-                                         }
-                                       , { moduleName = Common.Common
-                                         , name = "Error"
-                                         , declaration =
-                                            errorType
-                                                |> Elm.exposeConstructor
-                                         , group = "Http"
-                                         }
-                                       , { moduleName = Common.Common
-                                         , name = "Nullable"
-                                         , declaration =
-                                            nullableType
-                                                |> Elm.exposeConstructor
-                                         , group = "Types"
-                                         }
-                                       ]
                                     ++ serverDecls apiSpec server
                         in
                         { modules =
@@ -199,82 +227,46 @@ files { namespace, generateTodos, effectTypes, server, formats } apiSpec =
                     )
 
 
-elmHttpCommonDeclarations : List OpenApi.Config.EffectType -> List CliMonad.Declaration
-elmHttpCommonDeclarations effectTypes =
-    if List.any (\effectType -> effectTypeToPackage effectType == Common.ElmHttp) effectTypes then
-        [ { moduleName = Common.Common
-          , name = "expectJsonCustom"
-          , declaration = Elm.expose expectJsonCustom.declaration
-          , group = "Http"
-          }
-        , { moduleName = Common.Common
-          , name = "jsonResolverCustom"
-          , declaration = Elm.expose jsonResolverCustom.declaration
-          , group = "Http"
-          }
-        , { moduleName = Common.Common
-          , name = "expectStringCustom"
-          , declaration = Elm.expose expectStringCustom.declaration
-          , group = "Http"
-          }
-        , { moduleName = Common.Common
-          , name = "stringResolverCustom"
-          , declaration = Elm.expose stringResolverCustom.declaration
-          , group = "Http"
-          }
-        , { moduleName = Common.Common
-          , name = "expectBytesCustom"
-          , declaration = Elm.expose expectBytesCustom.declaration
-          , group = "Http"
-          }
-        , { moduleName = Common.Common
-          , name = "bytesResolverCustom"
-          , declaration = Elm.expose bytesResolverCustom.declaration
-          , group = "Http"
-          }
-        ]
-
-    else
-        []
+type alias ElmHttpSubmodule =
+    { expectJsonCustom : Elm.Expression -> Elm.Expression -> Elm.Expression -> Elm.Expression
+    , jsonResolverCustom : Elm.Expression -> Elm.Expression -> Elm.Expression
+    , expectStringCustom : Elm.Expression -> Elm.Expression -> Elm.Expression
+    , stringResolverCustom : Elm.Expression -> Elm.Expression
+    , expectBytesCustom : Elm.Expression -> Elm.Expression -> Elm.Expression
+    , bytesResolverCustom : Elm.Expression -> Elm.Expression
+    }
 
 
-lamderaProgramTestCommonDeclarations : List OpenApi.Config.EffectType -> List CliMonad.Declaration
-lamderaProgramTestCommonDeclarations effectTypes =
-    if List.any (\effectType -> effectTypeToPackage effectType == Common.LamderaProgramTest) effectTypes then
-        [ { moduleName = Common.Common
-          , name = "expectJsonCustomEffect"
-          , declaration = Elm.expose expectJsonCustomEffect.declaration
-          , group = "Http"
-          }
-        , { moduleName = Common.Common
-          , name = "jsonResolverCustomEffect"
-          , declaration = Elm.expose jsonResolverCustomEffect.declaration
-          , group = "Http"
-          }
-        , { moduleName = Common.Common
-          , name = "expectStringCustomEffect"
-          , declaration = Elm.expose expectStringCustomEffect.declaration
-          , group = "Http"
-          }
-        , { moduleName = Common.Common
-          , name = "stringResolverCustomEffect"
-          , declaration = Elm.expose stringResolverCustomEffect.declaration
-          , group = "Http"
-          }
-        , { moduleName = Common.Common
-          , name = "expectBytesCustomEffect"
-          , declaration = Elm.expose expectBytesCustomEffect.declaration
-          , group = "Http"
-          }
-        , { moduleName = Common.Common
-          , name = "bytesResolverCustomEffect"
-          , declaration = Elm.expose bytesResolverCustomEffect.declaration
-          , group = "Http"
-          }
-        ]
+elmHttpCommonDeclarations : Elm.Declare.Module ElmHttpSubmodule
+elmHttpCommonDeclarations =
+    Elm.Declare.module_ Common.commonModuleName ElmHttpSubmodule
+        |> Elm.Declare.with expectJsonCustom
+        |> Elm.Declare.with jsonResolverCustom
+        |> Elm.Declare.with expectStringCustom
+        |> Elm.Declare.with stringResolverCustom
+        |> Elm.Declare.with expectBytesCustom
+        |> Elm.Declare.with bytesResolverCustom
 
-    else
-        []
+
+type alias LamderaProgramTestSubmodule =
+    { expectJsonCustomEffect : Elm.Expression -> Elm.Expression -> Elm.Expression -> Elm.Expression
+    , jsonResolverCustomEffect : Elm.Expression -> Elm.Expression -> Elm.Expression
+    , expectStringCustomEffect : Elm.Expression -> Elm.Expression -> Elm.Expression
+    , stringResolverCustomEffect : Elm.Expression -> Elm.Expression
+    , expectBytesCustomEffect : Elm.Expression -> Elm.Expression -> Elm.Expression
+    , bytesResolverCustomEffect : Elm.Expression -> Elm.Expression
+    }
+
+
+lamderaProgramTestCommonDeclarations : Elm.Declare.Module LamderaProgramTestSubmodule
+lamderaProgramTestCommonDeclarations =
+    Elm.Declare.module_ Common.commonModuleName LamderaProgramTestSubmodule
+        |> Elm.Declare.with expectJsonCustomEffect
+        |> Elm.Declare.with jsonResolverCustomEffect
+        |> Elm.Declare.with expectStringCustomEffect
+        |> Elm.Declare.with stringResolverCustomEffect
+        |> Elm.Declare.with expectBytesCustomEffect
+        |> Elm.Declare.with bytesResolverCustomEffect
 
 
 extractEnums :

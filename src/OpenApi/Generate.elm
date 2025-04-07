@@ -103,14 +103,14 @@ files :
     ->
         Result
             CliMonad.Message
-            ( List
-                { moduleName : List String
-                , declarations : FastDict.Dict String { group : String, declaration : Elm.Declaration }
-                }
-            , { warnings : List CliMonad.Message
-              , requiredPackages : FastSet.Set String
-              }
-            )
+            { modules :
+                List
+                    { moduleName : List String
+                    , declarations : FastDict.Dict String { group : String, declaration : Elm.Declaration }
+                    }
+            , warnings : List CliMonad.Message
+            , requiredPackages : FastSet.Set String
+            }
 files { namespace, generateTodos, effectTypes, server, formats } apiSpec =
     case extractEnums apiSpec of
         Err e ->
@@ -173,29 +173,29 @@ files { namespace, generateTodos, effectTypes, server, formats } apiSpec =
                                        ]
                                     ++ serverDecls apiSpec server
                         in
-                        ( allDecls
-                            |> Dict.Extra.groupBy (\{ moduleName } -> Common.moduleToNamespace namespace moduleName)
-                            |> Dict.toList
-                            |> List.map
-                                (\( moduleName, group ) ->
-                                    { moduleName = moduleName
-                                    , declarations =
-                                        group
-                                            |> List.map
-                                                (\declaration ->
-                                                    ( declaration.name
-                                                    , { group = declaration.group
-                                                      , declaration = declaration.declaration
-                                                      }
+                        { modules =
+                            allDecls
+                                |> Dict.Extra.groupBy (\{ moduleName } -> Common.moduleToNamespace namespace moduleName)
+                                |> Dict.toList
+                                |> List.map
+                                    (\( moduleName, group ) ->
+                                        { moduleName = moduleName
+                                        , declarations =
+                                            group
+                                                |> List.map
+                                                    (\declaration ->
+                                                        ( declaration.name
+                                                        , { group = declaration.group
+                                                          , declaration = declaration.declaration
+                                                          }
+                                                        )
                                                     )
-                                                )
-                                            |> FastDict.fromList
-                                    }
-                                )
-                        , { warnings = warnings
-                          , requiredPackages = requiredPackages
-                          }
-                        )
+                                                |> FastDict.fromList
+                                        }
+                                    )
+                        , warnings = warnings
+                        , requiredPackages = requiredPackages
+                        }
                     )
 
 

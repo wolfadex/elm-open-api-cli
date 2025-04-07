@@ -879,9 +879,6 @@ generateFilesFromOpenApiSpecs configs =
         |> BackendTask.map
             (\result ->
                 let
-                    ( files, messages ) =
-                        List.unzip result
-
                     groupOrder : String -> Int
                     groupOrder group =
                         case group of
@@ -900,8 +897,8 @@ generateFilesFromOpenApiSpecs configs =
                             _ ->
                                 5
                 in
-                ( files
-                    |> List.concat
+                ( result
+                    |> List.concatMap .modules
                     |> Dict.Extra.groupBy .moduleName
                     |> Dict.toList
                     |> List.map
@@ -919,12 +916,12 @@ generateFilesFromOpenApiSpecs configs =
                                     )
                                 |> Elm.file moduleName
                         )
-                , { warnings = List.concatMap .warnings messages
+                , { warnings = List.concatMap .warnings result
                   , requiredPackages =
                         List.foldl
                             (\{ requiredPackages } acc -> FastSet.union requiredPackages acc)
                             FastSet.empty
-                            messages
+                            result
                   }
                 )
             )

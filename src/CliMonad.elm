@@ -550,7 +550,7 @@ withFormat basicType maybeFormatName getter default =
                                             (Elm.value
                                                 { name = "encode" ++ name
                                                 , annotation = Just encodeAnnotation
-                                                , importFrom = Common.moduleToNamespace namespace Common.Common
+                                                , importFrom = Common.commonModuleName
                                                 }
                                                 |> Elm.withType encodeAnnotation
                                             )
@@ -559,7 +559,7 @@ withFormat basicType maybeFormatName getter default =
                                     Elm.value
                                         { name = "decode" ++ name
                                         , annotation = Just decodeAnnotation
-                                        , importFrom = Common.moduleToNamespace namespace Common.Common
+                                        , importFrom = Common.commonModuleName
                                         }
                                         |> Elm.withType decodeAnnotation
                                 , toParamString =
@@ -568,7 +568,7 @@ withFormat basicType maybeFormatName getter default =
                                             (Elm.value
                                                 { name = "toParamString" ++ name
                                                 , annotation = Just toParamStringAnnotation
-                                                , importFrom = Common.moduleToNamespace namespace Common.Common
+                                                , importFrom = Common.commonModuleName
                                                 }
                                                 |> Elm.withType toParamStringAnnotation
                                             )

@@ -11,6 +11,7 @@ module Common exposing
     , UnsafeName(..)
     , VariantName
     , basicTypeToString
+    , commonModuleName
     , enum
     , moduleToNamespace
     , ref
@@ -73,7 +74,12 @@ moduleToNamespace namespace moduleName =
             namespace ++ [ "Servers" ]
 
         Common ->
-            [ "OpenApi", "Common" ]
+            commonModuleName
+
+
+commonModuleName : List String
+commonModuleName =
+    [ "OpenApi", "Common" ]
 
 
 

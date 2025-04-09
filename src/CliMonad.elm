@@ -455,7 +455,7 @@ withFormat basicType maybeFormatName getter default =
 
         Just formatName ->
             CliMonad
-                (\{ formats, namespace } ->
+                (\{ formats } ->
                     case
                         FastDict.get ( Common.basicTypeToString basicType, formatName ) formats
                     of

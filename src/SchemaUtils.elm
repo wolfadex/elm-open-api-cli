@@ -1,7 +1,6 @@
 module SchemaUtils exposing
     ( OneOfName
     , decodeOptionalField
-    , decodeOptionalFieldDocumentation
     , getAlias
     , oneOfDeclarations
     , recordType
@@ -22,6 +21,7 @@ import Elm.Annotation
 import Elm.Arg
 import Elm.Case
 import Elm.Declare
+import Elm.Declare.Extra
 import Elm.Let
 import Elm.Op
 import Elm.ToString
@@ -1609,12 +1609,9 @@ decodeOptionalField =
         resultAnnotation : Elm.Annotation.Annotation
         resultAnnotation =
             Gen.Json.Decode.annotation_.decoder (Gen.Maybe.annotation_.maybe <| Elm.Annotation.var "t")
-    in
-    Elm.Declare.fn2 "decodeOptionalField"
-        (Elm.Arg.varWith "key" Elm.Annotation.string)
-        (Elm.Arg.varWith "fieldDecoder" decoderAnnotation)
-    <|
-        \key fieldDecoder ->
+
+        body : Elm.Expression -> Elm.Expression -> Elm.Expression
+        body key fieldDecoder =
             -- The tricky part is that we want to make sure that
             -- if the field exists we error out if it has an incorrect shape.
             -- So what we do is we `oneOf` with `value` to avoid the `Nothing` branch,
@@ -1639,6 +1636,12 @@ decodeOptionalField =
                             (Gen.Json.Decode.succeed Gen.Maybe.make_.nothing)
                     )
                 |> Elm.withType resultAnnotation
+    in
+    Elm.Declare.fn2 "decodeOptionalField"
+        (Elm.Arg.varWith "key" Elm.Annotation.string)
+        (Elm.Arg.varWith "fieldDecoder" decoderAnnotation)
+        body
+        |> Elm.Declare.Extra.withDocumentation decodeOptionalFieldDocumentation
 
 
 decodeOptionalFieldDocumentation : String

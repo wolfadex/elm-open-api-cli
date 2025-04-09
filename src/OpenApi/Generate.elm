@@ -16,6 +16,7 @@ import Elm.Annotation
 import Elm.Arg
 import Elm.Case
 import Elm.Declare
+import Elm.Declare.Extra
 import Elm.Op
 import FastDict
 import FastSet
@@ -34,7 +35,6 @@ import Gen.Json.Decode
 import Gen.Json.Encode
 import Gen.List
 import Gen.Maybe
-import Gen.OpenApi.Common
 import Gen.Result
 import Gen.String
 import Gen.Task
@@ -104,11 +104,11 @@ commonDeclarations effectTypes =
         elmHttp : List { declaration : Elm.Declaration, group : String }
         elmHttp =
             if List.any (\effectType -> effectTypeToPackage effectType == Common.ElmHttp) effectTypes then
-                elmHttpCommonDeclarations.declarations
+                commonElmHttpSubmodule.declarations
                     |> List.map
                         (\declaration ->
                             { declaration = declaration
-                            , group = "Http"
+                            , group = "elm/http"
                             }
                         )
 
@@ -118,11 +118,11 @@ commonDeclarations effectTypes =
         lamderaProgramTest : List { declaration : Elm.Declaration, group : String }
         lamderaProgramTest =
             if List.any (\effectType -> effectTypeToPackage effectType == Common.LamderaProgramTest) effectTypes then
-                lamderaProgramTestCommonDeclarations.declarations
+                commonLamderaProgramTestSubmodule.declarations
                     |> List.map
                         (\declaration ->
                             { declaration = declaration
-                            , group = "Http"
+                            , group = "lamdera/program-test"
                             }
                         )
 
@@ -131,29 +131,13 @@ commonDeclarations effectTypes =
 
         common : List { declaration : Elm.Declaration, group : String }
         common =
-            [ { declaration =
-                    SchemaUtils.decodeOptionalField.declaration
-                        |> Elm.withDocumentation SchemaUtils.decodeOptionalFieldDocumentation
-                        |> Elm.expose
-              , group = "Decoders"
-              }
-            , { declaration =
-                    jsonDecodeAndMap
-                        |> Elm.withDocumentation "Chain JSON decoders, when `Json.Decode.map8` isn't enough."
-                        |> Elm.expose
-              , group = "Decoders"
-              }
-            , { declaration =
-                    errorType
-                        |> Elm.exposeConstructor
-              , group = "Http"
-              }
-            , { declaration =
-                    nullableType
-                        |> Elm.exposeConstructor
-              , group = "Types"
-              }
-            ]
+            commonCommonSubmodule.declarations
+                |> List.map
+                    (\declaration ->
+                        { declaration = declaration
+                        , group = "Common"
+                        }
+                    )
     in
     elmHttp ++ lamderaProgramTest ++ common
 
@@ -237,8 +221,8 @@ type alias ElmHttpSubmodule =
     }
 
 
-elmHttpCommonDeclarations : Elm.Declare.Module ElmHttpSubmodule
-elmHttpCommonDeclarations =
+commonElmHttpSubmodule : Elm.Declare.Module ElmHttpSubmodule
+commonElmHttpSubmodule =
     Elm.Declare.module_ Common.commonModuleName ElmHttpSubmodule
         |> Elm.Declare.with expectJsonCustom
         |> Elm.Declare.with jsonResolverCustom
@@ -258,8 +242,8 @@ type alias LamderaProgramTestSubmodule =
     }
 
 
-lamderaProgramTestCommonDeclarations : Elm.Declare.Module LamderaProgramTestSubmodule
-lamderaProgramTestCommonDeclarations =
+commonLamderaProgramTestSubmodule : Elm.Declare.Module LamderaProgramTestSubmodule
+commonLamderaProgramTestSubmodule =
     Elm.Declare.module_ Common.commonModuleName LamderaProgramTestSubmodule
         |> Elm.Declare.with expectJsonCustomEffect
         |> Elm.Declare.with jsonResolverCustomEffect
@@ -267,6 +251,65 @@ lamderaProgramTestCommonDeclarations =
         |> Elm.Declare.with stringResolverCustomEffect
         |> Elm.Declare.with expectBytesCustomEffect
         |> Elm.Declare.with bytesResolverCustomEffect
+
+
+type alias CommonSubmodule =
+    { decodeOptionalField : Elm.Expression -> Elm.Expression -> Elm.Expression
+    , jsonDecodeAndMap : Elm.Expression
+    , errorType :
+        { annotation : Elm.Annotation.Annotation -> Elm.Annotation.Annotation -> Elm.Annotation.Annotation
+        , case_ : Elm.Expression -> ErrorType -> Elm.Expression
+        , make_ : ErrorType
+        }
+    , nullableType :
+        { annotation : Elm.Annotation.Annotation -> Elm.Annotation.Annotation
+        , case_ : Elm.Expression -> NullableType -> Elm.Expression
+        , make_ : NullableType
+        }
+    }
+
+
+commonCommonSubmodule : Elm.Declare.Module CommonSubmodule
+commonCommonSubmodule =
+    let
+        base :
+            Elm.Declare.Module
+                { decodeOptionalField : Elm.Expression -> Elm.Expression -> Elm.Expression
+                , jsonDecodeAndMap : Elm.Expression
+                , errorType : { annotation : Elm.Annotation.Annotation, make_ : ErrorType, case_ : Elm.Expression -> ErrorType -> Elm.Expression }
+                , nullableType : { annotation : Elm.Annotation.Annotation, make_ : NullableType, case_ : Elm.Expression -> NullableType -> Elm.Expression }
+                }
+        base =
+            Elm.Declare.module_ Common.commonModuleName
+                (\decodeOptionalField_ jsonDecodeAndMap_ errorType_ nullableType_ ->
+                    { decodeOptionalField = decodeOptionalField_
+                    , jsonDecodeAndMap = jsonDecodeAndMap_
+                    , errorType = errorType_
+                    , nullableType = nullableType_
+                    }
+                )
+                |> Elm.Declare.with SchemaUtils.decodeOptionalField
+                |> Elm.Declare.with jsonDecodeAndMap
+                |> Elm.Declare.with errorType
+                |> Elm.Declare.with nullableType
+    in
+    { name = base.name
+    , declarations = base.declarations
+    , call =
+        { decodeOptionalField = base.call.decodeOptionalField
+        , jsonDecodeAndMap = base.call.jsonDecodeAndMap
+        , errorType =
+            { annotation = \err ok -> Elm.Annotation.namedWith Common.commonModuleName "Error" [ err, ok ]
+            , case_ = base.call.errorType.case_
+            , make_ = base.call.errorType.make_
+            }
+        , nullableType =
+            { annotation = \t -> Elm.Annotation.namedWith Common.commonModuleName "Nullable" [ t ]
+            , case_ = base.call.nullableType.case_
+            , make_ = base.call.nullableType.make_
+            }
+        }
+    }
 
 
 extractEnums :
@@ -900,7 +943,7 @@ toRequestFunctions server effectTypes method pathUrl operation =
                                 Elm.Annotation.function
                                     [ (paramType { requireToMsg = False }).core ]
                                     (Gen.Task.annotation_.task
-                                        (Gen.OpenApi.Common.annotation_.error errorTypeAnnotation bodyTypeAnnotation)
+                                        (commonCommonSubmodule.call.errorType.annotation errorTypeAnnotation bodyTypeAnnotation)
                                         successAnnotation
                                     )
                             , recordAnnotation =
@@ -913,7 +956,7 @@ toRequestFunctions server effectTypes method pathUrl operation =
                                         , ( "body", Gen.Http.annotation_.body )
                                         , ( "resolver"
                                           , Gen.Http.annotation_.resolver
-                                                (Gen.OpenApi.Common.annotation_.error errorTypeAnnotation bodyTypeAnnotation)
+                                                (commonCommonSubmodule.call.errorType.annotation errorTypeAnnotation bodyTypeAnnotation)
                                                 successAnnotation
                                           )
                                         , ( "timeout", Elm.Annotation.maybe Elm.Annotation.float )
@@ -1102,7 +1145,7 @@ toRequestFunctions server effectTypes method pathUrl operation =
                                     [ (paramType { requireToMsg = False }).lamderaProgramTest ]
                                     (Gen.Effect.Task.annotation_.task
                                         (Elm.Annotation.var "restriction")
-                                        (Gen.OpenApi.Common.annotation_.error errorTypeAnnotation bodyTypeAnnotation)
+                                        (commonCommonSubmodule.call.errorType.annotation errorTypeAnnotation bodyTypeAnnotation)
                                         successAnnotation
                                     )
                             , recordAnnotation =
@@ -1116,7 +1159,7 @@ toRequestFunctions server effectTypes method pathUrl operation =
                                         , ( "resolver"
                                           , Gen.Effect.Http.annotation_.resolver
                                                 (Elm.Annotation.var "restriction")
-                                                (Gen.OpenApi.Common.annotation_.error errorTypeAnnotation bodyTypeAnnotation)
+                                                (commonCommonSubmodule.call.errorType.annotation errorTypeAnnotation bodyTypeAnnotation)
                                                 successAnnotation
                                           )
                                         , ( "timeout", Elm.Annotation.maybe (Elm.Annotation.namedWith [ "Duration" ] "Duration" []) )
@@ -1876,8 +1919,8 @@ toConfigParamAnnotation options =
                 toMsgCore : Elm.Annotation.Annotation
                 toMsgCore =
                     Elm.Annotation.function
-                        [ Gen.Result.annotation_.result
-                            (Gen.OpenApi.Common.annotation_.error options.errorTypeAnnotation options.errorBodyAnnotation)
+                        [ Elm.Annotation.result
+                            (commonCommonSubmodule.call.errorType.annotation options.errorTypeAnnotation options.errorBodyAnnotation)
                             options.successAnnotation
                         ]
                         (Elm.Annotation.var "msg")
@@ -1885,8 +1928,8 @@ toConfigParamAnnotation options =
                 toMsgLamderaProgramTest : Elm.Annotation.Annotation
                 toMsgLamderaProgramTest =
                     Elm.Annotation.function
-                        [ Gen.Result.annotation_.result
-                            (Gen.OpenApi.Common.annotation_.error options.errorTypeAnnotation options.errorBodyAnnotation)
+                        [ Elm.Annotation.result
+                            (commonCommonSubmodule.call.errorType.annotation options.errorTypeAnnotation options.errorBodyAnnotation)
                             options.successAnnotation
                         ]
                         (Elm.Annotation.var "msg")
@@ -2393,23 +2436,23 @@ operationToTypesExpectAndResolver functionName operation =
 
         expectJsonBetter : Elm.Expression -> Elm.Expression -> ((Elm.Expression -> Elm.Expression) -> PerPackage Elm.Expression)
         expectJsonBetter errorDecoders successDecoder toMsg =
-            { core = Gen.OpenApi.Common.expectJsonCustom toMsg errorDecoders successDecoder
+            { core = commonElmHttpSubmodule.call.expectJsonCustom (Elm.functionReduced "msg" toMsg) errorDecoders successDecoder
             , elmPages = Gen.BackendTask.Http.expectJson successDecoder
-            , lamderaProgramTest = Gen.OpenApi.Common.expectJsonCustomEffect toMsg errorDecoders successDecoder
+            , lamderaProgramTest = commonLamderaProgramTestSubmodule.call.expectJsonCustomEffect (Elm.functionReduced "msg" toMsg) errorDecoders successDecoder
             }
 
         expectStringBetter : Elm.Expression -> (Elm.Expression -> Elm.Expression) -> PerPackage Elm.Expression
         expectStringBetter errorDecoders toMsg =
-            { core = Gen.OpenApi.Common.expectStringCustom toMsg errorDecoders
+            { core = commonElmHttpSubmodule.call.expectStringCustom (Elm.functionReduced "msg" toMsg) errorDecoders
             , elmPages = Gen.BackendTask.Http.expectString
-            , lamderaProgramTest = Gen.OpenApi.Common.expectStringCustomEffect toMsg errorDecoders
+            , lamderaProgramTest = commonLamderaProgramTestSubmodule.call.expectStringCustomEffect (Elm.functionReduced "msg" toMsg) errorDecoders
             }
 
         expectBytesBetter : Elm.Expression -> (Elm.Expression -> Elm.Expression) -> PerPackage Elm.Expression
         expectBytesBetter errorDecoders toMsg =
-            { core = Gen.OpenApi.Common.expectBytesCustom toMsg errorDecoders
+            { core = commonElmHttpSubmodule.call.expectBytesCustom (Elm.functionReduced "msg" toMsg) errorDecoders
             , elmPages = Gen.BackendTask.Http.expectBytes Gen.Bytes.Decode.values_.bytes
-            , lamderaProgramTest = Gen.OpenApi.Common.expectBytesCustomEffect toMsg errorDecoders
+            , lamderaProgramTest = commonLamderaProgramTestSubmodule.call.expectBytesCustomEffect (Elm.functionReduced "msg" toMsg) errorDecoders
             }
     in
     CliMonad.succeed responses
@@ -2632,8 +2675,8 @@ operationToTypesExpectAndResolver functionName operation =
                                                     , errorTypeAnnotation = errorTypeAnnotation
                                                     , expect = expectJsonBetter errorDecoders_ successDecoder
                                                     , resolver =
-                                                        { core = Gen.OpenApi.Common.jsonResolverCustom errorDecoders_ successDecoder
-                                                        , lamderaProgramTest = Gen.OpenApi.Common.jsonResolverCustomEffect errorDecoders_ successDecoder
+                                                        { core = commonElmHttpSubmodule.call.jsonResolverCustom errorDecoders_ successDecoder
+                                                        , lamderaProgramTest = commonLamderaProgramTestSubmodule.call.jsonResolverCustomEffect errorDecoders_ successDecoder
                                                         }
                                                     }
                                                 )
@@ -2654,8 +2697,8 @@ operationToTypesExpectAndResolver functionName operation =
                                                     , errorTypeAnnotation = errorTypeAnnotation
                                                     , expect = expectStringBetter errorDecoders_
                                                     , resolver =
-                                                        { core = Gen.OpenApi.Common.stringResolverCustom errorDecoders_
-                                                        , lamderaProgramTest = Gen.OpenApi.Common.stringResolverCustomEffect errorDecoders_
+                                                        { core = commonElmHttpSubmodule.call.stringResolverCustom errorDecoders_
+                                                        , lamderaProgramTest = commonLamderaProgramTestSubmodule.call.stringResolverCustomEffect errorDecoders_
                                                         }
                                                     }
                                                 )
@@ -2671,8 +2714,8 @@ operationToTypesExpectAndResolver functionName operation =
                                                     , errorTypeAnnotation = errorTypeAnnotation
                                                     , expect = expectBytesBetter errorDecoders_
                                                     , resolver =
-                                                        { core = Gen.OpenApi.Common.bytesResolverCustom errorDecoders_
-                                                        , lamderaProgramTest = Gen.OpenApi.Common.bytesResolverCustomEffect errorDecoders_
+                                                        { core = commonElmHttpSubmodule.call.bytesResolverCustom errorDecoders_
+                                                        , lamderaProgramTest = commonLamderaProgramTestSubmodule.call.bytesResolverCustomEffect errorDecoders_
                                                         }
                                                     }
                                                         |> CliMonad.succeed
@@ -2690,8 +2733,8 @@ operationToTypesExpectAndResolver functionName operation =
                                                     , errorTypeAnnotation = errorTypeAnnotation
                                                     , expect = expectJsonBetter errorDecoders_ (Gen.Json.Decode.succeed Elm.unit)
                                                     , resolver =
-                                                        { core = Gen.OpenApi.Common.jsonResolverCustom errorDecoders_ (Gen.Json.Decode.succeed Elm.unit)
-                                                        , lamderaProgramTest = Gen.OpenApi.Common.jsonResolverCustomEffect errorDecoders_ (Gen.Json.Decode.succeed Elm.unit)
+                                                        { core = commonElmHttpSubmodule.call.jsonResolverCustom errorDecoders_ (Gen.Json.Decode.succeed Elm.unit)
+                                                        , lamderaProgramTest = commonLamderaProgramTestSubmodule.call.jsonResolverCustomEffect errorDecoders_ (Gen.Json.Decode.succeed Elm.unit)
                                                         }
                                                     }
                                                 )
@@ -2728,8 +2771,8 @@ operationToTypesExpectAndResolver functionName operation =
                                                 , errorTypeAnnotation = errorTypeAnnotation
                                                 , expect = expectJsonBetter errorDecoders_ decoder
                                                 , resolver =
-                                                    { core = Gen.OpenApi.Common.jsonResolverCustom errorDecoders_ decoder
-                                                    , lamderaProgramTest = Gen.OpenApi.Common.jsonResolverCustomEffect errorDecoders_ decoder
+                                                    { core = commonElmHttpSubmodule.call.jsonResolverCustom errorDecoders_ decoder
+                                                    , lamderaProgramTest = commonLamderaProgramTestSubmodule.call.jsonResolverCustomEffect errorDecoders_ decoder
                                                     }
                                                 }
                                             )
@@ -2740,17 +2783,49 @@ operationToTypesExpectAndResolver functionName operation =
             )
 
 
-errorType : Elm.Declaration
+type alias ErrorType =
+    { badUrl : Elm.Expression -> Elm.Expression
+    , timeout : Elm.Expression
+    , networkError : Elm.Expression
+    , knownBadStatus : Elm.Expression -> Elm.Expression -> Elm.Expression
+    , unknownBadStatus : Elm.Expression -> Elm.Expression -> Elm.Expression
+    , badErrorBody : Elm.Expression -> Elm.Expression -> Elm.Expression
+    , badBody : Elm.Expression -> Elm.Expression -> Elm.Expression
+    }
+
+
+errorType :
+    { declaration : Elm.Declaration
+    , annotation : Elm.Annotation.Annotation -> Elm.Annotation.Annotation -> Elm.Annotation.Annotation
+    , make_ : ErrorType
+    , case_ : Elm.Expression -> ErrorType -> Elm.Expression
+    , internal :
+        Elm.Declare.Internal
+            { annotation : Elm.Annotation.Annotation
+            , make_ : ErrorType
+            , case_ : Elm.Expression -> ErrorType -> Elm.Expression
+            }
+    }
 errorType =
-    Elm.customType "Error"
-        [ Elm.variantWith "BadUrl" [ Elm.Annotation.string ]
-        , Elm.variant "Timeout"
-        , Elm.variant "NetworkError"
-        , Elm.variantWith "KnownBadStatus" [ Elm.Annotation.int, Elm.Annotation.var "err" ]
-        , Elm.variantWith "UnknownBadStatus" [ Gen.Http.annotation_.metadata, Elm.Annotation.var "body" ]
-        , Elm.variantWith "BadErrorBody" [ Gen.Http.annotation_.metadata, Elm.Annotation.var "body" ]
-        , Elm.variantWith "BadBody" [ Gen.Http.annotation_.metadata, Elm.Annotation.var "body" ]
-        ]
+    let
+        base : Elm.Declare.CustomType ErrorType
+        base =
+            Elm.Declare.customTypeAdvanced "Error" { exposeConstructor = True } ErrorType
+                |> Elm.Declare.variant1 "BadUrl" .badUrl Elm.Annotation.string
+                |> Elm.Declare.variant0 "Timeout" .timeout
+                |> Elm.Declare.variant0 "NetworkError" .networkError
+                |> Elm.Declare.variant2 "KnownBadStatus" .knownBadStatus Elm.Annotation.int (Elm.Annotation.var "err")
+                |> Elm.Declare.variant2 "UnknownBadStatus" .unknownBadStatus Gen.Http.annotation_.metadata (Elm.Annotation.var "body")
+                |> Elm.Declare.variant2 "BadErrorBody" .badErrorBody Gen.Http.annotation_.metadata (Elm.Annotation.var "body")
+                |> Elm.Declare.variant2 "BadBody" .badBody Gen.Http.annotation_.metadata (Elm.Annotation.var "body")
+                |> Elm.Declare.finishCustomType
+    in
+    { declaration = base.declaration
+    , annotation = \err ok -> Elm.Annotation.namedWith [] "Error" [ err, ok ]
+    , make_ = base.make_
+    , case_ = base.case_
+    , internal = base.internal
+    }
 
 
 outerExpectJsonCustom :
@@ -2761,7 +2836,7 @@ outerExpectJsonCustom name f =
     Elm.Declare.fn3 name
         (Elm.Arg.varWith "toMsg"
             (Elm.Annotation.function
-                [ Gen.Result.annotation_.result errorAnnotation (Elm.Annotation.var "success")
+                [ Elm.Annotation.result (errorAnnotation Elm.Annotation.string) (Elm.Annotation.var "success")
                 ]
                 (Elm.Annotation.var "msg")
             )
@@ -2778,9 +2853,9 @@ outerExpectJsonCustom name f =
         f
 
 
-errorAnnotation : Elm.Annotation.Annotation
-errorAnnotation =
-    Elm.Annotation.namedWith [] "Error" [ Elm.Annotation.var "err", Elm.Annotation.string ]
+errorAnnotation : Elm.Annotation.Annotation -> Elm.Annotation.Annotation
+errorAnnotation t =
+    commonCommonSubmodule.call.errorType.annotation (Elm.Annotation.var "err") t
 
 
 outerExpectStringCustom :
@@ -2791,7 +2866,7 @@ outerExpectStringCustom name f =
     Elm.Declare.fn2 name
         (Elm.Arg.varWith "toMsg"
             (Elm.Annotation.function
-                [ Gen.Result.annotation_.result errorAnnotation Elm.Annotation.string ]
+                [ Elm.Annotation.result (errorAnnotation Elm.Annotation.string) Elm.Annotation.string ]
                 (Elm.Annotation.var "msg")
             )
         )
@@ -2812,8 +2887,8 @@ outerExpectBytesCustom name f =
     Elm.Declare.fn2 name
         (Elm.Arg.varWith "toMsg"
             (Elm.Annotation.function
-                [ Gen.Result.annotation_.result
-                    (Elm.Annotation.namedWith [] "Error" [ Elm.Annotation.var "err", Gen.Bytes.annotation_.bytes ])
+                [ Elm.Annotation.result
+                    (errorAnnotation Gen.Bytes.annotation_.bytes)
                     Gen.Bytes.annotation_.bytes
                 ]
                 (Elm.Annotation.var "msg")
@@ -2956,7 +3031,7 @@ jsonResolverCustom =
                         (innerExpectJsonCustom errorDecoders successDecoder)
             in
             Gen.Http.stringResolver toResult
-                |> Elm.withType (Gen.Http.annotation_.resolver errorAnnotation (Elm.Annotation.var "success"))
+                |> Elm.withType (Gen.Http.annotation_.resolver (errorAnnotation Elm.Annotation.string) (Elm.Annotation.var "success"))
 
 
 jsonResolverCustomEffect : Elm.Declare.Function (Elm.Expression -> Elm.Expression -> Elm.Expression)
@@ -2970,7 +3045,7 @@ jsonResolverCustomEffect =
                         (innerExpectJsonCustom errorDecoders successDecoder)
             in
             Gen.Effect.Http.stringResolver toResult
-                |> Elm.withType (Gen.Effect.Http.annotation_.resolver (Elm.Annotation.var "restrictions") errorAnnotation (Elm.Annotation.var "success"))
+                |> Elm.withType (Gen.Effect.Http.annotation_.resolver (Elm.Annotation.var "restrictions") (errorAnnotation Elm.Annotation.string) (Elm.Annotation.var "success"))
 
 
 bytesResolverCustom : Elm.Declare.Function (Elm.Expression -> Elm.Expression)
@@ -2984,7 +3059,7 @@ bytesResolverCustom =
                         (innerExpectRawCustom bytesToString errorDecoders)
             in
             Gen.Http.bytesResolver toResult
-                |> Elm.withType (Gen.Http.annotation_.resolver (Elm.Annotation.namedWith [] "Error" [ Elm.Annotation.var "err", Gen.Bytes.annotation_.bytes ]) Gen.Bytes.annotation_.bytes)
+                |> Elm.withType (Gen.Http.annotation_.resolver (errorAnnotation Gen.Bytes.annotation_.bytes) Gen.Bytes.annotation_.bytes)
 
 
 bytesResolverCustomEffect : Elm.Declare.Function (Elm.Expression -> Elm.Expression)
@@ -2998,7 +3073,7 @@ bytesResolverCustomEffect =
                         (innerExpectRawCustom bytesToString errorDecoders)
             in
             Gen.Effect.Http.bytesResolver toResult
-                |> Elm.withType (Gen.Effect.Http.annotation_.resolver (Elm.Annotation.var "restrictions") (Elm.Annotation.namedWith [] "Error" [ Elm.Annotation.var "err", Gen.Bytes.annotation_.bytes ]) Gen.Bytes.annotation_.bytes)
+                |> Elm.withType (Gen.Effect.Http.annotation_.resolver (Elm.Annotation.var "restrictions") (errorAnnotation Gen.Bytes.annotation_.bytes) Gen.Bytes.annotation_.bytes)
 
 
 stringResolverCustom : Elm.Declare.Function (Elm.Expression -> Elm.Expression)
@@ -3012,7 +3087,7 @@ stringResolverCustom =
                         (innerExpectRawCustom identity errorDecoders)
             in
             Gen.Http.stringResolver toResult
-                |> Elm.withType (Gen.Http.annotation_.resolver errorAnnotation Elm.Annotation.string)
+                |> Elm.withType (Gen.Http.annotation_.resolver (errorAnnotation Elm.Annotation.string) Elm.Annotation.string)
 
 
 stringResolverCustomEffect : Elm.Declare.Function (Elm.Expression -> Elm.Expression)
@@ -3026,7 +3101,7 @@ stringResolverCustomEffect =
                         (innerExpectRawCustom identity errorDecoders)
             in
             Gen.Effect.Http.stringResolver toResult
-                |> Elm.withType (Gen.Effect.Http.annotation_.resolver (Elm.Annotation.var "restrictions") errorAnnotation Elm.Annotation.string)
+                |> Elm.withType (Gen.Effect.Http.annotation_.resolver (Elm.Annotation.var "restrictions") (errorAnnotation Elm.Annotation.string) Elm.Annotation.string)
 
 
 bytesToString : Elm.Expression -> Elm.Expression
@@ -3049,13 +3124,14 @@ innerExpectJsonCustom errorDecoders successDecoder =
     innerExpect identity
         errorDecoders
         (\metadata body ->
-            Gen.Result.caseOf_.result
+            Elm.Case.result
                 (Gen.Json.Decode.call_.decodeString successDecoder body)
                 { err =
-                    \_ ->
-                        Gen.Result.make_.err
-                            (Elm.apply (Elm.val "BadBody") [ metadata, body ])
-                , ok = \a -> Gen.Result.make_.ok a
+                    ( "_"
+                    , \_ ->
+                        Gen.Result.make_.err (errorType.make_.badBody metadata body)
+                    )
+                , ok = ( "res", Gen.Result.make_.ok )
                 }
         )
 
@@ -3086,29 +3162,35 @@ innerExpect :
         , goodStatus_ : Elm.Expression -> Elm.Expression -> Elm.Expression
         }
 innerExpect bodyToString errorDecoders goodStatus =
-    { badUrl_ = \url -> Gen.Result.make_.err (Elm.apply (Elm.val "BadUrl") [ url ])
-    , timeout_ = Gen.Result.make_.err (Elm.val "Timeout")
-    , networkError_ = Gen.Result.make_.err (Elm.val "NetworkError")
+    { badUrl_ = \url -> Gen.Result.make_.err (errorType.make_.badUrl url)
+    , timeout_ = Gen.Result.make_.err errorType.make_.timeout
+    , networkError_ = Gen.Result.make_.err errorType.make_.networkError
     , badStatus_ =
         \metadata body ->
-            Gen.Maybe.caseOf_.maybe
-                (Gen.Dict.call_.get (Gen.String.call_.fromInt (Elm.get "statusCode" metadata)) errorDecoders)
+            Elm.Case.maybe
+                (Gen.Dict.get (Gen.String.call_.fromInt (Elm.get "statusCode" metadata)) errorDecoders)
                 { nothing =
                     Gen.Result.make_.err
-                        (Elm.apply (Elm.val "UnknownBadStatus") [ metadata, body ])
+                        (errorType.make_.unknownBadStatus metadata body)
                 , just =
-                    \errorDecoder ->
-                        Gen.Result.caseOf_.result
+                    ( "err"
+                    , \errorDecoder ->
+                        Elm.Case.result
                             (Gen.Json.Decode.call_.decodeString errorDecoder (bodyToString body))
                             { ok =
-                                \x ->
+                                ( "res"
+                                , \x ->
                                     Gen.Result.make_.err
-                                        (Elm.apply (Elm.val "KnownBadStatus") [ Elm.get "statusCode" metadata, x ])
+                                        (errorType.make_.knownBadStatus (Elm.get "statusCode" metadata) x)
+                                )
                             , err =
-                                \_ ->
+                                ( "err"
+                                , \_ ->
                                     Gen.Result.make_.err
-                                        (Elm.apply (Elm.val "BadErrorBody") [ metadata, body ])
+                                        (errorType.make_.badErrorBody metadata body)
+                                )
                             }
+                    )
                 }
     , goodStatus_ = goodStatus
     }
@@ -3161,15 +3243,21 @@ getErrorResponses responses =
         |> Dict.filter (\status _ -> not <| isSuccessResponseStatus status)
 
 
-nullableType : Elm.Declaration
+type alias NullableType =
+    { null : Elm.Expression
+    , present : Elm.Expression -> Elm.Expression
+    }
+
+
+nullableType : Elm.Declare.CustomType NullableType
 nullableType =
-    Elm.customType "Nullable"
-        [ Elm.variant "Null"
-        , Elm.variantWith "Present" [ Elm.Annotation.var "value" ]
-        ]
+    Elm.Declare.customTypeAdvanced "Nullable" { exposeConstructor = True } NullableType
+        |> Elm.Declare.variant0 "Null" .null
+        |> Elm.Declare.variant1 "Present" .present (Elm.Annotation.var "value")
+        |> Elm.Declare.finishCustomType
 
 
-jsonDecodeAndMap : Elm.Declaration
+jsonDecodeAndMap : Elm.Declare.Value
 jsonDecodeAndMap =
     let
         aVarAnnotation : Elm.Annotation.Annotation
@@ -3184,20 +3272,19 @@ jsonDecodeAndMap =
         bVarAnnotation =
             Elm.Annotation.var "b"
     in
-    Elm.function []
-        (\_ ->
-            Elm.apply
-                Gen.Json.Decode.values_.map2
-                [ Elm.val "(|>)" ]
+    Elm.Declare.value "jsonDecodeAndMap"
+        (Elm.apply
+            Gen.Json.Decode.values_.map2
+            [ Elm.val "(|>)" ]
+            |> Elm.withType
+                (Elm.Annotation.function
+                    [ Gen.Json.Decode.annotation_.decoder aVarAnnotation
+                    , Gen.Json.Decode.annotation_.decoder aToBAnnotation
+                    ]
+                    (Gen.Json.Decode.annotation_.decoder bVarAnnotation)
+                )
         )
-        |> Elm.withType
-            (Elm.Annotation.function
-                [ Gen.Json.Decode.annotation_.decoder aVarAnnotation
-                , Gen.Json.Decode.annotation_.decoder aToBAnnotation
-                ]
-                (Gen.Json.Decode.annotation_.decoder bVarAnnotation)
-            )
-        |> Elm.declaration "jsonDecodeAndMap"
+        |> Elm.Declare.Extra.withDocumentation "Chain JSON decoders, when `Json.Decode.map8` isn't enough."
 
 
 responseToSchema : OpenApi.Response.Response -> CliMonad Json.Schema.Definitions.Schema

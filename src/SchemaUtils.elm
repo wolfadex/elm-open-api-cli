@@ -1,6 +1,5 @@
 module SchemaUtils exposing
     ( OneOfName
-    , decodeOptionalField
     , getAlias
     , oneOfDeclarations
     , recordType
@@ -20,8 +19,6 @@ import Elm
 import Elm.Annotation
 import Elm.Arg
 import Elm.Case
-import Elm.Declare
-import Elm.Declare.Extra
 import Elm.Let
 import Elm.Op
 import Elm.ToString
@@ -1585,74 +1582,3 @@ constToExpr const =
 
         Common.ConstNumber f ->
             Elm.float f
-
-
-{-| Decode an optional field
-
-    decodeString (decodeOptionalField "x" int) "{ \"x\": 3 }"
-    --> Ok (Just 3)
-
-    decodeString (decodeOptionalField "x" int) "{ \"x\": true }"
-    --> Err ...
-
-    decodeString (decodeOptionalField "x" int) "{ \"y\": 4 }"
-    --> Ok Nothing
-
--}
-decodeOptionalField : Elm.Declare.Function (Elm.Expression -> Elm.Expression -> Elm.Expression)
-decodeOptionalField =
-    let
-        decoderAnnotation : Elm.Annotation.Annotation
-        decoderAnnotation =
-            Gen.Json.Decode.annotation_.decoder (Elm.Annotation.var "t")
-
-        resultAnnotation : Elm.Annotation.Annotation
-        resultAnnotation =
-            Gen.Json.Decode.annotation_.decoder (Gen.Maybe.annotation_.maybe <| Elm.Annotation.var "t")
-
-        body : Elm.Expression -> Elm.Expression -> Elm.Expression
-        body key fieldDecoder =
-            -- The tricky part is that we want to make sure that
-            -- if the field exists we error out if it has an incorrect shape.
-            -- So what we do is we `oneOf` with `value` to avoid the `Nothing` branch,
-            -- `andThen` we decode it. This is why we can't just use `maybe`, we would
-            -- give `Nothing` when the shape is wrong.
-            Gen.Json.Decode.oneOf
-                [ Gen.Json.Decode.call_.map
-                    (Elm.fn Elm.Arg.ignore <| \_ -> Elm.bool True)
-                    (Gen.Json.Decode.call_.field key Gen.Json.Decode.value)
-                , Gen.Json.Decode.succeed (Elm.bool False)
-                ]
-                |> Gen.Json.Decode.andThen
-                    (\hasField ->
-                        Elm.ifThen hasField
-                            (Gen.Json.Decode.call_.field key
-                                (Gen.Json.Decode.oneOf
-                                    [ Gen.Json.Decode.map Gen.Maybe.make_.just fieldDecoder
-                                    , Gen.Json.Decode.null Gen.Maybe.make_.nothing
-                                    ]
-                                )
-                            )
-                            (Gen.Json.Decode.succeed Gen.Maybe.make_.nothing)
-                    )
-                |> Elm.withType resultAnnotation
-    in
-    Elm.Declare.fn2 "decodeOptionalField"
-        (Elm.Arg.varWith "key" Elm.Annotation.string)
-        (Elm.Arg.varWith "fieldDecoder" decoderAnnotation)
-        body
-        |> Elm.Declare.Extra.withDocumentation decodeOptionalFieldDocumentation
-
-
-decodeOptionalFieldDocumentation : String
-decodeOptionalFieldDocumentation =
-    """Decode an optional field
-
-    decodeString (decodeOptionalField "x" int) "{ "x": 3 }"
-    --> Ok (Just 3)
-
-    decodeString (decodeOptionalField "x" int) "{ "x": true }"
-    --> Err ...
-
-    decodeString (decodeOptionalField "x" int) "{ "y": 4 }"
-    --> Ok Nothing"""

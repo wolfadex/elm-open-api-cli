@@ -103,14 +103,14 @@ suite =
                             genFiles :
                                 Result
                                     CliMonad.Message
-                                    ( List
-                                        { moduleName : List String
-                                        , declarations : FastDict.Dict String { group : String, declaration : Elm.Declaration }
-                                        }
-                                    , { warnings : List CliMonad.Message
-                                      , requiredPackages : FastSet.Set String
-                                      }
-                                    )
+                                    { modules :
+                                        List
+                                            { moduleName : List String
+                                            , declarations : FastDict.Dict String { group : String, declaration : Elm.Declaration }
+                                            }
+                                    , warnings : List CliMonad.Message
+                                    , requiredPackages : FastSet.Set String
+                                    }
                             genFiles =
                                 OpenApi.Generate.files
                                     { namespace = namespace
@@ -125,8 +125,8 @@ suite =
                             Err _ ->
                                 Expect.fail "Unexpected generation error"
 
-                            Ok ( files, _ ) ->
-                                case files of
+                            Ok { modules } ->
+                                case modules of
                                     [ jsonFile, apiFile, helperFile ] ->
                                         let
                                             jsonPath : List String
@@ -153,9 +153,9 @@ suite =
                                     _ ->
                                         Expect.fail
                                             ("Expected to generate 3 files but found "
-                                                ++ (List.length files |> String.fromInt)
+                                                ++ (List.length modules |> String.fromInt)
                                                 ++ ": "
-                                                ++ moduleNames files
+                                                ++ moduleNames modules
                                             )
 
         -- Known bug: https://github.com/wolfadex/elm-open-api-cli/issues/48

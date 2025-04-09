@@ -634,9 +634,9 @@ toRequestFunctions server effectTypes method pathUrl operation =
         isSinglePackage =
             List.length (effectTypes |> List.map effectTypeToPackage |> List.Extra.unique) == 1
 
-        toMsg : Elm.Expression -> Elm.Expression -> Elm.Expression
-        toMsg config msg =
-            Elm.apply (Elm.get "toMsg" config) [ msg ]
+        toMsg : Elm.Expression -> Elm.Expression
+        toMsg config =
+            Elm.get "toMsg" config
 
         body :
             ContentSchema
@@ -2416,7 +2416,7 @@ type alias OperationUtils =
     , bodyTypeAnnotation : Elm.Annotation.Annotation
     , errorTypeDeclaration : Maybe { name : String, declaration : Elm.Declaration, group : String }
     , errorTypeAnnotation : Elm.Annotation.Annotation
-    , expect : (Elm.Expression -> Elm.Expression) -> PerPackage Elm.Expression
+    , expect : Elm.Expression -> PerPackage Elm.Expression
     , resolver :
         { core : Elm.Expression
         , lamderaProgramTest : Elm.Expression
@@ -2434,25 +2434,25 @@ operationToTypesExpectAndResolver functionName operation =
         responses =
             OpenApi.Operation.responses operation
 
-        expectJsonBetter : Elm.Expression -> Elm.Expression -> ((Elm.Expression -> Elm.Expression) -> PerPackage Elm.Expression)
+        expectJsonBetter : Elm.Expression -> Elm.Expression -> Elm.Expression -> PerPackage Elm.Expression
         expectJsonBetter errorDecoders successDecoder toMsg =
-            { core = commonElmHttpSubmodule.call.expectJsonCustom (Elm.functionReduced "msg" toMsg) errorDecoders successDecoder
+            { core = commonElmHttpSubmodule.call.expectJsonCustom errorDecoders successDecoder toMsg
             , elmPages = Gen.BackendTask.Http.expectJson successDecoder
-            , lamderaProgramTest = commonLamderaProgramTestSubmodule.call.expectJsonCustomEffect (Elm.functionReduced "msg" toMsg) errorDecoders successDecoder
+            , lamderaProgramTest = commonLamderaProgramTestSubmodule.call.expectJsonCustomEffect errorDecoders successDecoder toMsg
             }
 
-        expectStringBetter : Elm.Expression -> (Elm.Expression -> Elm.Expression) -> PerPackage Elm.Expression
+        expectStringBetter : Elm.Expression -> Elm.Expression -> PerPackage Elm.Expression
         expectStringBetter errorDecoders toMsg =
-            { core = commonElmHttpSubmodule.call.expectStringCustom (Elm.functionReduced "msg" toMsg) errorDecoders
+            { core = commonElmHttpSubmodule.call.expectStringCustom errorDecoders toMsg
             , elmPages = Gen.BackendTask.Http.expectString
-            , lamderaProgramTest = commonLamderaProgramTestSubmodule.call.expectStringCustomEffect (Elm.functionReduced "msg" toMsg) errorDecoders
+            , lamderaProgramTest = commonLamderaProgramTestSubmodule.call.expectStringCustomEffect errorDecoders toMsg
             }
 
-        expectBytesBetter : Elm.Expression -> (Elm.Expression -> Elm.Expression) -> PerPackage Elm.Expression
+        expectBytesBetter : Elm.Expression -> Elm.Expression -> PerPackage Elm.Expression
         expectBytesBetter errorDecoders toMsg =
-            { core = commonElmHttpSubmodule.call.expectBytesCustom (Elm.functionReduced "msg" toMsg) errorDecoders
+            { core = commonElmHttpSubmodule.call.expectBytesCustom errorDecoders toMsg
             , elmPages = Gen.BackendTask.Http.expectBytes Gen.Bytes.Decode.values_.bytes
-            , lamderaProgramTest = commonLamderaProgramTestSubmodule.call.expectBytesCustomEffect (Elm.functionReduced "msg" toMsg) errorDecoders
+            , lamderaProgramTest = commonLamderaProgramTestSubmodule.call.expectBytesCustomEffect errorDecoders toMsg
             }
     in
     CliMonad.succeed responses
@@ -2834,13 +2834,6 @@ outerExpectJsonCustom :
     -> Elm.Declare.Function (Elm.Expression -> Elm.Expression -> Elm.Expression -> Elm.Expression)
 outerExpectJsonCustom name f =
     Elm.Declare.fn3 name
-        (Elm.Arg.varWith "toMsg"
-            (Elm.Annotation.function
-                [ Elm.Annotation.result (errorAnnotation Elm.Annotation.string) (Elm.Annotation.var "success")
-                ]
-                (Elm.Annotation.var "msg")
-            )
-        )
         (Elm.Arg.varWith "errorDecoders"
             (Gen.Dict.annotation_.dict
                 Gen.String.annotation_.string
@@ -2849,6 +2842,13 @@ outerExpectJsonCustom name f =
         )
         (Elm.Arg.varWith "successDecoder"
             (Gen.Json.Decode.annotation_.decoder (Elm.Annotation.var "success"))
+        )
+        (Elm.Arg.varWith "toMsg"
+            (Elm.Annotation.function
+                [ Elm.Annotation.result (errorAnnotation Elm.Annotation.string) (Elm.Annotation.var "success")
+                ]
+                (Elm.Annotation.var "msg")
+            )
         )
         f
 
@@ -2864,16 +2864,16 @@ outerExpectStringCustom :
     -> Elm.Declare.Function (Elm.Expression -> Elm.Expression -> Elm.Expression)
 outerExpectStringCustom name f =
     Elm.Declare.fn2 name
-        (Elm.Arg.varWith "toMsg"
-            (Elm.Annotation.function
-                [ Elm.Annotation.result (errorAnnotation Elm.Annotation.string) Elm.Annotation.string ]
-                (Elm.Annotation.var "msg")
-            )
-        )
         (Elm.Arg.varWith "errorDecoders"
             (Gen.Dict.annotation_.dict
                 Gen.String.annotation_.string
                 (Gen.Json.Decode.annotation_.decoder (Elm.Annotation.var "err"))
+            )
+        )
+        (Elm.Arg.varWith "toMsg"
+            (Elm.Annotation.function
+                [ Elm.Annotation.result (errorAnnotation Elm.Annotation.string) Elm.Annotation.string ]
+                (Elm.Annotation.var "msg")
             )
         )
         f
@@ -2939,7 +2939,7 @@ outerRawResolverCustom name f =
 expectJsonCustom : Elm.Declare.Function (Elm.Expression -> Elm.Expression -> Elm.Expression -> Elm.Expression)
 expectJsonCustom =
     outerExpectJsonCustom "expectJsonCustom"
-        (\toMsg errorDecoders successDecoder ->
+        (\errorDecoders successDecoder toMsg ->
             let
                 toResult : Elm.Expression -> Elm.Expression
                 toResult response =
@@ -2953,7 +2953,7 @@ expectJsonCustom =
 expectJsonCustomEffect : Elm.Declare.Function (Elm.Expression -> Elm.Expression -> Elm.Expression -> Elm.Expression)
 expectJsonCustomEffect =
     outerExpectJsonCustom "expectJsonCustomEffect"
-        (\toMsg errorDecoders successDecoder ->
+        (\errorDecoders successDecoder toMsg ->
             let
                 toResult : Elm.Expression -> Elm.Expression
                 toResult response =
@@ -2995,7 +2995,7 @@ expectBytesCustomEffect =
 expectStringCustom : Elm.Declare.Function (Elm.Expression -> Elm.Expression -> Elm.Expression)
 expectStringCustom =
     outerExpectStringCustom "expectStringCustom"
-        (\toMsg errorDecoders ->
+        (\errorDecoders toMsg ->
             let
                 toResult : Elm.Expression -> Elm.Expression
                 toResult response =

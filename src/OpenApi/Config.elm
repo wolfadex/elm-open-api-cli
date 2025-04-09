@@ -1,5 +1,5 @@
 module OpenApi.Config exposing
-    ( Config, EffectType(..), Format, Input, Path(..), Server(..)
+    ( Config, EffectType(..), effectTypeToPackage, Format, Input, Path(..), Server(..)
     , init, inputFrom, pathFromString
     , withAutoConvertSwagger, withEffectTypes, withFormat, withFormats, withGenerateTodos, withInput, withSwaggerConversionCommand, withSwaggerConversionUrl
     , withOutputModuleName, withOverrides, withServer, withWriteMergedTo
@@ -14,7 +14,7 @@ module OpenApi.Config exposing
 
 # Types
 
-@docs Config, EffectType, Format, Input, Path, Server
+@docs Config, EffectType, effectTypeToPackage, Format, Input, Path, Server
 
 
 # Creation
@@ -104,6 +104,52 @@ type EffectType
     | LamderaProgramTestTask
     | LamderaProgramTestTaskRisky
     | LamderaProgramTestTaskRecord
+
+
+effectTypeToPackage : EffectType -> Common.Package
+effectTypeToPackage effectType =
+    case effectType of
+        ElmHttpCmd ->
+            Common.ElmHttp
+
+        ElmHttpCmdRisky ->
+            Common.ElmHttp
+
+        ElmHttpCmdRecord ->
+            Common.ElmHttp
+
+        ElmHttpTask ->
+            Common.ElmHttp
+
+        ElmHttpTaskRisky ->
+            Common.ElmHttp
+
+        ElmHttpTaskRecord ->
+            Common.ElmHttp
+
+        DillonkearnsElmPagesTaskRecord ->
+            Common.ElmHttp
+
+        DillonkearnsElmPagesTask ->
+            Common.DillonkearnsElmPages
+
+        LamderaProgramTestCmd ->
+            Common.LamderaProgramTest
+
+        LamderaProgramTestCmdRisky ->
+            Common.LamderaProgramTest
+
+        LamderaProgramTestCmdRecord ->
+            Common.LamderaProgramTest
+
+        LamderaProgramTestTask ->
+            Common.LamderaProgramTest
+
+        LamderaProgramTestTaskRisky ->
+            Common.LamderaProgramTest
+
+        LamderaProgramTestTaskRecord ->
+            Common.LamderaProgramTest
 
 
 type Server

@@ -22,6 +22,7 @@ import Json.Decode
 import Json.Encode
 import Json.Value
 import OpenApi
+import OpenApi.Common
 import OpenApi.Config
 import OpenApi.Generate
 import Pages.Script
@@ -879,9 +880,6 @@ generateFilesFromOpenApiSpecs configs =
         |> BackendTask.map
             (\result ->
                 let
-                    ( files, messages ) =
-                        List.unzip result
-
                     groupOrder : String -> Int
                     groupOrder group =
                         case group of
@@ -899,32 +897,72 @@ generateFilesFromOpenApiSpecs configs =
 
                             _ ->
                                 5
+
+                    commonDeclarationsFromResult : List { declaration : Elm.Declaration, group : String }
+                    commonDeclarationsFromResult =
+                        result
+                            |> List.concatMap .modules
+                            |> Dict.Extra.groupBy .moduleName
+                            |> Dict.toList
+                            |> List.concatMap
+                                (\( moduleName, declarations ) ->
+                                    if moduleName == Common.commonModuleName then
+                                        declarations
+                                            |> List.foldl (\e acc -> FastDict.union e.declarations acc) FastDict.empty
+                                            |> FastDict.values
+
+                                    else
+                                        []
+                                )
+
+                    allEffectTypes : List OpenApi.Config.EffectType
+                    allEffectTypes =
+                        List.concatMap
+                            (\( { effectTypes }, _ ) -> effectTypes)
+                            configs
+
+                    commonFile : Elm.File
+                    commonFile =
+                        OpenApi.Common.declarations allEffectTypes
+                            ++ commonDeclarationsFromResult
+                            |> fileFromGroups Common.commonModuleName
+
+                    fileFromGroups : List String -> List { group : String, declaration : Elm.Declaration } -> Elm.File
+                    fileFromGroups moduleName declarations =
+                        declarations
+                            |> Dict.Extra.groupBy (\{ group } -> ( groupOrder group, group ))
+                            |> Dict.toList
+                            |> List.concatMap
+                                (\( ( _, group ), decls ) ->
+                                    [ Elm.docs ("## " ++ group)
+                                    , Elm.group (List.map .declaration decls)
+                                    ]
+                                )
+                            |> Elm.file moduleName
                 in
-                ( files
-                    |> List.concat
+                ( result
+                    |> List.concatMap .modules
                     |> Dict.Extra.groupBy .moduleName
                     |> Dict.toList
-                    |> List.map
+                    |> List.filterMap
                         (\( moduleName, declarations ) ->
-                            declarations
-                                |> List.foldl (\e acc -> FastDict.union e.declarations acc) FastDict.empty
-                                |> FastDict.values
-                                |> Dict.Extra.groupBy (\{ group } -> ( groupOrder group, group ))
-                                |> Dict.toList
-                                |> List.concatMap
-                                    (\( ( _, group ), decls ) ->
-                                        [ Elm.docs ("## " ++ group)
-                                        , Elm.group (List.map .declaration decls)
-                                        ]
-                                    )
-                                |> Elm.file moduleName
+                            if moduleName == Common.commonModuleName then
+                                Nothing
+
+                            else
+                                declarations
+                                    |> List.foldl (\e acc -> FastDict.union e.declarations acc) FastDict.empty
+                                    |> FastDict.values
+                                    |> fileFromGroups moduleName
+                                    |> Just
                         )
-                , { warnings = List.concatMap .warnings messages
+                    |> (::) commonFile
+                , { warnings = List.concatMap .warnings result
                   , requiredPackages =
                         List.foldl
                             (\{ requiredPackages } acc -> FastSet.union requiredPackages acc)
                             FastSet.empty
-                            messages
+                            result
                   }
                 )
             )

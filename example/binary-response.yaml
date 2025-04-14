@@ -24,4 +24,4 @@ paths:
                         image/png:
                             schema:
                                 type: string
-                                format: bytes
+                                format: byte

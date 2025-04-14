@@ -22,7 +22,7 @@ import Json.Decode
 import Json.Encode
 import Json.Value
 import OpenApi
-import OpenApi.Common
+import OpenApi.Common.Internal
 import OpenApi.Config
 import OpenApi.Generate
 import Pages.Script
@@ -923,7 +923,7 @@ generateFilesFromOpenApiSpecs configs =
 
                     commonFile : Elm.File
                     commonFile =
-                        OpenApi.Common.declarations allEffectTypes
+                        OpenApi.Common.Internal.declarations allEffectTypes
                             ++ commonDeclarationsFromResult
                             |> fileFromGroups Common.commonModuleName
 

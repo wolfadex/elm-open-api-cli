@@ -41,7 +41,7 @@ import JsonSchema.Generate
 import List.Extra
 import List.NonEmpty
 import OpenApi
-import OpenApi.Common
+import OpenApi.Common.Internal
 import OpenApi.Components
 import OpenApi.Config
 import OpenApi.MediaType
@@ -800,7 +800,7 @@ toRequestFunctions server effectTypes method pathUrl operation =
                                 Elm.Annotation.function
                                     [ (paramType { requireToMsg = False }).core ]
                                     (Gen.Task.annotation_.task
-                                        (OpenApi.Common.annotation_.error errorTypeAnnotation bodyTypeAnnotation)
+                                        (OpenApi.Common.Internal.annotation_.error errorTypeAnnotation bodyTypeAnnotation)
                                         successAnnotation
                                     )
                             , recordAnnotation =
@@ -813,7 +813,7 @@ toRequestFunctions server effectTypes method pathUrl operation =
                                         , ( "body", Gen.Http.annotation_.body )
                                         , ( "resolver"
                                           , Gen.Http.annotation_.resolver
-                                                (OpenApi.Common.annotation_.error errorTypeAnnotation bodyTypeAnnotation)
+                                                (OpenApi.Common.Internal.annotation_.error errorTypeAnnotation bodyTypeAnnotation)
                                                 successAnnotation
                                           )
                                         , ( "timeout", Elm.Annotation.maybe Elm.Annotation.float )
@@ -1002,7 +1002,7 @@ toRequestFunctions server effectTypes method pathUrl operation =
                                     [ (paramType { requireToMsg = False }).lamderaProgramTest ]
                                     (Gen.Effect.Task.annotation_.task
                                         (Elm.Annotation.var "restriction")
-                                        (OpenApi.Common.annotation_.error errorTypeAnnotation bodyTypeAnnotation)
+                                        (OpenApi.Common.Internal.annotation_.error errorTypeAnnotation bodyTypeAnnotation)
                                         successAnnotation
                                     )
                             , recordAnnotation =
@@ -1016,7 +1016,7 @@ toRequestFunctions server effectTypes method pathUrl operation =
                                         , ( "resolver"
                                           , Gen.Effect.Http.annotation_.resolver
                                                 (Elm.Annotation.var "restriction")
-                                                (OpenApi.Common.annotation_.error errorTypeAnnotation bodyTypeAnnotation)
+                                                (OpenApi.Common.Internal.annotation_.error errorTypeAnnotation bodyTypeAnnotation)
                                                 successAnnotation
                                           )
                                         , ( "timeout", Elm.Annotation.maybe (Elm.Annotation.namedWith [ "Duration" ] "Duration" []) )
@@ -1731,7 +1731,7 @@ toConfigParamAnnotation options =
                 toMsgCore =
                     Elm.Annotation.function
                         [ Elm.Annotation.result
-                            (OpenApi.Common.annotation_.error options.errorTypeAnnotation options.errorBodyAnnotation)
+                            (OpenApi.Common.Internal.annotation_.error options.errorTypeAnnotation options.errorBodyAnnotation)
                             options.successAnnotation
                         ]
                         (Elm.Annotation.var "msg")
@@ -1740,7 +1740,7 @@ toConfigParamAnnotation options =
                 toMsgLamderaProgramTest =
                     Elm.Annotation.function
                         [ Elm.Annotation.result
-                            (OpenApi.Common.annotation_.error options.errorTypeAnnotation options.errorBodyAnnotation)
+                            (OpenApi.Common.Internal.annotation_.error options.errorTypeAnnotation options.errorBodyAnnotation)
                             options.successAnnotation
                         ]
                         (Elm.Annotation.var "msg")
@@ -2247,23 +2247,23 @@ operationToTypesExpectAndResolver functionName operation =
 
         expectJsonBetter : Elm.Expression -> Elm.Expression -> Elm.Expression -> PerPackage Elm.Expression
         expectJsonBetter errorDecoders successDecoder toMsg =
-            { core = OpenApi.Common.elmHttpSubmodule.call.expectJsonCustom errorDecoders successDecoder toMsg
+            { core = OpenApi.Common.Internal.elmHttpSubmodule.call.expectJsonCustom errorDecoders successDecoder toMsg
             , elmPages = Gen.BackendTask.Http.expectJson successDecoder
-            , lamderaProgramTest = OpenApi.Common.lamderaProgramTestSubmodule.call.expectJsonCustomEffect errorDecoders successDecoder toMsg
+            , lamderaProgramTest = OpenApi.Common.Internal.lamderaProgramTestSubmodule.call.expectJsonCustomEffect errorDecoders successDecoder toMsg
             }
 
         expectStringBetter : Elm.Expression -> Elm.Expression -> PerPackage Elm.Expression
         expectStringBetter errorDecoders toMsg =
-            { core = OpenApi.Common.elmHttpSubmodule.call.expectStringCustom errorDecoders toMsg
+            { core = OpenApi.Common.Internal.elmHttpSubmodule.call.expectStringCustom errorDecoders toMsg
             , elmPages = Gen.BackendTask.Http.expectString
-            , lamderaProgramTest = OpenApi.Common.lamderaProgramTestSubmodule.call.expectStringCustomEffect errorDecoders toMsg
+            , lamderaProgramTest = OpenApi.Common.Internal.lamderaProgramTestSubmodule.call.expectStringCustomEffect errorDecoders toMsg
             }
 
         expectBytesBetter : Elm.Expression -> Elm.Expression -> PerPackage Elm.Expression
         expectBytesBetter errorDecoders toMsg =
-            { core = OpenApi.Common.elmHttpSubmodule.call.expectBytesCustom errorDecoders toMsg
+            { core = OpenApi.Common.Internal.elmHttpSubmodule.call.expectBytesCustom errorDecoders toMsg
             , elmPages = Gen.BackendTask.Http.expectBytes Gen.Bytes.Decode.values_.bytes
-            , lamderaProgramTest = OpenApi.Common.lamderaProgramTestSubmodule.call.expectBytesCustomEffect errorDecoders toMsg
+            , lamderaProgramTest = OpenApi.Common.Internal.lamderaProgramTestSubmodule.call.expectBytesCustomEffect errorDecoders toMsg
             }
     in
     CliMonad.succeed responses
@@ -2486,8 +2486,8 @@ operationToTypesExpectAndResolver functionName operation =
                                                     , errorTypeAnnotation = errorTypeAnnotation
                                                     , expect = expectJsonBetter errorDecoders_ successDecoder
                                                     , resolver =
-                                                        { core = OpenApi.Common.elmHttpSubmodule.call.jsonResolverCustom errorDecoders_ successDecoder
-                                                        , lamderaProgramTest = OpenApi.Common.lamderaProgramTestSubmodule.call.jsonResolverCustomEffect errorDecoders_ successDecoder
+                                                        { core = OpenApi.Common.Internal.elmHttpSubmodule.call.jsonResolverCustom errorDecoders_ successDecoder
+                                                        , lamderaProgramTest = OpenApi.Common.Internal.lamderaProgramTestSubmodule.call.jsonResolverCustomEffect errorDecoders_ successDecoder
                                                         }
                                                     }
                                                 )
@@ -2508,8 +2508,8 @@ operationToTypesExpectAndResolver functionName operation =
                                                     , errorTypeAnnotation = errorTypeAnnotation
                                                     , expect = expectStringBetter errorDecoders_
                                                     , resolver =
-                                                        { core = OpenApi.Common.elmHttpSubmodule.call.stringResolverCustom errorDecoders_
-                                                        , lamderaProgramTest = OpenApi.Common.lamderaProgramTestSubmodule.call.stringResolverCustomEffect errorDecoders_
+                                                        { core = OpenApi.Common.Internal.elmHttpSubmodule.call.stringResolverCustom errorDecoders_
+                                                        , lamderaProgramTest = OpenApi.Common.Internal.lamderaProgramTestSubmodule.call.stringResolverCustomEffect errorDecoders_
                                                         }
                                                     }
                                                 )
@@ -2525,8 +2525,8 @@ operationToTypesExpectAndResolver functionName operation =
                                                     , errorTypeAnnotation = errorTypeAnnotation
                                                     , expect = expectBytesBetter errorDecoders_
                                                     , resolver =
-                                                        { core = OpenApi.Common.elmHttpSubmodule.call.bytesResolverCustom errorDecoders_
-                                                        , lamderaProgramTest = OpenApi.Common.lamderaProgramTestSubmodule.call.bytesResolverCustomEffect errorDecoders_
+                                                        { core = OpenApi.Common.Internal.elmHttpSubmodule.call.bytesResolverCustom errorDecoders_
+                                                        , lamderaProgramTest = OpenApi.Common.Internal.lamderaProgramTestSubmodule.call.bytesResolverCustomEffect errorDecoders_
                                                         }
                                                     }
                                                         |> CliMonad.succeed
@@ -2544,8 +2544,8 @@ operationToTypesExpectAndResolver functionName operation =
                                                     , errorTypeAnnotation = errorTypeAnnotation
                                                     , expect = expectJsonBetter errorDecoders_ (Gen.Json.Decode.succeed Elm.unit)
                                                     , resolver =
-                                                        { core = OpenApi.Common.elmHttpSubmodule.call.jsonResolverCustom errorDecoders_ (Gen.Json.Decode.succeed Elm.unit)
-                                                        , lamderaProgramTest = OpenApi.Common.lamderaProgramTestSubmodule.call.jsonResolverCustomEffect errorDecoders_ (Gen.Json.Decode.succeed Elm.unit)
+                                                        { core = OpenApi.Common.Internal.elmHttpSubmodule.call.jsonResolverCustom errorDecoders_ (Gen.Json.Decode.succeed Elm.unit)
+                                                        , lamderaProgramTest = OpenApi.Common.Internal.lamderaProgramTestSubmodule.call.jsonResolverCustomEffect errorDecoders_ (Gen.Json.Decode.succeed Elm.unit)
                                                         }
                                                     }
                                                 )
@@ -2582,8 +2582,8 @@ operationToTypesExpectAndResolver functionName operation =
                                                 , errorTypeAnnotation = errorTypeAnnotation
                                                 , expect = expectJsonBetter errorDecoders_ decoder
                                                 , resolver =
-                                                    { core = OpenApi.Common.elmHttpSubmodule.call.jsonResolverCustom errorDecoders_ decoder
-                                                    , lamderaProgramTest = OpenApi.Common.lamderaProgramTestSubmodule.call.jsonResolverCustomEffect errorDecoders_ decoder
+                                                    { core = OpenApi.Common.Internal.elmHttpSubmodule.call.jsonResolverCustom errorDecoders_ decoder
+                                                    , lamderaProgramTest = OpenApi.Common.Internal.lamderaProgramTestSubmodule.call.jsonResolverCustomEffect errorDecoders_ decoder
                                                     }
                                                 }
                                             )

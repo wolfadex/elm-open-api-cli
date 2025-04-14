@@ -1,4 +1,4 @@
-module OpenApi.Common exposing (CommonSubmodule, ElmHttpSubmodule, Error, LamderaProgramTestSubmodule, Nullable, annotation_, commonSubmodule, declarations, elmHttpSubmodule, lamderaProgramTestSubmodule, make_)
+module OpenApi.Common.Internal exposing (CommonSubmodule, ElmHttpSubmodule, Error, LamderaProgramTestSubmodule, Nullable, annotation_, commonSubmodule, declarations, elmHttpSubmodule, lamderaProgramTestSubmodule, make_)
 
 import Common
 import Elm

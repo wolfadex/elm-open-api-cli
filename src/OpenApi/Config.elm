@@ -366,7 +366,7 @@ byteFormat =
                         }
                 )
     , sharedDeclarations = []
-    , requiresPackages = [ "danfishgold/base64-bytes" ]
+    , requiresPackages = [ Common.base64PackageName ]
     }
 
 

@@ -19,6 +19,7 @@ import FastDict
 import FastSet
 import Gen.BackendTask
 import Gen.BackendTask.Http
+import Gen.Base64
 import Gen.Basics
 import Gen.Bytes
 import Gen.Bytes.Decode
@@ -69,6 +70,7 @@ type ContentSchema
     | JsonContent Common.Type
     | StringContent Mime
     | BytesContent Mime
+    | Base64Content Mime
 
 
 type alias AuthorizationInfo =
@@ -550,6 +552,23 @@ toRequestFunctions server effectTypes method pathUrl operation =
                             , lamderaProgramTest = toBody Gen.Effect.Http.bytesBody
                             }
 
+                Base64Content mime ->
+                    CliMonad.succeed <|
+                        \config ->
+                            let
+                                toBody : (Elm.Expression -> Elm.Expression -> Elm.Expression) -> Elm.Expression
+                                toBody f =
+                                    f (Elm.string mime)
+                                        (Elm.get "body" config
+                                            |> Gen.Base64.fromBytes
+                                            |> Gen.Maybe.withDefault (Elm.string "")
+                                        )
+                            in
+                            { core = toBody Gen.Http.call_.stringBody
+                            , elmPages = toBody Gen.BackendTask.Http.call_.stringBody
+                            , lamderaProgramTest = toBody Gen.Effect.Http.call_.stringBody
+                            }
+
         bodyParams : ContentSchema -> CliMonad (List ( Common.UnsafeName, Elm.Annotation.Annotation ))
         bodyParams contentSchema =
             case contentSchema of
@@ -566,6 +585,11 @@ toRequestFunctions server effectTypes method pathUrl operation =
                 BytesContent _ ->
                     CliMonad.succeed [ ( Common.UnsafeName "body", Gen.Bytes.annotation_.bytes ) ]
                         |> CliMonad.withRequiredPackage "elm/bytes"
+
+                Base64Content _ ->
+                    CliMonad.succeed [ ( Common.UnsafeName "body", Gen.Bytes.annotation_.bytes ) ]
+                        |> CliMonad.withRequiredPackage "elm/bytes"
+                        |> CliMonad.withRequiredPackage Common.base64PackageName
 
         headersFromList : (Elm.Expression -> Elm.Expression -> Elm.Expression) -> AuthorizationInfo -> Elm.Expression -> List (Elm.Expression -> ( Elm.Expression, Elm.Expression, Bool )) -> Elm.Expression
         headersFromList f auth config headerFunctions =
@@ -658,48 +682,53 @@ toRequestFunctions server effectTypes method pathUrl operation =
         step { successType, bodyTypeAnnotation, errorTypeDeclaration, errorTypeAnnotation, expect, resolver } =
             let
                 declarationGroup :
-                    AuthorizationInfo
-                    -> (() -> a)
+                    (PerPackage (CliMonad (Elm.Expression -> Elm.Expression)) -> CliMonad (Elm.Expression -> Elm.Expression))
+                    -> AuthorizationInfo
+                    -> ((Elm.Expression -> Elm.Expression) -> a)
                     -> List ( OpenApi.Config.EffectType, a -> ( String, Elm.Expression ) )
-                    -> List CliMonad.Declaration
-                declarationGroup auth sharedData list =
+                    -> CliMonad (List CliMonad.Declaration)
+                declarationGroup package auth sharedData list =
                     if List.any (\( effectType, _ ) -> List.member effectType effectTypes) list then
-                        let
-                            shared : a
-                            shared =
-                                sharedData ()
-                        in
-                        List.filterMap
-                            (\( effectType, toDeclaration ) ->
-                                if List.member effectType effectTypes then
+                        package expect
+                            |> CliMonad.map
+                                (\specificExpect ->
                                     let
-                                        ( name, expr ) =
-                                            toDeclaration shared
+                                        shared : a
+                                        shared =
+                                            sharedData specificExpect
                                     in
-                                    { moduleName =
-                                        if isSinglePackage then
-                                            Common.Api Nothing
+                                    List.filterMap
+                                        (\( effectType, toDeclaration ) ->
+                                            if List.member effectType effectTypes then
+                                                let
+                                                    ( name, expr ) =
+                                                        toDeclaration shared
+                                                in
+                                                { moduleName =
+                                                    if isSinglePackage then
+                                                        Common.Api Nothing
 
-                                        else
-                                            Common.Api (Just (OpenApi.Config.effectTypeToPackage effectType))
-                                    , name = name
-                                    , declaration =
-                                        expr
-                                            |> Elm.declaration name
-                                            |> Elm.withDocumentation (documentation auth)
-                                            |> Elm.expose
-                                    , group =
-                                        operationToGroup operation
-                                    }
-                                        |> Just
+                                                    else
+                                                        Common.Api (Just (OpenApi.Config.effectTypeToPackage effectType))
+                                                , name = name
+                                                , declaration =
+                                                    expr
+                                                        |> Elm.declaration name
+                                                        |> Elm.withDocumentation (documentation auth)
+                                                        |> Elm.expose
+                                                , group =
+                                                    operationToGroup operation
+                                                }
+                                                    |> Just
 
-                                else
-                                    Nothing
-                            )
-                            list
+                                            else
+                                                Nothing
+                                        )
+                                        list
+                                )
 
                     else
-                        []
+                        CliMonad.succeed []
 
                 elmHttpCommands :
                     AuthorizationInfo
@@ -708,10 +737,11 @@ toRequestFunctions server effectTypes method pathUrl operation =
                     -> (Elm.Expression -> PerPackage Elm.Expression)
                     -> (Elm.Expression -> Elm.Expression)
                     -> ({ requireToMsg : Bool } -> PerPackage Elm.Annotation.Annotation)
-                    -> List CliMonad.Declaration
+                    -> CliMonad (List CliMonad.Declaration)
                 elmHttpCommands auth toHeaderParams _ toBody replaced paramType =
-                    declarationGroup auth
-                        (\_ ->
+                    declarationGroup .core
+                        auth
+                        (\specificExpect ->
                             { cmdArg =
                                 \config ->
                                     Elm.record
@@ -720,7 +750,7 @@ toRequestFunctions server effectTypes method pathUrl operation =
                                         , ( "headers"
                                           , headersFromList Gen.Http.call_.header auth config toHeaderParams
                                           )
-                                        , ( "expect", (expect <| toMsg config).core )
+                                        , ( "expect", specificExpect <| toMsg config )
                                         , ( "body", (toBody config).core )
                                         , ( "timeout", Gen.Maybe.make_.nothing )
                                         , ( "tracker", Gen.Maybe.make_.nothing )
@@ -780,9 +810,10 @@ toRequestFunctions server effectTypes method pathUrl operation =
                     -> (Elm.Expression -> PerPackage Elm.Expression)
                     -> (Elm.Expression -> Elm.Expression)
                     -> ({ requireToMsg : Bool } -> PerPackage Elm.Annotation.Annotation)
-                    -> List CliMonad.Declaration
+                    -> CliMonad (List CliMonad.Declaration)
                 elmHttpTasks auth toHeaderParams successAnnotation toBody replaced paramType =
-                    declarationGroup auth
+                    declarationGroup .core
+                        auth
                         (\_ ->
                             { taskArg =
                                 \config ->
@@ -857,10 +888,11 @@ toRequestFunctions server effectTypes method pathUrl operation =
                     -> (Elm.Expression -> PerPackage Elm.Expression)
                     -> (Elm.Expression -> Elm.Expression)
                     -> ({ requireToMsg : Bool } -> PerPackage Elm.Annotation.Annotation)
-                    -> List CliMonad.Declaration
+                    -> CliMonad (List CliMonad.Declaration)
                 dillonkearnsElmPagesBackendTask auth toHeaderParams successAnnotation toBody replaced paramType =
-                    declarationGroup auth
-                        (\_ ->
+                    declarationGroup .elmPages
+                        auth
+                        (\specificExpect ->
                             { taskArg =
                                 \config ->
                                     Elm.record
@@ -899,23 +931,24 @@ toRequestFunctions server effectTypes method pathUrl operation =
                                         )
                                         (Gen.BackendTask.Http.annotation_.expect (Elm.Annotation.var "a"))
                                     )
+                            , specificExpect = specificExpect
                             }
                         )
                         [ ( OpenApi.Config.DillonkearnsElmPagesTask
-                          , \{ taskArg, taskAnnotation } ->
+                          , \{ taskArg, taskAnnotation, specificExpect } ->
                                 ( functionName
                                 , Elm.fn
                                     (Elm.Arg.var "config")
-                                    (\config -> Gen.BackendTask.Http.call_.request (taskArg config) (expect <| toMsg config).elmPages)
+                                    (\config -> Gen.BackendTask.Http.call_.request (taskArg config) (specificExpect <| toMsg config))
                                     |> Elm.withType taskAnnotation
                                 )
                           )
                         , ( OpenApi.Config.DillonkearnsElmPagesTaskRecord
-                          , \{ taskArg, recordAnnotation } ->
+                          , \{ taskArg, recordAnnotation, specificExpect } ->
                                 ( functionName
                                 , Elm.fn
                                     (Elm.Arg.var "config")
-                                    (\config -> Elm.tuple (taskArg config) (expect <| toMsg config).elmPages)
+                                    (\config -> Elm.tuple (taskArg config) (specificExpect <| toMsg config))
                                     |> Elm.withType recordAnnotation
                                 )
                           )
@@ -928,10 +961,11 @@ toRequestFunctions server effectTypes method pathUrl operation =
                     -> (Elm.Expression -> PerPackage Elm.Expression)
                     -> (Elm.Expression -> Elm.Expression)
                     -> ({ requireToMsg : Bool } -> PerPackage Elm.Annotation.Annotation)
-                    -> List CliMonad.Declaration
+                    -> CliMonad (List CliMonad.Declaration)
                 lamderaProgramTestCommands auth toHeaderParams _ toBody replaced paramType =
-                    declarationGroup auth
-                        (\_ ->
+                    declarationGroup .lamderaProgramTest
+                        auth
+                        (\specificExpect ->
                             { cmdArg =
                                 \config ->
                                     Elm.record
@@ -940,7 +974,7 @@ toRequestFunctions server effectTypes method pathUrl operation =
                                         , ( "headers"
                                           , headersFromList Gen.Effect.Http.call_.header auth config toHeaderParams
                                           )
-                                        , ( "expect", (expect <| toMsg config).lamderaProgramTest )
+                                        , ( "expect", specificExpect <| toMsg config )
                                         , ( "body", (toBody config).lamderaProgramTest )
                                         , ( "timeout", Gen.Maybe.make_.nothing )
                                         , ( "tracker", Gen.Maybe.make_.nothing )
@@ -981,9 +1015,10 @@ toRequestFunctions server effectTypes method pathUrl operation =
                     -> (Elm.Expression -> PerPackage Elm.Expression)
                     -> (Elm.Expression -> Elm.Expression)
                     -> ({ requireToMsg : Bool } -> PerPackage Elm.Annotation.Annotation)
-                    -> List CliMonad.Declaration
+                    -> CliMonad (List CliMonad.Declaration)
                 lamderaProgramTestTasks auth toHeaderParams successAnnotation toBody replaced paramType =
-                    declarationGroup auth
+                    declarationGroup .lamderaProgramTest
+                        auth
                         (\_ ->
                             { taskArg =
                                 \config ->
@@ -1055,26 +1090,29 @@ toRequestFunctions server effectTypes method pathUrl operation =
             in
             CliMonad.andThen3
                 (\contentSchema auth successAnnotation ->
-                    CliMonad.map4
+                    CliMonad.andThen4
                         (\toBody configAnnotation replaced toHeaderParams ->
-                            ([ elmHttpCommands, elmHttpTasks, dillonkearnsElmPagesBackendTask, lamderaProgramTestCommands, lamderaProgramTestTasks ]
-                                |> List.concatMap
-                                    (\toDecls ->
-                                        toDecls auth toHeaderParams successAnnotation toBody replaced configAnnotation
-                                    )
-                            )
-                                ++ (case errorTypeDeclaration of
-                                        Just { name, declaration, group } ->
-                                            [ { moduleName = Common.Types
-                                              , name = name
-                                              , declaration = declaration
-                                              , group = group
-                                              }
-                                            ]
+                            CliMonad.map2 (++)
+                                ([ elmHttpCommands, elmHttpTasks, dillonkearnsElmPagesBackendTask, lamderaProgramTestCommands, lamderaProgramTestTasks ]
+                                    |> CliMonad.combineMap
+                                        (\toDecls ->
+                                            toDecls auth toHeaderParams successAnnotation toBody replaced configAnnotation
+                                        )
+                                    |> CliMonad.map List.concat
+                                )
+                                (case errorTypeDeclaration of
+                                    Just { name, declaration, group } ->
+                                        [ { moduleName = Common.Types
+                                          , name = name
+                                          , declaration = declaration
+                                          , group = group
+                                          }
+                                        ]
+                                            |> CliMonad.succeed
 
-                                        Nothing ->
-                                            []
-                                   )
+                                    Nothing ->
+                                        [] |> CliMonad.succeed
+                                )
                         )
                         (body contentSchema)
                         (bodyParams contentSchema
@@ -1697,11 +1735,17 @@ contentToContentSchema qualify content =
             of
                 Just (Json.Schema.Definitions.ObjectSchema schema) ->
                     if schema.type_ == Json.Schema.Definitions.SingleType Json.Schema.Definitions.StringType then
-                        -- This is used by, e.g., base64 encoded data
-                        CliMonad.succeed (StringContent singleKey)
+                        case schema.format of
+                            Just "byte" ->
+                                -- base64-encoded data
+                                CliMonad.succeed (Base64Content singleKey)
 
-                    else if singleKey == "application/octet-stream" then
-                        CliMonad.succeed (BytesContent singleKey)
+                            Just "binary" ->
+                                -- binary data
+                                CliMonad.succeed (BytesContent singleKey)
+
+                            _ ->
+                                CliMonad.succeed (StringContent singleKey)
 
                     else
                         default (Just fallback)
@@ -2227,7 +2271,7 @@ type alias OperationUtils =
     , bodyTypeAnnotation : Elm.Annotation.Annotation
     , errorTypeDeclaration : Maybe { name : String, declaration : Elm.Declaration, group : String }
     , errorTypeAnnotation : Elm.Annotation.Annotation
-    , expect : Elm.Expression -> PerPackage Elm.Expression
+    , expect : PerPackage (CliMonad (Elm.Expression -> Elm.Expression))
     , resolver :
         { core : Elm.Expression
         , lamderaProgramTest : Elm.Expression
@@ -2245,25 +2289,54 @@ operationToTypesExpectAndResolver functionName operation =
         responses =
             OpenApi.Operation.responses operation
 
-        expectJsonBetter : Elm.Expression -> Elm.Expression -> Elm.Expression -> PerPackage Elm.Expression
-        expectJsonBetter errorDecoders successDecoder toMsg =
-            { core = OpenApi.Common.Internal.elmHttpSubmodule.call.expectJsonCustom errorDecoders successDecoder toMsg
-            , elmPages = Gen.BackendTask.Http.expectJson successDecoder
-            , lamderaProgramTest = OpenApi.Common.Internal.lamderaProgramTestSubmodule.call.expectJsonCustomEffect errorDecoders successDecoder toMsg
+        expectJsonBetter : Elm.Expression -> Elm.Expression -> PerPackage (CliMonad (Elm.Expression -> Elm.Expression))
+        expectJsonBetter errorDecoders successDecoder =
+            { core =
+                OpenApi.Common.Internal.elmHttpSubmodule.call.expectJsonCustom errorDecoders successDecoder
+                    |> CliMonad.succeed
+            , elmPages =
+                always (Gen.BackendTask.Http.expectJson successDecoder)
+                    |> CliMonad.succeed
+            , lamderaProgramTest =
+                OpenApi.Common.Internal.lamderaProgramTestSubmodule.call.expectJsonCustomEffect errorDecoders successDecoder
+                    |> CliMonad.succeed
             }
 
-        expectStringBetter : Elm.Expression -> Elm.Expression -> PerPackage Elm.Expression
-        expectStringBetter errorDecoders toMsg =
-            { core = OpenApi.Common.Internal.elmHttpSubmodule.call.expectStringCustom errorDecoders toMsg
-            , elmPages = Gen.BackendTask.Http.expectString
-            , lamderaProgramTest = OpenApi.Common.Internal.lamderaProgramTestSubmodule.call.expectStringCustomEffect errorDecoders toMsg
+        expectStringBetter : Elm.Expression -> PerPackage (CliMonad (Elm.Expression -> Elm.Expression))
+        expectStringBetter errorDecoders =
+            { core =
+                OpenApi.Common.Internal.elmHttpSubmodule.call.expectStringCustom errorDecoders
+                    |> CliMonad.succeed
+            , elmPages =
+                always Gen.BackendTask.Http.expectString
+                    |> CliMonad.succeed
+            , lamderaProgramTest =
+                OpenApi.Common.Internal.lamderaProgramTestSubmodule.call.expectStringCustomEffect errorDecoders
+                    |> CliMonad.succeed
             }
 
-        expectBytesBetter : Elm.Expression -> Elm.Expression -> PerPackage Elm.Expression
-        expectBytesBetter errorDecoders toMsg =
-            { core = OpenApi.Common.Internal.elmHttpSubmodule.call.expectBytesCustom errorDecoders toMsg
-            , elmPages = Gen.BackendTask.Http.expectBytes Gen.Bytes.Decode.values_.bytes
-            , lamderaProgramTest = OpenApi.Common.Internal.lamderaProgramTestSubmodule.call.expectBytesCustomEffect errorDecoders toMsg
+        expectBytesBetter : Elm.Expression -> PerPackage (CliMonad (Elm.Expression -> Elm.Expression))
+        expectBytesBetter errorDecoders =
+            { core =
+                OpenApi.Common.Internal.elmHttpSubmodule.call.expectBytesCustom errorDecoders
+                    |> CliMonad.succeed
+            , elmPages =
+                always (Gen.BackendTask.Http.expectBytes Gen.Bytes.Decode.values_.bytes)
+                    |> CliMonad.succeed
+            , lamderaProgramTest =
+                OpenApi.Common.Internal.lamderaProgramTestSubmodule.call.expectBytesCustomEffect errorDecoders
+                    |> CliMonad.succeed
+            }
+
+        expectBase64Better : Elm.Expression -> PerPackage (CliMonad (Elm.Expression -> Elm.Expression))
+        expectBase64Better errorDecoders =
+            { core =
+                OpenApi.Common.Internal.elmHttpBase64Submodule.call.expectBase64Custom errorDecoders
+                    |> CliMonad.succeed
+            , elmPages = CliMonad.fail "Base64 not supported yet in `elm-pages`"
+            , lamderaProgramTest =
+                OpenApi.Common.Internal.lamderaProgramTestBase64Submodule.call.expectBase64CustomEffect errorDecoders
+                    |> CliMonad.succeed
             }
     in
     CliMonad.succeed responses
@@ -2279,108 +2352,6 @@ operationToTypesExpectAndResolver functionName operation =
                     errorResponses : Dict.Dict String (OpenApi.Reference.ReferenceOr OpenApi.Response.Response)
                     errorResponses =
                         getErrorResponses responses
-
-                    toErrorVariant : String -> String
-                    toErrorVariant statusCode =
-                        String.Extra.toSentenceCase functionName ++ "_" ++ statusCode
-
-                    errorDecoders : CliMonad Elm.Expression
-                    errorDecoders =
-                        case Dict.toList errorResponses of
-                            [] ->
-                                Elm.list []
-                                    |> Gen.Dict.call_.fromList
-                                    |> CliMonad.succeed
-
-                            errorList ->
-                                errorList
-                                    |> CliMonad.combineMap
-                                        (\( statusCode, errResponseOrRef ) ->
-                                            let
-                                                single : Bool
-                                                single =
-                                                    case errorList of
-                                                        [ _ ] ->
-                                                            True
-
-                                                        _ ->
-                                                            False
-
-                                                common : Elm.Expression -> CliMonad Elm.Expression
-                                                common decoder =
-                                                    CliMonad.map
-                                                        (\typesNamespace ->
-                                                            Elm.tuple
-                                                                (Elm.string statusCode)
-                                                                (if single then
-                                                                    decoder
-
-                                                                 else
-                                                                    Gen.Json.Decode.call_.map
-                                                                        (Elm.value
-                                                                            { importFrom = typesNamespace
-                                                                            , name = toErrorVariant statusCode
-                                                                            , annotation = Nothing
-                                                                            }
-                                                                        )
-                                                                        decoder
-                                                                )
-                                                        )
-                                                        (CliMonad.moduleToNamespace Common.Types)
-                                            in
-                                            case OpenApi.Reference.toConcrete errResponseOrRef of
-                                                Just errResponse ->
-                                                    OpenApi.Response.content errResponse
-                                                        |> contentToContentSchema True
-                                                        |> CliMonad.andThen
-                                                            (\contentSchema ->
-                                                                case contentSchema of
-                                                                    JsonContent type_ ->
-                                                                        SchemaUtils.typeToDecoder True type_
-                                                                            |> CliMonad.andThen common
-
-                                                                    StringContent _ ->
-                                                                        CliMonad.succeed Gen.Json.Decode.string
-                                                                            |> CliMonad.andThen common
-
-                                                                    BytesContent _ ->
-                                                                        CliMonad.todo "Bytes errors are not supported yet"
-
-                                                                    EmptyContent ->
-                                                                        CliMonad.succeed (Gen.Json.Decode.succeed Elm.unit)
-                                                                            |> CliMonad.andThen common
-                                                            )
-
-                                                Nothing ->
-                                                    CliMonad.succeed errResponseOrRef
-                                                        |> CliMonad.stepOrFail "I found an error response, but I couldn't convert it to a concrete decoder"
-                                                            OpenApi.Reference.toReference
-                                                        |> CliMonad.andThen
-                                                            (\ref ->
-                                                                let
-                                                                    inner : String
-                                                                    inner =
-                                                                        OpenApi.Reference.ref ref
-                                                                in
-                                                                SchemaUtils.refToTypeName (String.split "/" inner)
-                                                                    |> CliMonad.map2
-                                                                        (\jsonNamespace typeName ->
-                                                                            Elm.value
-                                                                                { importFrom = jsonNamespace
-                                                                                , name = "decode" ++ Common.toTypeName typeName
-                                                                                , annotation = Nothing
-                                                                                }
-                                                                        )
-                                                                        (CliMonad.moduleToNamespace Common.Json)
-                                                                    |> CliMonad.andThen common
-                                                            )
-                                        )
-                                    |> CliMonad.map
-                                        (\decoders ->
-                                            decoders
-                                                |> Elm.list
-                                                |> Gen.Dict.call_.fromList
-                                        )
 
                     errorTypeDeclaration : CliMonad ( Maybe { name : String, declaration : Elm.Declaration, group : String }, Elm.Annotation.Annotation )
                     errorTypeDeclaration =
@@ -2417,6 +2388,14 @@ operationToTypesExpectAndResolver functionName operation =
                                                                     ( Elm.Annotation.unit
                                                                     , Elm.Annotation.unit
                                                                     )
+
+                                                            Base64Content _ ->
+                                                                CliMonad.succeed
+                                                                    ( Gen.Bytes.annotation_.bytes
+                                                                    , Gen.Bytes.annotation_.bytes
+                                                                    )
+                                                                    |> CliMonad.withRequiredPackage "elm/bytes"
+                                                                    |> CliMonad.withRequiredPackage Common.base64PackageName
                                                     )
 
                                         Nothing ->
@@ -2459,7 +2438,7 @@ operationToTypesExpectAndResolver functionName operation =
                                             ( { name = errorName
                                               , declaration =
                                                     errorList
-                                                        |> List.map (\( statusCode, ( localAnnotation, _ ) ) -> Elm.variantWith (toErrorVariant statusCode) [ localAnnotation ])
+                                                        |> List.map (\( statusCode, ( localAnnotation, _ ) ) -> Elm.variantWith (toErrorVariant functionName statusCode) [ localAnnotation ])
                                                         |> Elm.customType errorName
                                                         |> Elm.exposeConstructor
                                               , group = "Errors"
@@ -2470,128 +2449,240 @@ operationToTypesExpectAndResolver functionName operation =
                                 )
                                 (CliMonad.moduleToNamespace Common.Types)
                 in
-                case OpenApi.Reference.toConcrete responseOrRef of
-                    Just response ->
-                        OpenApi.Response.content response
-                            |> contentToContentSchema True
-                            |> CliMonad.andThen
-                                (\contentSchema ->
-                                    case contentSchema of
-                                        JsonContent type_ ->
-                                            CliMonad.map3
-                                                (\successDecoder errorDecoders_ ( errorTypeDeclaration_, errorTypeAnnotation ) ->
-                                                    { successType = type_
-                                                    , bodyTypeAnnotation = Elm.Annotation.string
-                                                    , errorTypeDeclaration = errorTypeDeclaration_
-                                                    , errorTypeAnnotation = errorTypeAnnotation
-                                                    , expect = expectJsonBetter errorDecoders_ successDecoder
-                                                    , resolver =
-                                                        { core = OpenApi.Common.Internal.elmHttpSubmodule.call.jsonResolverCustom errorDecoders_ successDecoder
-                                                        , lamderaProgramTest = OpenApi.Common.Internal.lamderaProgramTestSubmodule.call.jsonResolverCustomEffect errorDecoders_ successDecoder
-                                                        }
-                                                    }
-                                                )
-                                                (SchemaUtils.typeToDecoder True type_)
-                                                errorDecoders
-                                                errorTypeDeclaration
-
-                                        StringContent _ ->
-                                            CliMonad.map2
-                                                (\errorDecoders_ ( errorTypeDeclaration_, errorTypeAnnotation ) ->
-                                                    { successType =
-                                                        Common.Basic Common.String
-                                                            { const = Nothing
-                                                            , format = Nothing
+                CliMonad.andThen2
+                    (\errorDecoders_ ( errorTypeDeclaration_, errorTypeAnnotation ) ->
+                        case OpenApi.Reference.toConcrete responseOrRef of
+                            Just response ->
+                                CliMonad.andThen
+                                    (\contentSchema ->
+                                        case contentSchema of
+                                            JsonContent type_ ->
+                                                CliMonad.map
+                                                    (\successDecoder ->
+                                                        { successType = type_
+                                                        , bodyTypeAnnotation = Elm.Annotation.string
+                                                        , errorTypeDeclaration = errorTypeDeclaration_
+                                                        , errorTypeAnnotation = errorTypeAnnotation
+                                                        , expect = expectJsonBetter errorDecoders_ successDecoder
+                                                        , resolver =
+                                                            { core = OpenApi.Common.Internal.elmHttpSubmodule.call.jsonResolverCustom errorDecoders_ successDecoder
+                                                            , lamderaProgramTest = OpenApi.Common.Internal.lamderaProgramTestSubmodule.call.jsonResolverCustomEffect errorDecoders_ successDecoder
                                                             }
-                                                    , bodyTypeAnnotation = Elm.Annotation.string
-                                                    , errorTypeDeclaration = errorTypeDeclaration_
-                                                    , errorTypeAnnotation = errorTypeAnnotation
-                                                    , expect = expectStringBetter errorDecoders_
-                                                    , resolver =
-                                                        { core = OpenApi.Common.Internal.elmHttpSubmodule.call.stringResolverCustom errorDecoders_
-                                                        , lamderaProgramTest = OpenApi.Common.Internal.lamderaProgramTestSubmodule.call.stringResolverCustomEffect errorDecoders_
                                                         }
-                                                    }
-                                                )
-                                                errorDecoders
-                                                errorTypeDeclaration
+                                                    )
+                                                    (SchemaUtils.typeToDecoder True type_)
 
-                                        BytesContent _ ->
-                                            CliMonad.andThen2
-                                                (\errorDecoders_ ( errorTypeDeclaration_, errorTypeAnnotation ) ->
-                                                    { successType = Common.Bytes
-                                                    , bodyTypeAnnotation = Gen.Bytes.annotation_.bytes
-                                                    , errorTypeDeclaration = errorTypeDeclaration_
-                                                    , errorTypeAnnotation = errorTypeAnnotation
-                                                    , expect = expectBytesBetter errorDecoders_
-                                                    , resolver =
-                                                        { core = OpenApi.Common.Internal.elmHttpSubmodule.call.bytesResolverCustom errorDecoders_
-                                                        , lamderaProgramTest = OpenApi.Common.Internal.lamderaProgramTestSubmodule.call.bytesResolverCustomEffect errorDecoders_
+                                            StringContent _ ->
+                                                { successType =
+                                                    Common.Basic Common.String
+                                                        { const = Nothing
+                                                        , format = Nothing
                                                         }
-                                                    }
-                                                        |> CliMonad.succeed
-                                                        |> CliMonad.withRequiredPackage "elm/bytes"
-                                                )
-                                                errorDecoders
-                                                errorTypeDeclaration
-
-                                        EmptyContent ->
-                                            CliMonad.map2
-                                                (\errorDecoders_ ( errorTypeDeclaration_, errorTypeAnnotation ) ->
-                                                    { successType = Common.Unit
-                                                    , bodyTypeAnnotation = Elm.Annotation.string
-                                                    , errorTypeDeclaration = errorTypeDeclaration_
-                                                    , errorTypeAnnotation = errorTypeAnnotation
-                                                    , expect = expectJsonBetter errorDecoders_ (Gen.Json.Decode.succeed Elm.unit)
-                                                    , resolver =
-                                                        { core = OpenApi.Common.Internal.elmHttpSubmodule.call.jsonResolverCustom errorDecoders_ (Gen.Json.Decode.succeed Elm.unit)
-                                                        , lamderaProgramTest = OpenApi.Common.Internal.lamderaProgramTestSubmodule.call.jsonResolverCustomEffect errorDecoders_ (Gen.Json.Decode.succeed Elm.unit)
-                                                        }
-                                                    }
-                                                )
-                                                errorDecoders
-                                                errorTypeDeclaration
-                                )
-
-                    Nothing ->
-                        CliMonad.succeed responseOrRef
-                            |> CliMonad.stepOrFail "I found a successful response, but I couldn't convert it to a concrete one"
-                                OpenApi.Reference.toReference
-                            |> CliMonad.andThen
-                                (\ref ->
-                                    let
-                                        inner : String
-                                        inner =
-                                            OpenApi.Reference.ref ref
-                                    in
-                                    SchemaUtils.refToTypeName (String.split "/" inner)
-                                        |> CliMonad.map4
-                                            (\jsonNamespace errorDecoders_ ( errorTypeDeclaration_, errorTypeAnnotation ) typeName ->
-                                                let
-                                                    decoder : Elm.Expression
-                                                    decoder =
-                                                        Elm.value
-                                                            { importFrom = jsonNamespace
-                                                            , name = "decode" ++ Common.toTypeName typeName
-                                                            , annotation = Nothing
-                                                            }
-                                                in
-                                                { successType = Common.ref inner
                                                 , bodyTypeAnnotation = Elm.Annotation.string
                                                 , errorTypeDeclaration = errorTypeDeclaration_
                                                 , errorTypeAnnotation = errorTypeAnnotation
-                                                , expect = expectJsonBetter errorDecoders_ decoder
+                                                , expect = expectStringBetter errorDecoders_
                                                 , resolver =
-                                                    { core = OpenApi.Common.Internal.elmHttpSubmodule.call.jsonResolverCustom errorDecoders_ decoder
-                                                    , lamderaProgramTest = OpenApi.Common.Internal.lamderaProgramTestSubmodule.call.jsonResolverCustomEffect errorDecoders_ decoder
+                                                    { core = OpenApi.Common.Internal.elmHttpSubmodule.call.stringResolverCustom errorDecoders_
+                                                    , lamderaProgramTest = OpenApi.Common.Internal.lamderaProgramTestSubmodule.call.stringResolverCustomEffect errorDecoders_
                                                     }
                                                 }
-                                            )
-                                            (CliMonad.moduleToNamespace Common.Json)
-                                            errorDecoders
-                                            errorTypeDeclaration
-                                )
+                                                    |> CliMonad.succeed
+
+                                            BytesContent _ ->
+                                                { successType = Common.Bytes
+                                                , bodyTypeAnnotation = Gen.Bytes.annotation_.bytes
+                                                , errorTypeDeclaration = errorTypeDeclaration_
+                                                , errorTypeAnnotation = errorTypeAnnotation
+                                                , expect = expectBytesBetter errorDecoders_
+                                                , resolver =
+                                                    { core = OpenApi.Common.Internal.elmHttpSubmodule.call.bytesResolverCustom errorDecoders_
+                                                    , lamderaProgramTest = OpenApi.Common.Internal.lamderaProgramTestSubmodule.call.bytesResolverCustomEffect errorDecoders_
+                                                    }
+                                                }
+                                                    |> CliMonad.succeed
+                                                    |> CliMonad.withRequiredPackage "elm/bytes"
+
+                                            Base64Content _ ->
+                                                { successType = Common.Bytes
+                                                , bodyTypeAnnotation = Gen.Bytes.annotation_.bytes
+                                                , errorTypeDeclaration = errorTypeDeclaration_
+                                                , errorTypeAnnotation = errorTypeAnnotation
+                                                , expect = expectBase64Better errorDecoders_
+                                                , resolver =
+                                                    { core = OpenApi.Common.Internal.elmHttpBase64Submodule.call.base64ResolverCustom errorDecoders_
+                                                    , lamderaProgramTest = OpenApi.Common.Internal.lamderaProgramTestBase64Submodule.call.base64ResolverCustomEffect errorDecoders_
+                                                    }
+                                                }
+                                                    |> CliMonad.succeed
+                                                    |> CliMonad.withRequiredPackage "elm/bytes"
+                                                    |> CliMonad.withRequiredPackage Common.base64PackageName
+
+                                            EmptyContent ->
+                                                { successType = Common.Unit
+                                                , bodyTypeAnnotation = Elm.Annotation.string
+                                                , errorTypeDeclaration = errorTypeDeclaration_
+                                                , errorTypeAnnotation = errorTypeAnnotation
+                                                , expect = expectJsonBetter errorDecoders_ (Gen.Json.Decode.succeed Elm.unit)
+                                                , resolver =
+                                                    { core = OpenApi.Common.Internal.elmHttpSubmodule.call.jsonResolverCustom errorDecoders_ (Gen.Json.Decode.succeed Elm.unit)
+                                                    , lamderaProgramTest = OpenApi.Common.Internal.lamderaProgramTestSubmodule.call.jsonResolverCustomEffect errorDecoders_ (Gen.Json.Decode.succeed Elm.unit)
+                                                    }
+                                                }
+                                                    |> CliMonad.succeed
+                                    )
+                                    (OpenApi.Response.content response
+                                        |> contentToContentSchema True
+                                    )
+
+                            Nothing ->
+                                CliMonad.succeed responseOrRef
+                                    |> CliMonad.stepOrFail "I found a successful response, but I couldn't convert it to a concrete one"
+                                        OpenApi.Reference.toReference
+                                    |> CliMonad.andThen
+                                        (\ref ->
+                                            let
+                                                inner : String
+                                                inner =
+                                                    OpenApi.Reference.ref ref
+                                            in
+                                            CliMonad.map2
+                                                (\jsonNamespace typeName ->
+                                                    let
+                                                        decoder : Elm.Expression
+                                                        decoder =
+                                                            Elm.value
+                                                                { importFrom = jsonNamespace
+                                                                , name = "decode" ++ Common.toTypeName typeName
+                                                                , annotation = Nothing
+                                                                }
+                                                    in
+                                                    { successType = Common.ref inner
+                                                    , bodyTypeAnnotation = Elm.Annotation.string
+                                                    , errorTypeDeclaration = errorTypeDeclaration_
+                                                    , errorTypeAnnotation = errorTypeAnnotation
+                                                    , expect = expectJsonBetter errorDecoders_ decoder
+                                                    , resolver =
+                                                        { core = OpenApi.Common.Internal.elmHttpSubmodule.call.jsonResolverCustom errorDecoders_ decoder
+                                                        , lamderaProgramTest = OpenApi.Common.Internal.lamderaProgramTestSubmodule.call.jsonResolverCustomEffect errorDecoders_ decoder
+                                                        }
+                                                    }
+                                                )
+                                                (CliMonad.moduleToNamespace Common.Json)
+                                                (SchemaUtils.refToTypeName (String.split "/" inner))
+                                        )
+                    )
+                    (errorResponsesToErrorDecoders functionName errorResponses)
+                    errorTypeDeclaration
             )
+
+
+errorResponsesToErrorDecoders : String -> Dict.Dict String (OpenApi.Reference.ReferenceOr OpenApi.Response.Response) -> CliMonad Elm.Expression
+errorResponsesToErrorDecoders functionName errorResponses =
+    case Dict.toList errorResponses of
+        [] ->
+            Elm.list []
+                |> Gen.Dict.call_.fromList
+                |> CliMonad.succeed
+
+        errorList ->
+            let
+                single : Bool
+                single =
+                    case errorList of
+                        [ _ ] ->
+                            True
+
+                        _ ->
+                            False
+            in
+            CliMonad.moduleToNamespace Common.Types
+                |> CliMonad.andThen
+                    (\typesNamespace ->
+                        errorList
+                            |> CliMonad.combineMap
+                                (\( statusCode, errResponseOrRef ) ->
+                                    let
+                                        decoder : CliMonad Elm.Expression
+                                        decoder =
+                                            case OpenApi.Reference.toConcrete errResponseOrRef of
+                                                Just errResponse ->
+                                                    OpenApi.Response.content errResponse
+                                                        |> contentToContentSchema True
+                                                        |> CliMonad.andThen
+                                                            (\contentSchema ->
+                                                                case contentSchema of
+                                                                    JsonContent type_ ->
+                                                                        SchemaUtils.typeToDecoder True type_
+
+                                                                    StringContent _ ->
+                                                                        CliMonad.succeed Gen.Json.Decode.string
+
+                                                                    BytesContent _ ->
+                                                                        CliMonad.todo "Bytes errors are not supported yet"
+
+                                                                    Base64Content _ ->
+                                                                        CliMonad.todo "Base 64 errors are not supported yet"
+
+                                                                    EmptyContent ->
+                                                                        CliMonad.succeed (Gen.Json.Decode.succeed Elm.unit)
+                                                            )
+
+                                                Nothing ->
+                                                    CliMonad.succeed errResponseOrRef
+                                                        |> CliMonad.stepOrFail "I found an error response, but I couldn't convert it to a concrete decoder"
+                                                            OpenApi.Reference.toReference
+                                                        |> CliMonad.andThen
+                                                            (\ref ->
+                                                                let
+                                                                    inner : String
+                                                                    inner =
+                                                                        OpenApi.Reference.ref ref
+                                                                in
+                                                                CliMonad.map2
+                                                                    (\jsonNamespace typeName ->
+                                                                        Elm.value
+                                                                            { importFrom = jsonNamespace
+                                                                            , name = "decode" ++ Common.toTypeName typeName
+                                                                            , annotation = Nothing
+                                                                            }
+                                                                    )
+                                                                    (CliMonad.moduleToNamespace Common.Json)
+                                                                    (SchemaUtils.refToTypeName (String.split "/" inner))
+                                                            )
+                                    in
+                                    decoder
+                                        |> CliMonad.map
+                                            (\decoder_ ->
+                                                Elm.tuple
+                                                    (Elm.string statusCode)
+                                                    (if single then
+                                                        decoder_
+
+                                                     else
+                                                        Gen.Json.Decode.call_.map
+                                                            (Elm.value
+                                                                { importFrom = typesNamespace
+                                                                , name = toErrorVariant functionName statusCode
+                                                                , annotation = Nothing
+                                                                }
+                                                            )
+                                                            decoder_
+                                                    )
+                                            )
+                                )
+                    )
+                |> CliMonad.map
+                    (\decoders ->
+                        decoders
+                            |> Elm.list
+                            |> Gen.Dict.call_.fromList
+                    )
+
+
+toErrorVariant : String -> String -> String
+toErrorVariant functionName statusCode =
+    String.Extra.toSentenceCase functionName ++ "_" ++ statusCode
 
 
 isSuccessResponseStatus : String -> Bool

@@ -1,4 +1,4 @@
-module OpenApi.Common.Internal exposing (CommonSubmodule, ElmHttpSubmodule, Error, LamderaProgramTestSubmodule, Nullable, annotation_, commonSubmodule, declarations, elmHttpSubmodule, lamderaProgramTestSubmodule, make_)
+module OpenApi.Common.Internal exposing (CommonSubmodule, ElmHttpBase64Submodule, ElmHttpSubmodule, Error, LamderaProgramTestBase64Submodule, LamderaProgramTestSubmodule, Nullable, annotation_, commonSubmodule, declarations, elmHttpBase64Submodule, elmHttpSubmodule, lamderaProgramTestBase64Submodule, lamderaProgramTestSubmodule, make_)
 
 import Common
 import Elm
@@ -44,48 +44,60 @@ errorAnnotation t =
     annotation_.error (Elm.Annotation.var "err") t
 
 
-declarations : List OpenApi.Config.EffectType -> List { declaration : Elm.Declaration, group : String }
-declarations effectTypes =
+declarations : { a | requiresBase64 : Bool, effectTypes : List OpenApi.Config.EffectType } -> List { declaration : Elm.Declaration, group : String }
+declarations { requiresBase64, effectTypes } =
     let
+        requiresElmHttp : Bool
+        requiresElmHttp =
+            List.any
+                (\effectType -> OpenApi.Config.effectTypeToPackage effectType == Common.ElmHttp)
+                effectTypes
+
+        requiresLamderaProgramTest : Bool
+        requiresLamderaProgramTest =
+            List.any
+                (\effectType -> OpenApi.Config.effectTypeToPackage effectType == Common.LamderaProgramTest)
+                effectTypes
+
         elmHttp : List { declaration : Elm.Declaration, group : String }
         elmHttp =
-            if List.any (\effectType -> OpenApi.Config.effectTypeToPackage effectType == Common.ElmHttp) effectTypes then
-                elmHttpSubmodule.declarations
-                    |> List.map
-                        (\declaration ->
-                            { declaration = declaration
-                            , group = "elm/http"
-                            }
-                        )
+            group "elm/http" requiresElmHttp elmHttpSubmodule
 
-            else
-                []
+        elmHttpBase64 : List { declaration : Elm.Declaration, group : String }
+        elmHttpBase64 =
+            group "elm/http" (requiresElmHttp && requiresBase64) elmHttpBase64Submodule
 
         lamderaProgramTest : List { declaration : Elm.Declaration, group : String }
         lamderaProgramTest =
-            if List.any (\effectType -> OpenApi.Config.effectTypeToPackage effectType == Common.LamderaProgramTest) effectTypes then
-                lamderaProgramTestSubmodule.declarations
-                    |> List.map
-                        (\declaration ->
-                            { declaration = declaration
-                            , group = "lamdera/program-test"
-                            }
-                        )
+            group "lamdera/program-test" requiresLamderaProgramTest lamderaProgramTestSubmodule
 
-            else
-                []
+        lamderaProgramTestBase64 : List { declaration : Elm.Declaration, group : String }
+        lamderaProgramTestBase64 =
+            group "lamdera/program-test" (requiresElmHttp && requiresBase64) lamderaProgramTestBase64Submodule
 
         common : List { declaration : Elm.Declaration, group : String }
         common =
-            commonSubmodule.declarations
-                |> List.map
+            group "Common" True commonSubmodule
+
+        group :
+            String
+            -> Bool
+            -> { sub | declarations : List Elm.Declaration }
+            -> List { declaration : Elm.Declaration, group : String }
+        group name condition submodule =
+            if condition then
+                List.map
                     (\declaration ->
                         { declaration = declaration
-                        , group = "Common"
+                        , group = name
                         }
                     )
+                    submodule.declarations
+
+            else
+                []
     in
-    elmHttp ++ lamderaProgramTest ++ common
+    elmHttp ++ elmHttpBase64 ++ lamderaProgramTest ++ lamderaProgramTestBase64 ++ common
 
 
 type alias ElmHttpSubmodule =
@@ -107,6 +119,19 @@ elmHttpSubmodule =
         |> Elm.Declare.with stringResolverCustom
         |> Elm.Declare.with expectBytesCustom
         |> Elm.Declare.with bytesResolverCustom
+
+
+type alias ElmHttpBase64Submodule =
+    { expectBase64Custom : Elm.Expression -> Elm.Expression -> Elm.Expression
+    , base64ResolverCustom : Elm.Expression -> Elm.Expression
+    }
+
+
+elmHttpBase64Submodule : Elm.Declare.Module ElmHttpBase64Submodule
+elmHttpBase64Submodule =
+    Elm.Declare.module_ Common.commonModuleName ElmHttpBase64Submodule
+        |> Elm.Declare.with expectBase64Custom
+        |> Elm.Declare.with base64ResolverCustom
 
 
 expectJsonCustom : Elm.Declare.Function (Elm.Expression -> Elm.Expression -> Elm.Expression -> Elm.Expression)
@@ -144,7 +169,8 @@ expectStringCustom =
             let
                 toResult : Elm.Expression -> Elm.Expression
                 toResult response =
-                    Gen.Http.caseOf_.response response (innerExpectRawCustom identity errorDecoders)
+                    Gen.Http.caseOf_.response response
+                        (innerExpectRawCustom { isBytes = False } errorDecoders)
             in
             Gen.Http.expectStringResponse toMsg toResult
                 |> Elm.withType (Gen.Http.annotation_.expect (Elm.Annotation.var "msg"))
@@ -159,7 +185,7 @@ stringResolverCustom =
                 toResult : Elm.Expression -> Elm.Expression
                 toResult response =
                     Gen.Http.caseOf_.response response
-                        (innerExpectRawCustom identity errorDecoders)
+                        (innerExpectRawCustom { isBytes = False } errorDecoders)
             in
             Gen.Http.stringResolver toResult
                 |> Elm.withType (Gen.Http.annotation_.resolver (errorAnnotation Elm.Annotation.string) Elm.Annotation.string)
@@ -172,7 +198,8 @@ expectBytesCustom =
             let
                 toResult : Elm.Expression -> Elm.Expression
                 toResult response =
-                    Gen.Http.caseOf_.response response (innerExpectRawCustom bytesToString errorDecoders)
+                    Gen.Http.caseOf_.response response
+                        (innerExpectRawCustom { isBytes = True } errorDecoders)
             in
             Gen.Http.expectBytesResponse toMsg toResult
                 |> Elm.withType (Gen.Http.annotation_.expect (Elm.Annotation.var "msg"))
@@ -187,10 +214,39 @@ bytesResolverCustom =
                 toResult : Elm.Expression -> Elm.Expression
                 toResult response =
                     Gen.Http.caseOf_.response response
-                        (innerExpectRawCustom bytesToString errorDecoders)
+                        (innerExpectRawCustom { isBytes = True } errorDecoders)
             in
             Gen.Http.bytesResolver toResult
                 |> Elm.withType (Gen.Http.annotation_.resolver (errorAnnotation Gen.Bytes.annotation_.bytes) Gen.Bytes.annotation_.bytes)
+
+
+expectBase64Custom : Elm.Declare.Function (Elm.Expression -> Elm.Expression -> Elm.Expression)
+expectBase64Custom =
+    outerExpectStringCustom "expectBase64Custom"
+        (\errorDecoders toMsg ->
+            let
+                toResult : Elm.Expression -> Elm.Expression
+                toResult response =
+                    Gen.Http.caseOf_.response response
+                        (innerExpectRawCustom { isBytes = True } errorDecoders)
+            in
+            Gen.Http.expectStringResponse toMsg toResult
+                |> Elm.withType (Gen.Http.annotation_.expect (Elm.Annotation.var "msg"))
+        )
+
+
+base64ResolverCustom : Elm.Declare.Function (Elm.Expression -> Elm.Expression)
+base64ResolverCustom =
+    outerRawResolverCustom "base64ResolverCustom" <|
+        \errorDecoders ->
+            let
+                toResult : Elm.Expression -> Elm.Expression
+                toResult response =
+                    Gen.Http.caseOf_.response response
+                        (innerExpectRawCustom { isBytes = True } errorDecoders)
+            in
+            Gen.Http.bytesResolver toResult
+                |> Elm.withType (Gen.Http.annotation_.resolver (errorAnnotation Elm.Annotation.string) Gen.Bytes.annotation_.bytes)
 
 
 type alias LamderaProgramTestSubmodule =
@@ -212,6 +268,19 @@ lamderaProgramTestSubmodule =
         |> Elm.Declare.with stringResolverCustomEffect
         |> Elm.Declare.with expectBytesCustomEffect
         |> Elm.Declare.with bytesResolverCustomEffect
+
+
+type alias LamderaProgramTestBase64Submodule =
+    { expectBase64CustomEffect : Elm.Expression -> Elm.Expression -> Elm.Expression
+    , base64ResolverCustomEffect : Elm.Expression -> Elm.Expression
+    }
+
+
+lamderaProgramTestBase64Submodule : Elm.Declare.Module LamderaProgramTestBase64Submodule
+lamderaProgramTestBase64Submodule =
+    Elm.Declare.module_ Common.commonModuleName LamderaProgramTestBase64Submodule
+        |> Elm.Declare.with expectBase64CustomEffect
+        |> Elm.Declare.with base64ResolverCustomEffect
 
 
 expectJsonCustomEffect : Elm.Declare.Function (Elm.Expression -> Elm.Expression -> Elm.Expression -> Elm.Expression)
@@ -249,7 +318,8 @@ expectBytesCustomEffect =
             let
                 toResult : Elm.Expression -> Elm.Expression
                 toResult response =
-                    Gen.Effect.Http.caseOf_.response response (innerExpectRawCustom bytesToString errorDecoders)
+                    Gen.Effect.Http.caseOf_.response response
+                        (innerExpectRawCustom { isBytes = True } errorDecoders)
             in
             Gen.Effect.Http.expectBytesResponse toMsg toResult
                 |> Elm.withType (Gen.Effect.Http.annotation_.expect (Elm.Annotation.var "msg"))
@@ -264,7 +334,7 @@ bytesResolverCustomEffect =
                 toResult : Elm.Expression -> Elm.Expression
                 toResult response =
                     Gen.Effect.Http.caseOf_.response response
-                        (innerExpectRawCustom bytesToString errorDecoders)
+                        (innerExpectRawCustom { isBytes = True } errorDecoders)
             in
             Gen.Effect.Http.bytesResolver toResult
                 |> Elm.withType (Gen.Effect.Http.annotation_.resolver (Elm.Annotation.var "restrictions") (errorAnnotation Gen.Bytes.annotation_.bytes) Gen.Bytes.annotation_.bytes)
@@ -277,7 +347,8 @@ expectStringCustomEffect =
             let
                 toResult : Elm.Expression -> Elm.Expression
                 toResult response =
-                    Gen.Effect.Http.caseOf_.response response (innerExpectRawCustom identity errorDecoders)
+                    Gen.Effect.Http.caseOf_.response response
+                        (innerExpectRawCustom { isBytes = False } errorDecoders)
             in
             Gen.Effect.Http.expectStringResponse toMsg toResult
                 |> Elm.withType (Gen.Effect.Http.annotation_.expect (Elm.Annotation.var "msg"))
@@ -292,10 +363,39 @@ stringResolverCustomEffect =
                 toResult : Elm.Expression -> Elm.Expression
                 toResult response =
                     Gen.Effect.Http.caseOf_.response response
-                        (innerExpectRawCustom identity errorDecoders)
+                        (innerExpectRawCustom { isBytes = False } errorDecoders)
             in
             Gen.Effect.Http.stringResolver toResult
                 |> Elm.withType (Gen.Effect.Http.annotation_.resolver (Elm.Annotation.var "restrictions") (errorAnnotation Elm.Annotation.string) Elm.Annotation.string)
+
+
+expectBase64CustomEffect : Elm.Declare.Function (Elm.Expression -> Elm.Expression -> Elm.Expression)
+expectBase64CustomEffect =
+    outerExpectStringCustom "expectBase64CustomEffect"
+        (\errorDecoders toMsg ->
+            let
+                toResult : Elm.Expression -> Elm.Expression
+                toResult response =
+                    Gen.Effect.Http.caseOf_.response response
+                        (innerExpectRawCustom { isBytes = True } errorDecoders)
+            in
+            Gen.Effect.Http.expectStringResponse toMsg toResult
+                |> Elm.withType (Gen.Http.annotation_.expect (Elm.Annotation.var "msg"))
+        )
+
+
+base64ResolverCustomEffect : Elm.Declare.Function (Elm.Expression -> Elm.Expression)
+base64ResolverCustomEffect =
+    outerRawResolverCustom "base64ResolverCustomEffect" <|
+        \errorDecoders ->
+            let
+                toResult : Elm.Expression -> Elm.Expression
+                toResult response =
+                    Gen.Effect.Http.caseOf_.response response
+                        (innerExpectRawCustom { isBytes = True } errorDecoders)
+            in
+            Gen.Effect.Http.bytesResolver toResult
+                |> Elm.withType (Gen.Effect.Http.annotation_.resolver (Elm.Annotation.var "restrictions") (errorAnnotation Elm.Annotation.string) Gen.Bytes.annotation_.bytes)
 
 
 type alias CommonSubmodule =
@@ -592,7 +692,7 @@ innerExpectJsonCustom :
         , goodStatus_ : Elm.Expression -> Elm.Expression -> Elm.Expression
         }
 innerExpectJsonCustom errorDecoders successDecoder =
-    innerExpect identity
+    innerExpect { isBytes = False }
         errorDecoders
         (\metadata body ->
             Elm.Case.result
@@ -608,7 +708,7 @@ innerExpectJsonCustom errorDecoders successDecoder =
 
 
 innerExpectRawCustom :
-    (Elm.Expression -> Elm.Expression)
+    { isBytes : Bool }
     -> Elm.Expression
     ->
         { badUrl_ : Elm.Expression -> Elm.Expression
@@ -617,12 +717,12 @@ innerExpectRawCustom :
         , badStatus_ : Elm.Expression -> Elm.Expression -> Elm.Expression
         , goodStatus_ : Elm.Expression -> Elm.Expression -> Elm.Expression
         }
-innerExpectRawCustom bodyToString errorDecoders =
-    innerExpect bodyToString errorDecoders <| \_ body -> Gen.Result.make_.ok body
+innerExpectRawCustom config errorDecoders =
+    innerExpect config errorDecoders <| \_ body -> Gen.Result.make_.ok body
 
 
 innerExpect :
-    (Elm.Expression -> Elm.Expression)
+    { isBytes : Bool }
     -> Elm.Expression
     -> (Elm.Expression -> Elm.Expression -> Elm.Expression)
     ->
@@ -632,7 +732,7 @@ innerExpect :
         , badStatus_ : Elm.Expression -> Elm.Expression -> Elm.Expression
         , goodStatus_ : Elm.Expression -> Elm.Expression -> Elm.Expression
         }
-innerExpect bodyToString errorDecoders goodStatus =
+innerExpect config errorDecoders goodStatus =
     { badUrl_ = \url -> Gen.Result.make_.err (error.make_.badUrl url)
     , timeout_ = Gen.Result.make_.err error.make_.timeout
     , networkError_ = Gen.Result.make_.err error.make_.networkError
@@ -647,7 +747,14 @@ innerExpect bodyToString errorDecoders goodStatus =
                     ( "err"
                     , \errorDecoder ->
                         Elm.Case.result
-                            (Gen.Json.Decode.call_.decodeString errorDecoder (bodyToString body))
+                            (Gen.Json.Decode.call_.decodeString errorDecoder
+                                (if config.isBytes then
+                                    bytesToString body
+
+                                 else
+                                    body
+                                )
+                            )
                             { ok =
                                 ( "res"
                                 , \x ->

@@ -78,6 +78,10 @@ run =
         anyOfEnums =
             OpenApi.Config.inputFrom (OpenApi.Config.File "./example/anyOfEnums.yaml")
 
+        binaryResponse : OpenApi.Config.Input
+        binaryResponse =
+            OpenApi.Config.inputFrom (OpenApi.Config.File "./example/binary-response.yaml")
+
         config : OpenApi.Config.Config
         config =
             OpenApi.Config.init "./generated"
@@ -96,6 +100,7 @@ run =
                 |> OpenApi.Config.withInput trustmarkTradeCheck
                 |> OpenApi.Config.withInput gitHub
                 |> OpenApi.Config.withInput anyOfEnums
+                |> OpenApi.Config.withInput binaryResponse
     in
     Pages.Script.withoutCliOptions
         (BackendTask.doEach

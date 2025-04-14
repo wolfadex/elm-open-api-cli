@@ -38,7 +38,7 @@ import Json.Encode
 import Json.Schema.Definitions
 import Maybe.Extra
 import OpenApi
-import OpenApi.Common
+import OpenApi.Common.Internal
 import OpenApi.Components
 import OpenApi.Schema
 import Result.Extra
@@ -665,7 +665,7 @@ typeToAnnotationWithNullable qualify type_ =
     case type_ of
         Common.Nullable t ->
             CliMonad.map
-                OpenApi.Common.annotation_.nullable
+                OpenApi.Common.Internal.annotation_.nullable
                 (typeToAnnotationWithNullable qualify t)
 
         Common.Object fields ->
@@ -1053,7 +1053,7 @@ typeToEncoder qualify type_ =
                 (\encoder nullableValue ->
                     Elm.Case.custom
                         nullableValue
-                        (OpenApi.Common.annotation_.nullable (Elm.Annotation.var "value"))
+                        (OpenApi.Common.Internal.annotation_.nullable (Elm.Annotation.var "value"))
                         [ Elm.Case.branch (Elm.Arg.customType "Null" ()) (\_ -> Gen.Json.Encode.null)
                         , Elm.Case.branch
                             (Elm.Arg.customType "Present" identity
@@ -1176,12 +1176,12 @@ typeToDecoder qualify type_ =
                     CliMonad.map2
                         (\internalDecoder prevExpr ->
                             Elm.Op.Extra.pipeInto "prev"
-                                (OpenApi.Common.commonSubmodule.call.jsonDecodeAndMap
+                                (OpenApi.Common.Internal.commonSubmodule.call.jsonDecodeAndMap
                                     (if field.required then
                                         Gen.Json.Decode.field (Common.unwrapUnsafe key) internalDecoder
 
                                      else
-                                        OpenApi.Common.commonSubmodule.call.decodeOptionalField
+                                        OpenApi.Common.Internal.commonSubmodule.call.decodeOptionalField
                                             (Elm.string (Common.unwrapUnsafe key))
                                             internalDecoder
                                     )
@@ -1233,12 +1233,12 @@ typeToDecoder qualify type_ =
                             (\internalDecoder prevExpr ->
                                 prevExpr
                                     |> Elm.Op.Extra.pipeInto "prev"
-                                        (OpenApi.Common.commonSubmodule.call.jsonDecodeAndMap
+                                        (OpenApi.Common.Internal.commonSubmodule.call.jsonDecodeAndMap
                                             (if field.required then
                                                 Gen.Json.Decode.field (Common.unwrapUnsafe key) internalDecoder
 
                                              else
-                                                OpenApi.Common.commonSubmodule.call.decodeOptionalField
+                                                OpenApi.Common.Internal.commonSubmodule.call.decodeOptionalField
                                                     (Elm.string (Common.unwrapUnsafe key))
                                                     internalDecoder
                                             )
@@ -1276,7 +1276,7 @@ typeToDecoder qualify type_ =
                     (\dictValueDecoder prevExpr ->
                         prevExpr
                             |> Elm.Op.Extra.pipeInto "prev"
-                                (OpenApi.Common.commonSubmodule.call.jsonDecodeAndMap
+                                (OpenApi.Common.Internal.commonSubmodule.call.jsonDecodeAndMap
                                     (Gen.Json.Decode.keyValuePairs Gen.Json.Decode.value
                                         |> Elm.Op.Extra.pipeInto "keyValuePairs"
                                             (Gen.Json.Decode.andThen
@@ -1408,10 +1408,10 @@ typeToDecoder qualify type_ =
                 (\decoder ->
                     Gen.Json.Decode.oneOf
                         [ Gen.Json.Decode.map
-                            OpenApi.Common.make_.present
+                            OpenApi.Common.Internal.make_.present
                             decoder
                         , Gen.Json.Decode.null
-                            OpenApi.Common.make_.null
+                            OpenApi.Common.Internal.make_.null
                         ]
                 )
                 (typeToDecoder qualify t)

@@ -73,7 +73,7 @@ declarations { requiresBase64, effectTypes } =
 
         lamderaProgramTestBase64 : List { declaration : Elm.Declaration, group : String }
         lamderaProgramTestBase64 =
-            group "lamdera/program-test" (requiresElmHttp && requiresBase64) lamderaProgramTestBase64Submodule
+            group "lamdera/program-test" (requiresLamderaProgramTest && requiresBase64) lamderaProgramTestBase64Submodule
 
         common : List { declaration : Elm.Declaration, group : String }
         common =

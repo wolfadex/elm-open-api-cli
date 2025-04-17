@@ -49,7 +49,10 @@ import Common
 import Dict
 import Elm
 import Elm.Annotation
+import Elm.Case
 import Elm.Op
+import Gen.Base64
+import Gen.Bytes
 import Gen.Date
 import Gen.Json.Decode
 import Gen.Json.Encode
@@ -232,6 +235,7 @@ defaultFormats =
     [ dateTimeFormat
     , dateFormat
     , uriFormat
+    , byteFormat
     ]
 
 
@@ -335,6 +339,34 @@ uriFormat =
                 )
     , sharedDeclarations = []
     , requiresPackages = [ "justinmimbs/date" ]
+    }
+
+
+byteFormat : Format
+byteFormat =
+    { basicType = Common.String
+    , format = "byte"
+    , annotation = Gen.Bytes.annotation_.bytes
+    , encode =
+        \bytes ->
+            Gen.Base64.fromBytes bytes
+                |> Gen.Maybe.withDefault (Elm.string "")
+                |> Gen.Json.Encode.call_.string
+    , toParamString =
+        \bytes ->
+            Gen.Base64.fromBytes bytes
+                |> Gen.Maybe.withDefault (Elm.string "")
+    , decoder =
+        Gen.Json.Decode.string
+            |> Gen.Json.Decode.andThen
+                (\raw ->
+                    Elm.Case.maybe (Gen.Base64.call_.toBytes raw)
+                        { just = ( "bytes", Gen.Json.Decode.succeed )
+                        , nothing = Gen.Json.Decode.fail "Invalid base64 data"
+                        }
+                )
+    , sharedDeclarations = []
+    , requiresPackages = [ Common.base64PackageName ]
     }
 
 

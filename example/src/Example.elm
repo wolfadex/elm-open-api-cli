@@ -8,6 +8,7 @@ import AirlineCodeLookupApi.Api
 import AirlineCodeLookupApi.Types
 import BasicRouter.Json
 import BasicRouter.Types
+import BinaryResponse.Api
 import Browser
 import DbFahrplanApi.Api
 import DbFahrplanApi.Types

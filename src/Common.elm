@@ -10,6 +10,7 @@ module Common exposing
     , TypeName
     , UnsafeName(..)
     , VariantName
+    , base64PackageName
     , basicTypeToString
     , commonModuleName
     , enum
@@ -407,3 +408,8 @@ enum variants =
         |> List.sort
         |> List.map UnsafeName
         |> Enum
+
+
+base64PackageName : String
+base64PackageName =
+    "danfishgold/base64-bytes"

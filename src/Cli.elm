@@ -923,7 +923,10 @@ generateFilesFromOpenApiSpecs configs =
 
                     commonFile : Elm.File
                     commonFile =
-                        OpenApi.Common.Internal.declarations allEffectTypes
+                        OpenApi.Common.Internal.declarations
+                            { effectTypes = allEffectTypes
+                            , requiresBase64 = List.any (\{ requiredPackages } -> FastSet.member Common.base64PackageName requiredPackages) result
+                            }
                             ++ commonDeclarationsFromResult
                             |> fileFromGroups Common.commonModuleName
 

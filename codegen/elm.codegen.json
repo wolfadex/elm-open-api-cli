@@ -1,5 +1,5 @@
 {
-    "elm-codegen-version": "0.5.3",
+    "elm-codegen-version": "0.6.1",
     "codegen-helpers": {
         "packages": {
             "elm/bytes": "1.0.8",
@@ -13,7 +13,8 @@
             "justinmimbs/date": "4.1.0",
             "elm/time": "1.0.0",
             "elm/parser": "1.1.0",
-            "wolfadex/elm-rfc3339": "2.0.0"
+            "wolfadex/elm-rfc3339": "2.0.0",
+            "danfishgold/base64-bytes": "1.1.0"
         },
         "local": [
             "helpers"

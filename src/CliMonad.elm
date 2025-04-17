@@ -2,8 +2,8 @@ module CliMonad exposing
     ( CliMonad, Message, OneOfName, Path, Declaration
     , run, stepOrFail
     , succeed, succeedWith, fail
-    , map, map2, map3, map4
-    , andThen, andThen2, andThen3, combine, combineDict, combineMap, foldl
+    , map, map2, map3
+    , andThen, andThen2, andThen3, andThen4, combine, combineDict, combineMap, foldl
     , errorToWarning, fromApiSpec, enumName, moduleToNamespace
     , withPath, withWarning, withRequiredPackage
     , todo, todoWithDefault
@@ -15,8 +15,8 @@ module CliMonad exposing
 @docs CliMonad, Message, OneOfName, Path, Declaration
 @docs run, stepOrFail
 @docs succeed, succeedWith, fail
-@docs map, map2, map3, map4
-@docs andThen, andThen2, andThen3, combine, combineDict, combineMap, foldl
+@docs map, map2, map3
+@docs andThen, andThen2, andThen3, andThen4, combine, combineDict, combineMap, foldl
 @docs errorToWarning, fromApiSpec, enumName, moduleToNamespace
 @docs withPath, withWarning, withRequiredPackage
 @docs todo, todoWithDefault
@@ -253,6 +253,12 @@ andThen2 f x y =
 andThen3 : (a -> b -> c -> CliMonad d) -> CliMonad a -> CliMonad b -> CliMonad c -> CliMonad d
 andThen3 f x y z =
     map3 f x y z
+        |> andThen identity
+
+
+andThen4 : (a -> b -> c -> d -> CliMonad e) -> CliMonad a -> CliMonad b -> CliMonad c -> CliMonad d -> CliMonad e
+andThen4 f x y z w =
+    map4 f x y z w
         |> andThen identity
 
 

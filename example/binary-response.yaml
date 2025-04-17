@@ -1,0 +1,27 @@
+openapi: 3.0.1
+info:
+    title: "Binary response"
+    version: "1"
+paths:
+    /logo:
+        get:
+            summary: Get the logo image
+            responses:
+                "200":
+                    description: Logo image in PNG format
+                    content:
+                        image/png:
+                            schema:
+                                type: string
+                                format: binary
+    /logo-base64:
+        get:
+            summary: Get the logo image
+            responses:
+                "200":
+                    description: Logo image in base64 format
+                    content:
+                        image/png:
+                            schema:
+                                type: string
+                                format: byte

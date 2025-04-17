@@ -2391,11 +2391,9 @@ operationToTypesExpectAndResolver functionName operation =
 
                                                             Base64Content _ ->
                                                                 CliMonad.succeed
-                                                                    ( Gen.Bytes.annotation_.bytes
-                                                                    , Gen.Bytes.annotation_.bytes
+                                                                    ( Elm.Annotation.string
+                                                                    , Elm.Annotation.string
                                                                     )
-                                                                    |> CliMonad.withRequiredPackage "elm/bytes"
-                                                                    |> CliMonad.withRequiredPackage Common.base64PackageName
                                                     )
 
                                         Nothing ->
@@ -2505,7 +2503,7 @@ operationToTypesExpectAndResolver functionName operation =
 
                                             Base64Content _ ->
                                                 { successType = Common.Bytes
-                                                , bodyTypeAnnotation = Gen.Bytes.annotation_.bytes
+                                                , bodyTypeAnnotation = Elm.Annotation.string
                                                 , errorTypeDeclaration = errorTypeDeclaration_
                                                 , errorTypeAnnotation = errorTypeAnnotation
                                                 , expect = expectBase64Better errorDecoders_

@@ -9,7 +9,6 @@ import Elm.Declare
 import Elm.Declare.Extra
 import Elm.Extra
 import Gen.Base64
-import Gen.Basics
 import Gen.Bytes
 import Gen.Bytes.Decode
 import Gen.Dict

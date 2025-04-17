@@ -524,7 +524,11 @@ expectBase64CustomEffect =
                     responseToResultEffectWrapped
                         errorDecoders
                         identity
-                        (always Gen.Base64.call_.toBytes)
+                        (\metadata body ->
+                            body
+                                |> Gen.Base64.call_.toBytes
+                                |> Gen.Result.fromMaybe (error.make_.badBody metadata body)
+                        )
                         response
             in
             Gen.Effect.Http.expectStringResponse toMsg toResult
@@ -542,7 +546,11 @@ base64ResolverCustomEffect =
                     responseToResultEffectWrapped
                         errorDecoders
                         identity
-                        (always Gen.Base64.call_.toBytes)
+                        (\metadata body ->
+                            body
+                                |> Gen.Base64.call_.toBytes
+                                |> Gen.Result.fromMaybe (error.make_.badBody metadata body)
+                        )
                         response
             in
             Gen.Effect.Http.stringResolver toResult

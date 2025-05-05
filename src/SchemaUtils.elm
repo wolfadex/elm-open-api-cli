@@ -1310,10 +1310,12 @@ typeToDecoder qualify type_ =
                                                                                         in
                                                                                         Elm.just
                                                                                             (Gen.Result.make_.err
-                                                                                                (decoderErrorAsString
-                                                                                                    |> Elm.Op.append (Elm.string "': ")
-                                                                                                    |> Elm.Op.append key
-                                                                                                    |> Elm.Op.append (Elm.string "Field '")
+                                                                                                (Elm.Op.Extra.appends
+                                                                                                    [ Elm.string "Field '"
+                                                                                                    , key
+                                                                                                    , Elm.string "': "
+                                                                                                    , decoderErrorAsString
+                                                                                                    ]
                                                                                                 )
                                                                                             )
                                                                                     )
@@ -1381,7 +1383,30 @@ typeToDecoder qualify type_ =
                     (\maybeName ->
                         case maybeName of
                             Nothing ->
-                                CliMonad.succeed Gen.Json.Decode.string
+                                CliMonad.succeed
+                                    (Gen.Json.Decode.string
+                                        |> Gen.Json.Decode.andThen
+                                            (\raw ->
+                                                let
+                                                    unwrappedVariants : List String
+                                                    unwrappedVariants =
+                                                        List.map Common.unwrapUnsafe variants
+                                                in
+                                                Elm.Case.string raw
+                                                    { cases =
+                                                        unwrappedVariants
+                                                            |> List.map (\variant -> ( variant, Gen.Json.Decode.succeed (Elm.string variant) ))
+                                                    , otherwise =
+                                                        Gen.Json.Decode.call_.fail
+                                                            (Elm.Op.Extra.appends
+                                                                [ Elm.string "Value \""
+                                                                , raw
+                                                                , Elm.string ("\" is not valid for the enum, possible values: \"" ++ String.join "\", \"" unwrappedVariants ++ "\"")
+                                                                ]
+                                                            )
+                                                    }
+                                            )
+                                    )
 
                             Just name ->
                                 CliMonad.map

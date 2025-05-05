@@ -6,8 +6,6 @@ import AdditionalProperties.Json
 import AdditionalProperties.Types
 import AirlineCodeLookupApi.Api
 import AirlineCodeLookupApi.Types
-import BasicRouter.Json
-import BasicRouter.Types
 import BinaryResponse.Api
 import Browser
 import DbFahrplanApi.Api
@@ -23,6 +21,8 @@ import RealworldConduitApi.Api
 import RealworldConduitApi.Types
 import RecursiveAllofRefs.Json
 import RecursiveAllofRefs.Types
+import SingleEnum.Json
+import SingleEnum.Types
 import Trustmark.TradeCheck.Api
 import Trustmark.TradeCheck.Servers
 import Trustmark.TradeCheck.Types
@@ -159,10 +159,10 @@ additionalPropertiesTaxonomy =
     }
 
 
-{-| BasicRouter
+{-| SingleEnum
 -}
-basicRouterValuePropositionSummary : BasicRouter.Types.ValuePropositionSummary
-basicRouterValuePropositionSummary =
+singleEnumValuePropositionSummary : SingleEnum.Types.ValuePropositionSummary
+singleEnumValuePropositionSummary =
     { one_sentence_summary = ""
     , type_ = ""
     }

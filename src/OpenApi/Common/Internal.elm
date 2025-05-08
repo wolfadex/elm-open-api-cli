@@ -532,7 +532,7 @@ expectBase64CustomEffect =
                         response
             in
             Gen.Effect.Http.expectStringResponse toMsg toResult
-                |> Elm.withType (Gen.Http.annotation_.expect (Elm.Annotation.var "msg"))
+                |> Elm.withType (Gen.Effect.Http.annotation_.expect (Elm.Annotation.var "msg"))
         )
 
 
@@ -598,7 +598,7 @@ responseToResultEffect =
             )
         )
         (Elm.Arg.varWith "response"
-            (Gen.Http.annotation_.response
+            (Gen.Effect.Http.annotation_.response
                 (Elm.Annotation.var "body")
             )
         )

@@ -1739,14 +1739,14 @@ toConfigParamAnnotation options =
 
                 toAnnotation : Elm.Annotation.Annotation -> Elm.Annotation.Annotation
                 toAnnotation toMsg =
-                    (options.authorizationInfo.params
-                        ++ (case options.server of
-                                SingleServer _ ->
-                                    []
+                    ((case options.server of
+                        SingleServer _ ->
+                            []
 
-                                MultipleServers _ ->
-                                    [ ( Common.UnsafeName "server", Elm.Annotation.string ) ]
-                           )
+                        MultipleServers _ ->
+                            [ ( Common.UnsafeName "server", Elm.Annotation.string ) ]
+                     )
+                        ++ options.authorizationInfo.params
                         ++ (if requireToMsg then
                                 [ ( Common.UnsafeName "toMsg", toMsg ) ]
 

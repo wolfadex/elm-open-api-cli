@@ -233,6 +233,7 @@ serverDeclarations server =
                         , name = name
                         , declaration =
                             url
+                                |> stripTrailingSlash
                                 |> Elm.string
                                 |> Elm.declaration name
                                 |> (case description of
@@ -249,6 +250,15 @@ serverDeclarations server =
 
         SingleServer _ ->
             []
+
+
+stripTrailingSlash : String -> String
+stripTrailingSlash input =
+    if String.endsWith "/" input then
+        String.dropRight 1 input
+
+    else
+        input
 
 
 pathDeclarations : ServerInfo -> List OpenApi.Config.EffectType -> CliMonad (List CliMonad.Declaration)
@@ -1201,7 +1211,7 @@ replacedUrl server authInfo pathUrl operation =
                         Elm.string "/"
 
                     SingleServer s ->
-                        Elm.string s
+                        Elm.string (stripTrailingSlash s)
 
                     MultipleServers _ ->
                         Elm.get "server" config
@@ -1242,7 +1252,7 @@ replacedUrl server authInfo pathUrl operation =
                         Gen.Url.Builder.call_.absolute (Elm.list replacedSegments) allQueryParams
 
                     SingleServer s ->
-                        Gen.Url.Builder.call_.crossOrigin (Elm.string s) (Elm.list replacedSegments) allQueryParams
+                        Gen.Url.Builder.call_.crossOrigin (Elm.string (stripTrailingSlash s)) (Elm.list replacedSegments) allQueryParams
 
                     MultipleServers _ ->
                         Gen.Url.Builder.call_.crossOrigin (Elm.get "server" config) (Elm.list replacedSegments) allQueryParams

@@ -117,13 +117,18 @@ files { namespace, generateTodos, effectTypes, server, formats } apiSpec =
             Err e
 
         Ok enums ->
-            CliMonad.combine
-                [ pathDeclarations server effectTypes
-                , schemasDeclarations
-                , responsesDeclarations
-                , requestBodiesDeclarations
-                ]
-                |> CliMonad.map List.concat
+            serverInfo server
+                |> CliMonad.andThen
+                    (\info ->
+                        CliMonad.combine
+                            [ pathDeclarations info effectTypes
+                            , schemasDeclarations
+                            , responsesDeclarations
+                            , requestBodiesDeclarations
+                            , CliMonad.succeed (serverDeclarations info)
+                            ]
+                            |> CliMonad.map List.concat
+                    )
                 |> CliMonad.run
                     SchemaUtils.oneOfDeclarations
                     { openApi = apiSpec
@@ -134,14 +139,8 @@ files { namespace, generateTodos, effectTypes, server, formats } apiSpec =
                     }
                 |> Result.map
                     (\{ declarations, warnings, requiredPackages } ->
-                        let
-                            allDecls : List CliMonad.Declaration
-                            allDecls =
-                                declarations
-                                    ++ serverDecls apiSpec server
-                        in
                         { modules =
-                            allDecls
+                            declarations
                                 |> Dict.Extra.groupBy (\{ moduleName } -> Common.moduleToNamespace namespace moduleName)
                                 |> Dict.toList
                                 |> List.map
@@ -223,68 +222,46 @@ extractEnums openApi =
             (Ok FastDict.empty)
 
 
-serverDecls : OpenApi.OpenApi -> OpenApi.Config.Server -> List CliMonad.Declaration
-serverDecls apiSpec server =
+serverDeclarations : ServerInfo -> List CliMonad.Declaration
+serverDeclarations server =
     case server of
-        OpenApi.Config.Multiple servers ->
-            servers
-                |> Dict.toList
+        MultipleServers list ->
+            list
                 |> List.map
-                    (\( key, value ) ->
+                    (\{ name, url, description } ->
                         { moduleName = Common.Servers
-                        , name = key
+                        , name = name
                         , declaration =
-                            Elm.string value
-                                |> Elm.declaration key
+                            url
+                                |> stripTrailingSlash
+                                |> Elm.string
+                                |> Elm.declaration name
+                                |> (case description of
+                                        Nothing ->
+                                            identity
+
+                                        Just doc ->
+                                            Elm.withDocumentation doc
+                                   )
                                 |> Elm.exposeConstructor
                         , group = "Servers"
                         }
                     )
 
-        OpenApi.Config.Single _ ->
+        SingleServer _ ->
             []
 
-        OpenApi.Config.Default ->
-            case OpenApi.servers apiSpec of
-                [] ->
-                    []
 
-                [ _ ] ->
-                    []
+stripTrailingSlash : String -> String
+stripTrailingSlash input =
+    if String.endsWith "/" input then
+        String.dropRight 1 input
 
-                servers ->
-                    servers
-                        |> List.indexedMap
-                            (\i value ->
-                                let
-                                    key : String
-                                    key =
-                                        case OpenApi.Server.description value of
-                                            Nothing ->
-                                                "server" ++ String.fromInt i
-
-                                            Just description ->
-                                                description
-                                in
-                                { moduleName = Common.Servers
-                                , name = key
-                                , declaration =
-                                    Elm.string (OpenApi.Server.url value)
-                                        |> Elm.declaration key
-                                        |> (case OpenApi.Server.description value of
-                                                Nothing ->
-                                                    identity
-
-                                                Just description ->
-                                                    Elm.withDocumentation description
-                                           )
-                                        |> Elm.exposeConstructor
-                                , group = "Servers"
-                                }
-                            )
+    else
+        input
 
 
-pathDeclarations : OpenApi.Config.Server -> List OpenApi.Config.EffectType -> CliMonad (List CliMonad.Declaration)
+pathDeclarations : ServerInfo -> List OpenApi.Config.EffectType -> CliMonad (List CliMonad.Declaration)
 pathDeclarations server effectTypes =
     CliMonad.fromApiSpec OpenApi.paths
         |> CliMonad.andThen
@@ -466,7 +443,7 @@ requestBodyToDeclarations name reference =
                 |> CliMonad.withPath name
 
 
-toRequestFunctions : OpenApi.Config.Server -> List OpenApi.Config.EffectType -> String -> String -> OpenApi.Operation.Operation -> CliMonad (List CliMonad.Declaration)
+toRequestFunctions : ServerInfo -> List OpenApi.Config.EffectType -> String -> String -> OpenApi.Operation.Operation -> CliMonad (List CliMonad.Declaration)
 toRequestFunctions server effectTypes method pathUrl operation =
     let
         functionName : String
@@ -1201,7 +1178,7 @@ operationToHeaderParams operation =
         |> CliMonad.map (List.filterMap identity)
 
 
-replacedUrl : OpenApi.Config.Server -> AuthorizationInfo -> String -> OpenApi.Operation.Operation -> CliMonad (Elm.Expression -> Elm.Expression)
+replacedUrl : ServerInfo -> AuthorizationInfo -> String -> OpenApi.Operation.Operation -> CliMonad (Elm.Expression -> Elm.Expression)
 replacedUrl server authInfo pathUrl operation =
     let
         pathSegments : List String
@@ -1217,93 +1194,68 @@ replacedUrl server authInfo pathUrl operation =
                             Just segment
                     )
 
-        initialUrl : List ( String, Elm.Expression -> Elm.Expression ) -> List (Elm.Expression -> Elm.Expression) -> CliMonad (Elm.Expression -> Elm.Expression)
-        initialUrl replacements queryParams =
-            OpenApi.servers
-                |> CliMonad.fromApiSpec
-                |> CliMonad.map
-                    (\servers config ->
-                        let
-                            authArgs : List Elm.Expression
-                            authArgs =
-                                authInfo.query config
-                                    |> List.map
-                                        (\( k, v ) ->
-                                            Gen.Url.Builder.call_.string k v
-                                        )
+        initialUrl : List ( String, Elm.Expression -> Elm.Expression ) -> List (Elm.Expression -> Elm.Expression) -> (Elm.Expression -> Elm.Expression)
+        initialUrl replacements queryParams config =
+            let
+                authArgs : List Elm.Expression
+                authArgs =
+                    authInfo.query config
+                        |> List.map
+                            (\( k, v ) ->
+                                Gen.Url.Builder.call_.string k v
+                            )
+            in
+            if List.isEmpty pathSegments && List.isEmpty queryParams && List.isEmpty authArgs then
+                case server of
+                    SingleServer "" ->
+                        Elm.string "/"
 
-                            resolvedServer : Result String Elm.Expression
-                            resolvedServer =
-                                case server of
-                                    OpenApi.Config.Single cliServer ->
-                                        Err cliServer
+                    SingleServer s ->
+                        Elm.string (stripTrailingSlash s)
 
-                                    OpenApi.Config.Default ->
-                                        case servers of
-                                            [] ->
-                                                Err ""
+                    MultipleServers _ ->
+                        Elm.get "server" config
 
-                                            [ oneServer ] ->
-                                                Err (OpenApi.Server.url oneServer)
+            else
+                let
+                    replacedSegments : List Elm.Expression
+                    replacedSegments =
+                        pathSegments
+                            |> List.map
+                                (\segment ->
+                                    case List.Extra.find (\( pattern, _ ) -> pattern == segment) replacements of
+                                        Nothing ->
+                                            Elm.string segment
 
-                                            _ ->
-                                                Ok (Elm.get "server" config)
+                                        Just ( _, repl ) ->
+                                            repl config
+                                )
 
-                                    OpenApi.Config.Multiple _ ->
-                                        Ok (Elm.get "server" config)
-                        in
-                        if List.isEmpty pathSegments && List.isEmpty queryParams && List.isEmpty authArgs then
-                            case resolvedServer of
-                                Err "" ->
-                                    Elm.string "/"
+                    replacedQueryParams : List Elm.Expression
+                    replacedQueryParams =
+                        List.map (\arg -> arg config) queryParams
 
-                                Err s ->
-                                    Elm.string s
-
-                                Ok s ->
-                                    s
+                    allQueryParams : Elm.Expression
+                    allQueryParams =
+                        if List.isEmpty replacedQueryParams then
+                            authArgs
+                                |> Elm.list
 
                         else
-                            let
-                                replacedSegments : List Elm.Expression
-                                replacedSegments =
-                                    pathSegments
-                                        |> List.map
-                                            (\segment ->
-                                                case List.Extra.find (\( pattern, _ ) -> pattern == segment) replacements of
-                                                    Nothing ->
-                                                        Elm.string segment
+                            (replacedQueryParams
+                                ++ List.map (\arg -> Gen.Maybe.make_.just arg) authArgs
+                            )
+                                |> Gen.List.filterMap Gen.Basics.identity
+                in
+                case server of
+                    SingleServer "" ->
+                        Gen.Url.Builder.call_.absolute (Elm.list replacedSegments) allQueryParams
 
-                                                    Just ( _, repl ) ->
-                                                        repl config
-                                            )
+                    SingleServer s ->
+                        Gen.Url.Builder.call_.crossOrigin (Elm.string (stripTrailingSlash s)) (Elm.list replacedSegments) allQueryParams
 
-                                replacedQueryParams : List Elm.Expression
-                                replacedQueryParams =
-                                    List.map (\arg -> arg config) queryParams
-
-                                allQueryParams : Elm.Expression
-                                allQueryParams =
-                                    if List.isEmpty replacedQueryParams then
-                                        authArgs
-                                            |> Elm.list
-
-                                    else
-                                        (replacedQueryParams
-                                            ++ List.map (\arg -> Gen.Maybe.make_.just arg) authArgs
-                                        )
-                                            |> Gen.List.filterMap Gen.Basics.identity
-                            in
-                            case resolvedServer of
-                                Err "" ->
-                                    Gen.Url.Builder.call_.absolute (Elm.list replacedSegments) allQueryParams
-
-                                Err s ->
-                                    Gen.Url.Builder.call_.crossOrigin (Elm.string s) (Elm.list replacedSegments) allQueryParams
-
-                                Ok s ->
-                                    Gen.Url.Builder.call_.crossOrigin s (Elm.list replacedSegments) allQueryParams
-                    )
+                    MultipleServers _ ->
+                        Gen.Url.Builder.call_.crossOrigin (Elm.get "server" config) (Elm.list replacedSegments) allQueryParams
     in
     operation
         |> OpenApi.Operation.parameters
@@ -1363,14 +1315,10 @@ replacedUrl server authInfo pathUrl operation =
                     ( replacements, queryParams ) =
                         List.unzip pairs
                             |> Tuple.mapBoth (List.filterMap identity) List.concat
-
-                    queryParamsBuilders : CliMonad (List (Elm.Expression -> Elm.Expression))
-                    queryParamsBuilders =
-                        queryParams
-                            |> CliMonad.combineMap (queryParameterToUrlBuilderArgument True)
-                            |> CliMonad.map List.concat
                 in
-                CliMonad.andThen (initialUrl replacements) queryParamsBuilders
+                queryParams
+                    |> CliMonad.combineMap (queryParameterToUrlBuilderArgument True)
+                    |> CliMonad.map (\arg -> initialUrl replacements (List.concat arg))
             )
 
 
@@ -1764,12 +1712,12 @@ toConfigParamAnnotation :
     , errorTypeAnnotation : Elm.Annotation.Annotation
     , authorizationInfo : AuthorizationInfo
     , bodyParams : List ( Common.UnsafeName, Elm.Annotation.Annotation )
-    , server : OpenApi.Config.Server
+    , server : ServerInfo
     }
     -> CliMonad ({ requireToMsg : Bool } -> PerPackage Elm.Annotation.Annotation)
 toConfigParamAnnotation options =
-    CliMonad.map2
-        (\urlParams maybeServer { requireToMsg } ->
+    CliMonad.map
+        (\urlParams { requireToMsg } ->
             let
                 toMsgCore : Elm.Annotation.Annotation
                 toMsgCore =
@@ -1791,7 +1739,13 @@ toConfigParamAnnotation options =
 
                 toAnnotation : Elm.Annotation.Annotation -> Elm.Annotation.Annotation
                 toAnnotation toMsg =
-                    (maybeServer
+                    ((case options.server of
+                        SingleServer _ ->
+                            []
+
+                        MultipleServers _ ->
+                            [ ( Common.UnsafeName "server", Elm.Annotation.string ) ]
+                     )
                         ++ options.authorizationInfo.params
                         ++ (if requireToMsg then
                                 [ ( Common.UnsafeName "toMsg", toMsg ) ]
@@ -1812,29 +1766,65 @@ toConfigParamAnnotation options =
             }
         )
         (operationToUrlParams options.operation)
-        (case options.server of
-            OpenApi.Config.Multiple _ ->
-                [ ( Common.UnsafeName "server", Elm.Annotation.string ) ]
-                    |> CliMonad.succeed
 
-            OpenApi.Config.Single _ ->
-                CliMonad.succeed []
 
-            OpenApi.Config.Default ->
-                OpenApi.servers
-                    |> CliMonad.fromApiSpec
-                    |> CliMonad.map
-                        (\servers ->
-                            case servers of
-                                [] ->
-                                    []
+type ServerInfo
+    = SingleServer String
+    | MultipleServers (List { name : String, url : String, description : Maybe String })
 
-                                [ _ ] ->
-                                    []
 
-                                _ ->
-                                    [ ( Common.UnsafeName "server", Elm.Annotation.string ) ]
-                        )
+serverInfo : OpenApi.Config.Server -> CliMonad ServerInfo
+serverInfo server =
+    CliMonad.fromApiSpec
+        (\spec ->
+            case server of
+                OpenApi.Config.Single cliServer ->
+                    SingleServer cliServer
+
+                OpenApi.Config.Default ->
+                    case OpenApi.servers spec of
+                        [] ->
+                            SingleServer ""
+
+                        [ one ] ->
+                            SingleServer (OpenApi.Server.url one)
+
+                        servers ->
+                            servers
+                                |> List.indexedMap
+                                    (\i value ->
+                                        let
+                                            description : Maybe String
+                                            description =
+                                                OpenApi.Server.description value
+
+                                            name : String
+                                            name =
+                                                case description of
+                                                    Nothing ->
+                                                        "server" ++ String.fromInt i
+
+                                                    Just d ->
+                                                        d
+                                        in
+                                        { name = name
+                                        , url = OpenApi.Server.url value
+                                        , description = description
+                                        }
+                                    )
+                                |> MultipleServers
+
+                OpenApi.Config.Multiple servers ->
+                    servers
+                        |> Dict.toList
+                        |> List.map
+                            (\( name, url ) ->
+                                { name = name
+                                , url = url
+                                , description = Nothing
+                                }
+                            )
+                        |> MultipleServers
         )
 
 

@@ -1,0 +1,33 @@
+{
+    "type": "package",
+    "name": "wolfadex/elm-open-api-codegen",
+    "summary": "Code generation API from elm-open-api-cli",
+    "license": "BSD-3-Clause",
+    "version": "1.0.0",
+    "exposed-modules": [
+        "Common",
+        "OpenApi.BackendTask",
+        "OpenApi.Config"
+    ],
+    "elm-version": "0.19.0 <= v < 0.20.0",
+    "dependencies": {
+        "dillonkearns/elm-pages": "10.2.2 <= v < 11.0.0",
+        "elm/core": "1.0.5 <= v < 2.0.0",
+        "elm/json": "1.1.3 <= v < 2.0.0",
+        "elm/regex": "1.0.0 <= v < 2.0.0",
+        "elm/url": "1.0.0 <= v < 2.0.0",
+        "elmcraft/core-extra": "2.2.0 <= v < 3.0.0",
+        "json-tools/json-schema": "1.0.2 <= v < 2.0.0",
+        "json-tools/json-value": "1.0.1 <= v < 2.0.0",
+        "mdgriffith/elm-codegen": "5.2.0 <= v < 6.0.0",
+        "miniBill/elm-fast-dict": "1.2.4 <= v < 2.0.0",
+        "myrho/yaml": "1.0.0 <= v < 2.0.0",
+        "turboMaCk/non-empty-list-alias": "1.4.0 <= v < 2.0.0",
+        "wolfadex/elm-ansi": "3.0.0 <= v < 4.0.0",
+        "wolfadex/elm-open-api": "2.0.0 <= v < 3.0.0"
+    },
+    "test-dependencies": {
+        "elm-explorations/test": "2.2.0 <= v < 3.0.0",
+        "miniBill/elm-unicode": "1.1.1 <= v < 2.0.0"
+    }
+}

@@ -1,0 +1,18 @@
+openapi: 3.0.1
+info:
+  title: "Example schema"
+  version: "1"
+components:
+  schemas:
+    Person:
+      description: Person
+      type: object
+      properties:
+        name:
+          type: string
+      additionalProperties:
+        type: array
+        items:
+          type: string
+      required:
+        - name

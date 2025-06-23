@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+set -e
+
+# In order for the package to be able to import Gen.* modules, we must put them
+# in `src/`, since Elm packages do not support multiple source directories.
+rm -rf src/Gen 2>/dev/null
+npx --no -- elm-codegen install
+mv codegen/Gen src/
+
+# Avoid clashing module name with root project.
+rm src/Gen/CodeGen/Generate.elm

@@ -5,7 +5,7 @@ pkgs.mkShell {
     pkgs.elmPackages.elm-format
     pkgs.elmPackages.elm-test-rs
     pkgs.elmPackages.elm-review
-    pkgs.nodejs-18_x
+    pkgs.nodejs_20
     pkgs.git
     pkgs.bash
   ];

@@ -33,7 +33,7 @@ need to trick the Elm/Lamdera compiler by running a special script:
 This will modify some `elm.json` files locally. Make sure not to commit these
 changes.
 
-When you want to undo the link.run
+When you want to undo the linking, run:
 
     ./scripts/unlink-local-package
 

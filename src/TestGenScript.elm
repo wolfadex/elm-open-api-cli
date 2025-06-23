@@ -104,7 +104,7 @@ run =
     in
     Pages.Script.withoutCliOptions
         (BackendTask.doEach
-            [ OpenApi.BackendTask.withConfig
+            [ OpenApi.BackendTask.withConfig config
             , "\nCompiling Example app"
                 |> Ansi.Color.fontColor Ansi.Color.brightGreen
                 |> Pages.Script.log

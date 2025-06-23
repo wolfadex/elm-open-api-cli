@@ -24,7 +24,7 @@ moduleName_ =
 
 
 {-| application: 
-    Pages.ProgramConfig.ProgramConfig userMsg userModel route pageData actionData sharedData effect (Pages.Internal.Platform.Msg userMsg pageData actionData sharedData errorPage) errorPage
+    Pages.Internal.Platform.ProgramConfig userMsg userModel route pageData actionData sharedData effect (Pages.Internal.Platform.Msg userMsg pageData actionData sharedData errorPage) errorPage
     -> Platform.Program Pages.Internal.Platform.Flags (Pages.Internal.Platform.Model userModel pageData actionData sharedData) (Pages.Internal.Platform.Msg userMsg pageData actionData sharedData errorPage)
 -}
 application : Elm.Expression -> Elm.Expression
@@ -37,7 +37,7 @@ application applicationArg_ =
                  Just
                      (Type.function
                           [ Type.namedWith
-                              [ "Pages", "ProgramConfig" ]
+                              [ "Pages", "Internal", "Platform" ]
                               "ProgramConfig"
                               [ Type.var "userMsg"
                               , Type.var "userModel"
@@ -91,7 +91,7 @@ application applicationArg_ =
 
 
 {-| init: 
-    Pages.ProgramConfig.ProgramConfig userMsg userModel route pageData actionData sharedData userEffect (Pages.Internal.Platform.Msg userMsg pageData actionData sharedData errorPage) errorPage
+    Pages.Internal.Platform.ProgramConfig userMsg userModel route pageData actionData sharedData userEffect (Pages.Internal.Platform.Msg userMsg pageData actionData sharedData errorPage) errorPage
     -> Pages.Internal.Platform.Flags
     -> Url.Url
     -> Maybe Browser.Navigation.Key
@@ -112,7 +112,7 @@ init initArg_ initArg_0 initArg_1 initArg_2 =
                  Just
                      (Type.function
                           [ Type.namedWith
-                              [ "Pages", "ProgramConfig" ]
+                              [ "Pages", "Internal", "Platform" ]
                               "ProgramConfig"
                               [ Type.var "userMsg"
                               , Type.var "userModel"
@@ -173,7 +173,7 @@ init initArg_ initArg_0 initArg_1 initArg_2 =
 
 
 {-| update: 
-    Pages.ProgramConfig.ProgramConfig userMsg userModel route pageData actionData sharedData userEffect (Pages.Internal.Platform.Msg userMsg pageData actionData sharedData errorPage) errorPage
+    Pages.Internal.Platform.ProgramConfig userMsg userModel route pageData actionData sharedData userEffect (Pages.Internal.Platform.Msg userMsg pageData actionData sharedData errorPage) errorPage
     -> Pages.Internal.Platform.Msg userMsg pageData actionData sharedData errorPage
     -> Pages.Internal.Platform.Model userModel pageData actionData sharedData
     -> ( Pages.Internal.Platform.Model userModel pageData actionData sharedData, Pages.Internal.Platform.Effect userMsg pageData actionData sharedData userEffect errorPage )
@@ -188,7 +188,7 @@ update updateArg_ updateArg_0 updateArg_1 =
                  Just
                      (Type.function
                           [ Type.namedWith
-                              [ "Pages", "ProgramConfig" ]
+                              [ "Pages", "Internal", "Platform" ]
                               "ProgramConfig"
                               [ Type.var "userMsg"
                               , Type.var "userModel"
@@ -255,7 +255,7 @@ update updateArg_ updateArg_0 updateArg_1 =
 
 
 {-| view: 
-    Pages.ProgramConfig.ProgramConfig userMsg userModel route pageData actionData sharedData effect (Pages.Internal.Platform.Msg userMsg pageData actionData sharedData errorPage) errorPage
+    Pages.Internal.Platform.ProgramConfig userMsg userModel route pageData actionData sharedData effect (Pages.Internal.Platform.Msg userMsg pageData actionData sharedData errorPage) errorPage
     -> Pages.Internal.Platform.Model userModel pageData actionData sharedData
     -> Browser.Document (Pages.Internal.Platform.Msg userMsg pageData actionData sharedData errorPage)
 -}
@@ -269,7 +269,7 @@ view viewArg_ viewArg_0 =
                  Just
                      (Type.function
                           [ Type.namedWith
-                              [ "Pages", "ProgramConfig" ]
+                              [ "Pages", "Internal", "Platform" ]
                               "ProgramConfig"
                               [ Type.var "userMsg"
                               , Type.var "userModel"
@@ -335,6 +335,17 @@ annotation_ :
         -> Type.Annotation
     , program :
         Type.Annotation
+        -> Type.Annotation
+        -> Type.Annotation
+        -> Type.Annotation
+        -> Type.Annotation
+        -> Type.Annotation
+        -> Type.Annotation
+    , programConfig :
+        Type.Annotation
+        -> Type.Annotation
+        -> Type.Annotation
+        -> Type.Annotation
         -> Type.Annotation
         -> Type.Annotation
         -> Type.Annotation
@@ -492,6 +503,35 @@ annotation_ =
                          , Type.var "sharedData"
                          , Type.var "errorPage"
                          ]
+                     ]
+                )
+    , programConfig =
+        \programConfigArg0 programConfigArg1 programConfigArg2 programConfigArg3 programConfigArg4 programConfigArg5 programConfigArg6 programConfigArg7 programConfigArg8 ->
+            Type.alias
+                moduleName_
+                "ProgramConfig"
+                [ programConfigArg0
+                , programConfigArg1
+                , programConfigArg2
+                , programConfigArg3
+                , programConfigArg4
+                , programConfigArg5
+                , programConfigArg6
+                , programConfigArg7
+                , programConfigArg8
+                ]
+                (Type.namedWith
+                     [ "Pages", "ProgramConfig" ]
+                     "ProgramConfig"
+                     [ Type.var "userMsg"
+                     , Type.var "userModel"
+                     , Type.var "route"
+                     , Type.var "pageData"
+                     , Type.var "actionData"
+                     , Type.var "sharedData"
+                     , Type.var "effect"
+                     , Type.var "mappedMsg"
+                     , Type.var "errorPage"
                      ]
                 )
     , effect =
@@ -1833,7 +1873,7 @@ call_ =
                          Just
                              (Type.function
                                   [ Type.namedWith
-                                      [ "Pages", "ProgramConfig" ]
+                                      [ "Pages", "Internal", "Platform" ]
                                       "ProgramConfig"
                                       [ Type.var "userMsg"
                                       , Type.var "userModel"
@@ -1894,7 +1934,7 @@ call_ =
                          Just
                              (Type.function
                                   [ Type.namedWith
-                                      [ "Pages", "ProgramConfig" ]
+                                      [ "Pages", "Internal", "Platform" ]
                                       "ProgramConfig"
                                       [ Type.var "userMsg"
                                       , Type.var "userModel"
@@ -1962,7 +2002,7 @@ call_ =
                          Just
                              (Type.function
                                   [ Type.namedWith
-                                      [ "Pages", "ProgramConfig" ]
+                                      [ "Pages", "Internal", "Platform" ]
                                       "ProgramConfig"
                                       [ Type.var "userMsg"
                                       , Type.var "userModel"
@@ -2036,7 +2076,7 @@ call_ =
                          Just
                              (Type.function
                                   [ Type.namedWith
-                                      [ "Pages", "ProgramConfig" ]
+                                      [ "Pages", "Internal", "Platform" ]
                                       "ProgramConfig"
                                       [ Type.var "userMsg"
                                       , Type.var "userModel"
@@ -2101,7 +2141,7 @@ values_ =
                 Just
                     (Type.function
                          [ Type.namedWith
-                             [ "Pages", "ProgramConfig" ]
+                             [ "Pages", "Internal", "Platform" ]
                              "ProgramConfig"
                              [ Type.var "userMsg"
                              , Type.var "userModel"
@@ -2158,7 +2198,7 @@ values_ =
                 Just
                     (Type.function
                          [ Type.namedWith
-                             [ "Pages", "ProgramConfig" ]
+                             [ "Pages", "Internal", "Platform" ]
                              "ProgramConfig"
                              [ Type.var "userMsg"
                              , Type.var "userModel"
@@ -2222,7 +2262,7 @@ values_ =
                 Just
                     (Type.function
                          [ Type.namedWith
-                             [ "Pages", "ProgramConfig" ]
+                             [ "Pages", "Internal", "Platform" ]
                              "ProgramConfig"
                              [ Type.var "userMsg"
                              , Type.var "userModel"
@@ -2292,7 +2332,7 @@ values_ =
                 Just
                     (Type.function
                          [ Type.namedWith
-                             [ "Pages", "ProgramConfig" ]
+                             [ "Pages", "Internal", "Platform" ]
                              "ProgramConfig"
                              [ Type.var "userMsg"
                              , Type.var "userModel"

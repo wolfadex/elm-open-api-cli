@@ -24,7 +24,7 @@ moduleName_ =
 
 
 {-| cliApplication: 
-    Pages.ProgramConfig.ProgramConfig userMsg userModel (Maybe route) pageData actionData sharedData effect mappedMsg errorPage
+    Pages.Internal.Platform.Cli.ProgramConfig userMsg userModel (Maybe route) pageData actionData sharedData effect mappedMsg errorPage
     -> Pages.Internal.Platform.Cli.Program (Maybe route)
 -}
 cliApplication : Elm.Expression -> Elm.Expression
@@ -37,7 +37,7 @@ cliApplication cliApplicationArg_ =
                  Just
                      (Type.function
                           [ Type.namedWith
-                              [ "Pages", "ProgramConfig" ]
+                              [ "Pages", "Internal", "Platform", "Cli" ]
                               "ProgramConfig"
                               [ Type.var "userMsg"
                               , Type.var "userModel"
@@ -64,7 +64,7 @@ cliApplication cliApplicationArg_ =
 {-| init: 
     Pages.SiteConfig.SiteConfig
     -> RenderRequest.RenderRequest route
-    -> Pages.ProgramConfig.ProgramConfig userMsg userModel route pageData actionData sharedData effect mappedMsg errorPage
+    -> Pages.Internal.Platform.Cli.ProgramConfig userMsg userModel route pageData actionData sharedData effect mappedMsg errorPage
     -> Json.Decode.Value
     -> ( Pages.Internal.Platform.Cli.Model route, Pages.Internal.Platform.Effect.Effect )
 -}
@@ -91,7 +91,7 @@ init initArg_ initArg_0 initArg_1 initArg_2 =
                               "RenderRequest"
                               [ Type.var "route" ]
                           , Type.namedWith
-                              [ "Pages", "ProgramConfig" ]
+                              [ "Pages", "Internal", "Platform", "Cli" ]
                               "ProgramConfig"
                               [ Type.var "userMsg"
                               , Type.var "userModel"
@@ -206,6 +206,17 @@ annotation_ :
     { flags : Type.Annotation
     , model : Type.Annotation -> Type.Annotation
     , msg : Type.Annotation
+    , programConfig :
+        Type.Annotation
+        -> Type.Annotation
+        -> Type.Annotation
+        -> Type.Annotation
+        -> Type.Annotation
+        -> Type.Annotation
+        -> Type.Annotation
+        -> Type.Annotation
+        -> Type.Annotation
+        -> Type.Annotation
     , program : Type.Annotation -> Type.Annotation
     }
 annotation_ =
@@ -247,6 +258,35 @@ annotation_ =
                      ]
                 )
     , msg = Type.namedWith [ "Pages", "Internal", "Platform", "Cli" ] "Msg" []
+    , programConfig =
+        \programConfigArg0 programConfigArg1 programConfigArg2 programConfigArg3 programConfigArg4 programConfigArg5 programConfigArg6 programConfigArg7 programConfigArg8 ->
+            Type.alias
+                moduleName_
+                "ProgramConfig"
+                [ programConfigArg0
+                , programConfigArg1
+                , programConfigArg2
+                , programConfigArg3
+                , programConfigArg4
+                , programConfigArg5
+                , programConfigArg6
+                , programConfigArg7
+                , programConfigArg8
+                ]
+                (Type.namedWith
+                     [ "Pages", "ProgramConfig" ]
+                     "ProgramConfig"
+                     [ Type.var "userMsg"
+                     , Type.var "userModel"
+                     , Type.var "route"
+                     , Type.var "pageData"
+                     , Type.var "actionData"
+                     , Type.var "sharedData"
+                     , Type.var "effect"
+                     , Type.var "mappedMsg"
+                     , Type.var "errorPage"
+                     ]
+                )
     , program =
         \programArg0 ->
             Type.alias
@@ -425,7 +465,7 @@ call_ =
                          Just
                              (Type.function
                                   [ Type.namedWith
-                                      [ "Pages", "ProgramConfig" ]
+                                      [ "Pages", "Internal", "Platform", "Cli" ]
                                       "ProgramConfig"
                                       [ Type.var "userMsg"
                                       , Type.var "userModel"
@@ -469,7 +509,7 @@ call_ =
                                       "RenderRequest"
                                       [ Type.var "route" ]
                                   , Type.namedWith
-                                      [ "Pages", "ProgramConfig" ]
+                                      [ "Pages", "Internal", "Platform", "Cli" ]
                                       "ProgramConfig"
                                       [ Type.var "userMsg"
                                       , Type.var "userModel"
@@ -571,7 +611,7 @@ values_ =
                 Just
                     (Type.function
                          [ Type.namedWith
-                             [ "Pages", "ProgramConfig" ]
+                             [ "Pages", "Internal", "Platform", "Cli" ]
                              "ProgramConfig"
                              [ Type.var "userMsg"
                              , Type.var "userModel"
@@ -607,7 +647,7 @@ values_ =
                              "RenderRequest"
                              [ Type.var "route" ]
                          , Type.namedWith
-                             [ "Pages", "ProgramConfig" ]
+                             [ "Pages", "Internal", "Platform", "Cli" ]
                              "ProgramConfig"
                              [ Type.var "userMsg"
                              , Type.var "userModel"

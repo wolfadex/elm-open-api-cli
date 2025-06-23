@@ -1,16 +1,11 @@
 module Cli exposing (run)
 
-import Ansi
-import Ansi.Color
-import BackendTask exposing (BackendTask)
 import Cli.Option
 import Cli.OptionsParser
 import Cli.Program
 import Json.Decode
-import OpenApi
 import OpenApi.BackendTask
 import OpenApi.Config
-import OpenApi.Generate
 import Pages.Script
 import Result.Extra
 

@@ -13,7 +13,7 @@
         "format": "scripts/format",
         "test": "scripts/test",
         "test:gen": "elm-pages run src/TestGenScript.elm",
-        "test:watch": "elm-test --watch",
+        "test:watch": "cd elm-open-api-codegen && elm-test --watch",
         "pub": "npm run build && npm publish"
     },
     "author": "Wolfgang Schuster",

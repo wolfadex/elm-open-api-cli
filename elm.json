@@ -66,5 +66,8 @@
             "zwilias/elm-utf-tools": "2.0.1"
         }
     },
-    "test-dependencies": {}
+    "test-dependencies": {
+        "direct": {},
+        "indirect": {}
+    }
 }

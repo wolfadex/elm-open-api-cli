@@ -22,11 +22,39 @@ module Common exposing
     , unwrapUnsafe
     )
 
+{-|
+
+@docs BasicType
+@docs ConstValue
+@docs Field
+@docs Module
+@docs Object
+@docs OneOfData
+@docs Package
+@docs Type
+@docs TypeName
+@docs UnsafeName
+@docs VariantName
+@docs base64PackageName
+@docs basicTypeToString
+@docs commonModuleName
+@docs enum
+@docs moduleToNamespace
+@docs ref
+@docs reservedList
+@docs toTypeName
+@docs toValueName
+@docs unwrapUnsafe
+
+-}
+
 import Regex
 import Set exposing (Set)
 import String.Extra
 
 
+{-| An Elm module being generated
+-}
 type Module
     = Json
     | Types
@@ -36,6 +64,8 @@ type Module
     | Servers
 
 
+{-| An Effects package we can target when code-generating API calls.
+-}
 type Package
     = ElmHttp
     | DillonkearnsElmPages
@@ -48,6 +78,8 @@ type UnsafeName
     = UnsafeName String
 
 
+{-| Given a namespace and Module, generate the full module name
+-}
 moduleToNamespace : List String -> Module -> List String
 moduleToNamespace namespace moduleName =
     case moduleName of
@@ -78,6 +110,8 @@ moduleToNamespace namespace moduleName =
             commonModuleName
 
 
+{-| Module where we generate common helper functions.
+-}
 commonModuleName : List String
 commonModuleName =
     [ "OpenApi", "Common" ]
@@ -87,6 +121,8 @@ commonModuleName =
 -- Names adaptation --
 
 
+{-| Convert an UnsafeName to a valid TypeName.
+-}
 toTypeName : UnsafeName -> TypeName
 toTypeName (UnsafeName name) =
     name
@@ -169,6 +205,8 @@ toValueName (UnsafeName name) =
             clean
 
 
+{-| Reserved words; these can't be used for Elm variable names.
+-}
 reservedList : Set String
 reservedList =
     -- Copied from elm-syntax
@@ -314,6 +352,8 @@ initialUppercaseWordToLowercase input =
                 input
 
 
+{-| Intermediate representation of an OpenAPI schema
+-}
 type Type
     = Nullable Type
     | Object Object
@@ -335,6 +375,8 @@ type Type
     | Unit
 
 
+{-| A basic value
+-}
 type BasicType
     = Integer
     | Boolean
@@ -342,6 +384,8 @@ type BasicType
     | Number
 
 
+{-| A constant value
+-}
 type ConstValue
     = ConstInteger Int
     | ConstBoolean Bool
@@ -349,6 +393,8 @@ type ConstValue
     | ConstNumber Float
 
 
+{-| Convert BasicType to OpenAPI "type" string
+-}
 basicTypeToString : BasicType -> String
 basicTypeToString basicType =
     case basicType of
@@ -365,10 +411,14 @@ basicTypeToString basicType =
             "number"
 
 
+{-| An Object in a schema
+-}
 type alias Object =
     List ( UnsafeName, Field )
 
 
+{-| A `oneOf` declaration
+-}
 type alias OneOfData =
     List
         { name : UnsafeName
@@ -377,14 +427,20 @@ type alias OneOfData =
         }
 
 
+{-| Name of a Type.
+-}
 type alias TypeName =
     String
 
 
+{-| Variant.
+-}
 type alias VariantName =
     TypeName
 
 
+{-| An Object field.
+-}
 type alias Field =
     { type_ : Type
     , required : Bool
@@ -392,16 +448,22 @@ type alias Field =
     }
 
 
+{-| Create a "Ref", as in `$ref: "#/components/..."`.
+-}
 ref : String -> Type
 ref str =
     Ref (String.split "/" str)
 
 
+{-| Get the value inside of an UnsafeName.
+-}
 unwrapUnsafe : UnsafeName -> String
 unwrapUnsafe (UnsafeName name) =
     name
 
 
+{-| Generate an "enum" from a list of variants.
+-}
 enum : List String -> Type
 enum variants =
     variants
@@ -410,6 +472,8 @@ enum variants =
         |> Enum
 
 
+{-| Name of the package needed for Base64.
+-}
 base64PackageName : String
 base64PackageName =
     "danfishgold/base64-bytes"

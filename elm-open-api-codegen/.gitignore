@@ -1,1 +1,3 @@
+# If files pop up in this folder, don't commit them--run
+# `scripts/sync-elm-codegen` to take care of it.
 codegen/Gen

@@ -1,7 +1,7 @@
 {
     "type": "package",
     "name": "wolfadex/elm-open-api-codegen",
-    "summary": "Code generation API from elm-open-api-cli",
+    "summary": "Code generation used by elm-open-api-cli",
     "license": "BSD-3-Clause",
     "version": "1.0.0",
     "exposed-modules": [

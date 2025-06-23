@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+set -e
+rm -rf .elm-pages elm-open-api-codegen/.elm-pages example-using-api/.elm-pages
+sed -i -e 's#"mpizenberg/elm-placeholder-pkg"#"wolfadex/elm-open-api-codegen"#' elm.json example-using-api/scripts/elm.json

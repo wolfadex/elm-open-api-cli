@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+set -e
+env -C elm-open-api-codegen npx --no -- elm-test
+npm -C example-using-api test

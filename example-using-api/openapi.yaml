@@ -4,15 +4,45 @@ info:
   version: "1"
 components:
   schemas:
-    Person:
-      description: Person
+    User:
+      description: User
       type: object
       properties:
-        name:
+        email:
           type: string
+          format: email
       additionalProperties:
         type: array
         items:
           type: string
       required:
-        - name
+        - email
+    Thread:
+      description: Chat thread
+      type: object
+      properties:
+        id:
+          type: string
+          format: thread-id
+        created-at:
+          type: integer
+          format: unix-seconds
+      required:
+        - id
+        - created-at
+    Message:
+      description: Message in a chat thread
+      type: object
+      properties:
+        id:
+          type: string
+          format: message-id
+        created-at:
+          type: integer
+          format: unix-seconds
+        content:
+          type: string
+      required:
+        - id
+        - created-at
+        - content

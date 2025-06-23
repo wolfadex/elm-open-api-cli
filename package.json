@@ -11,7 +11,7 @@
         "review": "elm-review",
         "review:watch": "elm-review --watch --fix",
         "format": "elm-format src tests --validate",
-        "test": "cd elm-open-api-codegen && elm-test",
+        "test": "scripts/test",
         "test:gen": "elm-pages run src/TestGenScript.elm",
         "test:watch": "elm-test --watch",
         "pub": "npm run build && npm publish"

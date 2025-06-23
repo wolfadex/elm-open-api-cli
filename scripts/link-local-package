@@ -1,4 +1,11 @@
 #!/usr/bin/env bash
+if ! sed --help | grep GNU >/dev/null; then
+  echo >&2 "ERROR: Please use \`nix develop\` to enter the development shell first."
+  echo
+  echo >&2 "If I tried to run as-is, my sed command wouldn't work properly."
+  exit 1
+fi
+
 set -e
 cache=$HOME/.elm/0.19.1/packages/mpizenberg/elm-placeholder-pkg/1.0.0
 rm -rf "$cache"
@@ -6,5 +13,4 @@ mkdir -p "$cache"
 ln -s "$PWD/elm-open-api-codegen/elm.json" "$cache/elm.json"
 ln -s "$PWD/elm-open-api-codegen/src" "$cache/src"
 rm -rf elm-open-api-codegen/.elm-pages example-using-api/.elm-pages
-sed -i -e 's#"wolfadex/elm-open-api-codegen"#"mpizenberg/elm-placeholder-pkg"#' elm.json
-sed -i -e 's#"wolfadex/elm-open-api-codegen"#"mpizenberg/elm-placeholder-pkg"#' example-using-api/scripts/elm.json
+sed -i -e 's#"wolfadex/elm-open-api-codegen"#"mpizenberg/elm-placeholder-pkg"#' elm.json example-using-api/scripts/elm.json

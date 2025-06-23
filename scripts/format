@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+set -e
+echo "Checking formatting in root project"
+elm-format src --validate
+echo "Checking formatting in elm-open-api-codegen"
+cd elm-open-api-codegen
+find . \
+  -wholename './src/Gen/**' -prune -o \
+  -name elm-stuff -prune -o \
+  -name *.elm \
+  -exec elm-format --validate {} \+
+cd ..
+echo "Checking formatting in example-using-api"
+env -C example-using-api elm-format src scripts --validate

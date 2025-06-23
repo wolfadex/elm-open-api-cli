@@ -15,7 +15,7 @@ module Data.Id exposing
 
 import Data.Id.Internal
     exposing
-        (MessageTag
+        ( MessageTag
         , ThreadTag
         , UserTag
         )

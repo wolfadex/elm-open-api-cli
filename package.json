@@ -10,7 +10,7 @@
         "build": "elm-pages bundle-script src/Cli.elm --output dist/elm-open-api.js --debug",
         "review": "elm-review",
         "review:watch": "elm-review --watch --fix",
-        "format": "elm-format src tests --validate",
+        "format": "scripts/format",
         "test": "scripts/test",
         "test:gen": "elm-pages run src/TestGenScript.elm",
         "test:watch": "elm-test --watch",

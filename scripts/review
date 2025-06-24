@@ -4,7 +4,7 @@ cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." &>/dev/null
 ./scripts/is-in-dev-shell
 
 echo >&2 -e "\n-- Running \`elm-review\` for CLI"
-elm-review
+elm-review "$@"
 
 echo >&2 -e "\n-- Running \`elm-review\` for elm-open-api-codegen package"
-env -C elm-open-api-codegen elm-review
+env -C elm-open-api-codegen elm-review "$@"

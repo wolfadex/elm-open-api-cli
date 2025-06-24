@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+if [[ -z "$CI" && -z "$ELM_OPEN_API_CLI_DEVSHELL_ACTIVE" ]]; then
+  (
+    echo "ERROR: Please use \`nix develop\` to enter the development shell first."
+    echo
+    echo "This ensures all development dependencies are available, and at their"
+    echo "intended versions. If I tried to run as-is, some commands might fail."
+  ) >&2
+  exit 1
+fi

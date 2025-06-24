@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 set -e
+cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." &>/dev/null
+./scripts/is-in-dev-shell
 
 usage() {
   echo "Usage: $0 [--write]"

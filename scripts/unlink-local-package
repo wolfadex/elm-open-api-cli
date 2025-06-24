@@ -1,11 +1,7 @@
 #!/usr/bin/env bash
-if ! sed --help | grep GNU >/dev/null; then
-  echo >&2 "ERROR: Please use \`nix develop\` to enter the development shell first."
-  echo
-  echo >&2 "If I tried to run as-is, my sed command wouldn't work properly."
-  exit 1
-fi
-
 set -e
+cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." &>/dev/null
+./scripts/is-in-dev-shell
+
 rm -rf .elm-pages elm-open-api-codegen/.elm-pages example-using-api/.elm-pages
 sed -i -e 's#"mpizenberg/elm-placeholder-pkg"#"wolfadex/elm-open-api-codegen"#' elm.json example-using-api/scripts/elm.json

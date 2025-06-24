@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+set -e
+cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." &>/dev/null
+./scripts/is-in-dev-shell
+
+echo >&2 -e "\n-- Running \`elm-review ${PASSTHROUGH[*]}\` for CLI\n"
+elm-review "${PASSTHROUGH[@]}"
+
+echo >&2 -e "\n-- Running \`elm-review ${PASSTHROUGH[*]}\` for ELM-OPEN-API-CODEGEN PACKAGE\n"
+env -C elm-open-api-codegen elm-review "${PASSTHROUGH[@]}"

@@ -11,4 +11,7 @@ pkgs.mkShell {
     pkgs.findutils
     pkgs.gnused
   ];
+  shellHook = ''
+    export ELM_OPEN_API_CLI_DEVSHELL_ACTIVE=1
+  '';
 }

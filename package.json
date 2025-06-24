@@ -8,8 +8,10 @@
     "scripts": {
         "dev": "elm-pages run src/Cli.elm",
         "build": "elm-pages bundle-script src/Cli.elm --output dist/elm-open-api.js --debug",
-        "review": "elm-review",
-        "review:watch": "elm-review --watch --fix",
+        "link-local-package": "scripts/link-local-package",
+        "unlink-local-package": "scripts/unlink-local-package",
+        "review": "scripts/review",
+        "review:watch": "run-pty review-pty.json",
         "format": "scripts/format",
         "format:fix": "scripts/format --write",
         "test": "scripts/test",
@@ -29,6 +31,7 @@
         "elm-pages": "^3.0.19",
         "elm-review": "2.11.1",
         "elm-test": "^0.19.1-revision12",
+        "run-pty": "^5.0.0",
         "vite": "^6.0.3"
     },
     "volta": {

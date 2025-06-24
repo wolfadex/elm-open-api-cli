@@ -41,6 +41,22 @@ jobs:
             )}}
 
       # Caching based on https://github.com/jetify-com/devbox-install-action/blob/main/action.yml
+      - name: Workaround nix store cache permission issue
+        shell: bash
+        run: |
+          if [ "$RUNNER_OS" == "macOS" ]; then
+            gtar_path=$(which gtar)
+            sudo mv $gtar_path $gtar_path.orig
+            echo "#!/bin/sh" >> $gtar_path
+            echo "exec sudo $gtar_path.orig \"\$@\"" >> $gtar_path
+            sudo chmod +x $gtar_path
+          elif [ "$RUNNER_OS" == "Linux" ]; then
+            mkdir -p ~/.cache
+            mkdir -p ~/.local/bin
+            echo "#!/bin/sh" >> ~/.local/bin/tar
+            echo 'exec sudo /usr/bin/tar "$@"' >> ~/.local/bin/tar
+            sudo chmod +x ~/.local/bin/tar
+          fi
       - name: Mount nix store cache
         id: cache-nix-store
         uses: actions/cache/restore@v4
@@ -55,7 +71,7 @@ jobs:
             /nix/var/nix
           key: nix-store-${{ hashFiles('shell.nix', 'flake.lock') }}
 
-      - name: Build devShell
+      - name: Build devShell to populate Nix store
         run: nix develop -c echo devShell built
 
       - name: Save nix store cache
@@ -70,6 +86,16 @@ jobs:
             /nix/store
             /nix/var/nix
           key: nix-store-${{ hashFiles('shell.nix', 'flake.lock') }}
+      - name: Restore tar command
+        shell: bash
+        run: |
+          if [ "$RUNNER_OS" == "macOS" ]; then
+            gtar_path=$(which gtar)
+            sudo mv $gtar_path.orig $gtar_path
+          elif [ "$RUNNER_OS" == "Linux" ]; then
+            rm ~/.local/bin/tar
+          fi
+      # END of Nix store caching
 
       # Install npm packages, unless we restored them from cache.
       # Since `npm ci` removes the node_modules folder before running it’s
@@ -117,36 +143,9 @@ jobs:
 
       - uses: DeterminateSystems/determinate-nix-action@v3
 
-      - name: Mount nix store cache
-        id: cache-nix-store
-        uses: actions/cache/restore@v4
-        with:
-          path: |
-            ~/.cache/devbox
-            ~/.cache/nix
-            ~/.local/state/nix
-            ~/.nix-defexpr
-            ~/.nix-profile
-            /nix/store
-            /nix/var/nix
-          key: nix-store-${{ hashFiles('branch/shell.nix', 'branch/flake.lock') }}
-
       - name: Build devShell (branch)
         run: nix develop -c echo devShell built
         working-directory: branch
-
-      - name: Save nix store cache
-        if: steps.cache-nix-store.outputs.cache-hit != 'true'
-        uses: actions/cache/save@v4
-        with:
-          path: |
-            ~/.cache/nix
-            ~/.local/state/nix
-            ~/.nix-defexpr
-            ~/.nix-profile
-            /nix/store
-            /nix/var/nix
-          key: nix-store-${{ hashFiles('branch/shell.nix', 'branch/flake.lock') }}
 
       - name: Build devShell (main)
         run: nix develop -c echo devShell built

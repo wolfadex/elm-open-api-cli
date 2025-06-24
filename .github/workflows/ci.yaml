@@ -41,6 +41,10 @@ jobs:
         if: steps.cache-node_modules.outputs.cache-hit != 'true'
         run: npm ci
 
+      # TEMPORARY UNTIL elm-open-api-codegen IS PUBLISHED
+      - name: TEMP HACK
+        run: npm run link-local-package
+
       - name: Format
         run: npm run format
       - name: Review
@@ -111,6 +115,10 @@ jobs:
         working-directory: main
         run: npm ci
   
+      # TEMPORARY UNTIL elm-open-api-codegen IS PUBLISHED
+      - name: TEMP HACK
+        run: npm run link-local-package
+
       - name: Generate (branch)
         working-directory: branch
         run: npm run test:gen

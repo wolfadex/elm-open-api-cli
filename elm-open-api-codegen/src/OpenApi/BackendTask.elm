@@ -1,5 +1,11 @@
 module OpenApi.BackendTask exposing (withConfig)
 
+{-| Run OpenAPI code generation via an Elm Pages `BackendTask`.
+
+@docs withConfig
+
+-}
+
 import Ansi
 import Ansi.Color
 import BackendTask exposing (BackendTask)
@@ -44,6 +50,8 @@ withInnerStep index total label toTask =
         (\( input, acc1, acc2 ) -> toTask input |> BackendTask.map (\result -> ( result, acc1, acc2 )))
 
 
+{-| Given a configuration, create the BackendTask to run the code generation.
+-}
 withConfig : OpenApi.Config.Config -> BackendTask FatalError ()
 withConfig config =
     let

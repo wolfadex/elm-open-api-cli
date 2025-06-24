@@ -4,7 +4,7 @@
   "description": "Example of generating OpenAPI code using the elm-open-api API",
   "main": "index.js",
   "scripts": {
-    "test": "elm-pages run ./scripts/src/CodeGenOpenApi.elm"
+    "test": "scripts/test"
   },
   "author": "",
   "license": "BSD-3-Clause",

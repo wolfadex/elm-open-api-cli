@@ -79,17 +79,17 @@ jobs:
       - name: TEMP HACK
         run: nix develop --command npm run link-local-package
 
-      - run: find ~/.elm
-
       - name: Format
         run: nix develop --command npm run format
 
-
       - name: Review
-        run: nix develop --command npm run review || find ~/.elm
+        run: nix develop --command npm run review
 
       - name: Test
         run: nix develop --command npm run test
+
+      - name: Build
+        run: nix develop --command npm run build
 
       # TEMPORARY UNTIL elm-open-api-codegen IS PUBLISHED
       - name: TEMP HACK
@@ -128,8 +128,9 @@ jobs:
             /nix/var/nix
           key: nix-store-${{ hashFiles('shell.nix', 'flake.lock') }}
 
-      - name: Build devShell
+      - name: Build devShell (branch)
         run: nix develop -c echo devShell built
+        working-directory: branch
 
       - name: Save nix store cache
         if: steps.cache-nix-store.outputs.cache-hit != 'true'
@@ -143,6 +144,10 @@ jobs:
             /nix/store
             /nix/var/nix
           key: nix-store-${{ hashFiles('shell.nix', 'flake.lock') }}
+
+      - name: Build devShell (main)
+        run: nix develop -c echo devShell built
+        working-directory: main
 
       # Re-use node_modules between runs until package-lock.json changes.
       - name: Cache node_modules (branch)

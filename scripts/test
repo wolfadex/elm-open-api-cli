@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
 set -e
+cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." &>/dev/null
+./scripts/is-in-dev-shell
+
 env -C elm-open-api-codegen elm-test
 npm -C example-using-api test

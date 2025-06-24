@@ -37,6 +37,36 @@ jobs:
               'elm-open-api-codegen/review/elm.json'
             )}}
 
+      # Caching based on https://github.com/jetify-com/devbox-install-action/blob/main/action.yml
+      - name: Mount nix store cache
+        id: cache-nix-store
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            ~/.cache/devbox
+            ~/.cache/nix
+            ~/.local/state/nix
+            ~/.nix-defexpr
+            ~/.nix-profile
+            /nix/store
+            /nix/var/nix
+          key: nix-store-${{ hashFiles('shell.nix', 'flake.lock') }}
+
+      - name: Build devShell
+        run: nix develop -c echo devShell built
+
+      - name: Save nix store cache
+        if: steps.cache-nix-store.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            ~/.cache/nix
+            ~/.local/state/nix
+            ~/.nix-defexpr
+            ~/.nix-profile
+            /nix/store
+            /nix/var/nix
+          key: nix-store-${{ hashFiles('shell.nix', 'flake.lock') }}
 
       # Install npm packages, unless we restored them from cache.
       # Since `npm ci` removes the node_modules folder before running it’s
@@ -49,10 +79,15 @@ jobs:
       - name: TEMP HACK
         run: nix develop --command npm run link-local-package
 
+      - run: find ~/.elm
+
       - name: Format
         run: nix develop --command npm run format
+
+
       - name: Review
-        run: nix develop --command npm run review
+        run: nix develop --command npm run review || find ~/.elm
+
       - name: Test
         run: nix develop --command npm run test
 
@@ -78,6 +113,36 @@ jobs:
           path: main
 
       - uses: DeterminateSystems/determinate-nix-action@v3
+
+      - name: Mount nix store cache
+        id: cache-nix-store
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            ~/.cache/devbox
+            ~/.cache/nix
+            ~/.local/state/nix
+            ~/.nix-defexpr
+            ~/.nix-profile
+            /nix/store
+            /nix/var/nix
+          key: nix-store-${{ hashFiles('shell.nix', 'flake.lock') }}
+
+      - name: Build devShell
+        run: nix develop -c echo devShell built
+
+      - name: Save nix store cache
+        if: steps.cache-nix-store.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            ~/.cache/nix
+            ~/.local/state/nix
+            ~/.nix-defexpr
+            ~/.nix-profile
+            /nix/store
+            /nix/var/nix
+          key: nix-store-${{ hashFiles('shell.nix', 'flake.lock') }}
 
       # Re-use node_modules between runs until package-lock.json changes.
       - name: Cache node_modules (branch)

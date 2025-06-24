@@ -1,14 +1,42 @@
 #!/usr/bin/env bash
 set -e
-echo "Checking formatting in root project"
-elm-format src --validate
-echo "Checking formatting in elm-open-api-codegen"
+
+usage() {
+  echo "Usage: $0 [--write]"
+  echo
+  echo "Formats all project files using elm-format."
+  echo
+  echo "--validate      Check formatting (default)"
+  echo "--write         Format files"
+  echo
+}
+
+MODE=${1:---validate}
+if [[ "$MODE" == "--validate" ]]; then
+  ACTION="Checking formatting in"
+elif [[ "$MODE" == "--help" ]]; then
+  usage >&2
+  exit
+elif [[ "$MODE" == "--write" ]]; then
+  ACTION="Formatting"
+  MODE=--yes
+else
+  usage >&2
+  echo >&2 "Parameter '$MODE' not recognized"
+  exit 1
+fi
+
+echo -e "-- $ACTION root project" >&2
+elm-format src "$MODE"
+
+echo -e "\n-- $ACTION ./elm-open-api-codegen" >&2
 cd elm-open-api-codegen
 find . \
   -wholename './src/Gen/**' -prune -o \
   -name elm-stuff -prune -o \
-  -name *.elm \
-  -exec elm-format --validate {} \+
+  -name '*.elm' \
+  -exec elm-format "$MODE" {} \+
 cd ..
-echo "Checking formatting in example-using-api"
-env -C example-using-api elm-format src scripts --validate
+
+echo -e "\n-- $ACTION ./example-using-api" >&2
+env -C example-using-api elm-format src scripts "$MODE"

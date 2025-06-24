@@ -11,6 +11,7 @@
         "review": "elm-review",
         "review:watch": "elm-review --watch --fix",
         "format": "scripts/format",
+        "format:fix": "scripts/format --write",
         "test": "scripts/test",
         "test:gen": "elm-pages run src/TestGenScript.elm",
         "test:watch": "cd elm-open-api-codegen && elm-test --watch",

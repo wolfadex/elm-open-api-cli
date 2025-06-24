@@ -109,6 +109,6 @@ run =
                 |> Ansi.Color.fontColor Ansi.Color.brightGreen
                 |> Pages.Script.log
             , Pages.Script.exec "sh"
-                [ "-c", "cd example && npx --no -- elm make src/Example.elm --output=/dev/null" ]
+                [ "-c", "cd example && elm make src/Example.elm --output=/dev/null" ]
             ]
         )

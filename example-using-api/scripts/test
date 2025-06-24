@@ -1,7 +1,6 @@
-#!/usr/bin/env bash 
+#!/usr/bin/env bash
 if ! [ -d node_modules ]; then
   # elm-pages will crash with a vague error if elm-codegen is not in PATH.
   npm install
 fi
 elm-pages run ./scripts/src/CodeGenOpenApi.elm
-

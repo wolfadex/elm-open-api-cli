@@ -129,7 +129,7 @@ jobs:
             ~/.nix-profile
             /nix/store
             /nix/var/nix
-          key: nix-store-${{ hashFiles('shell.nix', 'flake.lock') }}
+          key: nix-store-${{ hashFiles('branch/shell.nix', 'branch/flake.lock') }}
 
       - name: Build devShell (branch)
         run: nix develop -c echo devShell built
@@ -146,7 +146,7 @@ jobs:
             ~/.nix-profile
             /nix/store
             /nix/var/nix
-          key: nix-store-${{ hashFiles('shell.nix', 'flake.lock') }}
+          key: nix-store-${{ hashFiles('branch/shell.nix', 'branch/flake.lock') }}
 
       - name: Build devShell (main)
         run: nix develop -c echo devShell built

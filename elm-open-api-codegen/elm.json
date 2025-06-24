@@ -4,12 +4,12 @@
     "summary": "Code generation used by elm-open-api-cli",
     "license": "BSD-3-Clause",
     "version": "1.0.0",
+    "elm-version": "0.19.0 <= v < 0.20.0",
     "exposed-modules": [
         "Common",
         "OpenApi.BackendTask",
         "OpenApi.Config"
     ],
-    "elm-version": "0.19.0 <= v < 0.20.0",
     "dependencies": {
         "dillonkearns/elm-pages": "10.2.2 <= v < 11.0.0",
         "elm/core": "1.0.5 <= v < 2.0.0",

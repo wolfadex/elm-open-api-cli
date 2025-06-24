@@ -1,5 +1,8 @@
 name: Merge Checks
 run-name: ${{ github.actor }} is testing out GitHub Actions 🚀
+env:
+  DEBUG: 1
+  NODE_DEBUG: 1
 on:
   pull_request:
     branches:
@@ -202,6 +205,7 @@ jobs:
       # TEMPORARY UNTIL elm-open-api-codegen IS PUBLISHED
       - name: TEMP HACK
         run: nix develop --command npm run link-local-package
+        working-directory: branch
 
       - name: Generate (branch)
         working-directory: branch
@@ -214,6 +218,7 @@ jobs:
       # TEMPORARY UNTIL elm-open-api-codegen IS PUBLISHED
       - name: TEMP HACK
         run: nix develop --command npm run unlink-local-package
+        working-directory: branch
 
       - name: Diff the outputs
         run: |

@@ -11,14 +11,18 @@ code based on the `format` listed in your OpenAPI schema.
 See the [example of using this package][example], located in the `-cli`
 repository.
 
-When running `elm-codegen`--or in any other way modifying this package's
-`codegen/elm.codegen.json` file--be sure to run this script afterward:
+The `elm.codegen.json` file in this project is located in the `src` directory.
+Since this isn't the standard directory, you'll need to tell elm-codegen where
+it is. You can run `elm-codegen install --cwd=src` or use this wrapper script:
 
-    ./scripts/sync-elm-codegen
+    ./scripts/codegen
 
-This moves the `Gen.*` modules to the `src/` folder, which is necessary because
-the code in this project is part of an Elm _package_, and unlike Elm
-applications, Elm packages do not support specifying extra source directories.
+The codegen config is in `src` so that the `Gen.*` modules are written to the
+`src/` folder, which is necessary because the code in this project is part of an
+Elm _package_, and unlike Elm applications, Elm packages do not support
+specifying extra source directories.
+
+Note that `elm-codegen run` isn't used (there is no `Generate.elm` file).
 
 [elm-open-api-cli]: https://github.com/wolfadex/elm-open-api-cli
 [example]: https://github.com/wolfadex/elm-open-api-cli/tree/main/example-using-api

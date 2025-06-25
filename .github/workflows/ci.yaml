@@ -1,8 +1,5 @@
 name: Merge Checks
 run-name: ${{ github.actor }} is testing out GitHub Actions 🚀
-env:
-  DEBUG: 1
-  NODE_DEBUG: 1
 on:
   pull_request:
     branches:
@@ -114,11 +111,11 @@ jobs:
       - name: Review
         run: nix develop --command npm run review
 
-      - name: Build
-        run: nix develop --command npm run build
-
       - name: Test
         run: nix develop --command npm run test
+
+      - name: Build
+        run: nix develop --command npm run build
 
       # TEMPORARY UNTIL elm-open-api-codegen IS PUBLISHED
       - name: TEMP HACK

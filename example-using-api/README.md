@@ -1,7 +1,7 @@
 # elm-open-api-codegen example
 
-This example uses `elm-open-api-codegen` to generates Elm code for an API
-schema, customizing some of the generated code in the process, by use of the
+This example uses `elm-open-api-codegen` to generate Elm code for an API schema,
+customizing some of the generated code in the process, by use of the
 `OpenApi.Config.withFormat` function.
 
 The "project" includes a `Data.Id` module that defines an opaque id type for API

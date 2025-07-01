@@ -1,2 +1,55 @@
-#!/usr/bin/env bash
-exec npx --no -- elm-codegen install --cwd=src "$@"
+#!/usr/bin/env node
+import { spawnSync } from "node:child_process";
+import { readdirSync } from "node:fs";
+import { unlink } from "node:fs/promises";
+
+const debug = process.env.DEBUG ? console.trace : () => {};
+
+function recursiveReaddir(path) {
+  const entries = readdirSync(path, { withFileTypes: true });
+  return entries.flatMap((dirent) => {
+    if (dirent.isDirectory()) {
+      return recursiveReaddir(`${path}/${dirent.name}`);
+    }
+    if (dirent.name.endsWith(".elm")) {
+      return [`${path}/${dirent.name}`];
+    }
+    return [];
+  });
+}
+
+// First generate all codegen helpers.
+spawnSync("npx", ["--no", "--", "elm-codegen", "install", "--cwd=src"], {
+  stdio: "inherit",
+});
+
+// Find all instances of importing codegen helpers.
+const { stdout } = spawnSync("grep", ["import Gen.", "-Rh", "src"]);
+
+// Determine which helper modules are actually used.
+const neededGenFiles = new Set(
+  stdout
+    .toString()
+    .trim()
+    .split("\n")
+    .map((line) => {
+      const moduleName = line
+        // Remove everything except module name
+        .replace(/^import ([^ ]*).*$/, "$1")
+        // Replace namespace separators with path separators
+        .replaceAll(".", "/");
+
+      return `src/${moduleName}.elm`;
+    }),
+);
+debug("needed Gen files", neededGenFiles);
+
+// Find *all* Gen files so we can determine which to delete.
+const allGenFiles = recursiveReaddir("src/Gen");
+const unneededGenFiles = allGenFiles.filter(
+  (file) => !neededGenFiles.has(file),
+);
+debug("Deletable files", unneededGenFiles);
+
+// Delete the dead code.
+await Promise.all(unneededGenFiles.map((file) => unlink(file)));

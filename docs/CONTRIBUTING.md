@@ -8,12 +8,19 @@ The general flow of the app is:
 
 ## Getting Started
 
+Make sure you have Nix installed (with flakes enabled) so you can use the
+project's development shell. An easy way to satisfy this requirement is the
+[Determinate Nix Installer][determinate-nix]).
+
 - Clone this repo
-- Inside your cloned repo, run `direnv allow`
+- Inside your cloned repo, run `direnv allow` to automatically enter the development shell,
+  - if you don't use direnv, run `nix develop` to manually enter a development shell
 - Start coding!
 - Run `npm run dev <path to oas spec>`
-  - e.g. `npm run dev ./example/github-spec.json` will produce: `generated/GithubV3RestApi/APi.elm`, `generated/GithubV3RestApi/Json.elm`, `generated/GithubV3RestApi/Types.elm`, and `generated/OpenApi/Common.elm`
+  - e.g. `npm run dev ./example/github-spec.json` will produce: `generated/GithubV3RestApi/Api.elm`, `generated/GithubV3RestApi/Json.elm`, `generated/GithubV3RestApi/Types.elm`, and `generated/OpenApi/Common.elm`
 - Please run `npm run test:gen` when making a pull request to ensure that the generated code is correct. _(would be nice to have this as part of the CI checks in the future)_
+
+[determinate-nix]: https://github.com/DeterminateSystems/nix-installer?tab=readme-ov-file#determinate-nix-installer
 
 ## Project structure
 

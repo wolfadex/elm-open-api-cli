@@ -3,8 +3,8 @@
 The general flow of the app is:
 
 1. parse args & read in the spec using `elm-pages`
-1. generate the Elm code with `elm-codegen`
-1. write it to disk using `elm-pages`.
+2. generate the Elm code with `elm-codegen`
+3. write it to disk using `elm-pages`.
 
 ## Getting Started
 

@@ -23,12 +23,15 @@
     "license": "MIT",
     "devDependencies": {
         "@lydell/elm-json": "0.2.13-1",
-        "@redocly/cli": "1.11.0",
+        "@redocly/cli": "^1.34.4",
         "elm-codegen": "^0.6.1",
-        "elm-optimize-level-2": "0.3.5",
+        "elm-optimize-level-2": "^0.3.5",
         "elm-pages": "^3.0.24",
         "run-pty": "^5.0.0",
         "vite": "^6.0.3"
+    },
+    "overrides": {
+        "cross-spawn": "6.0.6"
     },
     "volta": {
         "node": "20.11.0"

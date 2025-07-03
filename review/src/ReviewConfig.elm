@@ -18,6 +18,7 @@ import NoUnused.CustomTypeConstructorArgs
 import NoUnused.CustomTypeConstructors
 import NoUnused.Dependencies
 import NoUnused.Exports
+import NoUnused.Modules
 import NoUnused.Parameters
 import NoUnused.Patterns
 import NoUnused.Variables
@@ -33,8 +34,9 @@ config =
         , from = exposedModules
         }
     , Docs.ReviewLinksAndSections.rule
-        |> Rule.ignoreErrorsForDirectories [ "src/Gen" ]
+        |> Rule.ignoreErrorsForDirectories [ "src/Gen", "codegen" ]
     , Docs.ReviewAtDocs.rule
+        |> Rule.ignoreErrorsForDirectories [ "codegen" ]
     , Docs.UpToDateReadmeLinks.rule
     , NoConfusingPrefixOperator.rule
     , NoDebug.Log.rule
@@ -43,12 +45,15 @@ config =
     , NoExposingEverything.rule
     , NoImportingEverything.rule []
     , NoMissingTypeAnnotation.rule
+        |> Rule.ignoreErrorsForDirectories [ "codegen" ]
     , NoMissingTypeAnnotationInLetIn.rule
+        |> Rule.ignoreErrorsForDirectories [ "codegen" ]
     , NoMissingTypeExpose.rule
     , NoSimpleLetBody.rule
     , NoPrematureLetComputation.rule
     , NoUnused.CustomTypeConstructors.rule []
     , NoUnused.CustomTypeConstructorArgs.rule
+        |> Rule.ignoreErrorsForDirectories [ "codegen" ]
     , NoUnused.Dependencies.rule
     , NoUnused.Exports.rule
         |> Rule.ignoreErrorsForFiles
@@ -56,12 +61,16 @@ config =
             , "src/OpenApi/Config.elm"
             , "src/TestGenScript.elm"
             ]
+        |> Rule.ignoreErrorsForDirectories [ "codegen" ]
+
+    -- NoUnused.Modules would normally be redundant, but we are excluding codegen from NoUnused.Exports, and yet we still want to check for unused modules
+    , NoUnused.Modules.rule
+        |> Rule.ignoreErrorsForFiles [ "src/TestGenScript.elm" ]
     , NoUnused.Parameters.rule
     , NoUnused.Patterns.rule
     , NoUnused.Variables.rule
     , Simplify.rule Simplify.defaults
-        |> Rule.ignoreErrorsForDirectories [ "src/Gen" ]
+        |> Rule.ignoreErrorsForDirectories [ "src/Gen", "codegen" ]
     , Review.ImportSimple.rule
-        |> Rule.ignoreErrorsForDirectories [ "src/Gen" ]
+        |> Rule.ignoreErrorsForDirectories [ "src/Gen", "codegen" ]
     ]
-        |> List.map (Rule.ignoreErrorsForDirectories [ "codegen" ])

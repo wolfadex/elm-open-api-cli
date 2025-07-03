@@ -1,0 +1,22 @@
+[
+  {
+    "command": ["npx", "--no", "--", "elm-review", "--watch"],
+    "title": "elm-review - cli",
+    "cwd": ".",
+    "status": {
+      "ERROR": ["🚨", "E"],
+      "I found no errors!": null
+    },
+    "defaultStatus": ["⏳", "S"]
+  },
+  {
+    "command": ["npx", "--no", "--", "elm-review", "--watch"],
+    "title": "elm-review - package",
+    "cwd": "./elm-open-api-codegen",
+    "status": {
+      "ERROR": ["🚨", "E"],
+      "I found no errors!": null
+    },
+    "defaultStatus": ["⏳", "S"]
+  }
+]

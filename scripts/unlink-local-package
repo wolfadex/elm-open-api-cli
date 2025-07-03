@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+set -e
+cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." &>/dev/null
+./scripts/is-in-dev-shell
+
+rm -rf .elm-pages elm-open-api-codegen/.elm-pages example-using-api/.elm-pages
+sed -i -e 's#"mpizenberg/elm-placeholder-pkg"#"wolfadex/elm-open-api-codegen"#' elm.json example-using-api/scripts/elm.json

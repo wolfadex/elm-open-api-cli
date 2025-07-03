@@ -12,10 +12,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Use Node.js 20
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
+
+      - uses: DeterminateSystems/determinate-nix-action@v3
 
       # Re-use node_modules between runs until package-lock.json changes.
       - name: Cache node_modules
@@ -26,27 +24,102 @@ jobs:
           key: node_modules-${{ hashFiles('package-lock.json') }}
 
       # Re-use ~/.elm between runs until elm.json or review/elm.json changes.
-      # The Elm compiler saves downloaded Elm packages to ~/.elm saves
-      # downloaded tool executables there.
+      # The Elm compiler saves downloaded Elm packages to ~/.elm
       - name: Cache ~/.elm
         uses: actions/cache@v4
         with:
           path: ~/.elm
-          key: elm-${{ hashFiles('elm.json', 'review/elm.json') }}
+          key: |
+            elm-${{ hashFiles(
+              'elm.json',
+              'review/elm.json',
+              'elm-open-api-codegen/elm.json',
+              'elm-open-api-codegen/review/elm.json'
+            )}}
+
+      # Caching based on https://github.com/jetify-com/devbox-install-action/blob/main/action.yml
+      - name: Workaround nix store cache permission issue
+        shell: bash
+        run: |
+          if [ "$RUNNER_OS" == "macOS" ]; then
+            gtar_path=$(which gtar)
+            sudo mv $gtar_path $gtar_path.orig
+            echo "#!/bin/sh" >> $gtar_path
+            echo "exec sudo $gtar_path.orig \"\$@\"" >> $gtar_path
+            sudo chmod +x $gtar_path
+          elif [ "$RUNNER_OS" == "Linux" ]; then
+            mkdir -p ~/.cache
+            mkdir -p ~/.local/bin
+            echo "#!/bin/sh" >> ~/.local/bin/tar
+            echo 'exec sudo /usr/bin/tar "$@"' >> ~/.local/bin/tar
+            sudo chmod +x ~/.local/bin/tar
+          fi
+      - name: Mount nix store cache
+        id: cache-nix-store
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            ~/.cache/devbox
+            ~/.cache/nix
+            ~/.local/state/nix
+            ~/.nix-defexpr
+            ~/.nix-profile
+            /nix/store
+            /nix/var/nix
+          key: nix-store-${{ hashFiles('shell.nix', 'flake.lock') }}
+
+      - name: Build devShell to populate Nix store
+        run: nix develop -c echo devShell built
+
+      - name: Save nix store cache
+        if: steps.cache-nix-store.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            ~/.cache/nix
+            ~/.local/state/nix
+            ~/.nix-defexpr
+            ~/.nix-profile
+            /nix/store
+            /nix/var/nix
+          key: nix-store-${{ hashFiles('shell.nix', 'flake.lock') }}
+      - name: Restore tar command
+        shell: bash
+        run: |
+          if [ "$RUNNER_OS" == "macOS" ]; then
+            gtar_path=$(which gtar)
+            sudo mv $gtar_path.orig $gtar_path
+          elif [ "$RUNNER_OS" == "Linux" ]; then
+            rm ~/.local/bin/tar
+          fi
+      # END of Nix store caching
 
       # Install npm packages, unless we restored them from cache.
       # Since `npm ci` removes the node_modules folder before running it’s
       # important to skip this step if cache was restored.
       - name: npm ci
         if: steps.cache-node_modules.outputs.cache-hit != 'true'
-        run: npm ci
+        run: nix develop --command npm ci
+
+      # TEMPORARY UNTIL elm-open-api-codegen IS PUBLISHED
+      - name: TEMP HACK
+        run: nix develop --command npm run link-local-package
 
       - name: Format
-        run: npm run format
+        run: nix develop --command npm run format
+
       - name: Review
-        run: npm run review
+        run: nix develop --command npm run review
+
       - name: Test
-        run: npm run test
+        run: nix develop --command npm run test
+
+      - name: Build
+        run: nix develop --command npm run build
+
+      # TEMPORARY UNTIL elm-open-api-codegen IS PUBLISHED
+      - name: TEMP HACK
+        run: nix develop --command npm run unlink-local-package
 
   diff-generation:
     permissions:
@@ -54,11 +127,6 @@ jobs:
       pull-requests: write
     runs-on: ubuntu-latest
     steps:
-      - name: Use Node.js 20
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
       - name: Checkout branch
         uses: actions/checkout@v4
         with:
@@ -69,6 +137,16 @@ jobs:
         with:
           ref: main
           path: main
+
+      - uses: DeterminateSystems/determinate-nix-action@v3
+
+      - name: Build devShell (branch)
+        run: nix develop -c echo devShell built
+        working-directory: branch
+
+      - name: Build devShell (main)
+        run: nix develop -c echo devShell built
+        working-directory: main
 
       # Re-use node_modules between runs until package-lock.json changes.
       - name: Cache node_modules (branch)
@@ -87,13 +165,22 @@ jobs:
           key: node_modules-${{ hashFiles('main/package-lock.json') }}
 
       # Re-use ~/.elm between runs until elm.json or review/elm.json changes.
-      # The Elm compiler saves downloaded Elm packages to ~/.elm saves
-      # downloaded tool executables there.
+      # The Elm compiler saves downloaded Elm packages to ~/.elm.
       - name: Cache ~/.elm (both)
         uses: actions/cache@v4
         with:
           path: ~/.elm
-          key: elm-${{ hashFiles('main/elm.json', 'main/review/elm.json', 'branch/elm.json', 'branch/review/elm.json') }}
+          key: |
+            elm-${{ hashFiles(
+              'main/elm.json',
+              'main/review/elm.json',
+              'main/elm-open-api-codegen/elm.json',
+              'main/elm-open-api-codegen/review/elm.json',
+              'branch/elm.json',
+              'branch/review/elm.json',
+              'branch/elm-open-api-codegen/elm.json',
+              'branch/elm-open-api-codegen/review/elm.json'
+            )}}
 
       # Install npm packages, unless we restored them from cache.
       # Since `npm ci` removes the node_modules folder before running it’s
@@ -101,7 +188,7 @@ jobs:
       - name: npm ci (branch)
         if: steps.cache-node_modules-branch.outputs.cache-hit != 'true'
         working-directory: branch
-        run: npm ci
+        run: nix develop --command npm ci
 
       # Install npm packages, unless we restored them from cache.
       # Since `npm ci` removes the node_modules folder before running it’s
@@ -109,15 +196,25 @@ jobs:
       - name: npm ci (main)
         if: steps.cache-node_modules-main.outputs.cache-hit != 'true'
         working-directory: main
-        run: npm ci
+        run: nix develop --command npm ci
   
+      # TEMPORARY UNTIL elm-open-api-codegen IS PUBLISHED
+      - name: TEMP HACK
+        run: nix develop --command npm run link-local-package
+        working-directory: branch
+
       - name: Generate (branch)
         working-directory: branch
-        run: npm run test:gen
+        run: nix develop --command npm run test:gen
   
       - name: Generate (main)
         working-directory: main
-        run: npm run test:gen || true # We don't want to block on main failing to generate
+        run: nix develop --command npm run test:gen || true # We don't want to block on main failing to generate
+
+      # TEMPORARY UNTIL elm-open-api-codegen IS PUBLISHED
+      - name: TEMP HACK
+        run: nix develop --command npm run unlink-local-package
+        working-directory: branch
 
       - name: Diff the outputs
         run: |

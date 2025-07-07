@@ -38,6 +38,7 @@ import Json.Decode
 import Json.Encode
 import Json.Schema.Definitions
 import Maybe.Extra
+import Murmur3
 import OpenApi
 import OpenApi.Common.Internal
 import OpenApi.Components
@@ -515,7 +516,8 @@ oneOfType types =
                             Common.OneOf
                                 (names
                                     |> List.map fixOneOfName
-                                    |> String.join "_Or_"
+                                    |> String.join "_or_"
+                                    |> (\s -> "OneOf" ++ String.fromInt (Murmur3.hashString 1234 s))
                                 )
                                 sortedVariants
                         , documentation =

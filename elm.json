@@ -18,6 +18,7 @@
         "json-tools/json-schema": "1.0.0 <= v < 2.0.0",
         "mdgriffith/elm-codegen": "5.2.0 <= v < 6.0.0",
         "miniBill/elm-fast-dict": "1.2.0 <= v < 2.0.0",
+        "robinheghan/murmur3": "1.0.0 <= v < 2.0.0",
         "turboMaCk/non-empty-list-alias": "1.4.0 <= v < 2.0.0",
         "wolfadex/elm-open-api": "2.0.0 <= v < 3.0.0"
     },

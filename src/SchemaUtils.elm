@@ -5,6 +5,7 @@ module SchemaUtils exposing
     , recordType
     , refToTypeName
     , schemaToType
+    , subschemaToEnumMaybe
     , toVariantName
     , typeToAnnotationWithMaybe
     , typeToAnnotationWithNullable
@@ -36,7 +37,6 @@ import Gen.String
 import Json.Decode
 import Json.Encode
 import Json.Schema.Definitions
-import List.Extra
 import Maybe.Extra
 import OpenApi
 import OpenApi.Common.Internal
@@ -283,20 +283,18 @@ schemaToType qualify schema =
             in
             case subSchema.type_ of
                 Json.Schema.Definitions.SingleType Json.Schema.Definitions.StringType ->
-                    case subSchema.enum of
-                        Nothing ->
+                    case subschemaToEnumMaybe subSchema of
+                        Ok Nothing ->
                             singleTypeToType Json.Schema.Definitions.StringType
 
-                        Just enums ->
-                            case Result.Extra.combineMap (Json.Decode.decodeValue Json.Decode.string) enums of
-                                Err _ ->
-                                    CliMonad.fail "Attempted to parse an enum as a string and failed"
+                        Ok (Just decodedEnums) ->
+                            CliMonad.succeed
+                                { type_ = Common.enum decodedEnums
+                                , documentation = subSchema.description
+                                }
 
-                                Ok decodedEnums ->
-                                    CliMonad.succeed
-                                        { type_ = Common.enum decodedEnums
-                                        , documentation = subSchema.description
-                                        }
+                        Err e ->
+                            CliMonad.fail e
 
                 Json.Schema.Definitions.SingleType singleType ->
                     singleTypeToType singleType
@@ -358,37 +356,33 @@ schemaToType qualify schema =
                                                     oneOfToType oneOfs
 
                                                 Nothing ->
-                                                    case subSchema.enum of
-                                                        Nothing ->
+                                                    case subschemaToEnumMaybe subSchema of
+                                                        Ok Nothing ->
                                                             CliMonad.succeed { type_ = Common.Value, documentation = subSchema.description }
 
-                                                        Just enums ->
-                                                            case Result.Extra.combineMap (Json.Decode.decodeValue Json.Decode.string) enums of
-                                                                Err _ ->
-                                                                    CliMonad.fail "Attempted to parse an enum as a string and failed"
+                                                        Ok (Just decodedEnums) ->
+                                                            CliMonad.succeed
+                                                                { type_ = Common.enum decodedEnums
+                                                                , documentation = subSchema.description
+                                                                }
 
-                                                                Ok decodedEnums ->
-                                                                    CliMonad.succeed
-                                                                        { type_ = Common.enum decodedEnums
-                                                                        , documentation = subSchema.description
-                                                                        }
+                                                        Err e ->
+                                                            CliMonad.fail e
 
                 Json.Schema.Definitions.NullableType Json.Schema.Definitions.StringType ->
-                    case subSchema.enum of
-                        Nothing ->
+                    case subschemaToEnumMaybe subSchema of
+                        Ok Nothing ->
                             nullable (singleTypeToType Json.Schema.Definitions.StringType)
 
-                        Just enums ->
-                            case Result.Extra.combineMap (Json.Decode.decodeValue Json.Decode.string) enums of
-                                Err _ ->
-                                    CliMonad.fail "Attempted to parse an enum as a string and failed"
+                        Ok (Just decodedEnums) ->
+                            CliMonad.succeed
+                                { type_ = Common.enum decodedEnums
+                                , documentation = subSchema.description
+                                }
+                                |> nullable
 
-                                Ok decodedEnums ->
-                                    CliMonad.succeed
-                                        { type_ = Common.enum (List.Extra.removeWhen String.isEmpty decodedEnums)
-                                        , documentation = subSchema.description
-                                        }
-                                        |> nullable
+                        Err e ->
+                            CliMonad.fail e
 
                 Json.Schema.Definitions.NullableType singleType ->
                     nullable (singleTypeToType singleType)
@@ -414,6 +408,35 @@ schemaToType qualify schema =
                                 , documentation = documentation
                                 }
                             )
+
+
+subschemaToEnumMaybe : Json.Schema.Definitions.SubSchema -> Result String (Maybe (List String))
+subschemaToEnumMaybe subSchema =
+    case subSchema.enum of
+        Nothing ->
+            Ok Nothing
+
+        Just enums ->
+            case Result.Extra.combineMap (Json.Decode.decodeValue (Json.Decode.nullable Json.Decode.string)) enums of
+                Err _ ->
+                    Err "Attempted to parse an enum as a string and failed"
+
+                Ok decodedEnums ->
+                    Ok
+                        (Just
+                            (List.filterMap
+                                (Maybe.andThen
+                                    (\variant ->
+                                        if String.isEmpty variant then
+                                            Nothing
+
+                                        else
+                                            Just variant
+                                    )
+                                )
+                                decodedEnums
+                            )
+                        )
 
 
 typeToOneOfVariant :

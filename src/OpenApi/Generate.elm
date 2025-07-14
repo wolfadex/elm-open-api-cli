@@ -36,7 +36,6 @@ import Gen.Maybe
 import Gen.String
 import Gen.Task
 import Gen.Url.Builder
-import Json.Decode
 import Json.Schema.Definitions
 import JsonSchema.Generate
 import List.Extra
@@ -56,7 +55,6 @@ import OpenApi.Schema
 import OpenApi.SecurityRequirement
 import OpenApi.SecurityScheme
 import OpenApi.Server
-import Result.Extra
 import SchemaUtils
 import String.Extra
 
@@ -182,37 +180,25 @@ extractEnums openApi =
                     (\acc ->
                         case OpenApi.Schema.get schema of
                             Json.Schema.Definitions.ObjectSchema subSchema ->
-                                case subSchema.enum of
-                                    Nothing ->
+                                case SchemaUtils.subschemaToEnumMaybe subSchema of
+                                    Ok (Just decodedEnums) ->
+                                        Ok
+                                            (FastDict.insert
+                                                (List.sort decodedEnums)
+                                                { name = Common.UnsafeName name
+                                                , documentation = subSchema.description
+                                                }
+                                                acc
+                                            )
+
+                                    Ok Nothing ->
                                         Ok acc
 
-                                    Just enums ->
-                                        case
-                                            Result.Extra.combineMap
-                                                (Json.Decode.decodeValue
-                                                    (Json.Decode.oneOf
-                                                        [ Json.Decode.map Just Json.Decode.string
-                                                        , Json.Decode.null Nothing
-                                                        ]
-                                                    )
-                                                )
-                                                enums
-                                        of
-                                            Err _ ->
-                                                Err
-                                                    { message = "Attempted to parse an enum as a string and failed"
-                                                    , path = [ name, "Extracting enums" ]
-                                                    }
-
-                                            Ok decodedEnums ->
-                                                Ok
-                                                    (FastDict.insert
-                                                        (List.sort (List.filterMap identity decodedEnums))
-                                                        { name = Common.UnsafeName name
-                                                        , documentation = subSchema.description
-                                                        }
-                                                        acc
-                                                    )
+                                    Err e ->
+                                        Err
+                                            { message = e
+                                            , path = [ name, "Extracting enums" ]
+                                            }
 
                             _ ->
                                 Ok acc

@@ -36,6 +36,7 @@ import Gen.String
 import Json.Decode
 import Json.Encode
 import Json.Schema.Definitions
+import List.Extra
 import Maybe.Extra
 import OpenApi
 import OpenApi.Common.Internal
@@ -371,6 +372,23 @@ schemaToType qualify schema =
                                                                         { type_ = Common.enum decodedEnums
                                                                         , documentation = subSchema.description
                                                                         }
+
+                Json.Schema.Definitions.NullableType Json.Schema.Definitions.StringType ->
+                    case subSchema.enum of
+                        Nothing ->
+                            nullable (singleTypeToType Json.Schema.Definitions.StringType)
+
+                        Just enums ->
+                            case Result.Extra.combineMap (Json.Decode.decodeValue Json.Decode.string) enums of
+                                Err _ ->
+                                    CliMonad.fail "Attempted to parse an enum as a string and failed"
+
+                                Ok decodedEnums ->
+                                    CliMonad.succeed
+                                        { type_ = Common.enum (List.Extra.removeWhen String.isEmpty decodedEnums)
+                                        , documentation = subSchema.description
+                                        }
+                                        |> nullable
 
                 Json.Schema.Definitions.NullableType singleType ->
                     nullable (singleTypeToType singleType)

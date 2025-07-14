@@ -82,6 +82,10 @@ run =
         binaryResponse =
             OpenApi.Config.inputFrom (OpenApi.Config.File "./example/binary-response.yaml")
 
+        nullableEnum : OpenApi.Config.Input
+        nullableEnum =
+            OpenApi.Config.inputFrom (OpenApi.Config.File "./example/nullable-enum.yaml")
+
         config : OpenApi.Config.Config
         config =
             OpenApi.Config.init "./generated"
@@ -101,6 +105,7 @@ run =
                 |> OpenApi.Config.withInput gitHub
                 |> OpenApi.Config.withInput anyOfEnums
                 |> OpenApi.Config.withInput binaryResponse
+                |> OpenApi.Config.withInput nullableEnum
     in
     Pages.Script.withoutCliOptions
         (BackendTask.doEach

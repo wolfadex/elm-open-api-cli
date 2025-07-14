@@ -108,7 +108,7 @@ suite =
                                             { moduleName : List String
                                             , declarations : FastDict.Dict String { group : String, declaration : Elm.Declaration }
                                             }
-                                    , warnings : List CliMonad.Message
+                                    , messages : List CliMonad.Message
                                     , requiredPackages : FastSet.Set String
                                     }
                             genFiles =

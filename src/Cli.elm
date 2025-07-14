@@ -860,7 +860,7 @@ generateFilesFromOpenApiSpecs :
         BackendTask.BackendTask
             FatalError.FatalError
             ( List Elm.File
-            , { warnings : List CliMonad.Message
+            , { messages : List CliMonad.Message
               , requiredPackages : FastSet.Set String
               }
             )
@@ -872,7 +872,7 @@ generateFilesFromOpenApiSpecs configs =
                     |> Result.mapError
                         (\err ->
                             err
-                                |> messageToString
+                                |> errorToString
                                 |> FatalError.fromString
                         )
                     |> BackendTask.fromResult
@@ -960,7 +960,7 @@ generateFilesFromOpenApiSpecs configs =
                                     |> Just
                         )
                     |> (::) commonFile
-                , { warnings = List.concatMap .warnings result
+                , { messages = List.concatMap .messages result
                   , requiredPackages =
                         List.foldl
                             (\{ requiredPackages } acc -> FastSet.union requiredPackages acc)
@@ -1033,12 +1033,12 @@ writeSdkToDisk outputDirectory files =
 
 printSuccessMessageAndWarnings :
     ( List String
-    , { warnings : List CliMonad.Message
+    , { messages : List CliMonad.Message
       , requiredPackages : FastSet.Set String
       }
     )
     -> BackendTask.BackendTask FatalError.FatalError ()
-printSuccessMessageAndWarnings ( outputPaths, { requiredPackages, warnings } ) =
+printSuccessMessageAndWarnings ( outputPaths, { requiredPackages, messages } ) =
     let
         indentBy : Int -> String -> String
         indentBy amount input =
@@ -1070,12 +1070,12 @@ printSuccessMessageAndWarnings ( outputPaths, { requiredPackages, warnings } ) =
                 , url = "https://package.elm-lang.org/packages/" ++ dependency ++ "/latest/"
                 }
 
-        warningTask : BackendTask.BackendTask FatalError.FatalError ()
-        warningTask =
-            warnings
-                |> Dict.Extra.groupBy .message
+        messagesTask : BackendTask.BackendTask FatalError.FatalError ()
+        messagesTask =
+            messages
+                |> Dict.Extra.groupBy (\{ level, message } -> ( levelToString level, message ))
                 |> Dict.toList
-                |> List.map logWarning
+                |> List.map logMessage
                 |> BackendTask.doEach
 
         successTask : BackendTask.BackendTask error ()
@@ -1097,11 +1097,21 @@ printSuccessMessageAndWarnings ( outputPaths, { requiredPackages, warnings } ) =
                 |> List.map Pages.Script.log
                 |> BackendTask.doEach
     in
-    BackendTask.doEach [ successTask, warningTask ]
+    BackendTask.doEach [ successTask, messagesTask ]
 
 
-messageToString : CliMonad.Message -> String
-messageToString { path, message } =
+levelToString : CliMonad.MessageLevel -> String
+levelToString level =
+    case level of
+        CliMonad.Warning ->
+            "Waring"
+
+        CliMonad.Debug ->
+            "Debug"
+
+
+errorToString : CliMonad.Error -> String
+errorToString { path, message } =
     if List.isEmpty path then
         "Error! " ++ message
 
@@ -1109,12 +1119,16 @@ messageToString { path, message } =
         "Error! " ++ message ++ "\n  Path: " ++ String.join " -> " path
 
 
-logWarning : ( String, List CliMonad.Message ) -> BackendTask.BackendTask FatalError.FatalError ()
-logWarning ( message, messages ) =
+logMessage : ( ( String, String ), List CliMonad.Message ) -> BackendTask.BackendTask FatalError.FatalError ()
+logMessage ( ( level, message ), messages ) =
     let
         firstLine : String
         firstLine =
-            Ansi.Color.fontColor Ansi.Color.brightYellow "Warning: " ++ message
+            if level == "Warning" then
+                Ansi.Color.fontColor Ansi.Color.brightYellow (level ++ ": ") ++ message
+
+            else
+                Ansi.Color.fontColor Ansi.Color.cyan (level ++ ": ") ++ message
 
         paths : List String
         paths =

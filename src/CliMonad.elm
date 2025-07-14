@@ -1,24 +1,24 @@
 module CliMonad exposing
-    ( CliMonad, Message, OneOfName, Path, Declaration
+    ( CliMonad, Message, MessageLevel(..), Error, OneOfName, Path, Declaration
     , run, stepOrFail
     , succeed, succeedWith, fail
     , map, map2, map3
     , andThen, andThen2, andThen3, andThen4, combine, combineDict, combineMap, foldl
     , errorToWarning, fromApiSpec, enumName, moduleToNamespace
-    , withPath, withWarning, withRequiredPackage
+    , withPath, withWarning, withRequiredPackage, debug
     , todo, todoWithDefault
     , withFormat
     )
 
 {-|
 
-@docs CliMonad, Message, OneOfName, Path, Declaration
+@docs CliMonad, Message, MessageLevel, Error, OneOfName, Path, Declaration
 @docs run, stepOrFail
 @docs succeed, succeedWith, fail
 @docs map, map2, map3
 @docs andThen, andThen2, andThen3, andThen4, combine, combineDict, combineMap, foldl
 @docs errorToWarning, fromApiSpec, enumName, moduleToNamespace
-@docs withPath, withWarning, withRequiredPackage
+@docs withPath, withWarning, withRequiredPackage, debug
 @docs todo, todoWithDefault
 @docs withFormat
 
@@ -39,6 +39,18 @@ import String.Extra
 
 
 type alias Message =
+    { level : MessageLevel
+    , message : String
+    , path : Path
+    }
+
+
+type MessageLevel
+    = Warning
+    | Debug
+
+
+type alias Error =
     { message : String
     , path : Path
     }
@@ -76,12 +88,12 @@ type CliMonad a
          , namespace : List String
          , formats : FastDict.Dict InternalFormatName InternalFormat
          }
-         -> Result Message ( a, Output )
+         -> Result Error ( a, Output )
         )
 
 
 type alias Output =
-    { warnings : List Message
+    { messages : List Message
     , oneOfs : FastDict.Dict OneOfName Common.OneOfData
     , requiredPackages : FastSet.Set String
     , sharedDeclarations : FastDict.Dict String { value : Elm.Expression, group : String }
@@ -90,7 +102,7 @@ type alias Output =
 
 emptyOutput : Output
 emptyOutput =
-    { warnings = []
+    { messages = []
     , oneOfs = FastDict.empty
     , requiredPackages = FastSet.empty
     , sharedDeclarations = FastDict.empty
@@ -106,25 +118,40 @@ withPath segment (CliMonad f) =
                     Err (addPath segment message)
 
                 Ok ( res, output ) ->
-                    Ok ( res, { output | warnings = List.map (addPath segment) output.warnings } )
+                    Ok ( res, { output | messages = List.map (addPath segment) output.messages } )
         )
 
 
-addPath : Common.UnsafeName -> Message -> Message
-addPath (Common.UnsafeName segment) { path, message } =
-    { path = segment :: path
-    , message = message
-    }
+addPath : Common.UnsafeName -> { a | path : List String } -> { a | path : List String }
+addPath (Common.UnsafeName segment) message =
+    { message | path = segment :: message.path }
 
 
 withWarning : String -> CliMonad a -> CliMonad a
-withWarning message (CliMonad f) =
+withWarning message f =
+    withMessage Warning (\_ -> message) f
+
+
+debug : String -> (a -> String) -> CliMonad a -> CliMonad a
+debug label toString f =
+    withMessage Debug (\res -> label ++ ": " ++ toString res) f
+
+
+withMessage : MessageLevel -> (a -> String) -> CliMonad a -> CliMonad a
+withMessage level toMessage (CliMonad f) =
     CliMonad
         (\inputs ->
             Result.map
                 (\( res, output ) ->
                     ( res
-                    , { output | warnings = { path = [], message = message } :: output.warnings }
+                    , { output
+                        | messages =
+                            { level = level
+                            , path = []
+                            , message = toMessage res
+                            }
+                                :: output.messages
+                      }
                     )
                 )
                 (f inputs)
@@ -141,7 +168,17 @@ todoWithDefault default message =
     CliMonad
         (\{ generateTodos } ->
             if generateTodos then
-                Ok ( default, { emptyOutput | warnings = [ { path = [], message = message } ] } )
+                Ok
+                    ( default
+                    , { emptyOutput
+                        | messages =
+                            [ { level = Warning
+                              , path = []
+                              , message = message
+                              }
+                            ]
+                      }
+                    )
 
             else
                 Err
@@ -186,7 +223,7 @@ map2 f (CliMonad x) (CliMonad y) =
 
 mergeOutput : Output -> Output -> Output
 mergeOutput l r =
-    { warnings = l.warnings ++ r.warnings
+    { messages = l.messages ++ r.messages
     , oneOfs = FastDict.union l.oneOfs r.oneOfs
     , requiredPackages = FastSet.union l.requiredPackages r.requiredPackages
     , sharedDeclarations = FastDict.union l.sharedDeclarations r.sharedDeclarations
@@ -287,9 +324,9 @@ run :
     -> CliMonad (List Declaration)
     ->
         Result
-            Message
+            Error
             { declarations : List Declaration
-            , warnings : List Message
+            , messages : List Message
             , requiredPackages : FastSet.Set String
             }
 run oneOfDeclarations input (CliMonad x) =
@@ -337,8 +374,8 @@ run oneOfDeclarations input (CliMonad x) =
                     |> Result.map
                         (\( oneOfDecls, oneOfOutput ) ->
                             { declarations = decls ++ oneOfDecls ++ declarationsForFormats output ++ declarationsForFormats oneOfOutput
-                            , warnings =
-                                (oneOfOutput.warnings ++ output.warnings)
+                            , messages =
+                                (oneOfOutput.messages ++ output.messages)
                                     |> List.reverse
                             , requiredPackages = FastSet.union output.requiredPackages oneOfOutput.requiredPackages
                             }
@@ -388,7 +425,17 @@ errorToWarning (CliMonad f) =
                     Ok ( Just res, output )
 
                 Err { path, message } ->
-                    Ok ( Nothing, { emptyOutput | warnings = [ { path = path, message = message } ] } )
+                    Ok
+                        ( Nothing
+                        , { emptyOutput
+                            | messages =
+                                [ { level = Warning
+                                  , path = path
+                                  , message = message
+                                  }
+                                ]
+                          }
+                        )
         )
 
 
@@ -498,8 +545,9 @@ withFormat basicType maybeFormatName getter default =
 
                               else
                                 { emptyOutput
-                                    | warnings =
-                                        [ { message =
+                                    | messages =
+                                        [ { level = Warning
+                                          , message =
                                                 "Don't know how to handle format \""
                                                     ++ formatName
                                                     ++ "\" for type "

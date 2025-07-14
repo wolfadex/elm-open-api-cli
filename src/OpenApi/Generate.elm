@@ -102,13 +102,13 @@ files :
     -> OpenApi.OpenApi
     ->
         Result
-            CliMonad.Message
+            CliMonad.Error
             { modules :
                 List
                     { moduleName : List String
                     , declarations : FastDict.Dict String { group : String, declaration : Elm.Declaration }
                     }
-            , warnings : List CliMonad.Message
+            , messages : List CliMonad.Message
             , requiredPackages : FastSet.Set String
             }
 files { namespace, generateTodos, effectTypes, server, formats } apiSpec =
@@ -138,7 +138,7 @@ files { namespace, generateTodos, effectTypes, server, formats } apiSpec =
                     , formats = formats
                     }
                 |> Result.map
-                    (\{ declarations, warnings, requiredPackages } ->
+                    (\{ declarations, messages, requiredPackages } ->
                         { modules =
                             declarations
                                 |> Dict.Extra.groupBy (\{ moduleName } -> Common.moduleToNamespace namespace moduleName)
@@ -159,7 +159,7 @@ files { namespace, generateTodos, effectTypes, server, formats } apiSpec =
                                                 |> FastDict.fromList
                                         }
                                     )
-                        , warnings = warnings
+                        , messages = messages
                         , requiredPackages = requiredPackages
                         }
                     )
@@ -169,7 +169,7 @@ extractEnums :
     OpenApi.OpenApi
     ->
         Result
-            CliMonad.Message
+            CliMonad.Error
             (FastDict.Dict (List String) { name : Common.UnsafeName, documentation : Maybe String })
 extractEnums openApi =
     openApi

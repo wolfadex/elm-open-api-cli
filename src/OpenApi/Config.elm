@@ -62,6 +62,7 @@ import Gen.Result
 import Gen.Rfc3339
 import Gen.Time
 import Gen.Url
+import Gen.Uuid
 import OpenApi
 import OpenApi.Info
 import Url
@@ -235,6 +236,7 @@ defaultFormats =
     [ dateTimeFormat
     , dateFormat
     , uriFormat
+    , uuidFormat
     , byteFormat
     ]
 
@@ -311,6 +313,34 @@ dateFormat =
                 )
     , sharedDeclarations = []
     , requiresPackages = [ "justinmimbs/date" ]
+    }
+
+
+uuidFormat : Format
+uuidFormat =
+    { basicType = Common.String
+    , format = "uuid"
+    , annotation = Gen.Uuid.annotation_.uuid
+    , encode =
+        \url ->
+            url
+                |> Gen.Uuid.toString
+                |> Gen.Json.Encode.call_.string
+    , toParamString = Gen.Uuid.toString
+    , decoder =
+        Gen.Json.Decode.string
+            |> Gen.Json.Decode.andThen
+                (\raw ->
+                    Gen.Maybe.caseOf_.maybe
+                        (Gen.Uuid.call_.fromString raw)
+                        { just = Gen.Json.Decode.succeed
+                        , nothing =
+                            Gen.Json.Decode.call_.fail
+                                (Elm.Op.append raw (Elm.string " is not a valid UUID"))
+                        }
+                )
+    , sharedDeclarations = []
+    , requiresPackages = [ "cachix/elm-uuid" ]
     }
 
 

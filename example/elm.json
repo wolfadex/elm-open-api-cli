@@ -7,6 +7,7 @@
     "elm-version": "0.19.1",
     "dependencies": {
         "direct": {
+            "cachix/elm-uuid": "2.0.0",
             "danfishgold/base64-bytes": "1.1.0",
             "elm/browser": "1.0.2",
             "elm/bytes": "1.0.8",
@@ -22,8 +23,11 @@
             "wolfadex/elm-rfc3339": "2.0.0"
         },
         "indirect": {
+            "NoRedInk/elm-random-general": "1.0.0",
+            "NoRedInk/elm-random-pcg-extended": "1.0.0",
             "elm/file": "1.0.5",
             "elm/html": "1.0.0",
+            "elm/regex": "1.0.0",
             "elm/virtual-dom": "1.0.3",
             "rtfeldman/elm-iso8601-date-strings": "1.1.4"
         }

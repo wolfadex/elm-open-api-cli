@@ -155,10 +155,15 @@ schemaToType qualify schema =
                 nullable : CliMonad { type_ : Common.Type, documentation : Maybe String } -> CliMonad { type_ : Common.Type, documentation : Maybe String }
                 nullable =
                     CliMonad.map
-                        (\{ type_, documentation } ->
-                            { type_ = Common.Nullable type_
-                            , documentation = documentation
-                            }
+                        (\({ type_, documentation } as t) ->
+                            case type_ of
+                                Common.Nullable _ ->
+                                    t
+
+                                _ ->
+                                    { type_ = Common.Nullable type_
+                                    , documentation = documentation
+                                    }
                         )
 
                 singleTypeToType : Json.Schema.Definitions.SingleType -> CliMonad { type_ : Common.Type, documentation : Maybe String }

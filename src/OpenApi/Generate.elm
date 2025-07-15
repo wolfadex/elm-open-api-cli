@@ -127,6 +127,7 @@ files { namespace, generateTodos, effectTypes, server, formats } apiSpec =
                             ]
                             |> CliMonad.map List.concat
                     )
+                |> CliMonad.withPath (Common.UnsafeName (String.join "." namespace))
                 |> CliMonad.run
                     SchemaUtils.oneOfDeclarations
                     { openApi = apiSpec

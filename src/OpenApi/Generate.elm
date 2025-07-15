@@ -181,15 +181,20 @@ extractEnums openApi =
                         case OpenApi.Schema.get schema of
                             Json.Schema.Definitions.ObjectSchema subSchema ->
                                 case SchemaUtils.subschemaToEnumMaybe subSchema of
-                                    Ok (Just decodedEnums) ->
-                                        Ok
-                                            (FastDict.insert
-                                                (List.sort decodedEnums)
-                                                { name = Common.UnsafeName name
-                                                , documentation = subSchema.description
-                                                }
-                                                acc
-                                            )
+                                    Ok (Just { decodedEnums, hasNull }) ->
+                                        if hasNull then
+                                            -- If the enum can contain null then we require another named enum, without null, to name it
+                                            Ok acc
+
+                                        else
+                                            Ok
+                                                (FastDict.insert
+                                                    (List.sort decodedEnums)
+                                                    { name = Common.UnsafeName name
+                                                    , documentation = subSchema.description
+                                                    }
+                                                    acc
+                                                )
 
                                     Ok Nothing ->
                                         Ok acc

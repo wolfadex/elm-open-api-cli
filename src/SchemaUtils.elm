@@ -287,11 +287,17 @@ schemaToType qualify schema =
                         Ok Nothing ->
                             singleTypeToType Json.Schema.Definitions.StringType
 
-                        Ok (Just decodedEnums) ->
+                        Ok (Just { decodedEnums, hasNull }) ->
                             CliMonad.succeed
                                 { type_ = Common.enum decodedEnums
                                 , documentation = subSchema.description
                                 }
+                                |> (if hasNull then
+                                        nullable
+
+                                    else
+                                        identity
+                                   )
 
                         Err e ->
                             CliMonad.fail e
@@ -360,11 +366,17 @@ schemaToType qualify schema =
                                                         Ok Nothing ->
                                                             CliMonad.succeed { type_ = Common.Value, documentation = subSchema.description }
 
-                                                        Ok (Just decodedEnums) ->
+                                                        Ok (Just { decodedEnums, hasNull }) ->
                                                             CliMonad.succeed
                                                                 { type_ = Common.enum decodedEnums
                                                                 , documentation = subSchema.description
                                                                 }
+                                                                |> (if hasNull then
+                                                                        nullable
+
+                                                                    else
+                                                                        identity
+                                                                   )
 
                                                         Err e ->
                                                             CliMonad.fail e
@@ -374,7 +386,7 @@ schemaToType qualify schema =
                         Ok Nothing ->
                             nullable (singleTypeToType Json.Schema.Definitions.StringType)
 
-                        Ok (Just decodedEnums) ->
+                        Ok (Just { decodedEnums }) ->
                             CliMonad.succeed
                                 { type_ = Common.enum decodedEnums
                                 , documentation = subSchema.description
@@ -410,7 +422,16 @@ schemaToType qualify schema =
                             )
 
 
-subschemaToEnumMaybe : Json.Schema.Definitions.SubSchema -> Result String (Maybe (List String))
+subschemaToEnumMaybe :
+    Json.Schema.Definitions.SubSchema
+    ->
+        Result
+            String
+            (Maybe
+                { decodedEnums : List String
+                , hasNull : Bool
+                }
+            )
 subschemaToEnumMaybe subSchema =
     case subSchema.enum of
         Nothing ->
@@ -424,18 +445,20 @@ subschemaToEnumMaybe subSchema =
                 Ok decodedEnums ->
                     Ok
                         (Just
-                            (List.filterMap
-                                (Maybe.andThen
-                                    (\variant ->
-                                        if String.isEmpty variant then
-                                            Nothing
+                            { decodedEnums =
+                                List.filterMap
+                                    (Maybe.andThen
+                                        (\variant ->
+                                            if String.isEmpty variant then
+                                                Nothing
 
-                                        else
-                                            Just variant
+                                            else
+                                                Just variant
+                                        )
                                     )
-                                )
-                                decodedEnums
-                            )
+                                    decodedEnums
+                            , hasNull = List.member Nothing decodedEnums
+                            }
                         )
 
 

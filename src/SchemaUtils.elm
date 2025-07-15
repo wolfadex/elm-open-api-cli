@@ -445,18 +445,7 @@ subschemaToEnumMaybe subSchema =
                 Ok decodedEnums ->
                     Ok
                         (Just
-                            { decodedEnums =
-                                List.filterMap
-                                    (Maybe.andThen
-                                        (\variant ->
-                                            if String.isEmpty variant then
-                                                Nothing
-
-                                            else
-                                                Just variant
-                                        )
-                                    )
-                                    decodedEnums
+                            { decodedEnums = List.filterMap identity decodedEnums
                             , hasNull = List.member Nothing decodedEnums
                             }
                         )

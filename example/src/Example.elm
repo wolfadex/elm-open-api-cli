@@ -1,27 +1,23 @@
 module Example exposing (..)
 
--- import BimcloudApi20232AlphaRelease
-
-import AdditionalProperties.Json
 import AdditionalProperties.Types
 import AirlineCodeLookupApi.Api
 import AirlineCodeLookupApi.Types
-import BinaryResponse.Api
 import Browser
 import DbFahrplanApi.Api
 import DbFahrplanApi.Types
 import Dict
 import GithubV3RestApi.Api
 import GithubV3RestApi.Types
-import Json.Decode
 import MarioPartyStats.Api
 import MarioPartyStats.Types
+import NullableEnum.Json
 import OpenApi.Common
+import PatreonApi.Api
+import PatreonApi.Types
 import RealworldConduitApi.Api
 import RealworldConduitApi.Types
-import RecursiveAllofRefs.Json
 import RecursiveAllofRefs.Types
-import SingleEnum.Json
 import SingleEnum.Types
 import Trustmark.TradeCheck.Api
 import Trustmark.TradeCheck.Servers
@@ -91,6 +87,18 @@ init () =
             , body = { publicId = 0, schemeId = Nothing }
             , toMsg = TrustmarkResponse
             }
+        , PatreonApi.Api.getCampaign
+            { authorization = { oauth2 = "" }
+            , toMsg = PatreonResponse
+            , params =
+                { include = Nothing
+                , fields = Nothing
+                , campaign_id = ""
+                , user_Agent = ""
+                }
+            }
+        , NullableEnum.Json.decodeColor
+            |> always Cmd.none
         ]
     )
 
@@ -108,20 +116,19 @@ type Msg
     | DbFahrplanResponse (Result (OpenApi.Common.Error Never String) DbFahrplanApi.Types.LocationResponse)
     | MarioPartyStatsResponse (Result (OpenApi.Common.Error Never String) (List MarioPartyStats.Types.Boards))
     | TrustmarkResponse (Result (OpenApi.Common.Error Never String) Trustmark.TradeCheck.Types.TradeCheckResponse)
+    | PatreonResponse (Result (OpenApi.Common.Error PatreonApi.Types.GetCampaign_Error String) PatreonApi.Types.CampaignResponse)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        ConduitResponse response ->
+        ConduitResponse _ ->
             ( model, Cmd.none )
 
-        AmadeusResponse response ->
+        AmadeusResponse _ ->
             ( model, Cmd.none )
 
-        -- BimResponse response ->
-        --     ( model, Cmd.none )
-        GithubResponse response ->
+        GithubResponse _ ->
             ( model, Cmd.none )
 
         DbFahrplanResponse _ ->
@@ -131,6 +138,9 @@ update msg model =
             ( model, Cmd.none )
 
         TrustmarkResponse _ ->
+            ( model, Cmd.none )
+
+        PatreonResponse _ ->
             ( model, Cmd.none )
 
 

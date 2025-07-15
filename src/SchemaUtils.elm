@@ -5,6 +5,7 @@ module SchemaUtils exposing
     , recordType
     , refToTypeName
     , schemaToType
+    , subschemaToEnumMaybe
     , toVariantName
     , typeToAnnotationWithMaybe
     , typeToAnnotationWithNullable
@@ -154,10 +155,15 @@ schemaToType qualify schema =
                 nullable : CliMonad { type_ : Common.Type, documentation : Maybe String } -> CliMonad { type_ : Common.Type, documentation : Maybe String }
                 nullable =
                     CliMonad.map
-                        (\{ type_, documentation } ->
-                            { type_ = Common.Nullable type_
-                            , documentation = documentation
-                            }
+                        (\({ type_, documentation } as t) ->
+                            case type_ of
+                                Common.Nullable _ ->
+                                    t
+
+                                _ ->
+                                    { type_ = Common.Nullable type_
+                                    , documentation = documentation
+                                    }
                         )
 
                 singleTypeToType : Json.Schema.Definitions.SingleType -> CliMonad { type_ : Common.Type, documentation : Maybe String }
@@ -282,20 +288,24 @@ schemaToType qualify schema =
             in
             case subSchema.type_ of
                 Json.Schema.Definitions.SingleType Json.Schema.Definitions.StringType ->
-                    case subSchema.enum of
-                        Nothing ->
+                    case subschemaToEnumMaybe subSchema of
+                        Ok Nothing ->
                             singleTypeToType Json.Schema.Definitions.StringType
 
-                        Just enums ->
-                            case Result.Extra.combineMap (Json.Decode.decodeValue Json.Decode.string) enums of
-                                Err _ ->
-                                    CliMonad.fail "Attempted to parse an enum as a string and failed"
+                        Ok (Just { decodedEnums, hasNull }) ->
+                            CliMonad.succeed
+                                { type_ = Common.enum decodedEnums
+                                , documentation = subSchema.description
+                                }
+                                |> (if hasNull then
+                                        nullable
 
-                                Ok decodedEnums ->
-                                    CliMonad.succeed
-                                        { type_ = Common.enum decodedEnums
-                                        , documentation = subSchema.description
-                                        }
+                                    else
+                                        identity
+                                   )
+
+                        Err e ->
+                            CliMonad.fail e
 
                 Json.Schema.Definitions.SingleType singleType ->
                     singleTypeToType singleType
@@ -357,20 +367,39 @@ schemaToType qualify schema =
                                                     oneOfToType oneOfs
 
                                                 Nothing ->
-                                                    case subSchema.enum of
-                                                        Nothing ->
+                                                    case subschemaToEnumMaybe subSchema of
+                                                        Ok Nothing ->
                                                             CliMonad.succeed { type_ = Common.Value, documentation = subSchema.description }
 
-                                                        Just enums ->
-                                                            case Result.Extra.combineMap (Json.Decode.decodeValue Json.Decode.string) enums of
-                                                                Err _ ->
-                                                                    CliMonad.fail "Attempted to parse an enum as a string and failed"
+                                                        Ok (Just { decodedEnums, hasNull }) ->
+                                                            CliMonad.succeed
+                                                                { type_ = Common.enum decodedEnums
+                                                                , documentation = subSchema.description
+                                                                }
+                                                                |> (if hasNull then
+                                                                        nullable
 
-                                                                Ok decodedEnums ->
-                                                                    CliMonad.succeed
-                                                                        { type_ = Common.enum decodedEnums
-                                                                        , documentation = subSchema.description
-                                                                        }
+                                                                    else
+                                                                        identity
+                                                                   )
+
+                                                        Err e ->
+                                                            CliMonad.fail e
+
+                Json.Schema.Definitions.NullableType Json.Schema.Definitions.StringType ->
+                    case subschemaToEnumMaybe subSchema of
+                        Ok Nothing ->
+                            nullable (singleTypeToType Json.Schema.Definitions.StringType)
+
+                        Ok (Just { decodedEnums }) ->
+                            CliMonad.succeed
+                                { type_ = Common.enum decodedEnums
+                                , documentation = subSchema.description
+                                }
+                                |> nullable
+
+                        Err e ->
+                            CliMonad.fail e
 
                 Json.Schema.Definitions.NullableType singleType ->
                     nullable (singleTypeToType singleType)
@@ -396,6 +425,35 @@ schemaToType qualify schema =
                                 , documentation = documentation
                                 }
                             )
+
+
+subschemaToEnumMaybe :
+    Json.Schema.Definitions.SubSchema
+    ->
+        Result
+            String
+            (Maybe
+                { decodedEnums : List String
+                , hasNull : Bool
+                }
+            )
+subschemaToEnumMaybe subSchema =
+    case subSchema.enum of
+        Nothing ->
+            Ok Nothing
+
+        Just enums ->
+            case Result.Extra.combineMap (Json.Decode.decodeValue (Json.Decode.nullable Json.Decode.string)) enums of
+                Err _ ->
+                    Err "Attempted to parse an enum as a string and failed"
+
+                Ok decodedEnums ->
+                    Ok
+                        (Just
+                            { decodedEnums = List.filterMap identity decodedEnums
+                            , hasNull = List.member Nothing decodedEnums
+                            }
+                        )
 
 
 typeToOneOfVariant :

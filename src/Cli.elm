@@ -842,9 +842,9 @@ yamlToJsonValueDecoder : Yaml.Decode.Decoder Json.Value.JsonValue
 yamlToJsonValueDecoder =
     Yaml.Decode.oneOf
         [ Yaml.Decode.map Json.Value.NumericValue Yaml.Decode.float
+        , Yaml.Decode.map (\_ -> Json.Value.NullValue) Yaml.Decode.null
         , Yaml.Decode.map Json.Value.StringValue Yaml.Decode.string
         , Yaml.Decode.map Json.Value.BoolValue Yaml.Decode.bool
-        , Yaml.Decode.map (\_ -> Json.Value.NullValue) Yaml.Decode.null
         , Yaml.Decode.map
             Json.Value.ArrayValue
             (Yaml.Decode.list (Yaml.Decode.lazy (\_ -> yamlToJsonValueDecoder)))

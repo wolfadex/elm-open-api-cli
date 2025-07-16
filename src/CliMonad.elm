@@ -33,6 +33,7 @@ import FastSet
 import Gen.Debug
 import Gen.Json.Decode
 import Gen.Json.Encode
+import Json.Encode
 import OpenApi exposing (OpenApi)
 import OpenApi.Config
 import String.Extra
@@ -433,12 +434,34 @@ moduleToNamespace mod =
 
 enumName : List Common.UnsafeName -> CliMonad (Maybe Common.UnsafeName)
 enumName variants =
-    map
+    andThen
         (\e ->
-            FastDict.get (List.map Common.unwrapUnsafe variants) e
-                |> Maybe.map .name
+            case FastDict.get (List.map Common.unwrapUnsafe variants) e of
+                Just { name } ->
+                    succeed (Just name)
+
+                Nothing ->
+                    succeed Nothing
+                        |> withWarning
+                            ("No named enum found for [ "
+                                ++ String.join ", "
+                                    (List.map
+                                        (\variant ->
+                                            variant
+                                                |> Common.unwrapUnsafe
+                                                |> escapeString
+                                        )
+                                        variants
+                                    )
+                                ++ " ]. Define one to improve type safety"
+                            )
         )
         enums
+
+
+escapeString : String -> String
+escapeString s =
+    Json.Encode.encode 0 (Json.Encode.string s)
 
 
 withFormat :

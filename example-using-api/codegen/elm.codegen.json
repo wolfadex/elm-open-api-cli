@@ -7,7 +7,7 @@
             "elm/time": "1.0.0"
         },
         "local": [
-            "src/Data/Id.elm"
+            "src/ArticleId.elm"
         ]
     }
 }

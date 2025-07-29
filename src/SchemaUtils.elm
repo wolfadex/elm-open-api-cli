@@ -514,10 +514,18 @@ oneOfType types =
                         in
                         { type_ =
                             Common.OneOf
-                                (names
-                                    |> List.map fixOneOfName
-                                    |> String.join "_or_"
-                                    |> (\s -> "OneOf" ++ String.fromInt (Murmur3.hashString 1234 s))
+                                (let
+                                    readableName : String
+                                    readableName =
+                                        names
+                                            |> List.map fixOneOfName
+                                            |> String.join "_Or_"
+                                 in
+                                 if String.length readableName > 200 then
+                                    "OneOf" ++ String.fromInt (Murmur3.hashString 1234 readableName)
+
+                                 else
+                                    readableName
                                 )
                                 sortedVariants
                         , documentation =

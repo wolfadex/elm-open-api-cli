@@ -2,7 +2,7 @@ module TestGenScript exposing (run)
 
 import Ansi.Color
 import BackendTask
-import Cli
+import OpenApi.BackendTask
 import OpenApi.Config
 import Pages.Script
 
@@ -109,7 +109,7 @@ run =
     in
     Pages.Script.withoutCliOptions
         (BackendTask.doEach
-            [ Cli.withConfig config
+            [ OpenApi.BackendTask.withConfig config
             , "\nCompiling Example app"
                 |> Ansi.Color.fontColor Ansi.Color.brightGreen
                 |> Pages.Script.log

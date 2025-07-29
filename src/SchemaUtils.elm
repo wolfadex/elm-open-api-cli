@@ -511,17 +511,16 @@ oneOfType types =
                             names : List Common.UnsafeName
                             names =
                                 List.map .name sortedVariants
+
+                            readableName : String
+                            readableName =
+                                names
+                                    |> List.map fixOneOfName
+                                    |> String.join "_Or_"
                         in
                         { type_ =
                             Common.OneOf
-                                (let
-                                    readableName : String
-                                    readableName =
-                                        names
-                                            |> List.map fixOneOfName
-                                            |> String.join "_Or_"
-                                 in
-                                 if String.length readableName > 200 then
+                                (if String.length readableName > 200 then
                                     "OneOf" ++ String.fromInt (Murmur3.hashString 1234 readableName)
 
                                  else

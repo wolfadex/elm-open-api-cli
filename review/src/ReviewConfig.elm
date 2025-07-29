@@ -30,7 +30,7 @@ config : List Rule
 config =
     includingCodegenRules
         ++ List.map
-            (Rule.ignoreErrorsForDirectories [ "codegen" ])
+            (Rule.ignoreErrorsForDirectories [ "src/Gen" ])
             exceptCodegenRules
 
 
@@ -71,9 +71,9 @@ includingCodegenRules : List Rule
 includingCodegenRules =
     [ NoUnused.Exports.rule
         |> Rule.ignoreErrorsForFiles
-            [ "src/Cli.elm"
-            , "src/OpenApi/Config.elm"
-            , "src/TestGenScript.elm"
+            [ "cli/src/Cli.elm"
+            , "cli/src/OpenApi/Config.elm"
+            , "cli/src/TestGenScript.elm"
             ]
     , NoUnused.Variables.rule
     ]

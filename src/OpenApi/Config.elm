@@ -69,6 +69,8 @@ import Url
 import Utils
 
 
+{-| Configuration for OpenAPI code generation. See `inputFrom` and the builder functions in this module, such as `withInput`, `withFormat`, `withEffectTypes`, etc.
+-}
 type Config
     = Config
         { inputs : List Input
@@ -82,6 +84,8 @@ type Config
         }
 
 
+{-| An OpenAPI schema used as the basis for code generation.
+-}
 type Input
     = Input
         { oasPath : Path
@@ -93,6 +97,8 @@ type Input
         }
 
 
+{-| Which type to build in API calls helpers in the generated `OutputModuleName.Api` module.
+-}
 type EffectType
     = ElmHttpCmd
     | ElmHttpCmdRecord
@@ -110,6 +116,11 @@ type EffectType
     | LamderaProgramTestTaskRecord
 
 
+{-| Determine which package is needed for an EffectType
+
+TODO: Don't expose this.
+
+-}
 effectTypeToPackage : EffectType -> Common.Package
 effectTypeToPackage effectType =
     case effectType of
@@ -156,12 +167,19 @@ effectTypeToPackage effectType =
             Common.LamderaProgramTest
 
 
+{-| How to generate the `OutputModuleName.Server` module, which defines different server URLs for an API.
+
+To skip generating a Server module, use `Multiple []`.
+
+-}
 type Server
     = Default
     | Single String
     | Multiple (Dict.Dict String String)
 
 
+{-| Specify how to generate code and type annotations for data with a specific `format` declared.
+-}
 type alias Format =
     { basicType : Common.BasicType
     , format : String
@@ -174,11 +192,26 @@ type alias Format =
     }
 
 
+{-| Specify the location of an input, such as a schema or schema overrides file.
+
+  - File: A file path. Can be absolute or relative to the current working directory.
+  - Url: An absolute URL.
+
+Examples:
+
+  - File "swagger.json"
+  - File "./swagger.json"
+  - File "./folder/swagger.json"
+  - Url "<https://petstore3.swagger.io/api/v3/openapi.json>"
+
+-}
 type Path
-    = File String -- swagger.json ./swagger.json /folder/swagger.json
-    | Url Url.Url -- https://petstore3.swagger.io/api/v3/openapi.json
+    = File String
+    | Url Url.Url
 
 
+{-| Create a Path
+-}
 pathFromString : String -> Path
 pathFromString path =
     case Url.fromString path of
@@ -189,6 +222,8 @@ pathFromString path =
             File path
 
 
+{-| Unwrap a Path
+-}
 pathToString : Path -> String
 pathToString pathType =
     case pathType of
@@ -199,6 +234,8 @@ pathToString pathType =
             Url.toString url
 
 
+{-| Create a new Config, given an initial value for output directory.
+-}
 init : String -> Config
 init initialOutputDirectory =
     { inputs = []
@@ -213,6 +250,8 @@ init initialOutputDirectory =
         |> Config
 
 
+{-| Create an Input to attach to a Config.
+-}
 inputFrom : Path -> Input
 inputFrom path =
     { oasPath = path
@@ -231,6 +270,8 @@ inputFrom path =
 -------------
 
 
+{-| Built-in Formats
+-}
 defaultFormats : List Format
 defaultFormats =
     [ dateTimeFormat
@@ -241,6 +282,8 @@ defaultFormats =
     ]
 
 
+{-| Default format for `format: date-time`
+-}
 dateTimeFormat : Format
 dateTimeFormat =
     let
@@ -290,6 +333,8 @@ dateTimeFormat =
     }
 
 
+{-| Default format for `format: date`
+-}
 dateFormat : Format
 dateFormat =
     { basicType = Common.String
@@ -316,6 +361,8 @@ dateFormat =
     }
 
 
+{-| Default format for `format: uuid`
+-}
 uuidFormat : Format
 uuidFormat =
     { basicType = Common.String
@@ -344,6 +391,8 @@ uuidFormat =
     }
 
 
+{-| Default format for `format: uri`
+-}
 uriFormat : Format
 uriFormat =
     { basicType = Common.String
@@ -372,6 +421,8 @@ uriFormat =
     }
 
 
+{-| Default format for `format: byte`
+-}
 byteFormat : Format
 byteFormat =
     { basicType = Common.String
@@ -406,56 +457,86 @@ byteFormat =
 -------------
 
 
+{-| Set the type of Effects generated for an Input.
+-}
 withEffectTypes : List EffectType -> Input -> Input
 withEffectTypes effectTypes (Input input) =
     Input { input | effectTypes = effectTypes }
 
 
+{-| Set an Input's generated Elm module namespace. Generated modules will be within the given namespace.
+-}
 withOutputModuleName : List String -> Input -> Input
 withOutputModuleName moduleName (Input input) =
     Input { input | outputModuleName = Just moduleName }
 
 
+{-| Add override file(s) to an input, to override parts of the schema.
+
+Override files cannot delete a key from a schema, but can add keys or change the values of keys.
+
+However, specifying `security: []` in an override for a Path will override the top-level `security` declaration, turning off security for that path.
+
+-}
 withOverrides : List Path -> Input -> Input
 withOverrides newOverrides (Input input) =
     Input { input | overrides = newOverrides }
 
 
+{-| Set whether to generate TODOs for unimplemented endpoints, or fail when something unexpected is encountered.
+
+Setting this to True will generate `Debug.todo ""` instead of failing.
+
+-}
 withGenerateTodos : Bool -> Config -> Config
 withGenerateTodos generateTodos (Config config) =
     Config { config | generateTodos = generateTodos }
 
 
+{-| Set whether to automatically convert a Swagger schema to an OpenAPI one.
+-}
 withAutoConvertSwagger : Bool -> Config -> Config
 withAutoConvertSwagger newAutoConvertSwagger (Config config) =
     Config { config | autoConvertSwagger = newAutoConvertSwagger }
 
 
+{-| Set the URL to convert a Swagger schema to an OpenAPI one.
+-}
 withSwaggerConversionUrl : String -> Config -> Config
 withSwaggerConversionUrl newSwaggerConversionUrl (Config config) =
     Config { config | swaggerConversionUrl = newSwaggerConversionUrl }
 
 
+{-| Set the shell command to convert a Swagger schema to an OpenAPI one.
+-}
 withSwaggerConversionCommand : { command : String, args : List String } -> Config -> Config
 withSwaggerConversionCommand newSwaggerConversionCommand (Config config) =
     Config { config | swaggerConversionCommand = Just newSwaggerConversionCommand }
 
 
+{-| Configure Server.elm module generation.
+-}
 withServer : Server -> Input -> Input
 withServer newServer (Input input) =
     Input { input | server = newServer }
 
 
+{-| Set output for merged writing.
+-}
 withWriteMergedTo : String -> Input -> Input
 withWriteMergedTo newWriteMergedTo (Input input) =
     Input { input | writeMergedTo = Just newWriteMergedTo }
 
 
+{-| Add a custom Format.
+-}
 withFormat : Format -> Config -> Config
 withFormat newFormat (Config config) =
     Config { config | staticFormats = newFormat :: config.staticFormats }
 
 
+{-| Add dynamic formats.
+-}
 withFormats :
     (List { format : String, basicType : Common.BasicType } -> List Format)
     -> Config
@@ -464,52 +545,76 @@ withFormats newFormat (Config config) =
     Config { config | dynamicFormats = \input -> newFormat input ++ config.dynamicFormats input }
 
 
+{-| Add an input schema.
+-}
 withInput : Input -> Config -> Config
 withInput input (Config config) =
     Config { config | inputs = input :: config.inputs }
 
 
 
--------------
--- Getters --
--------------
+--------------------
+-- Config Getters --
+--------------------
 
 
+{-| Retrieve Swagger conversion URL.
+-}
 swaggerConversionUrl : Config -> String
 swaggerConversionUrl (Config config) =
     config.swaggerConversionUrl
 
 
+{-| Retrieve Swagger conversion command.
+-}
 swaggerConversionCommand : Config -> Maybe { command : String, args : List String }
 swaggerConversionCommand (Config config) =
     config.swaggerConversionCommand
 
 
+{-| Retrieve whether to automatically convert Swagger to OpenAPI.
+-}
 autoConvertSwagger : Config -> Bool
 autoConvertSwagger (Config config) =
     config.autoConvertSwagger
 
 
+{-| Retrieve the output directory.
+-}
 outputDirectory : Config -> String
 outputDirectory (Config config) =
     config.outputDirectory
 
 
+{-| Retrieve Inputs.
+-}
 inputs : Config -> List Input
 inputs (Config config) =
     List.reverse config.inputs
 
 
+
+-------------------
+-- Input Getters --
+-------------------
+
+
+{-| Retrieve OpenAPI Schema path.
+-}
 oasPath : Input -> Path
 oasPath (Input input) =
     input.oasPath
 
 
+{-| Retrieve writeMergedTo path, if applicable.
+-}
 writeMergedTo : Input -> Maybe String
 writeMergedTo (Input input) =
     input.writeMergedTo
 
 
+{-| Retrieve schema override paths.
+-}
 overrides : Input -> List Path
 overrides (Input input) =
     input.overrides
@@ -521,6 +626,8 @@ overrides (Input input) =
 ------------
 
 
+{-| TODO: Move to an Internal module!
+-}
 toGenerationConfig :
     List { format : String, basicType : Common.BasicType }
     -> Config

@@ -18,7 +18,6 @@ project's development shell. An easy way to satisfy this requirement is the
 - Start coding!
 - Run `npm run dev <path to oas spec>`
   - e.g. `npm run dev ./example/github-spec.json` will produce: `generated/GithubV3RestApi/Api.elm`, `generated/GithubV3RestApi/Json.elm`, `generated/GithubV3RestApi/Types.elm`, and `generated/OpenApi/Common.elm`
-- Please run `npm run test:gen` when making a pull request to ensure that the generated code is correct. _(would be nice to have this as part of the CI checks in the future)_
 
 [determinate-nix]: https://github.com/DeterminateSystems/nix-installer?tab=readme-ov-file#determinate-nix-installer
 

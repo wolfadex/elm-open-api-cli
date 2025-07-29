@@ -1,0 +1,9 @@
+{
+    "elm-codegen-version": "0.6.1",
+    "codegen-helpers": {
+        "packages": {},
+        "local": [
+            "src/ArticleId.elm"
+        ]
+    }
+}

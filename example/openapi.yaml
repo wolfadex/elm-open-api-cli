@@ -1,0 +1,18 @@
+openapi: 3.0.1
+info:
+  title: "Example schema"
+  version: "1"
+components:
+  schemas:
+    Article:
+      description: Article
+      type: object
+      properties:
+        id:
+          type: string
+          format: article-id
+        content:
+          type: string
+      required:
+        - id
+        - content

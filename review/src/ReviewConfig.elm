@@ -28,6 +28,14 @@ import Simplify
 
 config : List Rule
 config =
+    includingCodegenRules
+        ++ List.map
+            (Rule.ignoreErrorsForDirectories [ "codegen" ])
+            exceptCodegenRules
+
+
+exceptCodegenRules : List Rule
+exceptCodegenRules =
     [ Docs.NoMissing.rule
         { document = onlyExposed
         , from = exposedModules
@@ -50,18 +58,22 @@ config =
     , NoUnused.CustomTypeConstructors.rule []
     , NoUnused.CustomTypeConstructorArgs.rule
     , NoUnused.Dependencies.rule
-    , NoUnused.Exports.rule
-        |> Rule.ignoreErrorsForFiles
-            [ "src/Cli.elm"
-            , "src/OpenApi/Config.elm"
-            , "src/TestGenScript.elm"
-            ]
     , NoUnused.Parameters.rule
     , NoUnused.Patterns.rule
-    , NoUnused.Variables.rule
     , Simplify.rule Simplify.defaults
         |> Rule.ignoreErrorsForDirectories [ "src/Gen" ]
     , Review.ImportSimple.rule
         |> Rule.ignoreErrorsForDirectories [ "src/Gen" ]
     ]
-        |> List.map (Rule.ignoreErrorsForDirectories [ "codegen" ])
+
+
+includingCodegenRules : List Rule
+includingCodegenRules =
+    [ NoUnused.Exports.rule
+        |> Rule.ignoreErrorsForFiles
+            [ "src/Cli.elm"
+            , "src/OpenApi/Config.elm"
+            , "src/TestGenScript.elm"
+            ]
+    , NoUnused.Variables.rule
+    ]

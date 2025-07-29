@@ -10,7 +10,7 @@ The general flow of the app is:
 
 Make sure you have Nix installed (with flakes enabled) so you can use the
 project's development shell. An easy way to satisfy this requirement is the
-[Determinate Nix Installer][determinate-nix]).
+[Determinate Nix Installer][determinate-nix].
 
 - Clone this repo
 - Inside your cloned repo, run `direnv allow` to automatically enter the development shell,

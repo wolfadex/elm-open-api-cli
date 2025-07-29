@@ -1,0 +1,25 @@
+{
+    "name": "elm-open-api-codegen",
+    "scripts": {
+        "dev": "npm -C cli run dev",
+        "build": "npm -C cli run build",
+        "review": "elm-review",
+        "review:watch": "elm-review --watch --fix",
+        "format": "elm-format src cli/src tests --validate",
+        "test": "elm-test",
+        "test:gen": "npm -C cli test",
+        "test:watch": "elm-test --watch"
+    },
+    "author": "Wolfgang Schuster",
+    "license": "MIT",
+    "devDependencies": {
+        "elm": "0.19.1-6",
+        "elm-codegen": "^0.6.1",
+        "elm-format": "0.8.7",
+        "elm-review": "^2.13.3",
+        "elm-test": "^0.19.1-revision12"
+    },
+    "volta": {
+        "node": "20.11.0"
+    }
+}

@@ -8,12 +8,7 @@
     "scripts": {
         "dev": "elm-pages run src/Cli.elm",
         "build": "elm-pages bundle-script src/Cli.elm --output dist/elm-open-api.js --debug",
-        "review": "elm-review",
-        "review:watch": "elm-review --watch --fix",
-        "format": "elm-format src tests --validate",
-        "test": "elm-test",
-        "test:gen": "elm-pages run src/TestGenScript.elm",
-        "test:watch": "elm-test --watch",
+        "test": "elm-pages run src/TestGenScript.elm",
         "pub": "npm run build && npm publish"
     },
     "author": "Wolfgang Schuster",
@@ -22,13 +17,9 @@
         "@lydell/elm-json": "0.2.13-1",
         "@redocly/cli": "1.11.0",
         "elm": "0.19.1-6",
-        "elm-codegen": "^0.6.1",
         "elm-format": "0.8.7",
         "elm-optimize-level-2": "0.3.5",
-        "elm-pages": "^3.0.19",
-        "elm-review": "^2.13.3",
-        "elm-test": "^0.19.1-revision12",
-        "vite": "^6.0.3"
+        "elm-pages": "^3.0.19"
     },
     "volta": {
         "node": "20.11.0"

@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+if ! [ -d node_modules ]; then
+  # Make sure `elm-pages` is available.
+  npm install
+fi
+
+npx --no -- elm-pages run ./scripts/src/CodeGenOpenApi.elm

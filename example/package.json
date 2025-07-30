@@ -1,0 +1,9 @@
+{
+  "scripts": {
+    "test": "scripts/test"
+  },
+  "devDependencies": {
+    "elm-codegen": "^0.6.1",
+    "elm-pages": "^3.0.24"
+  }
+}

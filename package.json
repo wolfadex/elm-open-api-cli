@@ -1,34 +1,23 @@
 {
-    "name": "elm-open-api",
-    "version": "0.7.0",
-    "description": "A tool for generating Elm SDKs from OpenAPI Specs.",
-    "main": "dist/elm-open-api.js",
-    "bin": "dist/elm-open-api.js",
-    "type": "module",
+    "name": "elm-open-api-codegen",
     "scripts": {
-        "dev": "elm-pages run src/Cli.elm",
-        "build": "elm-pages bundle-script src/Cli.elm --output dist/elm-open-api.js --debug",
+        "dev": "npm -C cli run dev",
+        "build": "npm -C cli run build",
         "review": "elm-review",
         "review:watch": "elm-review --watch --fix",
-        "format": "elm-format src tests --validate",
+        "format": "elm-format src cli/src tests --validate",
         "test": "elm-test",
-        "test:gen": "elm-pages run src/TestGenScript.elm",
-        "test:watch": "elm-test --watch",
-        "pub": "npm run build && npm publish"
+        "test:gen": "npm -C cli test",
+        "test:watch": "elm-test --watch"
     },
     "author": "Wolfgang Schuster",
     "license": "MIT",
     "devDependencies": {
-        "@lydell/elm-json": "0.2.13-1",
-        "@redocly/cli": "1.11.0",
         "elm": "0.19.1-6",
         "elm-codegen": "^0.6.1",
         "elm-format": "0.8.7",
-        "elm-optimize-level-2": "0.3.5",
-        "elm-pages": "^3.0.19",
         "elm-review": "^2.13.3",
-        "elm-test": "^0.19.1-revision12",
-        "vite": "^6.0.3"
+        "elm-test": "^0.19.1-revision12"
     },
     "volta": {
         "node": "20.11.0"

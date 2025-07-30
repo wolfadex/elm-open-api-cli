@@ -76,7 +76,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: branch/node_modules
-          key: node_modules-${{ hashFiles('branch/package-lock.json') }}
+          key: node_modules-${{ hashFiles('branch/package-lock.json', 'branch/cli/package-lock.json') }}
 
       # Re-use node_modules between runs until package-lock.json changes.
       - name: Cache node_modules (main)
@@ -84,7 +84,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: main/node_modules
-          key: node_modules-${{ hashFiles('main/package-lock.json') }}
+          key: node_modules-${{ hashFiles('main/package-lock.json', 'main/cli/package-lock.json') }}
 
       # Re-use ~/.elm between runs until elm.json or review/elm.json changes.
       # The Elm compiler saves downloaded Elm packages to ~/.elm saves
@@ -113,18 +113,31 @@ jobs:
   
       - name: Generate (branch)
         working-directory: branch
-        run: npm run test:gen
+        run: |
+          # Change following line to just `npm -C cli ci` after #214 is merged
+          [ ! -d cli ] || npm -C cli ci
+          npm run test:gen
   
       - name: Generate (main)
         working-directory: main
-        run: npm run test:gen || true # We don't want to block on main failing to generate
+        run: |
+          # Change following line to just `npm -C cli ci` after #214 is merged
+          [ ! -d cli ] || npm -C cli ci
+          npm run test:gen || true # We don't want to block on main failing to generate
 
       - name: Diff the outputs
         run: |
+          main_folder=main/cli/generated
+          branch_folder=branch/cli/generated
+
+          # Remove the following two lines after #214 is merged
+          [ -d main/cli ] || main_folder=main/generated
+          [ -d branch/cli ] || branch_folder=branch/generated
+
           echo '```diff' > diff.md
           diff --ignore-all-space --minimal --new-file --recursive \
-            main/generated \
-            branch/generated | dd bs=1024 count=30 >> diff.md || true # We ignore diff exiting with a 1
+            "$main_folder" \
+            "$branch_folder" | dd bs=1024 count=30 >> diff.md || true # We ignore diff exiting with a 1
           echo -e '\n```' >> diff.md
 
       - name: Post a comment with the diff

@@ -1,32 +1,29 @@
 module Common exposing
-    ( BasicType(..)
-    , ConstValue(..)
-    , Field
-    , Module(..)
-    , Object
-    , OneOfData
-    , Package(..)
-    , Type(..)
-    , TypeName
-    , UnsafeName(..)
-    , VariantName
-    , base64PackageName
-    , basicTypeToString
-    , commonModuleName
-    , enum
-    , moduleToNamespace
-    , ref
-    , reservedList
-    , toTypeName
-    , toValueName
-    , unwrapUnsafe
+    ( BasicType(..), commonModuleName, base64PackageName
+    , ConstValue(..), Field, Module(..), Object, OneOfData, Package(..), Type(..), TypeName, UnsafeName(..), VariantName, basicTypeToString, enum, moduleToNamespace, ref, reservedList, toTypeName, toValueName, unwrapUnsafe
     )
+
+{-|
+
+@docs BasicType, commonModuleName, base64PackageName
+
+
+# TODO: These should probably not be exposed.
+
+@docs ConstValue, Field, Module, Object, OneOfData, Package, Type, TypeName, UnsafeName, VariantName, basicTypeToString, enum, moduleToNamespace, ref, reservedList, toTypeName, toValueName, unwrapUnsafe
+
+-}
 
 import Regex
 import Set exposing (Set)
 import String.Extra
 
 
+{-| An Elm module being generated
+
+TODO: Don't expose this.
+
+-}
 type Module
     = Json
     | Types
@@ -36,6 +33,8 @@ type Module
     | Servers
 
 
+{-| An Effects package we can target when code-generating API calls
+-}
 type Package
     = ElmHttp
     | DillonkearnsElmPages
@@ -43,11 +42,19 @@ type Package
 
 
 {-| An unsanitized name
+
+TODO: Don't expose this.
+
 -}
 type UnsafeName
     = UnsafeName String
 
 
+{-| Given a namespace and Module, generate the full module name
+
+TODO: Don't expose this.
+
+-}
 moduleToNamespace : List String -> Module -> List String
 moduleToNamespace namespace moduleName =
     case moduleName of
@@ -78,6 +85,8 @@ moduleToNamespace namespace moduleName =
             commonModuleName
 
 
+{-| Module where we generate common helper functions.
+-}
 commonModuleName : List String
 commonModuleName =
     [ "OpenApi", "Common" ]
@@ -87,6 +96,11 @@ commonModuleName =
 -- Names adaptation --
 
 
+{-| Convert an UnsafeName to a valid TypeName.
+
+TODO: Don't expose this.
+
+-}
 toTypeName : UnsafeName -> TypeName
 toTypeName (UnsafeName name) =
     name
@@ -134,6 +148,9 @@ replaceSpacesRegex =
 
 
 {-| Convert into a name suitable to be used in Elm as a variable.
+
+TODO: Don't expose this.
+
 -}
 toValueName : UnsafeName -> String
 toValueName (UnsafeName name) =
@@ -169,6 +186,11 @@ toValueName (UnsafeName name) =
             clean
 
 
+{-| Reserved words; these can't be used for Elm variable names.
+
+TODO: Don't expose this.
+
+-}
 reservedList : Set String
 reservedList =
     -- Copied from elm-syntax
@@ -314,6 +336,11 @@ initialUppercaseWordToLowercase input =
                 input
 
 
+{-| Intermediate representation of an OpenAPI schema
+
+TODO: Don't expose this.
+
+-}
 type Type
     = Nullable Type
     | Object Object
@@ -335,6 +362,8 @@ type Type
     | Unit
 
 
+{-| A basic value
+-}
 type BasicType
     = Integer
     | Boolean
@@ -342,6 +371,11 @@ type BasicType
     | Number
 
 
+{-| A constant value
+
+TODO: Don't expose this.
+
+-}
 type ConstValue
     = ConstInteger Int
     | ConstBoolean Bool
@@ -349,6 +383,11 @@ type ConstValue
     | ConstNumber Float
 
 
+{-| Convert BasicType to OpenAPI "type" string
+
+TODO: Don't expose this. Move to CliMonad?
+
+-}
 basicTypeToString : BasicType -> String
 basicTypeToString basicType =
     case basicType of
@@ -365,10 +404,20 @@ basicTypeToString basicType =
             "number"
 
 
+{-| An Object in a schema
+
+TODO: Don't expose this.
+
+-}
 type alias Object =
     List ( UnsafeName, Field )
 
 
+{-| A `oneOf` declaration
+
+TODO: Don't expose this.
+
+-}
 type alias OneOfData =
     List
         { name : UnsafeName
@@ -377,14 +426,27 @@ type alias OneOfData =
         }
 
 
+{-| Name of a Type
+
+TODO: Don't expose this.
+
+-}
 type alias TypeName =
     String
 
 
+{-| Variant of a custom type
+
+TODO: Don't expose this.
+
+-}
 type alias VariantName =
     TypeName
 
 
+{-| An Object field
+TODO: Don't expose this.
+-}
 type alias Field =
     { type_ : Type
     , required : Bool
@@ -392,16 +454,31 @@ type alias Field =
     }
 
 
+{-| Create a "Ref", as in `$ref: "#/components/..."`.
+
+TODO: Don't expose this.
+
+-}
 ref : String -> Type
 ref str =
     Ref (String.split "/" str)
 
 
+{-| Get the value inside of an UnsafeName.
+
+TODO: Don't expose this.
+
+-}
 unwrapUnsafe : UnsafeName -> String
 unwrapUnsafe (UnsafeName name) =
     name
 
 
+{-| Generate an "enum" from a list of variants.
+
+TODO: Don't expose this.
+
+-}
 enum : List String -> Type
 enum variants =
     variants
@@ -410,6 +487,8 @@ enum variants =
         |> Enum
 
 
+{-| Name of the package needed for Base64.
+-}
 base64PackageName : String
 base64PackageName =
     "danfishgold/base64-bytes"

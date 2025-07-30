@@ -6,13 +6,13 @@
     "bin": "dist/elm-open-api.js",
     "type": "module",
     "scripts": {
-        "dev": "elm-pages run src/Cli.elm",
-        "build": "elm-pages bundle-script src/Cli.elm --output dist/elm-open-api.js --debug",
+        "dev": "SKIP_ELM_CODEGEN=true elm-pages run src/Cli.elm",
+        "build": "SKIP_ELM_CODEGEN=true elm-pages bundle-script src/Cli.elm --output dist/elm-open-api.js --debug",
         "review": "elm-review",
         "review:watch": "elm-review --watch --fix",
         "format": "elm-format src tests --validate",
         "test": "elm-test",
-        "test:gen": "elm-pages run src/TestGenScript.elm",
+        "test:gen": "SKIP_ELM_CODEGEN=true elm-pages run src/TestGenScript.elm",
         "test:watch": "elm-test --watch",
         "pub": "npm run build && npm publish"
     },

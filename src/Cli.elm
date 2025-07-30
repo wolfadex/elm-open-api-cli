@@ -91,7 +91,7 @@ program =
                 |> Cli.OptionsParser.with
                     (Cli.Option.optionalKeywordArg "write-merged-to")
                 |> Cli.OptionsParser.withDoc """
-version: 0.6.1
+version: 0.7.0
 
 options:
 

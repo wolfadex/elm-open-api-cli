@@ -38,6 +38,7 @@ import Json.Decode
 import Json.Encode
 import Json.Schema.Definitions
 import Maybe.Extra
+import Murmur3
 import OpenApi
 import OpenApi.Common.Internal
 import OpenApi.Components
@@ -510,12 +511,20 @@ oneOfType types =
                             names : List Common.UnsafeName
                             names =
                                 List.map .name sortedVariants
+
+                            readableName : String
+                            readableName =
+                                names
+                                    |> List.map fixOneOfName
+                                    |> String.join "_Or_"
                         in
                         { type_ =
                             Common.OneOf
-                                (names
-                                    |> List.map fixOneOfName
-                                    |> String.join "_Or_"
+                                (if String.length readableName > 200 then
+                                    "OneOf" ++ String.fromInt (Murmur3.hashString 1234 readableName)
+
+                                 else
+                                    readableName
                                 )
                                 sortedVariants
                         , documentation =

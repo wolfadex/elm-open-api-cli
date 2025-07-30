@@ -113,11 +113,17 @@ jobs:
   
       - name: Generate (branch)
         working-directory: branch
-        run: npm run test:gen
+        run: |
+          # Change following line to just `npm -C cli install` after #214 is merged
+          [ ! -d cli ] || npm -C cli install
+          npm run test:gen
   
       - name: Generate (main)
         working-directory: main
-        run: npm run test:gen || true # We don't want to block on main failing to generate
+        run: |
+          # Change following line to just `npm -C cli install` after #214 is merged
+          [ ! -d cli ] || npm -C cli install
+          npm run test:gen || true # We don't want to block on main failing to generate
 
       - name: Diff the outputs
         run: |

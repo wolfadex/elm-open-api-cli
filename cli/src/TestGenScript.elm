@@ -116,4 +116,5 @@ run =
             , Pages.Script.exec "sh"
                 [ "-c", "cd example && npx --no -- elm make src/Example.elm --output=/dev/null" ]
             ]
+            |> BackendTask.inDir "cli"
         )

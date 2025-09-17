@@ -4,7 +4,10 @@
     "summary": "A CLI tool for generating Elm modules from Open API specs. ",
     "license": "MIT",
     "version": "1.0.0",
-    "exposed-modules": ["OpenApi.Config", "OpenApi.Generate"],
+    "exposed-modules": [
+        "OpenApi.Config",
+        "OpenApi.Generate"
+    ],
     "elm-version": "0.19.0 <= v < 0.20.0",
     "dependencies": {
         "elm/core": "1.0.0 <= v < 2.0.0",
@@ -18,5 +21,7 @@
         "turboMaCk/non-empty-list-alias": "1.4.0 <= v < 2.0.0",
         "wolfadex/elm-open-api": "2.0.0 <= v < 3.0.0"
     },
-    "test-dependencies": {}
+    "test-dependencies": {
+        "elm-explorations/test": "2.2.0 <= v < 3.0.0"
+    }
 }

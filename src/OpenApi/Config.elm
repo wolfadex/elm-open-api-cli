@@ -69,6 +69,7 @@ import Url
 import Utils
 
 
+{-| -}
 type Config
     = Config
         { inputs : List Input
@@ -82,6 +83,7 @@ type Config
         }
 
 
+{-| -}
 type Input
     = Input
         { oasPath : Path
@@ -93,6 +95,7 @@ type Input
         }
 
 
+{-| -}
 type EffectType
     = ElmHttpCmd
     | ElmHttpCmdRecord
@@ -110,6 +113,7 @@ type EffectType
     | LamderaProgramTestTaskRecord
 
 
+{-| -}
 effectTypeToPackage : EffectType -> Common.Package
 effectTypeToPackage effectType =
     case effectType of
@@ -156,12 +160,14 @@ effectTypeToPackage effectType =
             Common.LamderaProgramTest
 
 
+{-| -}
 type Server
     = Default
     | Single String
     | Multiple (Dict.Dict String String)
 
 
+{-| -}
 type alias Format =
     { basicType : Common.BasicType
     , format : String
@@ -174,11 +180,13 @@ type alias Format =
     }
 
 
+{-| -}
 type Path
     = File String -- swagger.json ./swagger.json /folder/swagger.json
     | Url Url.Url -- https://petstore3.swagger.io/api/v3/openapi.json
 
 
+{-| -}
 pathFromString : String -> Path
 pathFromString path =
     case Url.fromString path of
@@ -189,6 +197,7 @@ pathFromString path =
             File path
 
 
+{-| -}
 pathToString : Path -> String
 pathToString pathType =
     case pathType of
@@ -199,6 +208,7 @@ pathToString pathType =
             Url.toString url
 
 
+{-| -}
 init : String -> Config
 init initialOutputDirectory =
     { inputs = []
@@ -213,6 +223,7 @@ init initialOutputDirectory =
         |> Config
 
 
+{-| -}
 inputFrom : Path -> Input
 inputFrom path =
     { oasPath = path
@@ -231,6 +242,7 @@ inputFrom path =
 -------------
 
 
+{-| -}
 defaultFormats : List Format
 defaultFormats =
     [ dateTimeFormat
@@ -406,56 +418,67 @@ byteFormat =
 -------------
 
 
+{-| -}
 withEffectTypes : List EffectType -> Input -> Input
 withEffectTypes effectTypes (Input input) =
     Input { input | effectTypes = effectTypes }
 
 
+{-| -}
 withOutputModuleName : List String -> Input -> Input
 withOutputModuleName moduleName (Input input) =
     Input { input | outputModuleName = Just moduleName }
 
 
+{-| -}
 withOverrides : List Path -> Input -> Input
 withOverrides newOverrides (Input input) =
     Input { input | overrides = newOverrides }
 
 
+{-| -}
 withGenerateTodos : Bool -> Config -> Config
 withGenerateTodos generateTodos (Config config) =
     Config { config | generateTodos = generateTodos }
 
 
+{-| -}
 withAutoConvertSwagger : Bool -> Config -> Config
 withAutoConvertSwagger newAutoConvertSwagger (Config config) =
     Config { config | autoConvertSwagger = newAutoConvertSwagger }
 
 
+{-| -}
 withSwaggerConversionUrl : String -> Config -> Config
 withSwaggerConversionUrl newSwaggerConversionUrl (Config config) =
     Config { config | swaggerConversionUrl = newSwaggerConversionUrl }
 
 
+{-| -}
 withSwaggerConversionCommand : { command : String, args : List String } -> Config -> Config
 withSwaggerConversionCommand newSwaggerConversionCommand (Config config) =
     Config { config | swaggerConversionCommand = Just newSwaggerConversionCommand }
 
 
+{-| -}
 withServer : Server -> Input -> Input
 withServer newServer (Input input) =
     Input { input | server = newServer }
 
 
+{-| -}
 withWriteMergedTo : String -> Input -> Input
 withWriteMergedTo newWriteMergedTo (Input input) =
     Input { input | writeMergedTo = Just newWriteMergedTo }
 
 
+{-| -}
 withFormat : Format -> Config -> Config
 withFormat newFormat (Config config) =
     Config { config | staticFormats = newFormat :: config.staticFormats }
 
 
+{-| -}
 withFormats :
     (List { format : String, basicType : Common.BasicType } -> List Format)
     -> Config
@@ -464,6 +487,7 @@ withFormats newFormat (Config config) =
     Config { config | dynamicFormats = \input -> newFormat input ++ config.dynamicFormats input }
 
 
+{-| -}
 withInput : Input -> Config -> Config
 withInput input (Config config) =
     Config { config | inputs = input :: config.inputs }
@@ -475,41 +499,49 @@ withInput input (Config config) =
 -------------
 
 
+{-| -}
 swaggerConversionUrl : Config -> String
 swaggerConversionUrl (Config config) =
     config.swaggerConversionUrl
 
 
+{-| -}
 swaggerConversionCommand : Config -> Maybe { command : String, args : List String }
 swaggerConversionCommand (Config config) =
     config.swaggerConversionCommand
 
 
+{-| -}
 autoConvertSwagger : Config -> Bool
 autoConvertSwagger (Config config) =
     config.autoConvertSwagger
 
 
+{-| -}
 outputDirectory : Config -> String
 outputDirectory (Config config) =
     config.outputDirectory
 
 
+{-| -}
 inputs : Config -> List Input
 inputs (Config config) =
     List.reverse config.inputs
 
 
+{-| -}
 oasPath : Input -> Path
 oasPath (Input input) =
     input.oasPath
 
 
+{-| -}
 writeMergedTo : Input -> Maybe String
 writeMergedTo (Input input) =
     input.writeMergedTo
 
 
+{-| -}
 overrides : Input -> List Path
 overrides (Input input) =
     input.overrides
@@ -521,6 +553,7 @@ overrides (Input input) =
 ------------
 
 
+{-| -}
 toGenerationConfig :
     List { format : String, basicType : Common.BasicType }
     -> Config

@@ -1,11 +1,11 @@
-module OpenApi.Generate exposing
-    ( Config
-    , ContentSchema(..)
-    , Mime
-    , files
-    )
+module OpenApi.Generate exposing (Config, ContentSchema(..), Mime, files)
 
-import Cli.Validate
+{-|
+
+@docs Config, ContentSchema, Mime, files
+
+-}
+
 import CliMonad exposing (CliMonad)
 import Common
 import Dict
@@ -55,14 +55,17 @@ import OpenApi.Schema
 import OpenApi.SecurityRequirement
 import OpenApi.SecurityScheme
 import OpenApi.Server
+import Regex exposing (Regex)
 import SchemaUtils
 import String.Extra
 
 
+{-| -}
 type alias Mime =
     String
 
 
+{-| -}
 type ContentSchema
     = EmptyContent
     | JsonContent Common.Type
@@ -86,6 +89,7 @@ type alias PerPackage a =
     }
 
 
+{-| -}
 type alias Config =
     { namespace : List String
     , generateTodos : Bool
@@ -95,6 +99,7 @@ type alias Config =
     }
 
 
+{-| -}
 files :
     Config
     -> OpenApi.OpenApi
@@ -1587,19 +1592,15 @@ operationToContentSchema operation =
                         |> CliMonad.map (\ref -> JsonContent (Common.Ref <| String.split "/" <| OpenApi.Reference.ref ref))
 
 
-regexToCheckIfJson : String -> Cli.Validate.ValidationResult
-regexToCheckIfJson =
-    Cli.Validate.regex "^application\\/(vnd\\.[a-z0-9]+(\\.v\\d+)?(\\.[a-z0-9]+)?)?\\+?json$"
+jsonRegex : Regex
+jsonRegex =
+    Regex.fromString "^application\\/(vnd\\.[a-z0-9]+(\\.v\\d+)?(\\.[a-z0-9]+)?)?\\+?json$"
+        |> Maybe.withDefault Regex.never
 
 
 searchForJsonMediaType : String -> a -> Bool
 searchForJsonMediaType mediaType _ =
-    case regexToCheckIfJson mediaType of
-        Cli.Validate.Valid ->
-            True
-
-        Cli.Validate.Invalid _ ->
-            False
+    Regex.contains jsonRegex mediaType
 
 
 contentToContentSchema : Bool -> Dict.Dict String OpenApi.MediaType.MediaType -> CliMonad ContentSchema

@@ -52,6 +52,7 @@ exceptCodegenRules =
     , NoExposingEverything.rule
     , NoImportingEverything.rule []
     , NoMissingTypeAnnotation.rule
+        |> Rule.ignoreErrorsForDirectories [ "src/Gen" ]
     , NoMissingTypeAnnotationInLetIn.rule
     , NoMissingTypeExpose.rule
     , NoSimpleLetBody.rule
@@ -73,9 +74,9 @@ includingCodegenRules : List Rule
 includingCodegenRules =
     [ NoUnused.Exports.rule
         |> Rule.ignoreErrorsForFiles
-            [ "src/Cli.elm"
+            [ "cli/src/Cli.elm"
             , "src/OpenApi/Config.elm"
-            , "src/TestGenScript.elm"
+            , "cli/src/TestGenScript.elm"
             ]
     , NoUnused.Variables.rule
     ]

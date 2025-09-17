@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "automatically created by": "elm-review suppress",
+  "learn more": "elm-review suppress --help",
+  "suppressions": [
+    { "count": 3, "filePath": "src/Gen/BackendTask/Http.elm" },
+    { "count": 3, "filePath": "src/Gen/Dict.elm" },
+    { "count": 3, "filePath": "src/Gen/Http.elm" },
+    { "count": 3, "filePath": "src/Gen/Result.elm" },
+    { "count": 2, "filePath": "src/Gen/BackendTask.elm" },
+    { "count": 2, "filePath": "src/Gen/List.elm" },
+    { "count": 2, "filePath": "src/Gen/Task.elm" }
+  ]
+}

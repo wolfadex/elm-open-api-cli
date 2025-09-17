@@ -1,7 +1,7 @@
 {
     "type": "package",
     "name": "wolfadex/elm-open-api-cli",
-    "summary": " A CLI tool for generating Elm modules from Open API specs. ",
+    "summary": "A CLI tool for generating Elm modules from Open API specs. ",
     "license": "MIT",
     "version": "1.0.0",
     "exposed-modules": ["OpenApi.Config", "OpenApi.Generate"],

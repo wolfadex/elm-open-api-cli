@@ -10,7 +10,6 @@ import BackendTask.Stream
 import Cli.Option
 import Cli.OptionsParser
 import Cli.Program
-import CliMonad
 import Common
 import Dict
 import Dict.Extra
@@ -925,7 +924,7 @@ generateFilesFromOpenApiSpecs :
         BackendTask.BackendTask
             FatalError.FatalError
             ( List Elm.File
-            , { warnings : List CliMonad.Message
+            , { warnings : List OpenApi.Generate.Message
               , requiredPackages : FastSet.Set String
               }
             )
@@ -1098,7 +1097,7 @@ writeSdkToDisk outputDirectory files =
 
 printSuccessMessageAndWarnings :
     ( List String
-    , { warnings : List CliMonad.Message
+    , { warnings : List OpenApi.Generate.Message
       , requiredPackages : FastSet.Set String
       }
     )
@@ -1165,7 +1164,7 @@ printSuccessMessageAndWarnings ( outputPaths, { requiredPackages, warnings } ) =
     BackendTask.doEach [ successTask, warningTask ]
 
 
-messageToString : CliMonad.Message -> String
+messageToString : OpenApi.Generate.Message -> String
 messageToString { path, message } =
     if List.isEmpty path then
         "Error! " ++ message
@@ -1174,7 +1173,7 @@ messageToString { path, message } =
         "Error! " ++ message ++ "\n  Path: " ++ String.join " -> " path
 
 
-logWarning : ( String, List CliMonad.Message ) -> BackendTask.BackendTask FatalError.FatalError ()
+logWarning : ( String, List OpenApi.Generate.Message ) -> BackendTask.BackendTask FatalError.FatalError ()
 logWarning ( message, messages ) =
     let
         firstLine : String

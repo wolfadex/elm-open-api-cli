@@ -22,6 +22,7 @@
         "wolfadex/elm-open-api": "2.0.0 <= v < 3.0.0"
     },
     "test-dependencies": {
-        "elm-explorations/test": "2.2.0 <= v < 3.0.0"
+        "elm-explorations/test": "2.2.0 <= v < 3.0.0",
+        "miniBill/elm-unicode": "1.1.1 <= v < 2.0.0"
     }
 }

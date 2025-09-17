@@ -1,0 +1,9 @@
+{
+  "version": 1,
+  "automatically created by": "elm-review suppress",
+  "learn more": "elm-review suppress --help",
+  "suppressions": [
+    { "count": 33, "filePath": "src/OpenApi/Config.elm" },
+    { "count": 6, "filePath": "src/OpenApi/Generate.elm" }
+  ]
+}

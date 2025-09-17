@@ -52,6 +52,7 @@ exceptCodegenRules =
     , NoExposingEverything.rule
     , NoImportingEverything.rule []
     , NoMissingTypeAnnotation.rule
+        |> Rule.ignoreErrorsForDirectories [ "src/Gen" ]
     , NoMissingTypeAnnotationInLetIn.rule
     , NoMissingTypeExpose.rule
     , NoSimpleLetBody.rule

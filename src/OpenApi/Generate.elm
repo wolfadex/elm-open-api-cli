@@ -1,8 +1,8 @@
-module OpenApi.Generate exposing (Config, ContentSchema(..), Mime, files)
+module OpenApi.Generate exposing (Config, ContentSchema(..), Message, Path, Mime, files)
 
 {-|
 
-@docs Config, ContentSchema, Mime, files
+@docs Config, ContentSchema, Message, Path, Mime, files
 
 -}
 
@@ -66,6 +66,18 @@ type alias Mime =
 
 
 {-| -}
+type alias Message =
+    { message : String
+    , path : Path
+    }
+
+
+{-| -}
+type alias Path =
+    List String
+
+
+{-| -}
 type ContentSchema
     = EmptyContent
     | JsonContent Common.Type
@@ -105,13 +117,13 @@ files :
     -> OpenApi.OpenApi
     ->
         Result
-            CliMonad.Message
+            Message
             { modules :
                 List
                     { moduleName : List String
                     , declarations : FastDict.Dict String { group : String, declaration : Elm.Declaration }
                     }
-            , warnings : List CliMonad.Message
+            , warnings : List Message
             , requiredPackages : FastSet.Set String
             }
 files { namespace, generateTodos, effectTypes, server, formats } apiSpec =
@@ -173,7 +185,7 @@ extractEnums :
     OpenApi.OpenApi
     ->
         Result
-            CliMonad.Message
+            Message
             (FastDict.Dict (List String) { name : Common.UnsafeName, documentation : Maybe String })
 extractEnums openApi =
     openApi

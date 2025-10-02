@@ -485,8 +485,13 @@ withFormat basicType maybeFormatName getter default =
         Just formatName ->
             CliMonad
                 (\{ formats } ->
+                    let
+                        basicTypeName : String
+                        basicTypeName =
+                            Common.basicTypeToString basicType
+                    in
                     case
-                        FastDict.get ( Common.basicTypeToString basicType, formatName ) formats
+                        FastDict.get ( basicTypeName, formatName ) formats
                     of
                         Nothing ->
                             let
@@ -520,14 +525,34 @@ withFormat basicType maybeFormatName getter default =
                                 emptyOutput
 
                               else
+                                let
+                                    firstLine : String
+                                    firstLine =
+                                        "Don't know how to handle format \""
+                                            ++ formatName
+                                            ++ "\" for type "
+                                            ++ Common.basicTypeToString basicType
+                                            ++ ", treating as the corresponding basic type."
+
+                                    available : List String
+                                    available =
+                                        List.filterMap
+                                            (\( b, f ) ->
+                                                if b == basicTypeName then
+                                                    Just f
+
+                                                else
+                                                    Nothing
+                                            )
+                                            (FastDict.keys formats)
+
+                                    secondLine : String
+                                    secondLine =
+                                        "  Available formats: " ++ String.join ", " available
+                                in
                                 { emptyOutput
                                     | warnings =
-                                        [ { message =
-                                                "Don't know how to handle format \""
-                                                    ++ formatName
-                                                    ++ "\" for type "
-                                                    ++ Common.basicTypeToString basicType
-                                                    ++ ", treating as the corresponding basic type."
+                                        [ { message = firstLine ++ "\n" ++ secondLine
                                           , path = [ "format" ]
                                           }
                                         ]

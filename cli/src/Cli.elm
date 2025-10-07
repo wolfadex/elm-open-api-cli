@@ -876,7 +876,7 @@ decodeMaybeYaml oasPath input =
                         Ok jsonFromYaml
 
     else
-        case Yaml.Decode.fromString yamlToJsonValueDecoder input of
+        case Yaml.Decode.fromString yamlToJsonValueDecoder (input++"\n") of
             Err yamlError ->
                 -- If it errored out, it might be valid JSON that the yaml parser can't handle
                 case Json.Decode.decodeString Json.Value.decoder input of
@@ -898,6 +898,7 @@ decodeMaybeYaml oasPath input =
 
                     Ok decoded ->
                         Ok decoded
+
 
             Ok jsonFromYaml ->
                 Ok jsonFromYaml

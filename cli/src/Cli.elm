@@ -27,6 +27,7 @@ import OpenApi.Config
 import OpenApi.Generate
 import Pages.Script
 import Pages.Script.Spinner
+import Regex exposing (Regex)
 import Result.Extra
 import Set
 import String.Extra
@@ -453,7 +454,7 @@ parseOriginal input original =
     case decodeMaybeYaml (OpenApi.Config.oasPath input) original of
         Err e ->
             e
-                |> jsonErrorToFatalError
+                |> parseErrorToFatalError
                 |> BackendTask.fail
 
         Ok decoded ->
@@ -474,7 +475,7 @@ mergeOverrides ( overrides, original ) =
         (overrides
             |> List.reverse
             |> Result.Extra.combineMap (\( path, file ) -> decodeMaybeYaml path file)
-            |> Result.mapError jsonErrorToFatalError
+            |> Result.mapError parseErrorToFatalError
         )
         |> Result.Extra.join
         |> BackendTask.fromResult
@@ -632,6 +633,19 @@ convertToSwaggerAndThenDecode config input value =
             )
         |> Pages.Script.Spinner.runTask "Convert Swagger to Open API"
         |> BackendTask.andThen (\converted -> decodeOpenApiSpecOrFail { hasAttemptedToConvertFromSwagger = True } config input converted)
+
+
+parseErrorToFatalError : ParseError -> FatalError.FatalError
+parseErrorToFatalError parseError =
+    case parseError of
+        JsonDecodeError decodeError ->
+            jsonErrorToFatalError decodeError
+
+        YamlParseError yamlError ->
+            yamlError
+                |> Yaml.Decode.errorToString
+                |> Ansi.Color.fontColor Ansi.Color.brightRed
+                |> FatalError.fromString
 
 
 jsonErrorToFatalError : Json.Decode.Error -> FatalError.FatalError
@@ -811,28 +825,79 @@ swaggerFieldDecoder =
     Json.Decode.field "swagger" Json.Decode.string
 
 
-decodeMaybeYaml : OpenApi.Config.Path -> String -> Result Json.Decode.Error Json.Value.JsonValue
+{-| Because all OpenAPI specs are objects (including the overrides), we identify JSON by searching for an open brace at the beginning of the file.
+
+That said, because yaml is a superset of JSON, this doesn't completely rule yaml out.
+
+-}
+probablyJsonRegex : Regex
+probablyJsonRegex =
+    Regex.fromString "^\\s*\\{"
+        |> Maybe.withDefault Regex.never
+
+
+type ParseError
+    = JsonDecodeError Json.Decode.Error
+    | YamlParseError Yaml.Decode.Error
+
+
+decodeMaybeYaml : OpenApi.Config.Path -> String -> Result ParseError Json.Value.JsonValue
 decodeMaybeYaml oasPath input =
     let
-        -- TODO: Better handling of errors: https://github.com/wolfadex/elm-open-api-cli/issues/40
-        isJson : Bool
-        isJson =
+        path : String
+        path =
             case oasPath of
                 OpenApi.Config.File file ->
-                    String.endsWith ".json" file
+                    file
 
                 OpenApi.Config.Url url ->
-                    String.endsWith ".json" url.path
+                    url.path
+
+        isProbablyJson : Bool
+        isProbablyJson =
+            String.endsWith ".json" path || Regex.contains probablyJsonRegex input
     in
     -- Short-circuit the error-prone yaml parsing of JSON structures if we
     -- are reasonably confident that it is a JSON file
-    if isJson then
-        Json.Decode.decodeString Json.Value.decoder input
+    if isProbablyJson then
+        case Json.Decode.decodeString Json.Value.decoder input of
+            Ok decoded ->
+                Ok decoded
+
+            Err jsonError ->
+                -- If it errored out, it might be yaml
+                case Yaml.Decode.fromString yamlToJsonValueDecoder input of
+                    Err _ ->
+                        -- Not valid (or not successfully parsed) yaml.
+                        -- Because we thought it was JSON, return the JSON parsing error
+                        Err (JsonDecodeError jsonError)
+
+                    Ok jsonFromYaml ->
+                        Ok jsonFromYaml
 
     else
         case Yaml.Decode.fromString yamlToJsonValueDecoder input of
-            Err _ ->
-                Json.Decode.decodeString Json.Value.decoder input
+            Err yamlError ->
+                -- If it errored out, it might be valid JSON that the yaml parser can't handle
+                case Json.Decode.decodeString Json.Value.decoder input of
+                    Err jsonError ->
+                        let
+                            isProbablyYaml : Bool
+                            isProbablyYaml =
+                                String.endsWith ".yaml" path
+                                    || String.endsWith ".yml" path
+                                    || not (Regex.contains probablyJsonRegex input)
+                        in
+                        if isProbablyYaml then
+                            -- Not valid JSON.
+                            -- Because we thought it was yaml, return the yaml parsing error
+                            Err (YamlParseError yamlError)
+
+                        else
+                            Err (JsonDecodeError jsonError)
+
+                    Ok decoded ->
+                        Ok decoded
 
             Ok jsonFromYaml ->
                 Ok jsonFromYaml

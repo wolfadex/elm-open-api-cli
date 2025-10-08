@@ -237,13 +237,18 @@ serverDeclarations server =
             list
                 |> List.map
                     (\{ name, url, description } ->
+                        let
+                            safeName : String
+                            safeName =
+                                Common.toValueName name
+                        in
                         { moduleName = Common.Servers
-                        , name = name
+                        , name = safeName
                         , declaration =
                             url
                                 |> stripTrailingSlash
                                 |> Elm.string
-                                |> Elm.declaration name
+                                |> Elm.declaration safeName
                                 |> (case description of
                                         Nothing ->
                                             identity
@@ -1774,7 +1779,7 @@ toConfigParamAnnotation options =
 
 type ServerInfo
     = SingleServer String
-    | MultipleServers (List { name : String, url : String, description : Maybe String })
+    | MultipleServers (List { name : Common.UnsafeName, url : String, description : Maybe String })
 
 
 serverInfo : OpenApi.Config.Server -> CliMonad ServerInfo
@@ -1811,7 +1816,7 @@ serverInfo server =
                                                     Just d ->
                                                         d
                                         in
-                                        { name = name
+                                        { name = Common.UnsafeName name
                                         , url = OpenApi.Server.url value
                                         , description = description
                                         }
@@ -1823,7 +1828,7 @@ serverInfo server =
                         |> Dict.toList
                         |> List.map
                             (\( name, url ) ->
-                                { name = name
+                                { name = Common.UnsafeName name
                                 , url = url
                                 , description = Nothing
                                 }

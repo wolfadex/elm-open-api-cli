@@ -86,6 +86,10 @@ run =
         nullableEnum =
             OpenApi.Config.inputFrom (OpenApi.Config.File "./example/nullable-enum.yaml")
 
+        cookieAuth : OpenApi.Config.Input
+        cookieAuth =
+            OpenApi.Config.inputFrom (OpenApi.Config.File "./example/cookie-auth.yaml")
+
         config : OpenApi.Config.Config
         config =
             OpenApi.Config.init "./generated"
@@ -106,6 +110,7 @@ run =
                 |> OpenApi.Config.withInput anyOfEnums
                 |> OpenApi.Config.withInput binaryResponse
                 |> OpenApi.Config.withInput nullableEnum
+                |> OpenApi.Config.withInput cookieAuth
     in
     Pages.Script.withoutCliOptions
         (BackendTask.doEach

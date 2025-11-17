@@ -1,0 +1,28 @@
+openapi: 3.0.4
+
+info:
+    title: Cookie auth
+    version: 1.0.0
+paths:
+    /users:
+        get:
+            security:
+                - cookieAuth: []
+            description: Returns a list of users.
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                type: string
+
+components:
+    securitySchemes:
+        cookieAuth:
+            type: apiKey
+            in: cookie
+            name: COOKIE-MONSTER!
+
+security:
+    - cookieAuth: []

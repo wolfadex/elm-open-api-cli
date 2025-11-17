@@ -1468,7 +1468,31 @@ operationToAuthorizationInfo operation =
                                                                     |> CliMonad.succeed
 
                                                             OpenApi.SecurityScheme.Cookie ->
-                                                                CliMonad.todoWithDefault acc "Unsupported security schema: ApiKey in Cookie"
+                                                                if Dict.member "Cookie" acc.headers then
+                                                                    CliMonad.todoWithDefault acc "Cookie header already set"
+
+                                                                else
+                                                                    CliMonad.succeed
+                                                                        { acc
+                                                                            | headers =
+                                                                                Dict.insert "Cookie"
+                                                                                    (\config ->
+                                                                                        Elm.Op.append
+                                                                                            (Elm.string (apiKey.name ++ "="))
+                                                                                            (config
+                                                                                                |> Elm.get "authorization"
+                                                                                                |> Elm.get cleanName
+                                                                                            )
+                                                                                    )
+                                                                                    acc.headers
+                                                                            , params =
+                                                                                Dict.insert "authorization"
+                                                                                    (Dict.insert cleanName Elm.Annotation.string <|
+                                                                                        Maybe.withDefault Dict.empty <|
+                                                                                            Dict.get "authorization" acc.params
+                                                                                    )
+                                                                                    acc.params
+                                                                        }
 
                                                     OpenApi.SecurityScheme.Http details ->
                                                         case details.scheme of

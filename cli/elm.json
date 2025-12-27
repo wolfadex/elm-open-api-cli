@@ -22,7 +22,6 @@
             "mdgriffith/elm-codegen": "5.2.0",
             "miniBill/elm-fast-dict": "1.2.4",
             "robinheghan/murmur3": "1.0.0",
-            "turboMaCk/non-empty-list-alias": "1.4.0",
             "wolfadex/elm-ansi": "3.0.0",
             "wolfadex/elm-open-api": "2.0.0"
         },

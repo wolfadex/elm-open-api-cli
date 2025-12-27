@@ -389,7 +389,7 @@ withConfig config =
                                 )
                                 prev
                                 overrides
-                                |> withInnerStep index total "Merging overrides" mergeOverrides
+                                |> withInnerStep index total "Merging overrides" (\toMerge -> mergeOverrides toMerge |> BackendTask.fromResult)
                    )
                 |> (case OpenApi.Config.writeMergedTo input of
                         Nothing ->
@@ -422,6 +422,7 @@ withConfig config =
             (\( (), apiSpecs, allFormats ) ->
                 OpenApi.Config.toGenerationConfig (List.concat allFormats) config apiSpecs
                     |> generateFilesFromOpenApiSpecs
+                    |> BackendTask.fromResult
             )
         |> Pages.Script.Spinner.withStep "Format with elm-format" (onFirst attemptToFormat)
         |> Pages.Script.Spinner.withStep "Write to disk" (onFirst (writeSdkToDisk (OpenApi.Config.outputDirectory config)))
@@ -460,24 +461,21 @@ parseOriginal input original =
             BackendTask.succeed ( [], decoded )
 
 
-mergeOverrides : ( List ( OpenApi.Config.Path, String ), Json.Value.JsonValue ) -> BackendTask.BackendTask FatalError.FatalError Json.Decode.Value
+mergeOverrides : ( List ( OpenApi.Config.Path, String ), Json.Value.JsonValue ) -> Result FatalError.FatalError Json.Decode.Value
 mergeOverrides ( overrides, original ) =
-    Result.map
-        (\overridesValues ->
-            List.foldl
-                (\override acc -> Result.andThen (overrideWith override) acc)
-                (Ok original)
-                overridesValues
-                |> Result.mapError FatalError.fromString
-                |> Result.map Json.Value.encode
-        )
-        (overrides
-            |> List.reverse
-            |> Result.Extra.combineMap (\( path, file ) -> decodeMaybeYaml path file)
-            |> Result.mapError parseErrorToFatalError
-        )
-        |> Result.Extra.join
-        |> BackendTask.fromResult
+    overrides
+        |> List.reverse
+        |> Result.Extra.combineMap (\( path, file ) -> decodeMaybeYaml path file)
+        |> Result.mapError parseErrorToFatalError
+        |> Result.andThen
+            (\overridesValues ->
+                List.foldl
+                    (\override acc -> Result.andThen (overrideWith override) acc)
+                    (Ok original)
+                    overridesValues
+                    |> Result.mapError FatalError.fromString
+                    |> Result.map Json.Value.encode
+            )
 
 
 writeMerged : String -> Json.Decode.Value -> BackendTask.BackendTask FatalError.FatalError Json.Decode.Value
@@ -921,7 +919,7 @@ yamlToJsonValueDecoder =
 generateFilesFromOpenApiSpecs :
     List ( OpenApi.Generate.Config, OpenApi.OpenApi )
     ->
-        BackendTask.BackendTask
+        Result
             FatalError.FatalError
             ( List Elm.File
             , { warnings : List OpenApi.Generate.Message
@@ -930,7 +928,7 @@ generateFilesFromOpenApiSpecs :
             )
 generateFilesFromOpenApiSpecs configs =
     configs
-        |> BackendTask.Extra.combineMap
+        |> Result.Extra.combineMap
             (\( config, apiSpec ) ->
                 OpenApi.Generate.files config apiSpec
                     |> Result.mapError
@@ -939,9 +937,8 @@ generateFilesFromOpenApiSpecs configs =
                                 |> messageToString
                                 |> FatalError.fromString
                         )
-                    |> BackendTask.fromResult
             )
-        |> BackendTask.map
+        |> Result.map
             (\result ->
                 let
                     groupOrder : String -> Int

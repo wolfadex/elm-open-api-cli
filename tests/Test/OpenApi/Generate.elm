@@ -1,6 +1,5 @@
 module Test.OpenApi.Generate exposing (suite)
 
-import Char
 import CliMonad
 import Elm
 import Expect

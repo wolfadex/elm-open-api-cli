@@ -245,8 +245,20 @@ schemaToType qualify schema =
                                         (schemaToType qualify itemSchema)
 
                 anyOfToType : List Json.Schema.Definitions.Schema -> CliMonad { type_ : Common.Type, documentation : Maybe String }
-                anyOfToType _ =
-                    CliMonad.succeed { type_ = Common.Value, documentation = subSchema.description }
+                anyOfToType schemas =
+                    areSchemasDisjoint qualify schemas
+                        |> CliMonad.andThen
+                            (\disjoint ->
+                                if disjoint then
+                                    oneOfToType schemas
+
+                                else
+                                    CliMonad.todoWithDefault
+                                        { type_ = Common.Value
+                                        , documentation = subSchema.description
+                                        }
+                                        "anyOf between overlapping types is not supported"
+                            )
 
                 oneOfCombine : List Json.Schema.Definitions.Schema -> CliMonad { type_ : Common.Type, documentation : Maybe String }
                 oneOfCombine oneOf =
@@ -426,6 +438,335 @@ schemaToType qualify schema =
                                 , documentation = documentation
                                 }
                             )
+
+
+areSchemasDisjoint : Bool -> List Json.Schema.Definitions.Schema -> CliMonad Bool
+areSchemasDisjoint qualify schemas =
+    let
+        areDisjoint : Json.Schema.Definitions.Schema -> Json.Schema.Definitions.Schema -> CliMonad Bool
+        areDisjoint l r =
+            case ( l, r ) of
+                ( Json.Schema.Definitions.BooleanSchema lb, Json.Schema.Definitions.BooleanSchema rb ) ->
+                    if lb == rb then
+                        CliMonad.succeed False
+                            |> CliMonad.withWarning "anyOf between two booleans with the same value"
+
+                    else
+                        CliMonad.succeed True
+
+                ( Json.Schema.Definitions.BooleanSchema _, Json.Schema.Definitions.ObjectSchema _ ) ->
+                    CliMonad.succeed True
+
+                ( Json.Schema.Definitions.ObjectSchema _, Json.Schema.Definitions.BooleanSchema _ ) ->
+                    CliMonad.succeed True
+
+                ( Json.Schema.Definitions.ObjectSchema lo, Json.Schema.Definitions.ObjectSchema ro ) ->
+                    CliMonad.andThen2
+                        (\lprop rprop ->
+                            let
+                                ldict : FastDict.Dict String Common.Field
+                                ldict =
+                                    lprop
+                                        |> List.map
+                                            (\( name, field ) ->
+                                                ( Common.unwrapUnsafe name, field )
+                                            )
+                                        |> FastDict.fromList
+
+                                ladd : Bool
+                                ladd =
+                                    case lo.additionalProperties of
+                                        Just (Json.Schema.Definitions.BooleanSchema False) ->
+                                            False
+
+                                        _ ->
+                                            True
+
+                                rdict : FastDict.Dict String Common.Field
+                                rdict =
+                                    rprop
+                                        |> List.map
+                                            (\( name, field ) ->
+                                                ( Common.unwrapUnsafe name, field )
+                                            )
+                                        |> FastDict.fromList
+
+                                radd : Bool
+                                radd =
+                                    case ro.additionalProperties of
+                                        Just (Json.Schema.Definitions.BooleanSchema False) ->
+                                            False
+
+                                        _ ->
+                                            True
+
+                                merged : Result (List String) ()
+                                merged =
+                                    FastDict.merge
+                                        (\_ lval prev ->
+                                            case prev of
+                                                Ok () ->
+                                                    prev
+
+                                                Err _ ->
+                                                    -- A required field on the left when additionalProperties are forbidden on the right means the sets are disjoint
+                                                    if lval.required && not radd then
+                                                        Ok ()
+
+                                                    else
+                                                        prev
+                                        )
+                                        (\_ lval rval prev ->
+                                            case prev of
+                                                Ok () ->
+                                                    prev
+
+                                                Err warns ->
+                                                    -- If the field is optional in both we could have a value without it, so it's not enough to distinguish, so we ask it's required in at least one of them
+                                                    if lval.required || rval.required then
+                                                        let
+                                                            ( res, newWarns ) =
+                                                                areTypesDisjoint lval.type_ rval.type_
+                                                        in
+                                                        if res then
+                                                            Ok ()
+
+                                                        else
+                                                            Err (warns ++ newWarns)
+
+                                                    else
+                                                        prev
+                                        )
+                                        (\_ rval prev ->
+                                            case prev of
+                                                Ok () ->
+                                                    prev
+
+                                                Err _ ->
+                                                    -- A required field on the right when additionalProperties are forbidden on the left means the sets are disjoint
+                                                    if rval.required && not ladd then
+                                                        Ok ()
+
+                                                    else
+                                                        prev
+                                        )
+                                        ldict
+                                        rdict
+                                        (Err [])
+                            in
+                            case merged of
+                                Ok () ->
+                                    CliMonad.succeed True
+
+                                Err warns ->
+                                    warns
+                                        |> Set.fromList
+                                        |> Set.toList
+                                        |> List.foldl
+                                            CliMonad.withWarning
+                                            (CliMonad.succeed False)
+                        )
+                        (subSchemaToProperties qualify lo)
+                        (subSchemaToProperties qualify ro)
+
+        go :
+            Json.Schema.Definitions.Schema
+            -> List Json.Schema.Definitions.Schema
+            -> CliMonad Bool
+        go item queue =
+            queue
+                |> CliMonad.combineMap (\other -> areDisjoint item other)
+                |> CliMonad.andThen
+                    (\r ->
+                        if List.all identity r then
+                            case queue of
+                                [] ->
+                                    CliMonad.succeed True
+
+                                h :: t ->
+                                    go h t
+
+                        else
+                            CliMonad.succeed False
+                    )
+    in
+    case schemas of
+        [] ->
+            CliMonad.succeed True
+
+        h :: t ->
+            go h t
+
+
+type SimplifiedForDisjointBasicType
+    = SimplifiedForDisjointNumber (Maybe Float)
+    | SimplifiedForDisjointString (Maybe String)
+    | SimplifiedForDisjointBool (Maybe Bool)
+
+
+areTypesDisjoint : Common.Type -> Common.Type -> ( Bool, List String )
+areTypesDisjoint ltype rtype =
+    case ( ltype, rtype ) of
+        ( Common.Ref _, _ ) ->
+            ( False, [ "disjoin check for ref types not implemented yet" ] )
+
+        ( _, Common.Ref _ ) ->
+            ( False, [ "disjoin check for ref types not implemented yet" ] )
+
+        ( Common.Value, _ ) ->
+            ( False, [] )
+
+        ( _, Common.Value ) ->
+            ( False, [] )
+
+        ( Common.Nullable _, Common.Nullable _ ) ->
+            ( False, [] )
+
+        ( Common.Null, Common.Nullable _ ) ->
+            ( False, [] )
+
+        ( Common.Nullable _, Common.Null ) ->
+            ( False, [] )
+
+        ( Common.Null, Common.Null ) ->
+            ( False, [] )
+
+        ( Common.Null, Common.List _ ) ->
+            ( True, [] )
+
+        ( Common.List _, Common.Null ) ->
+            ( True, [] )
+
+        ( Common.OneOf _ alternatives, _ ) ->
+            alternatives
+                |> List.map (\alternative -> areTypesDisjoint alternative.type_ rtype)
+                |> List.unzip
+                |> Tuple.mapBoth (List.all identity) List.concat
+
+        ( _, Common.OneOf _ alternatives ) ->
+            alternatives
+                |> List.map (\alternative -> areTypesDisjoint ltype alternative.type_)
+                |> List.unzip
+                |> Tuple.mapBoth (List.all identity) List.concat
+
+        ( Common.List _, Common.List _ ) ->
+            -- Empty lists are not distinguished
+            ( False, [] )
+
+        ( Common.Basic lbasic lopt, Common.Basic rbasic ropt ) ->
+            case
+                ( simplifyForDisjoint lbasic lopt.const
+                , simplifyForDisjoint rbasic ropt.const
+                )
+            of
+                ( Err warning, _ ) ->
+                    ( False, [ warning ] )
+
+                ( _, Err warning ) ->
+                    ( False, [ warning ] )
+
+                ( Ok (SimplifiedForDisjointBool lconst), Ok (SimplifiedForDisjointBool rconst) ) ->
+                    ( lconst /= rconst, [] )
+
+                ( Ok (SimplifiedForDisjointNumber lconst), Ok (SimplifiedForDisjointNumber rconst) ) ->
+                    ( lconst /= rconst, [] )
+
+                ( Ok (SimplifiedForDisjointString lconst), Ok (SimplifiedForDisjointString rconst) ) ->
+                    if lconst /= rconst then
+                        ( True, [] )
+
+                    else
+                        -- TODO: check for disjoint formats
+                        ( False, [] )
+
+                _ ->
+                    ( True, [] )
+
+        _ ->
+            ( False, [ "disjoin check not implemented for types " ++ typeToString ltype ++ " and " ++ typeToString rtype ] )
+
+
+typeToString : Common.Type -> String
+typeToString type_ =
+    case type_ of
+        Common.Null ->
+            "null"
+
+        Common.Nullable _ ->
+            "nullable"
+
+        Common.Object _ ->
+            "object"
+
+        Common.Basic _ _ ->
+            "basic"
+
+        Common.List _ ->
+            "list"
+
+        Common.Dict _ _ ->
+            "dict"
+
+        Common.OneOf _ _ ->
+            "oneOf"
+
+        Common.Enum _ ->
+            "enum"
+
+        Common.Value ->
+            "value"
+
+        Common.Ref _ ->
+            "ref"
+
+        Common.Bytes ->
+            "bytes"
+
+        Common.Unit ->
+            "unit"
+
+
+simplifyForDisjoint : Common.BasicType -> Maybe Common.ConstValue -> Result String SimplifiedForDisjointBasicType
+simplifyForDisjoint basic const =
+    case ( basic, const ) of
+        ( Common.Boolean, Nothing ) ->
+            Ok (SimplifiedForDisjointBool Nothing)
+
+        ( Common.Boolean, Just (Common.ConstBoolean b) ) ->
+            Ok (SimplifiedForDisjointBool (Just b))
+
+        ( Common.Boolean, Just _ ) ->
+            Err "Invalid const for boolean type"
+
+        ( Common.String, Nothing ) ->
+            Ok (SimplifiedForDisjointString Nothing)
+
+        ( Common.String, Just (Common.ConstString b) ) ->
+            Ok (SimplifiedForDisjointString (Just b))
+
+        ( Common.String, Just _ ) ->
+            Err "Invalid const for string type"
+
+        ( Common.Integer, Nothing ) ->
+            Ok (SimplifiedForDisjointNumber Nothing)
+
+        ( Common.Integer, Just (Common.ConstInteger i) ) ->
+            Ok (SimplifiedForDisjointNumber (Just (toFloat i)))
+
+        ( Common.Integer, Just _ ) ->
+            Err "Invalid const for integer type"
+
+        ( Common.Number, Nothing ) ->
+            Ok (SimplifiedForDisjointNumber Nothing)
+
+        ( Common.Number, Just (Common.ConstInteger i) ) ->
+            Ok (SimplifiedForDisjointNumber (Just (toFloat i)))
+
+        ( Common.Number, Just (Common.ConstNumber f) ) ->
+            Ok (SimplifiedForDisjointNumber (Just f))
+
+        ( Common.Number, Just _ ) ->
+            Err "Invalid const for number type"
 
 
 subschemaToEnumMaybe :
@@ -622,29 +963,40 @@ objectSchemaToType qualify subSchema =
                 declaredProperties
                 additionalSchema
     in
-    case subSchema.additionalProperties of
-        -- Object contains only specified properties, not arbitrary extra ones.
-        Just (Json.Schema.Definitions.BooleanSchema False) ->
-            declaredProperties
-
-        -- It's unclear whether "true" is *technically* an acceptable value for
-        -- additionalProperties, but the GitHub API spec uses it. Since the type
-        -- of the properties could be anything, we keep them as Json Values.
-        Just (Json.Schema.Definitions.BooleanSchema True) ->
-            CliMonad.succeed
-                { type_ = Common.Value
-                , documentation = Just "Arbitrary data whose type is not defined by the API spec"
-                }
-                |> declaredAndAdditionalProperties
-
-        -- The object contains an additionalProperties entry that describes the
-        -- type of the values, which may have arbitrary keys, in the object.
-        Just additionalPropertiesSchema ->
-            schemaToType qualify additionalPropertiesSchema
-                |> declaredAndAdditionalProperties
+    (case subSchema.patternProperties of
+        Just _ ->
+            CliMonad.succeed ()
+                |> CliMonad.withWarning "patternProperties not implemented yet"
 
         Nothing ->
-            declaredProperties
+            CliMonad.succeed ()
+    )
+        |> CliMonad.andThen
+            (\() ->
+                case subSchema.additionalProperties of
+                    -- Object contains only specified properties, not arbitrary extra ones.
+                    Just (Json.Schema.Definitions.BooleanSchema False) ->
+                        declaredProperties
+
+                    -- It's unclear whether "true" is *technically* an acceptable value for
+                    -- additionalProperties, but the GitHub API spec uses it. Since the type
+                    -- of the properties could be anything, we keep them as Json Values.
+                    Just (Json.Schema.Definitions.BooleanSchema True) ->
+                        CliMonad.succeed
+                            { type_ = Common.Value
+                            , documentation = Just "Arbitrary data whose type is not defined by the API spec"
+                            }
+                            |> declaredAndAdditionalProperties
+
+                    -- The object contains an additionalProperties entry that describes the
+                    -- type of the values, which may have arbitrary keys, in the object.
+                    Just additionalPropertiesSchema ->
+                        schemaToType qualify additionalPropertiesSchema
+                            |> declaredAndAdditionalProperties
+
+                    Nothing ->
+                        declaredProperties
+            )
 
 
 joinIfNotEmpty : String -> List (Maybe String) -> Maybe String

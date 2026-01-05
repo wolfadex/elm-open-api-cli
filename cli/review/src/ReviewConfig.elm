@@ -17,6 +17,7 @@ import NoDebug.Log
 import NoDebug.TodoOrToString
 import NoExposingEverything
 import NoImportingEverything
+import NoInternalImports
 import NoMissingTypeAnnotation
 import NoMissingTypeAnnotationInLetIn
 import NoMissingTypeExpose
@@ -57,5 +58,6 @@ config =
     , NoUnused.Patterns.rule
     , NoUnused.Variables.rule
     , Simplify.rule Simplify.defaults
+    , NoInternalImports.rule [ "../src" ]
     ]
         |> List.map (Rule.ignoreErrorsForDirectories [ "../src/Gen" ])

@@ -565,8 +565,8 @@ areSchemasDisjoint qualify schemas =
                                             CliMonad.withWarning
                                             (CliMonad.succeed False)
                         )
-                        (subSchemaToProperties qualify lo)
-                        (subSchemaToProperties qualify ro)
+                        (schemaToProperties qualify l)
+                        (schemaToProperties qualify r)
 
         go :
             Json.Schema.Definitions.Schema
@@ -607,10 +607,10 @@ areTypesDisjoint : Common.Type -> Common.Type -> ( Bool, List String )
 areTypesDisjoint ltype rtype =
     case ( ltype, rtype ) of
         ( Common.Ref _, _ ) ->
-            ( False, [ "disjoin check for ref types not implemented yet" ] )
+            ( False, [ "Disjoin check for ref types not implemented yet" ] )
 
         ( _, Common.Ref _ ) ->
-            ( False, [ "disjoin check for ref types not implemented yet" ] )
+            ( False, [ "Disjoin check for ref types not implemented yet" ] )
 
         ( Common.Value, _ ) ->
             ( False, [] )
@@ -626,6 +626,12 @@ areTypesDisjoint ltype rtype =
 
         ( Common.Nullable _, Common.Null ) ->
             ( False, [] )
+
+        ( Common.Nullable c, Common.Basic _ _ ) ->
+            areTypesDisjoint c rtype
+
+        ( Common.Basic _ _, Common.Nullable c ) ->
+            areTypesDisjoint ltype c
 
         ( Common.Null, Common.Null ) ->
             ( False, [] )
@@ -681,8 +687,40 @@ areTypesDisjoint ltype rtype =
                 _ ->
                     ( True, [] )
 
+        ( Common.Object lfields, Common.Object rfields ) ->
+            let
+                ldict : FastDict.Dict String Common.Field
+                ldict =
+                    lfields
+                        |> List.map (\( k, v ) -> ( Common.unwrapUnsafe k, v ))
+                        |> FastDict.fromList
+
+                rdict : FastDict.Dict String Common.Field
+                rdict =
+                    rfields
+                        |> List.map (\( k, v ) -> ( Common.unwrapUnsafe k, v ))
+                        |> FastDict.fromList
+            in
+            FastDict.merge
+                (\_ _ acc -> acc)
+                (\_ lfield rfield ( acc, warns ) ->
+                    if acc || (not lfield.required && not rfield.required) then
+                        ( acc, warns )
+
+                    else
+                        let
+                            ( nacc, nwarns ) =
+                                areTypesDisjoint lfield.type_ rfield.type_
+                        in
+                        ( nacc, warns ++ nwarns )
+                )
+                (\_ _ acc -> acc)
+                ldict
+                rdict
+                ( False, [] )
+
         _ ->
-            ( False, [ "disjoin check not implemented for types " ++ typeToString ltype ++ " and " ++ typeToString rtype ] )
+            ( False, [ "Disjoin check not implemented for types " ++ typeToString ltype ++ " and " ++ typeToString rtype ] )
 
 
 typeToString : Common.Type -> String

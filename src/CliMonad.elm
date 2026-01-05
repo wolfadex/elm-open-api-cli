@@ -76,6 +76,7 @@ type CliMonad a
          , enums : FastDict.Dict (List String) { name : Common.UnsafeName, documentation : Maybe String }
          , namespace : List String
          , formats : FastDict.Dict InternalFormatName InternalFormat
+         , warnOnMissingEnums : Bool
          }
          -> Result Message ( a, Output )
         )
@@ -284,6 +285,7 @@ run :
         , enums : FastDict.Dict (List String) { name : Common.UnsafeName, documentation : Maybe String }
         , namespace : List String
         , formats : List OpenApi.Config.Format
+        , warnOnMissingEnums : Bool
         }
     -> CliMonad (List Declaration)
     ->
@@ -301,6 +303,7 @@ run oneOfDeclarations input (CliMonad x) =
             , enums : FastDict.Dict (List String) { name : Common.UnsafeName, documentation : Maybe String }
             , namespace : List String
             , formats : FastDict.Dict InternalFormatName InternalFormat
+            , warnOnMissingEnums : Bool
             }
         internalInput =
             { openApi = input.openApi
@@ -311,6 +314,7 @@ run oneOfDeclarations input (CliMonad x) =
                 input.formats
                     |> List.map toInternalFormat
                     |> FastDict.fromList
+            , warnOnMissingEnums = input.warnOnMissingEnums
             }
     in
     x internalInput
@@ -441,20 +445,32 @@ enumName variants =
                     succeed (Just name)
 
                 Nothing ->
-                    succeed Nothing
-                        |> withWarning
-                            ("No named enum found for [ "
-                                ++ String.join ", "
-                                    (List.map
-                                        (\variant ->
-                                            variant
-                                                |> Common.unwrapUnsafe
-                                                |> escapeString
-                                        )
-                                        variants
-                                    )
-                                ++ " ]. Define one to improve type safety"
-                            )
+                    CliMonad
+                        (\{ warnOnMissingEnums } ->
+                            if warnOnMissingEnums then
+                                let
+                                    variantNames : List String
+                                    variantNames =
+                                        List.map
+                                            (\variant ->
+                                                variant
+                                                    |> Common.unwrapUnsafe
+                                                    |> escapeString
+                                            )
+                                            variants
+
+                                    message : String
+                                    message =
+                                        "No named enum found for [ "
+                                            ++ String.join ", " variantNames
+                                            ++ " ]. Define one to improve type safety"
+                                in
+                                ( Nothing, { emptyOutput | warnings = [ { path = [], message = message } ] } )
+                                    |> Ok
+
+                            else
+                                Ok ( Nothing, emptyOutput )
+                        )
         )
         enums
 

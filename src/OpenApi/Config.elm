@@ -2,7 +2,7 @@ module OpenApi.Config exposing
     ( Config, EffectType(..), effectTypeToPackage, Format, Input, Path(..), Server(..)
     , init, inputFrom, pathFromString
     , withAutoConvertSwagger, withEffectTypes, withFormat, withFormats, withGenerateTodos, withInput, withSwaggerConversionCommand, withSwaggerConversionUrl
-    , withOutputModuleName, withOverrides, withServer, withWriteMergedTo
+    , withOutputModuleName, withOverrides, withServer, withWriteMergedTo, withWarnOnMissingEnums
     , autoConvertSwagger, inputs, outputDirectory, swaggerConversionCommand, swaggerConversionUrl
     , oasPath, overrides, writeMergedTo
     , toGenerationConfig, Generate, pathToString
@@ -21,7 +21,7 @@ module OpenApi.Config exposing
 
 @docs init, inputFrom, pathFromString
 @docs withAutoConvertSwagger, withEffectTypes, withFormat, withFormats, withGenerateTodos, withInput, withSwaggerConversionCommand, withSwaggerConversionUrl
-@docs withOutputModuleName, withOverrides, withServer, withWriteMergedTo
+@docs withOutputModuleName, withOverrides, withServer, withWriteMergedTo, withWarnOnMissingEnums
 
 
 # Config properties
@@ -92,6 +92,7 @@ type Input
         , overrides : List Path
         , writeMergedTo : Maybe String
         , effectTypes : List EffectType
+        , warnOnMissingEnums : Bool
         }
 
 
@@ -232,6 +233,7 @@ inputFrom path =
     , overrides = []
     , writeMergedTo = Nothing
     , effectTypes = [ ElmHttpCmd, ElmHttpTask ]
+    , warnOnMissingEnums = False
     }
         |> Input
 
@@ -473,6 +475,12 @@ withWriteMergedTo newWriteMergedTo (Input input) =
 
 
 {-| -}
+withWarnOnMissingEnums : Bool -> Input -> Input
+withWarnOnMissingEnums newWarnOnMissingEnums (Input input) =
+    Input { input | warnOnMissingEnums = newWarnOnMissingEnums }
+
+
+{-| -}
 withFormat : Format -> Config -> Config
 withFormat newFormat (Config config) =
     Config { config | staticFormats = newFormat :: config.staticFormats }
@@ -560,6 +568,7 @@ type alias Generate =
     , effectTypes : List EffectType
     , server : Server
     , formats : List Format
+    , warnOnMissingEnums : Bool
     }
 
 
@@ -591,6 +600,7 @@ toGenerationConfig formatsInput (Config config) augmentedInputs =
               , generateTodos = config.generateTodos
               , effectTypes = input.effectTypes
               , server = input.server
+              , warnOnMissingEnums = input.warnOnMissingEnums
               , formats = config.staticFormats ++ config.dynamicFormats formatsInput
               }
             , spec

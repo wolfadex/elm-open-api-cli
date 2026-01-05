@@ -73,6 +73,7 @@ run =
         gitHub : OpenApi.Config.Input
         gitHub =
             OpenApi.Config.inputFrom (OpenApi.Config.File "./example/github-spec.json")
+                |> OpenApi.Config.withWarnOnMissingEnums False
 
         ifconfigOvh : OpenApi.Config.Input
         ifconfigOvh =

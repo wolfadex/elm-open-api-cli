@@ -564,7 +564,11 @@ withFormat basicType maybeFormatName getter default =
 
                                     secondLine : String
                                     secondLine =
-                                        "  Available formats: " ++ String.join ", " available
+                                        if List.isEmpty available then
+                                            "  No available formats."
+
+                                        else
+                                            "  Available formats: " ++ String.join ", " available ++ "."
                                 in
                                 { emptyOutput
                                     | warnings =

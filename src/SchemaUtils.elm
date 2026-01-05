@@ -253,11 +253,11 @@ schemaToType qualify schema =
                                     oneOfToType schemas
 
                                 else
-                                    CliMonad.todoWithDefault
+                                    CliMonad.succeed
                                         { type_ = Common.Value
                                         , documentation = subSchema.description
                                         }
-                                        "anyOf between overlapping types is not supported"
+                                        |> CliMonad.withWarning "anyOf between overlapping types is not supported"
                             )
 
                 oneOfCombine : List Json.Schema.Definitions.Schema -> CliMonad { type_ : Common.Type, documentation : Maybe String }

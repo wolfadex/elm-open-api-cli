@@ -117,6 +117,7 @@ suite =
                                     , effectTypes = [ OpenApi.Config.ElmHttpCmd, OpenApi.Config.ElmHttpTask ]
                                     , server = OpenApi.Config.Default
                                     , formats = OpenApi.Config.defaultFormats
+                                    , warnOnMissingEnums = True
                                     }
                                     oas
                         in

@@ -919,7 +919,7 @@ yamlToJsonValueDecoder =
 
 
 generateFilesFromOpenApiSpecs :
-    List ( OpenApi.Generate.Config, OpenApi.OpenApi )
+    List ( OpenApi.Config.Generate, OpenApi.OpenApi )
     ->
         BackendTask.BackendTask
             FatalError.FatalError

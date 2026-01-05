@@ -1,8 +1,8 @@
-module OpenApi.Generate exposing (Config, ContentSchema(..), Message, Path, Mime, files)
+module OpenApi.Generate exposing (ContentSchema(..), Message, Path, Mime, files)
 
 {-|
 
-@docs Config, ContentSchema, Message, Path, Mime, files
+@docs ContentSchema, Message, Path, Mime, files
 
 -}
 
@@ -101,18 +101,8 @@ type alias PerPackage a =
 
 
 {-| -}
-type alias Config =
-    { namespace : List String
-    , generateTodos : Bool
-    , effectTypes : List OpenApi.Config.EffectType
-    , server : OpenApi.Config.Server
-    , formats : List OpenApi.Config.Format
-    }
-
-
-{-| -}
 files :
-    Config
+    OpenApi.Config.Generate
     -> OpenApi.OpenApi
     ->
         Result

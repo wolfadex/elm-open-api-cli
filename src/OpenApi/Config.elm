@@ -5,7 +5,7 @@ module OpenApi.Config exposing
     , withOutputModuleName, withOverrides, withServer, withWriteMergedTo
     , autoConvertSwagger, inputs, outputDirectory, swaggerConversionCommand, swaggerConversionUrl
     , oasPath, overrides, writeMergedTo
-    , toGenerationConfig, pathToString
+    , toGenerationConfig, Generate, pathToString
     , defaultFormats
     )
 
@@ -36,7 +36,7 @@ module OpenApi.Config exposing
 
 # Output
 
-@docs toGenerationConfig, pathToString
+@docs toGenerationConfig, Generate, pathToString
 
 
 # Internal
@@ -554,18 +554,23 @@ overrides (Input input) =
 
 
 {-| -}
+type alias Generate =
+    { namespace : List String
+    , generateTodos : Bool
+    , effectTypes : List EffectType
+    , server : Server
+    , formats : List Format
+    }
+
+
+{-| -}
 toGenerationConfig :
     List { format : String, basicType : Common.BasicType }
     -> Config
     -> List ( Input, OpenApi.OpenApi )
     ->
         List
-            ( { namespace : List String
-              , generateTodos : Bool
-              , effectTypes : List EffectType
-              , server : Server
-              , formats : List Format
-              }
+            ( Generate
             , OpenApi.OpenApi
             )
 toGenerationConfig formatsInput (Config config) augmentedInputs =

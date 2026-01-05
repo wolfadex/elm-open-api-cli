@@ -253,11 +253,8 @@ schemaToType qualify schema =
                                     oneOfToType schemas
 
                                 else
-                                    CliMonad.succeed
-                                        { type_ = Common.Value
-                                        , documentation = subSchema.description
-                                        }
-                                        |> CliMonad.withWarning "anyOf between overlapping types is not supported"
+                                    oneOfToType schemas
+                                        |> CliMonad.withWarning "Transformed `anyOf` into `oneOf`. Check your schema to make sure this is ok. Ideally, try to use `additionalProperties: false` to make the types disjoint."
                             )
 
                 oneOfCombine : List Json.Schema.Definitions.Schema -> CliMonad { type_ : Common.Type, documentation : Maybe String }

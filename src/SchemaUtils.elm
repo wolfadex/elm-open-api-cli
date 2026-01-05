@@ -561,8 +561,7 @@ areSchemasDisjoint qualify schemas =
                                 Err warns ->
                                     warns
                                         |> Set.fromList
-                                        |> Set.toList
-                                        |> List.foldl
+                                        |> Set.foldl
                                             CliMonad.withWarning
                                             (CliMonad.succeed False)
                         )

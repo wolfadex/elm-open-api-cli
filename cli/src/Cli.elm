@@ -41,7 +41,7 @@ type alias CliOptions =
     , outputModuleName : Maybe String
     , effectTypes : List OpenApi.Config.EffectType
     , generateTodos : Bool
-    , autoConvertSwagger : Bool
+    , autoConvertSwagger : OpenApi.Config.AutoConvertSwagger
     , swaggerConversionUrl : Maybe String
     , swaggerConversionCommand : Maybe String
     , swaggerConversionCommandArgs : List String
@@ -73,7 +73,9 @@ program =
                 |> Cli.OptionsParser.with
                     (Cli.Option.flag "generateTodos")
                 |> Cli.OptionsParser.with
-                    (Cli.Option.flag "auto-convert-swagger")
+                    (Cli.Option.optionalKeywordArg "auto-convert-swagger"
+                        |> Cli.Option.validateMap autoConvertValidation
+                    )
                 |> Cli.OptionsParser.with
                     (Cli.Option.optionalKeywordArg "swagger-conversion-url")
                 |> Cli.OptionsParser.with
@@ -131,10 +133,13 @@ options:
                                      a `Servers` module with your servers. You can pass in an
                                      empty object if you have fully dynamic servers.
 
-  --auto-convert-swagger             If passed in, and a Swagger doc is encountered,
-                                     will attempt to convert it to an Open API file.
-                                     If not passed in, and a Swagger doc is encountered,
-                                     the user will be manually prompted to convert.
+  --auto-convert-swagger=ask         If a Swagger doc is encountered, ask the user before converting
+                                     it to an Open API file. This is the default.
+
+  --auto-convert-swagger=never       If a Swagger doc is encountered, error out.
+
+  --auto-convert-swagger[=always]    If a Swagger doc is encountered, automatically convert it
+                                     to an Open API file.
 
   --swagger-conversion-url           The URL to use to convert a Swagger doc to an Open API
                                      file. Defaults to `https://converter.swagger.io/api/convert`.
@@ -155,6 +160,28 @@ options:
   --write-merged-to                  Write the merged Open API spec to the given file.
 """
             )
+
+
+autoConvertValidation : Maybe String -> Result String OpenApi.Config.AutoConvertSwagger
+autoConvertValidation input =
+    case input of
+        Nothing ->
+            Ok OpenApi.Config.AskBeforeConversion
+
+        Just "ask" ->
+            Ok OpenApi.Config.AskBeforeConversion
+
+        Just "" ->
+            Ok OpenApi.Config.AlwaysConvert
+
+        Just "always" ->
+            Ok OpenApi.Config.AlwaysConvert
+
+        Just "never" ->
+            Ok OpenApi.Config.NeverConvert
+
+        Just value ->
+            Err ("Unexpected value for auto-convert-swagger: " ++ value)
 
 
 effectTypesValidation : Maybe String -> Result String (List OpenApi.Config.EffectType)
@@ -518,22 +545,26 @@ decodeOpenApiSpecOrFail { hasAttemptedToConvertFromSwagger } config input value 
 
                     Ok _ ->
                         let
-                            askForConversion : BackendTask error Bool
-                            askForConversion =
-                                if OpenApi.Config.autoConvertSwagger config then
-                                    BackendTask.succeed True
+                            shouldConvertTask : BackendTask error Bool
+                            shouldConvertTask =
+                                case OpenApi.Config.autoConvertSwagger config of
+                                    OpenApi.Config.AlwaysConvert ->
+                                        BackendTask.succeed True
 
-                                else
-                                    Pages.Script.question
-                                        (Ansi.Color.fontColor Ansi.Color.brightCyan (OpenApi.Config.pathToString (OpenApi.Config.oasPath input))
-                                            ++ """ is a Swagger doc (aka Open API v2) and this tool only supports Open API v3.
+                                    OpenApi.Config.NeverConvert ->
+                                        BackendTask.succeed False
+
+                                    OpenApi.Config.AskBeforeConversion ->
+                                        Pages.Script.question
+                                            (Ansi.Color.fontColor Ansi.Color.brightCyan (OpenApi.Config.pathToString (OpenApi.Config.oasPath input))
+                                                ++ """ is a Swagger doc (aka Open API v2) and this tool only supports Open API v3.
 Would you like to use """
-                                            ++ Ansi.Color.fontColor Ansi.Color.brightCyan (OpenApi.Config.swaggerConversionUrl config)
-                                            ++ " to upgrade to v3? (y/n)\n"
-                                        )
-                                        |> BackendTask.map (\response -> String.toLower response == "y")
+                                                ++ Ansi.Color.fontColor Ansi.Color.brightCyan (OpenApi.Config.swaggerConversionUrl config)
+                                                ++ " to upgrade to v3? (y/n)\n"
+                                            )
+                                            |> BackendTask.map (\response -> String.toLower response == "y")
                         in
-                        askForConversion
+                        shouldConvertTask
                             |> BackendTask.andThen
                                 (\shouldConvert ->
                                     if shouldConvert then

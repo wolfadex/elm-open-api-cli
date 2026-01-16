@@ -571,7 +571,9 @@ Would you like to use """
                                         convertToSwaggerAndThenDecode config input value
 
                                     else
-                                        ("""The input file appears to be a Swagger doc,
+                                        ("The input "
+                                            ++ inputToString input
+                                            ++ """ appears to be a Swagger doc,
 and the CLI was not configured to automatically convert it to an Open API spec.
 See the """
                                             ++ Ansi.Color.fontColor Ansi.Color.brightCyan "--auto-convert-swagger"
@@ -580,6 +582,16 @@ See the """
                                             |> FatalError.fromString
                                             |> BackendTask.fail
                                 )
+
+
+inputToString : OpenApi.Config.Input -> String
+inputToString input =
+    case OpenApi.Config.oasPath input of
+        OpenApi.Config.File path ->
+            "file " ++ path
+
+        OpenApi.Config.Url url ->
+            "url " ++ Url.toString url
 
 
 extractFormats : Json.Decode.Value -> Result Json.Decode.Error (List { format : String, basicType : Common.BasicType })

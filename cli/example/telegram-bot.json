@@ -30554,7 +30554,8 @@
           "id",
           "audio_url",
           "title"
-        ]
+        ],
+        "additionalProperties": false
       },
       "InlineQueryResultVoice": {
         "externalDocs": {
@@ -30768,7 +30769,8 @@
           "latitude",
           "longitude",
           "title"
-        ]
+        ],
+        "additionalProperties": false
       },
       "InlineQueryResultVenue": {
         "externalDocs": {
@@ -30844,7 +30846,8 @@
           "longitude",
           "title",
           "address"
-        ]
+        ],
+        "additionalProperties": false
       },
       "InlineQueryResultContact": {
         "externalDocs": {
@@ -30902,7 +30905,8 @@
           "id",
           "phone_number",
           "first_name"
-        ]
+        ],
+        "additionalProperties": false
       },
       "InlineQueryResultGame": {
         "externalDocs": {
@@ -30932,7 +30936,8 @@
           "type",
           "id",
           "game_short_name"
-        ]
+        ],
+        "additionalProperties": false
       },
       "InlineQueryResultCachedPhoto": {
         "externalDocs": {
@@ -30994,7 +30999,8 @@
           "type",
           "id",
           "photo_file_id"
-        ]
+        ],
+        "additionalProperties": false
       },
       "InlineQueryResultCachedGif": {
         "externalDocs": {
@@ -31052,7 +31058,8 @@
           "type",
           "id",
           "gif_file_id"
-        ]
+        ],
+        "additionalProperties": false
       },
       "InlineQueryResultCachedMpeg4Gif": {
         "externalDocs": {
@@ -31110,7 +31117,8 @@
           "type",
           "id",
           "mpeg4_file_id"
-        ]
+        ],
+        "additionalProperties": false
       },
       "InlineQueryResultCachedSticker": {
         "externalDocs": {
@@ -31143,7 +31151,8 @@
           "type",
           "id",
           "sticker_file_id"
-        ]
+        ],
+        "additionalProperties": false
       },
       "InlineQueryResultCachedDocument": {
         "externalDocs": {
@@ -31202,7 +31211,8 @@
           "id",
           "title",
           "document_file_id"
-        ]
+        ],
+        "additionalProperties": false
       },
       "InlineQueryResultCachedVideo": {
         "externalDocs": {
@@ -31265,7 +31275,8 @@
           "id",
           "video_file_id",
           "title"
-        ]
+        ],
+        "additionalProperties": false
       },
       "InlineQueryResultCachedVoice": {
         "externalDocs": {
@@ -31320,7 +31331,8 @@
           "id",
           "voice_file_id",
           "title"
-        ]
+        ],
+        "additionalProperties": false
       },
       "InlineQueryResultCachedAudio": {
         "externalDocs": {
@@ -31370,7 +31382,8 @@
           "type",
           "id",
           "audio_file_id"
-        ]
+        ],
+        "additionalProperties": false
       },
       "InputMessageContent": {
         "externalDocs": {
@@ -31425,7 +31438,8 @@
         },
         "required": [
           "message_text"
-        ]
+        ],
+        "additionalProperties": false
       },
       "InputLocationMessageContent": {
         "externalDocs": {
@@ -31462,7 +31476,8 @@
         "required": [
           "latitude",
           "longitude"
-        ]
+        ],
+        "additionalProperties": false
       },
       "InputVenueMessageContent": {
         "externalDocs": {
@@ -31509,7 +31524,8 @@
           "longitude",
           "title",
           "address"
-        ]
+        ],
+        "additionalProperties": false
       },
       "InputContactMessageContent": {
         "externalDocs": {
@@ -31538,7 +31554,8 @@
         "required": [
           "phone_number",
           "first_name"
-        ]
+        ],
+        "additionalProperties": false
       },
       "InputInvoiceMessageContent": {
         "externalDocs": {
@@ -31645,7 +31662,8 @@
           "payload",
           "currency",
           "prices"
-        ]
+        ],
+        "additionalProperties": false
       },
       "ChosenInlineResult": {
         "externalDocs": {

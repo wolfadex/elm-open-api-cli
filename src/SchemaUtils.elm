@@ -719,6 +719,41 @@ areTypesDisjoint ltype rtype =
                 rdict
                 ( False, [] )
 
+        ( Common.Enum lItems, Common.Enum rItems ) ->
+            let
+                lSet : Set String
+                lSet =
+                    lItems
+                        |> List.map Common.unwrapUnsafe
+                        |> Set.fromList
+
+                rSet : Set String
+                rSet =
+                    rItems
+                        |> List.map Common.unwrapUnsafe
+                        |> Set.fromList
+            in
+            ( Set.isEmpty (Set.intersect lSet rSet), [] )
+
+        ( Common.Enum lItems, Common.Basic Common.String rOptions ) ->
+            case rOptions.const of
+                Just (Common.ConstString rConst) ->
+                    ( List.all (\lItem -> Common.unwrapUnsafe lItem /= rConst) lItems, [] )
+
+                Just _ ->
+                    ( False, [ "Wrong constant type" ] )
+
+                Nothing ->
+                    case rOptions.format of
+                        Nothing ->
+                            ( False, [] )
+
+                        Just rFormat ->
+                            ( False, [ "Disjoin check not implemented for types enum and string:" ++ rFormat ] )
+
+        ( Common.Basic Common.String _, Common.Enum _ ) ->
+            areTypesDisjoint rtype ltype
+
         _ ->
             ( False, [ "Disjoin check not implemented for types " ++ typeToString ltype ++ " and " ++ typeToString rtype ] )
 

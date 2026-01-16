@@ -499,71 +499,38 @@ areSchemasDisjoint qualify schemas =
 
                                         _ ->
                                             True
-
-                                merged : Result (List String) ()
-                                merged =
-                                    FastDict.merge
-                                        (\_ lval prev ->
-                                            case prev of
-                                                Ok () ->
-                                                    prev
-
-                                                Err _ ->
-                                                    -- A required field on the left when additionalProperties are forbidden on the right means the sets are disjoint
-                                                    if lval.required && not radd then
-                                                        Ok ()
-
-                                                    else
-                                                        prev
-                                        )
-                                        (\_ lval rval prev ->
-                                            case prev of
-                                                Ok () ->
-                                                    prev
-
-                                                Err warns ->
-                                                    -- If the field is optional in both we could have a value without it, so it's not enough to distinguish, so we ask it's required in at least one of them
-                                                    if lval.required || rval.required then
-                                                        let
-                                                            ( res, newWarns ) =
-                                                                areTypesDisjoint lval.type_ rval.type_
-                                                        in
-                                                        if res then
-                                                            Ok ()
-
-                                                        else
-                                                            Err (warns ++ newWarns)
-
-                                                    else
-                                                        prev
-                                        )
-                                        (\_ rval prev ->
-                                            case prev of
-                                                Ok () ->
-                                                    prev
-
-                                                Err _ ->
-                                                    -- A required field on the right when additionalProperties are forbidden on the left means the sets are disjoint
-                                                    if rval.required && not ladd then
-                                                        Ok ()
-
-                                                    else
-                                                        prev
-                                        )
-                                        ldict
-                                        rdict
-                                        (Err [])
                             in
-                            case merged of
-                                Ok () ->
-                                    CliMonad.succeed True
+                            FastDict.merge
+                                (\_ lval ->
+                                    CliMonad.map
+                                        (\prev ->
+                                            prev
+                                                || -- A required field on the left when additionalProperties are forbidden on the right means the sets are disjoint
+                                                   (lval.required && not radd)
+                                        )
+                                )
+                                (\_ lval rval ->
+                                    CliMonad.andThen
+                                        (\prev ->
+                                            if not prev && (lval.required || rval.required) then
+                                                -- If the field is optional in both we could have a value without it, so it's not enough to distinguish, so we ask it's required in at least one of them
+                                                areTypesDisjoint lval.type_ rval.type_
 
-                                Err warns ->
-                                    warns
-                                        |> Set.fromList
-                                        |> Set.foldl
-                                            CliMonad.withWarning
-                                            (CliMonad.succeed False)
+                                            else
+                                                CliMonad.succeed prev
+                                        )
+                                )
+                                (\_ rval ->
+                                    CliMonad.map
+                                        (\prev ->
+                                            prev
+                                                || -- A required field on the right when additionalProperties are forbidden on the left means the sets are disjoint
+                                                   (rval.required && not ladd)
+                                        )
+                                )
+                                ldict
+                                rdict
+                                (CliMonad.succeed False)
                         )
                         (schemaToProperties qualify l)
                         (schemaToProperties qualify r)
@@ -603,29 +570,31 @@ type SimplifiedForDisjointBasicType
     | SimplifiedForDisjointBool (Maybe Bool)
 
 
-areTypesDisjoint : Common.Type -> Common.Type -> ( Bool, List String )
+areTypesDisjoint : Common.Type -> Common.Type -> CliMonad Bool
 areTypesDisjoint ltype rtype =
     case ( ltype, rtype ) of
         ( Common.Ref _, _ ) ->
-            ( False, [ "Disjoin check for ref types not implemented yet" ] )
+            CliMonad.succeed False
+                |> CliMonad.withWarning "Disjoin check for ref types not implemented yet"
 
         ( _, Common.Ref _ ) ->
-            ( False, [ "Disjoin check for ref types not implemented yet" ] )
+            CliMonad.succeed False
+                |> CliMonad.withWarning "Disjoin check for ref types not implemented yet"
 
         ( Common.Value, _ ) ->
-            ( False, [] )
+            CliMonad.succeed False
 
         ( _, Common.Value ) ->
-            ( False, [] )
+            CliMonad.succeed False
 
         ( Common.Nullable _, Common.Nullable _ ) ->
-            ( False, [] )
+            CliMonad.succeed False
 
         ( Common.Null, Common.Nullable _ ) ->
-            ( False, [] )
+            CliMonad.succeed False
 
         ( Common.Nullable _, Common.Null ) ->
-            ( False, [] )
+            CliMonad.succeed False
 
         ( Common.Nullable c, Common.Basic _ _ ) ->
             areTypesDisjoint c rtype
@@ -634,29 +603,27 @@ areTypesDisjoint ltype rtype =
             areTypesDisjoint ltype c
 
         ( Common.Null, Common.Null ) ->
-            ( False, [] )
+            CliMonad.succeed False
 
         ( Common.Null, Common.List _ ) ->
-            ( True, [] )
+            CliMonad.succeed True
 
         ( Common.List _, Common.Null ) ->
-            ( True, [] )
+            CliMonad.succeed True
 
         ( Common.OneOf _ alternatives, _ ) ->
             alternatives
-                |> List.map (\alternative -> areTypesDisjoint alternative.type_ rtype)
-                |> List.unzip
-                |> Tuple.mapBoth (List.all identity) List.concat
+                |> CliMonad.combineMap (\alternative -> areTypesDisjoint alternative.type_ rtype)
+                |> CliMonad.map (List.all identity)
 
         ( _, Common.OneOf _ alternatives ) ->
             alternatives
-                |> List.map (\alternative -> areTypesDisjoint ltype alternative.type_)
-                |> List.unzip
-                |> Tuple.mapBoth (List.all identity) List.concat
+                |> CliMonad.combineMap (\alternative -> areTypesDisjoint ltype alternative.type_)
+                |> CliMonad.map (List.all identity)
 
         ( Common.List _, Common.List _ ) ->
-            -- Empty lists are not distinguished
-            ( False, [] )
+            -- Empty lists are not possible to distinguish
+            CliMonad.succeed False
 
         ( Common.Basic lbasic lopt, Common.Basic rbasic ropt ) ->
             case
@@ -665,27 +632,29 @@ areTypesDisjoint ltype rtype =
                 )
             of
                 ( Err warning, _ ) ->
-                    ( False, [ warning ] )
+                    CliMonad.succeed False
+                        |> CliMonad.withWarning warning
 
                 ( _, Err warning ) ->
-                    ( False, [ warning ] )
+                    CliMonad.succeed False
+                        |> CliMonad.withWarning warning
 
                 ( Ok (SimplifiedForDisjointBool lconst), Ok (SimplifiedForDisjointBool rconst) ) ->
-                    ( lconst /= rconst, [] )
+                    CliMonad.succeed (lconst /= rconst)
 
                 ( Ok (SimplifiedForDisjointNumber lconst), Ok (SimplifiedForDisjointNumber rconst) ) ->
-                    ( lconst /= rconst, [] )
+                    CliMonad.succeed (lconst /= rconst)
 
                 ( Ok (SimplifiedForDisjointString lconst), Ok (SimplifiedForDisjointString rconst) ) ->
                     if lconst /= rconst then
-                        ( True, [] )
+                        CliMonad.succeed True
 
                     else
                         -- TODO: check for disjoint formats
-                        ( False, [] )
+                        CliMonad.succeed False
 
                 _ ->
-                    ( True, [] )
+                    CliMonad.succeed True
 
         ( Common.Object lfields, Common.Object rfields ) ->
             let
@@ -703,21 +672,20 @@ areTypesDisjoint ltype rtype =
             in
             FastDict.merge
                 (\_ _ acc -> acc)
-                (\_ lfield rfield ( acc, warns ) ->
-                    if acc || (not lfield.required && not rfield.required) then
-                        ( acc, warns )
+                (\_ lfield rfield ->
+                    CliMonad.andThen
+                        (\acc ->
+                            if acc || (not lfield.required && not rfield.required) then
+                                CliMonad.succeed acc
 
-                    else
-                        let
-                            ( nacc, nwarns ) =
+                            else
                                 areTypesDisjoint lfield.type_ rfield.type_
-                        in
-                        ( nacc, warns ++ nwarns )
+                        )
                 )
                 (\_ _ acc -> acc)
                 ldict
                 rdict
-                ( False, [] )
+                (CliMonad.succeed False)
 
         ( Common.Enum lItems, Common.Enum rItems ) ->
             let
@@ -733,29 +701,32 @@ areTypesDisjoint ltype rtype =
                         |> List.map Common.unwrapUnsafe
                         |> Set.fromList
             in
-            ( Set.isEmpty (Set.intersect lSet rSet), [] )
+            CliMonad.succeed (Set.isEmpty (Set.intersect lSet rSet))
 
         ( Common.Enum lItems, Common.Basic Common.String rOptions ) ->
             case rOptions.const of
                 Just (Common.ConstString rConst) ->
-                    ( List.all (\lItem -> Common.unwrapUnsafe lItem /= rConst) lItems, [] )
+                    CliMonad.succeed (List.all (\lItem -> Common.unwrapUnsafe lItem /= rConst) lItems)
 
                 Just _ ->
-                    ( False, [ "Wrong constant type" ] )
+                    CliMonad.succeed False
+                        |> CliMonad.withWarning "Wrong constant type"
 
                 Nothing ->
                     case rOptions.format of
                         Nothing ->
-                            ( False, [] )
+                            CliMonad.succeed False
 
                         Just rFormat ->
-                            ( False, [ "Disjoin check not implemented for types enum and string:" ++ rFormat ] )
+                            CliMonad.succeed False
+                                |> CliMonad.withWarning ("Disjoin check not implemented for types enum and string:" ++ rFormat)
 
         ( Common.Basic Common.String _, Common.Enum _ ) ->
             areTypesDisjoint rtype ltype
 
         _ ->
-            ( False, [ "Disjoin check not implemented for types " ++ typeToString ltype ++ " and " ++ typeToString rtype ] )
+            CliMonad.succeed False
+                |> CliMonad.withWarning ("Disjoin check not implemented for types " ++ typeToString ltype ++ " and " ++ typeToString rtype)
 
 
 typeToString : Common.Type -> String

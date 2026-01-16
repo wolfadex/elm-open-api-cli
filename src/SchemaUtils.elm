@@ -629,12 +629,10 @@ areTypesDisjoint ltype rtype =
                 )
             of
                 ( Err warning, _ ) ->
-                    CliMonad.succeed False
-                        |> CliMonad.withWarning warning
+                    CliMonad.fail warning
 
                 ( _, Err warning ) ->
-                    CliMonad.succeed False
-                        |> CliMonad.withWarning warning
+                    CliMonad.fail warning
 
                 ( Ok (SimplifiedForDisjointBool lconst), Ok (SimplifiedForDisjointBool rconst) ) ->
                     CliMonad.succeed (lconst /= rconst)

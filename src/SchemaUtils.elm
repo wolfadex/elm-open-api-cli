@@ -714,14 +714,14 @@ areTypesDisjoint ltype rtype =
 
                         Just rFormat ->
                             CliMonad.succeed False
-                                |> CliMonad.withWarning ("Disjoin check not implemented for types enum and string:" ++ rFormat)
+                                |> CliMonad.withWarning ("Disjoint check not implemented for types enum and string:" ++ rFormat)
 
         ( Common.Basic Common.String _, Common.Enum _ ) ->
             areTypesDisjoint rtype ltype
 
         _ ->
             CliMonad.succeed False
-                |> CliMonad.withWarning ("Disjoin check not implemented for types " ++ typeToString ltype ++ " and " ++ typeToString rtype)
+                |> CliMonad.withWarning ("Disjoint check not implemented for types " ++ typeToString ltype ++ " and " ++ typeToString rtype)
 
 
 typeToString : Common.Type -> String

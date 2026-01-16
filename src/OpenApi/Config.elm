@@ -1,7 +1,7 @@
 module OpenApi.Config exposing
     ( Config, EffectType(..), effectTypeToPackage, Format, Input, Path(..), Server(..)
     , init, inputFrom, pathFromString
-    , withAutoConvertSwagger, withEffectTypes, withFormat, withFormats, withGenerateTodos, withInput, withSwaggerConversionCommand, withSwaggerConversionUrl
+    , withAutoConvertSwagger, AutoConvertSwagger(..), withEffectTypes, withFormat, withFormats, withGenerateTodos, withInput, withSwaggerConversionCommand, withSwaggerConversionUrl
     , withOutputModuleName, withOverrides, withServer, withWriteMergedTo, withWarnOnMissingEnums
     , autoConvertSwagger, inputs, outputDirectory, swaggerConversionCommand, swaggerConversionUrl
     , oasPath, overrides, writeMergedTo
@@ -20,7 +20,7 @@ module OpenApi.Config exposing
 # Creation
 
 @docs init, inputFrom, pathFromString
-@docs withAutoConvertSwagger, withEffectTypes, withFormat, withFormats, withGenerateTodos, withInput, withSwaggerConversionCommand, withSwaggerConversionUrl
+@docs withAutoConvertSwagger, AutoConvertSwagger, withEffectTypes, withFormat, withFormats, withGenerateTodos, withInput, withSwaggerConversionCommand, withSwaggerConversionUrl
 @docs withOutputModuleName, withOverrides, withServer, withWriteMergedTo, withWarnOnMissingEnums
 
 
@@ -75,12 +75,19 @@ type Config
         { inputs : List Input
         , outputDirectory : String
         , generateTodos : Bool
-        , autoConvertSwagger : Bool
+        , autoConvertSwagger : AutoConvertSwagger
         , swaggerConversionUrl : String
         , swaggerConversionCommand : Maybe { command : String, args : List String }
         , staticFormats : List Format
         , dynamicFormats : List { format : String, basicType : Common.BasicType } -> List Format
         }
+
+
+{-| -}
+type AutoConvertSwagger
+    = AlwaysConvert
+    | NeverConvert
+    | AskBeforeConversion
 
 
 {-| -}
@@ -215,7 +222,7 @@ init initialOutputDirectory =
     { inputs = []
     , outputDirectory = initialOutputDirectory
     , generateTodos = False
-    , autoConvertSwagger = False
+    , autoConvertSwagger = AskBeforeConversion
     , swaggerConversionUrl = "https://converter.swagger.io/api/convert"
     , swaggerConversionCommand = Nothing
     , staticFormats = defaultFormats
@@ -445,7 +452,7 @@ withGenerateTodos generateTodos (Config config) =
 
 
 {-| -}
-withAutoConvertSwagger : Bool -> Config -> Config
+withAutoConvertSwagger : AutoConvertSwagger -> Config -> Config
 withAutoConvertSwagger newAutoConvertSwagger (Config config) =
     Config { config | autoConvertSwagger = newAutoConvertSwagger }
 
@@ -520,7 +527,7 @@ swaggerConversionCommand (Config config) =
 
 
 {-| -}
-autoConvertSwagger : Config -> Bool
+autoConvertSwagger : Config -> AutoConvertSwagger
 autoConvertSwagger (Config config) =
     config.autoConvertSwagger
 

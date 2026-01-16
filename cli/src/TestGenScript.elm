@@ -102,7 +102,7 @@ run =
         config : OpenApi.Config.Config
         config =
             OpenApi.Config.init "./generated"
-                |> OpenApi.Config.withAutoConvertSwagger True
+                |> OpenApi.Config.withAutoConvertSwagger OpenApi.Config.AlwaysConvert
                 |> OpenApi.Config.withInput additionalProperties
                 |> OpenApi.Config.withInput recursiveAllofRefs
                 |> OpenApi.Config.withInput overridingGlobalSecurity

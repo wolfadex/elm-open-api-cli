@@ -573,13 +573,10 @@ type SimplifiedForDisjointBasicType
 areTypesDisjoint : Common.Type -> Common.Type -> CliMonad Bool
 areTypesDisjoint ltype rtype =
     case ( ltype, rtype ) of
-        ( Common.Ref _, _ ) ->
-            CliMonad.succeed False
-                |> CliMonad.withWarning "Disjoin check for ref types not implemented yet"
-
-        ( _, Common.Ref _ ) ->
-            CliMonad.succeed False
-                |> CliMonad.withWarning "Disjoin check for ref types not implemented yet"
+        ( Common.Ref lref, Common.Ref rref ) ->
+            CliMonad.andThen2 (\lschema rschema -> areSchemasDisjoint True [ lschema, rschema ])
+                (getAlias lref)
+                (getAlias rref)
 
         ( Common.Value, _ ) ->
             CliMonad.succeed False

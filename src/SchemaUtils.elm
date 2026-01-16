@@ -645,8 +645,17 @@ areTypesDisjoint ltype rtype =
                         CliMonad.succeed True
 
                     else
-                        -- TODO: check for disjoint formats
-                        CliMonad.succeed False
+                        case ( lopt.format, ropt.format ) of
+                            ( Nothing, _ ) ->
+                                CliMonad.succeed False
+
+                            ( _, Nothing ) ->
+                                CliMonad.succeed False
+
+                            ( Just lformat, Just rformat ) ->
+                                -- TODO: check for disjoint formats
+                                CliMonad.succeed False
+                                    |> CliMonad.withWarning ("Disjoint check not implemented for string:" ++ lformat ++ " and string:" ++ rformat)
 
                 _ ->
                     CliMonad.succeed True

@@ -1377,12 +1377,7 @@ typeToEncoder qualify type_ =
                                     (\jsonNamespace rec ->
                                         Elm.apply
                                             (Elm.value
-                                                { importFrom =
-                                                    if qualify then
-                                                        jsonNamespace
-
-                                                    else
-                                                        []
+                                                { importFrom = jsonNamespace
                                                 , name = "encode" ++ Common.toTypeName name
                                                 , annotation = Nothing
                                                 }
@@ -1534,12 +1529,7 @@ typeToEncoder qualify type_ =
                 (\jsonNamespace name rec ->
                     Elm.apply
                         (Elm.value
-                            { importFrom =
-                                if qualify then
-                                    jsonNamespace
-
-                                else
-                                    []
+                            { importFrom = jsonNamespace
                             , name = "encode" ++ Common.toTypeName name
                             , annotation = Nothing
                             }
@@ -1874,12 +1864,7 @@ typeToDecoder qualify type_ =
                                 CliMonad.map
                                     (\jsonNamespace ->
                                         Elm.value
-                                            { importFrom =
-                                                if qualify then
-                                                    jsonNamespace
-
-                                                else
-                                                    []
+                                            { importFrom = jsonNamespace
                                             , name = "decode" ++ Common.toTypeName name
                                             , annotation = Nothing
                                             }
@@ -1907,12 +1892,7 @@ typeToDecoder qualify type_ =
             CliMonad.map2
                 (\jsonNamespace name ->
                     Elm.value
-                        { importFrom =
-                            if qualify then
-                                jsonNamespace
-
-                            else
-                                []
+                        { importFrom = jsonNamespace
                         , name = "decode" ++ Common.toTypeName name
                         , annotation = Nothing
                         }

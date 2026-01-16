@@ -94,6 +94,10 @@ run =
         cookieAuth =
             OpenApi.Config.inputFrom (OpenApi.Config.File "./example/cookie-auth.yaml")
 
+        telegramBot : OpenApi.Config.Input
+        telegramBot =
+            OpenApi.Config.inputFrom (OpenApi.Config.File "./example/telegram-bot.json")
+
         config : OpenApi.Config.Config
         config =
             OpenApi.Config.init "./generated"
@@ -116,6 +120,7 @@ run =
                 |> OpenApi.Config.withInput binaryResponse
                 |> OpenApi.Config.withInput nullableEnum
                 |> OpenApi.Config.withInput cookieAuth
+                |> OpenApi.Config.withInput telegramBot
     in
     Pages.Script.withoutCliOptions
         (BackendTask.doEach

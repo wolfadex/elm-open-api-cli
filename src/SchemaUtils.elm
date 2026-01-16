@@ -461,79 +461,7 @@ areSchemasDisjoint qualify schemas =
                     CliMonad.succeed True
 
                 ( Json.Schema.Definitions.ObjectSchema lo, Json.Schema.Definitions.ObjectSchema ro ) ->
-                    CliMonad.andThen2
-                        (\lprop rprop ->
-                            let
-                                ldict : FastDict.Dict String Common.Field
-                                ldict =
-                                    lprop
-                                        |> List.map
-                                            (\( name, field ) ->
-                                                ( Common.unwrapUnsafe name, field )
-                                            )
-                                        |> FastDict.fromList
-
-                                ladd : Bool
-                                ladd =
-                                    case lo.additionalProperties of
-                                        Just (Json.Schema.Definitions.BooleanSchema False) ->
-                                            False
-
-                                        _ ->
-                                            True
-
-                                rdict : FastDict.Dict String Common.Field
-                                rdict =
-                                    rprop
-                                        |> List.map
-                                            (\( name, field ) ->
-                                                ( Common.unwrapUnsafe name, field )
-                                            )
-                                        |> FastDict.fromList
-
-                                radd : Bool
-                                radd =
-                                    case ro.additionalProperties of
-                                        Just (Json.Schema.Definitions.BooleanSchema False) ->
-                                            False
-
-                                        _ ->
-                                            True
-                            in
-                            FastDict.merge
-                                (\_ lval ->
-                                    CliMonad.map
-                                        (\prev ->
-                                            prev
-                                                || -- A required field on the left when additionalProperties are forbidden on the right means the sets are disjoint
-                                                   (lval.required && not radd)
-                                        )
-                                )
-                                (\_ lval rval ->
-                                    CliMonad.andThen
-                                        (\prev ->
-                                            if not prev && (lval.required || rval.required) then
-                                                -- If the field is optional in both we could have a value without it, so it's not enough to distinguish, so we ask it's required in at least one of them
-                                                areTypesDisjoint lval.type_ rval.type_
-
-                                            else
-                                                CliMonad.succeed prev
-                                        )
-                                )
-                                (\_ rval ->
-                                    CliMonad.map
-                                        (\prev ->
-                                            prev
-                                                || -- A required field on the right when additionalProperties are forbidden on the left means the sets are disjoint
-                                                   (rval.required && not ladd)
-                                        )
-                                )
-                                ldict
-                                rdict
-                                (CliMonad.succeed False)
-                        )
-                        (schemaToProperties qualify l)
-                        (schemaToProperties qualify r)
+                    areSubSchemasDisjoint qualify lo ro
 
         go :
             Json.Schema.Definitions.Schema
@@ -564,14 +492,219 @@ areSchemasDisjoint qualify schemas =
             go h t
 
 
+areSubSchemasDisjoint : Bool -> Json.Schema.Definitions.SubSchema -> Json.Schema.Definitions.SubSchema -> CliMonad Bool
+areSubSchemasDisjoint qualify lo ro =
+    case ( lo.ref, ro.ref ) of
+        ( Just lref, _ ) ->
+            getAlias (String.split "/" lref)
+                |> CliMonad.withPath (Common.UnsafeName lref)
+                |> CliMonad.andThen (\lschema -> areSchemasDisjoint qualify [ lschema, Json.Schema.Definitions.ObjectSchema ro ])
+
+        ( _, Just rref ) ->
+            getAlias (String.split "/" rref)
+                |> CliMonad.withPath (Common.UnsafeName rref)
+                |> CliMonad.andThen (\rschema -> areSchemasDisjoint qualify [ Json.Schema.Definitions.ObjectSchema lo, rschema ])
+
+        _ ->
+            case ( lo.anyOf, ro.anyOf ) of
+                ( Just lSchemas, Just rSchemas ) ->
+                    areSchemasDisjoint qualify (lSchemas ++ rSchemas)
+
+                _ ->
+                    case ( lo.type_, ro.type_ ) of
+                        ( Json.Schema.Definitions.SingleType Json.Schema.Definitions.ObjectType, Json.Schema.Definitions.SingleType Json.Schema.Definitions.ObjectType ) ->
+                            CliMonad.andThen2
+                                (\lprop rprop ->
+                                    let
+                                        ldict : FastDict.Dict String Common.Field
+                                        ldict =
+                                            lprop
+                                                |> List.map
+                                                    (\( name, field ) ->
+                                                        ( Common.unwrapUnsafe name, field )
+                                                    )
+                                                |> FastDict.fromList
+
+                                        ladd : Bool
+                                        ladd =
+                                            case lo.additionalProperties of
+                                                Just (Json.Schema.Definitions.BooleanSchema False) ->
+                                                    False
+
+                                                _ ->
+                                                    True
+
+                                        rdict : FastDict.Dict String Common.Field
+                                        rdict =
+                                            rprop
+                                                |> List.map
+                                                    (\( name, field ) ->
+                                                        ( Common.unwrapUnsafe name, field )
+                                                    )
+                                                |> FastDict.fromList
+
+                                        radd : Bool
+                                        radd =
+                                            case ro.additionalProperties of
+                                                Just (Json.Schema.Definitions.BooleanSchema False) ->
+                                                    False
+
+                                                _ ->
+                                                    True
+                                    in
+                                    FastDict.merge
+                                        (\_ lval ->
+                                            CliMonad.map
+                                                (\prev ->
+                                                    prev
+                                                        || -- A required field on the left when additionalProperties are forbidden on the right means the sets are disjoint
+                                                           (lval.required && not radd)
+                                                )
+                                        )
+                                        (\key lval rval ->
+                                            CliMonad.andThen
+                                                (\prev ->
+                                                    if not prev && (lval.required || rval.required) then
+                                                        -- If the field is optional in both we could have a value without it, so it's not enough to distinguish, so we ask it's required in at least one of them
+                                                        areTypesDisjoint key lval.type_ rval.type_
+
+                                                    else
+                                                        CliMonad.succeed prev
+                                                )
+                                        )
+                                        (\_ rval ->
+                                            CliMonad.map
+                                                (\prev ->
+                                                    prev
+                                                        || -- A required field on the right when additionalProperties are forbidden on the left means the sets are disjoint
+                                                           (rval.required && not ladd)
+                                                )
+                                        )
+                                        ldict
+                                        rdict
+                                        (CliMonad.succeed False)
+                                )
+                                (schemaToProperties qualify (Json.Schema.Definitions.ObjectSchema lo))
+                                (schemaToProperties qualify (Json.Schema.Definitions.ObjectSchema ro))
+
+                        ( Json.Schema.Definitions.SingleType lType, Json.Schema.Definitions.SingleType rType ) ->
+                            CliMonad.succeed (areSingleTypesDisjoint lType rType)
+
+                        _ ->
+                            CliMonad.succeed False
+                                |> CliMonad.withWarning ("Disjoint check not implemented for types " ++ schemaTypeToString lo.type_ ++ " and " ++ schemaTypeToString ro.type_)
+
+
+schemaTypeToString : Json.Schema.Definitions.Type -> String
+schemaTypeToString type_ =
+    case type_ of
+        Json.Schema.Definitions.SingleType singleType ->
+            singleTypeToString singleType
+
+        Json.Schema.Definitions.AnyType ->
+            "any"
+
+        Json.Schema.Definitions.NullableType c ->
+            "nullable " ++ singleTypeToString c
+
+        Json.Schema.Definitions.UnionType singles ->
+            "union of " ++ String.join ", " (List.map singleTypeToString singles)
+
+
+singleTypeToString : Json.Schema.Definitions.SingleType -> String
+singleTypeToString singleType =
+    case singleType of
+        Json.Schema.Definitions.ObjectType ->
+            "object"
+
+        Json.Schema.Definitions.IntegerType ->
+            "integer"
+
+        Json.Schema.Definitions.NumberType ->
+            "number"
+
+        Json.Schema.Definitions.StringType ->
+            "string"
+
+        Json.Schema.Definitions.BooleanType ->
+            "boolean"
+
+        Json.Schema.Definitions.ArrayType ->
+            "array"
+
+        Json.Schema.Definitions.NullType ->
+            "null"
+
+
+areSingleTypesDisjoint : Json.Schema.Definitions.SingleType -> Json.Schema.Definitions.SingleType -> Bool
+areSingleTypesDisjoint lType rType =
+    case ( lType, rType ) of
+        ( Json.Schema.Definitions.ObjectType, Json.Schema.Definitions.ObjectType ) ->
+            False
+
+        ( Json.Schema.Definitions.NullType, Json.Schema.Definitions.NullType ) ->
+            False
+
+        ( Json.Schema.Definitions.StringType, Json.Schema.Definitions.StringType ) ->
+            False
+
+        ( Json.Schema.Definitions.NumberType, Json.Schema.Definitions.NumberType ) ->
+            False
+
+        ( Json.Schema.Definitions.IntegerType, Json.Schema.Definitions.IntegerType ) ->
+            False
+
+        ( Json.Schema.Definitions.ArrayType, Json.Schema.Definitions.ArrayType ) ->
+            False
+
+        ( Json.Schema.Definitions.BooleanType, Json.Schema.Definitions.BooleanType ) ->
+            False
+
+        ( Json.Schema.Definitions.NumberType, Json.Schema.Definitions.IntegerType ) ->
+            False
+
+        ( Json.Schema.Definitions.IntegerType, Json.Schema.Definitions.NumberType ) ->
+            False
+
+        ( Json.Schema.Definitions.ObjectType, _ ) ->
+            True
+
+        ( _, Json.Schema.Definitions.ObjectType ) ->
+            True
+
+        ( Json.Schema.Definitions.NullType, _ ) ->
+            True
+
+        ( _, Json.Schema.Definitions.NullType ) ->
+            True
+
+        ( Json.Schema.Definitions.BooleanType, _ ) ->
+            True
+
+        ( _, Json.Schema.Definitions.BooleanType ) ->
+            True
+
+        ( Json.Schema.Definitions.ArrayType, _ ) ->
+            True
+
+        ( _, Json.Schema.Definitions.ArrayType ) ->
+            True
+
+        ( Json.Schema.Definitions.StringType, _ ) ->
+            True
+
+        ( _, Json.Schema.Definitions.StringType ) ->
+            True
+
+
 type SimplifiedForDisjointBasicType
     = SimplifiedForDisjointNumber (Maybe Float)
     | SimplifiedForDisjointString (Maybe String)
     | SimplifiedForDisjointBool (Maybe Bool)
 
 
-areTypesDisjoint : Common.Type -> Common.Type -> CliMonad Bool
-areTypesDisjoint ltype rtype =
+areTypesDisjoint : String -> Common.Type -> Common.Type -> CliMonad Bool
+areTypesDisjoint key ltype rtype =
     case ( ltype, rtype ) of
         ( Common.Ref lref, Common.Ref rref ) ->
             CliMonad.andThen2 (\lschema rschema -> areSchemasDisjoint True [ lschema, rschema ])
@@ -594,10 +727,10 @@ areTypesDisjoint ltype rtype =
             CliMonad.succeed False
 
         ( Common.Nullable c, Common.Basic _ _ ) ->
-            areTypesDisjoint c rtype
+            areTypesDisjoint key c rtype
 
         ( Common.Basic _ _, Common.Nullable c ) ->
-            areTypesDisjoint ltype c
+            areTypesDisjoint key ltype c
 
         ( Common.Null, Common.Null ) ->
             CliMonad.succeed False
@@ -610,12 +743,12 @@ areTypesDisjoint ltype rtype =
 
         ( Common.OneOf _ alternatives, _ ) ->
             alternatives
-                |> CliMonad.combineMap (\alternative -> areTypesDisjoint alternative.type_ rtype)
+                |> CliMonad.combineMap (\alternative -> areTypesDisjoint key alternative.type_ rtype)
                 |> CliMonad.map (List.all identity)
 
         ( _, Common.OneOf _ alternatives ) ->
             alternatives
-                |> CliMonad.combineMap (\alternative -> areTypesDisjoint ltype alternative.type_)
+                |> CliMonad.combineMap (\alternative -> areTypesDisjoint key ltype alternative.type_)
                 |> CliMonad.map (List.all identity)
 
         ( Common.List _, Common.List _ ) ->
@@ -683,7 +816,7 @@ areTypesDisjoint ltype rtype =
                                 CliMonad.succeed acc
 
                             else
-                                areTypesDisjoint lfield.type_ rfield.type_
+                                areTypesDisjoint key lfield.type_ rfield.type_
                         )
                 )
                 (\_ _ acc -> acc)
@@ -726,7 +859,7 @@ areTypesDisjoint ltype rtype =
                                 |> CliMonad.withWarning ("Disjoint check not implemented for types enum and string:" ++ rFormat)
 
         ( Common.Basic Common.String _, Common.Enum _ ) ->
-            areTypesDisjoint rtype ltype
+            areTypesDisjoint key rtype ltype
 
         _ ->
             CliMonad.succeed False

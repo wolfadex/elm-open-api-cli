@@ -1179,11 +1179,33 @@ printSuccessMessageAndWarnings ( outputPaths, { requiredPackages, warnings } ) =
 
         warningTask : BackendTask.BackendTask FatalError.FatalError ()
         warningTask =
-            warnings
-                |> Dict.Extra.groupBy .message
-                |> Dict.toList
-                |> List.map logWarning
-                |> BackendTask.doEach
+            let
+                len : Int
+                len =
+                    List.length warnings
+            in
+            if len == 0 then
+                BackendTask.succeed ()
+
+            else
+                let
+                    warningTasks : List (BackendTask FatalError ())
+                    warningTasks =
+                        warnings
+                            |> Dict.Extra.groupBy .message
+                            |> Dict.toList
+                            |> List.map logWarning
+
+                    countMessage : String
+                    countMessage =
+                        if len == 1 then
+                            "\nGenerated 1" ++ Ansi.Color.fontColor Ansi.Color.yellow " warning" ++ "."
+
+                        else
+                            "\nGenerated " ++ String.fromInt len ++ Ansi.Color.fontColor Ansi.Color.yellow " warnings" ++ "."
+                in
+                (warningTasks ++ [ Pages.Script.log countMessage ])
+                    |> BackendTask.doEach
 
         successTask : BackendTask.BackendTask error ()
         successTask =

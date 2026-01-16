@@ -249,15 +249,17 @@ schemaToType qualify schema =
                     areSchemasDisjoint qualify schemas
                         |> CliMonad.andThen
                             (\disjoint ->
-                                if disjoint then
-                                    oneOfToType schemas
+                                case disjoint of
+                                    Nothing ->
+                                        oneOfToType schemas
 
-                                else
-                                    CliMonad.succeed
-                                        { type_ = Common.Value
-                                        , documentation = subSchema.description
-                                        }
-                                        |> CliMonad.withWarning "anyOf between overlapping types is not supported"
+                                    Just ( l, r ) ->
+                                        CliMonad.succeed
+                                            { type_ = Common.Value
+                                            , documentation = subSchema.description
+                                            }
+                                            |> CliMonad.withWarning "anyOf between overlapping types is not supported - "
+                                            |> CliMonad.withPath (Common.UnsafeName (l ++ " clashes with " ++ r))
                             )
 
                 oneOfCombine : List Json.Schema.Definitions.Schema -> CliMonad { type_ : Common.Type, documentation : Maybe String }
@@ -440,56 +442,75 @@ schemaToType qualify schema =
                             )
 
 
-areSchemasDisjoint : Bool -> List Json.Schema.Definitions.Schema -> CliMonad Bool
+areSchemasDisjoint : Bool -> List Json.Schema.Definitions.Schema -> CliMonad (Maybe ( String, String ))
 areSchemasDisjoint qualify schemas =
     let
-        areDisjoint : Json.Schema.Definitions.Schema -> Json.Schema.Definitions.Schema -> CliMonad Bool
+        areDisjoint : Json.Schema.Definitions.Schema -> Json.Schema.Definitions.Schema -> CliMonad (Maybe ( String, String ))
         areDisjoint l r =
             case ( l, r ) of
                 ( Json.Schema.Definitions.BooleanSchema lb, Json.Schema.Definitions.BooleanSchema rb ) ->
                     if lb == rb then
-                        CliMonad.succeed False
+                        CliMonad.succeed (Just ( "bool", "bool" ))
                             |> CliMonad.withWarning "anyOf between two booleans with the same value"
 
                     else
-                        CliMonad.succeed True
+                        CliMonad.succeed Nothing
 
                 ( Json.Schema.Definitions.BooleanSchema _, Json.Schema.Definitions.ObjectSchema _ ) ->
-                    CliMonad.succeed True
+                    CliMonad.succeed Nothing
 
                 ( Json.Schema.Definitions.ObjectSchema _, Json.Schema.Definitions.BooleanSchema _ ) ->
-                    CliMonad.succeed True
+                    CliMonad.succeed Nothing
 
                 ( Json.Schema.Definitions.ObjectSchema lo, Json.Schema.Definitions.ObjectSchema ro ) ->
                     areSubSchemasDisjoint qualify lo ro
+                        |> CliMonad.map
+                            (\res ->
+                                if res then
+                                    Nothing
+
+                                else
+                                    Just ( describeSubSchema lo, describeSubSchema ro )
+                            )
 
         go :
             Json.Schema.Definitions.Schema
             -> List Json.Schema.Definitions.Schema
-            -> CliMonad Bool
+            -> CliMonad (Maybe ( String, String ))
         go item queue =
             queue
                 |> CliMonad.combineMap (\other -> areDisjoint item other)
                 |> CliMonad.andThen
                     (\r ->
-                        if List.all identity r then
-                            case queue of
-                                [] ->
-                                    CliMonad.succeed True
+                        case Maybe.Extra.values r of
+                            h :: _ ->
+                                CliMonad.succeed (Just h)
 
-                                h :: t ->
-                                    go h t
+                            [] ->
+                                case queue of
+                                    [] ->
+                                        CliMonad.succeed Nothing
 
-                        else
-                            CliMonad.succeed False
+                                    h :: t ->
+                                        go h t
                     )
     in
     case schemas of
         [] ->
-            CliMonad.succeed True
+            CliMonad.succeed Nothing
 
         h :: t ->
             go h t
+
+
+describeSubSchema : Json.Schema.Definitions.SubSchema -> String
+describeSubSchema subSchema =
+    case subSchema.ref of
+        Nothing ->
+            subSchema.source |> Json.Encode.encode 0
+
+        Just ref ->
+            ref
 
 
 areSubSchemasDisjoint : Bool -> Json.Schema.Definitions.SubSchema -> Json.Schema.Definitions.SubSchema -> CliMonad Bool
@@ -499,16 +520,19 @@ areSubSchemasDisjoint qualify lo ro =
             getAlias (String.split "/" lref)
                 |> CliMonad.withPath (Common.UnsafeName lref)
                 |> CliMonad.andThen (\lschema -> areSchemasDisjoint qualify [ lschema, Json.Schema.Definitions.ObjectSchema ro ])
+                |> CliMonad.map ((==) Nothing)
 
         ( _, Just rref ) ->
             getAlias (String.split "/" rref)
                 |> CliMonad.withPath (Common.UnsafeName rref)
                 |> CliMonad.andThen (\rschema -> areSchemasDisjoint qualify [ Json.Schema.Definitions.ObjectSchema lo, rschema ])
+                |> CliMonad.map ((==) Nothing)
 
         _ ->
             case ( lo.anyOf, ro.anyOf ) of
                 ( Just lSchemas, Just rSchemas ) ->
                     areSchemasDisjoint qualify (lSchemas ++ rSchemas)
+                        |> CliMonad.map ((==) Nothing)
 
                 _ ->
                     case ( lo.type_, ro.type_ ) of
@@ -715,6 +739,7 @@ areTypesDisjoint key ltype rtype =
             CliMonad.andThen2 (\lschema rschema -> areSchemasDisjoint True [ lschema, rschema ])
                 (getAlias lref)
                 (getAlias rref)
+                |> CliMonad.map ((==) Nothing)
 
         ( Common.Value, _ ) ->
             CliMonad.succeed False

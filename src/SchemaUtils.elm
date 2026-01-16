@@ -513,79 +513,7 @@ areSubSchemasDisjoint qualify lo ro =
                 _ ->
                     case ( lo.type_, ro.type_ ) of
                         ( Json.Schema.Definitions.SingleType Json.Schema.Definitions.ObjectType, Json.Schema.Definitions.SingleType Json.Schema.Definitions.ObjectType ) ->
-                            CliMonad.andThen2
-                                (\lprop rprop ->
-                                    let
-                                        ldict : FastDict.Dict String Common.Field
-                                        ldict =
-                                            lprop
-                                                |> List.map
-                                                    (\( name, field ) ->
-                                                        ( Common.unwrapUnsafe name, field )
-                                                    )
-                                                |> FastDict.fromList
-
-                                        ladd : Bool
-                                        ladd =
-                                            case lo.additionalProperties of
-                                                Just (Json.Schema.Definitions.BooleanSchema False) ->
-                                                    False
-
-                                                _ ->
-                                                    True
-
-                                        rdict : FastDict.Dict String Common.Field
-                                        rdict =
-                                            rprop
-                                                |> List.map
-                                                    (\( name, field ) ->
-                                                        ( Common.unwrapUnsafe name, field )
-                                                    )
-                                                |> FastDict.fromList
-
-                                        radd : Bool
-                                        radd =
-                                            case ro.additionalProperties of
-                                                Just (Json.Schema.Definitions.BooleanSchema False) ->
-                                                    False
-
-                                                _ ->
-                                                    True
-                                    in
-                                    FastDict.merge
-                                        (\_ lval ->
-                                            CliMonad.map
-                                                (\prev ->
-                                                    prev
-                                                        || -- A required field on the left when additionalProperties are forbidden on the right means the sets are disjoint
-                                                           (lval.required && not radd)
-                                                )
-                                        )
-                                        (\key lval rval ->
-                                            CliMonad.andThen
-                                                (\prev ->
-                                                    if not prev && (lval.required || rval.required) then
-                                                        -- If the field is optional in both we could have a value without it, so it's not enough to distinguish, so we ask it's required in at least one of them
-                                                        areTypesDisjoint key lval.type_ rval.type_
-
-                                                    else
-                                                        CliMonad.succeed prev
-                                                )
-                                        )
-                                        (\_ rval ->
-                                            CliMonad.map
-                                                (\prev ->
-                                                    prev
-                                                        || -- A required field on the right when additionalProperties are forbidden on the left means the sets are disjoint
-                                                           (rval.required && not ladd)
-                                                )
-                                        )
-                                        ldict
-                                        rdict
-                                        (CliMonad.succeed False)
-                                )
-                                (schemaToProperties qualify (Json.Schema.Definitions.ObjectSchema lo))
-                                (schemaToProperties qualify (Json.Schema.Definitions.ObjectSchema ro))
+                            areObjectTypesDisjoint qualify lo ro
 
                         ( Json.Schema.Definitions.SingleType lType, Json.Schema.Definitions.SingleType rType ) ->
                             CliMonad.succeed (areSingleTypesDisjoint lType rType)
@@ -593,6 +521,83 @@ areSubSchemasDisjoint qualify lo ro =
                         _ ->
                             CliMonad.succeed False
                                 |> CliMonad.withWarning ("Disjoint check not implemented for types " ++ schemaTypeToString lo.type_ ++ " and " ++ schemaTypeToString ro.type_)
+
+
+areObjectTypesDisjoint : Bool -> Json.Schema.Definitions.SubSchema -> Json.Schema.Definitions.SubSchema -> CliMonad Bool
+areObjectTypesDisjoint qualify lo ro =
+    CliMonad.andThen2
+        (\lprop rprop ->
+            let
+                ldict : FastDict.Dict String Common.Field
+                ldict =
+                    lprop
+                        |> List.map
+                            (\( name, field ) ->
+                                ( Common.unwrapUnsafe name, field )
+                            )
+                        |> FastDict.fromList
+
+                ladd : Bool
+                ladd =
+                    case lo.additionalProperties of
+                        Just (Json.Schema.Definitions.BooleanSchema False) ->
+                            False
+
+                        _ ->
+                            True
+
+                rdict : FastDict.Dict String Common.Field
+                rdict =
+                    rprop
+                        |> List.map
+                            (\( name, field ) ->
+                                ( Common.unwrapUnsafe name, field )
+                            )
+                        |> FastDict.fromList
+
+                radd : Bool
+                radd =
+                    case ro.additionalProperties of
+                        Just (Json.Schema.Definitions.BooleanSchema False) ->
+                            False
+
+                        _ ->
+                            True
+            in
+            FastDict.merge
+                (\_ lval ->
+                    CliMonad.map
+                        (\prev ->
+                            prev
+                                || -- A required field on the left when additionalProperties are forbidden on the right means the sets are disjoint
+                                   (lval.required && not radd)
+                        )
+                )
+                (\key lval rval ->
+                    CliMonad.andThen
+                        (\prev ->
+                            if not prev && (lval.required || rval.required) then
+                                -- If the field is optional in both we could have a value without it, so it's not enough to distinguish, so we ask it's required in at least one of them
+                                areTypesDisjoint key lval.type_ rval.type_
+
+                            else
+                                CliMonad.succeed prev
+                        )
+                )
+                (\_ rval ->
+                    CliMonad.map
+                        (\prev ->
+                            prev
+                                || -- A required field on the right when additionalProperties are forbidden on the left means the sets are disjoint
+                                   (rval.required && not ladd)
+                        )
+                )
+                ldict
+                rdict
+                (CliMonad.succeed False)
+        )
+        (schemaToProperties qualify (Json.Schema.Definitions.ObjectSchema lo))
+        (schemaToProperties qualify (Json.Schema.Definitions.ObjectSchema ro))
 
 
 schemaTypeToString : Json.Schema.Definitions.Type -> String

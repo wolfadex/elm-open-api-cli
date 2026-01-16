@@ -1355,8 +1355,8 @@ fieldToAnnotation qualify { useMaybe } { type_, required } =
         CliMonad.map Gen.Maybe.annotation_.maybe annotation
 
 
-typeToEncoder : Bool -> Common.Type -> CliMonad (Elm.Expression -> Elm.Expression)
-typeToEncoder qualify type_ =
+typeToEncoder : Common.Type -> CliMonad (Elm.Expression -> Elm.Expression)
+typeToEncoder type_ =
     case type_ of
         Common.Basic basicType basic ->
             basicTypeToEncoder basicType basic
@@ -1377,12 +1377,7 @@ typeToEncoder qualify type_ =
                                     (\jsonNamespace rec ->
                                         Elm.apply
                                             (Elm.value
-                                                { importFrom =
-                                                    if qualify then
-                                                        jsonNamespace
-
-                                                    else
-                                                        []
+                                                { importFrom = jsonNamespace
                                                 , name = "encode" ++ Common.toTypeName name
                                                 , annotation = Nothing
                                                 }
@@ -1401,7 +1396,7 @@ typeToEncoder qualify type_ =
             properties
                 |> CliMonad.combineMap
                     (\( key, field ) ->
-                        typeToEncoder qualify field.type_
+                        typeToEncoder field.type_
                             |> CliMonad.map
                                 (\encoder rec ->
                                     let
@@ -1438,7 +1433,7 @@ typeToEncoder qualify type_ =
                     )
 
         Common.List t ->
-            typeToEncoder qualify t
+            typeToEncoder t
                 |> CliMonad.map
                     (\encoder ->
                         Gen.Json.Encode.call_.list (Elm.functionReduced "rec" encoder)
@@ -1447,7 +1442,7 @@ typeToEncoder qualify type_ =
         -- An object with additionalProperties (the type of those properties is
         -- `additionalProperties`) and no normal `properties` fields: A simple Dict.
         Common.Dict additionalProperties [] ->
-            typeToEncoder qualify additionalProperties.type_
+            typeToEncoder additionalProperties.type_
                 |> CliMonad.map
                     (\encoder ->
                         Gen.Json.Encode.call_.dict Gen.Basics.values_.identity (Elm.functionReduced "rec" encoder)
@@ -1463,7 +1458,7 @@ typeToEncoder qualify type_ =
             properties
                 |> CliMonad.combineMap
                     (\( key, field ) ->
-                        typeToEncoder qualify field.type_
+                        typeToEncoder field.type_
                             |> CliMonad.map
                                 (\encoder rec ->
                                     let
@@ -1508,7 +1503,7 @@ typeToEncoder qualify type_ =
                                     )
                                 )
                     )
-                    (typeToEncoder qualify additionalProperties.type_)
+                    (typeToEncoder additionalProperties.type_)
 
         Common.Nullable t ->
             CliMonad.map
@@ -1524,7 +1519,7 @@ typeToEncoder qualify type_ =
                             encoder
                         ]
                 )
-                (typeToEncoder qualify t)
+                (typeToEncoder t)
 
         Common.Value ->
             CliMonad.succeed <| Gen.Basics.identity
@@ -1534,12 +1529,7 @@ typeToEncoder qualify type_ =
                 (\jsonNamespace name rec ->
                     Elm.apply
                         (Elm.value
-                            { importFrom =
-                                if qualify then
-                                    jsonNamespace
-
-                                else
-                                    []
+                            { importFrom = jsonNamespace
                             , name = "encode" ++ Common.toTypeName name
                             , annotation = Nothing
                             }
@@ -1562,7 +1552,7 @@ typeToEncoder qualify type_ =
                                     variantEncoder
                             )
                             (typeToAnnotationWithNullable True variant.type_)
-                            (typeToEncoder qualify variant.type_)
+                            (typeToEncoder variant.type_)
                     )
                 |> CliMonad.map2
                     (\typesNamespace branches rec ->
@@ -1629,8 +1619,8 @@ refToTypeName ref =
             CliMonad.fail <| "Couldn't get the type ref (" ++ String.join "/" ref ++ ") for the response"
 
 
-typeToDecoder : Bool -> Common.Type -> CliMonad Elm.Expression
-typeToDecoder qualify type_ =
+typeToDecoder : Common.Type -> CliMonad Elm.Expression
+typeToDecoder type_ =
     case type_ of
         Common.Object properties ->
             List.foldl
@@ -1650,7 +1640,7 @@ typeToDecoder qualify type_ =
                                 )
                                 prevExpr
                         )
-                        (typeToDecoder qualify field.type_)
+                        (typeToDecoder field.type_)
                         prevExprRes
                 )
                 (CliMonad.succeed
@@ -1681,11 +1671,11 @@ typeToDecoder qualify type_ =
 
         Common.List t ->
             CliMonad.map Gen.Json.Decode.list
-                (typeToDecoder qualify t)
+                (typeToDecoder t)
 
         Common.Dict additionalProperties [] ->
             CliMonad.map Gen.Json.Decode.dict
-                (typeToDecoder qualify additionalProperties.type_)
+                (typeToDecoder additionalProperties.type_)
 
         Common.Dict additionalProperties properties ->
             properties
@@ -1706,7 +1696,7 @@ typeToDecoder qualify type_ =
                                             )
                                         )
                             )
-                            (typeToDecoder qualify field.type_)
+                            (typeToDecoder field.type_)
                             prevExprRes
                     )
                     (CliMonad.succeed
@@ -1837,7 +1827,7 @@ typeToDecoder qualify type_ =
                                     )
                                 )
                     )
-                    (typeToDecoder qualify additionalProperties.type_)
+                    (typeToDecoder additionalProperties.type_)
 
         Common.Enum variants ->
             CliMonad.enumName variants
@@ -1874,12 +1864,7 @@ typeToDecoder qualify type_ =
                                 CliMonad.map
                                     (\jsonNamespace ->
                                         Elm.value
-                                            { importFrom =
-                                                if qualify then
-                                                    jsonNamespace
-
-                                                else
-                                                    []
+                                            { importFrom = jsonNamespace
                                             , name = "decode" ++ Common.toTypeName name
                                             , annotation = Nothing
                                             }
@@ -1901,18 +1886,13 @@ typeToDecoder qualify type_ =
                             OpenApi.Common.Internal.make_.null
                         ]
                 )
-                (typeToDecoder qualify t)
+                (typeToDecoder t)
 
         Common.Ref ref ->
             CliMonad.map2
                 (\jsonNamespace name ->
                     Elm.value
-                        { importFrom =
-                            if qualify then
-                                jsonNamespace
-
-                            else
-                                []
+                        { importFrom = jsonNamespace
                         , name = "decode" ++ Common.toTypeName name
                         , annotation = Nothing
                         }
@@ -1924,7 +1904,7 @@ typeToDecoder qualify type_ =
             variants
                 |> CliMonad.combineMap
                     (\variant ->
-                        typeToDecoder qualify variant.type_
+                        typeToDecoder variant.type_
                             |> CliMonad.map2
                                 (\typesNamespace ->
                                     Gen.Json.Decode.call_.map

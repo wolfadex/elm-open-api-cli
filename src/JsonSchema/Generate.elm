@@ -216,7 +216,7 @@ schemaToDeclarations name schema =
                                                 }
                                             )
                                             (CliMonad.moduleToNamespace Common.Types)
-                                            (schemaToDecoder False schema)
+                                            (schemaToDecoder schema)
                                         , CliMonad.map2
                                             (\typesNamespace encoder ->
                                                 { moduleName = Common.Json
@@ -231,7 +231,7 @@ schemaToDeclarations name schema =
                                                 }
                                             )
                                             (CliMonad.moduleToNamespace Common.Types)
-                                            (schemaToEncoder False schema)
+                                            (schemaToEncoder schema)
                                         ]
                                             |> CliMonad.combine
                                 )
@@ -239,13 +239,13 @@ schemaToDeclarations name schema =
         |> CliMonad.withPath name
 
 
-schemaToDecoder : Bool -> Json.Schema.Definitions.Schema -> CliMonad Elm.Expression
-schemaToDecoder qualify schema =
+schemaToDecoder : Json.Schema.Definitions.Schema -> CliMonad Elm.Expression
+schemaToDecoder schema =
     SchemaUtils.schemaToType True schema
-        |> CliMonad.andThen (\{ type_ } -> SchemaUtils.typeToDecoder qualify type_)
+        |> CliMonad.andThen (\{ type_ } -> SchemaUtils.typeToDecoder type_)
 
 
-schemaToEncoder : Bool -> Json.Schema.Definitions.Schema -> CliMonad (Elm.Expression -> Elm.Expression)
-schemaToEncoder qualify schema =
+schemaToEncoder : Json.Schema.Definitions.Schema -> CliMonad (Elm.Expression -> Elm.Expression)
+schemaToEncoder schema =
     SchemaUtils.schemaToType True schema
-        |> CliMonad.andThen (\{ type_ } -> SchemaUtils.typeToEncoder qualify type_)
+        |> CliMonad.andThen (\{ type_ } -> SchemaUtils.typeToEncoder type_)

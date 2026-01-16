@@ -382,7 +382,7 @@ unitDeclarations name =
                 }
             )
             (CliMonad.moduleToNamespace Common.Types)
-            (SchemaUtils.typeToDecoder False Common.Unit)
+            (SchemaUtils.typeToDecoder Common.Unit)
         , CliMonad.map2
             (\typesNamespace encoder ->
                 { moduleName = Common.Json
@@ -397,7 +397,7 @@ unitDeclarations name =
                 }
             )
             (CliMonad.moduleToNamespace Common.Types)
-            (SchemaUtils.typeToEncoder False Common.Unit)
+            (SchemaUtils.typeToEncoder Common.Unit)
         ]
 
 
@@ -493,7 +493,7 @@ toRequestFunctions server effectTypes method pathUrl operation =
                         )
 
                 JsonContent type_ ->
-                    SchemaUtils.typeToEncoder True type_
+                    SchemaUtils.typeToEncoder type_
                         |> CliMonad.map
                             (\encoder config ->
                                 let
@@ -2482,7 +2482,7 @@ operationToTypesExpectAndResolver functionName operation =
                                                             }
                                                         }
                                                     )
-                                                    (SchemaUtils.typeToDecoder True type_)
+                                                    (SchemaUtils.typeToDecoder type_)
 
                                             StringContent _ ->
                                                 { successType =
@@ -2625,7 +2625,7 @@ errorResponsesToErrorDecoders functionName errorResponses =
                                                             (\contentSchema ->
                                                                 case contentSchema of
                                                                     JsonContent type_ ->
-                                                                        SchemaUtils.typeToDecoder True type_
+                                                                        SchemaUtils.typeToDecoder type_
 
                                                                     StringContent _ ->
                                                                         CliMonad.succeed Gen.Json.Decode.string

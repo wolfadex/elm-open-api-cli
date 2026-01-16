@@ -2,10 +2,10 @@ module OpenApi.Config exposing
     ( Config, EffectType(..), effectTypeToPackage, Format, Input, Path(..), Server(..)
     , init, inputFrom, pathFromString
     , withAutoConvertSwagger, withEffectTypes, withFormat, withFormats, withGenerateTodos, withInput, withSwaggerConversionCommand, withSwaggerConversionUrl
-    , withOutputModuleName, withOverrides, withServer, withWriteMergedTo
+    , withOutputModuleName, withOverrides, withServer, withWriteMergedTo, withWarnOnMissingEnums
     , autoConvertSwagger, inputs, outputDirectory, swaggerConversionCommand, swaggerConversionUrl
     , oasPath, overrides, writeMergedTo
-    , toGenerationConfig, pathToString
+    , toGenerationConfig, Generate, pathToString
     , defaultFormats
     )
 
@@ -21,7 +21,7 @@ module OpenApi.Config exposing
 
 @docs init, inputFrom, pathFromString
 @docs withAutoConvertSwagger, withEffectTypes, withFormat, withFormats, withGenerateTodos, withInput, withSwaggerConversionCommand, withSwaggerConversionUrl
-@docs withOutputModuleName, withOverrides, withServer, withWriteMergedTo
+@docs withOutputModuleName, withOverrides, withServer, withWriteMergedTo, withWarnOnMissingEnums
 
 
 # Config properties
@@ -36,7 +36,7 @@ module OpenApi.Config exposing
 
 # Output
 
-@docs toGenerationConfig, pathToString
+@docs toGenerationConfig, Generate, pathToString
 
 
 # Internal
@@ -92,6 +92,7 @@ type Input
         , overrides : List Path
         , writeMergedTo : Maybe String
         , effectTypes : List EffectType
+        , warnOnMissingEnums : Bool
         }
 
 
@@ -232,6 +233,7 @@ inputFrom path =
     , overrides = []
     , writeMergedTo = Nothing
     , effectTypes = [ ElmHttpCmd, ElmHttpTask ]
+    , warnOnMissingEnums = False
     }
         |> Input
 
@@ -473,6 +475,12 @@ withWriteMergedTo newWriteMergedTo (Input input) =
 
 
 {-| -}
+withWarnOnMissingEnums : Bool -> Input -> Input
+withWarnOnMissingEnums newWarnOnMissingEnums (Input input) =
+    Input { input | warnOnMissingEnums = newWarnOnMissingEnums }
+
+
+{-| -}
 withFormat : Format -> Config -> Config
 withFormat newFormat (Config config) =
     Config { config | staticFormats = newFormat :: config.staticFormats }
@@ -554,18 +562,24 @@ overrides (Input input) =
 
 
 {-| -}
+type alias Generate =
+    { namespace : List String
+    , generateTodos : Bool
+    , effectTypes : List EffectType
+    , server : Server
+    , formats : List Format
+    , warnOnMissingEnums : Bool
+    }
+
+
+{-| -}
 toGenerationConfig :
     List { format : String, basicType : Common.BasicType }
     -> Config
     -> List ( Input, OpenApi.OpenApi )
     ->
         List
-            ( { namespace : List String
-              , generateTodos : Bool
-              , effectTypes : List EffectType
-              , server : Server
-              , formats : List Format
-              }
+            ( Generate
             , OpenApi.OpenApi
             )
 toGenerationConfig formatsInput (Config config) augmentedInputs =
@@ -586,6 +600,7 @@ toGenerationConfig formatsInput (Config config) augmentedInputs =
               , generateTodos = config.generateTodos
               , effectTypes = input.effectTypes
               , server = input.server
+              , warnOnMissingEnums = input.warnOnMissingEnums
               , formats = config.staticFormats ++ config.dynamicFormats formatsInput
               }
             , spec

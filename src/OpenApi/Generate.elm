@@ -1,8 +1,8 @@
-module OpenApi.Generate exposing (Config, ContentSchema(..), Message, Path, Mime, files)
+module OpenApi.Generate exposing (ContentSchema(..), Message, Path, Mime, files)
 
 {-|
 
-@docs Config, ContentSchema, Message, Path, Mime, files
+@docs ContentSchema, Message, Path, Mime, files
 
 -}
 
@@ -101,18 +101,8 @@ type alias PerPackage a =
 
 
 {-| -}
-type alias Config =
-    { namespace : List String
-    , generateTodos : Bool
-    , effectTypes : List OpenApi.Config.EffectType
-    , server : OpenApi.Config.Server
-    , formats : List OpenApi.Config.Format
-    }
-
-
-{-| -}
 files :
-    Config
+    OpenApi.Config.Generate
     -> OpenApi.OpenApi
     ->
         Result
@@ -125,7 +115,7 @@ files :
             , warnings : List Message
             , requiredPackages : FastSet.Set String
             }
-files { namespace, generateTodos, effectTypes, server, formats } apiSpec =
+files { namespace, generateTodos, effectTypes, server, formats, warnOnMissingEnums } apiSpec =
     case extractEnums apiSpec of
         Err e ->
             Err e
@@ -151,6 +141,7 @@ files { namespace, generateTodos, effectTypes, server, formats } apiSpec =
                     , enums = enums
                     , namespace = namespace
                     , formats = formats
+                    , warnOnMissingEnums = warnOnMissingEnums
                     }
                 |> Result.map
                     (\{ declarations, warnings, requiredPackages } ->

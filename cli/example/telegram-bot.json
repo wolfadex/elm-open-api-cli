@@ -1,5 +1,5 @@
 {
-  "openapi": "3.0.0",
+  "openapi": "3.1.0",
   "info": {
     "title": "Telegram Bot API",
     "description": "Auto-generated OpenAPI schema",
@@ -23270,7 +23270,8 @@
           },
           "date": {
             "description": "Date the message was sent in Unix time. It is always a positive number, representing a valid date.",
-            "type": "integer"
+            "type": "integer",
+            "minimum": 1
           },
           "business_connection_id": {
             "description": "*Optional*. Unique identifier of the business connection from which the message was received. If non-empty, the message belongs to a chat of the corresponding business account that is independent from any potential bot chat which might share the same identifier.",
@@ -23651,7 +23652,8 @@
           },
           "date": {
             "description": "Always 0. The field can be used to differentiate regular and inaccessible messages.",
-            "type": "integer"
+            "type": "integer",
+            "const": 0
           }
         },
         "required": [
@@ -23948,7 +23950,7 @@
         "properties": {
           "type": {
             "description": "Type of the message origin, always “user”",
-            "default": "user",
+            "const": "user",
             "type": "string"
           },
           "date": {
@@ -23974,7 +23976,7 @@
         "properties": {
           "type": {
             "description": "Type of the message origin, always “hidden\\_user”",
-            "default": "hidden_user",
+            "const": "hidden_user",
             "type": "string"
           },
           "date": {
@@ -24001,7 +24003,7 @@
         "properties": {
           "type": {
             "description": "Type of the message origin, always “chat”",
-            "default": "chat",
+            "const": "chat",
             "type": "string"
           },
           "date": {
@@ -24031,7 +24033,7 @@
         "properties": {
           "type": {
             "description": "Type of the message origin, always “channel”",
-            "default": "channel",
+            "const": "channel",
             "type": "string"
           },
           "date": {
@@ -24432,7 +24434,7 @@
         "properties": {
           "type": {
             "description": "Type of the paid media, always “preview”",
-            "default": "preview",
+            "const": "preview",
             "type": "string"
           },
           "width": {
@@ -24461,7 +24463,7 @@
         "properties": {
           "type": {
             "description": "Type of the paid media, always “photo”",
-            "default": "photo",
+            "const": "photo",
             "type": "string"
           },
           "photo": {
@@ -24486,7 +24488,7 @@
         "properties": {
           "type": {
             "description": "Type of the paid media, always “video”",
-            "default": "video",
+            "const": "video",
             "type": "string"
           },
           "video": {
@@ -25120,7 +25122,7 @@
         "properties": {
           "type": {
             "description": "Type of the background fill, always “solid”",
-            "default": "solid",
+            "const": "solid",
             "type": "string"
           },
           "color": {
@@ -25142,7 +25144,7 @@
         "properties": {
           "type": {
             "description": "Type of the background fill, always “gradient”",
-            "default": "gradient",
+            "const": "gradient",
             "type": "string"
           },
           "top_color": {
@@ -25174,7 +25176,7 @@
         "properties": {
           "type": {
             "description": "Type of the background fill, always “freeform\\_gradient”",
-            "default": "freeform_gradient",
+            "const": "freeform_gradient",
             "type": "string"
           },
           "colors": {
@@ -25219,7 +25221,7 @@
         "properties": {
           "type": {
             "description": "Type of the background, always “fill”",
-            "default": "fill",
+            "const": "fill",
             "type": "string"
           },
           "fill": {
@@ -25245,7 +25247,7 @@
         "properties": {
           "type": {
             "description": "Type of the background, always “wallpaper”",
-            "default": "wallpaper",
+            "const": "wallpaper",
             "type": "string"
           },
           "document": {
@@ -25281,7 +25283,7 @@
         "properties": {
           "type": {
             "description": "Type of the background, always “pattern”",
-            "default": "pattern",
+            "const": "pattern",
             "type": "string"
           },
           "document": {
@@ -25321,7 +25323,7 @@
         "properties": {
           "type": {
             "description": "Type of the background, always “chat\\_theme”",
-            "default": "chat_theme",
+            "const": "chat_theme",
             "type": "string"
           },
           "theme_name": {
@@ -26141,7 +26143,8 @@
         },
         "required": [
           "keyboard"
-        ]
+        ],
+        "additionalProperties": false
       },
       "KeyboardButton": {
         "externalDocs": {
@@ -26307,7 +26310,8 @@
         },
         "required": [
           "remove_keyboard"
-        ]
+        ],
+        "additionalProperties": false
       },
       "InlineKeyboardMarkup": {
         "externalDocs": {
@@ -26329,7 +26333,8 @@
         },
         "required": [
           "inline_keyboard"
-        ]
+        ],
+        "additionalProperties": false
       },
       "InlineKeyboardButton": {
         "externalDocs": {
@@ -26522,7 +26527,8 @@
         },
         "required": [
           "force_reply"
-        ]
+        ],
+        "additionalProperties": false
       },
       "ChatPhoto": {
         "externalDocs": {
@@ -26778,7 +26784,7 @@
         "properties": {
           "status": {
             "description": "The member's status in the chat, always “creator”",
-            "default": "creator",
+            "const": "creator",
             "type": "string"
           },
           "user": {
@@ -26808,7 +26814,7 @@
         "properties": {
           "status": {
             "description": "The member's status in the chat, always “administrator”",
-            "default": "administrator",
+            "const": "administrator",
             "type": "string"
           },
           "user": {
@@ -26913,7 +26919,7 @@
         "properties": {
           "status": {
             "description": "The member's status in the chat, always “member”",
-            "default": "member",
+            "const": "member",
             "type": "string"
           },
           "user": {
@@ -26938,7 +26944,7 @@
         "properties": {
           "status": {
             "description": "The member's status in the chat, always “restricted”",
-            "default": "restricted",
+            "const": "restricted",
             "type": "string"
           },
           "user": {
@@ -27039,7 +27045,7 @@
         "properties": {
           "status": {
             "description": "The member's status in the chat, always “left”",
-            "default": "left",
+            "const": "left",
             "type": "string"
           },
           "user": {
@@ -27060,7 +27066,7 @@
         "properties": {
           "status": {
             "description": "The member's status in the chat, always “kicked”",
-            "default": "kicked",
+            "const": "kicked",
             "type": "string"
           },
           "user": {
@@ -27418,7 +27424,7 @@
         "properties": {
           "type": {
             "description": "Type of the area, always “location”",
-            "default": "location",
+            "const": "location",
             "type": "string"
           },
           "latitude": {
@@ -27448,7 +27454,7 @@
         "properties": {
           "type": {
             "description": "Type of the area, always “suggested\\_reaction”",
-            "default": "suggested_reaction",
+            "const": "suggested_reaction",
             "type": "string"
           },
           "reaction_type": {
@@ -27477,7 +27483,7 @@
         "properties": {
           "type": {
             "description": "Type of the area, always “link”",
-            "default": "link",
+            "const": "link",
             "type": "string"
           },
           "url": {
@@ -27499,7 +27505,7 @@
         "properties": {
           "type": {
             "description": "Type of the area, always “weather”",
-            "default": "weather",
+            "const": "weather",
             "type": "string"
           },
           "temperature": {
@@ -27531,7 +27537,7 @@
         "properties": {
           "type": {
             "description": "Type of the area, always “unique\\_gift”",
-            "default": "unique_gift",
+            "const": "unique_gift",
             "type": "string"
           },
           "name": {
@@ -27611,7 +27617,7 @@
         "properties": {
           "type": {
             "description": "Type of the reaction, always “emoji”",
-            "default": "emoji",
+            "const": "emoji",
             "type": "string"
           },
           "emoji": {
@@ -27708,7 +27714,7 @@
         "properties": {
           "type": {
             "description": "Type of the reaction, always “custom\\_emoji”",
-            "default": "custom_emoji",
+            "const": "custom_emoji",
             "type": "string"
           },
           "custom_emoji_id": {
@@ -27730,7 +27736,7 @@
         "properties": {
           "type": {
             "description": "Type of the reaction, always “paid”",
-            "default": "paid",
+            "const": "paid",
             "type": "string"
           }
         },
@@ -28326,7 +28332,7 @@
         "properties": {
           "type": {
             "description": "Type of the gift, always “regular”",
-            "default": "regular",
+            "const": "regular",
             "type": "string"
           },
           "gift": {
@@ -28407,7 +28413,7 @@
         "properties": {
           "type": {
             "description": "Type of the gift, always “unique”",
-            "default": "unique",
+            "const": "unique",
             "type": "string"
           },
           "gift": {
@@ -28596,7 +28602,7 @@
         "properties": {
           "type": {
             "description": "Scope type, must be *default*",
-            "default": "default",
+            "const": "default",
             "type": "string"
           }
         },
@@ -28613,7 +28619,7 @@
         "properties": {
           "type": {
             "description": "Scope type, must be *all\\_private\\_chats*",
-            "default": "all_private_chats",
+            "const": "all_private_chats",
             "type": "string"
           }
         },
@@ -28630,7 +28636,7 @@
         "properties": {
           "type": {
             "description": "Scope type, must be *all\\_group\\_chats*",
-            "default": "all_group_chats",
+            "const": "all_group_chats",
             "type": "string"
           }
         },
@@ -28647,7 +28653,7 @@
         "properties": {
           "type": {
             "description": "Scope type, must be *all\\_chat\\_administrators*",
-            "default": "all_chat_administrators",
+            "const": "all_chat_administrators",
             "type": "string"
           }
         },
@@ -28664,7 +28670,7 @@
         "properties": {
           "type": {
             "description": "Scope type, must be *chat*",
-            "default": "chat",
+            "const": "chat",
             "type": "string"
           },
           "chat_id": {
@@ -28693,7 +28699,7 @@
         "properties": {
           "type": {
             "description": "Scope type, must be *chat\\_administrators*",
-            "default": "chat_administrators",
+            "const": "chat_administrators",
             "type": "string"
           },
           "chat_id": {
@@ -28722,7 +28728,7 @@
         "properties": {
           "type": {
             "description": "Scope type, must be *chat\\_member*",
-            "default": "chat_member",
+            "const": "chat_member",
             "type": "string"
           },
           "chat_id": {
@@ -28821,7 +28827,7 @@
         "properties": {
           "type": {
             "description": "Type of the button, must be *commands*",
-            "default": "commands",
+            "const": "commands",
             "type": "string"
           }
         },
@@ -28838,7 +28844,7 @@
         "properties": {
           "type": {
             "description": "Type of the button, must be *web\\_app*",
-            "default": "web_app",
+            "const": "web_app",
             "type": "string"
           },
           "text": {
@@ -28864,7 +28870,7 @@
         "properties": {
           "type": {
             "description": "Type of the button, must be *default*",
-            "default": "default",
+            "const": "default",
             "type": "string"
           }
         },
@@ -28898,7 +28904,7 @@
         "properties": {
           "source": {
             "description": "Source of the boost, always “premium”",
-            "default": "premium",
+            "const": "premium",
             "type": "string"
           },
           "user": {
@@ -28919,7 +28925,7 @@
         "properties": {
           "source": {
             "description": "Source of the boost, always “gift\\_code”",
-            "default": "gift_code",
+            "const": "gift_code",
             "type": "string"
           },
           "user": {
@@ -28940,7 +28946,7 @@
         "properties": {
           "source": {
             "description": "Source of the boost, always “giveaway”",
-            "default": "giveaway",
+            "const": "giveaway",
             "type": "string"
           },
           "giveaway_message_id": {
@@ -29256,7 +29262,7 @@
         "properties": {
           "type": {
             "description": "Type of the result, must be *photo*",
-            "default": "photo",
+            "const": "photo",
             "type": "string"
           },
           "media": {
@@ -29303,7 +29309,7 @@
         "properties": {
           "type": {
             "description": "Type of the result, must be *video*",
-            "default": "video",
+            "const": "video",
             "type": "string"
           },
           "media": {
@@ -29378,7 +29384,7 @@
         "properties": {
           "type": {
             "description": "Type of the result, must be *animation*",
-            "default": "animation",
+            "const": "animation",
             "type": "string"
           },
           "media": {
@@ -29441,7 +29447,7 @@
         "properties": {
           "type": {
             "description": "Type of the result, must be *audio*",
-            "default": "audio",
+            "const": "audio",
             "type": "string"
           },
           "media": {
@@ -29496,7 +29502,7 @@
         "properties": {
           "type": {
             "description": "Type of the result, must be *document*",
-            "default": "document",
+            "const": "document",
             "type": "string"
           },
           "media": {
@@ -29563,7 +29569,7 @@
         "properties": {
           "type": {
             "description": "Type of the media, must be *photo*",
-            "default": "photo",
+            "const": "photo",
             "type": "string"
           },
           "media": {
@@ -29585,7 +29591,7 @@
         "properties": {
           "type": {
             "description": "Type of the media, must be *video*",
-            "default": "video",
+            "const": "video",
             "type": "string"
           },
           "media": {
@@ -29649,7 +29655,7 @@
         "properties": {
           "type": {
             "description": "Type of the profile photo, must be *static*",
-            "default": "static",
+            "const": "static",
             "type": "string"
           },
           "photo": {
@@ -29671,7 +29677,7 @@
         "properties": {
           "type": {
             "description": "Type of the profile photo, must be *animated*",
-            "default": "animated",
+            "const": "animated",
             "type": "string"
           },
           "animation": {
@@ -29711,7 +29717,7 @@
         "properties": {
           "type": {
             "description": "Type of the content, must be *photo*",
-            "default": "photo",
+            "const": "photo",
             "type": "string"
           },
           "photo": {
@@ -29733,7 +29739,7 @@
         "properties": {
           "type": {
             "description": "Type of the content, must be *video*",
-            "default": "video",
+            "const": "video",
             "type": "string"
           },
           "video": {
@@ -30108,7 +30114,7 @@
         "properties": {
           "type": {
             "description": "Type of the result, must be *article*",
-            "default": "article",
+            "const": "article",
             "type": "string"
           },
           "id": {
@@ -30162,7 +30168,7 @@
         "properties": {
           "type": {
             "description": "Type of the result, must be *photo*",
-            "default": "photo",
+            "const": "photo",
             "type": "string"
           },
           "id": {
@@ -30237,7 +30243,7 @@
         "properties": {
           "type": {
             "description": "Type of the result, must be *gif*",
-            "default": "gif",
+            "const": "gif",
             "type": "string"
           },
           "id": {
@@ -30322,7 +30328,7 @@
         "properties": {
           "type": {
             "description": "Type of the result, must be *mpeg4\\_gif*",
-            "default": "mpeg4_gif",
+            "const": "mpeg4_gif",
             "type": "string"
           },
           "id": {
@@ -30407,7 +30413,7 @@
         "properties": {
           "type": {
             "description": "Type of the result, must be *video*",
-            "default": "video",
+            "const": "video",
             "type": "string"
           },
           "id": {
@@ -30496,7 +30502,7 @@
         "properties": {
           "type": {
             "description": "Type of the result, must be *audio*",
-            "default": "audio",
+            "const": "audio",
             "type": "string"
           },
           "id": {
@@ -30548,7 +30554,8 @@
           "id",
           "audio_url",
           "title"
-        ]
+        ],
+        "additionalProperties": false
       },
       "InlineQueryResultVoice": {
         "externalDocs": {
@@ -30559,7 +30566,7 @@
         "properties": {
           "type": {
             "description": "Type of the result, must be *voice*",
-            "default": "voice",
+            "const": "voice",
             "type": "string"
           },
           "id": {
@@ -30618,7 +30625,7 @@
         "properties": {
           "type": {
             "description": "Type of the result, must be *document*",
-            "default": "document",
+            "const": "document",
             "type": "string"
           },
           "id": {
@@ -30698,7 +30705,7 @@
         "properties": {
           "type": {
             "description": "Type of the result, must be *location*",
-            "default": "location",
+            "const": "location",
             "type": "string"
           },
           "id": {
@@ -30727,11 +30734,15 @@
           },
           "heading": {
             "description": "*Optional*. For live locations, a direction in which the user is moving, in degrees. Must be between 1 and 360 if specified.",
-            "type": "integer"
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 360
           },
           "proximity_alert_radius": {
             "description": "*Optional*. For live locations, a maximum distance for proximity alerts about approaching another chat member, in meters. Must be between 1 and 100000 if specified.",
-            "type": "integer"
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100000
           },
           "reply_markup": {
             "$ref": "#/components/schemas/InlineKeyboardMarkup"
@@ -30758,7 +30769,8 @@
           "latitude",
           "longitude",
           "title"
-        ]
+        ],
+        "additionalProperties": false
       },
       "InlineQueryResultVenue": {
         "externalDocs": {
@@ -30769,7 +30781,7 @@
         "properties": {
           "type": {
             "description": "Type of the result, must be *venue*",
-            "default": "venue",
+            "const": "venue",
             "type": "string"
           },
           "id": {
@@ -30834,7 +30846,8 @@
           "longitude",
           "title",
           "address"
-        ]
+        ],
+        "additionalProperties": false
       },
       "InlineQueryResultContact": {
         "externalDocs": {
@@ -30845,7 +30858,7 @@
         "properties": {
           "type": {
             "description": "Type of the result, must be *contact*",
-            "default": "contact",
+            "const": "contact",
             "type": "string"
           },
           "id": {
@@ -30892,7 +30905,8 @@
           "id",
           "phone_number",
           "first_name"
-        ]
+        ],
+        "additionalProperties": false
       },
       "InlineQueryResultGame": {
         "externalDocs": {
@@ -30903,7 +30917,7 @@
         "properties": {
           "type": {
             "description": "Type of the result, must be *game*",
-            "default": "game",
+            "const": "game",
             "type": "string"
           },
           "id": {
@@ -30922,7 +30936,8 @@
           "type",
           "id",
           "game_short_name"
-        ]
+        ],
+        "additionalProperties": false
       },
       "InlineQueryResultCachedPhoto": {
         "externalDocs": {
@@ -30933,7 +30948,7 @@
         "properties": {
           "type": {
             "description": "Type of the result, must be *photo*",
-            "default": "photo",
+            "const": "photo",
             "type": "string"
           },
           "id": {
@@ -30984,7 +30999,8 @@
           "type",
           "id",
           "photo_file_id"
-        ]
+        ],
+        "additionalProperties": false
       },
       "InlineQueryResultCachedGif": {
         "externalDocs": {
@@ -30995,7 +31011,7 @@
         "properties": {
           "type": {
             "description": "Type of the result, must be *gif*",
-            "default": "gif",
+            "const": "gif",
             "type": "string"
           },
           "id": {
@@ -31042,7 +31058,8 @@
           "type",
           "id",
           "gif_file_id"
-        ]
+        ],
+        "additionalProperties": false
       },
       "InlineQueryResultCachedMpeg4Gif": {
         "externalDocs": {
@@ -31053,7 +31070,7 @@
         "properties": {
           "type": {
             "description": "Type of the result, must be *mpeg4\\_gif*",
-            "default": "mpeg4_gif",
+            "const": "mpeg4_gif",
             "type": "string"
           },
           "id": {
@@ -31100,7 +31117,8 @@
           "type",
           "id",
           "mpeg4_file_id"
-        ]
+        ],
+        "additionalProperties": false
       },
       "InlineQueryResultCachedSticker": {
         "externalDocs": {
@@ -31111,7 +31129,7 @@
         "properties": {
           "type": {
             "description": "Type of the result, must be *sticker*",
-            "default": "sticker",
+            "const": "sticker",
             "type": "string"
           },
           "id": {
@@ -31133,7 +31151,8 @@
           "type",
           "id",
           "sticker_file_id"
-        ]
+        ],
+        "additionalProperties": false
       },
       "InlineQueryResultCachedDocument": {
         "externalDocs": {
@@ -31144,7 +31163,7 @@
         "properties": {
           "type": {
             "description": "Type of the result, must be *document*",
-            "default": "document",
+            "const": "document",
             "type": "string"
           },
           "id": {
@@ -31192,7 +31211,8 @@
           "id",
           "title",
           "document_file_id"
-        ]
+        ],
+        "additionalProperties": false
       },
       "InlineQueryResultCachedVideo": {
         "externalDocs": {
@@ -31203,7 +31223,7 @@
         "properties": {
           "type": {
             "description": "Type of the result, must be *video*",
-            "default": "video",
+            "const": "video",
             "type": "string"
           },
           "id": {
@@ -31255,7 +31275,8 @@
           "id",
           "video_file_id",
           "title"
-        ]
+        ],
+        "additionalProperties": false
       },
       "InlineQueryResultCachedVoice": {
         "externalDocs": {
@@ -31266,7 +31287,7 @@
         "properties": {
           "type": {
             "description": "Type of the result, must be *voice*",
-            "default": "voice",
+            "const": "voice",
             "type": "string"
           },
           "id": {
@@ -31310,7 +31331,8 @@
           "id",
           "voice_file_id",
           "title"
-        ]
+        ],
+        "additionalProperties": false
       },
       "InlineQueryResultCachedAudio": {
         "externalDocs": {
@@ -31321,7 +31343,7 @@
         "properties": {
           "type": {
             "description": "Type of the result, must be *audio*",
-            "default": "audio",
+            "const": "audio",
             "type": "string"
           },
           "id": {
@@ -31360,7 +31382,8 @@
           "type",
           "id",
           "audio_file_id"
-        ]
+        ],
+        "additionalProperties": false
       },
       "InputMessageContent": {
         "externalDocs": {
@@ -31415,7 +31438,8 @@
         },
         "required": [
           "message_text"
-        ]
+        ],
+        "additionalProperties": false
       },
       "InputLocationMessageContent": {
         "externalDocs": {
@@ -31452,7 +31476,8 @@
         "required": [
           "latitude",
           "longitude"
-        ]
+        ],
+        "additionalProperties": false
       },
       "InputVenueMessageContent": {
         "externalDocs": {
@@ -31499,7 +31524,8 @@
           "longitude",
           "title",
           "address"
-        ]
+        ],
+        "additionalProperties": false
       },
       "InputContactMessageContent": {
         "externalDocs": {
@@ -31528,7 +31554,8 @@
         "required": [
           "phone_number",
           "first_name"
-        ]
+        ],
+        "additionalProperties": false
       },
       "InputInvoiceMessageContent": {
         "externalDocs": {
@@ -31635,7 +31662,8 @@
           "payload",
           "currency",
           "prices"
-        ]
+        ],
+        "additionalProperties": false
       },
       "ChosenInlineResult": {
         "externalDocs": {
@@ -31920,7 +31948,7 @@
         "properties": {
           "currency": {
             "description": "Three-letter ISO 4217 [currency](https://core.telegram.org/bots/payments#supported-currencies) code, or “XTR” for payments in [Telegram Stars](https://t.me/BotNews/90). Currently, always “XTR”",
-            "default": "XTR",
+            "const": "XTR",
             "type": "string"
           },
           "total_amount": {
@@ -32064,7 +32092,7 @@
         "properties": {
           "type": {
             "description": "Type of the state, always “pending”",
-            "default": "pending",
+            "const": "pending",
             "type": "string"
           }
         },
@@ -32081,7 +32109,7 @@
         "properties": {
           "type": {
             "description": "Type of the state, always “succeeded”",
-            "default": "succeeded",
+            "const": "succeeded",
             "type": "string"
           },
           "date": {
@@ -32108,7 +32136,7 @@
         "properties": {
           "type": {
             "description": "Type of the state, always “failed”",
-            "default": "failed",
+            "const": "failed",
             "type": "string"
           }
         },
@@ -32185,7 +32213,7 @@
         "properties": {
           "type": {
             "description": "Type of the transaction partner, always “user”",
-            "default": "user",
+            "const": "user",
             "type": "string"
           },
           "transaction_type": {
@@ -32247,7 +32275,7 @@
         "properties": {
           "type": {
             "description": "Type of the transaction partner, always “chat”",
-            "default": "chat",
+            "const": "chat",
             "type": "string"
           },
           "chat": {
@@ -32271,7 +32299,7 @@
         "properties": {
           "type": {
             "description": "Type of the transaction partner, always “affiliate\\_program”",
-            "default": "affiliate_program",
+            "const": "affiliate_program",
             "type": "string"
           },
           "sponsor_user": {
@@ -32296,7 +32324,7 @@
         "properties": {
           "type": {
             "description": "Type of the transaction partner, always “fragment”",
-            "default": "fragment",
+            "const": "fragment",
             "type": "string"
           },
           "withdrawal_state": {
@@ -32316,7 +32344,7 @@
         "properties": {
           "type": {
             "description": "Type of the transaction partner, always “telegram\\_ads”",
-            "default": "telegram_ads",
+            "const": "telegram_ads",
             "type": "string"
           }
         },
@@ -32333,7 +32361,7 @@
         "properties": {
           "type": {
             "description": "Type of the transaction partner, always “telegram\\_api”",
-            "default": "telegram_api",
+            "const": "telegram_api",
             "type": "string"
           },
           "request_count": {
@@ -32355,7 +32383,7 @@
         "properties": {
           "type": {
             "description": "Type of the transaction partner, always “other”",
-            "default": "other",
+            "const": "other",
             "type": "string"
           }
         },
@@ -32613,7 +32641,7 @@
         "properties": {
           "source": {
             "description": "Error source, must be *data*",
-            "default": "data",
+            "const": "data",
             "type": "string"
           },
           "type": {
@@ -32658,7 +32686,7 @@
         "properties": {
           "source": {
             "description": "Error source, must be *front\\_side*",
-            "default": "front_side",
+            "const": "front_side",
             "type": "string"
           },
           "type": {
@@ -32696,7 +32724,7 @@
         "properties": {
           "source": {
             "description": "Error source, must be *reverse\\_side*",
-            "default": "reverse_side",
+            "const": "reverse_side",
             "type": "string"
           },
           "type": {
@@ -32732,7 +32760,7 @@
         "properties": {
           "source": {
             "description": "Error source, must be *selfie*",
-            "default": "selfie",
+            "const": "selfie",
             "type": "string"
           },
           "type": {
@@ -32770,7 +32798,7 @@
         "properties": {
           "source": {
             "description": "Error source, must be *file*",
-            "default": "file",
+            "const": "file",
             "type": "string"
           },
           "type": {
@@ -32809,7 +32837,7 @@
         "properties": {
           "source": {
             "description": "Error source, must be *files*",
-            "default": "files",
+            "const": "files",
             "type": "string"
           },
           "type": {
@@ -32851,7 +32879,7 @@
         "properties": {
           "source": {
             "description": "Error source, must be *translation\\_file*",
-            "default": "translation_file",
+            "const": "translation_file",
             "type": "string"
           },
           "type": {
@@ -32894,7 +32922,7 @@
         "properties": {
           "source": {
             "description": "Error source, must be *translation\\_files*",
-            "default": "translation_files",
+            "const": "translation_files",
             "type": "string"
           },
           "type": {
@@ -32940,7 +32968,7 @@
         "properties": {
           "source": {
             "description": "Error source, must be *unspecified*",
-            "default": "unspecified",
+            "const": "unspecified",
             "type": "string"
           },
           "type": {

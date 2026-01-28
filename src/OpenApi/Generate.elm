@@ -747,7 +747,7 @@ toRequestFunctions server effectTypes method pathUrl operation =
                                         [ ( "method", Elm.Annotation.string )
                                         , ( "headers", Elm.Annotation.list Gen.Http.annotation_.header )
                                         , ( "url", Elm.Annotation.string )
-                                        , ( "body", Gen.Http.annotation_.header )
+                                        , ( "body", Gen.Http.annotation_.body )
                                         , ( "expect", Gen.Http.annotation_.expect (Elm.Annotation.var "msg") )
                                         , ( "timeout", Elm.Annotation.maybe Elm.Annotation.float )
                                         , ( "tracker", Elm.Annotation.maybe Elm.Annotation.string )

@@ -63,6 +63,7 @@ import Gen.Rfc3339
 import Gen.Time
 import Gen.Url
 import Gen.Uuid
+import Json.Encode
 import OpenApi
 import OpenApi.Info
 import Url
@@ -185,6 +186,7 @@ type alias Format =
     , annotation : Elm.Annotation.Annotation
     , sharedDeclarations : List ( String, { value : Elm.Expression, group : String } )
     , requiresPackages : List String
+    , example : Json.Encode.Value
     }
 
 
@@ -308,6 +310,7 @@ dateTimeFormat =
         , "justinmimbs/time-extra"
         , "wolfadex/elm-rfc3339"
         ]
+    , example = Json.Encode.string "1789-07-21T12:00:00+01:00"
     }
 
 
@@ -334,6 +337,7 @@ dateFormat =
                 )
     , sharedDeclarations = []
     , requiresPackages = [ "justinmimbs/date" ]
+    , example = Json.Encode.string "1789-07-21"
     }
 
 
@@ -362,6 +366,7 @@ uuidFormat =
                 )
     , sharedDeclarations = []
     , requiresPackages = [ "cachix/elm-uuid" ]
+    , example = Json.Encode.string "f81d4fae-7dec-11d0-a765-00a0c91e6bf6"
     }
 
 
@@ -390,6 +395,7 @@ uriFormat =
                 )
     , sharedDeclarations = []
     , requiresPackages = [ "justinmimbs/date" ]
+    , example = Json.Encode.string "https://en.wikipedia.org"
     }
 
 
@@ -418,6 +424,7 @@ byteFormat =
                 )
     , sharedDeclarations = []
     , requiresPackages = [ Common.base64PackageName ]
+    , example = Json.Encode.string "<bytes>"
     }
 
 

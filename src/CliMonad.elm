@@ -67,6 +67,7 @@ type alias InternalFormat =
     , annotation : Elm.Annotation.Annotation
     , sharedDeclarations : List ( String, { value : Elm.Expression, group : String } )
     , requiresPackages : List String
+    , example : Json.Encode.Value
     }
 
 
@@ -377,6 +378,7 @@ toInternalFormat format =
       , annotation = format.annotation
       , sharedDeclarations = format.sharedDeclarations
       , requiresPackages = format.requiresPackages
+      , example = format.example
       }
     )
 
@@ -514,6 +516,7 @@ withFormat :
          , decoder : Elm.Expression
          , toParamString : Elm.Expression -> Elm.Expression
          , annotation : Elm.Annotation.Annotation
+         , example : Json.Encode.Value
          }
          -> a
         )
@@ -675,6 +678,7 @@ withFormat basicType maybeFormatName getter default =
                                             )
                                             [ value ]
                                 , annotation = format.annotation
+                                , example = format.example
                                 }
                             , { emptyOutput
                                 | requiredPackages = FastSet.fromList format.requiresPackages

@@ -678,21 +678,26 @@ objectsIntersection qualify lo ro =
             in
             FastDict.merge
                 (\lkey lval ->
-                    CliMonad.map
-                        (Maybe.andThen
-                            (\prev ->
-                                -- A required field on the left when additionalProperties are forbidden on the right means the sets are disjoint
-                                if lval.required && not radd then
-                                    Nothing
+                    if lval.required && not radd then
+                        -- A required field on the left when additionalProperties are forbidden on the right means the sets are disjoint
+                        CliMonad.map (\_ -> Nothing)
 
-                                else
-                                    Just (( lkey, exampleOfType lval.type_ ) :: prev)
+                    else
+                        CliMonad.map2
+                            (\example ->
+                                Maybe.map
+                                    (\prev ->
+                                        ( lkey, example ) :: prev
+                                    )
                             )
-                        )
+                            (exampleOfType qualify lval.type_)
                 )
                 (\key lval rval ->
-                    if lval.required || rval.required then
+                    if not (lval.required || rval.required) then
                         -- If the field is optional in both then we can just omit it in the intersection
+                        identity
+
+                    else
                         CliMonad.map2
                             (Maybe.map2
                                 (\ival prev ->
@@ -700,22 +705,21 @@ objectsIntersection qualify lo ro =
                                 )
                             )
                             (typesIntersection qualify lval.type_ rval.type_)
-
-                    else
-                        identity
                 )
                 (\rkey rval ->
-                    CliMonad.map
-                        (Maybe.andThen
-                            (\prev ->
-                                -- A required field on the right when additionalProperties are forbidden on the left means the sets are disjoint
-                                if rval.required && not ladd then
-                                    Nothing
+                    if rval.required && not ladd then
+                        -- A required field on the right when additionalProperties are forbidden on the left means the sets are disjoint
+                        CliMonad.map (\_ -> Nothing)
 
-                                else
-                                    Just (( rkey, exampleOfType rval.type_ ) :: prev)
+                    else
+                        CliMonad.map2
+                            (\example ->
+                                Maybe.map
+                                    (\prev ->
+                                        ( rkey, example ) :: prev
+                                    )
                             )
-                        )
+                            (exampleOfType qualify rval.type_)
                 )
                 ldict
                 rdict
@@ -726,95 +730,122 @@ objectsIntersection qualify lo ro =
         (schemaToProperties qualify (Json.Schema.Definitions.ObjectSchema ro))
 
 
-exampleOfType : Common.Type -> Json.Encode.Value
-exampleOfType type_ =
+exampleOfType : Bool -> Common.Type -> CliMonad Json.Encode.Value
+exampleOfType qualify type_ =
     case type_ of
         Common.Nullable _ ->
-            Json.Encode.null
+            CliMonad.succeed Json.Encode.null
 
         Common.Object fields ->
             fields
-                |> List.filterMap
+                |> CliMonad.combineMap
                     (\( fieldName, field ) ->
                         if field.required then
-                            Just ( Common.unwrapUnsafe fieldName, exampleOfType field.type_ )
+                            exampleOfType qualify field.type_
+                                |> CliMonad.map
+                                    (\example ->
+                                        Just ( Common.unwrapUnsafe fieldName, example )
+                                    )
 
                         else
-                            Nothing
+                            CliMonad.succeed Nothing
                     )
-                |> Json.Encode.object
+                |> CliMonad.map
+                    (\exampleFields ->
+                        exampleFields
+                            |> Maybe.Extra.values
+                            |> Json.Encode.object
+                    )
 
         Common.Basic t { const, format } ->
             case ( const, t ) of
                 ( Just (Common.ConstBoolean b), _ ) ->
                     Json.Encode.bool b
+                        |> CliMonad.succeed
 
                 ( Just (Common.ConstInteger i), _ ) ->
                     Json.Encode.int i
+                        |> CliMonad.succeed
 
                 ( Just (Common.ConstString s), _ ) ->
                     Json.Encode.string s
+                        |> CliMonad.succeed
 
                 ( Just (Common.ConstNumber f), _ ) ->
                     Json.Encode.float f
+                        |> CliMonad.succeed
 
                 ( Nothing, Common.Integer ) ->
                     Json.Encode.int 0
+                        |> CliMonad.succeed
 
                 ( Nothing, Common.Boolean ) ->
                     Json.Encode.bool True
+                        |> CliMonad.succeed
+
+                ( Nothing, Common.Number ) ->
+                    Json.Encode.int 0
+                        |> CliMonad.succeed
 
                 ( Nothing, Common.String ) ->
                     exampleString format
 
-                ( Nothing, Common.Number ) ->
-                    Json.Encode.int 0
-
         Common.Null ->
-            Json.Encode.null
+            CliMonad.succeed Json.Encode.null
 
         Common.List _ ->
-            Json.Encode.list never []
+            CliMonad.succeed (Json.Encode.list never [])
 
         Common.Dict _ fields ->
             fields
-                |> List.filterMap
+                |> CliMonad.combineMap
                     (\( fieldName, field ) ->
                         if field.required then
-                            Just ( Common.unwrapUnsafe fieldName, exampleOfType field.type_ )
+                            exampleOfType qualify field.type_
+                                |> CliMonad.map
+                                    (\example ->
+                                        Just ( Common.unwrapUnsafe fieldName, example )
+                                    )
 
                         else
-                            Nothing
+                            CliMonad.succeed Nothing
                     )
-                |> Json.Encode.object
+                |> CliMonad.map
+                    (\exampleFields ->
+                        exampleFields
+                            |> Maybe.Extra.values
+                            |> Json.Encode.object
+                    )
 
         Common.OneOf _ ( t, _ ) ->
-            exampleOfType t.type_
+            exampleOfType qualify t.type_
 
         Common.Enum ( t, _ ) ->
             Json.Encode.string (Common.unwrapUnsafe t)
+                |> CliMonad.succeed
 
         Common.Value ->
             Json.Encode.null
+                |> CliMonad.succeed
 
         Common.Ref name ->
-            Json.Encode.string ("<" ++ String.join "/" name ++ ">")
+            name
+                |> getAlias
+                |> CliMonad.andThen (schemaToType qualify)
+                |> CliMonad.andThen (\t -> exampleOfType qualify t.type_)
 
         Common.Bytes ->
             Json.Encode.string "<bytes>"
+                |> CliMonad.succeed
 
         Common.Unit ->
             Json.Encode.string "<empty>"
+                |> CliMonad.succeed
 
 
-exampleString : Maybe String -> Json.Encode.Value
-exampleString maybeFormat =
-    case maybeFormat of
-        Nothing ->
-            Json.Encode.string ""
-
-        Just format ->
-            Json.Encode.string ("<a string:" ++ format ++ ">")
+exampleString : Maybe String -> CliMonad Json.Encode.Value
+exampleString format =
+    CliMonad.withFormat Common.String format .example (Json.Encode.string "")
 
 
 schemaTypeToString : Json.Schema.Definitions.Type -> String
@@ -940,10 +971,10 @@ typesIntersection qualify ltype rtype =
                 |> CliMonad.andThen (\{ type_ } -> typesIntersection qualify ltype type_)
 
         ( Common.Value, _ ) ->
-            CliMonad.succeed (Just (exampleOfType rtype))
+            CliMonad.map Just (exampleOfType qualify rtype)
 
         ( _, Common.Value ) ->
-            CliMonad.succeed (Just (exampleOfType ltype))
+            CliMonad.map Just (exampleOfType qualify ltype)
 
         ( Common.Nullable _, Common.Nullable _ ) ->
             CliMonad.succeed (Just Json.Encode.null)
@@ -1031,14 +1062,13 @@ typesIntersection qualify ltype rtype =
                                         stringFormatsIntersection lFormat rFormat
 
                                     else
-                                        CliMonad.succeed (Just (exampleString (Just lFormat)))
+                                        CliMonad.map Just (exampleString (Just lFormat))
 
                                 _ ->
                                     lopt.format
                                         |> Maybe.Extra.orElse ropt.format
                                         |> exampleString
-                                        |> Just
-                                        |> CliMonad.succeed
+                                        |> CliMonad.map Just
 
                 _ ->
                     CliMonad.succeed Nothing
@@ -1059,12 +1089,18 @@ typesIntersection qualify ltype rtype =
             in
             FastDict.merge
                 (\lkey lField ->
-                    CliMonad.map
-                        (Maybe.map
-                            (\prev ->
-                                ( lkey, exampleOfType lField.type_ ) :: prev
+                    if lField.required then
+                        CliMonad.map2
+                            (\example ->
+                                Maybe.map
+                                    (\prev ->
+                                        ( lkey, example ) :: prev
+                                    )
                             )
-                        )
+                            (exampleOfType qualify lField.type_)
+
+                    else
+                        identity
                 )
                 (\bkey lField rField ->
                     if not lField.required && not rField.required then
@@ -1080,12 +1116,18 @@ typesIntersection qualify ltype rtype =
                             (typesIntersection qualify lField.type_ rField.type_)
                 )
                 (\rkey rField ->
-                    CliMonad.map
-                        (Maybe.map
-                            (\prev ->
-                                ( rkey, exampleOfType rField.type_ ) :: prev
+                    if rField.required then
+                        CliMonad.map2
+                            (\example ->
+                                Maybe.map
+                                    (\prev ->
+                                        ( rkey, example ) :: prev
+                                    )
                             )
-                        )
+                            (exampleOfType qualify rField.type_)
+
+                    else
+                        identity
                 )
                 lDict
                 rDict

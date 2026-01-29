@@ -5,7 +5,7 @@ module CliMonad exposing
     , map, map2, map3
     , andThen, andThen2, andThen3, andThen4, combine, combineDict, combineMap, foldl
     , errorToWarning, fromApiSpec, enumName, moduleToNamespace
-    , withPath, withWarning, withRequiredPackage
+    , withPath, withWarning, withExtendedWarning, withRequiredPackage
     , todo, todoWithDefault
     , withFormat
     )
@@ -18,7 +18,7 @@ module CliMonad exposing
 @docs map, map2, map3
 @docs andThen, andThen2, andThen3, andThen4, combine, combineDict, combineMap, foldl
 @docs errorToWarning, fromApiSpec, enumName, moduleToNamespace
-@docs withPath, withWarning, withRequiredPackage
+@docs withPath, withWarning, withExtendedWarning, withRequiredPackage
 @docs todo, todoWithDefault
 @docs withFormat
 
@@ -42,6 +42,7 @@ import String.Extra
 type alias Message =
     { message : String
     , path : Path
+    , details : List String
     }
 
 
@@ -66,6 +67,7 @@ type alias InternalFormat =
     , annotation : Elm.Annotation.Annotation
     , sharedDeclarations : List ( String, { value : Elm.Expression, group : String } )
     , requiresPackages : List String
+    , example : Json.Encode.Value
     }
 
 
@@ -84,7 +86,7 @@ type CliMonad a
 
 type alias Output =
     { warnings : List Message
-    , oneOfs : FastDict.Dict OneOfName Common.OneOfData
+    , oneOfs : FastDict.Dict OneOfName (List Common.OneOfData)
     , requiredPackages : FastSet.Set String
     , sharedDeclarations : FastDict.Dict String { value : Elm.Expression, group : String }
     }
@@ -113,9 +115,10 @@ withPath segment (CliMonad f) =
 
 
 addPath : Common.UnsafeName -> Message -> Message
-addPath (Common.UnsafeName segment) { path, message } =
+addPath (Common.UnsafeName segment) { path, message, details } =
     { path = segment :: path
     , message = message
+    , details = details
     }
 
 
@@ -126,7 +129,21 @@ withWarning message (CliMonad f) =
             Result.map
                 (\( res, output ) ->
                     ( res
-                    , { output | warnings = { path = [], message = message } :: output.warnings }
+                    , { output | warnings = { path = [], message = message, details = [] } :: output.warnings }
+                    )
+                )
+                (f inputs)
+        )
+
+
+withExtendedWarning : { message : String, details : List String } -> CliMonad a -> CliMonad a
+withExtendedWarning { message, details } (CliMonad f) =
+    CliMonad
+        (\inputs ->
+            Result.map
+                (\( res, output ) ->
+                    ( res
+                    , { output | warnings = { path = [], message = message, details = details } :: output.warnings }
                     )
                 )
                 (f inputs)
@@ -143,19 +160,20 @@ todoWithDefault default message =
     CliMonad
         (\{ generateTodos } ->
             if generateTodos then
-                Ok ( default, { emptyOutput | warnings = [ { path = [], message = message } ] } )
+                Ok ( default, { emptyOutput | warnings = [ { path = [], message = message, details = [] } ] } )
 
             else
                 Err
                     { path = []
                     , message = "Todo: " ++ message
+                    , details = []
                     }
         )
 
 
 fail : String -> CliMonad a
 fail message =
-    CliMonad (\_ -> Err { path = [], message = message })
+    CliMonad (\_ -> Err { path = [], message = message, details = [] })
 
 
 succeed : a -> CliMonad a
@@ -163,7 +181,7 @@ succeed x =
     CliMonad (\_ -> Ok ( x, emptyOutput ))
 
 
-succeedWith : FastDict.Dict OneOfName Common.OneOfData -> a -> CliMonad a
+succeedWith : FastDict.Dict OneOfName (List Common.OneOfData) -> a -> CliMonad a
 succeedWith oneOfs x =
     CliMonad (\_ -> Ok ( x, { emptyOutput | oneOfs = oneOfs } ))
 
@@ -278,7 +296,7 @@ Automatically appends the needed `oneOf` declarations.
 
 -}
 run :
-    (FastDict.Dict OneOfName Common.OneOfData -> CliMonad (List Declaration))
+    (FastDict.Dict OneOfName (List Common.OneOfData) -> CliMonad (List Declaration))
     ->
         { openApi : OpenApi
         , generateTodos : Bool
@@ -360,6 +378,7 @@ toInternalFormat format =
       , annotation = format.annotation
       , sharedDeclarations = format.sharedDeclarations
       , requiresPackages = format.requiresPackages
+      , example = format.example
       }
     )
 
@@ -393,7 +412,7 @@ errorToWarning (CliMonad f) =
                     Ok ( Just res, output )
 
                 Err { path, message } ->
-                    Ok ( Nothing, { emptyOutput | warnings = [ { path = path, message = message } ] } )
+                    Ok ( Nothing, { emptyOutput | warnings = [ { path = path, message = message, details = [] } ] } )
         )
 
 
@@ -465,7 +484,16 @@ enumName variants =
                                             ++ String.join ", " variantNames
                                             ++ " ]. Define one to improve type safety"
                                 in
-                                ( Nothing, { emptyOutput | warnings = [ { path = [], message = message } ] } )
+                                ( Nothing
+                                , { emptyOutput
+                                    | warnings =
+                                        [ { path = []
+                                          , message = message
+                                          , details = []
+                                          }
+                                        ]
+                                  }
+                                )
                                     |> Ok
 
                             else
@@ -488,6 +516,7 @@ withFormat :
          , decoder : Elm.Expression
          , toParamString : Elm.Expression -> Elm.Expression
          , annotation : Elm.Annotation.Annotation
+         , example : Json.Encode.Value
          }
          -> a
         )
@@ -574,6 +603,7 @@ withFormat basicType maybeFormatName getter default =
                                     | warnings =
                                         [ { message = firstLine ++ "\n" ++ secondLine
                                           , path = [ "format" ]
+                                          , details = []
                                           }
                                         ]
                                 }
@@ -648,6 +678,7 @@ withFormat basicType maybeFormatName getter default =
                                             )
                                             [ value ]
                                 , annotation = format.annotation
+                                , example = format.example
                                 }
                             , { emptyOutput
                                 | requiredPackages = FastSet.fromList format.requiresPackages

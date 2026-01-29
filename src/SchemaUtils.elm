@@ -572,10 +572,33 @@ describeSubSchema : Json.Schema.Definitions.SubSchema -> String
 describeSubSchema subSchema =
     case subSchema.ref of
         Nothing ->
-            subSchema.source |> Json.Encode.encode 0
+            subSchema.source
+                |> Json.Decode.decodeValue removeDocumentation
+                |> Result.withDefault subSchema.source
+                |> Json.Encode.encode 0
 
         Just ref ->
             ref
+
+
+removeDocumentation : Json.Decode.Decoder Json.Decode.Value
+removeDocumentation =
+    Json.Decode.lazy
+        (\_ ->
+            Json.Decode.oneOf
+                [ Json.Decode.dict removeDocumentation
+                    |> Json.Decode.map
+                        (\dict ->
+                            dict
+                                |> Dict.remove "description"
+                                |> Dict.toList
+                                |> Json.Encode.object
+                        )
+                , Json.Decode.list removeDocumentation
+                    |> Json.Decode.map (Json.Encode.list identity)
+                , Json.Decode.value -- everything else can pass through
+                ]
+        )
 
 
 subSchemaIntersection : Bool -> Json.Schema.Definitions.SubSchema -> Json.Schema.Definitions.SubSchema -> CliMonad (Maybe Json.Encode.Value)

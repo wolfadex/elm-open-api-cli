@@ -256,23 +256,34 @@ schemaToType qualify schema =
                                         oneOfToType schemas
 
                                     Just collision ->
-                                        CliMonad.succeed
-                                            { type_ = Common.Value
-                                            , documentation = subSchema.description
-                                            }
-                                            |> CliMonad.withExtendedWarning
-                                                { message = "anyOf between overlapping types is not supported"
-                                                , details =
-                                                    [ "Clash between"
-                                                    , "  - " ++ collision.leftSchema
-                                                    , "  - " ++ collision.rightSchema
-                                                    , "Possible clashing value:"
-                                                    ]
-                                                        ++ (Json.Encode.encode 2 collision.value
-                                                                |> String.lines
-                                                                |> List.map (\line -> "  " ++ line)
-                                                           )
-                                                }
+                                        case areAllArrays schemas of
+                                            Just innerSchemas ->
+                                                oneOfToType innerSchemas
+                                                    |> CliMonad.map
+                                                        (\t ->
+                                                            { type_ = Common.List t.type_
+                                                            , documentation = t.documentation
+                                                            }
+                                                        )
+
+                                            Nothing ->
+                                                CliMonad.succeed
+                                                    { type_ = Common.Value
+                                                    , documentation = subSchema.description
+                                                    }
+                                                    |> CliMonad.withExtendedWarning
+                                                        { message = "anyOf between overlapping types is not supported"
+                                                        , details =
+                                                            [ "Clash between"
+                                                            , "  - " ++ collision.leftSchema
+                                                            , "  - " ++ collision.rightSchema
+                                                            , "Possible clashing value:"
+                                                            ]
+                                                                ++ (Json.Encode.encode 2 collision.value
+                                                                        |> String.lines
+                                                                        |> List.map (\line -> "  " ++ line)
+                                                                   )
+                                                        }
                             )
 
                 oneOfCombine : List Json.Schema.Definitions.Schema -> CliMonad { type_ : Common.Type, documentation : Maybe String }
@@ -453,6 +464,34 @@ schemaToType qualify schema =
                                 , documentation = documentation
                                 }
                             )
+
+
+areAllArrays : List Json.Schema.Definitions.Schema -> Maybe (List Json.Schema.Definitions.Schema)
+areAllArrays schemas =
+    schemas
+        |> Maybe.Extra.combineMap
+            (\schema ->
+                case schema of
+                    Json.Schema.Definitions.BooleanSchema _ ->
+                        Nothing
+
+                    Json.Schema.Definitions.ObjectSchema o ->
+                        case o.type_ of
+                            Json.Schema.Definitions.SingleType Json.Schema.Definitions.ArrayType ->
+                                case o.items of
+                                    Json.Schema.Definitions.NoItems ->
+                                        Nothing
+
+                                    Json.Schema.Definitions.ItemDefinition s ->
+                                        Just [ s ]
+
+                                    Json.Schema.Definitions.ArrayOfItems ss ->
+                                        Just ss
+
+                            _ ->
+                                Nothing
+            )
+        |> Maybe.map List.concat
 
 
 type alias SchemaIntersection =

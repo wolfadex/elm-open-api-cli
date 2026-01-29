@@ -699,7 +699,7 @@ objectsIntersection qualify lo ro =
                                     ( key, ival ) :: prev
                                 )
                             )
-                            (typesIntersection lval.type_ rval.type_)
+                            (typesIntersection qualify lval.type_ rval.type_)
 
                     else
                         identity
@@ -765,7 +765,7 @@ exampleOfType type_ =
                     Json.Encode.bool True
 
                 ( Nothing, Common.String ) ->
-                    Json.Encode.string ("<" ++ Maybe.withDefault "" format ++ ">")
+                    exampleString format
 
                 ( Nothing, Common.Number ) ->
                     Json.Encode.int 0
@@ -805,6 +805,16 @@ exampleOfType type_ =
 
         Common.Unit ->
             Json.Encode.string "<empty>"
+
+
+exampleString : Maybe String -> Json.Encode.Value
+exampleString maybeFormat =
+    case maybeFormat of
+        Nothing ->
+            Json.Encode.string ""
+
+        Just format ->
+            Json.Encode.string ("<a string:" ++ format ++ ">")
 
 
 schemaTypeToString : Json.Schema.Definitions.Type -> String
@@ -916,14 +926,18 @@ type SimplifiedForDisjointBasicType
     | SimplifiedForDisjointBool (Maybe Bool)
 
 
-typesIntersection : Common.Type -> Common.Type -> CliMonad (Maybe Json.Encode.Value)
-typesIntersection ltype rtype =
+typesIntersection : Bool -> Common.Type -> Common.Type -> CliMonad (Maybe Json.Encode.Value)
+typesIntersection qualify ltype rtype =
     case ( ltype, rtype ) of
-        ( Common.Ref lref, Common.Ref rref ) ->
-            CliMonad.andThen2 (\lschema rschema -> schemaIntersection True [ lschema, rschema ])
-                (getAlias lref)
-                (getAlias rref)
-                |> CliMonad.map (Maybe.map .value)
+        ( Common.Ref lref, _ ) ->
+            getAlias lref
+                |> CliMonad.andThen (schemaToType qualify)
+                |> CliMonad.andThen (\{ type_ } -> typesIntersection qualify type_ rtype)
+
+        ( _, Common.Ref rref ) ->
+            getAlias rref
+                |> CliMonad.andThen (schemaToType qualify)
+                |> CliMonad.andThen (\{ type_ } -> typesIntersection qualify ltype type_)
 
         ( Common.Value, _ ) ->
             CliMonad.succeed (Just (exampleOfType rtype))
@@ -941,10 +955,10 @@ typesIntersection ltype rtype =
             CliMonad.succeed (Just Json.Encode.null)
 
         ( Common.Nullable c, Common.Basic _ _ ) ->
-            typesIntersection c rtype
+            typesIntersection qualify c rtype
 
         ( Common.Basic _ _, Common.Nullable c ) ->
-            typesIntersection ltype c
+            typesIntersection qualify ltype c
 
         ( Common.Null, Common.Null ) ->
             CliMonad.succeed (Just Json.Encode.null)
@@ -958,13 +972,13 @@ typesIntersection ltype rtype =
         ( Common.OneOf _ alternatives, _ ) ->
             alternatives
                 |> nonEmptyToList
-                |> CliMonad.combineMap (\alternative -> typesIntersection alternative.type_ rtype)
+                |> CliMonad.combineMap (\alternative -> typesIntersection qualify alternative.type_ rtype)
                 |> CliMonad.map (List.Extra.findMap identity)
 
         ( _, Common.OneOf _ alternatives ) ->
             alternatives
                 |> nonEmptyToList
-                |> CliMonad.combineMap (\alternative -> typesIntersection ltype alternative.type_)
+                |> CliMonad.combineMap (\alternative -> typesIntersection qualify ltype alternative.type_)
                 |> CliMonad.map (List.Extra.findMap identity)
 
         ( Common.List _, Common.List _ ) ->
@@ -1012,23 +1026,19 @@ typesIntersection ltype rtype =
 
                         _ ->
                             case ( lopt.format, ropt.format ) of
-                                ( Nothing, Nothing ) ->
-                                    CliMonad.succeed (Just (Json.Encode.string ""))
-
-                                ( Nothing, Just rFormat ) ->
-                                    CliMonad.succeed (Just (Json.Encode.string ("<a string:" ++ rFormat ++ ">")))
-
-                                ( Just lFormat, Nothing ) ->
-                                    CliMonad.succeed (Just (Json.Encode.string ("<a string:" ++ lFormat ++ ">")))
-
                                 ( Just lFormat, Just rFormat ) ->
-                                    if lFormat == rFormat then
-                                        CliMonad.succeed (Just (Json.Encode.string ("<a string:" ++ lFormat ++ ">")))
+                                    if lFormat /= rFormat then
+                                        stringFormatsIntersection lFormat rFormat
 
                                     else
-                                        -- TODO: check for disjoint formats
-                                        CliMonad.succeed Nothing
-                                            |> CliMonad.withWarning ("Disjoint check not implemented for string:" ++ lFormat ++ " and string:" ++ rFormat)
+                                        CliMonad.succeed (Just (exampleString (Just lFormat)))
+
+                                _ ->
+                                    lopt.format
+                                        |> Maybe.Extra.orElse ropt.format
+                                        |> exampleString
+                                        |> Just
+                                        |> CliMonad.succeed
 
                 _ ->
                     CliMonad.succeed Nothing
@@ -1067,7 +1077,7 @@ typesIntersection ltype rtype =
                                     ( bkey, bValue ) :: acc
                                 )
                             )
-                            (typesIntersection lField.type_ rField.type_)
+                            (typesIntersection qualify lField.type_ rField.type_)
                 )
                 (\rkey rField ->
                     CliMonad.map
@@ -1132,11 +1142,18 @@ typesIntersection ltype rtype =
                                 |> CliMonad.withWarning ("Disjoint check not implemented for types enum and string:" ++ rFormat)
 
         ( Common.Basic Common.String _, Common.Enum _ ) ->
-            typesIntersection rtype ltype
+            typesIntersection qualify rtype ltype
 
         _ ->
             CliMonad.succeed Nothing
                 |> CliMonad.withWarning ("Disjoint check not implemented for types " ++ typeToString ltype ++ " and " ++ typeToString rtype)
+
+
+stringFormatsIntersection : String -> String -> CliMonad (Maybe Json.Encode.Value)
+stringFormatsIntersection lFormat rFormat =
+    -- TODO: check for disjoint formats
+    CliMonad.succeed Nothing
+        |> CliMonad.withWarning ("Disjoint check not implemented for string:" ++ lFormat ++ " and string:" ++ rFormat)
 
 
 nonEmptyToList : ( a, List a ) -> List a

@@ -736,7 +736,7 @@ exampleOfType type_ =
             Json.Encode.null
 
         Common.Ref name ->
-            Json.Encode.string ("{" ++ String.join "/" name ++ "}")
+            Json.Encode.string ("<" ++ String.join "/" name ++ ">")
 
         Common.Bytes ->
             Json.Encode.string "<bytes>"

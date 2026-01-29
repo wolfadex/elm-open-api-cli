@@ -1,13 +1,8 @@
-module NonEmpty exposing (NonEmpty, fromList, head, map, sort, sortBy, toList)
+module NonEmpty exposing (NonEmpty, fromList, map, sort, sortBy, toList)
 
 
 type alias NonEmpty a =
     ( a, List a )
-
-
-head : NonEmpty a -> a
-head ( h, _ ) =
-    h
 
 
 fromList : List a -> Maybe (NonEmpty a)

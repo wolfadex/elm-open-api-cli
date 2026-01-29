@@ -624,7 +624,7 @@ objectsIntersection qualify lo ro =
                                     Nothing
 
                                 else
-                                    Just (( lkey, irrelevantValue ) :: prev)
+                                    Just (( lkey, exampleOfType lval.type_ ) :: prev)
                             )
                         )
                 )
@@ -725,11 +725,6 @@ exampleOfType type_ =
 
         Common.Unit ->
             Json.Encode.string "<empty>"
-
-
-irrelevantValue : Json.Encode.Value
-irrelevantValue =
-    Json.Encode.string "<irrelevant>"
 
 
 schemaTypeToString : Json.Schema.Definitions.Type -> String
@@ -851,10 +846,10 @@ typesIntersection ltype rtype =
                 |> CliMonad.map (Maybe.map .value)
 
         ( Common.Value, _ ) ->
-            CliMonad.succeed (Just irrelevantValue)
+            CliMonad.succeed (Just (exampleOfType rtype))
 
         ( _, Common.Value ) ->
-            CliMonad.succeed (Just irrelevantValue)
+            CliMonad.succeed (Just (exampleOfType ltype))
 
         ( Common.Nullable _, Common.Nullable _ ) ->
             CliMonad.succeed (Just Json.Encode.null)
@@ -954,26 +949,26 @@ typesIntersection ltype rtype =
                 _ ->
                     CliMonad.succeed Nothing
 
-        ( Common.Object lfields, Common.Object rfields ) ->
+        ( Common.Object lFields, Common.Object rFields ) ->
             let
-                ldict : FastDict.Dict String Common.Field
-                ldict =
-                    lfields
+                lDict : FastDict.Dict String Common.Field
+                lDict =
+                    lFields
                         |> List.map (\( k, v ) -> ( Common.unwrapUnsafe k, v ))
                         |> FastDict.fromList
 
-                rdict : FastDict.Dict String Common.Field
-                rdict =
-                    rfields
+                rDict : FastDict.Dict String Common.Field
+                rDict =
+                    rFields
                         |> List.map (\( k, v ) -> ( Common.unwrapUnsafe k, v ))
                         |> FastDict.fromList
             in
             FastDict.merge
-                (\lkey _ ->
+                (\lkey lField ->
                     CliMonad.map
                         (Maybe.map
                             (\prev ->
-                                ( lkey, irrelevantValue ) :: prev
+                                ( lkey, exampleOfType lField.type_ ) :: prev
                             )
                         )
                 )
@@ -990,16 +985,16 @@ typesIntersection ltype rtype =
                             )
                             (typesIntersection lField.type_ rField.type_)
                 )
-                (\rkey _ ->
+                (\rkey rField ->
                     CliMonad.map
                         (Maybe.map
                             (\prev ->
-                                ( rkey, irrelevantValue ) :: prev
+                                ( rkey, exampleOfType rField.type_ ) :: prev
                             )
                         )
                 )
-                ldict
-                rdict
+                lDict
+                rDict
                 (CliMonad.succeed (Just []))
                 |> CliMonad.map (Maybe.map Json.Encode.object)
 

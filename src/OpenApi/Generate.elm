@@ -68,6 +68,7 @@ type alias Mime =
 type alias Message =
     { message : String
     , path : Path
+    , details : List String
     }
 
 
@@ -211,6 +212,7 @@ extractEnums openApi =
                                         Err
                                             { message = e
                                             , path = [ name, "Extracting enums" ]
+                                            , details = []
                                             }
 
                             _ ->

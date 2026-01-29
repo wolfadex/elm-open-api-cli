@@ -5,7 +5,7 @@ module CliMonad exposing
     , map, map2, map3
     , andThen, andThen2, andThen3, andThen4, combine, combineDict, combineMap, foldl
     , errorToWarning, fromApiSpec, enumName, moduleToNamespace
-    , withPath, withWarning, withRequiredPackage
+    , withPath, withWarning, withExtendedWarning, withRequiredPackage
     , todo, todoWithDefault
     , withFormat
     )
@@ -18,7 +18,7 @@ module CliMonad exposing
 @docs map, map2, map3
 @docs andThen, andThen2, andThen3, andThen4, combine, combineDict, combineMap, foldl
 @docs errorToWarning, fromApiSpec, enumName, moduleToNamespace
-@docs withPath, withWarning, withRequiredPackage
+@docs withPath, withWarning, withExtendedWarning, withRequiredPackage
 @docs todo, todoWithDefault
 @docs withFormat
 
@@ -42,6 +42,7 @@ import String.Extra
 type alias Message =
     { message : String
     , path : Path
+    , details : List String
     }
 
 
@@ -113,9 +114,10 @@ withPath segment (CliMonad f) =
 
 
 addPath : Common.UnsafeName -> Message -> Message
-addPath (Common.UnsafeName segment) { path, message } =
+addPath (Common.UnsafeName segment) { path, message, details } =
     { path = segment :: path
     , message = message
+    , details = details
     }
 
 
@@ -126,7 +128,21 @@ withWarning message (CliMonad f) =
             Result.map
                 (\( res, output ) ->
                     ( res
-                    , { output | warnings = { path = [], message = message } :: output.warnings }
+                    , { output | warnings = { path = [], message = message, details = [] } :: output.warnings }
+                    )
+                )
+                (f inputs)
+        )
+
+
+withExtendedWarning : { message : String, details : List String } -> CliMonad a -> CliMonad a
+withExtendedWarning { message, details } (CliMonad f) =
+    CliMonad
+        (\inputs ->
+            Result.map
+                (\( res, output ) ->
+                    ( res
+                    , { output | warnings = { path = [], message = message, details = details } :: output.warnings }
                     )
                 )
                 (f inputs)
@@ -143,19 +159,20 @@ todoWithDefault default message =
     CliMonad
         (\{ generateTodos } ->
             if generateTodos then
-                Ok ( default, { emptyOutput | warnings = [ { path = [], message = message } ] } )
+                Ok ( default, { emptyOutput | warnings = [ { path = [], message = message, details = [] } ] } )
 
             else
                 Err
                     { path = []
                     , message = "Todo: " ++ message
+                    , details = []
                     }
         )
 
 
 fail : String -> CliMonad a
 fail message =
-    CliMonad (\_ -> Err { path = [], message = message })
+    CliMonad (\_ -> Err { path = [], message = message, details = [] })
 
 
 succeed : a -> CliMonad a
@@ -393,7 +410,7 @@ errorToWarning (CliMonad f) =
                     Ok ( Just res, output )
 
                 Err { path, message } ->
-                    Ok ( Nothing, { emptyOutput | warnings = [ { path = path, message = message } ] } )
+                    Ok ( Nothing, { emptyOutput | warnings = [ { path = path, message = message, details = [] } ] } )
         )
 
 
@@ -465,7 +482,16 @@ enumName variants =
                                             ++ String.join ", " variantNames
                                             ++ " ]. Define one to improve type safety"
                                 in
-                                ( Nothing, { emptyOutput | warnings = [ { path = [], message = message } ] } )
+                                ( Nothing
+                                , { emptyOutput
+                                    | warnings =
+                                        [ { path = []
+                                          , message = message
+                                          , details = []
+                                          }
+                                        ]
+                                  }
+                                )
                                     |> Ok
 
                             else
@@ -574,6 +600,7 @@ withFormat basicType maybeFormatName getter default =
                                     | warnings =
                                         [ { message = firstLine ++ "\n" ++ secondLine
                                           , path = [ "format" ]
+                                          , details = []
                                           }
                                         ]
                                 }

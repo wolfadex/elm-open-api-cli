@@ -670,8 +670,17 @@ exampleOfType type_ =
         Common.Nullable _ ->
             Json.Encode.null
 
-        Common.Object _ ->
-            Json.Encode.string "{...}"
+        Common.Object fields ->
+            fields
+                |> List.filterMap
+                    (\( fieldName, field ) ->
+                        if field.required then
+                            Just ( Common.unwrapUnsafe fieldName, exampleOfType field.type_ )
+
+                        else
+                            Nothing
+                    )
+                |> Json.Encode.object
 
         Common.Basic t { const, format } ->
             case ( const, t ) of
@@ -705,8 +714,17 @@ exampleOfType type_ =
         Common.List _ ->
             Json.Encode.list never []
 
-        Common.Dict _ _ ->
-            Json.Encode.string "{...}"
+        Common.Dict _ fields ->
+            fields
+                |> List.filterMap
+                    (\( fieldName, field ) ->
+                        if field.required then
+                            Just ( Common.unwrapUnsafe fieldName, exampleOfType field.type_ )
+
+                        else
+                            Nothing
+                    )
+                |> Json.Encode.object
 
         Common.OneOf _ ( t, _ ) ->
             exampleOfType t.type_
@@ -717,8 +735,8 @@ exampleOfType type_ =
         Common.Value ->
             Json.Encode.null
 
-        Common.Ref _ ->
-            Json.Encode.string "{...}"
+        Common.Ref name ->
+            Json.Encode.string ("{" ++ String.join "/" name ++ "}")
 
         Common.Bytes ->
             Json.Encode.string "<bytes>"

@@ -12,6 +12,7 @@ import Gen.Json.Decode
 import Gen.Json.Encode
 import Gen.Maybe
 import Json.Schema.Definitions
+import NonEmpty
 import SchemaUtils
 
 
@@ -31,6 +32,7 @@ schemaToDeclarations name schema =
                           , name = typeName
                           , declaration =
                                 enumVariants
+                                    |> NonEmpty.toList
                                     |> List.map (\variantName -> Elm.variant (SchemaUtils.toVariantName typeName variantName))
                                     |> Elm.customType typeName
                                     |> (case documentation of
@@ -50,6 +52,7 @@ schemaToDeclarations name schema =
                                 Elm.fn (Elm.Arg.var "value")
                                     (\value ->
                                         enumVariants
+                                            |> NonEmpty.toList
                                             |> List.map
                                                 (\variant ->
                                                     Elm.Case.branch
@@ -74,6 +77,7 @@ schemaToDeclarations name schema =
                                         Elm.Case.string value
                                             { cases =
                                                 enumVariants
+                                                    |> NonEmpty.toList
                                                     |> List.map
                                                         (\variant ->
                                                             ( Common.unwrapUnsafe variant
@@ -99,6 +103,7 @@ schemaToDeclarations name schema =
                           , name = Common.toValueName name ++ "Variants"
                           , declaration =
                                 enumVariants
+                                    |> NonEmpty.toList
                                     |> List.map
                                         (\variant ->
                                             Elm.value

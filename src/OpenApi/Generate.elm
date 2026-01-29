@@ -39,6 +39,7 @@ import Gen.Url.Builder
 import Json.Schema.Definitions
 import JsonSchema.Generate
 import List.Extra
+import NonEmpty
 import OpenApi
 import OpenApi.Common.Internal
 import OpenApi.Components
@@ -198,7 +199,7 @@ extractEnums openApi =
                                         else
                                             Ok
                                                 (FastDict.insert
-                                                    (List.sort decodedEnums)
+                                                    (List.sort (NonEmpty.toList decodedEnums))
                                                     { name = Common.UnsafeName name
                                                     , documentation = subSchema.description
                                                     }
@@ -2138,11 +2139,13 @@ paramToString qualify type_ =
                             (paramToString qualify alternative.type_)
                             (SchemaUtils.typeToAnnotationWithNullable qualify alternative.type_)
                     )
-                    data
+                    (NonEmpty.toList data)
                 )
 
         Common.Enum variants ->
-            CliMonad.enumName variants
+            variants
+                |> NonEmpty.toList
+                |> CliMonad.enumName
                 |> CliMonad.andThen
                     (\maybeName ->
                         case maybeName of

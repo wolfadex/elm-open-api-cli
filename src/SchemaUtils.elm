@@ -40,6 +40,7 @@ import Json.Schema.Definitions
 import List.Extra
 import Maybe.Extra
 import Murmur3
+import NonEmpty exposing (NonEmpty)
 import OpenApi
 import OpenApi.Common.Internal
 import OpenApi.Components
@@ -650,7 +651,7 @@ objectsIntersection qualify lo ro =
                                     Nothing
 
                                 else
-                                    Just (( rkey, irrelevantValue ) :: prev)
+                                    Just (( rkey, exampleOfType rval.type_ ) :: prev)
                             )
                         )
                 )
@@ -661,6 +662,69 @@ objectsIntersection qualify lo ro =
         )
         (schemaToProperties qualify (Json.Schema.Definitions.ObjectSchema lo))
         (schemaToProperties qualify (Json.Schema.Definitions.ObjectSchema ro))
+
+
+exampleOfType : Common.Type -> Json.Encode.Value
+exampleOfType type_ =
+    case type_ of
+        Common.Nullable _ ->
+            Json.Encode.null
+
+        Common.Object _ ->
+            Json.Encode.string "{...}"
+
+        Common.Basic t { const, format } ->
+            case ( const, t ) of
+                ( Just (Common.ConstBoolean b), _ ) ->
+                    Json.Encode.bool b
+
+                ( Just (Common.ConstInteger i), _ ) ->
+                    Json.Encode.int i
+
+                ( Just (Common.ConstString s), _ ) ->
+                    Json.Encode.string s
+
+                ( Just (Common.ConstNumber f), _ ) ->
+                    Json.Encode.float f
+
+                ( Nothing, Common.Integer ) ->
+                    Json.Encode.int 0
+
+                ( Nothing, Common.Boolean ) ->
+                    Json.Encode.bool True
+
+                ( Nothing, Common.String ) ->
+                    Json.Encode.string ("<" ++ Maybe.withDefault "" format ++ ">")
+
+                ( Nothing, Common.Number ) ->
+                    Json.Encode.int 0
+
+        Common.Null ->
+            Json.Encode.null
+
+        Common.List _ ->
+            Json.Encode.list never []
+
+        Common.Dict _ _ ->
+            Json.Encode.string "{...}"
+
+        Common.OneOf _ ( t, _ ) ->
+            exampleOfType t.type_
+
+        Common.Enum ( t, _ ) ->
+            Json.Encode.string (Common.unwrapUnsafe t)
+
+        Common.Value ->
+            Json.Encode.null
+
+        Common.Ref _ ->
+            Json.Encode.string "{...}"
+
+        Common.Bytes ->
+            Json.Encode.string "<bytes>"
+
+        Common.Unit ->
+            Json.Encode.string "<empty>"
 
 
 irrelevantValue : Json.Encode.Value
@@ -818,11 +882,13 @@ typesIntersection ltype rtype =
 
         ( Common.OneOf _ alternatives, _ ) ->
             alternatives
+                |> nonEmptyToList
                 |> CliMonad.combineMap (\alternative -> typesIntersection alternative.type_ rtype)
                 |> CliMonad.map (List.Extra.findMap identity)
 
         ( _, Common.OneOf _ alternatives ) ->
             alternatives
+                |> nonEmptyToList
                 |> CliMonad.combineMap (\alternative -> typesIntersection ltype alternative.type_)
                 |> CliMonad.map (List.Extra.findMap identity)
 
@@ -942,12 +1008,14 @@ typesIntersection ltype rtype =
                 lSet : Set String
                 lSet =
                     lItems
+                        |> nonEmptyToList
                         |> List.map Common.unwrapUnsafe
                         |> Set.fromList
 
                 rSet : Set String
                 rSet =
                     rItems
+                        |> nonEmptyToList
                         |> List.map Common.unwrapUnsafe
                         |> Set.fromList
             in
@@ -960,7 +1028,7 @@ typesIntersection ltype rtype =
         ( Common.Enum lItems, Common.Basic Common.String rOptions ) ->
             case rOptions.const of
                 Just (Common.ConstString rConst) ->
-                    if List.member (Common.UnsafeName rConst) lItems then
+                    if List.member (Common.UnsafeName rConst) (nonEmptyToList lItems) then
                         CliMonad.succeed (Just (Json.Encode.string rConst))
 
                     else
@@ -974,13 +1042,10 @@ typesIntersection ltype rtype =
                     case rOptions.format of
                         Nothing ->
                             lItems
-                                |> List.head
-                                |> Maybe.map
-                                    (\name ->
-                                        name
-                                            |> Common.unwrapUnsafe
-                                            |> Json.Encode.string
-                                    )
+                                |> Tuple.first
+                                |> Common.unwrapUnsafe
+                                |> Json.Encode.string
+                                |> Just
                                 |> CliMonad.succeed
 
                         Just rFormat ->
@@ -993,6 +1058,11 @@ typesIntersection ltype rtype =
         _ ->
             CliMonad.succeed Nothing
                 |> CliMonad.withWarning ("Disjoint check not implemented for types " ++ typeToString ltype ++ " and " ++ typeToString rtype)
+
+
+nonEmptyToList : ( a, List a ) -> List a
+nonEmptyToList ( h, t ) =
+    h :: t
 
 
 typeToString : Common.Type -> String
@@ -1084,7 +1154,7 @@ subschemaToEnumMaybe :
         Result
             String
             (Maybe
-                { decodedEnums : List String
+                { decodedEnums : NonEmpty String
                 , hasNull : Bool
                 }
             )
@@ -1099,12 +1169,16 @@ subschemaToEnumMaybe subSchema =
                     Err "Attempted to parse an enum as a string and failed"
 
                 Ok decodedEnums ->
-                    Ok
-                        (Just
-                            { decodedEnums = List.filterMap identity decodedEnums
+                    case Maybe.Extra.values decodedEnums |> NonEmpty.fromList of
+                        Nothing ->
+                            Err "Found an enum with no non-null values"
+
+                        Just variants ->
+                            { decodedEnums = variants
                             , hasNull = List.member Nothing decodedEnums
                             }
-                        )
+                                |> Just
+                                |> Ok
 
 
 typeToOneOfVariant :
@@ -1143,24 +1217,29 @@ oneOfType types =
         |> CliMonad.combineMap (typeToOneOfVariant False)
         |> CliMonad.map
             (\maybeVariants ->
-                case Maybe.Extra.combine maybeVariants of
+                case Maybe.Extra.combine maybeVariants |> Maybe.andThen NonEmpty.fromList of
                     Nothing ->
                         { type_ = Common.Value, documentation = Nothing }
 
                     Just variants ->
                         let
                             sortedVariants :
-                                List
+                                ( { name : Common.UnsafeName
+                                  , type_ : Common.Type
+                                  , documentation : Maybe String
+                                  }
+                                , List
                                     { name : Common.UnsafeName
                                     , type_ : Common.Type
                                     , documentation : Maybe String
                                     }
+                                )
                             sortedVariants =
-                                List.sortBy (\{ name } -> Common.unwrapUnsafe name) variants
+                                NonEmpty.sortBy (\{ name } -> Common.unwrapUnsafe name) variants
 
                             names : List Common.UnsafeName
                             names =
-                                List.map .name sortedVariants
+                                List.map .name (NonEmpty.toList sortedVariants)
 
                             readableName : String
                             readableName =
@@ -1179,6 +1258,7 @@ oneOfType types =
                                 sortedVariants
                         , documentation =
                             sortedVariants
+                                |> NonEmpty.toList
                                 |> List.map (\{ name, documentation } -> Maybe.map (\doc -> " - " ++ Common.toValueName name ++ ": " ++ doc) documentation)
                                 |> joinIfNotEmpty "\n\n"
                                 |> Maybe.map (\doc -> "This is a oneOf. The alternatives are:\n\n" ++ doc)
@@ -1327,7 +1407,7 @@ type alias OneOfName =
 
 
 oneOfDeclarations :
-    FastDict.Dict OneOfName Common.OneOfData
+    FastDict.Dict OneOfName (List Common.OneOfData)
     -> CliMonad (List CliMonad.Declaration)
 oneOfDeclarations enums =
     CliMonad.combineMap
@@ -1336,7 +1416,7 @@ oneOfDeclarations enums =
 
 
 oneOfDeclaration :
-    ( OneOfName, Common.OneOfData )
+    ( OneOfName, List Common.OneOfData )
     -> CliMonad CliMonad.Declaration
 oneOfDeclaration ( oneOfName, variants ) =
     let
@@ -1433,7 +1513,7 @@ typeToAnnotationWithNullable qualify type_ =
                 |> objectToAnnotation qualify { useMaybe = False }
 
         Common.Enum variants ->
-            CliMonad.enumName variants
+            CliMonad.enumName (NonEmpty.toList variants)
                 |> CliMonad.andThen
                     (\maybeName ->
                         case maybeName of
@@ -1453,7 +1533,7 @@ typeToAnnotationWithNullable qualify type_ =
                     )
 
         Common.OneOf oneOfName oneOfData ->
-            oneOfAnnotation qualify oneOfName oneOfData
+            oneOfAnnotation qualify oneOfName (NonEmpty.toList oneOfData)
 
         Common.Value ->
             CliMonad.succeed Gen.Json.Encode.annotation_.value
@@ -1523,7 +1603,9 @@ typeToAnnotationWithMaybe qualify type_ =
                 |> objectToAnnotation qualify { useMaybe = True }
 
         Common.Enum variants ->
-            CliMonad.enumName variants
+            variants
+                |> NonEmpty.toList
+                |> CliMonad.enumName
                 |> CliMonad.andThen
                     (\maybeName ->
                         case maybeName of
@@ -1543,7 +1625,7 @@ typeToAnnotationWithMaybe qualify type_ =
                     )
 
         Common.OneOf oneOfName oneOfData ->
-            oneOfAnnotation qualify oneOfName oneOfData
+            oneOfAnnotation qualify oneOfName (NonEmpty.toList oneOfData)
 
         Common.Value ->
             CliMonad.succeed Gen.Json.Encode.annotation_.value
@@ -1631,7 +1713,9 @@ typeToEncoder type_ =
             CliMonad.succeed (\_ -> Gen.Json.Encode.null)
 
         Common.Enum variants ->
-            CliMonad.enumName variants
+            variants
+                |> NonEmpty.toList
+                |> CliMonad.enumName
                 |> CliMonad.andThen
                     (\maybeName ->
                         case maybeName of
@@ -1807,6 +1891,7 @@ typeToEncoder type_ =
 
         Common.OneOf oneOfName oneOfData ->
             oneOfData
+                |> NonEmpty.toList
                 |> CliMonad.combineMap
                     (\variant ->
                         CliMonad.map2
@@ -1857,7 +1942,7 @@ basicTypeToEncoder basicType { format } =
     CliMonad.withFormat basicType format .encode default
 
 
-oneOfAnnotation : Bool -> Common.TypeName -> Common.OneOfData -> CliMonad Elm.Annotation.Annotation
+oneOfAnnotation : Bool -> Common.TypeName -> List Common.OneOfData -> CliMonad Elm.Annotation.Annotation
 oneOfAnnotation qualify oneOfName oneOfData =
     CliMonad.andThen
         (\typesNamespace ->
@@ -2096,7 +2181,9 @@ typeToDecoder type_ =
                     (typeToDecoder additionalProperties.type_)
 
         Common.Enum variants ->
-            CliMonad.enumName variants
+            variants
+                |> NonEmpty.toList
+                |> CliMonad.enumName
                 |> CliMonad.andThen
                     (\maybeName ->
                         case maybeName of
@@ -2108,7 +2195,7 @@ typeToDecoder type_ =
                                                 let
                                                     unwrappedVariants : List String
                                                     unwrappedVariants =
-                                                        List.map Common.unwrapUnsafe variants
+                                                        List.map Common.unwrapUnsafe (NonEmpty.toList variants)
                                                 in
                                                 Elm.Case.string raw
                                                     { cases =
@@ -2168,6 +2255,7 @@ typeToDecoder type_ =
 
         Common.OneOf oneOfName variants ->
             variants
+                |> NonEmpty.toList
                 |> CliMonad.combineMap
                     (\variant ->
                         typeToDecoder variant.type_

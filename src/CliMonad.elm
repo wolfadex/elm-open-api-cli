@@ -85,7 +85,7 @@ type CliMonad a
 
 type alias Output =
     { warnings : List Message
-    , oneOfs : FastDict.Dict OneOfName Common.OneOfData
+    , oneOfs : FastDict.Dict OneOfName (List Common.OneOfData)
     , requiredPackages : FastSet.Set String
     , sharedDeclarations : FastDict.Dict String { value : Elm.Expression, group : String }
     }
@@ -180,7 +180,7 @@ succeed x =
     CliMonad (\_ -> Ok ( x, emptyOutput ))
 
 
-succeedWith : FastDict.Dict OneOfName Common.OneOfData -> a -> CliMonad a
+succeedWith : FastDict.Dict OneOfName (List Common.OneOfData) -> a -> CliMonad a
 succeedWith oneOfs x =
     CliMonad (\_ -> Ok ( x, { emptyOutput | oneOfs = oneOfs } ))
 
@@ -295,7 +295,7 @@ Automatically appends the needed `oneOf` declarations.
 
 -}
 run :
-    (FastDict.Dict OneOfName Common.OneOfData -> CliMonad (List Declaration))
+    (FastDict.Dict OneOfName (List Common.OneOfData) -> CliMonad (List Declaration))
     ->
         { openApi : OpenApi
         , generateTodos : Bool

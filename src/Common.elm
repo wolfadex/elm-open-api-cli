@@ -22,6 +22,7 @@ module Common exposing
     , unwrapUnsafe
     )
 
+import NonEmpty
 import Regex
 import Set exposing (Set)
 import String.Extra
@@ -327,8 +328,8 @@ type Type
     | List Type
       -- The type declared in additionalProperties, and a list of normal properties
     | Dict { type_ : Type, documentation : Maybe String } Object
-    | OneOf TypeName OneOfData
-    | Enum (List UnsafeName)
+    | OneOf TypeName ( OneOfData, List OneOfData )
+    | Enum ( UnsafeName, List UnsafeName )
     | Value
     | Ref (List String)
     | Bytes
@@ -370,11 +371,10 @@ type alias Object =
 
 
 type alias OneOfData =
-    List
-        { name : UnsafeName
-        , type_ : Type
-        , documentation : Maybe String
-        }
+    { name : UnsafeName
+    , type_ : Type
+    , documentation : Maybe String
+    }
 
 
 type alias TypeName =
@@ -402,11 +402,11 @@ unwrapUnsafe (UnsafeName name) =
     name
 
 
-enum : List String -> Type
+enum : ( String, List String ) -> Type
 enum variants =
     variants
-        |> List.sort
-        |> List.map UnsafeName
+        |> NonEmpty.sort
+        |> NonEmpty.map UnsafeName
         |> Enum
 
 

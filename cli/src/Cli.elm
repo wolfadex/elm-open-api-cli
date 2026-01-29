@@ -20,6 +20,8 @@ import FatalError exposing (FatalError)
 import Json.Decode
 import Json.Encode
 import Json.Value
+import List.Extra
+import Maybe.Extra
 import OpenApi
 import OpenApi.Common.Internal
 import OpenApi.Config
@@ -1230,12 +1232,23 @@ printSuccessMessageAndWarnings ( outputPaths, { requiredPackages, warnings } ) =
 
 
 messageToString : OpenApi.Generate.Message -> String
-messageToString { path, message } =
-    if List.isEmpty path then
-        "Error! " ++ message
+messageToString { path, message, details } =
+    [ Just ("Error! " ++ message)
+    , if List.isEmpty path then
+        Nothing
 
-    else
-        "Error! " ++ message ++ "\n  Path: " ++ String.join " -> " path
+      else
+        Just ("  Path: " ++ String.join " -> " path)
+    , if List.isEmpty details then
+        Nothing
+
+      else
+        ("  Details:" :: details)
+            |> String.join "\n    "
+            |> Just
+    ]
+        |> Maybe.Extra.values
+        |> String.join "\n"
 
 
 logWarning : ( String, List OpenApi.Generate.Message ) -> BackendTask.BackendTask FatalError.FatalError ()
@@ -1248,16 +1261,19 @@ logWarning ( message, messages ) =
         paths : List String
         paths =
             messages
-                |> List.filterMap
-                    (\{ path } ->
-                        if List.isEmpty path then
-                            Nothing
+                |> List.map
+                    (\{ path, details } ->
+                        (if List.isEmpty path then
+                            details
 
-                        else
-                            Just ("  at " ++ String.join " -> " path)
+                         else
+                            ("  at " ++ String.join " -> " path) :: details
+                        )
+                            |> String.join "\n    "
                     )
                 |> Set.fromList
                 |> Set.toList
+                |> List.Extra.remove ""
     in
     (firstLine :: paths)
         |> List.map Pages.Script.log

@@ -1022,9 +1022,13 @@ typesIntersection ltype rtype =
                                     CliMonad.succeed (Just (Json.Encode.string ("<a string:" ++ lFormat ++ ">")))
 
                                 ( Just lFormat, Just rFormat ) ->
-                                    -- TODO: check for disjoint formats
-                                    CliMonad.succeed Nothing
-                                        |> CliMonad.withWarning ("Disjoint check not implemented for string:" ++ lFormat ++ " and string:" ++ rFormat)
+                                    if lFormat == rFormat then
+                                        CliMonad.succeed (Just (Json.Encode.string ("<a string:" ++ lFormat ++ ">")))
+
+                                    else
+                                        -- TODO: check for disjoint formats
+                                        CliMonad.succeed Nothing
+                                            |> CliMonad.withWarning ("Disjoint check not implemented for string:" ++ lFormat ++ " and string:" ++ rFormat)
 
                 _ ->
                     CliMonad.succeed Nothing

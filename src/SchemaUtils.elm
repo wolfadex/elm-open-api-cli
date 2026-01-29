@@ -597,12 +597,12 @@ areObjectTypesDisjoint qualify lo ro =
                                    (lval.required && not radd)
                         )
                 )
-                (\key lval rval ->
+                (\_ lval rval ->
                     CliMonad.andThen
                         (\prev ->
                             if not prev && (lval.required || rval.required) then
                                 -- If the field is optional in both we could have a value without it, so it's not enough to distinguish, so we ask it's required in at least one of them
-                                areTypesDisjoint key lval.type_ rval.type_
+                                areTypesDisjoint lval.type_ rval.type_
 
                             else
                                 CliMonad.succeed prev
@@ -732,8 +732,8 @@ type SimplifiedForDisjointBasicType
     | SimplifiedForDisjointBool (Maybe Bool)
 
 
-areTypesDisjoint : String -> Common.Type -> Common.Type -> CliMonad Bool
-areTypesDisjoint key ltype rtype =
+areTypesDisjoint : Common.Type -> Common.Type -> CliMonad Bool
+areTypesDisjoint ltype rtype =
     case ( ltype, rtype ) of
         ( Common.Ref lref, Common.Ref rref ) ->
             CliMonad.andThen2 (\lschema rschema -> areSchemasDisjoint True [ lschema, rschema ])
@@ -757,10 +757,10 @@ areTypesDisjoint key ltype rtype =
             CliMonad.succeed False
 
         ( Common.Nullable c, Common.Basic _ _ ) ->
-            areTypesDisjoint key c rtype
+            areTypesDisjoint c rtype
 
         ( Common.Basic _ _, Common.Nullable c ) ->
-            areTypesDisjoint key ltype c
+            areTypesDisjoint ltype c
 
         ( Common.Null, Common.Null ) ->
             CliMonad.succeed False
@@ -773,12 +773,12 @@ areTypesDisjoint key ltype rtype =
 
         ( Common.OneOf _ alternatives, _ ) ->
             alternatives
-                |> CliMonad.combineMap (\alternative -> areTypesDisjoint key alternative.type_ rtype)
+                |> CliMonad.combineMap (\alternative -> areTypesDisjoint alternative.type_ rtype)
                 |> CliMonad.map (List.all identity)
 
         ( _, Common.OneOf _ alternatives ) ->
             alternatives
-                |> CliMonad.combineMap (\alternative -> areTypesDisjoint key ltype alternative.type_)
+                |> CliMonad.combineMap (\alternative -> areTypesDisjoint ltype alternative.type_)
                 |> CliMonad.map (List.all identity)
 
         ( Common.List _, Common.List _ ) ->
@@ -846,7 +846,7 @@ areTypesDisjoint key ltype rtype =
                                 CliMonad.succeed acc
 
                             else
-                                areTypesDisjoint key lfield.type_ rfield.type_
+                                areTypesDisjoint lfield.type_ rfield.type_
                         )
                 )
                 (\_ _ acc -> acc)
@@ -889,7 +889,7 @@ areTypesDisjoint key ltype rtype =
                                 |> CliMonad.withWarning ("Disjoint check not implemented for types enum and string:" ++ rFormat)
 
         ( Common.Basic Common.String _, Common.Enum _ ) ->
-            areTypesDisjoint key rtype ltype
+            areTypesDisjoint rtype ltype
 
         _ ->
             CliMonad.succeed False

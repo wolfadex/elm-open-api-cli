@@ -16,9 +16,9 @@ import NonEmpty
 import SchemaUtils
 
 
-schemaToDeclarations : Common.UnsafeName -> Json.Schema.Definitions.Schema -> CliMonad (List CliMonad.Declaration)
-schemaToDeclarations name schema =
-    SchemaUtils.schemaToType False schema
+schemaToDeclarations : CliMonad.Input -> Common.UnsafeName -> Json.Schema.Definitions.Schema -> CliMonad (List CliMonad.Declaration)
+schemaToDeclarations input name schema =
+    SchemaUtils.schemaToType input False [] schema
         |> CliMonad.andThen
             (\{ type_, documentation } ->
                 let
@@ -45,7 +45,6 @@ schemaToDeclarations name schema =
                                     |> Elm.exposeConstructor
                           , group = "Enum"
                           }
-                            |> CliMonad.succeed
                         , { moduleName = Common.Types
                           , name = Common.toValueName name ++ "ToString"
                           , declaration =
@@ -68,7 +67,6 @@ schemaToDeclarations name schema =
                                     |> Elm.expose
                           , group = "Enum"
                           }
-                            |> CliMonad.succeed
                         , { moduleName = Common.Types
                           , name = Common.toValueName name ++ "FromString"
                           , declaration =
@@ -98,7 +96,6 @@ schemaToDeclarations name schema =
                                     |> Elm.expose
                           , group = "Enum"
                           }
-                            |> CliMonad.succeed
                         , { moduleName = Common.Types
                           , name = Common.toValueName name ++ "Variants"
                           , declaration =
@@ -117,74 +114,75 @@ schemaToDeclarations name schema =
                                     |> Elm.expose
                           , group = "Enum"
                           }
-                            |> CliMonad.succeed
-                        , CliMonad.map
-                            (\typesNamespace ->
-                                { moduleName = Common.Json
-                                , name = "decode" ++ typeName
-                                , declaration =
-                                    Elm.declaration
-                                        ("decode" ++ typeName)
-                                        (Gen.Json.Decode.string
-                                            |> Gen.Json.Decode.andThen
-                                                (\str ->
-                                                    Gen.Maybe.caseOf_.maybe
-                                                        (Elm.apply
-                                                            (Elm.value
-                                                                { importFrom = typesNamespace
-                                                                , name = Common.toValueName name ++ "FromString"
-                                                                , annotation = Nothing
-                                                                }
-                                                            )
-                                                            [ str ]
+                        , let
+                            typesNamespace : List String
+                            typesNamespace =
+                                CliMonad.moduleToNamespace input Common.Types
+                          in
+                          { moduleName = Common.Json
+                          , name = "decode" ++ typeName
+                          , declaration =
+                                Elm.declaration
+                                    ("decode" ++ typeName)
+                                    (Gen.Json.Decode.string
+                                        |> Gen.Json.Decode.andThen
+                                            (\str ->
+                                                Gen.Maybe.caseOf_.maybe
+                                                    (Elm.apply
+                                                        (Elm.value
+                                                            { importFrom = typesNamespace
+                                                            , name = Common.toValueName name ++ "FromString"
+                                                            , annotation = Nothing
+                                                            }
                                                         )
-                                                        { just = Gen.Json.Decode.succeed
-                                                        , nothing =
-                                                            Gen.Json.Decode.call_.fail
-                                                                (Elm.Op.append
-                                                                    str
-                                                                    (Elm.string (" is not a valid " ++ typeName))
-                                                                )
-                                                        }
-                                                )
-                                            |> Elm.withType (Gen.Json.Decode.annotation_.decoder (Elm.Annotation.named typesNamespace typeName))
-                                        )
-                                        |> Elm.expose
-                                , group = "Decoders"
-                                }
-                            )
-                            (CliMonad.moduleToNamespace Common.Types)
-                        , CliMonad.map
-                            (\typesNamespace ->
-                                { moduleName = Common.Json
-                                , name = "encode" ++ typeName
-                                , declaration =
-                                    Elm.declaration ("encode" ++ typeName)
-                                        (Elm.functionReduced "rec"
-                                            (\value ->
-                                                Elm.apply
-                                                    (Elm.value
-                                                        { importFrom = typesNamespace
-                                                        , name = Common.toValueName name ++ "ToString"
-                                                        , annotation = Nothing
-                                                        }
+                                                        [ str ]
                                                     )
-                                                    [ value ]
-                                                    |> Gen.Json.Encode.call_.string
+                                                    { just = Gen.Json.Decode.succeed
+                                                    , nothing =
+                                                        Gen.Json.Decode.call_.fail
+                                                            (Elm.Op.append
+                                                                str
+                                                                (Elm.string (" is not a valid " ++ typeName))
+                                                            )
+                                                    }
                                             )
-                                            |> Elm.withType (Elm.Annotation.function [ Elm.Annotation.named typesNamespace typeName ] Gen.Json.Encode.annotation_.value)
+                                        |> Elm.withType (Gen.Json.Decode.annotation_.decoder (Elm.Annotation.named typesNamespace typeName))
+                                    )
+                                    |> Elm.expose
+                          , group = "Decoders"
+                          }
+                        , let
+                            typesNamespace : List String
+                            typesNamespace =
+                                CliMonad.moduleToNamespace input Common.Types
+                          in
+                          { moduleName = Common.Json
+                          , name = "encode" ++ typeName
+                          , declaration =
+                                Elm.declaration ("encode" ++ typeName)
+                                    (Elm.functionReduced "rec"
+                                        (\value ->
+                                            Elm.apply
+                                                (Elm.value
+                                                    { importFrom = typesNamespace
+                                                    , name = Common.toValueName name ++ "ToString"
+                                                    , annotation = Nothing
+                                                    }
+                                                )
+                                                [ value ]
+                                                |> Gen.Json.Encode.call_.string
                                         )
-                                        |> Elm.expose
-                                , group = "Encoders"
-                                }
-                            )
-                            (CliMonad.moduleToNamespace Common.Types)
+                                        |> Elm.withType (Elm.Annotation.function [ Elm.Annotation.named typesNamespace typeName ] Gen.Json.Encode.annotation_.value)
+                                    )
+                                    |> Elm.expose
+                          , group = "Encoders"
+                          }
                         ]
-                            |> CliMonad.combine
+                            |> CliMonad.succeed
 
                     _ ->
                         type_
-                            |> SchemaUtils.typeToAnnotationWithNullable False
+                            |> SchemaUtils.typeToAnnotationWithNullable input False
                             |> CliMonad.andThen
                                 (\annotation ->
                                     if (Elm.ToString.annotation annotation).signature == typeName then
@@ -206,37 +204,35 @@ schemaToDeclarations name schema =
                                           , group = "Aliases"
                                           }
                                             |> CliMonad.succeed
-                                        , CliMonad.map2
-                                            (\typesNamespace schemaDecoder ->
+                                        , CliMonad.map
+                                            (\schemaDecoder ->
                                                 { moduleName = Common.Json
                                                 , name = "decode" ++ typeName
                                                 , declaration =
                                                     Elm.declaration
                                                         ("decode" ++ typeName)
                                                         (schemaDecoder
-                                                            |> Elm.withType (Gen.Json.Decode.annotation_.decoder (Elm.Annotation.named typesNamespace typeName))
+                                                            |> Elm.withType (Gen.Json.Decode.annotation_.decoder (Elm.Annotation.named (CliMonad.moduleToNamespace input Common.Types) typeName))
                                                         )
                                                         |> Elm.expose
                                                 , group = "Decoders"
                                                 }
                                             )
-                                            (CliMonad.moduleToNamespace Common.Types)
-                                            (schemaToDecoder schema)
-                                        , CliMonad.map2
-                                            (\typesNamespace encoder ->
+                                            (schemaToDecoder input schema)
+                                        , CliMonad.map
+                                            (\encoder ->
                                                 { moduleName = Common.Json
                                                 , name = "encode" ++ typeName
                                                 , declaration =
                                                     Elm.declaration ("encode" ++ typeName)
                                                         (Elm.functionReduced "rec" encoder
-                                                            |> Elm.withType (Elm.Annotation.function [ Elm.Annotation.named typesNamespace typeName ] Gen.Json.Encode.annotation_.value)
+                                                            |> Elm.withType (Elm.Annotation.function [ Elm.Annotation.named (CliMonad.moduleToNamespace input Common.Types) typeName ] Gen.Json.Encode.annotation_.value)
                                                         )
                                                         |> Elm.expose
                                                 , group = "Encoders"
                                                 }
                                             )
-                                            (CliMonad.moduleToNamespace Common.Types)
-                                            (schemaToEncoder schema)
+                                            (schemaToEncoder input schema)
                                         ]
                                             |> CliMonad.combine
                                 )
@@ -244,13 +240,13 @@ schemaToDeclarations name schema =
         |> CliMonad.withPath name
 
 
-schemaToDecoder : Json.Schema.Definitions.Schema -> CliMonad Elm.Expression
-schemaToDecoder schema =
-    SchemaUtils.schemaToType True schema
-        |> CliMonad.andThen (\{ type_ } -> SchemaUtils.typeToDecoder type_)
+schemaToDecoder : CliMonad.Input -> Json.Schema.Definitions.Schema -> CliMonad Elm.Expression
+schemaToDecoder input schema =
+    SchemaUtils.schemaToType input True [] schema
+        |> CliMonad.andThen (\{ type_ } -> SchemaUtils.typeToDecoder input type_)
 
 
-schemaToEncoder : Json.Schema.Definitions.Schema -> CliMonad (Elm.Expression -> Elm.Expression)
-schemaToEncoder schema =
-    SchemaUtils.schemaToType True schema
-        |> CliMonad.andThen (\{ type_ } -> SchemaUtils.typeToEncoder type_)
+schemaToEncoder : CliMonad.Input -> Json.Schema.Definitions.Schema -> CliMonad (Elm.Expression -> Elm.Expression)
+schemaToEncoder input schema =
+    SchemaUtils.schemaToType input True [] schema
+        |> CliMonad.andThen (\{ type_ } -> SchemaUtils.typeToEncoder input type_)

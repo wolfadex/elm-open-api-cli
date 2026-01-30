@@ -1658,7 +1658,7 @@ contentToContentSchema input qualify content =
                     CliMonad.succeed jsonSchema
                         |> CliMonad.stepOrFail "The request's application/json content option doesn't have a schema"
                             (OpenApi.MediaType.schema >> Maybe.map OpenApi.Schema.get)
-                        |> CliMonad.andThen (SchemaUtils.schemaToType input qualify)
+                        |> CliMonad.andThen (SchemaUtils.schemaToType input qualify [])
                         |> CliMonad.map (\{ type_ } -> JsonContent type_)
 
                 Nothing ->
@@ -1685,7 +1685,7 @@ contentToContentSchema input qualify content =
             CliMonad.succeed htmlSchema
                 |> CliMonad.stepOrFail ("The request's " ++ mime ++ " content option doesn't have a schema")
                     (OpenApi.MediaType.schema >> Maybe.map OpenApi.Schema.get)
-                |> CliMonad.andThen (SchemaUtils.schemaToType input True)
+                |> CliMonad.andThen (SchemaUtils.schemaToType input True [])
                 |> CliMonad.andThen
                     (\{ type_ } ->
                         case type_ of
@@ -2112,7 +2112,7 @@ paramToString input qualify type_ =
         Common.Ref ref ->
             --  These are mostly aliases
             SchemaUtils.getAlias input ref
-                |> CliMonad.andThen (SchemaUtils.schemaToType input qualify)
+                |> CliMonad.andThen (SchemaUtils.schemaToType input qualify [])
                 |> CliMonad.andThen (\param -> paramToString input qualify param.type_)
 
         Common.OneOf name data ->
@@ -2225,14 +2225,14 @@ paramToType input qualify concreteParam =
     CliMonad.succeed concreteParam
         |> CliMonad.stepOrFail ("Could not get schema for parameter " ++ paramName)
             (OpenApi.Parameter.schema >> Maybe.map OpenApi.Schema.get)
-        |> CliMonad.andThen (SchemaUtils.schemaToType input qualify)
+        |> CliMonad.andThen (SchemaUtils.schemaToType input qualify [])
         |> CliMonad.andThen
             (\{ type_ } ->
                 case type_ of
                     Common.Ref ref ->
                         ref
                             |> SchemaUtils.getAlias input
-                            |> CliMonad.andThen (SchemaUtils.schemaToType input qualify)
+                            |> CliMonad.andThen (SchemaUtils.schemaToType input qualify [])
                             |> CliMonad.map
                                 (\inner ->
                                     case inner.type_ of

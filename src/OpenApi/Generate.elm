@@ -1633,7 +1633,7 @@ operationToContentSchema input operation =
 
 jsonRegex : Regex
 jsonRegex =
-    Regex.fromString "^application\\/(vnd\\.[a-z0-9]+(\\.v\\d+)?(\\.[a-z0-9]+)?)?\\+?json$"
+    Regex.fromString "^application\\/(vnd\\.[a-z0-9]+(\\.v\\d+)?(\\.[a-z0-9]+)?)?\\+?json(;charset=utf-8)?$"
         |> Maybe.withDefault Regex.never
 
 

@@ -143,6 +143,7 @@ run oneOfDeclarations input (CliMonad x) =
             , warnOnMissingEnums = input.warnOnMissingEnums
             }
 
+        res : Result Message ( List Declaration, Output, FastDict.Dict (List String) Common.Type )
         res =
             x internalInput FastDict.empty
     in
@@ -480,11 +481,6 @@ combine =
 getApiSpec : CliMonad OpenApi
 getApiSpec =
     CliMonad (\input cache -> Ok ( input.openApi, emptyOutput, cache ))
-
-
-enums : CliMonad (FastDict.Dict (List String) { name : Common.UnsafeName, documentation : Maybe String })
-enums =
-    CliMonad (\input cache -> Ok ( input.enums, emptyOutput, cache ))
 
 
 errorToWarning : CliMonad a -> CliMonad (Maybe a)

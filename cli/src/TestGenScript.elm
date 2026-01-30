@@ -137,6 +137,7 @@ run =
                 |> OpenApi.Config.withInput simpleRef
                 |> OpenApi.Config.withInput (bug 7889)
                 |> OpenApi.Config.withInput (bug 10398)
+                |> OpenApi.Config.withInput (bug 13654)
                 |> OpenApi.Config.withInput (bug 16104)
                 |> OpenApi.Config.withInput (bug 22119)
                 |> OpenApi.Config.withInput (bug 22530)

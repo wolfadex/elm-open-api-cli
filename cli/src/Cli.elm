@@ -455,7 +455,26 @@ withConfig config =
         |> Pages.Script.Spinner.withStep "Format with elm-format" (onFirst attemptToFormat)
         |> Pages.Script.Spinner.withStep "Write to disk" (onFirst (writeSdkToDisk (OpenApi.Config.outputDirectory config)))
         |> Pages.Script.Spinner.runSteps
+        |> BackendTask.map convertElmCodegenWarnings
         |> BackendTask.andThen printSuccessMessageAndWarnings
+
+
+convertElmCodegenWarnings :
+    ( List ( String, List { declaration : String, warning : String } )
+    , { warnings : List OpenApi.Generate.Message, requiredPackages : FastSet.Set String }
+    )
+    ->
+        ( List String
+        , { warnings : List OpenApi.Generate.Message, requiredPackages : FastSet.Set String }
+        )
+convertElmCodegenWarnings ( outputPathsAndElmCodegenWarnings, { warnings, requiredPackages } ) =
+    ( List.map Tuple.first outputPathsAndElmCodegenWarnings
+    , { warnings =
+            warnings
+                ++ List.concatMap elmCodegenWarningToMessage outputPathsAndElmCodegenWarnings
+      , requiredPackages = requiredPackages
+      }
+    )
 
 
 counter : Int -> Int -> String
@@ -1105,7 +1124,7 @@ attemptToFormat files =
             )
 
 
-writeSdkToDisk : String -> List Elm.File -> BackendTask.BackendTask FatalError.FatalError (List String)
+writeSdkToDisk : String -> List Elm.File -> BackendTask.BackendTask FatalError.FatalError (List ( String, List { declaration : String, warning : String } ))
 writeSdkToDisk outputDirectory files =
     BackendTask.Extra.combineMap
         (\file ->
@@ -1135,7 +1154,7 @@ writeSdkToDisk outputDirectory files =
                                     Ansi.Color.fontColor Ansi.Color.brightRed
                                         ("Uh oh! Failed to write " ++ outputPath)
                     )
-                |> BackendTask.map (\_ -> outputPath)
+                |> BackendTask.map (\_ -> ( outputPath, file.warnings ))
         )
         files
 
@@ -1206,7 +1225,7 @@ printSuccessMessageAndWarnings ( outputPaths, { requiredPackages, warnings } ) =
                         else
                             "\nGenerated " ++ String.fromInt len ++ Ansi.Color.fontColor Ansi.Color.yellow " warnings" ++ "."
                 in
-                (warningTasks ++ [ Pages.Script.log countMessage ])
+                (Pages.Script.log "" :: warningTasks ++ [ Pages.Script.log countMessage ])
                     |> BackendTask.doEach
 
         successTask : BackendTask.BackendTask error ()
@@ -1229,6 +1248,18 @@ printSuccessMessageAndWarnings ( outputPaths, { requiredPackages, warnings } ) =
                 |> BackendTask.doEach
     in
     BackendTask.doEach [ successTask, warningTask ]
+
+
+elmCodegenWarningToMessage : ( String, List { declaration : String, warning : String } ) -> List OpenApi.Generate.Message
+elmCodegenWarningToMessage ( path, warnings ) =
+    List.map
+        (\warning ->
+            { message = warning.warning
+            , details = []
+            , path = [ path, warning.declaration ]
+            }
+        )
+        warnings
 
 
 messageToString : OpenApi.Generate.Message -> String

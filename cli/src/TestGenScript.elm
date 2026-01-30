@@ -130,6 +130,7 @@ run =
                 |> OpenApi.Config.withInput nullableEnum
                 |> OpenApi.Config.withInput cookieAuth
                 |> OpenApi.Config.withInput (bug 10398)
+                |> OpenApi.Config.withInput (bug 22119)
                 |> OpenApi.Config.withInput (bug 22530)
 
         config : OpenApi.Config.Config

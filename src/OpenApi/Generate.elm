@@ -1639,7 +1639,7 @@ jsonRegex =
 
 searchForJsonMediaType : String -> a -> Bool
 searchForJsonMediaType mediaType _ =
-    Regex.contains jsonRegex mediaType
+    mediaType == "*/*" || Regex.contains jsonRegex mediaType
 
 
 contentToContentSchema : CliMonad.Input -> Bool -> Dict.Dict String OpenApi.MediaType.MediaType -> CliMonad ContentSchema

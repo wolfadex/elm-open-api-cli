@@ -123,31 +123,28 @@ files { namespace, generateTodos, effectTypes, server, formats, warnOnMissingEnu
             Err e
 
         Ok enums ->
-            CliMonad.run
-                SchemaUtils.oneOfDeclarations
-                { openApi = apiSpec
-                , generateTodos = generateTodos
-                , enums = enums
-                , namespace = namespace
-                , formats = formats
-                , warnOnMissingEnums = warnOnMissingEnums
-                }
-                (\input ->
-                    let
-                        info : ServerInfo
-                        info =
-                            serverInfo input server
-                    in
-                    CliMonad.combine
-                        [ pathDeclarations input info effectTypes
-                        , schemasDeclarations input
-                        , responsesDeclarations input
-                        , requestBodiesDeclarations input
+            serverInfo server
+                |> CliMonad.andThen
+                    (\info ->
+                        [ pathDeclarations effectTypes info
+                        , schemasDeclarations
+                        , responsesDeclarations
+                        , requestBodiesDeclarations
                         , CliMonad.succeed (serverDeclarations info)
                         ]
-                        |> CliMonad.map List.concat
-                        |> CliMonad.withPath (Common.UnsafeName (String.join "." namespace))
-                )
+                            |> CliMonad.combine
+                    )
+                |> CliMonad.map List.concat
+                |> CliMonad.withPath (Common.UnsafeName (String.join "." namespace))
+                |> CliMonad.run
+                    SchemaUtils.oneOfDeclarations
+                    { openApi = apiSpec
+                    , generateTodos = generateTodos
+                    , enums = enums
+                    , namespace = namespace
+                    , formats = formats
+                    , warnOnMissingEnums = warnOnMissingEnums
+                    }
                 |> Result.map
                     (\{ declarations, warnings, requiredPackages } ->
                         { modules =
@@ -271,88 +268,95 @@ stripTrailingSlash input =
         input
 
 
-pathDeclarations : CliMonad.Input -> ServerInfo -> List OpenApi.Config.EffectType -> CliMonad (List CliMonad.Declaration)
-pathDeclarations input server effectTypes =
-    let
-        paths : Dict.Dict String OpenApi.Path.Path
-        paths =
-            input
-                |> CliMonad.getApiSpec
-                |> OpenApi.paths
-    in
-    paths
-        |> Dict.toList
-        |> CliMonad.combineMap
-            (\( url, path ) ->
-                [ ( "GET", OpenApi.Path.get )
-                , ( "POST", OpenApi.Path.post )
-                , ( "PUT", OpenApi.Path.put )
-                , ( "PATCH", OpenApi.Path.patch )
-                , ( "DELETE", OpenApi.Path.delete )
-                , ( "HEAD", OpenApi.Path.head )
-                , ( "TRACE", OpenApi.Path.trace )
-                ]
-                    |> List.filterMap (\( method, getter ) -> Maybe.map (Tuple.pair method) (getter path))
+pathDeclarations : List OpenApi.Config.EffectType -> ServerInfo -> CliMonad (List CliMonad.Declaration)
+pathDeclarations effectTypes server =
+    CliMonad.getApiSpec
+        |> CliMonad.andThen
+            (\spec ->
+                spec
+                    |> OpenApi.paths
+                    |> Dict.toList
                     |> CliMonad.combineMap
-                        (\( method, operation ) ->
-                            toRequestFunctions input server effectTypes method url operation
-                                |> CliMonad.errorToWarning
+                        (\( url, path ) ->
+                            [ ( "GET", OpenApi.Path.get )
+                            , ( "POST", OpenApi.Path.post )
+                            , ( "PUT", OpenApi.Path.put )
+                            , ( "PATCH", OpenApi.Path.patch )
+                            , ( "DELETE", OpenApi.Path.delete )
+                            , ( "HEAD", OpenApi.Path.head )
+                            , ( "TRACE", OpenApi.Path.trace )
+                            ]
+                                |> List.filterMap (\( method, getter ) -> Maybe.map (Tuple.pair method) (getter path))
+                                |> CliMonad.combineMap
+                                    (\( method, operation ) ->
+                                        toRequestFunctions server effectTypes method url operation
+                                            |> CliMonad.errorToWarning
+                                    )
+                                |> CliMonad.map (List.filterMap identity >> List.concat)
                         )
-                    |> CliMonad.map (List.filterMap identity >> List.concat)
+                    |> CliMonad.map List.concat
             )
-        |> CliMonad.map List.concat
 
 
-responsesDeclarations : CliMonad.Input -> CliMonad (List CliMonad.Declaration)
-responsesDeclarations input =
-    input
-        |> CliMonad.getApiSpec
-        |> OpenApi.components
-        |> Maybe.map OpenApi.Components.responses
-        |> Maybe.withDefault Dict.empty
-        |> Dict.foldl
-            (\name schema ->
-                CliMonad.map2 (::)
-                    (responseToDeclarations input (Common.UnsafeName name) schema)
+responsesDeclarations : CliMonad (List CliMonad.Declaration)
+responsesDeclarations =
+    CliMonad.getApiSpec
+        |> CliMonad.andThen
+            (\spec ->
+                spec
+                    |> OpenApi.components
+                    |> Maybe.map OpenApi.Components.responses
+                    |> Maybe.withDefault Dict.empty
+                    |> Dict.foldl
+                        (\name schema ->
+                            CliMonad.map2 (::)
+                                (responseToDeclarations (Common.UnsafeName name) schema)
+                        )
+                        (CliMonad.succeed [])
+                    |> CliMonad.map List.concat
             )
-            (CliMonad.succeed [])
-        |> CliMonad.map List.concat
 
 
-requestBodiesDeclarations : CliMonad.Input -> CliMonad (List CliMonad.Declaration)
-requestBodiesDeclarations input =
-    input
-        |> CliMonad.getApiSpec
-        |> OpenApi.components
-        |> Maybe.map OpenApi.Components.requestBodies
-        |> Maybe.withDefault Dict.empty
-        |> Dict.foldl
-            (\name schema ->
-                CliMonad.map2 (::)
-                    (requestBodyToDeclarations input (Common.UnsafeName name) schema)
+requestBodiesDeclarations : CliMonad (List CliMonad.Declaration)
+requestBodiesDeclarations =
+    CliMonad.getApiSpec
+        |> CliMonad.andThen
+            (\spec ->
+                spec
+                    |> OpenApi.components
+                    |> Maybe.map OpenApi.Components.requestBodies
+                    |> Maybe.withDefault Dict.empty
+                    |> Dict.foldl
+                        (\name schema ->
+                            CliMonad.map2 (::)
+                                (requestBodyToDeclarations (Common.UnsafeName name) schema)
+                        )
+                        (CliMonad.succeed [])
+                    |> CliMonad.map List.concat
             )
-            (CliMonad.succeed [])
-        |> CliMonad.map List.concat
 
 
-schemasDeclarations : CliMonad.Input -> CliMonad (List CliMonad.Declaration)
-schemasDeclarations input =
-    input
-        |> CliMonad.getApiSpec
-        |> OpenApi.components
-        |> Maybe.map OpenApi.Components.schemas
-        |> Maybe.withDefault Dict.empty
-        |> Dict.foldl
-            (\name schema ->
-                CliMonad.map2
-                    (\decls declAcc -> decls ++ declAcc)
-                    (JsonSchema.Generate.schemaToDeclarations input (Common.UnsafeName name) (OpenApi.Schema.get schema))
+schemasDeclarations : CliMonad (List CliMonad.Declaration)
+schemasDeclarations =
+    CliMonad.getApiSpec
+        |> CliMonad.andThen
+            (\spec ->
+                spec
+                    |> OpenApi.components
+                    |> Maybe.map OpenApi.Components.schemas
+                    |> Maybe.withDefault Dict.empty
+                    |> Dict.foldl
+                        (\name schema ->
+                            CliMonad.map2
+                                (\decls declAcc -> decls ++ declAcc)
+                                (JsonSchema.Generate.schemaToDeclarations (Common.UnsafeName name) (OpenApi.Schema.get schema))
+                        )
+                        (CliMonad.succeed [])
             )
-            (CliMonad.succeed [])
 
 
-unitDeclarations : CliMonad.Input -> Common.UnsafeName -> CliMonad (List CliMonad.Declaration)
-unitDeclarations input name =
+unitDeclarations : Common.UnsafeName -> CliMonad (List CliMonad.Declaration)
+unitDeclarations name =
     let
         typeName : Common.TypeName
         typeName =
@@ -367,44 +371,41 @@ unitDeclarations input name =
           , group = "Aliases"
           }
             |> CliMonad.succeed
-        , CliMonad.map
-            (\schemaDecoder ->
+        , CliMonad.map2
+            (\importFrom schemaDecoder ->
                 { moduleName = Common.Json
                 , name = "decode" ++ typeName
                 , declaration =
                     Elm.declaration ("decode" ++ typeName)
                         (schemaDecoder
-                            |> Elm.withType (Gen.Json.Decode.annotation_.decoder (Elm.Annotation.named (CliMonad.moduleToNamespace input Common.Types) typeName))
+                            |> Elm.withType (Gen.Json.Decode.annotation_.decoder (Elm.Annotation.named importFrom typeName))
                         )
                         |> Elm.exposeConstructor
                 , group = "Decoders"
                 }
             )
-            (SchemaUtils.typeToDecoder input Common.Unit)
-        , CliMonad.map
-            (\encoder ->
-                let
-                    typesNamespace : List String
-                    typesNamespace =
-                        CliMonad.moduleToNamespace input Common.Types
-                in
+            (CliMonad.moduleToNamespace Common.Types)
+            (SchemaUtils.typeToDecoder Common.Unit)
+        , CliMonad.map2
+            (\importFrom encoder ->
                 { moduleName = Common.Json
                 , name = "encode" ++ typeName
                 , declaration =
                     Elm.declaration ("encode" ++ typeName)
                         (Elm.functionReduced "rec" encoder
-                            |> Elm.withType (Elm.Annotation.function [ Elm.Annotation.named typesNamespace typeName ] Gen.Json.Encode.annotation_.value)
+                            |> Elm.withType (Elm.Annotation.function [ Elm.Annotation.named importFrom typeName ] Gen.Json.Encode.annotation_.value)
                         )
                         |> Elm.expose
                 , group = "Encoders"
                 }
             )
-            (SchemaUtils.typeToEncoder input Common.Unit)
+            (CliMonad.moduleToNamespace Common.Types)
+            (SchemaUtils.typeToEncoder Common.Unit)
         ]
 
 
-responseToDeclarations : CliMonad.Input -> Common.UnsafeName -> OpenApi.Reference.ReferenceOr OpenApi.Response.Response -> CliMonad (List CliMonad.Declaration)
-responseToDeclarations input name reference =
+responseToDeclarations : Common.UnsafeName -> OpenApi.Reference.ReferenceOr OpenApi.Response.Response -> CliMonad (List CliMonad.Declaration)
+responseToDeclarations name reference =
     case OpenApi.Reference.toConcrete reference of
         Just response ->
             let
@@ -413,21 +414,21 @@ responseToDeclarations input name reference =
                     OpenApi.Response.content response
             in
             if Dict.isEmpty content then
-                -- If there is no CliMonad.Input -> content then we go with the unit value, `()` as the response type
-                unitDeclarations input name
+                -- If there is no input content then we go with the unit value, `()` as the response type
+                unitDeclarations name
 
             else
                 responseToSchema response
                     |> CliMonad.withPath name
-                    |> CliMonad.andThen (JsonSchema.Generate.schemaToDeclarations input name)
+                    |> CliMonad.andThen (JsonSchema.Generate.schemaToDeclarations name)
 
         Nothing ->
             CliMonad.fail "Could not convert reference to concrete value"
                 |> CliMonad.withPath name
 
 
-requestBodyToDeclarations : CliMonad.Input -> Common.UnsafeName -> OpenApi.Reference.ReferenceOr OpenApi.RequestBody.RequestBody -> CliMonad (List CliMonad.Declaration)
-requestBodyToDeclarations input name reference =
+requestBodyToDeclarations : Common.UnsafeName -> OpenApi.Reference.ReferenceOr OpenApi.RequestBody.RequestBody -> CliMonad (List CliMonad.Declaration)
+requestBodyToDeclarations name reference =
     case OpenApi.Reference.toConcrete reference of
         Just requestBody ->
             let
@@ -436,21 +437,21 @@ requestBodyToDeclarations input name reference =
                     OpenApi.RequestBody.content requestBody
             in
             if Dict.isEmpty content then
-                -- If there is no CliMonad.Input -> content then we go with the unit value, `()` as the requestBody type
-                unitDeclarations input name
+                -- If there is no   content then we go with the unit value, `()` as the requestBody type
+                unitDeclarations name
 
             else
                 requestBodyToSchema requestBody
                     |> CliMonad.withPath name
-                    |> CliMonad.andThen (JsonSchema.Generate.schemaToDeclarations input name)
+                    |> CliMonad.andThen (JsonSchema.Generate.schemaToDeclarations name)
 
         Nothing ->
             CliMonad.fail "Could not convert reference to concrete value"
                 |> CliMonad.withPath name
 
 
-toRequestFunctions : CliMonad.Input -> ServerInfo -> List OpenApi.Config.EffectType -> String -> String -> OpenApi.Operation.Operation -> CliMonad (List CliMonad.Declaration)
-toRequestFunctions input server effectTypes method pathUrl operation =
+toRequestFunctions : ServerInfo -> List OpenApi.Config.EffectType -> String -> String -> OpenApi.Operation.Operation -> CliMonad (List CliMonad.Declaration)
+toRequestFunctions server effectTypes method pathUrl operation =
     let
         functionName : String
         functionName =
@@ -495,7 +496,7 @@ toRequestFunctions input server effectTypes method pathUrl operation =
                         )
 
                 JsonContent type_ ->
-                    SchemaUtils.typeToEncoder input type_
+                    SchemaUtils.typeToEncoder type_
                         |> CliMonad.map
                             (\encoder config ->
                                 let
@@ -559,7 +560,7 @@ toRequestFunctions input server effectTypes method pathUrl operation =
                     CliMonad.succeed []
 
                 JsonContent type_ ->
-                    SchemaUtils.typeToAnnotationWithNullable input True type_
+                    SchemaUtils.typeToAnnotationWithNullable True type_
                         |> CliMonad.map (\annotation -> [ ( Common.UnsafeName "body", annotation ) ])
 
                 StringContent _ ->
@@ -1101,7 +1102,7 @@ toRequestFunctions input server effectTypes method pathUrl operation =
                         (bodyParams contentSchema
                             |> CliMonad.andThen
                                 (\params ->
-                                    toConfigParamAnnotation input
+                                    toConfigParamAnnotation
                                         { operation = operation
                                         , successAnnotation = successAnnotation
                                         , errorBodyAnnotation = bodyTypeAnnotation
@@ -1112,14 +1113,14 @@ toRequestFunctions input server effectTypes method pathUrl operation =
                                         }
                                 )
                         )
-                        (replacedUrl input server auth pathUrl operation)
-                        (operationToHeaderParams input operation)
+                        (replacedUrl server auth pathUrl operation)
+                        (operationToHeaderParams operation)
                 )
-                (operationToContentSchema input operation)
-                (operationToAuthorizationInfo input operation)
-                (SchemaUtils.typeToAnnotationWithNullable input True successType)
+                (operationToContentSchema operation)
+                (operationToAuthorizationInfo operation)
+                (SchemaUtils.typeToAnnotationWithNullable True successType)
     in
-    operationToTypesExpectAndResolver input functionName operation
+    operationToTypesExpectAndResolver functionName operation
         |> CliMonad.andThen step
         |> CliMonad.withPath (Common.UnsafeName method)
         |> CliMonad.withPath (Common.UnsafeName pathUrl)
@@ -1135,13 +1136,13 @@ operationToGroup operation =
             "Operations"
 
 
-operationToHeaderParams : CliMonad.Input -> OpenApi.Operation.Operation -> CliMonad (List (Elm.Expression -> ( Elm.Expression, Elm.Expression, Bool )))
-operationToHeaderParams input operation =
+operationToHeaderParams : OpenApi.Operation.Operation -> CliMonad (List (Elm.Expression -> ( Elm.Expression, Elm.Expression, Bool )))
+operationToHeaderParams operation =
     operation
         |> OpenApi.Operation.parameters
         |> CliMonad.combineMap
             (\param ->
-                toConcreteParam input param
+                toConcreteParam param
                     |> CliMonad.andThen
                         (\concreteParam ->
                             case OpenApi.Parameter.in_ concreteParam of
@@ -1154,10 +1155,10 @@ operationToHeaderParams input operation =
                                     CliMonad.succeed Nothing
 
                                 "header" ->
-                                    paramToType input True concreteParam
+                                    paramToType True concreteParam
                                         |> CliMonad.andThen
                                             (\( paramName, type_ ) ->
-                                                paramToString input True type_
+                                                paramToString True type_
                                                     |> CliMonad.map
                                                         (\{ inputToString, isMaybe } ->
                                                             (\config ->
@@ -1184,8 +1185,8 @@ operationToHeaderParams input operation =
         |> CliMonad.map (List.filterMap identity)
 
 
-replacedUrl : CliMonad.Input -> ServerInfo -> AuthorizationInfo -> String -> OpenApi.Operation.Operation -> CliMonad (Elm.Expression -> Elm.Expression)
-replacedUrl input server authInfo pathUrl operation =
+replacedUrl : ServerInfo -> AuthorizationInfo -> String -> OpenApi.Operation.Operation -> CliMonad (Elm.Expression -> Elm.Expression)
+replacedUrl server authInfo pathUrl operation =
     let
         pathSegments : List String
         pathSegments =
@@ -1267,15 +1268,15 @@ replacedUrl input server authInfo pathUrl operation =
         |> OpenApi.Operation.parameters
         |> CliMonad.combineMap
             (\param ->
-                toConcreteParam input param
+                toConcreteParam param
                     |> CliMonad.andThen
                         (\concreteParam ->
                             case OpenApi.Parameter.in_ concreteParam of
                                 "path" ->
-                                    paramToType input True concreteParam
+                                    paramToType True concreteParam
                                         |> CliMonad.andThen
                                             (\( paramName, type_ ) ->
-                                                paramToString input True type_
+                                                paramToString True type_
                                                     |> CliMonad.map
                                                         (\{ inputToString, alwaysJust } ->
                                                             { paramName = paramName
@@ -1312,7 +1313,7 @@ replacedUrl input server authInfo pathUrl operation =
                                     CliMonad.succeed ( Nothing, [] )
 
                                 paramIn ->
-                                    CliMonad.todoWithDefault input ( Nothing, [] ) <| "Parameters in \"" ++ paramIn ++ "\""
+                                    CliMonad.todoWithDefault ( Nothing, [] ) <| "Parameters in \"" ++ paramIn ++ "\""
                         )
             )
         |> CliMonad.andThen
@@ -1323,264 +1324,264 @@ replacedUrl input server authInfo pathUrl operation =
                             |> Tuple.mapBoth (List.filterMap identity) List.concat
                 in
                 queryParams
-                    |> CliMonad.combineMap (queryParameterToUrlBuilderArgument input True)
+                    |> CliMonad.combineMap (queryParameterToUrlBuilderArgument True)
                     |> CliMonad.map (\arg -> initialUrl replacements (List.concat arg))
             )
 
 
-operationToAuthorizationInfo : CliMonad.Input -> OpenApi.Operation.Operation -> CliMonad AuthorizationInfo
-operationToAuthorizationInfo input operation =
-    let
-        globalSecurity : List OpenApi.SecurityRequirement.SecurityRequirement
-        globalSecurity =
-            input |> CliMonad.getApiSpec |> OpenApi.security
+operationToAuthorizationInfo : OpenApi.Operation.Operation -> CliMonad AuthorizationInfo
+operationToAuthorizationInfo operation =
+    CliMonad.getApiSpec
+        |> CliMonad.andThen
+            (\spec ->
+                let
+                    components : Maybe OpenApi.Components.Components
+                    components =
+                        OpenApi.components spec
+                in
+                -- If present, the operation's security overrides globalSecurity.
+                OpenApi.Operation.security operation
+                    |> Maybe.withDefault (OpenApi.security spec)
+                    |> List.concatMap
+                        (Dict.toList << OpenApi.SecurityRequirement.requirements)
+                    |> CliMonad.foldl
+                        (\e acc ->
+                            case e of
+                                ( "oauth_2_0", ss ) ->
+                                    if Dict.member "Authorization" acc.headers then
+                                        CliMonad.todoWithDefault acc "Authorization header already set"
 
-        components : Maybe OpenApi.Components.Components
-        components =
-            input |> CliMonad.getApiSpec |> OpenApi.components
-    in
-    -- If present, the operation's security overrides globalSecurity.
-    OpenApi.Operation.security operation
-        |> Maybe.withDefault globalSecurity
-        |> List.concatMap
-            (Dict.toList << OpenApi.SecurityRequirement.requirements)
-        |> CliMonad.foldl
-            (\e acc ->
-                case e of
-                    ( "oauth_2_0", ss ) ->
-                        if Dict.member "Authorization" acc.headers then
-                            CliMonad.todoWithDefault input acc "Authorization header already set"
+                                    else
+                                        CliMonad.succeed
+                                            { acc
+                                                | headers =
+                                                    Dict.insert "Authorization"
+                                                        (\config ->
+                                                            Elm.Op.append
+                                                                (Elm.string "Bearer ")
+                                                                (config
+                                                                    |> Elm.get "authorization"
+                                                                    |> Elm.get "bearer"
+                                                                )
+                                                        )
+                                                        acc.headers
+                                                , params =
+                                                    Dict.insert "authorization"
+                                                        (Dict.insert "bearer" Elm.Annotation.string <|
+                                                            Maybe.withDefault Dict.empty <|
+                                                                Dict.get "authorization" acc.params
+                                                        )
+                                                        acc.params
+                                                , scopes = ss ++ acc.scopes
+                                            }
 
-                        else
-                            CliMonad.succeed
-                                { acc
-                                    | headers =
-                                        Dict.insert "Authorization"
-                                            (\config ->
-                                                Elm.Op.append
-                                                    (Elm.string "Bearer ")
-                                                    (config
-                                                        |> Elm.get "authorization"
-                                                        |> Elm.get "bearer"
-                                                    )
-                                            )
-                                            acc.headers
-                                    , params =
-                                        Dict.insert "authorization"
-                                            (Dict.insert "bearer" Elm.Annotation.string <|
-                                                Maybe.withDefault Dict.empty <|
-                                                    Dict.get "authorization" acc.params
-                                            )
-                                            acc.params
-                                    , scopes = ss ++ acc.scopes
-                                }
+                                ( "Token", [] ) ->
+                                    if Dict.member "Authorization" acc.headers then
+                                        CliMonad.todoWithDefault acc "Authorization header already set"
 
-                    ( "Token", [] ) ->
-                        if Dict.member "Authorization" acc.headers then
-                            CliMonad.todoWithDefault input acc "Authorization header already set"
+                                    else
+                                        CliMonad.succeed
+                                            { acc
+                                                | headers =
+                                                    Dict.insert "Authorization"
+                                                        (\config ->
+                                                            Elm.Op.append
+                                                                (Elm.string "Token ")
+                                                                (config
+                                                                    |> Elm.get "authorization"
+                                                                    |> Elm.get "token"
+                                                                )
+                                                        )
+                                                        acc.headers
+                                                , params =
+                                                    Dict.insert "authorization"
+                                                        (Dict.insert "token" Elm.Annotation.string <|
+                                                            Maybe.withDefault Dict.empty <|
+                                                                Dict.get "authorization" acc.params
+                                                        )
+                                                        acc.params
+                                            }
 
-                        else
-                            CliMonad.succeed
-                                { acc
-                                    | headers =
-                                        Dict.insert "Authorization"
-                                            (\config ->
-                                                Elm.Op.append
-                                                    (Elm.string "Token ")
-                                                    (config
-                                                        |> Elm.get "authorization"
-                                                        |> Elm.get "token"
-                                                    )
-                                            )
-                                            acc.headers
-                                    , params =
-                                        Dict.insert "authorization"
-                                            (Dict.insert "token" Elm.Annotation.string <|
-                                                Maybe.withDefault Dict.empty <|
-                                                    Dict.get "authorization" acc.params
-                                            )
-                                            acc.params
-                                }
+                                ( name, _ ) ->
+                                    case Maybe.map OpenApi.Components.securitySchemes components of
+                                        Just securitySchemas ->
+                                            case Maybe.andThen OpenApi.Reference.toConcrete <| Dict.get name securitySchemas of
+                                                Nothing ->
+                                                    CliMonad.todoWithDefault
+                                                        acc
+                                                        ("Unknown security requirement: " ++ name)
 
-                    ( name, _ ) ->
-                        case Maybe.map OpenApi.Components.securitySchemes components of
-                            Just securitySchemas ->
-                                case Maybe.andThen OpenApi.Reference.toConcrete <| Dict.get name securitySchemas of
-                                    Nothing ->
-                                        CliMonad.todoWithDefault input
-                                            acc
-                                            ("Unknown security requirement: " ++ name)
+                                                Just securitySchema ->
+                                                    case OpenApi.SecurityScheme.type_ securitySchema of
+                                                        OpenApi.SecurityScheme.ApiKey apiKey ->
+                                                            let
+                                                                unsafeName : Common.UnsafeName
+                                                                unsafeName =
+                                                                    Common.UnsafeName (String.toLower apiKey.name)
 
-                                    Just securitySchema ->
-                                        case OpenApi.SecurityScheme.type_ securitySchema of
-                                            OpenApi.SecurityScheme.ApiKey apiKey ->
-                                                let
-                                                    unsafeName : Common.UnsafeName
-                                                    unsafeName =
-                                                        Common.UnsafeName (String.toLower apiKey.name)
+                                                                cleanName : String
+                                                                cleanName =
+                                                                    Common.toValueName unsafeName
+                                                            in
+                                                            case apiKey.in_ of
+                                                                OpenApi.SecurityScheme.Header ->
+                                                                    if Dict.member apiKey.name acc.headers then
+                                                                        CliMonad.todoWithDefault acc (apiKey.name ++ " header already set")
 
-                                                    cleanName : String
-                                                    cleanName =
-                                                        Common.toValueName unsafeName
-                                                in
-                                                case apiKey.in_ of
-                                                    OpenApi.SecurityScheme.Header ->
-                                                        if Dict.member apiKey.name acc.headers then
-                                                            CliMonad.todoWithDefault input acc (apiKey.name ++ " header already set")
+                                                                    else
+                                                                        CliMonad.succeed
+                                                                            { acc
+                                                                                | headers =
+                                                                                    Dict.insert apiKey.name
+                                                                                        (\config ->
+                                                                                            config
+                                                                                                |> Elm.get "authorization"
+                                                                                                |> Elm.get cleanName
+                                                                                        )
+                                                                                        acc.headers
+                                                                                , params =
+                                                                                    Dict.insert "authorization"
+                                                                                        (Dict.insert cleanName Elm.Annotation.string <|
+                                                                                            Maybe.withDefault Dict.empty <|
+                                                                                                Dict.get "authorization" acc.params
+                                                                                        )
+                                                                                        acc.params
+                                                                            }
 
-                                                        else
-                                                            CliMonad.succeed
-                                                                { acc
-                                                                    | headers =
-                                                                        Dict.insert apiKey.name
-                                                                            (\config ->
-                                                                                config
-                                                                                    |> Elm.get "authorization"
-                                                                                    |> Elm.get cleanName
-                                                                            )
-                                                                            acc.headers
-                                                                    , params =
-                                                                        Dict.insert "authorization"
-                                                                            (Dict.insert cleanName Elm.Annotation.string <|
-                                                                                Maybe.withDefault Dict.empty <|
-                                                                                    Dict.get "authorization" acc.params
-                                                                            )
-                                                                            acc.params
-                                                                }
-
-                                                    OpenApi.SecurityScheme.Query ->
-                                                        { acc
-                                                            | query =
-                                                                Dict.insert cleanName
-                                                                    (\config ->
-                                                                        config
-                                                                            |> Elm.get "authorization"
-                                                                            |> Elm.get cleanName
-                                                                    )
-                                                                    acc.query
-                                                            , params =
-                                                                Dict.insert "authorization"
-                                                                    (Dict.insert cleanName Elm.Annotation.string <|
-                                                                        Maybe.withDefault Dict.empty <|
-                                                                            Dict.get "authorization" acc.params
-                                                                    )
-                                                                    acc.params
-                                                        }
-                                                            |> CliMonad.succeed
-
-                                                    OpenApi.SecurityScheme.Cookie ->
-                                                        if Dict.member "Cookie" acc.headers then
-                                                            CliMonad.todoWithDefault input acc "Cookie header already set"
-
-                                                        else
-                                                            CliMonad.succeed
-                                                                { acc
-                                                                    | headers =
-                                                                        Dict.insert "Cookie"
-                                                                            (\config ->
-                                                                                Elm.Op.append
-                                                                                    (Elm.string (apiKey.name ++ "="))
-                                                                                    (config
+                                                                OpenApi.SecurityScheme.Query ->
+                                                                    { acc
+                                                                        | query =
+                                                                            Dict.insert cleanName
+                                                                                (\config ->
+                                                                                    config
                                                                                         |> Elm.get "authorization"
                                                                                         |> Elm.get cleanName
-                                                                                    )
-                                                                            )
-                                                                            acc.headers
-                                                                    , params =
-                                                                        Dict.insert "authorization"
-                                                                            (Dict.insert cleanName Elm.Annotation.string <|
-                                                                                Maybe.withDefault Dict.empty <|
-                                                                                    Dict.get "authorization" acc.params
-                                                                            )
-                                                                            acc.params
-                                                                }
+                                                                                )
+                                                                                acc.query
+                                                                        , params =
+                                                                            Dict.insert "authorization"
+                                                                                (Dict.insert cleanName Elm.Annotation.string <|
+                                                                                    Maybe.withDefault Dict.empty <|
+                                                                                        Dict.get "authorization" acc.params
+                                                                                )
+                                                                                acc.params
+                                                                    }
+                                                                        |> CliMonad.succeed
 
-                                            OpenApi.SecurityScheme.Http details ->
-                                                case details.scheme of
-                                                    "bearer" ->
-                                                        let
-                                                            unsafeName : Common.UnsafeName
-                                                            unsafeName =
-                                                                Common.UnsafeName (String.toLower name)
+                                                                OpenApi.SecurityScheme.Cookie ->
+                                                                    if Dict.member "Cookie" acc.headers then
+                                                                        CliMonad.todoWithDefault acc "Cookie header already set"
 
-                                                            cleanName : String
-                                                            cleanName =
-                                                                Common.toValueName unsafeName
-                                                        in
-                                                        { acc
-                                                            | headers =
-                                                                Dict.insert "authorization"
-                                                                    (\config ->
-                                                                        Elm.Op.append
-                                                                            (Elm.string "Bearer ")
-                                                                            (config
-                                                                                |> Elm.get "authorization"
-                                                                                |> Elm.get cleanName
-                                                                            )
-                                                                    )
-                                                                    acc.headers
-                                                            , params =
-                                                                Dict.insert "authorization"
-                                                                    (Dict.insert cleanName Elm.Annotation.string <|
-                                                                        Maybe.withDefault Dict.empty <|
-                                                                            Dict.get "authorization" acc.params
-                                                                    )
-                                                                    acc.params
-                                                        }
-                                                            |> CliMonad.succeed
+                                                                    else
+                                                                        CliMonad.succeed
+                                                                            { acc
+                                                                                | headers =
+                                                                                    Dict.insert "Cookie"
+                                                                                        (\config ->
+                                                                                            Elm.Op.append
+                                                                                                (Elm.string (apiKey.name ++ "="))
+                                                                                                (config
+                                                                                                    |> Elm.get "authorization"
+                                                                                                    |> Elm.get cleanName
+                                                                                                )
+                                                                                        )
+                                                                                        acc.headers
+                                                                                , params =
+                                                                                    Dict.insert "authorization"
+                                                                                        (Dict.insert cleanName Elm.Annotation.string <|
+                                                                                            Maybe.withDefault Dict.empty <|
+                                                                                                Dict.get "authorization" acc.params
+                                                                                        )
+                                                                                        acc.params
+                                                                            }
 
-                                                    unsupportedScheme ->
-                                                        CliMonad.todoWithDefault input acc ("Unsupported security schema 'Http' with scheme of '" ++ unsupportedScheme ++ "'")
+                                                        OpenApi.SecurityScheme.Http details ->
+                                                            case details.scheme of
+                                                                "bearer" ->
+                                                                    let
+                                                                        unsafeName : Common.UnsafeName
+                                                                        unsafeName =
+                                                                            Common.UnsafeName (String.toLower name)
 
-                                            OpenApi.SecurityScheme.MutualTls ->
-                                                CliMonad.todoWithDefault input acc "Unsupported security schema: MutualTls"
+                                                                        cleanName : String
+                                                                        cleanName =
+                                                                            Common.toValueName unsafeName
+                                                                    in
+                                                                    { acc
+                                                                        | headers =
+                                                                            Dict.insert "authorization"
+                                                                                (\config ->
+                                                                                    Elm.Op.append
+                                                                                        (Elm.string "Bearer ")
+                                                                                        (config
+                                                                                            |> Elm.get "authorization"
+                                                                                            |> Elm.get cleanName
+                                                                                        )
+                                                                                )
+                                                                                acc.headers
+                                                                        , params =
+                                                                            Dict.insert "authorization"
+                                                                                (Dict.insert cleanName Elm.Annotation.string <|
+                                                                                    Maybe.withDefault Dict.empty <|
+                                                                                        Dict.get "authorization" acc.params
+                                                                                )
+                                                                                acc.params
+                                                                    }
+                                                                        |> CliMonad.succeed
 
-                                            OpenApi.SecurityScheme.Oauth2 _ ->
-                                                let
-                                                    unsafeName : Common.UnsafeName
-                                                    unsafeName =
-                                                        Common.UnsafeName (String.toLower name)
+                                                                unsupportedScheme ->
+                                                                    CliMonad.todoWithDefault acc ("Unsupported security schema 'Http' with scheme of '" ++ unsupportedScheme ++ "'")
 
-                                                    cleanName : String
-                                                    cleanName =
-                                                        Common.toValueName unsafeName
-                                                in
-                                                { acc
-                                                    | headers =
-                                                        Dict.insert "authorization"
-                                                            (\config ->
-                                                                Elm.Op.append
-                                                                    (Elm.string "Bearer ")
-                                                                    (config
-                                                                        |> Elm.get "authorization"
-                                                                        |> Elm.get cleanName
-                                                                    )
-                                                            )
-                                                            acc.headers
-                                                    , params =
-                                                        Dict.insert "authorization"
-                                                            (Dict.insert cleanName Elm.Annotation.string <|
-                                                                Maybe.withDefault Dict.empty <|
-                                                                    Dict.get "authorization" acc.params
-                                                            )
-                                                            acc.params
-                                                }
-                                                    |> CliMonad.succeed
+                                                        OpenApi.SecurityScheme.MutualTls ->
+                                                            CliMonad.todoWithDefault acc "Unsupported security schema: MutualTls"
 
-                                            OpenApi.SecurityScheme.OpenIdConnect _ ->
-                                                CliMonad.todoWithDefault input acc "Unsupported security schema: OpenIdConnect"
+                                                        OpenApi.SecurityScheme.Oauth2 _ ->
+                                                            let
+                                                                unsafeName : Common.UnsafeName
+                                                                unsafeName =
+                                                                    Common.UnsafeName (String.toLower name)
 
-                            Nothing ->
-                                CliMonad.todoWithDefault input
-                                    acc
-                                    ("Unknown security requirement: " ++ name)
-            )
-            (CliMonad.succeed
-                { headers = Dict.empty
-                , params = Dict.empty
-                , query = Dict.empty
-                , scopes = []
-                }
+                                                                cleanName : String
+                                                                cleanName =
+                                                                    Common.toValueName unsafeName
+                                                            in
+                                                            { acc
+                                                                | headers =
+                                                                    Dict.insert "authorization"
+                                                                        (\config ->
+                                                                            Elm.Op.append
+                                                                                (Elm.string "Bearer ")
+                                                                                (config
+                                                                                    |> Elm.get "authorization"
+                                                                                    |> Elm.get cleanName
+                                                                                )
+                                                                        )
+                                                                        acc.headers
+                                                                , params =
+                                                                    Dict.insert "authorization"
+                                                                        (Dict.insert cleanName Elm.Annotation.string <|
+                                                                            Maybe.withDefault Dict.empty <|
+                                                                                Dict.get "authorization" acc.params
+                                                                        )
+                                                                        acc.params
+                                                            }
+                                                                |> CliMonad.succeed
+
+                                                        OpenApi.SecurityScheme.OpenIdConnect _ ->
+                                                            CliMonad.todoWithDefault acc "Unsupported security schema: OpenIdConnect"
+
+                                        Nothing ->
+                                            CliMonad.todoWithDefault
+                                                acc
+                                                ("Unknown security requirement: " ++ name)
+                        )
+                        (CliMonad.succeed
+                            { headers = Dict.empty
+                            , params = Dict.empty
+                            , query = Dict.empty
+                            , scopes = []
+                            }
+                        )
             )
         |> CliMonad.map
             (\{ headers, params, query, scopes } ->
@@ -1612,8 +1613,8 @@ operationToAuthorizationInfo input operation =
             )
 
 
-operationToContentSchema : CliMonad.Input -> OpenApi.Operation.Operation -> CliMonad ContentSchema
-operationToContentSchema input operation =
+operationToContentSchema : OpenApi.Operation.Operation -> CliMonad ContentSchema
+operationToContentSchema operation =
     case OpenApi.Operation.requestBody operation of
         Nothing ->
             CliMonad.succeed EmptyContent
@@ -1622,7 +1623,7 @@ operationToContentSchema input operation =
             case OpenApi.Reference.toConcrete requestOrRef of
                 Just request ->
                     OpenApi.RequestBody.content request
-                        |> contentToContentSchema input True
+                        |> contentToContentSchema True
 
                 Nothing ->
                     CliMonad.succeed requestOrRef
@@ -1642,8 +1643,8 @@ searchForJsonMediaType mediaType _ =
     mediaType == "*/*" || Regex.contains jsonRegex mediaType
 
 
-contentToContentSchema : CliMonad.Input -> Bool -> Dict.Dict String OpenApi.MediaType.MediaType -> CliMonad ContentSchema
-contentToContentSchema input qualify content =
+contentToContentSchema : Bool -> Dict.Dict String OpenApi.MediaType.MediaType -> CliMonad ContentSchema
+contentToContentSchema qualify content =
     let
         default : Maybe (CliMonad ContentSchema) -> CliMonad ContentSchema
         default fallback =
@@ -1658,7 +1659,7 @@ contentToContentSchema input qualify content =
                     CliMonad.succeed jsonSchema
                         |> CliMonad.stepOrFail "The request's application/json content option doesn't have a schema"
                             (OpenApi.MediaType.schema >> Maybe.map OpenApi.Schema.get)
-                        |> CliMonad.andThen (SchemaUtils.schemaToType input qualify [])
+                        |> CliMonad.andThen (SchemaUtils.schemaToType qualify [])
                         |> CliMonad.map (\{ type_ } -> JsonContent type_)
 
                 Nothing ->
@@ -1685,7 +1686,7 @@ contentToContentSchema input qualify content =
             CliMonad.succeed htmlSchema
                 |> CliMonad.stepOrFail ("The request's " ++ mime ++ " content option doesn't have a schema")
                     (OpenApi.MediaType.schema >> Maybe.map OpenApi.Schema.get)
-                |> CliMonad.andThen (SchemaUtils.schemaToType input True [])
+                |> CliMonad.andThen (SchemaUtils.schemaToType True [])
                 |> CliMonad.andThen
                     (\{ type_ } ->
                         case type_ of
@@ -1738,18 +1739,16 @@ contentToContentSchema input qualify content =
 
 
 toConfigParamAnnotation :
-    CliMonad.Input
-    ->
-        { operation : OpenApi.Operation.Operation
-        , successAnnotation : Elm.Annotation.Annotation
-        , errorBodyAnnotation : Elm.Annotation.Annotation
-        , errorTypeAnnotation : Elm.Annotation.Annotation
-        , authorizationInfo : AuthorizationInfo
-        , bodyParams : List ( Common.UnsafeName, Elm.Annotation.Annotation )
-        , server : ServerInfo
-        }
+    { operation : OpenApi.Operation.Operation
+    , successAnnotation : Elm.Annotation.Annotation
+    , errorBodyAnnotation : Elm.Annotation.Annotation
+    , errorTypeAnnotation : Elm.Annotation.Annotation
+    , authorizationInfo : AuthorizationInfo
+    , bodyParams : List ( Common.UnsafeName, Elm.Annotation.Annotation )
+    , server : ServerInfo
+    }
     -> CliMonad ({ requireToMsg : Bool } -> PerPackage Elm.Annotation.Annotation)
-toConfigParamAnnotation input options =
+toConfigParamAnnotation options =
     CliMonad.map
         (\urlParams { requireToMsg } ->
             let
@@ -1799,7 +1798,7 @@ toConfigParamAnnotation input options =
             , lamderaProgramTest = toAnnotation toMsgLamderaProgramTest
             }
         )
-        (operationToUrlParams input options.operation)
+        (operationToUrlParams options.operation)
 
 
 type ServerInfo
@@ -1807,44 +1806,49 @@ type ServerInfo
     | MultipleServers (List { name : Common.UnsafeName, url : String, description : Maybe String })
 
 
-serverInfo : CliMonad.Input -> OpenApi.Config.Server -> ServerInfo
-serverInfo input server =
+serverInfo : OpenApi.Config.Server -> CliMonad ServerInfo
+serverInfo server =
     case server of
         OpenApi.Config.Single cliServer ->
             SingleServer cliServer
+                |> CliMonad.succeed
 
         OpenApi.Config.Default ->
-            case OpenApi.servers (CliMonad.getApiSpec input) of
-                [] ->
-                    SingleServer ""
+            CliMonad.getApiSpec
+                |> CliMonad.map
+                    (\spec ->
+                        case OpenApi.servers spec of
+                            [] ->
+                                SingleServer ""
 
-                [ one ] ->
-                    SingleServer (OpenApi.Server.url one)
+                            [ one ] ->
+                                SingleServer (OpenApi.Server.url one)
 
-                servers ->
-                    servers
-                        |> List.indexedMap
-                            (\i value ->
-                                let
-                                    description : Maybe String
-                                    description =
-                                        OpenApi.Server.description value
+                            servers ->
+                                servers
+                                    |> List.indexedMap
+                                        (\i value ->
+                                            let
+                                                description : Maybe String
+                                                description =
+                                                    OpenApi.Server.description value
 
-                                    name : String
-                                    name =
-                                        case description of
-                                            Nothing ->
-                                                "server" ++ String.fromInt i
+                                                name : String
+                                                name =
+                                                    case description of
+                                                        Nothing ->
+                                                            "server" ++ String.fromInt i
 
-                                            Just d ->
-                                                d
-                                in
-                                { name = Common.UnsafeName name
-                                , url = OpenApi.Server.url value
-                                , description = description
-                                }
-                            )
-                        |> MultipleServers
+                                                        Just d ->
+                                                            d
+                                            in
+                                            { name = Common.UnsafeName name
+                                            , url = OpenApi.Server.url value
+                                            , description = description
+                                            }
+                                        )
+                                    |> MultipleServers
+                    )
 
         OpenApi.Config.Multiple servers ->
             servers
@@ -1857,10 +1861,11 @@ serverInfo input server =
                         }
                     )
                 |> MultipleServers
+                |> CliMonad.succeed
 
 
-operationToUrlParams : CliMonad.Input -> OpenApi.Operation.Operation -> CliMonad (List ( Common.UnsafeName, Elm.Annotation.Annotation ))
-operationToUrlParams input operation =
+operationToUrlParams : OpenApi.Operation.Operation -> CliMonad (List ( Common.UnsafeName, Elm.Annotation.Annotation ))
+operationToUrlParams operation =
     let
         params : List (OpenApi.Reference.ReferenceOr OpenApi.Parameter.Parameter)
         params =
@@ -1873,16 +1878,16 @@ operationToUrlParams input operation =
         params
             |> CliMonad.combineMap
                 (\param ->
-                    toConcreteParam input param
-                        |> CliMonad.andThen (paramToAnnotation input True)
+                    toConcreteParam param
+                        |> CliMonad.andThen (paramToAnnotation True)
                 )
             |> CliMonad.map
                 (\types -> [ ( Common.UnsafeName "params", SchemaUtils.recordType types ) ])
 
 
-queryParameterToUrlBuilderArgument : CliMonad.Input -> Bool -> OpenApi.Parameter.Parameter -> CliMonad (List (Elm.Expression -> Elm.Expression))
-queryParameterToUrlBuilderArgument input qualify param =
-    paramToType input qualify param
+queryParameterToUrlBuilderArgument : Bool -> OpenApi.Parameter.Parameter -> CliMonad (List (Elm.Expression -> Elm.Expression))
+queryParameterToUrlBuilderArgument qualify param =
+    paramToType qualify param
         |> CliMonad.andThen
             (\( paramName, type_ ) ->
                 let
@@ -1944,7 +1949,7 @@ queryParameterToUrlBuilderArgument input qualify param =
                         fields
                             |> CliMonad.combineMap
                                 (\( fieldName, field ) ->
-                                    paramToString input qualify (Common.Nullable field.type_)
+                                    paramToString qualify (Common.Nullable field.type_)
                                         |> CliMonad.map
                                             (\{ inputToString, alwaysJust } ->
                                                 paramToBuilder inputToString alwaysJust [ ( fieldName, True ) ]
@@ -1956,7 +1961,7 @@ queryParameterToUrlBuilderArgument input qualify param =
                         fields
                             |> CliMonad.combineMap
                                 (\( fieldName, field ) ->
-                                    paramToString input qualify field.type_
+                                    paramToString qualify field.type_
                                         |> CliMonad.map
                                             (\{ inputToString, alwaysJust } ->
                                                 paramToBuilder inputToString alwaysJust [ ( fieldName, False ) ]
@@ -1965,7 +1970,7 @@ queryParameterToUrlBuilderArgument input qualify param =
                                 )
 
                     _ ->
-                        paramToString input qualify type_
+                        paramToString qualify type_
                             |> CliMonad.map
                                 (\{ inputToString, alwaysJust } ->
                                     [ paramToBuilder inputToString alwaysJust []
@@ -1981,11 +1986,10 @@ type InputToString
 
 
 paramToString :
-    CliMonad.Input
-    -> Bool
+    Bool
     -> Common.Type
     -> CliMonad { inputToString : InputToString, alwaysJust : Bool, isMaybe : Bool }
-paramToString input qualify type_ =
+paramToString qualify type_ =
     let
         recursive :
             Common.Type
@@ -1993,7 +1997,7 @@ paramToString input qualify type_ =
             -> ({ inputToString : InputToString, alwaysJust : Bool, isMaybe : Bool } -> InputToString)
             -> CliMonad { inputToString : InputToString, alwaysJust : Bool, isMaybe : Bool }
         recursive p isMaybe f =
-            paramToString input qualify p
+            paramToString qualify p
                 |> CliMonad.map
                     (\{ inputToString, alwaysJust } ->
                         { inputToString =
@@ -2029,7 +2033,7 @@ paramToString input qualify type_ =
     in
     case type_ of
         Common.Basic basicType basic ->
-            CliMonad.withFormat input
+            CliMonad.withFormat
                 basicType
                 basic.format
                 (\{ toParamString } -> InputToString toParamString)
@@ -2111,9 +2115,9 @@ paramToString input qualify type_ =
 
         Common.Ref ref ->
             --  These are mostly aliases
-            SchemaUtils.getAlias input ref
-                |> CliMonad.andThen (SchemaUtils.schemaToType input qualify [])
-                |> CliMonad.andThen (\param -> paramToString input qualify param.type_)
+            SchemaUtils.getAlias ref
+                |> CliMonad.andThen (SchemaUtils.schemaToType qualify [])
+                |> CliMonad.andThen (\param -> paramToString qualify param.type_)
 
         Common.OneOf name data ->
             CliMonad.map2
@@ -2124,7 +2128,7 @@ paramToString input qualify type_ =
                     , isMaybe = False
                     }
                 )
-                (SchemaUtils.typeToAnnotationWithNullable input qualify type_)
+                (SchemaUtils.typeToAnnotationWithNullable qualify type_)
                 (CliMonad.combineMap
                     (\alternative ->
                         CliMonad.andThen2
@@ -2142,8 +2146,8 @@ paramToString input qualify type_ =
                                         (inputToStringToFunction inputToString)
                                         |> CliMonad.succeed
                             )
-                            (paramToString input qualify alternative.type_)
-                            (SchemaUtils.typeToAnnotationWithNullable input qualify alternative.type_)
+                            (paramToString qualify alternative.type_)
+                            (SchemaUtils.typeToAnnotationWithNullable qualify alternative.type_)
                     )
                     (NonEmpty.toList data)
                 )
@@ -2151,9 +2155,9 @@ paramToString input qualify type_ =
         Common.Enum variants ->
             variants
                 |> NonEmpty.toList
-                |> CliMonad.enumName input
-                |> CliMonad.map
-                    (\maybeName ->
+                |> CliMonad.enumName
+                |> CliMonad.map2
+                    (\importFrom maybeName ->
                         case maybeName of
                             Nothing ->
                                 { inputToString = Identity, alwaysJust = True, isMaybe = False }
@@ -2164,7 +2168,7 @@ paramToString input qualify type_ =
                                         (\val ->
                                             Elm.apply
                                                 (Elm.value
-                                                    { importFrom = CliMonad.moduleToNamespace input Common.Types
+                                                    { importFrom = importFrom
                                                     , name = Common.toValueName name ++ "ToString"
                                                     , annotation = Nothing
                                                     }
@@ -2175,9 +2179,10 @@ paramToString input qualify type_ =
                                 , isMaybe = False
                                 }
                     )
+                    (CliMonad.moduleToNamespace Common.Types)
 
         _ ->
-            SchemaUtils.typeToAnnotationWithNullable input qualify type_
+            SchemaUtils.typeToAnnotationWithNullable qualify type_
                 |> CliMonad.andThen
                     (\annotation ->
                         let
@@ -2185,7 +2190,7 @@ paramToString input qualify type_ =
                             msg =
                                 "Params of type \"" ++ Elm.Annotation.toString annotation ++ "\""
                         in
-                        CliMonad.todoWithDefault input
+                        CliMonad.todoWithDefault
                             { inputToString = InputToString (\_ -> Gen.Debug.todo msg)
                             , alwaysJust = True
                             , isMaybe = False
@@ -2204,19 +2209,19 @@ inputToStringToFunction inputToString val =
             f val
 
 
-paramToAnnotation : CliMonad.Input -> Bool -> OpenApi.Parameter.Parameter -> CliMonad ( Common.UnsafeName, Elm.Annotation.Annotation )
-paramToAnnotation input qualify concreteParam =
-    paramToType input qualify concreteParam
+paramToAnnotation : Bool -> OpenApi.Parameter.Parameter -> CliMonad ( Common.UnsafeName, Elm.Annotation.Annotation )
+paramToAnnotation qualify concreteParam =
+    paramToType qualify concreteParam
         |> CliMonad.andThen
             (\( paramName, type_ ) ->
-                SchemaUtils.typeToAnnotationWithMaybe input qualify type_
+                SchemaUtils.typeToAnnotationWithMaybe qualify type_
                     |> CliMonad.map
                         (\annotation -> ( paramName, annotation ))
             )
 
 
-paramToType : CliMonad.Input -> Bool -> OpenApi.Parameter.Parameter -> CliMonad ( Common.UnsafeName, Common.Type )
-paramToType input qualify concreteParam =
+paramToType : Bool -> OpenApi.Parameter.Parameter -> CliMonad ( Common.UnsafeName, Common.Type )
+paramToType qualify concreteParam =
     let
         paramName : String
         paramName =
@@ -2225,14 +2230,14 @@ paramToType input qualify concreteParam =
     CliMonad.succeed concreteParam
         |> CliMonad.stepOrFail ("Could not get schema for parameter " ++ paramName)
             (OpenApi.Parameter.schema >> Maybe.map OpenApi.Schema.get)
-        |> CliMonad.andThen (SchemaUtils.schemaToType input qualify [])
+        |> CliMonad.andThen (SchemaUtils.schemaToType qualify [])
         |> CliMonad.andThen
             (\{ type_ } ->
                 case type_ of
                     Common.Ref ref ->
                         ref
-                            |> SchemaUtils.getAlias input
-                            |> CliMonad.andThen (SchemaUtils.schemaToType input qualify [])
+                            |> SchemaUtils.getAlias
+                            |> CliMonad.andThen (SchemaUtils.schemaToType qualify [])
                             |> CliMonad.map
                                 (\inner ->
                                     case inner.type_ of
@@ -2258,8 +2263,8 @@ paramToType input qualify concreteParam =
         |> CliMonad.map (Tuple.pair (Common.UnsafeName paramName))
 
 
-toConcreteParam : CliMonad.Input -> OpenApi.Reference.ReferenceOr OpenApi.Parameter.Parameter -> CliMonad OpenApi.Parameter.Parameter
-toConcreteParam input param =
+toConcreteParam : OpenApi.Reference.ReferenceOr OpenApi.Parameter.Parameter -> CliMonad OpenApi.Parameter.Parameter
+toConcreteParam param =
     case OpenApi.Reference.toConcrete param of
         Just concreteParam ->
             CliMonad.succeed concreteParam
@@ -2272,13 +2277,16 @@ toConcreteParam input param =
                     (\ref ->
                         case String.split "/" ref of
                             [ "#", "components", "parameters", parameterType ] ->
-                                input
-                                    |> CliMonad.getApiSpec
-                                    |> OpenApi.components
-                                    |> Maybe.map OpenApi.Components.parameters
-                                    |> Maybe.andThen (Dict.get parameterType)
-                                    |> Maybe.map (toConcreteParam input)
-                                    |> Maybe.withDefault (CliMonad.fail <| "Param ref " ++ parameterType ++ " not found")
+                                CliMonad.getApiSpec
+                                    |> CliMonad.andThen
+                                        (\spec ->
+                                            spec
+                                                |> OpenApi.components
+                                                |> Maybe.map OpenApi.Components.parameters
+                                                |> Maybe.andThen (Dict.get parameterType)
+                                                |> Maybe.map toConcreteParam
+                                                |> Maybe.withDefault (CliMonad.fail <| "Param ref " ++ parameterType ++ " not found")
+                                        )
 
                             _ ->
                                 CliMonad.fail <| "Param reference should be to \"#/components/parameters/ref\", found:" ++ ref
@@ -2299,11 +2307,10 @@ type alias OperationUtils =
 
 
 operationToTypesExpectAndResolver :
-    CliMonad.Input
-    -> String
+    String
     -> OpenApi.Operation.Operation
     -> CliMonad OperationUtils
-operationToTypesExpectAndResolver input functionName operation =
+operationToTypesExpectAndResolver functionName operation =
     let
         responses : Dict.Dict String (OpenApi.Reference.ReferenceOr OpenApi.Response.Response)
         responses =
@@ -2381,14 +2388,14 @@ operationToTypesExpectAndResolver input functionName operation =
                                     case OpenApi.Reference.toConcrete errResponseOrRef of
                                         Just errResponse ->
                                             OpenApi.Response.content errResponse
-                                                |> contentToContentSchema input True
+                                                |> contentToContentSchema True
                                                 |> CliMonad.andThen
                                                     (\contentSchema ->
                                                         case contentSchema of
                                                             JsonContent type_ ->
                                                                 CliMonad.map2 Tuple.pair
-                                                                    (SchemaUtils.typeToAnnotationWithNullable input False type_)
-                                                                    (SchemaUtils.typeToAnnotationWithNullable input True type_)
+                                                                    (SchemaUtils.typeToAnnotationWithNullable False type_)
+                                                                    (SchemaUtils.typeToAnnotationWithNullable True type_)
 
                                                             StringContent _ ->
                                                                 CliMonad.succeed
@@ -2420,8 +2427,8 @@ operationToTypesExpectAndResolver input functionName operation =
                                             CliMonad.succeed errResponseOrRef
                                                 |> CliMonad.stepOrFail "I found an error response, but I couldn't convert it to a concrete annotation"
                                                     OpenApi.Reference.toReference
-                                                |> CliMonad.andThen
-                                                    (\ref ->
+                                                |> CliMonad.andThen2
+                                                    (\importFrom ref ->
                                                         let
                                                             inner : String
                                                             inner =
@@ -2431,20 +2438,23 @@ operationToTypesExpectAndResolver input functionName operation =
                                                             |> CliMonad.map
                                                                 (\typeName ->
                                                                     ( Elm.Annotation.named [] (Common.toTypeName typeName)
-                                                                    , Elm.Annotation.named (CliMonad.moduleToNamespace input Common.Types) (Common.toTypeName typeName)
+                                                                    , Elm.Annotation.named importFrom (Common.toTypeName typeName)
                                                                     )
                                                                 )
                                                     )
+                                                    (CliMonad.moduleToNamespace Common.Types)
                                 )
                             |> CliMonad.combineDict
-                            |> CliMonad.map
+                            |> CliMonad.andThen
                                 (\dict ->
                                     case Dict.toList dict of
                                         [] ->
                                             ( Nothing, Elm.Annotation.var "e" )
+                                                |> CliMonad.succeed
 
                                         [ ( _, ( _, globalAnnotation ) ) ] ->
                                             ( Nothing, globalAnnotation )
+                                                |> CliMonad.succeed
 
                                         errorList ->
                                             let
@@ -2452,17 +2462,21 @@ operationToTypesExpectAndResolver input functionName operation =
                                                 errorName =
                                                     String.Extra.toSentenceCase functionName ++ "_Error"
                                             in
-                                            ( { name = errorName
-                                              , declaration =
-                                                    errorList
-                                                        |> List.map (\( statusCode, ( localAnnotation, _ ) ) -> Elm.variantWith (toErrorVariant functionName statusCode) [ localAnnotation ])
-                                                        |> Elm.customType errorName
-                                                        |> Elm.exposeConstructor
-                                              , group = "Errors"
-                                              }
-                                                |> Just
-                                            , Elm.Annotation.named (CliMonad.moduleToNamespace input Common.Types) errorName
-                                            )
+                                            CliMonad.moduleToNamespace Common.Types
+                                                |> CliMonad.map
+                                                    (\importFrom ->
+                                                        ( { name = errorName
+                                                          , declaration =
+                                                                errorList
+                                                                    |> List.map (\( statusCode, ( localAnnotation, _ ) ) -> Elm.variantWith (toErrorVariant functionName statusCode) [ localAnnotation ])
+                                                                    |> Elm.customType errorName
+                                                                    |> Elm.exposeConstructor
+                                                          , group = "Errors"
+                                                          }
+                                                            |> Just
+                                                        , Elm.Annotation.named importFrom errorName
+                                                        )
+                                                    )
                                 )
                 in
                 CliMonad.andThen2
@@ -2486,7 +2500,7 @@ operationToTypesExpectAndResolver input functionName operation =
                                                             }
                                                         }
                                                     )
-                                                    (SchemaUtils.typeToDecoder input type_)
+                                                    (SchemaUtils.typeToDecoder type_)
 
                                             StringContent _ ->
                                                 { successType =
@@ -2548,7 +2562,7 @@ operationToTypesExpectAndResolver input functionName operation =
                                                     |> CliMonad.succeed
                                     )
                                     (OpenApi.Response.content response
-                                        |> contentToContentSchema input True
+                                        |> contentToContentSchema True
                                     )
 
                             Nothing ->
@@ -2562,13 +2576,13 @@ operationToTypesExpectAndResolver input functionName operation =
                                                 inner =
                                                     OpenApi.Reference.ref ref
                                             in
-                                            CliMonad.map
-                                                (\typeName ->
+                                            CliMonad.map2
+                                                (\importFrom typeName ->
                                                     let
                                                         decoder : Elm.Expression
                                                         decoder =
                                                             Elm.value
-                                                                { importFrom = CliMonad.moduleToNamespace input Common.Json
+                                                                { importFrom = importFrom
                                                                 , name = "decode" ++ Common.toTypeName typeName
                                                                 , annotation = Nothing
                                                                 }
@@ -2584,16 +2598,17 @@ operationToTypesExpectAndResolver input functionName operation =
                                                         }
                                                     }
                                                 )
+                                                (CliMonad.moduleToNamespace Common.Json)
                                                 (SchemaUtils.refToTypeName (String.split "/" inner))
                                         )
                     )
-                    (errorResponsesToErrorDecoders input functionName errorResponses)
+                    (errorResponsesToErrorDecoders functionName errorResponses)
                     errorTypeDeclaration
             )
 
 
-errorResponsesToErrorDecoders : CliMonad.Input -> String -> Dict.Dict String (OpenApi.Reference.ReferenceOr OpenApi.Response.Response) -> CliMonad Elm.Expression
-errorResponsesToErrorDecoders input functionName errorResponses =
+errorResponsesToErrorDecoders : String -> Dict.Dict String (OpenApi.Reference.ReferenceOr OpenApi.Response.Response) -> CliMonad Elm.Expression
+errorResponsesToErrorDecoders functionName errorResponses =
     case Dict.toList errorResponses of
         [] ->
             Elm.list []
@@ -2610,83 +2625,83 @@ errorResponsesToErrorDecoders input functionName errorResponses =
 
                         _ ->
                             False
-
-                typesNamespace : List String
-                typesNamespace =
-                    CliMonad.moduleToNamespace input Common.Types
             in
-            (errorList
-                |> CliMonad.combineMap
-                    (\( statusCode, errResponseOrRef ) ->
-                        let
-                            decoder : CliMonad Elm.Expression
-                            decoder =
-                                case OpenApi.Reference.toConcrete errResponseOrRef of
-                                    Just errResponse ->
-                                        OpenApi.Response.content errResponse
-                                            |> contentToContentSchema input True
-                                            |> CliMonad.andThen
-                                                (\contentSchema ->
-                                                    case contentSchema of
-                                                        JsonContent type_ ->
-                                                            SchemaUtils.typeToDecoder input type_
+            CliMonad.moduleToNamespace Common.Types
+                |> CliMonad.andThen
+                    (\typesNamespace ->
+                        errorList
+                            |> CliMonad.combineMap
+                                (\( statusCode, errResponseOrRef ) ->
+                                    let
+                                        decoder : CliMonad Elm.Expression
+                                        decoder =
+                                            case OpenApi.Reference.toConcrete errResponseOrRef of
+                                                Just errResponse ->
+                                                    OpenApi.Response.content errResponse
+                                                        |> contentToContentSchema True
+                                                        |> CliMonad.andThen
+                                                            (\contentSchema ->
+                                                                case contentSchema of
+                                                                    JsonContent type_ ->
+                                                                        SchemaUtils.typeToDecoder type_
 
-                                                        StringContent _ ->
-                                                            CliMonad.succeed Gen.Json.Decode.string
+                                                                    StringContent _ ->
+                                                                        CliMonad.succeed Gen.Json.Decode.string
 
-                                                        BytesContent _ ->
-                                                            CliMonad.todo input "Bytes errors are not supported yet"
+                                                                    BytesContent _ ->
+                                                                        CliMonad.todo "Bytes errors are not supported yet"
 
-                                                        Base64Content _ ->
-                                                            CliMonad.todo input "Base 64 errors are not supported yet"
+                                                                    Base64Content _ ->
+                                                                        CliMonad.todo "Base 64 errors are not supported yet"
 
-                                                        EmptyContent ->
-                                                            CliMonad.succeed (Gen.Json.Decode.succeed Elm.unit)
-                                                )
+                                                                    EmptyContent ->
+                                                                        CliMonad.succeed (Gen.Json.Decode.succeed Elm.unit)
+                                                            )
 
-                                    Nothing ->
-                                        CliMonad.succeed errResponseOrRef
-                                            |> CliMonad.stepOrFail "I found an error response, but I couldn't convert it to a concrete decoder"
-                                                OpenApi.Reference.toReference
-                                            |> CliMonad.andThen
-                                                (\ref ->
-                                                    let
-                                                        inner : String
-                                                        inner =
-                                                            OpenApi.Reference.ref ref
-                                                    in
-                                                    CliMonad.map
-                                                        (\typeName ->
-                                                            Elm.value
-                                                                { importFrom = CliMonad.moduleToNamespace input Common.Json
-                                                                , name = "decode" ++ Common.toTypeName typeName
+                                                Nothing ->
+                                                    CliMonad.succeed errResponseOrRef
+                                                        |> CliMonad.stepOrFail "I found an error response, but I couldn't convert it to a concrete decoder"
+                                                            OpenApi.Reference.toReference
+                                                        |> CliMonad.andThen
+                                                            (\ref ->
+                                                                let
+                                                                    inner : String
+                                                                    inner =
+                                                                        OpenApi.Reference.ref ref
+                                                                in
+                                                                CliMonad.map2
+                                                                    (\jsonNamespace typeName ->
+                                                                        Elm.value
+                                                                            { importFrom = jsonNamespace
+                                                                            , name = "decode" ++ Common.toTypeName typeName
+                                                                            , annotation = Nothing
+                                                                            }
+                                                                    )
+                                                                    (CliMonad.moduleToNamespace Common.Json)
+                                                                    (SchemaUtils.refToTypeName (String.split "/" inner))
+                                                            )
+                                    in
+                                    decoder
+                                        |> CliMonad.map
+                                            (\decoder_ ->
+                                                Elm.tuple
+                                                    (Elm.string statusCode)
+                                                    (if single then
+                                                        decoder_
+
+                                                     else
+                                                        Gen.Json.Decode.call_.map
+                                                            (Elm.value
+                                                                { importFrom = typesNamespace
+                                                                , name = toErrorVariant functionName statusCode
                                                                 , annotation = Nothing
                                                                 }
-                                                        )
-                                                        (SchemaUtils.refToTypeName (String.split "/" inner))
-                                                )
-                        in
-                        decoder
-                            |> CliMonad.map
-                                (\decoder_ ->
-                                    Elm.tuple
-                                        (Elm.string statusCode)
-                                        (if single then
-                                            decoder_
-
-                                         else
-                                            Gen.Json.Decode.call_.map
-                                                (Elm.value
-                                                    { importFrom = typesNamespace
-                                                    , name = toErrorVariant functionName statusCode
-                                                    , annotation = Nothing
-                                                    }
-                                                )
-                                                decoder_
-                                        )
+                                                            )
+                                                            decoder_
+                                                    )
+                                            )
                                 )
                     )
-            )
                 |> CliMonad.map
                     (\decoders ->
                         decoders

@@ -1,10 +1,10 @@
 module CliMonad exposing
-    ( CliMonad, Message, OneOfName, Path, Declaration, Input
+    ( CliMonad, Message, OneOfName, Path, Declaration
     , run, stepOrFail
     , succeed, succeedWith, fail
     , map, map2, map3
     , andThen, andThen2, andThen3, andThen4, combine, combineDict, combineMap, foldl
-    , errorToWarning, getApiSpec, enumName, moduleToNamespace
+    , errorToWarning, getApiSpec, enumName, moduleToNamespace, getOrCache
     , withPath, withWarning, withExtendedWarning, withRequiredPackage
     , todo, todoWithDefault
     , withFormat
@@ -12,12 +12,12 @@ module CliMonad exposing
 
 {-|
 
-@docs CliMonad, Message, OneOfName, Path, Declaration, Input
+@docs CliMonad, Message, OneOfName, Path, Declaration
 @docs run, stepOrFail
 @docs succeed, succeedWith, fail
 @docs map, map2, map3
 @docs andThen, andThen2, andThen3, andThen4, combine, combineDict, combineMap, foldl
-@docs errorToWarning, getApiSpec, enumName, moduleToNamespace
+@docs errorToWarning, getApiSpec, enumName, moduleToNamespace, getOrCache
 @docs withPath, withWarning, withExtendedWarning, withRequiredPackage
 @docs todo, todoWithDefault
 @docs withFormat
@@ -71,19 +71,22 @@ type alias InternalFormat =
     }
 
 
-type Input
-    = Input
-        { openApi : OpenApi
-        , generateTodos : Bool
-        , enums : FastDict.Dict (List String) { name : Common.UnsafeName, documentation : Maybe String }
-        , namespace : List String
-        , formats : FastDict.Dict InternalFormatName InternalFormat
-        , warnOnMissingEnums : Bool
-        }
+type alias Input =
+    { openApi : OpenApi
+    , generateTodos : Bool
+    , enums : FastDict.Dict (List String) { name : Common.UnsafeName, documentation : Maybe String }
+    , namespace : List String
+    , formats : FastDict.Dict InternalFormatName InternalFormat
+    , warnOnMissingEnums : Bool
+    }
 
 
 type CliMonad a
-    = CliMonad (Result Message ( a, Output ))
+    = CliMonad
+        (Input
+         -> FastDict.Dict (List String) Common.Type
+         -> Result Message ( a, Output, FastDict.Dict (List String) Common.Type )
+        )
 
 
 type alias Output =
@@ -108,7 +111,7 @@ Automatically appends the needed `oneOf` declarations.
 
 -}
 run :
-    (Input -> FastDict.Dict OneOfName (List Common.OneOfData) -> CliMonad (List Declaration))
+    (FastDict.Dict OneOfName (List Common.OneOfData) -> CliMonad (List Declaration))
     ->
         { openApi : OpenApi
         , generateTodos : Bool
@@ -117,7 +120,7 @@ run :
         , formats : List OpenApi.Config.Format
         , warnOnMissingEnums : Bool
         }
-    -> (Input -> CliMonad (List Declaration))
+    -> CliMonad (List Declaration)
     ->
         Result
             Message
@@ -125,31 +128,30 @@ run :
             , warnings : List Message
             , requiredPackages : FastSet.Set String
             }
-run oneOfDeclarations input x =
+run oneOfDeclarations input (CliMonad x) =
     let
         internalInput : Input
         internalInput =
-            Input
-                { openApi = input.openApi
-                , generateTodos = input.generateTodos
-                , enums = input.enums
-                , namespace = input.namespace
-                , formats =
-                    input.formats
-                        |> List.map toInternalFormat
-                        |> FastDict.fromList
-                , warnOnMissingEnums = input.warnOnMissingEnums
-                }
+            { openApi = input.openApi
+            , generateTodos = input.generateTodos
+            , enums = input.enums
+            , namespace = input.namespace
+            , formats =
+                input.formats
+                    |> List.map toInternalFormat
+                    |> FastDict.fromList
+            , warnOnMissingEnums = input.warnOnMissingEnums
+            }
 
-        (CliMonad res) =
-            x internalInput
+        res =
+            x internalInput FastDict.empty
     in
     res
         |> Result.andThen
-            (\( decls, output ) ->
+            (\( decls, output, cache ) ->
                 let
                     (CliMonad h) =
-                        oneOfDeclarations internalInput output.oneOfs
+                        oneOfDeclarations output.oneOfs
                             |> withPath (Common.UnsafeName "While generating `oneOf`s")
 
                     declarationsForFormats : Output -> List Declaration
@@ -165,9 +167,9 @@ run oneOfDeclarations input x =
                                     }
                                 )
                 in
-                h
+                h internalInput cache
                     |> Result.map
-                        (\( oneOfDecls, oneOfOutput ) ->
+                        (\( oneOfDecls, oneOfOutput, _ ) ->
                             { declarations = decls ++ oneOfDecls ++ declarationsForFormats output ++ declarationsForFormats oneOfOutput
                             , warnings =
                                 (oneOfOutput.warnings ++ output.warnings)
@@ -176,6 +178,28 @@ run oneOfDeclarations input x =
                             }
                         )
             )
+
+
+getOrCache : List String -> (() -> CliMonad Common.Type) -> CliMonad Common.Type
+getOrCache key compute =
+    CliMonad
+        (\input cache ->
+            case FastDict.get key cache of
+                Nothing ->
+                    let
+                        (CliMonad inner) =
+                            compute ()
+                    in
+                    case inner input cache of
+                        Ok ( computed, output, cache2 ) ->
+                            Ok ( computed, output, FastDict.insert key computed cache2 )
+
+                        Err e ->
+                            Err e
+
+                Just found ->
+                    Ok ( found, emptyOutput, cache )
+        )
 
 
 emptyOutput : Output
@@ -190,12 +214,13 @@ emptyOutput =
 withPath : Common.UnsafeName -> CliMonad a -> CliMonad a
 withPath segment (CliMonad f) =
     CliMonad
-        (case f of
-            Err message ->
-                Err (addPath segment message)
+        (\input cache ->
+            case f input cache of
+                Err message ->
+                    Err (addPath segment message)
 
-            Ok ( res, output ) ->
-                Ok ( res, { output | warnings = List.map (addPath segment) output.warnings } )
+                Ok ( res, output, cache2 ) ->
+                    Ok ( res, { output | warnings = List.map (addPath segment) output.warnings }, cache2 )
         )
 
 
@@ -210,78 +235,98 @@ addPath (Common.UnsafeName segment) { path, message, details } =
 withWarning : String -> CliMonad a -> CliMonad a
 withWarning message (CliMonad f) =
     CliMonad
-        (Result.map
-            (\( res, output ) ->
-                ( res
-                , { output | warnings = { path = [], message = message, details = [] } :: output.warnings }
+        (\input cache ->
+            Result.map
+                (\( res, output, cache2 ) ->
+                    ( res
+                    , { output | warnings = { path = [], message = message, details = [] } :: output.warnings }
+                    , cache2
+                    )
                 )
-            )
-            f
+                (f input cache)
         )
 
 
 withExtendedWarning : { message : String, details : List String } -> CliMonad a -> CliMonad a
 withExtendedWarning { message, details } (CliMonad f) =
     CliMonad
-        (Result.map
-            (\( res, output ) ->
-                ( res
-                , { output | warnings = { path = [], message = message, details = details } :: output.warnings }
+        (\input cache ->
+            Result.map
+                (\( res, output, cache2 ) ->
+                    ( res
+                    , { output | warnings = { path = [], message = message, details = details } :: output.warnings }
+                    , cache2
+                    )
                 )
-            )
-            f
+                (f input cache)
         )
 
 
-todo : Input -> String -> CliMonad Elm.Expression
-todo input message =
-    todoWithDefault input (Gen.Debug.todo message) message
+todo : String -> CliMonad Elm.Expression
+todo message =
+    todoWithDefault (Gen.Debug.todo message) message
 
 
-todoWithDefault : Input -> a -> String -> CliMonad a
-todoWithDefault (Input { generateTodos }) default message =
+todoWithDefault : a -> String -> CliMonad a
+todoWithDefault default message =
     CliMonad
-        (if generateTodos then
-            Ok ( default, { emptyOutput | warnings = [ { path = [], message = message, details = [] } ] } )
+        (\{ generateTodos } cache ->
+            if generateTodos then
+                Ok
+                    ( default
+                    , { emptyOutput | warnings = [ { path = [], message = message, details = [] } ] }
+                    , cache
+                    )
 
-         else
-            Err
-                { path = []
-                , message = "Todo: " ++ message
-                , details = []
-                }
+            else
+                Err
+                    { path = []
+                    , message = "Todo: " ++ message
+                    , details = []
+                    }
         )
 
 
 fail : String -> CliMonad a
 fail message =
-    CliMonad (Err { path = [], message = message, details = [] })
+    CliMonad (\_ _ -> Err { path = [], message = message, details = [] })
 
 
 succeed : a -> CliMonad a
 succeed x =
-    CliMonad (Ok ( x, emptyOutput ))
+    CliMonad (\_ cache -> Ok ( x, emptyOutput, cache ))
 
 
 succeedWith : FastDict.Dict OneOfName (List Common.OneOfData) -> a -> CliMonad a
 succeedWith oneOfs x =
-    CliMonad (Ok ( x, { emptyOutput | oneOfs = oneOfs } ))
+    CliMonad (\_ cache -> Ok ( x, { emptyOutput | oneOfs = oneOfs }, cache ))
 
 
 map : (a -> b) -> CliMonad a -> CliMonad b
 map f (CliMonad x) =
-    CliMonad (Result.map (\( xr, o ) -> ( f xr, o )) x)
+    CliMonad
+        (\input cache ->
+            Result.map
+                (\( xr, o, cache2 ) -> ( f xr, o, cache2 ))
+                (x input cache)
+        )
 
 
 map2 : (a -> b -> c) -> CliMonad a -> CliMonad b -> CliMonad c
 map2 f (CliMonad x) (CliMonad y) =
     CliMonad
-        (Result.map2
-            (\( xr, xo ) ( yr, yo ) ->
-                ( f xr yr, mergeOutput xo yo )
-            )
-            x
-            y
+        (\input cache ->
+            case x input cache of
+                Err e ->
+                    Err e
+
+                Ok ( xr, xo, cache2 ) ->
+                    case y input cache2 of
+                        Err e ->
+                            Err e
+
+                        Ok ( yr, yo, cache3 ) ->
+                            Ok ( f xr yr, mergeOutput xo yo, cache3 )
         )
 
 
@@ -302,67 +347,110 @@ mergeOutputs list =
 map3 : (a -> b -> c -> d) -> CliMonad a -> CliMonad b -> CliMonad c -> CliMonad d
 map3 f (CliMonad x) (CliMonad y) (CliMonad z) =
     CliMonad
-        (Result.map3
-            (\( xr, xo ) ( yr, yo ) ( zr, zo ) ->
-                ( f xr yr zr, mergeOutputs [ xo, yo, zo ] )
-            )
-            x
-            y
-            z
+        (\input cache ->
+            case x input cache of
+                Err e ->
+                    Err e
+
+                Ok ( xr, xo, cache2 ) ->
+                    case y input cache2 of
+                        Err e ->
+                            Err e
+
+                        Ok ( yr, yo, cache3 ) ->
+                            case z input cache3 of
+                                Err e ->
+                                    Err e
+
+                                Ok ( zr, zo, cache4 ) ->
+                                    Ok ( f xr yr zr, mergeOutputs [ xo, yo, zo ], cache4 )
         )
 
 
 map4 : (a -> b -> c -> d -> e) -> CliMonad a -> CliMonad b -> CliMonad c -> CliMonad d -> CliMonad e
 map4 f (CliMonad x) (CliMonad y) (CliMonad z) (CliMonad w) =
     CliMonad
-        (Result.map4
-            (\( xr, xo ) ( yr, yo ) ( zr, zo ) ( wr, wo ) ->
-                ( f xr yr zr wr, mergeOutputs [ xo, yo, zo, wo ] )
-            )
-            x
-            y
-            z
-            w
+        (\input cache ->
+            case x input cache of
+                Err e ->
+                    Err e
+
+                Ok ( xr, xo, cache2 ) ->
+                    case y input cache2 of
+                        Err e ->
+                            Err e
+
+                        Ok ( yr, yo, cache3 ) ->
+                            case z input cache3 of
+                                Err e ->
+                                    Err e
+
+                                Ok ( zr, zo, cache4 ) ->
+                                    case w input cache4 of
+                                        Err e ->
+                                            Err e
+
+                                        Ok ( wr, wo, cache5 ) ->
+                                            Ok ( f xr yr zr wr, mergeOutputs [ xo, yo, zo, wo ], cache5 )
         )
 
 
 andThen : (a -> CliMonad b) -> CliMonad a -> CliMonad b
 andThen f (CliMonad x) =
     CliMonad
-        (case x of
-            Err e ->
-                Err e
+        (\input cache ->
+            case x input cache of
+                Err e ->
+                    Err e
 
-            Ok ( y, yo ) ->
-                let
-                    (CliMonad z) =
-                        f y
-                in
-                case z of
-                    Err e ->
-                        Err e
+                Ok ( y, yo, cache2 ) ->
+                    let
+                        (CliMonad z) =
+                            f y
+                    in
+                    case z input cache2 of
+                        Err e ->
+                            Err e
 
-                    Ok ( w, wo ) ->
-                        Ok ( w, mergeOutput yo wo )
+                        Ok ( w, wo, cache3 ) ->
+                            Ok ( w, mergeOutput yo wo, cache3 )
+        )
+
+
+join : CliMonad (CliMonad a) -> CliMonad a
+join (CliMonad x) =
+    CliMonad
+        (\input cache ->
+            case x input cache of
+                Err e ->
+                    Err e
+
+                Ok ( CliMonad y, xo, cache2 ) ->
+                    case y input cache2 of
+                        Err e ->
+                            Err e
+
+                        Ok ( w, wo, cache3 ) ->
+                            Ok ( w, mergeOutput xo wo, cache3 )
         )
 
 
 andThen2 : (a -> b -> CliMonad c) -> CliMonad a -> CliMonad b -> CliMonad c
 andThen2 f x y =
     map2 f x y
-        |> andThen identity
+        |> join
 
 
 andThen3 : (a -> b -> c -> CliMonad d) -> CliMonad a -> CliMonad b -> CliMonad c -> CliMonad d
 andThen3 f x y z =
     map3 f x y z
-        |> andThen identity
+        |> join
 
 
 andThen4 : (a -> b -> c -> d -> CliMonad e) -> CliMonad a -> CliMonad b -> CliMonad c -> CliMonad d -> CliMonad e
 andThen4 f x y z w =
     map4 f x y z w
-        |> andThen identity
+        |> join
 
 
 toInternalFormat : OpenApi.Config.Format -> ( InternalFormatName, InternalFormat )
@@ -389,25 +477,30 @@ combine =
     List.foldr (map2 (::)) (succeed [])
 
 
-getApiSpec : Input -> OpenApi
-getApiSpec (Input input) =
-    input.openApi
+getApiSpec : CliMonad OpenApi
+getApiSpec =
+    CliMonad (\input cache -> Ok ( input.openApi, emptyOutput, cache ))
 
 
-enums : Input -> FastDict.Dict (List String) { name : Common.UnsafeName, documentation : Maybe String }
-enums (Input input) =
-    input.enums
+enums : CliMonad (FastDict.Dict (List String) { name : Common.UnsafeName, documentation : Maybe String })
+enums =
+    CliMonad (\input cache -> Ok ( input.enums, emptyOutput, cache ))
 
 
 errorToWarning : CliMonad a -> CliMonad (Maybe a)
 errorToWarning (CliMonad f) =
     CliMonad
-        (case f of
-            Ok ( res, output ) ->
-                Ok ( Just res, output )
+        (\input cache ->
+            case f input cache of
+                Ok ( res, output, cache2 ) ->
+                    Ok ( Just res, output, cache2 )
 
-            Err { path, message } ->
-                Ok ( Nothing, { emptyOutput | warnings = [ { path = path, message = message, details = [] } ] } )
+                Err { path, message } ->
+                    ( Nothing
+                    , { emptyOutput | warnings = [ { path = path, message = message, details = [] } ] }
+                    , cache
+                    )
+                        |> Ok
         )
 
 
@@ -445,52 +538,54 @@ foldl f init list =
     List.foldl (\e acc -> andThen (f e) acc) init list
 
 
-moduleToNamespace : Input -> Common.Module -> List String
-moduleToNamespace (Input input) mod =
-    Common.moduleToNamespace input.namespace mod
+moduleToNamespace : Common.Module -> CliMonad (List String)
+moduleToNamespace mod =
+    CliMonad (\input cache -> Ok ( Common.moduleToNamespace input.namespace mod, emptyOutput, cache ))
 
 
-enumName : Input -> List Common.UnsafeName -> CliMonad (Maybe Common.UnsafeName)
-enumName ((Input { warnOnMissingEnums }) as input) variants =
-    case FastDict.get (List.map Common.unwrapUnsafe variants) (enums input) of
-        Just { name } ->
-            succeed (Just name)
+enumName : List Common.UnsafeName -> CliMonad (Maybe Common.UnsafeName)
+enumName variants =
+    CliMonad
+        (\input cache ->
+            case FastDict.get (List.map Common.unwrapUnsafe variants) input.enums of
+                Just { name } ->
+                    Ok ( Just name, emptyOutput, cache )
 
-        Nothing ->
-            CliMonad
-                (if warnOnMissingEnums then
-                    let
-                        variantNames : List String
-                        variantNames =
-                            List.map
-                                (\variant ->
-                                    variant
-                                        |> Common.unwrapUnsafe
-                                        |> escapeString
-                                )
-                                variants
+                Nothing ->
+                    if input.warnOnMissingEnums then
+                        let
+                            variantNames : List String
+                            variantNames =
+                                List.map
+                                    (\variant ->
+                                        variant
+                                            |> Common.unwrapUnsafe
+                                            |> escapeString
+                                    )
+                                    variants
 
-                        message : String
-                        message =
-                            "No named enum found for [ "
-                                ++ String.join ", " variantNames
-                                ++ " ]. Define one to improve type safety"
-                    in
-                    ( Nothing
-                    , { emptyOutput
-                        | warnings =
-                            [ { path = []
-                              , message = message
-                              , details = []
-                              }
-                            ]
-                      }
-                    )
-                        |> Ok
+                            message : String
+                            message =
+                                "No named enum found for [ "
+                                    ++ String.join ", " variantNames
+                                    ++ " ]. Define one to improve type safety"
+                        in
+                        ( Nothing
+                        , { emptyOutput
+                            | warnings =
+                                [ { path = []
+                                  , message = message
+                                  , details = []
+                                  }
+                                ]
+                          }
+                        , cache
+                        )
+                            |> Ok
 
-                 else
-                    Ok ( Nothing, emptyOutput )
-                )
+                    else
+                        Ok ( Nothing, emptyOutput, cache )
+        )
 
 
 escapeString : String -> String
@@ -499,8 +594,7 @@ escapeString s =
 
 
 withFormat :
-    Input
-    -> Common.BasicType
+    Common.BasicType
     -> Maybe String
     ->
         ({ encode : Elm.Expression -> Elm.Expression
@@ -513,185 +607,190 @@ withFormat :
         )
     -> a
     -> CliMonad a
-withFormat (Input { formats }) basicType maybeFormatName getter default =
+withFormat basicType maybeFormatName getter default =
     case maybeFormatName of
         Nothing ->
             succeed default
 
         Just formatName ->
             CliMonad
-                (let
-                    basicTypeName : String
-                    basicTypeName =
-                        Common.basicTypeToString basicType
-                 in
-                 case
-                    FastDict.get ( basicTypeName, formatName ) formats
-                 of
-                    Nothing ->
-                        let
-                            isSimple : Bool
-                            isSimple =
-                                case ( basicType, formatName ) of
-                                    -- These formats don't require special handling
-                                    ( Common.Integer, "int32" ) ->
-                                        True
-
-                                    ( Common.Number, "int32" ) ->
-                                        True
-
-                                    ( Common.Number, "float" ) ->
-                                        True
-
-                                    ( Common.Number, "double" ) ->
-                                        True
-
-                                    ( Common.String, "password" ) ->
-                                        True
-
-                                    ( Common.String, "email" ) ->
-                                        True
-
-                                    _ ->
-                                        False
-                        in
-                        ( default
-                        , if isSimple then
-                            emptyOutput
-
-                          else
+                (\input cache ->
+                    let
+                        basicTypeName : String
+                        basicTypeName =
+                            Common.basicTypeToString basicType
+                    in
+                    case
+                        FastDict.get ( basicTypeName, formatName ) input.formats
+                    of
+                        Nothing ->
                             let
-                                firstLine : String
-                                firstLine =
-                                    "Don't know how to handle format \""
-                                        ++ formatName
-                                        ++ "\" for type "
-                                        ++ Common.basicTypeToString basicType
-                                        ++ ", treating as the corresponding basic type."
+                                isSimple : Bool
+                                isSimple =
+                                    case ( basicType, formatName ) of
+                                        -- These formats don't require special handling
+                                        ( Common.Integer, "int32" ) ->
+                                            True
 
-                                available : List String
-                                available =
-                                    List.filterMap
-                                        (\( b, f ) ->
-                                            if b == basicTypeName then
-                                                Just f
+                                        ( Common.Number, "int32" ) ->
+                                            True
 
-                                            else
-                                                Nothing
-                                        )
-                                        (FastDict.keys formats)
+                                        ( Common.Number, "float" ) ->
+                                            True
 
-                                secondLine : String
-                                secondLine =
-                                    if List.isEmpty available then
-                                        "  No available formats."
+                                        ( Common.Number, "double" ) ->
+                                            True
 
-                                    else
-                                        "  Available formats: " ++ String.join ", " available ++ "."
+                                        ( Common.String, "password" ) ->
+                                            True
+
+                                        ( Common.String, "email" ) ->
+                                            True
+
+                                        _ ->
+                                            False
                             in
-                            { emptyOutput
-                                | warnings =
-                                    [ { message = firstLine ++ "\n" ++ secondLine
-                                      , path = [ "format" ]
-                                      , details = []
-                                      }
-                                    ]
-                            }
-                        )
-                            |> Ok
+                            ( default
+                            , if isSimple then
+                                emptyOutput
 
-                    Just format ->
-                        let
-                            name : String
-                            name =
-                                String.Extra.classify (Common.basicTypeToString basicType ++ "-" ++ formatName)
+                              else
+                                let
+                                    firstLine : String
+                                    firstLine =
+                                        "Don't know how to handle format \""
+                                            ++ formatName
+                                            ++ "\" for type "
+                                            ++ Common.basicTypeToString basicType
+                                            ++ ", treating as the corresponding basic type."
 
-                            encodeAnnotation : Elm.Annotation.Annotation
-                            encodeAnnotation =
-                                Elm.Annotation.function
-                                    [ format.annotation ]
-                                    Gen.Json.Encode.annotation_.value
+                                    available : List String
+                                    available =
+                                        List.filterMap
+                                            (\( b, f ) ->
+                                                if b == basicTypeName then
+                                                    Just f
 
-                            toParamStringAnnotation : Elm.Annotation.Annotation
-                            toParamStringAnnotation =
-                                Elm.Annotation.function
-                                    [ format.annotation ]
-                                    Elm.Annotation.string
+                                                else
+                                                    Nothing
+                                            )
+                                            (FastDict.keys input.formats)
 
-                            decodeAnnotation : Elm.Annotation.Annotation
-                            decodeAnnotation =
-                                Gen.Json.Decode.annotation_.decoder format.annotation
+                                    secondLine : String
+                                    secondLine =
+                                        if List.isEmpty available then
+                                            "  No available formats."
 
-                            encoder : Elm.Expression
-                            encoder =
-                                Elm.functionReduced "value" format.encode
-                                    |> Elm.withType encodeAnnotation
+                                        else
+                                            "  Available formats: " ++ String.join ", " available ++ "."
+                                in
+                                { emptyOutput
+                                    | warnings =
+                                        [ { message = firstLine ++ "\n" ++ secondLine
+                                          , path = [ "format" ]
+                                          , details = []
+                                          }
+                                        ]
+                                }
+                            , cache
+                            )
+                                |> Ok
 
-                            decoder : Elm.Expression
-                            decoder =
-                                format.decoder
-                                    |> Elm.withType decodeAnnotation
+                        Just format ->
+                            let
+                                name : String
+                                name =
+                                    String.Extra.classify (Common.basicTypeToString basicType ++ "-" ++ formatName)
 
-                            toParamString : Elm.Expression
-                            toParamString =
-                                Elm.functionReduced "value" format.toParamString
-                                    |> Elm.withType toParamStringAnnotation
-                        in
-                        ( getter
-                            { encode =
-                                \value ->
-                                    Elm.apply
-                                        (Elm.value
-                                            { name = "encode" ++ name
-                                            , annotation = Just encodeAnnotation
-                                            , importFrom = Common.commonModuleName
-                                            }
-                                            |> Elm.withType encodeAnnotation
-                                        )
-                                        [ value ]
-                            , decoder =
-                                Elm.value
-                                    { name = "decode" ++ name
-                                    , annotation = Just decodeAnnotation
-                                    , importFrom = Common.commonModuleName
-                                    }
-                                    |> Elm.withType decodeAnnotation
-                            , toParamString =
-                                \value ->
-                                    Elm.apply
-                                        (Elm.value
-                                            { name = "toParamString" ++ name
-                                            , annotation = Just toParamStringAnnotation
-                                            , importFrom = Common.commonModuleName
-                                            }
-                                            |> Elm.withType toParamStringAnnotation
-                                        )
-                                        [ value ]
-                            , annotation = format.annotation
-                            , example = format.example
-                            }
-                        , { emptyOutput
-                            | requiredPackages = FastSet.fromList format.requiresPackages
-                            , sharedDeclarations =
-                                format.sharedDeclarations
-                                    |> FastDict.fromList
-                                    |> FastDict.insert ("encode" ++ name) { value = encoder, group = "Encoders" }
-                                    |> FastDict.insert ("decode" ++ name) { value = decoder, group = "Decoders" }
-                                    |> FastDict.insert ("toParamString" ++ name) { value = toParamString, group = "Encoders" }
-                          }
-                        )
-                            |> Ok
+                                encodeAnnotation : Elm.Annotation.Annotation
+                                encodeAnnotation =
+                                    Elm.Annotation.function
+                                        [ format.annotation ]
+                                        Gen.Json.Encode.annotation_.value
+
+                                toParamStringAnnotation : Elm.Annotation.Annotation
+                                toParamStringAnnotation =
+                                    Elm.Annotation.function
+                                        [ format.annotation ]
+                                        Elm.Annotation.string
+
+                                decodeAnnotation : Elm.Annotation.Annotation
+                                decodeAnnotation =
+                                    Gen.Json.Decode.annotation_.decoder format.annotation
+
+                                encoder : Elm.Expression
+                                encoder =
+                                    Elm.functionReduced "value" format.encode
+                                        |> Elm.withType encodeAnnotation
+
+                                decoder : Elm.Expression
+                                decoder =
+                                    format.decoder
+                                        |> Elm.withType decodeAnnotation
+
+                                toParamString : Elm.Expression
+                                toParamString =
+                                    Elm.functionReduced "value" format.toParamString
+                                        |> Elm.withType toParamStringAnnotation
+                            in
+                            ( getter
+                                { encode =
+                                    \value ->
+                                        Elm.apply
+                                            (Elm.value
+                                                { name = "encode" ++ name
+                                                , annotation = Just encodeAnnotation
+                                                , importFrom = Common.commonModuleName
+                                                }
+                                                |> Elm.withType encodeAnnotation
+                                            )
+                                            [ value ]
+                                , decoder =
+                                    Elm.value
+                                        { name = "decode" ++ name
+                                        , annotation = Just decodeAnnotation
+                                        , importFrom = Common.commonModuleName
+                                        }
+                                        |> Elm.withType decodeAnnotation
+                                , toParamString =
+                                    \value ->
+                                        Elm.apply
+                                            (Elm.value
+                                                { name = "toParamString" ++ name
+                                                , annotation = Just toParamStringAnnotation
+                                                , importFrom = Common.commonModuleName
+                                                }
+                                                |> Elm.withType toParamStringAnnotation
+                                            )
+                                            [ value ]
+                                , annotation = format.annotation
+                                , example = format.example
+                                }
+                            , { emptyOutput
+                                | requiredPackages = FastSet.fromList format.requiresPackages
+                                , sharedDeclarations =
+                                    format.sharedDeclarations
+                                        |> FastDict.fromList
+                                        |> FastDict.insert ("encode" ++ name) { value = encoder, group = "Encoders" }
+                                        |> FastDict.insert ("decode" ++ name) { value = decoder, group = "Decoders" }
+                                        |> FastDict.insert ("toParamString" ++ name) { value = toParamString, group = "Encoders" }
+                              }
+                            , cache
+                            )
+                                |> Ok
                 )
 
 
 withRequiredPackage : String -> CliMonad a -> CliMonad a
 withRequiredPackage package (CliMonad f) =
     CliMonad
-        (Result.map
-            (\( y, output ) ->
-                ( y
-                , { output | requiredPackages = FastSet.insert package output.requiredPackages }
+        (\input cache ->
+            Result.map
+                (\( y, output, cache2 ) ->
+                    ( y
+                    , { output | requiredPackages = FastSet.insert package output.requiredPackages }
+                    , cache2
+                    )
                 )
-            )
-            f
+                (f input cache)
         )

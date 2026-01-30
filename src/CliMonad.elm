@@ -251,16 +251,21 @@ andThen : (a -> CliMonad b) -> CliMonad a -> CliMonad b
 andThen f (CliMonad x) =
     CliMonad
         (\input ->
-            Result.andThen
-                (\( y, yo ) ->
+            case x input of
+                Err e ->
+                    Err e
+
+                Ok ( y, yo ) ->
                     let
                         (CliMonad z) =
                             f y
                     in
-                    z input
-                        |> Result.map (\( w, wo ) -> ( w, mergeOutput yo wo ))
-                )
-                (x input)
+                    case z input of
+                        Err e ->
+                            Err e
+
+                        Ok ( w, wo ) ->
+                            Ok ( w, mergeOutput yo wo )
         )
 
 

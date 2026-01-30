@@ -1,0 +1,43 @@
+{
+    "openapi": "3.0.1",
+    "info": {
+        "title": "Bug 22530",
+        "version": "v0"
+    },
+    "servers": [
+        {
+            "url": "http://127.0.0.1:3000",
+            "description": "Generated server url"
+        }
+    ],
+    "paths": {
+        "/api/something": {
+            "get": {
+                "operationId": "something-controller_get",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string",
+                                        "enum": [
+                                            "SOMETHING",
+                                            "SOMETHING_ELSE",
+                                            "SOMETHING_MORE"
+                                        ]
+                                    }
+                                }
+                            }
+                        },
+                        "description": "OK"
+                    }
+                },
+                "tags": ["something-controller"]
+            }
+        }
+    },
+    "components": {}
+}

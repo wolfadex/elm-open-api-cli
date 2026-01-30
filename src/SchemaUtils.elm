@@ -677,10 +677,10 @@ objectsIntersection qualify lo ro =
                             True
             in
             FastDict.merge
-                (\lkey lval ->
+                (\lkey lval acc ->
                     if lval.required && not radd then
                         -- A required field on the left when additionalProperties are forbidden on the right means the sets are disjoint
-                        CliMonad.map (\_ -> Nothing)
+                        CliMonad.map (\_ -> Nothing) acc
 
                     else
                         CliMonad.map2
@@ -691,11 +691,12 @@ objectsIntersection qualify lo ro =
                                     )
                             )
                             (exampleOfType qualify lval.type_)
+                            acc
                 )
-                (\key lval rval ->
+                (\key lval rval acc ->
                     if not (lval.required || rval.required) then
                         -- If the field is optional in both then we can just omit it in the intersection
-                        identity
+                        acc
 
                     else
                         CliMonad.map2
@@ -705,11 +706,12 @@ objectsIntersection qualify lo ro =
                                 )
                             )
                             (typesIntersection qualify lval.type_ rval.type_)
+                            acc
                 )
-                (\rkey rval ->
+                (\rkey rval acc ->
                     if rval.required && not ladd then
                         -- A required field on the right when additionalProperties are forbidden on the left means the sets are disjoint
-                        CliMonad.map (\_ -> Nothing)
+                        CliMonad.map (\_ -> Nothing) acc
 
                     else
                         CliMonad.map2
@@ -720,6 +722,7 @@ objectsIntersection qualify lo ro =
                                     )
                             )
                             (exampleOfType qualify rval.type_)
+                            acc
                 )
                 ldict
                 rdict

@@ -69,17 +69,17 @@ getAlias refUri =
             CliMonad.fail <| "Couldn't get the type ref (" ++ String.join "/" refUri ++ ") for the response"
 
 
-subSchemaAllOfToProperties : Bool -> List (List String) -> Json.Schema.Definitions.SubSchema -> CliMonad (List ( Common.UnsafeName, Common.Field ))
-subSchemaAllOfToProperties qualify seen subSchema =
+subSchemaAllOfToProperties : List (List String) -> Json.Schema.Definitions.SubSchema -> CliMonad (List ( Common.UnsafeName, Common.Field ))
+subSchemaAllOfToProperties seen subSchema =
     subSchema.allOf
         |> Maybe.withDefault []
-        |> CliMonad.combineMap (schemaToProperties qualify seen)
+        |> CliMonad.combineMap (schemaToProperties seen)
         |> CliMonad.map (List.foldl listUnion [])
         |> CliMonad.withPath (Common.UnsafeName "allOf")
 
 
-schemaToProperties : Bool -> List (List String) -> Json.Schema.Definitions.Schema -> CliMonad (List ( Common.UnsafeName, Common.Field ))
-schemaToProperties qualify seen allOfItem =
+schemaToProperties : List (List String) -> Json.Schema.Definitions.Schema -> CliMonad (List ( Common.UnsafeName, Common.Field ))
+schemaToProperties seen allOfItem =
     case allOfItem of
         Json.Schema.Definitions.ObjectSchema allOfItemSchema ->
             CliMonad.map3
@@ -87,9 +87,9 @@ schemaToProperties qualify seen allOfItem =
                     listUnion a b
                         |> listUnion c
                 )
-                (subSchemaToProperties qualify seen allOfItemSchema)
-                (subSchemaRefToProperties qualify seen allOfItemSchema)
-                (subSchemaAllOfToProperties qualify seen allOfItemSchema)
+                (subSchemaToProperties seen allOfItemSchema)
+                (subSchemaRefToProperties seen allOfItemSchema)
+                (subSchemaAllOfToProperties seen allOfItemSchema)
 
         Json.Schema.Definitions.BooleanSchema _ ->
             CliMonad.todoWithDefault [] "Boolean schema inside allOf"
@@ -107,20 +107,20 @@ listUnion l r =
         |> List.map (Tuple.mapFirst Common.UnsafeName)
 
 
-subSchemaRefToProperties : Bool -> List (List String) -> Json.Schema.Definitions.SubSchema -> CliMonad (List ( Common.UnsafeName, Common.Field ))
-subSchemaRefToProperties qualify seen allOfItem =
+subSchemaRefToProperties : List (List String) -> Json.Schema.Definitions.SubSchema -> CliMonad (List ( Common.UnsafeName, Common.Field ))
+subSchemaRefToProperties seen allOfItem =
     case allOfItem.ref of
         Nothing ->
             CliMonad.succeed []
 
         Just ref ->
             getAlias (String.split "/" ref)
-                |> CliMonad.andThen (schemaToProperties qualify seen)
+                |> CliMonad.andThen (schemaToProperties seen)
                 |> CliMonad.withPath (Common.UnsafeName ref)
 
 
-subSchemaToProperties : Bool -> List (List String) -> Json.Schema.Definitions.SubSchema -> CliMonad (List ( Common.UnsafeName, Common.Field ))
-subSchemaToProperties qualify seen sch =
+subSchemaToProperties : List (List String) -> Json.Schema.Definitions.SubSchema -> CliMonad (List ( Common.UnsafeName, Common.Field ))
+subSchemaToProperties seen sch =
     -- TODO: rename
     let
         requiredSet : Set String
@@ -134,7 +134,7 @@ subSchemaToProperties qualify seen sch =
         |> Maybe.withDefault []
         |> CliMonad.combineMap
             (\( key, valueSchema ) ->
-                schemaToType qualify seen valueSchema
+                schemaToType seen valueSchema
                     |> CliMonad.map
                         (\{ type_, documentation } ->
                             ( Common.UnsafeName key
@@ -148,8 +148,8 @@ subSchemaToProperties qualify seen sch =
             )
 
 
-schemaToType : Bool -> List (List String) -> Json.Schema.Definitions.Schema -> CliMonad { type_ : Common.Type, documentation : Maybe String }
-schemaToType qualify seen schema =
+schemaToType : List (List String) -> Json.Schema.Definitions.Schema -> CliMonad { type_ : Common.Type, documentation : Maybe String }
+schemaToType seen schema =
     case schema of
         Json.Schema.Definitions.BooleanSchema _ ->
             CliMonad.todoWithDefault { type_ = Common.Value, documentation = Nothing } "Boolean schema"
@@ -201,7 +201,7 @@ schemaToType qualify seen schema =
                     in
                     case singleType of
                         Json.Schema.Definitions.ObjectType ->
-                            objectSchemaToType qualify seen subSchema
+                            objectSchemaToType seen subSchema
 
                         Json.Schema.Definitions.StringType ->
                             basic Common.String Common.ConstString Json.Decode.string
@@ -245,11 +245,11 @@ schemaToType qualify seen schema =
                                                     |> joinIfNotEmpty "\n\n"
                                             }
                                         )
-                                        (schemaToType qualify seen itemSchema)
+                                        (schemaToType seen itemSchema)
 
                 anyOfToType : List Json.Schema.Definitions.Schema -> CliMonad { type_ : Common.Type, documentation : Maybe String }
                 anyOfToType schemas =
-                    schemaIntersection qualify seen schemas
+                    schemaIntersection seen schemas
                         |> CliMonad.andThen
                             (\disjoint ->
                                 case disjoint of
@@ -290,7 +290,7 @@ schemaToType qualify seen schema =
                 oneOfCombine : List Json.Schema.Definitions.Schema -> CliMonad { type_ : Common.Type, documentation : Maybe String }
                 oneOfCombine oneOf =
                     oneOf
-                        |> CliMonad.combineMap (schemaToType qualify seen)
+                        |> CliMonad.combineMap (schemaToType seen)
                         |> CliMonad.andThen oneOfType
                         |> CliMonad.map
                             (\{ type_, documentation } ->
@@ -315,11 +315,11 @@ schemaToType qualify seen schema =
                         [ (Json.Schema.Definitions.ObjectSchema firstSchema) as first, (Json.Schema.Definitions.ObjectSchema secondSchema) as second ] ->
                             case ( firstSchema.type_, secondSchema.type_ ) of
                                 ( Json.Schema.Definitions.SingleType Json.Schema.Definitions.NullType, _ ) ->
-                                    schemaToType qualify seen second
+                                    schemaToType seen second
                                         |> nullable
 
                                 ( _, Json.Schema.Definitions.SingleType Json.Schema.Definitions.NullType ) ->
-                                    schemaToType qualify seen first
+                                    schemaToType seen first
                                         |> nullable
 
                                 _ ->
@@ -360,7 +360,7 @@ schemaToType qualify seen schema =
                         Nothing ->
                             case subSchema.anyOf of
                                 Just [ onlySchema ] ->
-                                    schemaToType qualify seen onlySchema
+                                    schemaToType seen onlySchema
 
                                 Just [ firstSchema, secondSchema ] ->
                                     case ( firstSchema, secondSchema ) of
@@ -370,10 +370,10 @@ schemaToType qualify seen schema =
                                             -- mark a value as nullable in the schema.
                                             case ( firstSubSchema.type_, secondSubSchema.type_ ) of
                                                 ( Json.Schema.Definitions.SingleType Json.Schema.Definitions.NullType, _ ) ->
-                                                    nullable (schemaToType qualify seen secondSchema)
+                                                    nullable (schemaToType seen secondSchema)
 
                                                 ( _, Json.Schema.Definitions.SingleType Json.Schema.Definitions.NullType ) ->
-                                                    nullable (schemaToType qualify seen firstSchema)
+                                                    nullable (schemaToType seen firstSchema)
 
                                                 _ ->
                                                     anyOfToType [ firstSchema, secondSchema ]
@@ -387,7 +387,7 @@ schemaToType qualify seen schema =
                                 Nothing ->
                                     case subSchema.allOf of
                                         Just [ onlySchema ] ->
-                                            schemaToType qualify seen onlySchema
+                                            schemaToType seen onlySchema
 
                                         Just [] ->
                                             CliMonad.succeed { type_ = Common.Value, documentation = subSchema.description }
@@ -395,12 +395,12 @@ schemaToType qualify seen schema =
                                         Just _ ->
                                             -- If we have more than one item in `allOf`, then it's _probably_ an object
                                             -- TODO: improve this to actually check if all the `allOf` subschema are objects.
-                                            objectSchemaToType qualify seen subSchema
+                                            objectSchemaToType seen subSchema
 
                                         Nothing ->
                                             case subSchema.oneOf of
                                                 Just [ onlySchema ] ->
-                                                    schemaToType qualify seen onlySchema
+                                                    schemaToType seen onlySchema
 
                                                 Just [] ->
                                                     CliMonad.succeed { type_ = Common.Value, documentation = subSchema.description }
@@ -504,8 +504,8 @@ type alias SchemaIntersection =
     }
 
 
-schemaIntersection : Bool -> List (List String) -> List Json.Schema.Definitions.Schema -> CliMonad (Maybe SchemaIntersection)
-schemaIntersection qualify seen schemas =
+schemaIntersection : List (List String) -> List Json.Schema.Definitions.Schema -> CliMonad (Maybe SchemaIntersection)
+schemaIntersection seen schemas =
     let
         areDisjoint : Json.Schema.Definitions.Schema -> Json.Schema.Definitions.Schema -> CliMonad (Maybe SchemaIntersection)
         areDisjoint l r =
@@ -532,10 +532,10 @@ schemaIntersection qualify seen schemas =
                 ( Json.Schema.Definitions.ObjectSchema lo, Json.Schema.Definitions.ObjectSchema ro ) ->
                     CliMonad.andThen2
                         (\lt rt ->
-                            typesIntersection qualify seen lt.type_ rt.type_
+                            typesIntersection seen lt.type_ rt.type_
                         )
-                        (schemaToType qualify seen l)
-                        (schemaToType qualify seen r)
+                        (schemaToType seen l)
+                        (schemaToType seen r)
                         |> CliMonad.map
                             (Maybe.map
                                 (\res ->
@@ -609,8 +609,8 @@ removeDocumentation =
         )
 
 
-exampleOfType : Bool -> List (List String) -> Common.Type -> CliMonad Json.Encode.Value
-exampleOfType qualify seen type_ =
+exampleOfType : List (List String) -> Common.Type -> CliMonad Json.Encode.Value
+exampleOfType seen type_ =
     case type_ of
         Common.Nullable _ ->
             CliMonad.succeed Json.Encode.null
@@ -620,7 +620,7 @@ exampleOfType qualify seen type_ =
                 |> CliMonad.combineMap
                     (\( fieldName, field ) ->
                         if field.required then
-                            exampleOfType qualify seen field.type_
+                            exampleOfType seen field.type_
                                 |> CliMonad.map
                                     (\example ->
                                         Just ( Common.unwrapUnsafe fieldName, example )
@@ -681,7 +681,7 @@ exampleOfType qualify seen type_ =
                 |> CliMonad.combineMap
                     (\( fieldName, field ) ->
                         if field.required then
-                            exampleOfType qualify seen field.type_
+                            exampleOfType seen field.type_
                                 |> CliMonad.map
                                     (\example ->
                                         Just ( Common.unwrapUnsafe fieldName, example )
@@ -699,7 +699,7 @@ exampleOfType qualify seen type_ =
                     )
 
         Common.OneOf _ ( t, _ ) ->
-            exampleOfType qualify seen t.type_
+            exampleOfType seen t.type_
 
         Common.Enum ( t, _ ) ->
             Json.Encode.string (Common.unwrapUnsafe t)
@@ -720,8 +720,8 @@ exampleOfType qualify seen type_ =
                     newSeen =
                         ref :: seen
                 in
-                refToType qualify newSeen ref
-                    |> CliMonad.andThen (\t -> exampleOfType qualify newSeen t)
+                refToType newSeen ref
+                    |> CliMonad.andThen (\t -> exampleOfType newSeen t)
                     |> CliMonad.withPath (Common.UnsafeName (String.join "/" ref))
 
         Common.Bytes ->
@@ -733,12 +733,12 @@ exampleOfType qualify seen type_ =
                 |> CliMonad.succeed
 
 
-refToType : Bool -> List (List String) -> List String -> CliMonad Common.Type
-refToType qualify seen ref =
+refToType : List (List String) -> List String -> CliMonad Common.Type
+refToType seen ref =
     CliMonad.getOrCache ref
         (\() ->
             getAlias ref
-                |> CliMonad.andThen (schemaToType qualify seen)
+                |> CliMonad.andThen (schemaToType seen)
                 |> CliMonad.map .type_
         )
 
@@ -754,8 +754,8 @@ type SimplifiedForDisjointBasicType
     | SimplifiedForDisjointBool (Maybe Bool)
 
 
-typesIntersection : Bool -> List (List String) -> Common.Type -> Common.Type -> CliMonad (Maybe Json.Encode.Value)
-typesIntersection qualify seen lType rType =
+typesIntersection : List (List String) -> Common.Type -> Common.Type -> CliMonad (Maybe Json.Encode.Value)
+typesIntersection seen lType rType =
     let
         followLeftRef : List String -> CliMonad (Maybe Json.Encode.Value)
         followLeftRef lRef =
@@ -768,14 +768,14 @@ typesIntersection qualify seen lType rType =
                     newSeen =
                         lRef :: seen
                 in
-                refToType qualify newSeen lRef
-                    |> CliMonad.andThen (\type_ -> typesIntersection qualify newSeen type_ rType)
+                refToType newSeen lRef
+                    |> CliMonad.andThen (\type_ -> typesIntersection newSeen type_ rType)
                     |> CliMonad.withPath (Common.UnsafeName (String.join "/" lRef))
     in
     case ( lType, rType ) of
         ( Common.Ref lRef, Common.Ref rRef ) ->
             if lRef == rRef then
-                exampleOfType qualify seen lType
+                exampleOfType seen lType
                     |> CliMonad.map Just
 
             else
@@ -794,15 +794,15 @@ typesIntersection qualify seen lType rType =
                     newSeen =
                         rRef :: seen
                 in
-                refToType qualify newSeen rRef
-                    |> CliMonad.andThen (\type_ -> typesIntersection qualify newSeen lType type_)
+                refToType newSeen rRef
+                    |> CliMonad.andThen (\type_ -> typesIntersection newSeen lType type_)
                     |> CliMonad.withPath (Common.UnsafeName (String.join "/" rRef))
 
         ( Common.Value, _ ) ->
-            CliMonad.map Just (exampleOfType qualify seen rType)
+            CliMonad.map Just (exampleOfType seen rType)
 
         ( _, Common.Value ) ->
-            CliMonad.map Just (exampleOfType qualify seen lType)
+            CliMonad.map Just (exampleOfType seen lType)
 
         ( Common.Nullable _, Common.Nullable _ ) ->
             CliMonad.succeed (Just Json.Encode.null)
@@ -814,16 +814,16 @@ typesIntersection qualify seen lType rType =
             CliMonad.succeed (Just Json.Encode.null)
 
         ( Common.Nullable c, Common.Basic _ _ ) ->
-            typesIntersection qualify seen c rType
+            typesIntersection seen c rType
 
         ( Common.Basic _ _, Common.Nullable c ) ->
-            typesIntersection qualify seen lType c
+            typesIntersection seen lType c
 
         ( Common.Nullable c, Common.Object _ ) ->
-            typesIntersection qualify seen c rType
+            typesIntersection seen c rType
 
         ( Common.Object _, Common.Nullable c ) ->
-            typesIntersection qualify seen lType c
+            typesIntersection seen lType c
 
         ( Common.Null, Common.Null ) ->
             CliMonad.succeed (Just Json.Encode.null)
@@ -839,7 +839,7 @@ typesIntersection qualify seen lType rType =
                 |> nonEmptyToList
                 |> CliMonad.combineMap
                     (\alternative ->
-                        typesIntersection qualify seen alternative.type_ rType
+                        typesIntersection seen alternative.type_ rType
                             |> CliMonad.withPath alternative.name
                     )
                 |> CliMonad.map (List.Extra.findMap identity)
@@ -849,7 +849,7 @@ typesIntersection qualify seen lType rType =
                 |> nonEmptyToList
                 |> CliMonad.combineMap
                     (\alternative ->
-                        typesIntersection qualify seen lType alternative.type_
+                        typesIntersection seen lType alternative.type_
                             |> CliMonad.withPath alternative.name
                     )
                 |> CliMonad.map (List.Extra.findMap identity)
@@ -916,10 +916,10 @@ typesIntersection qualify seen lType rType =
                     CliMonad.succeed Nothing
 
         ( Common.Object lFields, Common.Object rFields ) ->
-            objectsIntersection qualify seen ( lFields, Nothing ) ( rFields, Nothing )
+            objectsIntersection seen ( lFields, Nothing ) ( rFields, Nothing )
 
         ( Common.Dict lAdditional lFields, Common.Dict rAdditional rFields ) ->
-            objectsIntersection qualify seen ( lFields, Just lAdditional.type_ ) ( rFields, Just rAdditional.type_ )
+            objectsIntersection seen ( lFields, Just lAdditional.type_ ) ( rFields, Just rAdditional.type_ )
 
         ( Common.Enum lItems, Common.Enum rItems ) ->
             let
@@ -967,12 +967,11 @@ typesIntersection qualify seen lType rType =
 
 
 objectsIntersection :
-    Bool
-    -> List (List String)
+    List (List String)
     -> ( Common.Object, Maybe Common.Type )
     -> ( Common.Object, Maybe Common.Type )
     -> CliMonad (Maybe Json.Encode.Value)
-objectsIntersection qualify seen ( lFields, lAdditional ) ( rFields, rAdditional ) =
+objectsIntersection seen ( lFields, lAdditional ) ( rFields, rAdditional ) =
     let
         lDict : FastDict.Dict String Common.Field
         lDict =
@@ -997,7 +996,7 @@ objectsIntersection qualify seen ( lFields, lAdditional ) ( rFields, rAdditional
                                     ( lkey, example ) :: prev
                                 )
                         )
-                        (exampleOfType qualify seen lField.type_
+                        (exampleOfType seen lField.type_
                             |> CliMonad.withPath (Common.UnsafeName lkey)
                         )
                         acc
@@ -1019,7 +1018,7 @@ objectsIntersection qualify seen ( lFields, lAdditional ) ( rFields, rAdditional
                             ( bkey, bValue ) :: iAcc
                         )
                     )
-                    (typesIntersection qualify seen lField.type_ rField.type_
+                    (typesIntersection seen lField.type_ rField.type_
                         |> CliMonad.withPath (Common.UnsafeName bkey)
                     )
                     acc
@@ -1034,7 +1033,7 @@ objectsIntersection qualify seen ( lFields, lAdditional ) ( rFields, rAdditional
                                     ( rkey, example ) :: prev
                                 )
                         )
-                        (exampleOfType qualify seen rField.type_
+                        (exampleOfType seen rField.type_
                             |> CliMonad.withPath (Common.UnsafeName rkey)
                         )
                         acc
@@ -1211,12 +1210,11 @@ subschemaToEnumMaybe subSchema =
 
 
 typeToOneOfVariant :
-    Bool
-    -> { type_ : Common.Type, documentation : Maybe String }
+    { type_ : Common.Type, documentation : Maybe String }
     -> CliMonad (Maybe { name : Common.UnsafeName, type_ : Common.Type, documentation : Maybe String })
-typeToOneOfVariant qualify { type_, documentation } =
+typeToOneOfVariant { type_, documentation } =
     type_
-        |> typeToAnnotationWithNullable qualify
+        |> typeToAnnotationWithNullable
         |> CliMonad.map
             (\ann ->
                 let
@@ -1243,7 +1241,7 @@ oneOfType :
     -> CliMonad { type_ : Common.Type, documentation : Maybe String }
 oneOfType types =
     types
-        |> CliMonad.combineMap (typeToOneOfVariant False)
+        |> CliMonad.combineMap typeToOneOfVariant
         |> CliMonad.map
             (\maybeVariants ->
                 case Maybe.Extra.combine maybeVariants |> Maybe.andThen NonEmpty.fromList of
@@ -1297,8 +1295,8 @@ oneOfType types =
 
 {-| Transform an object schema's named and inherited (via $ref) properties to a type
 -}
-objectSchemaToTypeHelp : Bool -> List (List String) -> Json.Schema.Definitions.SubSchema -> CliMonad { type_ : Common.Type, documentation : Maybe String }
-objectSchemaToTypeHelp qualify seen subSchema =
+objectSchemaToTypeHelp : List (List String) -> Json.Schema.Definitions.SubSchema -> CliMonad { type_ : Common.Type, documentation : Maybe String }
+objectSchemaToTypeHelp seen subSchema =
     CliMonad.map2
         (\schemaProps allOfProps ->
             let
@@ -1334,16 +1332,16 @@ objectSchemaToTypeHelp qualify seen subSchema =
                             |> joinIfNotEmpty "\n\n"
             }
         )
-        (subSchemaToProperties qualify seen subSchema)
-        (subSchemaAllOfToProperties qualify seen subSchema)
+        (subSchemaToProperties seen subSchema)
+        (subSchemaAllOfToProperties seen subSchema)
 
 
-objectSchemaToType : Bool -> List (List String) -> Json.Schema.Definitions.SubSchema -> CliMonad { type_ : Common.Type, documentation : Maybe String }
-objectSchemaToType qualify seen subSchema =
+objectSchemaToType : List (List String) -> Json.Schema.Definitions.SubSchema -> CliMonad { type_ : Common.Type, documentation : Maybe String }
+objectSchemaToType seen subSchema =
     let
         declaredProperties : CliMonad { type_ : Common.Type, documentation : Maybe String }
         declaredProperties =
-            objectSchemaToTypeHelp qualify seen subSchema
+            objectSchemaToTypeHelp seen subSchema
 
         declaredAndAdditionalProperties : CliMonad { type_ : Common.Type, documentation : Maybe String } -> CliMonad { type_ : Common.Type, documentation : Maybe String }
         declaredAndAdditionalProperties additionalSchema =
@@ -1409,7 +1407,7 @@ objectSchemaToType qualify seen subSchema =
                     -- The object contains an additionalProperties entry that describes the
                     -- type of the values, which may have arbitrary keys, in the object.
                     Just additionalPropertiesSchema ->
-                        schemaToType qualify seen additionalPropertiesSchema
+                        schemaToType seen additionalPropertiesSchema
                             |> declaredAndAdditionalProperties
 
                     Nothing ->
@@ -1454,7 +1452,7 @@ oneOfDeclaration ( oneOfName, variants ) =
     let
         variantDeclaration : { name : Common.UnsafeName, type_ : Common.Type, documentation : Maybe String } -> CliMonad Elm.Variant
         variantDeclaration { name, type_ } =
-            typeToAnnotationWithNullable False type_
+            typeToAnnotationWithNullable type_
                 |> CliMonad.map
                     (\variantAnnotation ->
                         let
@@ -1501,16 +1499,16 @@ fixOneOfName name =
 
 {-| Transform an OpenAPI type into an Elm annotation. Nullable values are represented using Nullable.
 -}
-typeToAnnotationWithNullable : Bool -> Common.Type -> CliMonad Elm.Annotation.Annotation
-typeToAnnotationWithNullable qualify type_ =
+typeToAnnotationWithNullable : Common.Type -> CliMonad Elm.Annotation.Annotation
+typeToAnnotationWithNullable type_ =
     case type_ of
         Common.Nullable t ->
             CliMonad.map
                 OpenApi.Common.Internal.annotation_.nullable
-                (typeToAnnotationWithNullable qualify t)
+                (typeToAnnotationWithNullable t)
 
         Common.Object fields ->
-            objectToAnnotation qualify { useMaybe = False } fields
+            objectToAnnotation { useMaybe = False } fields
 
         Common.Basic basicType basic ->
             basicTypeToAnnotation basicType basic
@@ -1519,14 +1517,14 @@ typeToAnnotationWithNullable qualify type_ =
             CliMonad.succeed Elm.Annotation.unit
 
         Common.List t ->
-            CliMonad.map Elm.Annotation.list (typeToAnnotationWithNullable qualify t)
+            CliMonad.map Elm.Annotation.list (typeToAnnotationWithNullable t)
 
         Common.Dict additionalProperties [] ->
             -- We do not use `Elm.Annotation.dict` here because it will NOT
             -- result in `import Dict` being generated in the module, due to
             -- a bug in elm-codegen.
             CliMonad.map (Gen.Dict.annotation_.dict Elm.Annotation.string)
-                (typeToAnnotationWithNullable qualify additionalProperties.type_)
+                (typeToAnnotationWithNullable additionalProperties.type_)
 
         Common.Dict additionalProperties fields ->
             let
@@ -1543,7 +1541,7 @@ typeToAnnotationWithNullable qualify type_ =
                     )
             in
             (additionalPropertiesField :: fields)
-                |> objectToAnnotation qualify { useMaybe = False }
+                |> objectToAnnotation { useMaybe = False }
 
         Common.Enum variants ->
             CliMonad.enumName (NonEmpty.toList variants)
@@ -1554,11 +1552,11 @@ typeToAnnotationWithNullable qualify type_ =
                                 CliMonad.succeed Elm.Annotation.string
 
                             Just name ->
-                                nameToAnnotation qualify name
+                                nameToAnnotation name
                     )
 
         Common.OneOf oneOfName oneOfData ->
-            oneOfAnnotation qualify oneOfName (NonEmpty.toList oneOfData)
+            oneOfAnnotation oneOfName (NonEmpty.toList oneOfData)
 
         Common.Value ->
             CliMonad.succeed Gen.Json.Encode.annotation_.value
@@ -1567,7 +1565,7 @@ typeToAnnotationWithNullable qualify type_ =
             refToTypeName ref
                 |> CliMonad.andThen
                     (\name ->
-                        nameToAnnotation qualify name
+                        nameToAnnotation name
                     )
                 |> CliMonad.withPath (Common.UnsafeName (String.join "/" ref))
 
@@ -1581,14 +1579,14 @@ typeToAnnotationWithNullable qualify type_ =
 
 {-| Transform an OpenAPI type into an Elm annotation. Nullable values are represented using Maybe.
 -}
-typeToAnnotationWithMaybe : Bool -> Common.Type -> CliMonad Elm.Annotation.Annotation
-typeToAnnotationWithMaybe qualify type_ =
+typeToAnnotationWithMaybe : Common.Type -> CliMonad Elm.Annotation.Annotation
+typeToAnnotationWithMaybe type_ =
     case type_ of
         Common.Nullable t ->
-            CliMonad.map Elm.Annotation.maybe (typeToAnnotationWithMaybe qualify t)
+            CliMonad.map Elm.Annotation.maybe (typeToAnnotationWithMaybe t)
 
         Common.Object fields ->
-            objectToAnnotation qualify { useMaybe = True } fields
+            objectToAnnotation { useMaybe = True } fields
 
         Common.Basic basicType basic ->
             basicTypeToAnnotation basicType basic
@@ -1597,14 +1595,14 @@ typeToAnnotationWithMaybe qualify type_ =
             CliMonad.succeed Elm.Annotation.unit
 
         Common.List t ->
-            CliMonad.map Elm.Annotation.list (typeToAnnotationWithMaybe qualify t)
+            CliMonad.map Elm.Annotation.list (typeToAnnotationWithMaybe t)
 
         Common.Dict additionalProperties [] ->
             -- We do not use `Elm.Annotation.dict` here because it will NOT
             -- result in `import Dict` being generated in the module, due to
             -- a bug in elm-codegen.
             CliMonad.map (Gen.Dict.annotation_.dict Elm.Annotation.string)
-                (typeToAnnotationWithMaybe qualify additionalProperties.type_)
+                (typeToAnnotationWithMaybe additionalProperties.type_)
 
         Common.Dict additionalProperties fields ->
             let
@@ -1621,7 +1619,7 @@ typeToAnnotationWithMaybe qualify type_ =
                     )
             in
             (additionalPropertiesField :: fields)
-                |> objectToAnnotation qualify { useMaybe = True }
+                |> objectToAnnotation { useMaybe = True }
 
         Common.Enum variants ->
             variants
@@ -1634,11 +1632,11 @@ typeToAnnotationWithMaybe qualify type_ =
                                 CliMonad.succeed Elm.Annotation.string
 
                             Just name ->
-                                nameToAnnotation qualify name
+                                nameToAnnotation name
                     )
 
         Common.OneOf oneOfName oneOfData ->
-            oneOfAnnotation qualify oneOfName (NonEmpty.toList oneOfData)
+            oneOfAnnotation oneOfName (NonEmpty.toList oneOfData)
 
         Common.Value ->
             CliMonad.succeed Gen.Json.Encode.annotation_.value
@@ -1646,7 +1644,7 @@ typeToAnnotationWithMaybe qualify type_ =
         Common.Ref ref ->
             refToTypeName ref
                 |> CliMonad.andThen
-                    (\name -> nameToAnnotation qualify name)
+                    (\name -> nameToAnnotation name)
                 |> CliMonad.withPath (Common.UnsafeName (String.join "/" ref))
 
         Common.Bytes ->
@@ -1657,18 +1655,13 @@ typeToAnnotationWithMaybe qualify type_ =
             CliMonad.succeed Elm.Annotation.unit
 
 
-nameToAnnotation : Bool -> Common.UnsafeName -> CliMonad Elm.Annotation.Annotation
-nameToAnnotation qualify name =
+nameToAnnotation : Common.UnsafeName -> CliMonad Elm.Annotation.Annotation
+nameToAnnotation name =
     CliMonad.moduleToNamespace Common.Types
         |> CliMonad.map
             (\importFrom ->
                 Elm.Annotation.named
-                    (if qualify then
-                        importFrom
-
-                     else
-                        []
-                    )
+                    importFrom
                     (Common.toTypeName name)
             )
 
@@ -1694,12 +1687,12 @@ basicTypeToAnnotation basicType { format } =
     CliMonad.withFormat basicType format .annotation default
 
 
-objectToAnnotation : Bool -> { useMaybe : Bool } -> Common.Object -> CliMonad Elm.Annotation.Annotation
-objectToAnnotation qualify config fields =
+objectToAnnotation : { useMaybe : Bool } -> Common.Object -> CliMonad Elm.Annotation.Annotation
+objectToAnnotation config fields =
     fields
         |> CliMonad.combineMap
             (\( k, v ) ->
-                fieldToAnnotation qualify config v
+                fieldToAnnotation config v
                     |> CliMonad.map (Tuple.pair k)
                     |> CliMonad.withPath k
             )
@@ -1713,16 +1706,16 @@ recordType fields =
         |> Elm.Annotation.record
 
 
-fieldToAnnotation : Bool -> { useMaybe : Bool } -> Common.Field -> CliMonad Elm.Annotation.Annotation
-fieldToAnnotation qualify { useMaybe } { type_, required } =
+fieldToAnnotation : { useMaybe : Bool } -> Common.Field -> CliMonad Elm.Annotation.Annotation
+fieldToAnnotation { useMaybe } { type_, required } =
     let
         annotation : CliMonad Elm.Annotation.Annotation
         annotation =
             if useMaybe then
-                typeToAnnotationWithMaybe qualify type_
+                typeToAnnotationWithMaybe type_
 
             else
-                typeToAnnotationWithNullable qualify type_
+                typeToAnnotationWithNullable type_
     in
     if required then
         annotation
@@ -1933,7 +1926,7 @@ typeToEncoder type_ =
                                     )
                                     variantEncoder
                             )
-                            (typeToAnnotationWithNullable True variant.type_)
+                            (typeToAnnotationWithNullable variant.type_)
                             (typeToEncoder variant.type_)
                             |> CliMonad.withPath variant.name
                     )
@@ -1974,18 +1967,13 @@ basicTypeToEncoder basicType { format } =
     CliMonad.withFormat basicType format .encode default
 
 
-oneOfAnnotation : Bool -> Common.TypeName -> List Common.OneOfData -> CliMonad Elm.Annotation.Annotation
-oneOfAnnotation qualify oneOfName oneOfData =
+oneOfAnnotation : Common.TypeName -> List Common.OneOfData -> CliMonad Elm.Annotation.Annotation
+oneOfAnnotation oneOfName oneOfData =
     CliMonad.moduleToNamespace Common.Types
         |> CliMonad.andThen
             (\importFrom ->
                 Elm.Annotation.named
-                    (if qualify then
-                        importFrom
-
-                     else
-                        []
-                    )
+                    importFrom
                     oneOfName
                     |> CliMonad.succeedWith
                         (FastDict.singleton oneOfName oneOfData)

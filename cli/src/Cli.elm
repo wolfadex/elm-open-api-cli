@@ -21,7 +21,6 @@ import Json.Decode
 import Json.Encode
 import Json.Value
 import List.Extra
-import Maybe.Extra
 import OpenApi
 import OpenApi.Common.Internal
 import OpenApi.Config
@@ -1001,6 +1000,7 @@ generateFilesFromOpenApiSpecs configs =
                         (\err ->
                             err
                                 |> messageToString
+                                |> String.join "\n"
                                 |> FatalError.fromString
                         )
                     |> BackendTask.fromResult
@@ -1262,24 +1262,33 @@ elmCodegenWarningToMessage ( path, warnings ) =
         warnings
 
 
-messageToString : OpenApi.Generate.Message -> String
+messageToString : OpenApi.Generate.Message -> List String
 messageToString { path, message, details } =
-    [ Just ("Error! " ++ message)
+    [ [ "Error! " ++ message ]
     , if List.isEmpty path then
-        Nothing
+        []
 
       else
-        Just ("  Path: " ++ String.join " -> " path)
+        [ "  Path: " ++ String.join " -> " path ]
     , if List.isEmpty details then
-        Nothing
+        []
 
       else
-        ("  Details:" :: details)
-            |> String.join "\n    "
-            |> Just
+        "  Details:" :: indentLinesWith "    " details
     ]
-        |> Maybe.Extra.values
-        |> String.join "\n"
+        |> List.concat
+
+
+indentLinesWith : String -> List String -> List String
+indentLinesWith prefix lines =
+    let
+        indentLineWith : String -> List String
+        indentLineWith line =
+            line
+                |> String.lines
+                |> List.map (\l -> prefix ++ l)
+    in
+    List.concatMap indentLineWith lines
 
 
 logWarning : ( String, List OpenApi.Generate.Message ) -> BackendTask.BackendTask FatalError.FatalError ()

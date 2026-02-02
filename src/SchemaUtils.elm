@@ -34,9 +34,11 @@ import Gen.List
 import Gen.Maybe
 import Gen.Result
 import Gen.String
+import IntersectionResult exposing (IntersectionResult)
 import Json.Decode
 import Json.Encode
 import Json.Schema.Definitions
+import LazyList exposing (LazyList)
 import List.Extra
 import Maybe.Extra
 import Murmur3
@@ -252,11 +254,12 @@ schemaToType seen schema =
                     schemaIntersection seen schemas
                         |> CliMonad.andThen
                             (\disjoint ->
-                                case disjoint of
-                                    Nothing ->
-                                        oneOfToType schemas
-
-                                    Just collision ->
+                                let
+                                    onIntersection :
+                                        { a | leftSchema : String, rightSchema : String }
+                                        -> Maybe Json.Encode.Value
+                                        -> CliMonad { type_ : Common.Type, documentation : Maybe String }
+                                    onIntersection collision value =
                                         case areAllArrays schemas of
                                             Just innerSchemas ->
                                                 oneOfToType innerSchemas
@@ -268,23 +271,49 @@ schemaToType seen schema =
                                                         )
 
                                             Nothing ->
+                                                let
+                                                    indentWith : String -> String -> String
+                                                    indentWith prefix text =
+                                                        text
+                                                            |> String.lines
+                                                            |> String.join ("\n" ++ prefix)
+
+                                                    details : List String
+                                                    details =
+                                                        case value of
+                                                            Just found ->
+                                                                [ "Clash between"
+                                                                , "  - " ++ indentWith "    " collision.leftSchema
+                                                                , "  - " ++ indentWith "    " collision.rightSchema
+                                                                , "Possible clashing value:"
+                                                                , "  " ++ indentWith "  " (Json.Encode.encode 2 found)
+                                                                ]
+
+                                                            Nothing ->
+                                                                [ "Clash between"
+                                                                , "  - " ++ indentWith "    " collision.leftSchema
+                                                                , "  - " ++ indentWith "    " collision.rightSchema
+                                                                , "Could not build a clashing value"
+                                                                ]
+                                                in
                                                 CliMonad.succeed
                                                     { type_ = Common.Value
                                                     , documentation = subSchema.description
                                                     }
                                                     |> CliMonad.withExtendedWarning
                                                         { message = "anyOf between overlapping types is not supported"
-                                                        , details =
-                                                            [ "Clash between"
-                                                            , "  - " ++ collision.leftSchema
-                                                            , "  - " ++ collision.rightSchema
-                                                            , "Possible clashing value:"
-                                                            ]
-                                                                ++ (Json.Encode.encode 2 collision.value
-                                                                        |> String.lines
-                                                                        |> List.map (\line -> "  " ++ line)
-                                                                   )
+                                                        , details = details
                                                         }
+                                in
+                                case disjoint of
+                                    NoSchemaIntersection ->
+                                        oneOfToType schemas
+
+                                    FoundSchemaIntersection collision ->
+                                        onIntersection collision (Just collision.value)
+
+                                    SchemaMayIntersect collision ->
+                                        onIntersection collision Nothing
                             )
 
                 oneOfCombine : List Json.Schema.Definitions.Schema -> CliMonad { type_ : Common.Type, documentation : Maybe String }
@@ -497,18 +526,24 @@ areAllArrays schemas =
         |> Maybe.map List.concat
 
 
-type alias SchemaIntersection =
-    { leftSchema : String
-    , value : Json.Encode.Value
-    , rightSchema : String
-    }
+type SchemaIntersectionResult
+    = NoSchemaIntersection
+    | SchemaMayIntersect
+        { leftSchema : String
+        , rightSchema : String
+        }
+    | FoundSchemaIntersection
+        { leftSchema : String
+        , value : Json.Encode.Value
+        , rightSchema : String
+        }
 
 
-schemaIntersection : List (List String) -> List Json.Schema.Definitions.Schema -> CliMonad (Maybe SchemaIntersection)
+schemaIntersection : List (List String) -> List Json.Schema.Definitions.Schema -> CliMonad SchemaIntersectionResult
 schemaIntersection seen schemas =
     let
-        areDisjoint : Json.Schema.Definitions.Schema -> Json.Schema.Definitions.Schema -> CliMonad (Maybe SchemaIntersection)
-        areDisjoint l r =
+        intersect : Json.Schema.Definitions.Schema -> Json.Schema.Definitions.Schema -> CliMonad SchemaIntersectionResult
+        intersect l r =
             case ( l, r ) of
                 ( Json.Schema.Definitions.BooleanSchema lb, Json.Schema.Definitions.BooleanSchema rb ) ->
                     if lb == rb then
@@ -516,18 +551,17 @@ schemaIntersection seen schemas =
                         , value = Json.Encode.bool lb
                         , rightSchema = "bool"
                         }
-                            |> Just
+                            |> FoundSchemaIntersection
                             |> CliMonad.succeed
-                            |> CliMonad.withWarning "anyOf between two booleans with the same value"
 
                     else
-                        CliMonad.succeed Nothing
+                        CliMonad.succeed NoSchemaIntersection
 
                 ( Json.Schema.Definitions.BooleanSchema _, Json.Schema.Definitions.ObjectSchema _ ) ->
-                    CliMonad.succeed Nothing
+                    CliMonad.succeed NoSchemaIntersection
 
                 ( Json.Schema.Definitions.ObjectSchema _, Json.Schema.Definitions.BooleanSchema _ ) ->
-                    CliMonad.succeed Nothing
+                    CliMonad.succeed NoSchemaIntersection
 
                 ( Json.Schema.Definitions.ObjectSchema lo, Json.Schema.Definitions.ObjectSchema ro ) ->
                     CliMonad.andThen2
@@ -536,57 +570,97 @@ schemaIntersection seen schemas =
                         )
                         (schemaToType seen l)
                         (schemaToType seen r)
-                        |> CliMonad.map
-                            (Maybe.map
-                                (\res ->
-                                    { leftSchema = describeSubSchema lo
-                                    , value = res
-                                    , rightSchema = describeSubSchema ro
-                                    }
-                                )
+                        |> CliMonad.andThen
+                            (\res ->
+                                case res of
+                                    IntersectionResult.FoundIntersection i ->
+                                        CliMonad.map2
+                                            (\ld rd ->
+                                                { leftSchema = ld
+                                                , value = i
+                                                , rightSchema = rd
+                                                }
+                                                    |> FoundSchemaIntersection
+                                            )
+                                            (describeSubSchema lo)
+                                            (describeSubSchema ro)
+
+                                    IntersectionResult.MayIntersect ->
+                                        CliMonad.map2
+                                            (\ld rd ->
+                                                { leftSchema = ld
+                                                , rightSchema = rd
+                                                }
+                                                    |> SchemaMayIntersect
+                                            )
+                                            (describeSubSchema lo)
+                                            (describeSubSchema ro)
+
+                                    IntersectionResult.NoIntersection ->
+                                        CliMonad.succeed NoSchemaIntersection
                             )
 
         go :
-            Json.Schema.Definitions.Schema
-            -> List Json.Schema.Definitions.Schema
-            -> CliMonad (Maybe SchemaIntersection)
-        go item queue =
-            queue
-                |> CliMonad.combineMap (\other -> areDisjoint item other)
-                |> CliMonad.andThen
-                    (\r ->
-                        case Maybe.Extra.values r of
-                            h :: _ ->
-                                CliMonad.succeed (Just h)
+            LazyList ( Json.Schema.Definitions.Schema, Json.Schema.Definitions.Schema )
+            -> SchemaIntersectionResult
+            -> CliMonad SchemaIntersectionResult
+        go queue acc =
+            case queue of
+                LazyList.LazyEmpty ->
+                    CliMonad.succeed acc
 
-                            [] ->
-                                case queue of
-                                    [] ->
-                                        CliMonad.succeed Nothing
+                LazyList.LazyCons ( l, r ) t ->
+                    intersect l r
+                        |> CliMonad.andThen
+                            (\f ->
+                                case f of
+                                    FoundSchemaIntersection _ ->
+                                        CliMonad.succeed f
 
-                                    h :: t ->
-                                        go h t
-                    )
+                                    SchemaMayIntersect _ ->
+                                        go (t ()) f
+
+                                    NoSchemaIntersection ->
+                                        go (t ()) acc
+                            )
+
+        lazyList : LazyList Json.Schema.Definitions.Schema
+        lazyList =
+            LazyList.fromList schemas
     in
-    case schemas of
-        [] ->
-            CliMonad.succeed Nothing
-
-        h :: t ->
-            go h t
+    go (LazyList.uniquePairs lazyList) NoSchemaIntersection
 
 
-describeSubSchema : Json.Schema.Definitions.SubSchema -> String
+describeSubSchema : Json.Schema.Definitions.SubSchema -> CliMonad String
 describeSubSchema subSchema =
-    case subSchema.ref of
-        Nothing ->
-            subSchema.source
+    let
+        sourceToString : Json.Decode.Value -> String
+        sourceToString source =
+            source
                 |> Json.Decode.decodeValue removeDocumentation
                 |> Result.withDefault subSchema.source
                 |> Json.Encode.encode 0
+    in
+    case subSchema.ref of
+        Nothing ->
+            CliMonad.succeed (sourceToString subSchema.source)
 
         Just ref ->
-            ref
+            getAlias (String.split "/" ref)
+                |> CliMonad.map
+                    (\f ->
+                        let
+                            source : Json.Decode.Value
+                            source =
+                                case f of
+                                    Json.Schema.Definitions.ObjectSchema o ->
+                                        o.source
+
+                                    Json.Schema.Definitions.BooleanSchema b ->
+                                        Json.Encode.bool b
+                        in
+                        ref ++ ":\n" ++ sourceToString source
+                    )
 
 
 removeDocumentation : Json.Decode.Decoder Json.Decode.Value
@@ -748,120 +822,89 @@ exampleString format =
     CliMonad.withFormat Common.String format .example (Json.Encode.string "")
 
 
-type SimplifiedForDisjointBasicType
-    = SimplifiedForDisjointNumber (Maybe Float)
-    | SimplifiedForDisjointString (Maybe String)
-    | SimplifiedForDisjointBool (Maybe Bool)
+type SimplifiedForIntersectionBasicType
+    = SimplifiedForIntersectionNumber (Maybe Float)
+    | SimplifiedForIntersectionString (Maybe String)
+    | SimplifiedForIntersectionBool (Maybe Bool)
 
 
-typesIntersection : List (List String) -> Common.Type -> Common.Type -> CliMonad (Maybe Json.Encode.Value)
+typesIntersection : List (List String) -> Common.Type -> Common.Type -> CliMonad (IntersectionResult Json.Encode.Value)
 typesIntersection seen lType rType =
     let
-        followLeftRef : List String -> CliMonad (Maybe Json.Encode.Value)
-        followLeftRef lRef =
-            if List.Extra.count ((==) lRef) seen > 2 then
-                CliMonad.fail ("Recursive type: " ++ String.join "/" lRef)
+        followRef : List String -> Common.Type -> CliMonad (IntersectionResult Json.Encode.Value)
+        followRef ref oType =
+            if List.Extra.count ((==) ref) seen > 2 then
+                CliMonad.succeed IntersectionResult.MayIntersect
 
             else
                 let
                     newSeen : List (List String)
                     newSeen =
-                        lRef :: seen
+                        ref :: seen
                 in
-                refToType newSeen lRef
-                    |> CliMonad.andThen (\type_ -> typesIntersection newSeen type_ rType)
-                    |> CliMonad.withPath (Common.UnsafeName (String.join "/" lRef))
+                refToType newSeen ref
+                    |> CliMonad.andThen (\type_ -> typesIntersection newSeen type_ oType)
+                    |> CliMonad.withPath (Common.UnsafeName (String.join "/" ref))
     in
     case ( lType, rType ) of
         ( Common.Ref lRef, Common.Ref rRef ) ->
             if lRef == rRef then
                 exampleOfType seen lType
-                    |> CliMonad.map Just
+                    |> CliMonad.map IntersectionResult.FoundIntersection
 
             else
-                followLeftRef lRef
+                followRef lRef rType
 
         ( Common.Ref lRef, _ ) ->
-            followLeftRef lRef
+            followRef lRef rType
 
         ( _, Common.Ref rRef ) ->
-            if List.Extra.count ((==) rRef) seen > 2 then
-                CliMonad.fail ("Recursive type: " ++ String.join "/" rRef)
-
-            else
-                let
-                    newSeen : List (List String)
-                    newSeen =
-                        rRef :: seen
-                in
-                refToType newSeen rRef
-                    |> CliMonad.andThen (\type_ -> typesIntersection newSeen lType type_)
-                    |> CliMonad.withPath (Common.UnsafeName (String.join "/" rRef))
+            followRef rRef lType
 
         ( Common.Value, _ ) ->
-            CliMonad.map Just (exampleOfType seen rType)
+            CliMonad.map IntersectionResult.FoundIntersection (exampleOfType seen rType)
 
         ( _, Common.Value ) ->
-            CliMonad.map Just (exampleOfType seen lType)
+            CliMonad.map IntersectionResult.FoundIntersection (exampleOfType seen lType)
 
         ( Common.Nullable _, Common.Nullable _ ) ->
-            CliMonad.succeed (Just Json.Encode.null)
+            CliMonad.succeed (IntersectionResult.FoundIntersection Json.Encode.null)
 
         ( Common.Null, Common.Nullable _ ) ->
-            CliMonad.succeed (Just Json.Encode.null)
+            CliMonad.succeed (IntersectionResult.FoundIntersection Json.Encode.null)
 
         ( Common.Nullable _, Common.Null ) ->
-            CliMonad.succeed (Just Json.Encode.null)
+            CliMonad.succeed (IntersectionResult.FoundIntersection Json.Encode.null)
 
-        ( Common.Nullable c, Common.Basic _ _ ) ->
+        ( Common.Nullable c, _ ) ->
             typesIntersection seen c rType
 
-        ( Common.Basic _ _, Common.Nullable c ) ->
-            typesIntersection seen lType c
-
-        ( Common.Nullable c, Common.Object _ ) ->
-            typesIntersection seen c rType
-
-        ( Common.Object _, Common.Nullable c ) ->
+        ( _, Common.Nullable c ) ->
             typesIntersection seen lType c
 
         ( Common.Null, Common.Null ) ->
-            CliMonad.succeed (Just Json.Encode.null)
+            CliMonad.succeed (IntersectionResult.FoundIntersection Json.Encode.null)
 
         ( Common.Null, Common.List _ ) ->
-            CliMonad.succeed Nothing
+            CliMonad.succeed IntersectionResult.NoIntersection
 
         ( Common.List _, Common.Null ) ->
-            CliMonad.succeed Nothing
+            CliMonad.succeed IntersectionResult.NoIntersection
 
         ( Common.OneOf _ alternatives, _ ) ->
-            alternatives
-                |> nonEmptyToList
-                |> CliMonad.combineMap
-                    (\alternative ->
-                        typesIntersection seen alternative.type_ rType
-                            |> CliMonad.withPath alternative.name
-                    )
-                |> CliMonad.map (List.Extra.findMap identity)
+            typesIntersectionOneOf seen (NonEmpty.toList alternatives) rType
 
         ( _, Common.OneOf _ alternatives ) ->
-            alternatives
-                |> nonEmptyToList
-                |> CliMonad.combineMap
-                    (\alternative ->
-                        typesIntersection seen lType alternative.type_
-                            |> CliMonad.withPath alternative.name
-                    )
-                |> CliMonad.map (List.Extra.findMap identity)
+            typesIntersectionOneOf seen (NonEmpty.toList alternatives) lType
 
         ( Common.List _, Common.List _ ) ->
             -- Empty lists are not possible to distinguish
-            CliMonad.succeed (Just (Json.Encode.list never []))
+            CliMonad.succeed (IntersectionResult.FoundIntersection (Json.Encode.list never []))
 
         ( Common.Basic lbasic lopt, Common.Basic rbasic ropt ) ->
             case
-                ( simplifyForDisjoint lbasic lopt.const
-                , simplifyForDisjoint rbasic ropt.const
+                ( simplifyForIntersection lbasic lopt.const
+                , simplifyForIntersection rbasic ropt.const
                 )
             of
                 ( Err warning, _ ) ->
@@ -870,32 +913,32 @@ typesIntersection seen lType rType =
                 ( _, Err warning ) ->
                     CliMonad.fail warning
 
-                ( Ok (SimplifiedForDisjointBool lconst), Ok (SimplifiedForDisjointBool rconst) ) ->
+                ( Ok (SimplifiedForIntersectionBool lconst), Ok (SimplifiedForIntersectionBool rconst) ) ->
                     CliMonad.succeed
                         (if lconst == rconst then
-                            Just (Json.Encode.bool (Maybe.withDefault True lconst))
+                            IntersectionResult.FoundIntersection (Json.Encode.bool (Maybe.withDefault True lconst))
 
                          else
-                            Nothing
+                            IntersectionResult.NoIntersection
                         )
 
-                ( Ok (SimplifiedForDisjointNumber lconst), Ok (SimplifiedForDisjointNumber rconst) ) ->
+                ( Ok (SimplifiedForIntersectionNumber lconst), Ok (SimplifiedForIntersectionNumber rconst) ) ->
                     CliMonad.succeed
                         (if lconst == rconst then
-                            Just (Json.Encode.float (Maybe.withDefault 0 lconst))
+                            IntersectionResult.FoundIntersection (Json.Encode.float (Maybe.withDefault 0 lconst))
 
                          else
-                            Nothing
+                            IntersectionResult.NoIntersection
                         )
 
-                ( Ok (SimplifiedForDisjointString lconst), Ok (SimplifiedForDisjointString rconst) ) ->
+                ( Ok (SimplifiedForIntersectionString lconst), Ok (SimplifiedForIntersectionString rconst) ) ->
                     case ( lconst, rconst ) of
                         ( Just lstr, Just rstr ) ->
                             if lstr == rstr then
-                                CliMonad.succeed (Just (Json.Encode.string lstr))
+                                CliMonad.succeed (IntersectionResult.FoundIntersection (Json.Encode.string lstr))
 
                             else
-                                CliMonad.succeed Nothing
+                                CliMonad.succeed IntersectionResult.NoIntersection
 
                         _ ->
                             case ( lopt.format, ropt.format ) of
@@ -904,16 +947,16 @@ typesIntersection seen lType rType =
                                         stringFormatsIntersection lFormat rFormat
 
                                     else
-                                        CliMonad.map Just (exampleString (Just lFormat))
+                                        CliMonad.map IntersectionResult.FoundIntersection (exampleString (Just lFormat))
 
                                 _ ->
                                     lopt.format
                                         |> Maybe.Extra.orElse ropt.format
                                         |> exampleString
-                                        |> CliMonad.map Just
+                                        |> CliMonad.map IntersectionResult.FoundIntersection
 
                 _ ->
-                    CliMonad.succeed Nothing
+                    CliMonad.succeed IntersectionResult.NoIntersection
 
         ( Common.Object lFields, Common.Object rFields ) ->
             objectsIntersection seen ( lFields, Nothing ) ( rFields, Nothing )
@@ -937,11 +980,12 @@ typesIntersection seen lType rType =
                         |> List.map Common.unwrapUnsafe
                         |> Set.fromList
             in
-            Set.intersect lSet rSet
-                |> Set.toList
-                |> List.head
-                |> Maybe.map Json.Encode.string
-                |> CliMonad.succeed
+            case Set.toList (Set.intersect lSet rSet) of
+                h :: _ ->
+                    CliMonad.succeed (IntersectionResult.FoundIntersection (Json.Encode.string h))
+
+                [] ->
+                    CliMonad.succeed IntersectionResult.NoIntersection
 
         ( Common.Enum lItems, Common.Basic Common.String rOptions ) ->
             stringAndEnumIntersection rOptions lItems
@@ -950,27 +994,77 @@ typesIntersection seen lType rType =
             stringAndEnumIntersection lOptions rItems
 
         ( Common.Enum _, Common.Object _ ) ->
-            CliMonad.succeed Nothing
+            CliMonad.succeed IntersectionResult.NoIntersection
 
         ( Common.Object _, Common.Enum _ ) ->
-            CliMonad.succeed Nothing
+            CliMonad.succeed IntersectionResult.NoIntersection
 
         ( Common.Basic _ _, Common.Object _ ) ->
-            CliMonad.succeed Nothing
+            CliMonad.succeed IntersectionResult.NoIntersection
 
         ( Common.Object _, Common.Basic _ _ ) ->
-            CliMonad.succeed Nothing
+            CliMonad.succeed IntersectionResult.NoIntersection
+
+        ( Common.Enum _, Common.Dict _ _ ) ->
+            CliMonad.succeed IntersectionResult.NoIntersection
+
+        ( Common.Dict _ _, Common.Enum _ ) ->
+            CliMonad.succeed IntersectionResult.NoIntersection
+
+        ( Common.Basic _ _, Common.Dict _ _ ) ->
+            CliMonad.succeed IntersectionResult.NoIntersection
+
+        ( Common.Dict _ _, Common.Basic _ _ ) ->
+            CliMonad.succeed IntersectionResult.NoIntersection
 
         _ ->
-            CliMonad.succeed Nothing
+            CliMonad.succeed IntersectionResult.MayIntersect
                 |> CliMonad.withWarning ("Disjoint check not implemented for types " ++ typeToString lType ++ " and " ++ typeToString rType)
+
+
+typesIntersectionOneOf : List (List String) -> List Common.OneOfData -> Common.Type -> CliMonad (IntersectionResult Json.Encode.Value)
+typesIntersectionOneOf seen alternatives t =
+    alternatives
+        |> CliMonad.combineMap
+            (\alternative ->
+                typesIntersection seen alternative.type_ t
+                    |> CliMonad.withPath alternative.name
+            )
+        |> CliMonad.map findAnyIntersection
+
+
+findAnyIntersection : List (IntersectionResult a) -> IntersectionResult a
+findAnyIntersection =
+    List.foldl
+        (\e acc ->
+            -- We're looking for at least one intersection, so:
+            case ( e, acc ) of
+                -- if we find it we're good;
+                ( IntersectionResult.FoundIntersection f, _ ) ->
+                    IntersectionResult.FoundIntersection f
+
+                ( _, IntersectionResult.FoundIntersection f ) ->
+                    IntersectionResult.FoundIntersection f
+
+                -- if we could have found it, then we can't rule out an intersection;
+                ( IntersectionResult.MayIntersect, _ ) ->
+                    IntersectionResult.MayIntersect
+
+                ( _, IntersectionResult.MayIntersect ) ->
+                    IntersectionResult.MayIntersect
+
+                -- otherwise it means there actually is none.
+                ( IntersectionResult.NoIntersection, IntersectionResult.NoIntersection ) ->
+                    IntersectionResult.NoIntersection
+        )
+        IntersectionResult.NoIntersection
 
 
 objectsIntersection :
     List (List String)
     -> ( Common.Object, Maybe Common.Type )
     -> ( Common.Object, Maybe Common.Type )
-    -> CliMonad (Maybe Json.Encode.Value)
+    -> CliMonad (IntersectionResult Json.Encode.Value)
 objectsIntersection seen ( lFields, lAdditional ) ( rFields, rAdditional ) =
     let
         lDict : FastDict.Dict String Common.Field
@@ -984,25 +1078,50 @@ objectsIntersection seen ( lFields, lAdditional ) ( rFields, rAdditional ) =
             rFields
                 |> List.map (\( k, v ) -> ( Common.unwrapUnsafe k, v ))
                 |> FastDict.fromList
+
+        combine : IntersectionResult a -> IntersectionResult (List a) -> IntersectionResult (List a)
+        combine e prev =
+            -- Here we're trying to build a record that satisfies both schemas so:
+            case ( e, prev ) of
+                -- if we already failed there is nothing to do;
+                ( IntersectionResult.NoIntersection, _ ) ->
+                    IntersectionResult.NoIntersection
+
+                ( _, IntersectionResult.NoIntersection ) ->
+                    IntersectionResult.NoIntersection
+
+                -- if we failed to build a concrete intersection then we'll keep failing;
+                ( IntersectionResult.MayIntersect, _ ) ->
+                    IntersectionResult.MayIntersect
+
+                ( _, IntersectionResult.MayIntersect ) ->
+                    IntersectionResult.MayIntersect
+
+                -- otherwise we can keep building.
+                ( IntersectionResult.FoundIntersection p, IntersectionResult.FoundIntersection a ) ->
+                    IntersectionResult.FoundIntersection (p :: a)
     in
     FastDict.merge
         (\lkey lField acc ->
             if lField.required then
-                if rAdditional == Just lField.type_ then
-                    CliMonad.map2
-                        (\example ->
-                            Maybe.map
-                                (\prev ->
-                                    ( lkey, example ) :: prev
-                                )
-                        )
-                        (exampleOfType seen lField.type_
-                            |> CliMonad.withPath (Common.UnsafeName lkey)
-                        )
-                        acc
+                case rAdditional of
+                    Nothing ->
+                        CliMonad.succeed IntersectionResult.NoIntersection
 
-                else
-                    CliMonad.succeed Nothing
+                    Just rAdditionalType ->
+                        CliMonad.map2
+                            (\i prev ->
+                                combine
+                                    (IntersectionResult.map
+                                        (\example -> ( lkey, example ))
+                                        i
+                                    )
+                                    prev
+                            )
+                            (typesIntersection seen lField.type_ rAdditionalType
+                                |> CliMonad.withPath (Common.UnsafeName lkey)
+                            )
+                            acc
 
             else
                 acc
@@ -1013,10 +1132,10 @@ objectsIntersection seen ( lFields, lAdditional ) ( rFields, rAdditional ) =
 
             else
                 CliMonad.map2
-                    (Maybe.map2
-                        (\bValue iAcc ->
-                            ( bkey, bValue ) :: iAcc
-                        )
+                    (\i prev ->
+                        combine
+                            (IntersectionResult.map (\example -> ( bkey, example )) i)
+                            prev
                     )
                     (typesIntersection seen lField.type_ rField.type_
                         |> CliMonad.withPath (Common.UnsafeName bkey)
@@ -1025,43 +1144,46 @@ objectsIntersection seen ( lFields, lAdditional ) ( rFields, rAdditional ) =
         )
         (\rkey rField acc ->
             if rField.required then
-                if lAdditional == Just rField.type_ then
-                    CliMonad.map2
-                        (\example ->
-                            Maybe.map
-                                (\prev ->
-                                    ( rkey, example ) :: prev
-                                )
-                        )
-                        (exampleOfType seen rField.type_
-                            |> CliMonad.withPath (Common.UnsafeName rkey)
-                        )
-                        acc
+                case lAdditional of
+                    Nothing ->
+                        CliMonad.succeed IntersectionResult.NoIntersection
 
-                else
-                    CliMonad.succeed Nothing
+                    Just lAdditionalType ->
+                        CliMonad.map2
+                            (\i prev ->
+                                combine
+                                    (IntersectionResult.map
+                                        (\example -> ( rkey, example ))
+                                        i
+                                    )
+                                    prev
+                            )
+                            (typesIntersection seen rField.type_ lAdditionalType
+                                |> CliMonad.withPath (Common.UnsafeName rkey)
+                            )
+                            acc
 
             else
                 acc
         )
         lDict
         rDict
-        (CliMonad.succeed (Just []))
-        |> CliMonad.map (Maybe.map Json.Encode.object)
+        (CliMonad.succeed (IntersectionResult.FoundIntersection []))
+        |> CliMonad.map (IntersectionResult.map Json.Encode.object)
 
 
 stringAndEnumIntersection :
     { format : Maybe String, const : Maybe Common.ConstValue }
     -> NonEmpty Common.UnsafeName
-    -> CliMonad (Maybe Json.Encode.Value)
+    -> CliMonad (IntersectionResult Json.Encode.Value)
 stringAndEnumIntersection rOptions lItems =
     case rOptions.const of
         Just (Common.ConstString rConst) ->
             if List.member (Common.UnsafeName rConst) (nonEmptyToList lItems) then
-                CliMonad.succeed (Just (Json.Encode.string rConst))
+                CliMonad.succeed (IntersectionResult.FoundIntersection (Json.Encode.string rConst))
 
             else
-                CliMonad.succeed Nothing
+                CliMonad.succeed IntersectionResult.NoIntersection
 
         Just _ ->
             CliMonad.fail "Wrong constant type"
@@ -1073,18 +1195,18 @@ stringAndEnumIntersection rOptions lItems =
                         |> Tuple.first
                         |> Common.unwrapUnsafe
                         |> Json.Encode.string
-                        |> Just
+                        |> IntersectionResult.FoundIntersection
                         |> CliMonad.succeed
 
                 Just rFormat ->
-                    CliMonad.succeed Nothing
+                    CliMonad.succeed IntersectionResult.MayIntersect
                         |> CliMonad.withWarning ("Disjoint check not implemented for types enum and string:" ++ rFormat)
 
 
-stringFormatsIntersection : String -> String -> CliMonad (Maybe Json.Encode.Value)
+stringFormatsIntersection : String -> String -> CliMonad (IntersectionResult Json.Encode.Value)
 stringFormatsIntersection lFormat rFormat =
     -- TODO: check for disjoint formats
-    CliMonad.succeed Nothing
+    CliMonad.succeed IntersectionResult.MayIntersect
         |> CliMonad.withWarning ("Disjoint check not implemented for string:" ++ lFormat ++ " and string:" ++ rFormat)
 
 
@@ -1133,44 +1255,44 @@ typeToString type_ =
             "unit"
 
 
-simplifyForDisjoint : Common.BasicType -> Maybe Common.ConstValue -> Result String SimplifiedForDisjointBasicType
-simplifyForDisjoint basic const =
+simplifyForIntersection : Common.BasicType -> Maybe Common.ConstValue -> Result String SimplifiedForIntersectionBasicType
+simplifyForIntersection basic const =
     case ( basic, const ) of
         ( Common.Boolean, Nothing ) ->
-            Ok (SimplifiedForDisjointBool Nothing)
+            Ok (SimplifiedForIntersectionBool Nothing)
 
         ( Common.Boolean, Just (Common.ConstBoolean b) ) ->
-            Ok (SimplifiedForDisjointBool (Just b))
+            Ok (SimplifiedForIntersectionBool (Just b))
 
         ( Common.Boolean, Just _ ) ->
             Err "Invalid const for boolean type"
 
         ( Common.String, Nothing ) ->
-            Ok (SimplifiedForDisjointString Nothing)
+            Ok (SimplifiedForIntersectionString Nothing)
 
         ( Common.String, Just (Common.ConstString b) ) ->
-            Ok (SimplifiedForDisjointString (Just b))
+            Ok (SimplifiedForIntersectionString (Just b))
 
         ( Common.String, Just _ ) ->
             Err "Invalid const for string type"
 
         ( Common.Integer, Nothing ) ->
-            Ok (SimplifiedForDisjointNumber Nothing)
+            Ok (SimplifiedForIntersectionNumber Nothing)
 
         ( Common.Integer, Just (Common.ConstInteger i) ) ->
-            Ok (SimplifiedForDisjointNumber (Just (toFloat i)))
+            Ok (SimplifiedForIntersectionNumber (Just (toFloat i)))
 
         ( Common.Integer, Just _ ) ->
             Err "Invalid const for integer type"
 
         ( Common.Number, Nothing ) ->
-            Ok (SimplifiedForDisjointNumber Nothing)
+            Ok (SimplifiedForIntersectionNumber Nothing)
 
         ( Common.Number, Just (Common.ConstInteger i) ) ->
-            Ok (SimplifiedForDisjointNumber (Just (toFloat i)))
+            Ok (SimplifiedForIntersectionNumber (Just (toFloat i)))
 
         ( Common.Number, Just (Common.ConstNumber f) ) ->
-            Ok (SimplifiedForDisjointNumber (Just f))
+            Ok (SimplifiedForIntersectionNumber (Just f))
 
         ( Common.Number, Just _ ) ->
             Err "Invalid const for number type"

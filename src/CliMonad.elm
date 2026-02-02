@@ -33,17 +33,17 @@ import FastSet
 import Gen.Debug
 import Gen.Json.Decode
 import Gen.Json.Encode
-import IndentedString exposing (IndentedString)
 import Json.Encode
 import OpenApi exposing (OpenApi)
 import OpenApi.Config
+import Pretty
 import String.Extra
 
 
 type alias Message =
     { message : String
     , path : Path
-    , details : List IndentedString
+    , details : Pretty.Doc ()
     }
 
 
@@ -241,7 +241,14 @@ withWarning message (CliMonad f) =
             Result.map
                 (\( res, output, cache2 ) ->
                     ( res
-                    , { output | warnings = { path = [], message = message, details = [] } :: output.warnings }
+                    , { output
+                        | warnings =
+                            { path = []
+                            , message = message
+                            , details = Pretty.empty
+                            }
+                                :: output.warnings
+                      }
                     , cache2
                     )
                 )
@@ -249,14 +256,21 @@ withWarning message (CliMonad f) =
         )
 
 
-withExtendedWarning : { message : String, details : List IndentedString } -> CliMonad a -> CliMonad a
+withExtendedWarning : { message : String, details : Pretty.Doc () } -> CliMonad a -> CliMonad a
 withExtendedWarning { message, details } (CliMonad f) =
     CliMonad
         (\input cache ->
             Result.map
                 (\( res, output, cache2 ) ->
                     ( res
-                    , { output | warnings = { path = [], message = message, details = details } :: output.warnings }
+                    , { output
+                        | warnings =
+                            { path = []
+                            , message = message
+                            , details = details
+                            }
+                                :: output.warnings
+                      }
                     , cache2
                     )
                 )
@@ -276,7 +290,14 @@ todoWithDefault default message =
             if generateTodos then
                 Ok
                     ( default
-                    , { emptyOutput | warnings = [ { path = [], message = message, details = [] } ] }
+                    , { emptyOutput
+                        | warnings =
+                            [ { path = []
+                              , message = message
+                              , details = Pretty.empty
+                              }
+                            ]
+                      }
                     , cache
                     )
 
@@ -284,14 +305,14 @@ todoWithDefault default message =
                 Err
                     { path = []
                     , message = "Todo: " ++ message
-                    , details = []
+                    , details = Pretty.empty
                     }
         )
 
 
 fail : String -> CliMonad a
 fail message =
-    CliMonad (\_ _ -> Err { path = [], message = message, details = [] })
+    CliMonad (\_ _ -> Err { path = [], message = message, details = Pretty.empty })
 
 
 succeed : a -> CliMonad a
@@ -544,7 +565,7 @@ errorToWarning (CliMonad f) =
 
                 Err { path, message } ->
                     ( Nothing
-                    , { emptyOutput | warnings = [ { path = path, message = message, details = [] } ] }
+                    , { emptyOutput | warnings = [ { path = path, message = message, details = Pretty.empty } ] }
                     , cache
                     )
                         |> Ok
@@ -622,7 +643,7 @@ enumName variants =
                             | warnings =
                                 [ { path = []
                                   , message = message
-                                  , details = []
+                                  , details = Pretty.empty
                                   }
                                 ]
                           }
@@ -735,7 +756,7 @@ withFormat basicType maybeFormatName getter default =
                                     | warnings =
                                         [ { message = firstLine ++ "\n" ++ secondLine
                                           , path = [ "format" ]
-                                          , details = []
+                                          , details = Pretty.empty
                                           }
                                         ]
                                 }

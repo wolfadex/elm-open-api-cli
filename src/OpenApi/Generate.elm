@@ -36,7 +36,6 @@ import Gen.Maybe
 import Gen.String
 import Gen.Task
 import Gen.Url.Builder
-import IndentedString exposing (IndentedString)
 import Json.Schema.Definitions
 import JsonSchema.Generate
 import List.Extra
@@ -56,6 +55,7 @@ import OpenApi.Schema
 import OpenApi.SecurityRequirement
 import OpenApi.SecurityScheme
 import OpenApi.Server
+import Pretty
 import Regex exposing (Regex)
 import SchemaUtils
 import String.Extra
@@ -70,7 +70,7 @@ type alias Mime =
 type alias Message =
     { message : String
     , path : Path
-    , details : List IndentedString
+    , details : Pretty.Doc ()
     }
 
 
@@ -214,7 +214,7 @@ extractEnums openApi =
                                         Err
                                             { message = e
                                             , path = [ name, "Extracting enums" ]
-                                            , details = []
+                                            , details = Pretty.empty
                                             }
 
                             _ ->

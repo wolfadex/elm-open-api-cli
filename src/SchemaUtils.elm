@@ -271,31 +271,38 @@ schemaToType seen schema =
                                                         )
 
                                             Nothing ->
+                                                let
+                                                    indentWith : String -> String -> String
+                                                    indentWith prefix text =
+                                                        text
+                                                            |> String.lines
+                                                            |> String.join ("\n" ++ prefix)
+
+                                                    details : List String
+                                                    details =
+                                                        case value of
+                                                            Just found ->
+                                                                [ "Clash between"
+                                                                , "  - " ++ indentWith "    " collision.leftSchema
+                                                                , "  - " ++ indentWith "    " collision.rightSchema
+                                                                , "Possible clashing value:"
+                                                                , "  " ++ indentWith "  " (Json.Encode.encode 2 found)
+                                                                ]
+
+                                                            Nothing ->
+                                                                [ "Clash between"
+                                                                , "  - " ++ indentWith "    " collision.leftSchema
+                                                                , "  - " ++ indentWith "    " collision.rightSchema
+                                                                , "Could not build a clashing value"
+                                                                ]
+                                                in
                                                 CliMonad.succeed
                                                     { type_ = Common.Value
                                                     , documentation = subSchema.description
                                                     }
                                                     |> CliMonad.withExtendedWarning
                                                         { message = "anyOf between overlapping types is not supported"
-                                                        , details =
-                                                            case value of
-                                                                Just found ->
-                                                                    [ "Clash between"
-                                                                    , "  - " ++ collision.leftSchema
-                                                                    , "  - " ++ collision.rightSchema
-                                                                    , "Possible clashing value:"
-                                                                    ]
-                                                                        ++ (Json.Encode.encode 2 found
-                                                                                |> String.lines
-                                                                                |> List.map (\line -> "  " ++ line)
-                                                                           )
-
-                                                                Nothing ->
-                                                                    [ "Clash between"
-                                                                    , "  - " ++ collision.leftSchema
-                                                                    , "  - " ++ collision.rightSchema
-                                                                    , "Could not build a clashing value"
-                                                                    ]
+                                                        , details = details
                                                         }
                                 in
                                 case disjoint of
@@ -626,24 +633,33 @@ schemaIntersection seen schemas =
 
 describeSubSchema : Json.Schema.Definitions.SubSchema -> CliMonad String
 describeSubSchema subSchema =
-    case subSchema.ref of
-        Nothing ->
-            subSchema.source
+    let
+        sourceToString : Json.Decode.Value -> String
+        sourceToString source =
+            source
                 |> Json.Decode.decodeValue removeDocumentation
                 |> Result.withDefault subSchema.source
                 |> Json.Encode.encode 0
-                |> CliMonad.succeed
+    in
+    case subSchema.ref of
+        Nothing ->
+            CliMonad.succeed (sourceToString subSchema.source)
 
         Just ref ->
             getAlias (String.split "/" ref)
                 |> CliMonad.map
                     (\f ->
-                        case f of
-                            Json.Schema.Definitions.ObjectSchema o ->
-                                ref ++ ": " ++ Json.Encode.encode 0 o.source
+                        let
+                            source : Json.Decode.Value
+                            source =
+                                case f of
+                                    Json.Schema.Definitions.ObjectSchema o ->
+                                        o.source
 
-                            Json.Schema.Definitions.BooleanSchema b ->
-                                ref ++ ": " ++ Json.Encode.encode 0 (Json.Encode.bool b)
+                                    Json.Schema.Definitions.BooleanSchema b ->
+                                        Json.Encode.bool b
+                        in
+                        ref ++ ":\n" ++ sourceToString source
                     )
 
 
@@ -987,6 +1003,12 @@ typesIntersection seen lType rType =
             CliMonad.succeed IntersectionResult.NoIntersection
 
         ( Common.Object _, Common.Basic _ _ ) ->
+            CliMonad.succeed IntersectionResult.NoIntersection
+
+        ( Common.Enum _, Common.Dict _ _ ) ->
+            CliMonad.succeed IntersectionResult.NoIntersection
+
+        ( Common.Dict _ _, Common.Enum _ ) ->
             CliMonad.succeed IntersectionResult.NoIntersection
 
         ( Common.Basic _ _, Common.Dict _ _ ) ->

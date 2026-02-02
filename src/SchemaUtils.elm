@@ -563,24 +563,34 @@ schemaIntersection seen schemas =
                         )
                         (schemaToType seen l)
                         (schemaToType seen r)
-                        |> CliMonad.map
+                        |> CliMonad.andThen
                             (\res ->
                                 case res of
                                     IntersectionResult.FoundIntersection i ->
-                                        { leftSchema = describeSubSchema lo
-                                        , value = i
-                                        , rightSchema = describeSubSchema ro
-                                        }
-                                            |> FoundSchemaIntersection
+                                        CliMonad.map2
+                                            (\ld rd ->
+                                                { leftSchema = ld
+                                                , value = i
+                                                , rightSchema = rd
+                                                }
+                                                    |> FoundSchemaIntersection
+                                            )
+                                            (describeSubSchema lo)
+                                            (describeSubSchema ro)
 
                                     IntersectionResult.MayIntersect ->
-                                        { leftSchema = describeSubSchema lo
-                                        , rightSchema = describeSubSchema ro
-                                        }
-                                            |> SchemaMayIntersect
+                                        CliMonad.map2
+                                            (\ld rd ->
+                                                { leftSchema = ld
+                                                , rightSchema = rd
+                                                }
+                                                    |> SchemaMayIntersect
+                                            )
+                                            (describeSubSchema lo)
+                                            (describeSubSchema ro)
 
                                     IntersectionResult.NoIntersection ->
-                                        NoSchemaIntersection
+                                        CliMonad.succeed NoSchemaIntersection
                             )
 
         go :
@@ -614,7 +624,7 @@ schemaIntersection seen schemas =
     go (LazyList.uniquePairs lazyList) NoSchemaIntersection
 
 
-describeSubSchema : Json.Schema.Definitions.SubSchema -> String
+describeSubSchema : Json.Schema.Definitions.SubSchema -> CliMonad String
 describeSubSchema subSchema =
     case subSchema.ref of
         Nothing ->
@@ -622,9 +632,19 @@ describeSubSchema subSchema =
                 |> Json.Decode.decodeValue removeDocumentation
                 |> Result.withDefault subSchema.source
                 |> Json.Encode.encode 0
+                |> CliMonad.succeed
 
         Just ref ->
-            ref
+            getAlias (String.split "/" ref)
+                |> CliMonad.map
+                    (\f ->
+                        case f of
+                            Json.Schema.Definitions.ObjectSchema o ->
+                                ref ++ ": " ++ Json.Encode.encode 0 o.source
+
+                            Json.Schema.Definitions.BooleanSchema b ->
+                                ref ++ ": " ++ Json.Encode.encode 0 (Json.Encode.bool b)
+                    )
 
 
 removeDocumentation : Json.Decode.Decoder Json.Decode.Value

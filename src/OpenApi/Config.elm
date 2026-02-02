@@ -70,7 +70,8 @@ import Url
 import Utils
 
 
-{-| -}
+{-| Main configuration for the OpenAPI code generator.
+-}
 type Config
     = Config
         { inputs : List Input
@@ -84,14 +85,19 @@ type Config
         }
 
 
-{-| -}
+{-| Whether to automatically convert Swagger files to OpenAPI files.
+
+This features uses an external service.
+
+-}
 type AutoConvertSwagger
     = AlwaysConvert
     | NeverConvert
     | AskBeforeConversion
 
 
-{-| -}
+{-| An input OpenAPI spec.
+-}
 type Input
     = Input
         { oasPath : Path
@@ -104,22 +110,23 @@ type Input
         }
 
 
-{-| -}
+{-| Supported effect types.
+-}
 type EffectType
-    = ElmHttpCmd
-    | ElmHttpCmdRecord
-    | ElmHttpCmdRisky
-    | ElmHttpTask
-    | ElmHttpTaskRecord
-    | ElmHttpTaskRisky
-    | DillonkearnsElmPagesTask
-    | DillonkearnsElmPagesTaskRecord
-    | LamderaProgramTestCmd
-    | LamderaProgramTestCmdRisky
-    | LamderaProgramTestCmdRecord
-    | LamderaProgramTestTask
-    | LamderaProgramTestTaskRisky
-    | LamderaProgramTestTaskRecord
+    = ElmHttpCmd -- `Http.request` from elm/http
+    | ElmHttpCmdRecord -- The input to `Http.request` from elm/http
+    | ElmHttpCmdRisky -- `Http.riskyRequest` from elm/http
+    | ElmHttpTask -- `Http.task` from elm/http
+    | ElmHttpTaskRecord -- The input to `Http.task` from elm/http
+    | ElmHttpTaskRisky -- `Http.riskyTask` from elm/http
+    | DillonkearnsElmPagesTask -- `BackendTask.Http.request` from dillonkearns/elm-pages
+    | DillonkearnsElmPagesTaskRecord -- The input to `BackendTask.Http.request` from dillonkearns/elm-pages
+    | LamderaProgramTestCmd -- `Effect.Http.request` from lamdera/program-test
+    | LamderaProgramTestCmdRecord -- The input to `Effect.Http.request` from lamdera/program-test
+    | LamderaProgramTestCmdRisky -- `Effect.Http.riskyRequest` from lamdera/program-test
+    | LamderaProgramTestTask -- `Effect.Http.task` from lamdera/program-test
+    | LamderaProgramTestTaskRecord -- The input to `Effect.Http.task` from lamdera/program-test
+    | LamderaProgramTestTaskRisky -- `Effect.Http.riskyTask` from lamdera/program-test
 
 
 {-| -}

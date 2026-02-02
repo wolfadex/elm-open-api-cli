@@ -276,7 +276,7 @@ replaceSymbolsWith replacement input =
     input
         |> String.map
             (\c ->
-                if c /= '_' && not (Char.isAlphaNum c) then
+                if Char.toCode c /= {- '_' -} 95 && not (Char.isAlphaNum c) then
                     replacement
 
                 else

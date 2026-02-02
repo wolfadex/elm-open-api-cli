@@ -179,7 +179,7 @@ isLower c =
 
 isAlphaNumOrUnderscore : Char -> Bool
 isAlphaNumOrUnderscore c =
-    Char.isAlphaNum c || c == '_' || Unicode.isAlphaNum c
+    Char.isAlphaNum c || Char.toCode c == {- '_' -} 95 || Unicode.isAlphaNum c
 
 
 escape : String -> String

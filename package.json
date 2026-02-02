@@ -23,10 +23,10 @@
         "@lydell/elm-json": "0.2.13-1",
         "@redocly/cli": "1.11.0",
         "elm": "0.19.1-6",
-        "elm-codegen": "^0.6.1",
+        "elm-codegen": "^0.6.3",
         "elm-format": "0.8.7",
         "elm-optimize-level-2": "0.3.5",
-        "elm-pages": "^3.0.19",
+        "elm-pages": "^3.0.28",
         "elm-review": "^2.13.5",
         "elm-test": "^0.19.1-revision16",
         "vite": "^6.0.3"

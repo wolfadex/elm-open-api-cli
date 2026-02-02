@@ -1352,7 +1352,7 @@ operationToAuthorizationInfo operation =
             case e of
                 ( "oauth_2_0", ss ) ->
                     if Dict.member "Authorization" acc.headers then
-                        CliMonad.todoWithDefault acc "Authorization header already set"
+                        CliMonad.fail "Authorization header already set"
 
                     else
                         CliMonad.succeed
@@ -1371,7 +1371,7 @@ operationToAuthorizationInfo operation =
 
                 ( "Token", [] ) ->
                     if Dict.member "Authorization" acc.headers then
-                        CliMonad.todoWithDefault acc "Authorization header already set"
+                        CliMonad.fail "Authorization header already set"
 
                     else
                         CliMonad.succeed
@@ -1411,7 +1411,7 @@ operationToAuthorizationInfo operation =
                                             case apiKey.in_ of
                                                 OpenApi.SecurityScheme.Header ->
                                                     if Dict.member apiKey.name acc.headers then
-                                                        CliMonad.todoWithDefault acc (apiKey.name ++ " header already set")
+                                                        CliMonad.fail (apiKey.name ++ " header already set")
 
                                                     else
                                                         CliMonad.succeed
@@ -1441,7 +1441,7 @@ operationToAuthorizationInfo operation =
 
                                                 OpenApi.SecurityScheme.Cookie ->
                                                     if Dict.member "Cookie" acc.headers then
-                                                        CliMonad.todoWithDefault acc "Cookie header already set"
+                                                        CliMonad.fail "Cookie header already set"
 
                                                     else
                                                         CliMonad.succeed

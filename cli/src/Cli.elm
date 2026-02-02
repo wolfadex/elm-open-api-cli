@@ -1028,12 +1028,6 @@ generateFilesFromOpenApiSpecs configs =
                             _ ->
                                 5
 
-                    allEffectTypes : List OpenApi.Config.EffectType
-                    allEffectTypes =
-                        List.concatMap
-                            (\( { effectTypes }, _ ) -> effectTypes)
-                            configs
-
                     fileFromGroups : List String -> List { group : String, declaration : Elm.Declaration } -> Elm.File
                     fileFromGroups moduleName declarations =
                         declarations
@@ -1062,6 +1056,12 @@ generateFilesFromOpenApiSpecs configs =
                             in
                             if moduleName == Common.commonModuleName then
                                 let
+                                    allEffectTypes : List OpenApi.Config.EffectType
+                                    allEffectTypes =
+                                        List.concatMap
+                                            (\( { effectTypes }, _ ) -> effectTypes)
+                                            configs
+
                                     commonDeclarations : List { declaration : Elm.Declaration, group : String }
                                     commonDeclarations =
                                         OpenApi.Common.Internal.declarations

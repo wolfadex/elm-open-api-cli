@@ -560,7 +560,7 @@ toRequestFunctions server effectTypes method pathUrl operation =
                     CliMonad.succeed []
 
                 JsonContent type_ ->
-                    SchemaUtils.typeToAnnotationWithNullable True type_
+                    SchemaUtils.typeToAnnotationWithNullable type_
                         |> CliMonad.map (\annotation -> [ ( Common.UnsafeName "body", annotation ) ])
 
                 StringContent _ ->
@@ -1118,7 +1118,7 @@ toRequestFunctions server effectTypes method pathUrl operation =
                 )
                 (operationToContentSchema operation)
                 (operationToAuthorizationInfo operation)
-                (SchemaUtils.typeToAnnotationWithNullable True successType)
+                (SchemaUtils.typeToAnnotationWithNullable successType)
     in
     operationToTypesExpectAndResolver functionName operation
         |> CliMonad.andThen step
@@ -1155,10 +1155,10 @@ operationToHeaderParams operation =
                                     CliMonad.succeed Nothing
 
                                 "header" ->
-                                    paramToType True concreteParam
+                                    paramToType concreteParam
                                         |> CliMonad.andThen
                                             (\( paramName, type_ ) ->
-                                                paramToString True type_
+                                                paramToString type_
                                                     |> CliMonad.map
                                                         (\{ inputToString, isMaybe } ->
                                                             (\config ->
@@ -1273,10 +1273,10 @@ replacedUrl server authInfo pathUrl operation =
                         (\concreteParam ->
                             case OpenApi.Parameter.in_ concreteParam of
                                 "path" ->
-                                    paramToType True concreteParam
+                                    paramToType concreteParam
                                         |> CliMonad.andThen
                                             (\( paramName, type_ ) ->
-                                                paramToString True type_
+                                                paramToString type_
                                                     |> CliMonad.map
                                                         (\{ inputToString, alwaysJust } ->
                                                             { paramName = paramName
@@ -1324,7 +1324,7 @@ replacedUrl server authInfo pathUrl operation =
                             |> Tuple.mapBoth (List.filterMap identity) List.concat
                 in
                 queryParams
-                    |> CliMonad.combineMap (queryParameterToUrlBuilderArgument True)
+                    |> CliMonad.combineMap queryParameterToUrlBuilderArgument
                     |> CliMonad.map (\arg -> initialUrl replacements (List.concat arg))
             )
 
@@ -1623,7 +1623,7 @@ operationToContentSchema operation =
             case OpenApi.Reference.toConcrete requestOrRef of
                 Just request ->
                     OpenApi.RequestBody.content request
-                        |> contentToContentSchema True
+                        |> contentToContentSchema
 
                 Nothing ->
                     CliMonad.succeed requestOrRef
@@ -1643,8 +1643,8 @@ searchForJsonMediaType mediaType _ =
     mediaType == "*/*" || Regex.contains jsonRegex mediaType
 
 
-contentToContentSchema : Bool -> Dict.Dict String OpenApi.MediaType.MediaType -> CliMonad ContentSchema
-contentToContentSchema qualify content =
+contentToContentSchema : Dict.Dict String OpenApi.MediaType.MediaType -> CliMonad ContentSchema
+contentToContentSchema content =
     let
         default : Maybe (CliMonad ContentSchema) -> CliMonad ContentSchema
         default fallback =
@@ -1659,7 +1659,7 @@ contentToContentSchema qualify content =
                     CliMonad.succeed jsonSchema
                         |> CliMonad.stepOrFail "The request's application/json content option doesn't have a schema"
                             (OpenApi.MediaType.schema >> Maybe.map OpenApi.Schema.get)
-                        |> CliMonad.andThen (SchemaUtils.schemaToType qualify [])
+                        |> CliMonad.andThen (SchemaUtils.schemaToType [])
                         |> CliMonad.map (\{ type_ } -> JsonContent type_)
 
                 Nothing ->
@@ -1686,7 +1686,7 @@ contentToContentSchema qualify content =
             CliMonad.succeed htmlSchema
                 |> CliMonad.stepOrFail ("The request's " ++ mime ++ " content option doesn't have a schema")
                     (OpenApi.MediaType.schema >> Maybe.map OpenApi.Schema.get)
-                |> CliMonad.andThen (SchemaUtils.schemaToType True [])
+                |> CliMonad.andThen (SchemaUtils.schemaToType [])
                 |> CliMonad.andThen
                     (\{ type_ } ->
                         case type_ of
@@ -1879,15 +1879,15 @@ operationToUrlParams operation =
             |> CliMonad.combineMap
                 (\param ->
                     toConcreteParam param
-                        |> CliMonad.andThen (paramToAnnotation True)
+                        |> CliMonad.andThen paramToAnnotation
                 )
             |> CliMonad.map
                 (\types -> [ ( Common.UnsafeName "params", SchemaUtils.recordType types ) ])
 
 
-queryParameterToUrlBuilderArgument : Bool -> OpenApi.Parameter.Parameter -> CliMonad (List (Elm.Expression -> Elm.Expression))
-queryParameterToUrlBuilderArgument qualify param =
-    paramToType qualify param
+queryParameterToUrlBuilderArgument : OpenApi.Parameter.Parameter -> CliMonad (List (Elm.Expression -> Elm.Expression))
+queryParameterToUrlBuilderArgument param =
+    paramToType param
         |> CliMonad.andThen
             (\( paramName, type_ ) ->
                 let
@@ -1949,7 +1949,7 @@ queryParameterToUrlBuilderArgument qualify param =
                         fields
                             |> CliMonad.combineMap
                                 (\( fieldName, field ) ->
-                                    paramToString qualify (Common.Nullable field.type_)
+                                    paramToString (Common.Nullable field.type_)
                                         |> CliMonad.map
                                             (\{ inputToString, alwaysJust } ->
                                                 paramToBuilder inputToString alwaysJust [ ( fieldName, True ) ]
@@ -1961,7 +1961,7 @@ queryParameterToUrlBuilderArgument qualify param =
                         fields
                             |> CliMonad.combineMap
                                 (\( fieldName, field ) ->
-                                    paramToString qualify field.type_
+                                    paramToString field.type_
                                         |> CliMonad.map
                                             (\{ inputToString, alwaysJust } ->
                                                 paramToBuilder inputToString alwaysJust [ ( fieldName, False ) ]
@@ -1970,7 +1970,7 @@ queryParameterToUrlBuilderArgument qualify param =
                                 )
 
                     _ ->
-                        paramToString qualify type_
+                        paramToString type_
                             |> CliMonad.map
                                 (\{ inputToString, alwaysJust } ->
                                     [ paramToBuilder inputToString alwaysJust []
@@ -1986,10 +1986,9 @@ type InputToString
 
 
 paramToString :
-    Bool
-    -> Common.Type
+    Common.Type
     -> CliMonad { inputToString : InputToString, alwaysJust : Bool, isMaybe : Bool }
-paramToString qualify type_ =
+paramToString type_ =
     let
         recursive :
             Common.Type
@@ -1997,7 +1996,7 @@ paramToString qualify type_ =
             -> ({ inputToString : InputToString, alwaysJust : Bool, isMaybe : Bool } -> InputToString)
             -> CliMonad { inputToString : InputToString, alwaysJust : Bool, isMaybe : Bool }
         recursive p isMaybe f =
-            paramToString qualify p
+            paramToString p
                 |> CliMonad.map
                     (\{ inputToString, alwaysJust } ->
                         { inputToString =
@@ -2116,8 +2115,8 @@ paramToString qualify type_ =
         Common.Ref ref ->
             --  These are mostly aliases
             SchemaUtils.getAlias ref
-                |> CliMonad.andThen (SchemaUtils.schemaToType qualify [])
-                |> CliMonad.andThen (\param -> paramToString qualify param.type_)
+                |> CliMonad.andThen (SchemaUtils.schemaToType [])
+                |> CliMonad.andThen (\param -> paramToString param.type_)
 
         Common.OneOf name data ->
             CliMonad.map2
@@ -2128,7 +2127,7 @@ paramToString qualify type_ =
                     , isMaybe = False
                     }
                 )
-                (SchemaUtils.typeToAnnotationWithNullable qualify type_)
+                (SchemaUtils.typeToAnnotationWithNullable type_)
                 (CliMonad.combineMap
                     (\alternative ->
                         CliMonad.andThen2
@@ -2146,8 +2145,8 @@ paramToString qualify type_ =
                                         (inputToStringToFunction inputToString)
                                         |> CliMonad.succeed
                             )
-                            (paramToString qualify alternative.type_)
-                            (SchemaUtils.typeToAnnotationWithNullable qualify alternative.type_)
+                            (paramToString alternative.type_)
+                            (SchemaUtils.typeToAnnotationWithNullable alternative.type_)
                     )
                     (NonEmpty.toList data)
                 )
@@ -2182,7 +2181,7 @@ paramToString qualify type_ =
                     (CliMonad.moduleToNamespace Common.Types)
 
         _ ->
-            SchemaUtils.typeToAnnotationWithNullable qualify type_
+            SchemaUtils.typeToAnnotationWithNullable type_
                 |> CliMonad.andThen
                     (\annotation ->
                         let
@@ -2209,19 +2208,19 @@ inputToStringToFunction inputToString val =
             f val
 
 
-paramToAnnotation : Bool -> OpenApi.Parameter.Parameter -> CliMonad ( Common.UnsafeName, Elm.Annotation.Annotation )
-paramToAnnotation qualify concreteParam =
-    paramToType qualify concreteParam
+paramToAnnotation : OpenApi.Parameter.Parameter -> CliMonad ( Common.UnsafeName, Elm.Annotation.Annotation )
+paramToAnnotation concreteParam =
+    paramToType concreteParam
         |> CliMonad.andThen
             (\( paramName, type_ ) ->
-                SchemaUtils.typeToAnnotationWithMaybe qualify type_
+                SchemaUtils.typeToAnnotationWithMaybe type_
                     |> CliMonad.map
                         (\annotation -> ( paramName, annotation ))
             )
 
 
-paramToType : Bool -> OpenApi.Parameter.Parameter -> CliMonad ( Common.UnsafeName, Common.Type )
-paramToType qualify concreteParam =
+paramToType : OpenApi.Parameter.Parameter -> CliMonad ( Common.UnsafeName, Common.Type )
+paramToType concreteParam =
     let
         paramName : String
         paramName =
@@ -2230,14 +2229,14 @@ paramToType qualify concreteParam =
     CliMonad.succeed concreteParam
         |> CliMonad.stepOrFail ("Could not get schema for parameter " ++ paramName)
             (OpenApi.Parameter.schema >> Maybe.map OpenApi.Schema.get)
-        |> CliMonad.andThen (SchemaUtils.schemaToType qualify [])
+        |> CliMonad.andThen (SchemaUtils.schemaToType [])
         |> CliMonad.andThen
             (\{ type_ } ->
                 case type_ of
                     Common.Ref ref ->
                         ref
                             |> SchemaUtils.getAlias
-                            |> CliMonad.andThen (SchemaUtils.schemaToType qualify [])
+                            |> CliMonad.andThen (SchemaUtils.schemaToType [])
                             |> CliMonad.map
                                 (\inner ->
                                     case inner.type_ of
@@ -2388,14 +2387,14 @@ operationToTypesExpectAndResolver functionName operation =
                                     case OpenApi.Reference.toConcrete errResponseOrRef of
                                         Just errResponse ->
                                             OpenApi.Response.content errResponse
-                                                |> contentToContentSchema True
+                                                |> contentToContentSchema
                                                 |> CliMonad.andThen
                                                     (\contentSchema ->
                                                         case contentSchema of
                                                             JsonContent type_ ->
                                                                 CliMonad.map2 Tuple.pair
-                                                                    (SchemaUtils.typeToAnnotationWithNullable False type_)
-                                                                    (SchemaUtils.typeToAnnotationWithNullable True type_)
+                                                                    (SchemaUtils.typeToAnnotationWithNullable type_)
+                                                                    (SchemaUtils.typeToAnnotationWithNullable type_)
 
                                                             StringContent _ ->
                                                                 CliMonad.succeed
@@ -2562,7 +2561,7 @@ operationToTypesExpectAndResolver functionName operation =
                                                     |> CliMonad.succeed
                                     )
                                     (OpenApi.Response.content response
-                                        |> contentToContentSchema True
+                                        |> contentToContentSchema
                                     )
 
                             Nothing ->
@@ -2638,7 +2637,7 @@ errorResponsesToErrorDecoders functionName errorResponses =
                                             case OpenApi.Reference.toConcrete errResponseOrRef of
                                                 Just errResponse ->
                                                     OpenApi.Response.content errResponse
-                                                        |> contentToContentSchema True
+                                                        |> contentToContentSchema
                                                         |> CliMonad.andThen
                                                             (\contentSchema ->
                                                                 case contentSchema of

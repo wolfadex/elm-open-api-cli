@@ -18,7 +18,7 @@ import SchemaUtils
 
 schemaToDeclarations : Common.UnsafeName -> Json.Schema.Definitions.Schema -> CliMonad (List CliMonad.Declaration)
 schemaToDeclarations name schema =
-    SchemaUtils.schemaToType False [] schema
+    SchemaUtils.schemaToType [] schema
         |> CliMonad.andThen
             (\{ type_, documentation } ->
                 let
@@ -184,7 +184,7 @@ schemaToDeclarations name schema =
 
                     _ ->
                         type_
-                            |> SchemaUtils.typeToAnnotationWithNullable False
+                            |> SchemaUtils.typeToAnnotationWithNullable
                             |> CliMonad.andThen
                                 (\annotation ->
                                     if (Elm.ToString.annotation annotation).signature == typeName then
@@ -246,11 +246,11 @@ schemaToDeclarations name schema =
 
 schemaToDecoder : Json.Schema.Definitions.Schema -> CliMonad Elm.Expression
 schemaToDecoder schema =
-    SchemaUtils.schemaToType True [] schema
+    SchemaUtils.schemaToType [] schema
         |> CliMonad.andThen (\{ type_ } -> SchemaUtils.typeToDecoder type_)
 
 
 schemaToEncoder : Json.Schema.Definitions.Schema -> CliMonad (Elm.Expression -> Elm.Expression)
 schemaToEncoder schema =
-    SchemaUtils.schemaToType True [] schema
+    SchemaUtils.schemaToType [] schema
         |> CliMonad.andThen (\{ type_ } -> SchemaUtils.typeToEncoder type_)

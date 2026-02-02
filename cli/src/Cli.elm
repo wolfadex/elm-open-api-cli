@@ -2,6 +2,7 @@ module Cli exposing (run, withConfig)
 
 import Ansi
 import Ansi.Color
+import Ansi.Font
 import BackendTask exposing (BackendTask)
 import BackendTask.Extra
 import BackendTask.File
@@ -17,6 +18,7 @@ import Elm
 import FastDict
 import FastSet
 import FatalError exposing (FatalError)
+import IndentedString exposing (IndentedString)
 import Json.Decode
 import Json.Encode
 import Json.Value
@@ -1000,7 +1002,7 @@ generateFilesFromOpenApiSpecs configs =
                         (\err ->
                             err
                                 |> messageToString
-                                |> String.join "\n"
+                                |> IndentedString.toString
                                 |> FatalError.fromString
                         )
                     |> BackendTask.fromResult
@@ -1026,38 +1028,6 @@ generateFilesFromOpenApiSpecs configs =
                             _ ->
                                 5
 
-                    commonDeclarationsFromResult : List { declaration : Elm.Declaration, group : String }
-                    commonDeclarationsFromResult =
-                        result
-                            |> List.concatMap .modules
-                            |> Dict.Extra.groupBy .moduleName
-                            |> Dict.toList
-                            |> List.concatMap
-                                (\( moduleName, declarations ) ->
-                                    if moduleName == Common.commonModuleName then
-                                        declarations
-                                            |> List.foldl (\e acc -> FastDict.union e.declarations acc) FastDict.empty
-                                            |> FastDict.values
-
-                                    else
-                                        []
-                                )
-
-                    allEffectTypes : List OpenApi.Config.EffectType
-                    allEffectTypes =
-                        List.concatMap
-                            (\( { effectTypes }, _ ) -> effectTypes)
-                            configs
-
-                    commonFile : Elm.File
-                    commonFile =
-                        OpenApi.Common.Internal.declarations
-                            { effectTypes = allEffectTypes
-                            , requiresBase64 = List.any (\{ requiredPackages } -> FastSet.member Common.base64PackageName requiredPackages) result
-                            }
-                            ++ commonDeclarationsFromResult
-                            |> fileFromGroups Common.commonModuleName
-
                     fileFromGroups : List String -> List { group : String, declaration : Elm.Declaration } -> Elm.File
                     fileFromGroups moduleName declarations =
                         declarations
@@ -1074,20 +1044,37 @@ generateFilesFromOpenApiSpecs configs =
                 ( result
                     |> List.concatMap .modules
                     |> Dict.Extra.groupBy .moduleName
-                    |> Dict.toList
-                    |> List.filterMap
-                        (\( moduleName, declarations ) ->
+                    |> Dict.foldr
+                        (\moduleName declarations acc ->
+                            let
+                                deduplicatedDeclarations : List { declaration : Elm.Declaration, group : String }
+                                deduplicatedDeclarations =
+                                    List.foldl (\e dict -> FastDict.union e.declarations dict)
+                                        FastDict.empty
+                                        declarations
+                                        |> FastDict.values
+                            in
                             if moduleName == Common.commonModuleName then
-                                Nothing
+                                let
+                                    allEffectTypes : List OpenApi.Config.EffectType
+                                    allEffectTypes =
+                                        List.concatMap
+                                            (\( { effectTypes }, _ ) -> effectTypes)
+                                            configs
+
+                                    commonDeclarations : List { declaration : Elm.Declaration, group : String }
+                                    commonDeclarations =
+                                        OpenApi.Common.Internal.declarations
+                                            { effectTypes = allEffectTypes
+                                            , requiresBase64 = List.any (\{ requiredPackages } -> FastSet.member Common.base64PackageName requiredPackages) result
+                                            }
+                                in
+                                fileFromGroups moduleName (commonDeclarations ++ deduplicatedDeclarations) :: acc
 
                             else
-                                declarations
-                                    |> List.foldl (\e acc -> FastDict.union e.declarations acc) FastDict.empty
-                                    |> FastDict.values
-                                    |> fileFromGroups moduleName
-                                    |> Just
+                                fileFromGroups moduleName deduplicatedDeclarations :: acc
                         )
-                    |> (::) commonFile
+                        []
                 , { warnings = List.concatMap .warnings result
                   , requiredPackages =
                         List.foldl
@@ -1183,7 +1170,7 @@ printSuccessMessageAndWarnings ( outputPaths, { requiredPackages, warnings } ) =
 
         toInstall : String -> String
         toInstall dependency =
-            indentBy 4 "elm install " ++ dependency
+            "elm install " ++ dependency
 
         toSentence : List String -> String
         toSentence links =
@@ -1241,7 +1228,12 @@ printSuccessMessageAndWarnings ( outputPaths, { requiredPackages, warnings } ) =
               , "You'll also need " ++ toSentence allRequiredPackages ++ " installed. Try running:"
               , ""
               ]
-            , List.map toInstall allRequiredPackages
+            , allRequiredPackages
+                |> List.map
+                    (\requiredPackage ->
+                        toInstall requiredPackage
+                            |> indentBy 4
+                    )
             ]
                 |> List.concat
                 |> List.map Pages.Script.log
@@ -1262,33 +1254,22 @@ elmCodegenWarningToMessage ( path, warnings ) =
         warnings
 
 
-messageToString : OpenApi.Generate.Message -> List String
+messageToString : OpenApi.Generate.Message -> List IndentedString
 messageToString { path, message, details } =
-    [ [ "Error! " ++ message ]
+    [ IndentedString.fromString ("Error! " ++ message)
     , if List.isEmpty path then
         []
 
       else
-        [ "  Path: " ++ String.join " -> " path ]
+        IndentedString.fromString ("Path: " ++ String.join " -> " path)
     , if List.isEmpty details then
         []
 
       else
-        "  Details:" :: indentLinesWith "    " details
+        IndentedString.indent 2 (IndentedString.fromString "Details:")
+            ++ IndentedString.indent 4 details
     ]
         |> List.concat
-
-
-indentLinesWith : String -> List String -> List String
-indentLinesWith prefix lines =
-    let
-        indentLineWith : String -> List String
-        indentLineWith line =
-            line
-                |> String.lines
-                |> List.map (\l -> prefix ++ l)
-    in
-    List.concatMap indentLineWith lines
 
 
 logWarning : ( String, List OpenApi.Generate.Message ) -> BackendTask.BackendTask FatalError.FatalError ()
@@ -1307,13 +1288,15 @@ logWarning ( message, messages ) =
                             details
 
                          else
-                            ("  at " ++ String.join " -> " path) :: details
+                            IndentedString.fromString (Ansi.Font.bold "at " ++ String.join " -> " path)
+                                ++ IndentedString.indent 2 details
                         )
-                            |> String.join "\n    "
+                            |> IndentedString.indent 2
                     )
+                |> List.Extra.removeWhen List.isEmpty
+                |> List.map IndentedString.toString
                 |> Set.fromList
                 |> Set.toList
-                |> List.Extra.remove ""
     in
     (firstLine :: paths)
         |> List.map Pages.Script.log

@@ -852,6 +852,12 @@ typesIntersection seen lType rType =
         ( Common.Object _, Common.Nullable c ) ->
             typesIntersection seen lType c
 
+        ( Common.Nullable c, Common.Dict _ _ ) ->
+            typesIntersection seen c rType
+
+        ( Common.Dict _ _, Common.Nullable c ) ->
+            typesIntersection seen lType c
+
         ( Common.Null, Common.Null ) ->
             CliMonad.succeed (IntersectionResult.FoundIntersection Json.Encode.null)
 

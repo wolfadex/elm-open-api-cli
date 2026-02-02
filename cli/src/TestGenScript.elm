@@ -1,8 +1,15 @@
 module TestGenScript exposing (run)
 
 import Ansi.Color
-import BackendTask
+import BackendTask exposing (BackendTask)
+import BackendTask.Custom
 import Cli
+import Cli.Option
+import Cli.OptionsParser
+import Cli.Program
+import FatalError exposing (FatalError)
+import Json.Decode
+import Json.Encode
 import OpenApi.Config
 import Pages.Script
 
@@ -99,37 +106,72 @@ run =
         telegramBot =
             OpenApi.Config.inputFrom (OpenApi.Config.File "./example/telegram-bot.json")
 
-        config : OpenApi.Config.Config
-        config =
+        profileConfig : OpenApi.Config.Config
+        profileConfig =
+            -- Slimmed config for profiling
             OpenApi.Config.init "./generated"
-                |> OpenApi.Config.withAutoConvertSwagger OpenApi.Config.AlwaysConvert
                 |> OpenApi.Config.withInput additionalProperties
                 |> OpenApi.Config.withInput recursiveAllofRefs
                 |> OpenApi.Config.withInput overridingGlobalSecurity
                 |> OpenApi.Config.withInput singleEnum
-                |> OpenApi.Config.withInput patreon
                 |> OpenApi.Config.withInput realworldConduit
                 |> OpenApi.Config.withInput amadeusAirlineLookup
-                |> OpenApi.Config.withInput dbFahrplanApi
                 |> OpenApi.Config.withInput marioPartyStats
                 |> OpenApi.Config.withInput viaggiatreno
                 |> OpenApi.Config.withInput trustmark
                 |> OpenApi.Config.withInput trustmarkTradeCheck
-                |> OpenApi.Config.withInput gitHub
                 |> OpenApi.Config.withInput ifconfigOvh
                 |> OpenApi.Config.withInput anyOfEnums
                 |> OpenApi.Config.withInput binaryResponse
                 |> OpenApi.Config.withInput nullableEnum
                 |> OpenApi.Config.withInput cookieAuth
+
+        config : OpenApi.Config.Config
+        config =
+            profileConfig
+                |> OpenApi.Config.withInput patreon
+                |> OpenApi.Config.withInput dbFahrplanApi
+                |> OpenApi.Config.withInput gitHub
                 |> OpenApi.Config.withInput telegramBot
+                |> OpenApi.Config.withAutoConvertSwagger OpenApi.Config.AlwaysConvert
     in
-    Pages.Script.withoutCliOptions
-        (BackendTask.doEach
-            [ Cli.withConfig config
-            , "\nCompiling Example app"
-                |> Ansi.Color.fontColor Ansi.Color.brightGreen
-                |> Pages.Script.log
-            , Pages.Script.exec "sh"
-                [ "-c", "cd example && npx --no -- elm make src/Example.elm --output=/dev/null" ]
-            ]
+    Pages.Script.withCliOptions programConfig
+        (\profile ->
+            if profile then
+                profiling "main" (Cli.withConfig profileConfig)
+
+            else
+                BackendTask.doEach
+                    [ Cli.withConfig config
+                    , "\nCompiling Example app"
+                        |> Ansi.Color.fontColor Ansi.Color.brightGreen
+                        |> Pages.Script.log
+                    , Pages.Script.exec "sh"
+                        [ "-c", "cd example && npx --no -- elm make src/Example.elm --output=/dev/null" ]
+                    ]
         )
+
+
+programConfig : Cli.Program.Config Bool
+programConfig =
+    Cli.Program.config
+        |> Cli.Program.add
+            (Cli.OptionsParser.build identity
+                |> Cli.OptionsParser.with (Cli.Option.flag "profile")
+            )
+
+
+profiling : String -> BackendTask FatalError a -> BackendTask FatalError a
+profiling label task =
+    BackendTask.Custom.run "profile" (Json.Encode.string label) (Json.Decode.succeed ())
+        |> BackendTask.allowFatal
+        |> BackendTask.andThen
+            (\() ->
+                task
+            )
+        |> BackendTask.andThen
+            (\res ->
+                BackendTask.Custom.run "profileEnd" (Json.Encode.string label) (Json.Decode.succeed ())
+                    |> BackendTask.allowFatal
+                    |> BackendTask.map (\() -> res)
+            )

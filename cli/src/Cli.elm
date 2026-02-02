@@ -1028,37 +1028,11 @@ generateFilesFromOpenApiSpecs configs =
                             _ ->
                                 5
 
-                    commonDeclarationsFromResult : List { declaration : Elm.Declaration, group : String }
-                    commonDeclarationsFromResult =
-                        result
-                            |> List.concatMap .modules
-                            |> Dict.Extra.groupBy .moduleName
-                            |> Dict.toList
-                            |> List.concatMap
-                                (\( moduleName, declarations ) ->
-                                    if moduleName == Common.commonModuleName then
-                                        declarations
-                                            |> List.foldl (\e acc -> FastDict.union e.declarations acc) FastDict.empty
-                                            |> FastDict.values
-
-                                    else
-                                        []
-                                )
-
                     allEffectTypes : List OpenApi.Config.EffectType
                     allEffectTypes =
                         List.concatMap
                             (\( { effectTypes }, _ ) -> effectTypes)
                             configs
-
-                    commonFile : Elm.File
-                    commonFile =
-                        OpenApi.Common.Internal.declarations
-                            { effectTypes = allEffectTypes
-                            , requiresBase64 = List.any (\{ requiredPackages } -> FastSet.member Common.base64PackageName requiredPackages) result
-                            }
-                            ++ commonDeclarationsFromResult
-                            |> fileFromGroups Common.commonModuleName
 
                     fileFromGroups : List String -> List { group : String, declaration : Elm.Declaration } -> Elm.File
                     fileFromGroups moduleName declarations =
@@ -1076,20 +1050,31 @@ generateFilesFromOpenApiSpecs configs =
                 ( result
                     |> List.concatMap .modules
                     |> Dict.Extra.groupBy .moduleName
-                    |> Dict.toList
-                    |> List.filterMap
-                        (\( moduleName, declarations ) ->
+                    |> Dict.foldr
+                        (\moduleName declarations acc ->
+                            let
+                                deduplicatedDeclarations : List { declaration : Elm.Declaration, group : String }
+                                deduplicatedDeclarations =
+                                    List.foldl (\e dict -> FastDict.union e.declarations dict)
+                                        FastDict.empty
+                                        declarations
+                                        |> FastDict.values
+                            in
                             if moduleName == Common.commonModuleName then
-                                Nothing
+                                let
+                                    commonDeclarations : List { declaration : Elm.Declaration, group : String }
+                                    commonDeclarations =
+                                        OpenApi.Common.Internal.declarations
+                                            { effectTypes = allEffectTypes
+                                            , requiresBase64 = List.any (\{ requiredPackages } -> FastSet.member Common.base64PackageName requiredPackages) result
+                                            }
+                                in
+                                fileFromGroups moduleName (commonDeclarations ++ deduplicatedDeclarations) :: acc
 
                             else
-                                declarations
-                                    |> List.foldl (\e acc -> FastDict.union e.declarations acc) FastDict.empty
-                                    |> FastDict.values
-                                    |> fileFromGroups moduleName
-                                    |> Just
+                                fileFromGroups moduleName deduplicatedDeclarations :: acc
                         )
-                    |> (::) commonFile
+                        []
                 , { warnings = List.concatMap .warnings result
                   , requiredPackages =
                         List.foldl

@@ -989,6 +989,12 @@ typesIntersection seen lType rType =
         ( Common.Object _, Common.Basic _ _ ) ->
             CliMonad.succeed IntersectionResult.NoIntersection
 
+        ( Common.Basic _ _, Common.Dict _ _ ) ->
+            CliMonad.succeed IntersectionResult.NoIntersection
+
+        ( Common.Dict _ _, Common.Basic _ _ ) ->
+            CliMonad.succeed IntersectionResult.NoIntersection
+
         _ ->
             CliMonad.succeed IntersectionResult.MayIntersect
                 |> CliMonad.withWarning ("Disjoint check not implemented for types " ++ typeToString lType ++ " and " ++ typeToString rType)

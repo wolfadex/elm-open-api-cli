@@ -471,12 +471,62 @@ toInternalFormat format =
 
 combineMap : (a -> CliMonad b) -> List a -> CliMonad (List b)
 combineMap f ls =
-    combine (List.map f ls)
+    CliMonad
+        (\input cache ->
+            let
+                go :
+                    List a
+                    -> List b
+                    -> Output
+                    -> FastDict.Dict (List String) Common.Type
+                    -> Result Message ( List b, Output, FastDict.Dict (List String) Common.Type )
+                go queue acc output accCache =
+                    case queue of
+                        [] ->
+                            Ok ( List.reverse acc, output, accCache )
+
+                        el :: tail ->
+                            let
+                                (CliMonad h) =
+                                    f el
+                            in
+                            case h input accCache of
+                                Err e ->
+                                    Err e
+
+                                Ok ( res, resOutput, nextCache ) ->
+                                    go tail (res :: acc) (mergeOutput output resOutput) nextCache
+            in
+            go ls [] emptyOutput cache
+        )
 
 
 combine : List (CliMonad a) -> CliMonad (List a)
-combine =
-    List.foldr (map2 (::)) (succeed [])
+combine ls =
+    CliMonad
+        (\input cache ->
+            let
+                go :
+                    List (CliMonad a)
+                    -> List a
+                    -> Output
+                    -> FastDict.Dict (List String) Common.Type
+                    -> Result Message ( List a, Output, FastDict.Dict (List String) Common.Type )
+                go queue acc output accCache =
+                    case queue of
+                        [] ->
+                            Ok ( List.reverse acc, output, accCache )
+
+                        (CliMonad h) :: tail ->
+                            case h input accCache of
+                                Err e ->
+                                    Err e
+
+                                Ok ( res, resOutput, nextCache ) ->
+                                    go tail (res :: acc) (mergeOutput output resOutput) nextCache
+            in
+            go ls [] emptyOutput cache
+        )
 
 
 getApiSpec : CliMonad OpenApi

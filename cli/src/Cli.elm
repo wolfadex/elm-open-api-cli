@@ -2,6 +2,7 @@ module Cli exposing (run, withConfig)
 
 import Ansi
 import Ansi.Color
+import Ansi.Font
 import BackendTask exposing (BackendTask)
 import BackendTask.Extra
 import BackendTask.File
@@ -17,6 +18,7 @@ import Elm
 import FastDict
 import FastSet
 import FatalError exposing (FatalError)
+import IndentedString exposing (IndentedString)
 import Json.Decode
 import Json.Encode
 import Json.Value
@@ -1000,7 +1002,7 @@ generateFilesFromOpenApiSpecs configs =
                         (\err ->
                             err
                                 |> messageToString
-                                |> String.join "\n"
+                                |> IndentedString.toString
                                 |> FatalError.fromString
                         )
                     |> BackendTask.fromResult
@@ -1183,7 +1185,7 @@ printSuccessMessageAndWarnings ( outputPaths, { requiredPackages, warnings } ) =
 
         toInstall : String -> String
         toInstall dependency =
-            indentBy 4 "elm install " ++ dependency
+            "elm install " ++ dependency
 
         toSentence : List String -> String
         toSentence links =
@@ -1241,7 +1243,12 @@ printSuccessMessageAndWarnings ( outputPaths, { requiredPackages, warnings } ) =
               , "You'll also need " ++ toSentence allRequiredPackages ++ " installed. Try running:"
               , ""
               ]
-            , List.map toInstall allRequiredPackages
+            , allRequiredPackages
+                |> List.map
+                    (\requiredPackage ->
+                        toInstall requiredPackage
+                            |> indentBy 4
+                    )
             ]
                 |> List.concat
                 |> List.map Pages.Script.log
@@ -1262,33 +1269,22 @@ elmCodegenWarningToMessage ( path, warnings ) =
         warnings
 
 
-messageToString : OpenApi.Generate.Message -> List String
+messageToString : OpenApi.Generate.Message -> List IndentedString
 messageToString { path, message, details } =
-    [ [ "Error! " ++ message ]
+    [ IndentedString.fromString ("Error! " ++ message)
     , if List.isEmpty path then
         []
 
       else
-        [ "  Path: " ++ String.join " -> " path ]
+        IndentedString.fromString ("Path: " ++ String.join " -> " path)
     , if List.isEmpty details then
         []
 
       else
-        "  Details:" :: indentLinesWith "    " details
+        IndentedString.indent 2 (IndentedString.fromString "Details:")
+            ++ IndentedString.indent 4 details
     ]
         |> List.concat
-
-
-indentLinesWith : String -> List String -> List String
-indentLinesWith prefix lines =
-    let
-        indentLineWith : String -> List String
-        indentLineWith line =
-            line
-                |> String.lines
-                |> List.map (\l -> prefix ++ l)
-    in
-    List.concatMap indentLineWith lines
 
 
 logWarning : ( String, List OpenApi.Generate.Message ) -> BackendTask.BackendTask FatalError.FatalError ()
@@ -1307,13 +1303,15 @@ logWarning ( message, messages ) =
                             details
 
                          else
-                            ("  at " ++ String.join " -> " path) :: details
+                            IndentedString.fromString (Ansi.Font.bold "at " ++ String.join " -> " path)
+                                ++ IndentedString.indent 2 details
                         )
-                            |> String.join "\n    "
+                            |> IndentedString.indent 2
                     )
+                |> List.Extra.removeWhen List.isEmpty
+                |> List.map IndentedString.toString
                 |> Set.fromList
                 |> Set.toList
-                |> List.Extra.remove ""
     in
     (firstLine :: paths)
         |> List.map Pages.Script.log

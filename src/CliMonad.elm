@@ -33,6 +33,7 @@ import FastSet
 import Gen.Debug
 import Gen.Json.Decode
 import Gen.Json.Encode
+import IndentedString exposing (IndentedString)
 import Json.Encode
 import OpenApi exposing (OpenApi)
 import OpenApi.Config
@@ -42,7 +43,7 @@ import String.Extra
 type alias Message =
     { message : String
     , path : Path
-    , details : List String
+    , details : List IndentedString
     }
 
 
@@ -248,7 +249,7 @@ withWarning message (CliMonad f) =
         )
 
 
-withExtendedWarning : { message : String, details : List String } -> CliMonad a -> CliMonad a
+withExtendedWarning : { message : String, details : List IndentedString } -> CliMonad a -> CliMonad a
 withExtendedWarning { message, details } (CliMonad f) =
     CliMonad
         (\input cache ->

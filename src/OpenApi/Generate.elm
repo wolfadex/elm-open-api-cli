@@ -36,6 +36,7 @@ import Gen.Maybe
 import Gen.String
 import Gen.Task
 import Gen.Url.Builder
+import IndentedString exposing (IndentedString)
 import Json.Schema.Definitions
 import JsonSchema.Generate
 import List.Extra
@@ -69,7 +70,7 @@ type alias Mime =
 type alias Message =
     { message : String
     , path : Path
-    , details : List String
+    , details : List IndentedString
     }
 
 

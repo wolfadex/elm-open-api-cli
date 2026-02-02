@@ -34,6 +34,7 @@ import Gen.List
 import Gen.Maybe
 import Gen.Result
 import Gen.String
+import IndentedString exposing (IndentedString)
 import IntersectionResult exposing (IntersectionResult)
 import Json.Decode
 import Json.Encode
@@ -256,7 +257,7 @@ schemaToType seen schema =
                             (\disjoint ->
                                 let
                                     onIntersection :
-                                        { a | leftSchema : String, rightSchema : String }
+                                        { a | leftSchema : List IndentedString, rightSchema : List IndentedString }
                                         -> Maybe Json.Encode.Value
                                         -> CliMonad { type_ : Common.Type, documentation : Maybe String }
                                     onIntersection collision value =
@@ -272,29 +273,31 @@ schemaToType seen schema =
 
                                             Nothing ->
                                                 let
-                                                    indentWith : String -> String -> String
-                                                    indentWith prefix text =
-                                                        text
-                                                            |> String.lines
-                                                            |> String.join ("\n" ++ prefix)
+                                                    formatSchema : List IndentedString -> List IndentedString
+                                                    formatSchema s =
+                                                        s
+                                                            |> IndentedString.listItem "-"
 
-                                                    details : List String
+                                                    details : List IndentedString
                                                     details =
                                                         case value of
                                                             Just found ->
-                                                                [ "Clash between"
-                                                                , "  - " ++ indentWith "    " collision.leftSchema
-                                                                , "  - " ++ indentWith "    " collision.rightSchema
-                                                                , "Possible clashing value:"
-                                                                , "  " ++ indentWith "  " (Json.Encode.encode 2 found)
+                                                                [ IndentedString.fromString "Clash between"
+                                                                , formatSchema collision.leftSchema
+                                                                , formatSchema collision.rightSchema
+                                                                , IndentedString.fromString "Possible clashing value:"
+                                                                , IndentedString.fromString (Json.Encode.encode 2 found)
+                                                                    |> IndentedString.indent 2
                                                                 ]
+                                                                    |> List.concat
 
                                                             Nothing ->
-                                                                [ "Clash between"
-                                                                , "  - " ++ indentWith "    " collision.leftSchema
-                                                                , "  - " ++ indentWith "    " collision.rightSchema
-                                                                , "Could not build a clashing value"
+                                                                [ IndentedString.fromString "Clash between"
+                                                                , formatSchema collision.leftSchema
+                                                                , formatSchema collision.rightSchema
+                                                                , IndentedString.fromString "Could not build a clashing value"
                                                                 ]
+                                                                    |> List.concat
                                                 in
                                                 CliMonad.succeed
                                                     { type_ = Common.Value
@@ -529,13 +532,13 @@ areAllArrays schemas =
 type SchemaIntersectionResult
     = NoSchemaIntersection
     | SchemaMayIntersect
-        { leftSchema : String
-        , rightSchema : String
+        { leftSchema : List IndentedString
+        , rightSchema : List IndentedString
         }
     | FoundSchemaIntersection
-        { leftSchema : String
+        { leftSchema : List IndentedString
         , value : Json.Encode.Value
-        , rightSchema : String
+        , rightSchema : List IndentedString
         }
 
 
@@ -547,9 +550,9 @@ schemaIntersection seen schemas =
             case ( l, r ) of
                 ( Json.Schema.Definitions.BooleanSchema lb, Json.Schema.Definitions.BooleanSchema rb ) ->
                     if lb == rb then
-                        { leftSchema = "bool"
+                        { leftSchema = IndentedString.fromString "bool"
                         , value = Json.Encode.bool lb
-                        , rightSchema = "bool"
+                        , rightSchema = IndentedString.fromString "bool"
                         }
                             |> FoundSchemaIntersection
                             |> CliMonad.succeed
@@ -631,15 +634,16 @@ schemaIntersection seen schemas =
     go (LazyList.uniquePairs lazyList) NoSchemaIntersection
 
 
-describeSubSchema : Json.Schema.Definitions.SubSchema -> CliMonad String
+describeSubSchema : Json.Schema.Definitions.SubSchema -> CliMonad (List IndentedString)
 describeSubSchema subSchema =
     let
-        sourceToString : Json.Decode.Value -> String
+        sourceToString : Json.Decode.Value -> List IndentedString
         sourceToString source =
             source
                 |> Json.Decode.decodeValue removeDocumentation
                 |> Result.withDefault subSchema.source
                 |> Json.Encode.encode 0
+                |> IndentedString.fromString
     in
     case subSchema.ref of
         Nothing ->
@@ -659,7 +663,8 @@ describeSubSchema subSchema =
                                     Json.Schema.Definitions.BooleanSchema b ->
                                         Json.Encode.bool b
                         in
-                        ref ++ ":\n" ++ sourceToString source
+                        IndentedString.fromString (ref ++ ":")
+                            ++ sourceToString source
                     )
 
 

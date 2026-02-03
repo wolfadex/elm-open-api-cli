@@ -21,6 +21,7 @@
             "mdgriffith/elm-codegen": "6.0.1",
             "miniBill/elm-fast-dict": "1.2.4",
             "robinheghan/murmur3": "1.0.0",
+            "the-sett/elm-pretty-printer": "3.3.0",
             "wolfadex/elm-ansi": "3.0.1",
             "wolfadex/elm-open-api": "2.0.0"
         },
@@ -60,7 +61,6 @@
             "rtfeldman/elm-iso8601-date-strings": "1.1.4",
             "stil4m/elm-syntax": "7.3.9",
             "stil4m/structured-writer": "1.0.3",
-            "the-sett/elm-pretty-printer": "3.3.0",
             "the-sett/elm-syntax-dsl": "6.0.3",
             "zwilias/elm-utf-tools": "2.0.1"
         }

@@ -18,20 +18,18 @@ import Elm
 import FastDict
 import FastSet
 import FatalError exposing (FatalError)
-import IndentedString exposing (IndentedString)
 import Json.Decode
 import Json.Encode
 import Json.Value
-import List.Extra
 import OpenApi
 import OpenApi.Common.Internal
 import OpenApi.Config
 import OpenApi.Generate
 import Pages.Script
 import Pages.Script.Spinner
+import Pretty
 import Regex exposing (Regex)
 import Result.Extra
-import Set
 import String.Extra
 import Url
 import UrlPath
@@ -983,6 +981,11 @@ yamlToJsonValueDecoder =
         ]
 
 
+width : Int
+width =
+    120
+
+
 generateFilesFromOpenApiSpecs :
     List ( OpenApi.Config.Generate, OpenApi.OpenApi )
     ->
@@ -1002,7 +1005,7 @@ generateFilesFromOpenApiSpecs configs =
                         (\err ->
                             err
                                 |> messageToString
-                                |> IndentedString.toString
+                                |> Pretty.pretty width
                                 |> FatalError.fromString
                         )
                     |> BackendTask.fromResult
@@ -1155,10 +1158,6 @@ printSuccessMessageAndWarnings :
     -> BackendTask.BackendTask FatalError.FatalError ()
 printSuccessMessageAndWarnings ( outputPaths, { requiredPackages, warnings } ) =
     let
-        indentBy : Int -> String -> String
-        indentBy amount input =
-            String.repeat amount " " ++ input
-
         allRequiredPackages : List String
         allRequiredPackages =
             requiredPackages
@@ -1168,9 +1167,9 @@ printSuccessMessageAndWarnings ( outputPaths, { requiredPackages, warnings } ) =
                 |> FastSet.insert "elm/bytes"
                 |> FastSet.toList
 
-        toInstall : String -> String
+        toInstall : String -> Pretty.Doc ()
         toInstall dependency =
-            "elm install " ++ dependency
+            Pretty.string ("elm install " ++ dependency)
 
         toSentence : List String -> String
         toSentence links =
@@ -1185,61 +1184,75 @@ printSuccessMessageAndWarnings ( outputPaths, { requiredPackages, warnings } ) =
                 , url = "https://package.elm-lang.org/packages/" ++ dependency ++ "/latest/"
                 }
 
-        warningTask : BackendTask.BackendTask FatalError.FatalError ()
-        warningTask =
+        warningString : Pretty.Doc ()
+        warningString =
             let
                 len : Int
                 len =
                     List.length warnings
             in
             if len == 0 then
-                BackendTask.succeed ()
+                Pretty.empty
 
             else
                 let
-                    warningTasks : List (BackendTask FatalError ())
-                    warningTasks =
+                    joined : Pretty.Doc ()
+                    joined =
                         warnings
                             |> Dict.Extra.groupBy .message
                             |> Dict.toList
-                            |> List.map logWarning
+                            |> List.map warningToString
+                            |> Pretty.lines
 
-                    countMessage : String
+                    countMessage : Pretty.Doc ()
                     countMessage =
                         if len == 1 then
-                            "\nGenerated 1" ++ Ansi.Color.fontColor Ansi.Color.yellow " warning" ++ "."
+                            [ ""
+                            , "Generated 1" ++ Ansi.Color.fontColor Ansi.Color.yellow " warning" ++ "."
+                            ]
+                                |> List.map Pretty.string
+                                |> Pretty.lines
 
                         else
-                            "\nGenerated " ++ String.fromInt len ++ Ansi.Color.fontColor Ansi.Color.yellow " warnings" ++ "."
+                            [ ""
+                            , "Generated " ++ String.fromInt len ++ Ansi.Color.fontColor Ansi.Color.yellow " warnings" ++ "."
+                            ]
+                                |> List.map Pretty.string
+                                |> Pretty.lines
                 in
-                (Pages.Script.log "" :: warningTasks ++ [ Pages.Script.log countMessage ])
-                    |> BackendTask.doEach
+                [ Pretty.string ""
+                , joined
+                , countMessage
+                ]
+                    |> Pretty.lines
 
-        successTask : BackendTask.BackendTask error ()
+        successTask : Pretty.Doc ()
         successTask =
-            [ [ ""
-              , "🎉 SDK generated:"
-              , ""
+            [ [ Pretty.string ""
+              , Pretty.string "🎉 SDK generated:"
+              , Pretty.string ""
               ]
+                |> Pretty.lines
             , outputPaths
-                |> List.map (indentBy 4)
-            , [ ""
-              , ""
-              , "You'll also need " ++ toSentence allRequiredPackages ++ " installed. Try running:"
-              , ""
+                |> List.map (\path -> Pretty.string path |> Pretty.indent 4)
+                |> Pretty.lines
+            , [ Pretty.string ""
+              , Pretty.string ""
+              , Pretty.string ("You'll also need " ++ toSentence allRequiredPackages ++ " installed. Try running:")
+              , Pretty.string ""
               ]
+                |> Pretty.lines
             , allRequiredPackages
                 |> List.map
                     (\requiredPackage ->
                         toInstall requiredPackage
-                            |> indentBy 4
+                            |> Pretty.indent 4
                     )
+                |> Pretty.lines
             ]
-                |> List.concat
-                |> List.map Pages.Script.log
-                |> BackendTask.doEach
+                |> Pretty.lines
     in
-    BackendTask.doEach [ successTask, warningTask ]
+    Pages.Script.log (Pretty.pretty width (Pretty.lines [ successTask, warningString ]))
 
 
 elmCodegenWarningToMessage : ( String, List { declaration : String, warning : String } ) -> List OpenApi.Generate.Message
@@ -1247,60 +1260,60 @@ elmCodegenWarningToMessage ( path, warnings ) =
     List.map
         (\warning ->
             { message = warning.warning
-            , details = []
             , path = [ path, warning.declaration ]
+            , details = Pretty.empty
             }
         )
         warnings
 
 
-messageToString : OpenApi.Generate.Message -> List IndentedString
+messageToString : OpenApi.Generate.Message -> Pretty.Doc ()
 messageToString { path, message, details } =
-    [ IndentedString.fromString ("Error! " ++ message)
+    [ Pretty.string ("Error! " ++ message)
     , if List.isEmpty path then
-        []
+        Pretty.empty
 
       else
-        IndentedString.fromString ("Path: " ++ String.join " -> " path)
-    , if List.isEmpty details then
-        []
+        Pretty.string ("Path: " ++ String.join " -> " path)
+    , if details == Pretty.empty then
+        Pretty.empty
 
       else
-        IndentedString.indent 2 (IndentedString.fromString "Details:")
-            ++ IndentedString.indent 4 details
+        [ Pretty.string "Details:"
+        , details
+        ]
+            |> Pretty.lines
+            |> Pretty.nest 2
     ]
-        |> List.concat
+        |> Pretty.lines
 
 
-logWarning : ( String, List OpenApi.Generate.Message ) -> BackendTask.BackendTask FatalError.FatalError ()
-logWarning ( message, messages ) =
+warningToString : ( String, List OpenApi.Generate.Message ) -> Pretty.Doc ()
+warningToString ( message, messages ) =
     let
-        firstLine : String
+        firstLine : Pretty.Doc ()
         firstLine =
-            Ansi.Color.fontColor Ansi.Color.brightYellow "Warning: " ++ message
+            Pretty.string (Ansi.Color.fontColor Ansi.Color.brightYellow "Warning: " ++ message)
 
-        paths : List String
+        paths : List (Pretty.Doc ())
         paths =
             messages
                 |> List.map
                     (\{ path, details } ->
-                        (if List.isEmpty path then
+                        if List.isEmpty path then
                             details
 
-                         else
-                            IndentedString.fromString (Ansi.Font.bold "at " ++ String.join " -> " path)
-                                ++ IndentedString.indent 2 details
-                        )
-                            |> IndentedString.indent 2
+                        else
+                            [ Pretty.string (Ansi.Font.bold "at " ++ String.join " -> " path)
+                            , details
+                            ]
+                                |> Pretty.lines
+                                |> Pretty.nest 2
                     )
-                |> List.Extra.removeWhen List.isEmpty
-                |> List.map IndentedString.toString
-                |> Set.fromList
-                |> Set.toList
     in
     (firstLine :: paths)
-        |> List.map Pages.Script.log
-        |> BackendTask.doEach
+        |> Pretty.lines
+        |> Pretty.nest 2
 
 
 

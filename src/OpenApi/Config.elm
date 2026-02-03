@@ -268,6 +268,7 @@ defaultFormats =
     , uriFormat
     , uuidFormat
     , byteFormat
+    , passwordFormat
     ]
 
 
@@ -432,6 +433,21 @@ byteFormat =
     , sharedDeclarations = []
     , requiresPackages = [ Common.base64PackageName ]
     , example = Json.Encode.string "<bytes>"
+    }
+
+
+passwordFormat : Format
+passwordFormat =
+    { basicType = Common.String
+    , format = "password"
+    , annotation = Elm.Annotation.string
+    , encode = Gen.Json.Encode.call_.string
+    , decoder =
+        Gen.Json.Decode.string
+    , toParamString = identity
+    , sharedDeclarations = []
+    , requiresPackages = []
+    , example = Json.Encode.string "hunter2"
     }
 
 

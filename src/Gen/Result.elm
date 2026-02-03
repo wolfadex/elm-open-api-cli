@@ -67,7 +67,7 @@ make_ =
                     , annotation =
                         Just
                             (Type.namedWith
-                                []
+                                [ "Result" ]
                                 "Result"
                                 [ Type.var "error", Type.var "value" ]
                             )
@@ -83,7 +83,7 @@ make_ =
                     , annotation =
                         Just
                             (Type.namedWith
-                                []
+                                [ "Result" ]
                                 "Result"
                                 [ Type.var "error", Type.var "value" ]
                             )

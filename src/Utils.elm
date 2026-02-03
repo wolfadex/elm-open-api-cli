@@ -12,10 +12,16 @@ sanitizeModuleName str =
             String.filter
                 (\char ->
                     Char.isAlphaNum char
-                        || (char == '_')
-                        || (char == '-')
-                        || (char == ' ')
-                        || (char == ':')
+                        || (let
+                                code : Int
+                                code =
+                                    Char.toCode char
+                            in
+                            (code == {- '_' -} 95)
+                                || (code == {- '-' -} 45)
+                                || (code == {- ' ' -} 32)
+                                || (code == {- ':' -} 58)
+                           )
                 )
                 str
                 |> String.replace "_" " "

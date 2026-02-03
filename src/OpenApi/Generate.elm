@@ -2734,7 +2734,7 @@ makeNamespaceValid : String -> String
 makeNamespaceValid str =
     String.map
         (\char ->
-            if List.member char invalidModuleNameChars then
+            if isInvalidForModuleName char then
                 '_'
 
             else
@@ -2745,18 +2745,22 @@ makeNamespaceValid str =
 
 removeInvalidChars : String -> String
 removeInvalidChars str =
-    String.filter (\char -> char /= '\'') str
+    String.filter (\char -> Char.toCode char /= {- '\'' -} 39) str
 
 
-invalidModuleNameChars : List Char
-invalidModuleNameChars =
-    [ ' '
-    , '.'
-    , '/'
-    , '{'
-    , '}'
-    , '-'
-    , ':'
-    , '('
-    , ')'
-    ]
+isInvalidForModuleName : Char -> Bool
+isInvalidForModuleName char =
+    let
+        code : Int
+        code =
+            Char.toCode char
+    in
+    (code == {- ' ' -} 32)
+        || (code == {- '.' -} 46)
+        || (code == {- '/' -} 47)
+        || (code == {- '{' -} 123)
+        || (code == {- '}' -} 125)
+        || (code == {- '-' -} 45)
+        || (code == {- ':' -} 58)
+        || (code == {- '(' -} 40)
+        || (code == {- ')' -} 41)

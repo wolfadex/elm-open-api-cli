@@ -106,6 +106,10 @@ run =
         telegramBot =
             OpenApi.Config.inputFrom (OpenApi.Config.File "./example/telegram-bot.json")
 
+        bug : Int -> OpenApi.Config.Input
+        bug n =
+            OpenApi.Config.inputFrom (OpenApi.Config.File ("./example/openapi-generator-bugs/" ++ String.fromInt n ++ ".yaml"))
+
         profileConfig : OpenApi.Config.Config
         profileConfig =
             -- Slimmed config for profiling
@@ -125,6 +129,11 @@ run =
                 |> OpenApi.Config.withInput binaryResponse
                 |> OpenApi.Config.withInput nullableEnum
                 |> OpenApi.Config.withInput cookieAuth
+                |> OpenApi.Config.withInput (bug 7889)
+                |> OpenApi.Config.withInput (bug 10398)
+                |> OpenApi.Config.withInput (bug 16104)
+                |> OpenApi.Config.withInput (bug 22119)
+                |> OpenApi.Config.withInput (bug 22530)
 
         config : OpenApi.Config.Config
         config =

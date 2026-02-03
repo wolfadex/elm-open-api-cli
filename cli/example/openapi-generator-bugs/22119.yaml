@@ -1,0 +1,28 @@
+{
+  "openapi" : "3.0.1",
+  "info" : {
+    "title" : "Bug 22119",
+    "version" : "v0"
+  },
+  "servers" : [ {
+    "url" : "http://127.0.0.1:4000",
+    "description" : "Generated server url"
+  } ],
+  "paths": {},
+  "components" : {
+    "schemas" : {
+      "TestObject" : {
+        "type" : "object",
+        "properties" : {
+          "body" : {
+            "type" : "array",
+            "items": {
+              "type" : "string",
+              "enum" : [ "ENUM_FIRST", "ENUM_SECOND", "ENUM_THIRD" ]
+            }
+          }
+        }
+      }
+    }
+  }
+}

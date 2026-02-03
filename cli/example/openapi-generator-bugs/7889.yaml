@@ -1,0 +1,30 @@
+openapi: 3.0.0
+info:
+  version: 0.1.0-beta
+  title: Bug 7889
+
+paths:
+  /articles:
+    get:
+      summary: Get articles
+      operationId: GetArticles
+      parameters:
+        - name: category
+          in: query
+          description: Comma separated list of categories to filter
+          required: false
+          schema:
+            # NOTE elm code generation for array type query params is buggy as of now.
+           type: array
+           items:
+              $ref: "#/components/schemas/articleCategory"
+      responses:
+        "200":
+          description: Articles
+components:
+  schemas:
+    articleCategory:
+      type: string
+      enum:
+        - Travel
+        - Business

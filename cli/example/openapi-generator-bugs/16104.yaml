@@ -1,0 +1,88 @@
+{
+    "components": {
+        "schemas": {
+            "Example": {
+                "discriminator": {
+                    "mapping": {
+                        "generic": "ExampleGeneric",
+                        "images": "ExampleImages"
+                    },
+                    "propertyName": "tag"
+                },
+                "oneOf": [
+                    {
+                        "$ref": "#/components/schemas/ExampleGeneric"
+                    },
+                    {
+                        "$ref": "#/components/schemas/ExampleImages"
+                    }
+                ]
+            },
+            "ExampleGeneric": {
+                "properties": {
+                    "content": {
+                        "type": "string"
+                    },
+                    "tag": {
+                        "enum": [
+                            "generic"
+                        ],
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "content",
+                    "tag"
+                ],
+                "type": "object"
+            },
+            "ExampleImages": {
+                "properties": {
+                    "images": {
+                        "items": {
+                            "type": "string"
+                        },
+                        "type": "array"
+                    },
+                    "tag": {
+                        "enum": [
+                            "images"
+                        ],
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "images",
+                    "tag"
+                ],
+                "type": "object"
+            }
+        }
+    },
+    "info": {
+        "title": "Bug 16104",
+        "version": ""
+    },
+    "openapi": "3.0.0",
+    "paths": {
+        "/example": {
+            "get": {
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json;charset=utf-8": {
+                                "schema": {
+                                    "items": {
+                                        "$ref": "#/components/schemas/Example"
+                                    },
+                                    "type": "array"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        }
+    }
+}

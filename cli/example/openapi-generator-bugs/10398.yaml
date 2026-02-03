@@ -1,0 +1,48 @@
+openapi: "3.0.0"
+info:
+  version: 1.0.0
+  title: Bug 10398
+servers:
+  - url: https://swapi.dev/api/
+paths:
+  /planets:
+    get:
+      tags:
+        - swapi
+      operationId: getPlanets
+      responses:
+        "200":
+          description: List of planets
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PlanetList"
+  /planets/{planetId}:
+    get:
+      tags:
+        - swapi
+      operationId: getPlanet
+      parameters:
+        - name: planetId
+          in: path
+          description: Planet ID
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Planet name
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Planet"
+components:
+  schemas:
+    Planet:
+      type: string
+      description: Planet name
+    PlanetList:
+      type: array
+      description: List of planets
+      items:
+        $ref: "#/components/schemas/Planet"

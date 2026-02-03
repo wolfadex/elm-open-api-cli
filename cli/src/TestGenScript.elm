@@ -129,6 +129,7 @@ run =
                 |> OpenApi.Config.withInput binaryResponse
                 |> OpenApi.Config.withInput nullableEnum
                 |> OpenApi.Config.withInput cookieAuth
+                |> OpenApi.Config.withInput (bug 7889)
                 |> OpenApi.Config.withInput (bug 10398)
                 |> OpenApi.Config.withInput (bug 16104)
                 |> OpenApi.Config.withInput (bug 22119)

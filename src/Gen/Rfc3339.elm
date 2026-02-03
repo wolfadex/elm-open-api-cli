@@ -100,7 +100,8 @@ make_ =
                 (Elm.value
                     { importFrom = [ "Rfc3339" ]
                     , name = "DateTimeOffset"
-                    , annotation = Just (Type.namedWith [] "DateTime" [])
+                    , annotation =
+                        Just (Type.namedWith [ "Rfc3339" ] "DateTime" [])
                     }
                 )
                 [ ar0 ]
@@ -110,7 +111,8 @@ make_ =
                 (Elm.value
                     { importFrom = [ "Rfc3339" ]
                     , name = "DateTimeLocal"
-                    , annotation = Just (Type.namedWith [] "DateTime" [])
+                    , annotation =
+                        Just (Type.namedWith [ "Rfc3339" ] "DateTime" [])
                     }
                 )
                 [ ar0 ]
@@ -120,7 +122,8 @@ make_ =
                 (Elm.value
                     { importFrom = [ "Rfc3339" ]
                     , name = "DateLocal"
-                    , annotation = Just (Type.namedWith [] "DateTime" [])
+                    , annotation =
+                        Just (Type.namedWith [ "Rfc3339" ] "DateTime" [])
                     }
                 )
                 [ ar0 ]
@@ -130,7 +133,8 @@ make_ =
                 (Elm.value
                     { importFrom = [ "Rfc3339" ]
                     , name = "TimeLocal"
-                    , annotation = Just (Type.namedWith [] "DateTime" [])
+                    , annotation =
+                        Just (Type.namedWith [ "Rfc3339" ] "DateTime" [])
                     }
                 )
                 [ ar0 ]
@@ -138,31 +142,31 @@ make_ =
         Elm.value
             { importFrom = [ "Rfc3339" ]
             , name = "ExpectedDateSeparator"
-            , annotation = Just (Type.namedWith [] "Error" [])
+            , annotation = Just (Type.namedWith [ "Rfc3339" ] "Error" [])
             }
     , expectedDateTimeSeparator =
         Elm.value
             { importFrom = [ "Rfc3339" ]
             , name = "ExpectedDateTimeSeparator"
-            , annotation = Just (Type.namedWith [] "Error" [])
+            , annotation = Just (Type.namedWith [ "Rfc3339" ] "Error" [])
             }
     , expectedTimeSeparator =
         Elm.value
             { importFrom = [ "Rfc3339" ]
             , name = "ExpectedTimeSeparator"
-            , annotation = Just (Type.namedWith [] "Error" [])
+            , annotation = Just (Type.namedWith [ "Rfc3339" ] "Error" [])
             }
     , expectedOffsetSeparator =
         Elm.value
             { importFrom = [ "Rfc3339" ]
             , name = "ExpectedOffsetSeparator"
-            , annotation = Just (Type.namedWith [] "Error" [])
+            , annotation = Just (Type.namedWith [ "Rfc3339" ] "Error" [])
             }
     , invalidMonth =
         Elm.value
             { importFrom = [ "Rfc3339" ]
             , name = "InvalidMonth"
-            , annotation = Just (Type.namedWith [] "Error" [])
+            , annotation = Just (Type.namedWith [ "Rfc3339" ] "Error" [])
             }
     , dayTooLarge =
         \ar0 ->
@@ -170,7 +174,8 @@ make_ =
                 (Elm.value
                     { importFrom = [ "Rfc3339" ]
                     , name = "DayTooLarge"
-                    , annotation = Just (Type.namedWith [] "Error" [])
+                    , annotation =
+                        Just (Type.namedWith [ "Rfc3339" ] "Error" [])
                     }
                 )
                 [ ar0 ]
@@ -178,60 +183,60 @@ make_ =
         Elm.value
             { importFrom = [ "Rfc3339" ]
             , name = "ExpectedZuluOffset"
-            , annotation = Just (Type.namedWith [] "Error" [])
+            , annotation = Just (Type.namedWith [ "Rfc3339" ] "Error" [])
             }
     , expectedOffsetSign =
         Elm.value
             { importFrom = [ "Rfc3339" ]
             , name = "ExpectedOffsetSign"
-            , annotation = Just (Type.namedWith [] "Error" [])
+            , annotation = Just (Type.namedWith [ "Rfc3339" ] "Error" [])
             }
     , expectedFractionalSecondSeparator =
         Elm.value
             { importFrom = [ "Rfc3339" ]
             , name = "ExpectedFractionalSecondSeparator"
-            , annotation = Just (Type.namedWith [] "Error" [])
+            , annotation = Just (Type.namedWith [ "Rfc3339" ] "Error" [])
             }
     , expectedDigit =
         Elm.value
             { importFrom = [ "Rfc3339" ]
             , name = "ExpectedDigit"
-            , annotation = Just (Type.namedWith [] "Error" [])
+            , annotation = Just (Type.namedWith [ "Rfc3339" ] "Error" [])
             }
     , expectedAnInt =
         Elm.value
             { importFrom = [ "Rfc3339" ]
             , name = "ExpectedAnInt"
-            , annotation = Just (Type.namedWith [] "Error" [])
+            , annotation = Just (Type.namedWith [ "Rfc3339" ] "Error" [])
             }
     , invalidNegativeDigits =
         Elm.value
             { importFrom = [ "Rfc3339" ]
             , name = "InvalidNegativeDigits"
-            , annotation = Just (Type.namedWith [] "Error" [])
+            , annotation = Just (Type.namedWith [ "Rfc3339" ] "Error" [])
             }
     , invalidHour =
         Elm.value
             { importFrom = [ "Rfc3339" ]
             , name = "InvalidHour"
-            , annotation = Just (Type.namedWith [] "Error" [])
+            , annotation = Just (Type.namedWith [ "Rfc3339" ] "Error" [])
             }
     , invalidMinute =
         Elm.value
             { importFrom = [ "Rfc3339" ]
             , name = "InvalidMinute"
-            , annotation = Just (Type.namedWith [] "Error" [])
+            , annotation = Just (Type.namedWith [ "Rfc3339" ] "Error" [])
             }
     , invalidSecond =
         Elm.value
             { importFrom = [ "Rfc3339" ]
             , name = "InvalidSecond"
-            , annotation = Just (Type.namedWith [] "Error" [])
+            , annotation = Just (Type.namedWith [ "Rfc3339" ] "Error" [])
             }
     , invalidDay =
         Elm.value
             { importFrom = [ "Rfc3339" ]
             , name = "InvalidDay"
-            , annotation = Just (Type.namedWith [] "Error" [])
+            , annotation = Just (Type.namedWith [ "Rfc3339" ] "Error" [])
             }
     }

@@ -130,7 +130,8 @@ type EffectType
     | LamderaProgramTestTaskRisky -- `Effect.Http.riskyTask` from lamdera/program-test
 
 
-{-| -}
+{-| Gets the package that an `EffectType` is defined in.
+-}
 effectTypeToPackage : EffectType -> Common.Package
 effectTypeToPackage effectType =
     case effectType of
@@ -177,14 +178,16 @@ effectTypeToPackage effectType =
             Common.LamderaProgramTest
 
 
-{-| -}
+{-| One or multiple servers that the API will connect to.
+-}
 type Server
     = Default
     | Single String
     | Multiple (Dict.Dict String String)
 
 
-{-| -}
+{-| A custom `format` for basic types.
+-}
 type alias Format =
     { basicType : Common.BasicType
     , format : String
@@ -198,7 +201,8 @@ type alias Format =
     }
 
 
-{-| -}
+{-| An input path. Can be either a local file or an URL.
+-}
 type Path
     = File String -- swagger.json ./swagger.json /folder/swagger.json
     | Url Url.Url -- https://petstore3.swagger.io/api/v3/openapi.json

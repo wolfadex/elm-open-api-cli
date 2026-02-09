@@ -18,6 +18,7 @@ import PatreonApi.Types
 import RealworldConduitApi.Api
 import RealworldConduitApi.Types
 import RecursiveAllofRefs.Types
+import SimpleRef.Json
 import SingleEnum.Types
 import Trustmark.Api
 import Trustmark.TradeCheck.Api
@@ -41,6 +42,10 @@ type alias Model =
 
 init : () -> ( Model, Cmd Msg )
 init () =
+    let
+        _ =
+            SimpleRef.Json.decodeForbidden
+    in
     ( {}
     , Cmd.batch
         [ RealworldConduitApi.Api.getArticle

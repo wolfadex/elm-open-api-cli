@@ -49,6 +49,7 @@ type alias CliOptions =
     , server : OpenApi.Config.Server
     , overrides : List OpenApi.Config.Path
     , writeMergedTo : Maybe String
+    , noElmFormat : Bool
     }
 
 
@@ -93,6 +94,8 @@ program =
                     )
                 |> Cli.OptionsParser.with
                     (Cli.Option.optionalKeywordArg "write-merged-to")
+                |> Cli.OptionsParser.with
+                    (Cli.Option.flag "no-elm-format")
                 |> Cli.OptionsParser.withDoc """
 version: 0.7.0
 
@@ -159,6 +162,7 @@ options:
   --overrides                        Load an additional file to override parts of the original Open API file.
 
   --write-merged-to                  Write the merged Open API spec to the given file.
+  --no-elm-format                    Don't run elm-format on the outputs.
 """
             )
 
@@ -343,6 +347,7 @@ parseCliOptions cliOptions =
         |> OpenApi.Config.withInput input
         |> OpenApi.Config.withGenerateTodos cliOptions.generateTodos
         |> OpenApi.Config.withAutoConvertSwagger cliOptions.autoConvertSwagger
+        |> OpenApi.Config.withNoElmFormat cliOptions.noElmFormat
         |> maybe OpenApi.Config.withSwaggerConversionUrl cliOptions.swaggerConversionUrl
         |> maybe OpenApi.Config.withSwaggerConversionCommand
             (cliOptions.swaggerConversionCommand
@@ -451,7 +456,12 @@ withConfig config =
                 OpenApi.Config.toGenerationConfig (List.concat allFormats) config apiSpecs
                     |> generateFilesFromOpenApiSpecs
             )
-        |> Pages.Script.Spinner.withStep "Format with elm-format" (onFirst attemptToFormat)
+        |> (if OpenApi.Config.noElmFormat config then
+                identity
+
+            else
+                Pages.Script.Spinner.withStep "Format with elm-format" (onFirst attemptToFormat)
+           )
         |> Pages.Script.Spinner.withStep "Write to disk" (onFirst (writeSdkToDisk (OpenApi.Config.outputDirectory config)))
         |> Pages.Script.Spinner.runSteps
         |> BackendTask.map convertElmCodegenWarnings

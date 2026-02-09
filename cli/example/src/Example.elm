@@ -19,6 +19,7 @@ import RealworldConduitApi.Api
 import RealworldConduitApi.Types
 import RecursiveAllofRefs.Types
 import SingleEnum.Types
+import Trustmark.Api
 import Trustmark.TradeCheck.Api
 import Trustmark.TradeCheck.Servers
 import Trustmark.TradeCheck.Types
@@ -85,6 +86,13 @@ init () =
             { server = Trustmark.TradeCheck.Servers.sandbox
             , authorization = { x_api_key = "?" }
             , body = { publicId = 0, schemeId = Nothing }
+            , toMsg = TrustmarkTradeCheckResponse
+            }
+        , Trustmark.Api.taxonomiesDocumentTypes
+            { authorization =
+                { tm_api_key = "?"
+                , x_api_key = "?"
+                }
             , toMsg = TrustmarkResponse
             }
         , PatreonApi.Api.getCampaign
@@ -115,8 +123,9 @@ type Msg
     | GithubResponse (Result (OpenApi.Common.Error () String) GithubV3RestApi.Types.Root)
     | DbFahrplanResponse (Result (OpenApi.Common.Error Never String) DbFahrplanApi.Types.LocationResponse)
     | MarioPartyStatsResponse (Result (OpenApi.Common.Error Never String) (List MarioPartyStats.Types.Boards))
-    | TrustmarkResponse (Result (OpenApi.Common.Error Never String) Trustmark.TradeCheck.Types.TradeCheckResponse)
+    | TrustmarkTradeCheckResponse (Result (OpenApi.Common.Error Never String) Trustmark.TradeCheck.Types.TradeCheckResponse)
     | PatreonResponse (Result (OpenApi.Common.Error PatreonApi.Types.GetCampaign_Error String) PatreonApi.Types.CampaignResponse)
+    | TrustmarkResponse (Result (OpenApi.Common.Error Never String) (List String))
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -141,6 +150,9 @@ update msg model =
             ( model, Cmd.none )
 
         PatreonResponse _ ->
+            ( model, Cmd.none )
+
+        TrustmarkTradeCheckResponse _ ->
             ( model, Cmd.none )
 
 

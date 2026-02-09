@@ -114,6 +114,7 @@ run =
         profileConfig =
             -- Slimmed config for profiling
             OpenApi.Config.init "./generated"
+                |> OpenApi.Config.withNoElmFormat True
                 |> OpenApi.Config.withInput additionalProperties
                 |> OpenApi.Config.withInput recursiveAllofRefs
                 |> OpenApi.Config.withInput overridingGlobalSecurity
@@ -142,6 +143,7 @@ run =
                 |> OpenApi.Config.withInput dbFahrplanApi
                 |> OpenApi.Config.withInput gitHub
                 |> OpenApi.Config.withInput telegramBot
+                |> OpenApi.Config.withNoElmFormat False
                 |> OpenApi.Config.withAutoConvertSwagger OpenApi.Config.AlwaysConvert
     in
     Pages.Script.withCliOptions programConfig

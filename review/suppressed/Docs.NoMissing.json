@@ -3,7 +3,7 @@
   "automatically created by": "elm-review suppress",
   "learn more": "elm-review suppress --help",
   "suppressions": [
-    { "count": 32, "filePath": "src/OpenApi/Config.elm" },
+    { "count": 30, "filePath": "src/OpenApi/Config.elm" },
     { "count": 5, "filePath": "src/OpenApi/Generate.elm" }
   ]
 }

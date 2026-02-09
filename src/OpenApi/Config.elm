@@ -1,9 +1,9 @@
 module OpenApi.Config exposing
     ( Config, EffectType(..), effectTypeToPackage, Format, Input, Path(..), Server(..)
     , init, inputFrom, pathFromString
-    , withAutoConvertSwagger, AutoConvertSwagger(..), withEffectTypes, withFormat, withFormats, withGenerateTodos, withInput, withSwaggerConversionCommand, withSwaggerConversionUrl
+    , withAutoConvertSwagger, AutoConvertSwagger(..), withEffectTypes, withFormat, withFormats, withGenerateTodos, withInput, withSwaggerConversionCommand, withSwaggerConversionUrl, withNoElmFormat
     , withOutputModuleName, withOverrides, withServer, withWriteMergedTo, withWarnOnMissingEnums
-    , autoConvertSwagger, inputs, outputDirectory, swaggerConversionCommand, swaggerConversionUrl
+    , autoConvertSwagger, inputs, outputDirectory, swaggerConversionCommand, swaggerConversionUrl, noElmFormat
     , oasPath, overrides, writeMergedTo
     , toGenerationConfig, Generate, pathToString
     , defaultFormats
@@ -20,13 +20,13 @@ module OpenApi.Config exposing
 # Creation
 
 @docs init, inputFrom, pathFromString
-@docs withAutoConvertSwagger, AutoConvertSwagger, withEffectTypes, withFormat, withFormats, withGenerateTodos, withInput, withSwaggerConversionCommand, withSwaggerConversionUrl
+@docs withAutoConvertSwagger, AutoConvertSwagger, withEffectTypes, withFormat, withFormats, withGenerateTodos, withInput, withSwaggerConversionCommand, withSwaggerConversionUrl, withNoElmFormat
 @docs withOutputModuleName, withOverrides, withServer, withWriteMergedTo, withWarnOnMissingEnums
 
 
 # Config properties
 
-@docs autoConvertSwagger, inputs, outputDirectory, swaggerConversionCommand, swaggerConversionUrl
+@docs autoConvertSwagger, inputs, outputDirectory, swaggerConversionCommand, swaggerConversionUrl, noElmFormat
 
 
 # Input properties
@@ -82,6 +82,7 @@ type Config
         , swaggerConversionCommand : Maybe { command : String, args : List String }
         , staticFormats : List Format
         , dynamicFormats : List { format : String, basicType : Common.BasicType } -> List Format
+        , noElmFormat : Bool
         }
 
 
@@ -129,7 +130,8 @@ type EffectType
     | LamderaProgramTestTaskRisky -- `Effect.Http.riskyTask` from lamdera/program-test
 
 
-{-| -}
+{-| Gets the package that an `EffectType` is defined in.
+-}
 effectTypeToPackage : EffectType -> Common.Package
 effectTypeToPackage effectType =
     case effectType of
@@ -176,14 +178,16 @@ effectTypeToPackage effectType =
             Common.LamderaProgramTest
 
 
-{-| -}
+{-| One or multiple servers that the API will connect to.
+-}
 type Server
     = Default
     | Single String
     | Multiple (Dict.Dict String String)
 
 
-{-| -}
+{-| A custom `format` for basic types.
+-}
 type alias Format =
     { basicType : Common.BasicType
     , format : String
@@ -197,7 +201,8 @@ type alias Format =
     }
 
 
-{-| -}
+{-| An input path. Can be either a local file or an URL.
+-}
 type Path
     = File String -- swagger.json ./swagger.json /folder/swagger.json
     | Url Url.Url -- https://petstore3.swagger.io/api/v3/openapi.json
@@ -236,6 +241,7 @@ init initialOutputDirectory =
     , swaggerConversionCommand = Nothing
     , staticFormats = defaultFormats
     , dynamicFormats = \_ -> []
+    , noElmFormat = False
     }
         |> Config
 
@@ -538,6 +544,12 @@ withInput input (Config config) =
     Config { config | inputs = input :: config.inputs }
 
 
+{-| -}
+withNoElmFormat : Bool -> Config -> Config
+withNoElmFormat newNoElmFormat (Config config) =
+    Config { config | noElmFormat = newNoElmFormat }
+
+
 
 -------------
 -- Getters --
@@ -572,6 +584,12 @@ outputDirectory (Config config) =
 inputs : Config -> List Input
 inputs (Config config) =
     List.reverse config.inputs
+
+
+{-| -}
+noElmFormat : Config -> Bool
+noElmFormat (Config config) =
+    config.noElmFormat
 
 
 {-| -}

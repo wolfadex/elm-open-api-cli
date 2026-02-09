@@ -244,44 +244,49 @@ deSymbolify replacement str =
                 |> String.replace "+" "Plus"
             )
 
-    else if String.startsWith "$" str then
-        -- This was first identified in the BIMcloud OAS, the fields of `Resource` were prefixed with `$`
-        deSymbolify replacement (String.dropLeft 1 str)
-
     else
         let
-            removeLeadingUnderscores : String -> String
-            removeLeadingUnderscores acc =
-                case String.uncons acc of
-                    Nothing ->
-                        "empty__"
+            replaced : List Char
+            replaced =
+                str
+                    |> String.foldl
+                        (\c acc ->
+                            let
+                                code : Int
+                                code =
+                                    Char.toCode c
+                            in
+                            if
+                                -- lowercase
+                                (0x61 <= code && code <= 0x7A)
+                                    || -- uppercase
+                                       (0x41 <= code && code <= 0x5A)
+                                    || -- digits
+                                       (0x30 <= code && code <= 0x39)
+                            then
+                                c :: acc
 
-                    Just ( head, tail ) ->
-                        if head == replacement then
-                            removeLeadingUnderscores tail
+                            else if List.isEmpty acc then
+                                acc
 
-                        else if Char.isDigit head then
-                            "N" ++ acc
+                            else if code == {- '_' -} 95 then
+                                c :: acc
 
-                        else
-                            acc
+                            else
+                                replacement :: acc
+                        )
+                        []
         in
-        str
-            |> replaceSymbolsWith replacement
-            |> removeLeadingUnderscores
+        case List.reverse replaced of
+            [] ->
+                "empty__"
 
-
-replaceSymbolsWith : Char -> String -> String
-replaceSymbolsWith replacement input =
-    input
-        |> String.map
-            (\c ->
-                if Char.toCode c /= {- '_' -} 95 && not (Char.isAlphaNum c) then
-                    replacement
+            (h :: _) as nonEmpty ->
+                if Char.isDigit h then
+                    "N" ++ String.fromList nonEmpty
 
                 else
-                    c
-            )
+                    String.fromList nonEmpty
 
 
 initialUppercaseWordToLowercase : String -> String

@@ -244,10 +244,6 @@ deSymbolify replacement str =
                 |> String.replace "+" "Plus"
             )
 
-    else if String.startsWith "$" str then
-        -- This was first identified in the BIMcloud OAS, the fields of `Resource` were prefixed with `$`
-        deSymbolify replacement (String.dropLeft 1 str)
-
     else
         let
             replaced : List Char
@@ -261,9 +257,8 @@ deSymbolify replacement str =
                                     Char.toCode c
                             in
                             if
-                                (code == {- '_' -} 95)
-                                    || -- lowercase
-                                       (0x61 <= code && code <= 0x7A)
+                                -- lowercase
+                                (0x61 <= code && code <= 0x7A)
                                     || -- uppercase
                                        (0x41 <= code && code <= 0x5A)
                                     || -- digits
@@ -273,6 +268,9 @@ deSymbolify replacement str =
 
                             else if List.isEmpty acc then
                                 acc
+
+                            else if code == {- '_' -} 95 then
+                                c :: acc
 
                             else
                                 replacement :: acc

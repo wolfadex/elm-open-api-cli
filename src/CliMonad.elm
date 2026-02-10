@@ -1,26 +1,32 @@
 module CliMonad exposing
     ( CliMonad, Message, OneOfName, Path, Declaration
     , run, stepOrFail
-    , succeed, succeedWith, fail
+    , succeed, succeedWith, fail, fromResult
     , map, map2, map3
     , andThen, andThen2, andThen3, andThen4, combine, combineDict, combineMap, foldl
     , errorToWarning, getApiSpec, enumName, moduleToNamespace, getOrCache
     , withPath, withWarning, withExtendedWarning, withRequiredPackage
     , todo, todoWithDefault
     , withFormat
+    , nameToAnnotation, refToAnnotation, refToEncoder, refToDecoder
     )
 
 {-|
 
 @docs CliMonad, Message, OneOfName, Path, Declaration
 @docs run, stepOrFail
-@docs succeed, succeedWith, fail
+@docs succeed, succeedWith, fail, fromResult
 @docs map, map2, map3
 @docs andThen, andThen2, andThen3, andThen4, combine, combineDict, combineMap, foldl
 @docs errorToWarning, getApiSpec, enumName, moduleToNamespace, getOrCache
 @docs withPath, withWarning, withExtendedWarning, withRequiredPackage
 @docs todo, todoWithDefault
 @docs withFormat
+
+
+## Utils
+
+@docs nameToAnnotation, refToAnnotation, refToEncoder, refToDecoder
 
 -}
 
@@ -83,11 +89,11 @@ type alias Input =
 
 
 type CliMonad a
-    = CliMonad
-        (Input
-         -> FastDict.Dict (List String) Common.Type
-         -> Result Message ( a, Output, FastDict.Dict (List String) Common.Type )
-        )
+    = CliMonad (Input -> Cache -> Result Message ( a, Output, Cache ))
+
+
+type alias Cache =
+    FastDict.Dict String Common.Type
 
 
 type alias Output =
@@ -144,9 +150,9 @@ run oneOfDeclarations input (CliMonad x) =
             , warnOnMissingEnums = input.warnOnMissingEnums
             }
 
-        res : Result Message ( List Declaration, Output, FastDict.Dict (List String) Common.Type )
+        res : Result Message ( List Declaration, Output, Cache )
         res =
-            x internalInput FastDict.empty
+            x internalInput emptyCache
     in
     res
         |> Result.andThen
@@ -182,8 +188,17 @@ run oneOfDeclarations input (CliMonad x) =
             )
 
 
-getOrCache : List String -> (() -> CliMonad Common.Type) -> CliMonad Common.Type
-getOrCache key compute =
+emptyCache : Cache
+emptyCache =
+    FastDict.empty
+
+
+getOrCache : Common.RefTo Common.Schema -> (() -> CliMonad Common.Type) -> CliMonad Common.Type
+getOrCache ref compute =
+    let
+        (Common.UnsafeName key) =
+            Common.refToString ref
+    in
     CliMonad
         (\input cache ->
             case FastDict.get key cache of
@@ -499,8 +514,8 @@ combineMap f ls =
                     List a
                     -> List b
                     -> Output
-                    -> FastDict.Dict (List String) Common.Type
-                    -> Result Message ( List b, Output, FastDict.Dict (List String) Common.Type )
+                    -> Cache
+                    -> Result Message ( List b, Output, Cache )
                 go queue acc output accCache =
                     case queue of
                         [] ->
@@ -531,8 +546,8 @@ combine ls =
                     List (CliMonad a)
                     -> List a
                     -> Output
-                    -> FastDict.Dict (List String) Common.Type
-                    -> Result Message ( List a, Output, FastDict.Dict (List String) Common.Type )
+                    -> Cache
+                    -> Result Message ( List a, Output, Cache )
                 go queue acc output accCache =
                     case queue of
                         [] ->
@@ -862,3 +877,74 @@ withRequiredPackage package (CliMonad f) =
                 )
                 (f input cache)
         )
+
+
+fromResult : Result String a -> CliMonad a
+fromResult res =
+    case res of
+        Ok o ->
+            succeed o
+
+        Err e ->
+            fail e
+
+
+refToDecoder : Common.RefTo component -> CliMonad Elm.Expression
+refToDecoder ref =
+    let
+        ( component, name ) =
+            Common.unwrapRef ref
+    in
+    map2
+        (\importFrom ann ->
+            Elm.value
+                { importFrom = importFrom
+                , name = "decode" ++ Common.toTypeName name
+                , annotation = Just (Gen.Json.Decode.annotation_.decoder ann)
+                }
+        )
+        (moduleToNamespace (Common.Json component))
+        (refToAnnotation ref)
+
+
+refToEncoder : Common.RefTo component -> CliMonad (Elm.Expression -> Elm.Expression)
+refToEncoder ref =
+    let
+        ( component, name ) =
+            Common.unwrapRef ref
+    in
+    map2
+        (\importFrom ann rec ->
+            Elm.apply
+                (Elm.value
+                    { importFrom = importFrom
+                    , name = "encode" ++ Common.toTypeName name
+                    , annotation = Just (Elm.Annotation.function [ ann ] Gen.Json.Encode.annotation_.value)
+                    }
+                )
+                [ rec ]
+        )
+        (moduleToNamespace (Common.Json component))
+        (refToAnnotation ref)
+        |> withPath (Common.refToString ref)
+
+
+refToAnnotation : Common.RefTo schema -> CliMonad Elm.Annotation.Annotation
+refToAnnotation ref =
+    let
+        ( component, name ) =
+            Common.unwrapRef ref
+    in
+    nameToAnnotation component name
+        |> withPath (Common.refToString ref)
+
+
+nameToAnnotation : Common.Component -> Common.UnsafeName -> CliMonad Elm.Annotation.Annotation
+nameToAnnotation component name =
+    moduleToNamespace (Common.Types component)
+        |> map
+            (\importFrom ->
+                Elm.Annotation.named
+                    importFrom
+                    (Common.toTypeName name)
+            )

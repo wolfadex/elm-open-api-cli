@@ -1,0 +1,29 @@
+openapi: 3.0.1
+info:
+  title: "Simple Ref"
+  version: 1.0.0
+components:
+  schemas:
+    Forbidden:
+      $ref: "#/components/schemas/Message"
+    Message:
+      type: object
+      properties:
+        msg:
+          type: string
+      required:
+        - msg
+
+  responses:
+    Forbidden:
+      description: Wrong credentials
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Forbidden"
+paths:
+  "/api":
+    get:
+      responses:
+        200:
+          $ref: "#/components/responses/Forbidden"

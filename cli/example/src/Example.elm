@@ -2,7 +2,7 @@ module Example exposing (..)
 
 import AdditionalProperties.Types
 import AirlineCodeLookupApi.Api
-import AirlineCodeLookupApi.Types
+import AirlineCodeLookupApi.Types.Responses
 import Browser
 import DbFahrplanApi.Api
 import DbFahrplanApi.Types
@@ -14,11 +14,13 @@ import MarioPartyStats.Types
 import NullableEnum.Json
 import OpenApi.Common
 import PatreonApi.Api
-import PatreonApi.Types
+import PatreonApi.Types.Responses
 import RealworldConduitApi.Api
-import RealworldConduitApi.Types
+import RealworldConduitApi.Types.Responses
 import RecursiveAllofRefs.Types
+import SimpleRef.Json
 import SingleEnum.Types
+import Trustmark.Api
 import Trustmark.TradeCheck.Api
 import Trustmark.TradeCheck.Servers
 import Trustmark.TradeCheck.Types
@@ -40,6 +42,10 @@ type alias Model =
 
 init : () -> ( Model, Cmd Msg )
 init () =
+    let
+        _ =
+            SimpleRef.Json.decodeForbidden
+    in
     ( {}
     , Cmd.batch
         [ RealworldConduitApi.Api.getArticle
@@ -85,6 +91,13 @@ init () =
             { server = Trustmark.TradeCheck.Servers.sandbox
             , authorization = { x_api_key = "?" }
             , body = { publicId = 0, schemeId = Nothing }
+            , toMsg = TrustmarkTradeCheckResponse
+            }
+        , Trustmark.Api.taxonomiesDocumentTypes
+            { authorization =
+                { tm_api_key = "?"
+                , x_api_key = "?"
+                }
             , toMsg = TrustmarkResponse
             }
         , PatreonApi.Api.getCampaign
@@ -109,14 +122,15 @@ subscriptions _ =
 
 
 type Msg
-    = ConduitResponse (Result (OpenApi.Common.Error RealworldConduitApi.Types.GenericError String) RealworldConduitApi.Types.SingleArticleResponse)
-    | AmadeusResponse (Result (OpenApi.Common.Error AirlineCodeLookupApi.Types.Getairlines_Error String) AirlineCodeLookupApi.Types.Airlines)
+    = ConduitResponse (Result (OpenApi.Common.Error RealworldConduitApi.Types.Responses.GenericError String) RealworldConduitApi.Types.Responses.SingleArticleResponse)
+    | AmadeusResponse (Result (OpenApi.Common.Error AirlineCodeLookupApi.Types.Responses.Getairlines_Error String) AirlineCodeLookupApi.Types.Responses.Airlines)
       -- | BimResponse (Result (OpenApi.Common.Error BimcloudApi20232AlphaRelease.BlobStoreService10BeginBatchUpload_Error Bytes.Bytes) Bytes.Bytes)
     | GithubResponse (Result (OpenApi.Common.Error () String) GithubV3RestApi.Types.Root)
     | DbFahrplanResponse (Result (OpenApi.Common.Error Never String) DbFahrplanApi.Types.LocationResponse)
     | MarioPartyStatsResponse (Result (OpenApi.Common.Error Never String) (List MarioPartyStats.Types.Boards))
-    | TrustmarkResponse (Result (OpenApi.Common.Error Never String) Trustmark.TradeCheck.Types.TradeCheckResponse)
-    | PatreonResponse (Result (OpenApi.Common.Error PatreonApi.Types.GetCampaign_Error String) PatreonApi.Types.CampaignResponse)
+    | TrustmarkTradeCheckResponse (Result (OpenApi.Common.Error Never String) Trustmark.TradeCheck.Types.TradeCheckResponse)
+    | PatreonResponse (Result (OpenApi.Common.Error PatreonApi.Types.Responses.GetCampaign_Error String) PatreonApi.Types.Responses.CampaignResponse)
+    | TrustmarkResponse (Result (OpenApi.Common.Error Never String) (List String))
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -141,6 +155,9 @@ update msg model =
             ( model, Cmd.none )
 
         PatreonResponse _ ->
+            ( model, Cmd.none )
+
+        TrustmarkTradeCheckResponse _ ->
             ( model, Cmd.none )
 
 

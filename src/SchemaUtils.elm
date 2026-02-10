@@ -1,9 +1,8 @@
 module SchemaUtils exposing
     ( OneOfName
-    , getAlias
+    , getSchema
     , oneOfDeclarations
     , recordType
-    , refToTypeName
     , schemaToType
     , subschemaToEnumMaybe
     , toVariantName
@@ -52,8 +51,12 @@ import Result.Extra
 import Set exposing (Set)
 
 
-getSchema : String -> CliMonad Json.Schema.Definitions.Schema
-getSchema refName =
+getSchema : Common.RefTo Common.Schema -> CliMonad Json.Schema.Definitions.Schema
+getSchema ref =
+    let
+        ( _, Common.UnsafeName refName ) =
+            Common.unwrapRef ref
+    in
     CliMonad.getApiSpec
         |> CliMonad.stepOrFail ("Could not find components in the schema, while looking up " ++ refName)
             OpenApi.components
@@ -62,17 +65,7 @@ getSchema refName =
         |> CliMonad.map OpenApi.Schema.get
 
 
-getAlias : List String -> CliMonad Json.Schema.Definitions.Schema
-getAlias refUri =
-    case refUri of
-        [ "#", "components", _, refName ] ->
-            getSchema refName
-
-        _ ->
-            CliMonad.fail <| "Couldn't get the type ref (" ++ String.join "/" refUri ++ ") for the response"
-
-
-subSchemaAllOfToProperties : List (List String) -> Json.Schema.Definitions.SubSchema -> CliMonad (List ( Common.UnsafeName, Common.Field ))
+subSchemaAllOfToProperties : List (Common.RefTo Common.Schema) -> Json.Schema.Definitions.SubSchema -> CliMonad (List ( Common.UnsafeName, Common.Field ))
 subSchemaAllOfToProperties seen subSchema =
     subSchema.allOf
         |> Maybe.withDefault []
@@ -81,7 +74,7 @@ subSchemaAllOfToProperties seen subSchema =
         |> CliMonad.withPath (Common.UnsafeName "allOf")
 
 
-schemaToProperties : List (List String) -> Json.Schema.Definitions.Schema -> CliMonad (List ( Common.UnsafeName, Common.Field ))
+schemaToProperties : List (Common.RefTo Common.Schema) -> Json.Schema.Definitions.Schema -> CliMonad (List ( Common.UnsafeName, Common.Field ))
 schemaToProperties seen allOfItem =
     case allOfItem of
         Json.Schema.Definitions.ObjectSchema allOfItemSchema ->
@@ -110,19 +103,21 @@ listUnion l r =
         |> List.map (Tuple.mapFirst Common.UnsafeName)
 
 
-subSchemaRefToProperties : List (List String) -> Json.Schema.Definitions.SubSchema -> CliMonad (List ( Common.UnsafeName, Common.Field ))
+subSchemaRefToProperties : List (Common.RefTo Common.Schema) -> Json.Schema.Definitions.SubSchema -> CliMonad (List ( Common.UnsafeName, Common.Field ))
 subSchemaRefToProperties seen allOfItem =
     case allOfItem.ref of
         Nothing ->
             CliMonad.succeed []
 
         Just ref ->
-            getAlias (String.split "/" ref)
+            Common.parseSchemaRef ref
+                |> CliMonad.fromResult
+                |> CliMonad.andThen getSchema
                 |> CliMonad.andThen (schemaToProperties seen)
                 |> CliMonad.withPath (Common.UnsafeName ref)
 
 
-subSchemaToProperties : List (List String) -> Json.Schema.Definitions.SubSchema -> CliMonad (List ( Common.UnsafeName, Common.Field ))
+subSchemaToProperties : List (Common.RefTo Common.Schema) -> Json.Schema.Definitions.SubSchema -> CliMonad (List ( Common.UnsafeName, Common.Field ))
 subSchemaToProperties seen sch =
     -- TODO: rename
     let
@@ -151,7 +146,7 @@ subSchemaToProperties seen sch =
             )
 
 
-schemaToType : List (List String) -> Json.Schema.Definitions.Schema -> CliMonad { type_ : Common.Type, documentation : Maybe String }
+schemaToType : List (Common.RefTo Common.Schema) -> Json.Schema.Definitions.Schema -> CliMonad { type_ : Common.Type, documentation : Maybe String }
 schemaToType seen schema =
     case schema of
         Json.Schema.Definitions.BooleanSchema _ ->
@@ -391,7 +386,14 @@ schemaToType seen schema =
                 Json.Schema.Definitions.AnyType ->
                     case subSchema.ref of
                         Just ref ->
-                            CliMonad.succeed { type_ = Common.ref ref, documentation = subSchema.description }
+                            Common.parseSchemaRef ref
+                                |> CliMonad.fromResult
+                                |> CliMonad.map
+                                    (\parsed ->
+                                        { type_ = Common.Ref parsed
+                                        , documentation = subSchema.description
+                                        }
+                                    )
 
                         Nothing ->
                             case subSchema.anyOf of
@@ -546,7 +548,7 @@ type SchemaIntersectionResult
         }
 
 
-schemaIntersection : List (List String) -> List Json.Schema.Definitions.Schema -> CliMonad SchemaIntersectionResult
+schemaIntersection : List (Common.RefTo Common.Schema) -> List Json.Schema.Definitions.Schema -> CliMonad SchemaIntersectionResult
 schemaIntersection seen schemas =
     let
         intersect : Json.Schema.Definitions.Schema -> Json.Schema.Definitions.Schema -> CliMonad SchemaIntersectionResult
@@ -654,21 +656,27 @@ describeSubSchema subSchema =
             CliMonad.succeed (sourceToString subSchema.source)
 
         Just ref ->
-            getAlias (String.split "/" ref)
-                |> CliMonad.map
-                    (\f ->
-                        let
-                            source : Json.Decode.Value
-                            source =
-                                case f of
-                                    Json.Schema.Definitions.ObjectSchema o ->
-                                        o.source
+            Common.parseSchemaRef ref
+                |> CliMonad.fromResult
+                |> CliMonad.andThen
+                    (\parsedRef ->
+                        getSchema parsedRef
+                            |> CliMonad.map
+                                (\f ->
+                                    let
+                                        source : Json.Decode.Value
+                                        source =
+                                            case f of
+                                                Json.Schema.Definitions.ObjectSchema o ->
+                                                    o.source
 
-                                    Json.Schema.Definitions.BooleanSchema b ->
-                                        Json.Encode.bool b
-                        in
-                        Pretty.string (ref ++ ": ")
-                            |> Pretty.a (sourceToString source)
+                                                Json.Schema.Definitions.BooleanSchema b ->
+                                                    Json.Encode.bool b
+                                    in
+                                    Pretty.string (ref ++ ": ")
+                                        |> Pretty.a (sourceToString source)
+                                )
+                            |> CliMonad.withPath (Common.refToString parsedRef)
                     )
 
 
@@ -692,7 +700,7 @@ removeDocumentation =
         )
 
 
-exampleOfType : List (List String) -> Common.Type -> CliMonad Json.Encode.Value
+exampleOfType : List (Common.RefTo Common.Schema) -> Common.Type -> CliMonad Json.Encode.Value
 exampleOfType seen type_ =
     case type_ of
         Common.Nullable _ ->
@@ -799,13 +807,13 @@ exampleOfType seen type_ =
 
             else
                 let
-                    newSeen : List (List String)
+                    newSeen : List (Common.RefTo Common.Schema)
                     newSeen =
                         ref :: seen
                 in
                 refToType newSeen ref
                     |> CliMonad.andThen (\t -> exampleOfType newSeen t)
-                    |> CliMonad.withPath (Common.UnsafeName (String.join "/" ref))
+                    |> CliMonad.withPath (Common.refToString ref)
 
         Common.Bytes ->
             Json.Encode.string "<bytes>"
@@ -816,11 +824,11 @@ exampleOfType seen type_ =
                 |> CliMonad.succeed
 
 
-refToType : List (List String) -> List String -> CliMonad Common.Type
+refToType : List (Common.RefTo Common.Schema) -> Common.RefTo Common.Schema -> CliMonad Common.Type
 refToType seen ref =
     CliMonad.getOrCache ref
         (\() ->
-            getAlias ref
+            getSchema ref
                 |> CliMonad.andThen (schemaToType seen)
                 |> CliMonad.map .type_
         )
@@ -837,23 +845,23 @@ type SimplifiedForIntersectionBasicType
     | SimplifiedForIntersectionBool (Maybe Bool)
 
 
-typesIntersection : List (List String) -> Common.Type -> Common.Type -> CliMonad (IntersectionResult Json.Encode.Value)
+typesIntersection : List (Common.RefTo Common.Schema) -> Common.Type -> Common.Type -> CliMonad (IntersectionResult Json.Encode.Value)
 typesIntersection seen lType rType =
     let
-        followRef : List String -> Common.Type -> CliMonad (IntersectionResult Json.Encode.Value)
+        followRef : Common.RefTo Common.Schema -> Common.Type -> CliMonad (IntersectionResult Json.Encode.Value)
         followRef ref oType =
             if List.Extra.count ((==) ref) seen > 2 then
                 CliMonad.succeed IntersectionResult.MayIntersect
 
             else
                 let
-                    newSeen : List (List String)
+                    newSeen : List (Common.RefTo Common.Schema)
                     newSeen =
                         ref :: seen
                 in
                 refToType newSeen ref
                     |> CliMonad.andThen (\type_ -> typesIntersection newSeen type_ oType)
-                    |> CliMonad.withPath (Common.UnsafeName (String.join "/" ref))
+                    |> CliMonad.withPath (Common.refToString ref)
     in
     case ( lType, rType ) of
         ( Common.Ref lRef, Common.Ref rRef ) ->
@@ -1031,7 +1039,7 @@ typesIntersection seen lType rType =
                 |> CliMonad.withWarning ("Disjoint check not implemented for types " ++ typeToString lType ++ " and " ++ typeToString rType)
 
 
-typesIntersectionOneOf : List (List String) -> List Common.OneOfData -> Common.Type -> CliMonad (IntersectionResult Json.Encode.Value)
+typesIntersectionOneOf : List (Common.RefTo Common.Schema) -> List Common.OneOfData -> Common.Type -> CliMonad (IntersectionResult Json.Encode.Value)
 typesIntersectionOneOf seen alternatives t =
     alternatives
         |> CliMonad.combineMap
@@ -1070,7 +1078,7 @@ findAnyIntersection =
 
 
 objectsIntersection :
-    List (List String)
+    List (Common.RefTo Common.Schema)
     -> ( Common.Object, Maybe Common.Type )
     -> ( Common.Object, Maybe Common.Type )
     -> CliMonad (IntersectionResult Json.Encode.Value)
@@ -1382,16 +1390,11 @@ oneOfType types =
                     Just variants ->
                         let
                             sortedVariants :
-                                ( { name : Common.UnsafeName
-                                  , type_ : Common.Type
-                                  , documentation : Maybe String
-                                  }
-                                , List
+                                NonEmpty.NonEmpty
                                     { name : Common.UnsafeName
                                     , type_ : Common.Type
                                     , documentation : Maybe String
                                     }
-                                )
                             sortedVariants =
                                 NonEmpty.sortBy (\{ name } -> Common.unwrapUnsafe name) variants
 
@@ -1426,7 +1429,7 @@ oneOfType types =
 
 {-| Transform an object schema's named and inherited (via $ref) properties to a type
 -}
-objectSchemaToTypeHelp : List (List String) -> Json.Schema.Definitions.SubSchema -> CliMonad { type_ : Common.Type, documentation : Maybe String }
+objectSchemaToTypeHelp : List (Common.RefTo Common.Schema) -> Json.Schema.Definitions.SubSchema -> CliMonad { type_ : Common.Type, documentation : Maybe String }
 objectSchemaToTypeHelp seen subSchema =
     CliMonad.map2
         (\schemaProps allOfProps ->
@@ -1467,7 +1470,7 @@ objectSchemaToTypeHelp seen subSchema =
         (subSchemaAllOfToProperties seen subSchema)
 
 
-objectSchemaToType : List (List String) -> Json.Schema.Definitions.SubSchema -> CliMonad { type_ : Common.Type, documentation : Maybe String }
+objectSchemaToType : List (Common.RefTo Common.Schema) -> Json.Schema.Definitions.SubSchema -> CliMonad { type_ : Common.Type, documentation : Maybe String }
 objectSchemaToType seen subSchema =
     let
         declaredProperties : CliMonad { type_ : Common.Type, documentation : Maybe String }
@@ -1599,7 +1602,7 @@ oneOfDeclaration ( oneOfName, variants ) =
         |> CliMonad.combineMap variantDeclaration
         |> CliMonad.map
             (\decl ->
-                { moduleName = Common.Types
+                { moduleName = Common.Types Common.Schema
                 , name = oneOfName
                 , group = "One of"
                 , declaration =
@@ -1683,7 +1686,7 @@ typeToAnnotationWithNullable type_ =
                                 CliMonad.succeed Elm.Annotation.string
 
                             Just name ->
-                                nameToAnnotation name
+                                CliMonad.nameToAnnotation Common.Schema name
                     )
 
         Common.OneOf oneOfName oneOfData ->
@@ -1693,12 +1696,7 @@ typeToAnnotationWithNullable type_ =
             CliMonad.succeed Gen.Json.Encode.annotation_.value
 
         Common.Ref ref ->
-            refToTypeName ref
-                |> CliMonad.andThen
-                    (\name ->
-                        nameToAnnotation name
-                    )
-                |> CliMonad.withPath (Common.UnsafeName (String.join "/" ref))
+            CliMonad.refToAnnotation ref
 
         Common.Bytes ->
             CliMonad.succeed Gen.Bytes.annotation_.bytes
@@ -1763,7 +1761,7 @@ typeToAnnotationWithMaybe type_ =
                                 CliMonad.succeed Elm.Annotation.string
 
                             Just name ->
-                                nameToAnnotation name
+                                CliMonad.nameToAnnotation Common.Schema name
                     )
 
         Common.OneOf oneOfName oneOfData ->
@@ -1773,10 +1771,7 @@ typeToAnnotationWithMaybe type_ =
             CliMonad.succeed Gen.Json.Encode.annotation_.value
 
         Common.Ref ref ->
-            refToTypeName ref
-                |> CliMonad.andThen
-                    (\name -> nameToAnnotation name)
-                |> CliMonad.withPath (Common.UnsafeName (String.join "/" ref))
+            CliMonad.refToAnnotation ref
 
         Common.Bytes ->
             CliMonad.succeed Gen.Bytes.annotation_.bytes
@@ -1784,17 +1779,6 @@ typeToAnnotationWithMaybe type_ =
 
         Common.Unit ->
             CliMonad.succeed Elm.Annotation.unit
-
-
-nameToAnnotation : Common.UnsafeName -> CliMonad Elm.Annotation.Annotation
-nameToAnnotation name =
-    CliMonad.moduleToNamespace Common.Types
-        |> CliMonad.map
-            (\importFrom ->
-                Elm.Annotation.named
-                    importFrom
-                    (Common.toTypeName name)
-            )
 
 
 basicTypeToAnnotation : Common.BasicType -> { a | format : Maybe String } -> CliMonad Elm.Annotation.Annotation
@@ -1875,18 +1859,7 @@ typeToEncoder type_ =
                                 CliMonad.succeed Gen.Json.Encode.call_.string
 
                             Just name ->
-                                CliMonad.map
-                                    (\importFrom rec ->
-                                        Elm.apply
-                                            (Elm.value
-                                                { importFrom = importFrom
-                                                , name = "encode" ++ Common.toTypeName name
-                                                , annotation = Nothing
-                                                }
-                                            )
-                                            [ rec ]
-                                    )
-                                    (CliMonad.moduleToNamespace Common.Json)
+                                CliMonad.refToEncoder (Common.refTo Common.Schema name)
                     )
 
         Common.Object properties ->
@@ -2029,20 +2002,7 @@ typeToEncoder type_ =
             CliMonad.succeed <| Gen.Basics.identity
 
         Common.Ref ref ->
-            refToTypeName ref
-                |> CliMonad.map2
-                    (\importFrom name rec ->
-                        Elm.apply
-                            (Elm.value
-                                { importFrom = importFrom
-                                , name = "encode" ++ Common.toTypeName name
-                                , annotation = Nothing
-                                }
-                            )
-                            [ rec ]
-                    )
-                    (CliMonad.moduleToNamespace Common.Json)
-                |> CliMonad.withPath (Common.UnsafeName (String.join "/" ref))
+            CliMonad.refToEncoder ref
 
         Common.OneOf oneOfName oneOfData ->
             oneOfData
@@ -2067,7 +2027,7 @@ typeToEncoder type_ =
                             (Elm.Annotation.named importFrom oneOfName)
                             branches
                     )
-                    (CliMonad.moduleToNamespace Common.Types)
+                    (CliMonad.moduleToNamespace (Common.Types Common.Schema))
 
         Common.Bytes ->
             CliMonad.todo "Encoder for bytes not implemented"
@@ -2100,7 +2060,7 @@ basicTypeToEncoder basicType { format } =
 
 oneOfAnnotation : Common.TypeName -> List Common.OneOfData -> CliMonad Elm.Annotation.Annotation
 oneOfAnnotation oneOfName oneOfData =
-    CliMonad.moduleToNamespace Common.Types
+    CliMonad.moduleToNamespace (Common.Types Common.Schema)
         |> CliMonad.andThen
             (\importFrom ->
                 Elm.Annotation.named
@@ -2109,16 +2069,6 @@ oneOfAnnotation oneOfName oneOfData =
                     |> CliMonad.succeedWith
                         (FastDict.singleton oneOfName oneOfData)
             )
-
-
-refToTypeName : List String -> CliMonad Common.UnsafeName
-refToTypeName ref =
-    case ref of
-        [ "#", "components", _, name ] ->
-            CliMonad.succeed (Common.UnsafeName name)
-
-        _ ->
-            CliMonad.fail <| "Couldn't get the type ref (" ++ String.join "/" ref ++ ") for the response"
 
 
 typeToDecoder : Common.Type -> CliMonad Elm.Expression
@@ -2364,15 +2314,7 @@ typeToDecoder type_ =
                                     |> CliMonad.succeed
 
                             Just name ->
-                                CliMonad.map
-                                    (\importFrom ->
-                                        Elm.value
-                                            { importFrom = importFrom
-                                            , name = "decode" ++ Common.toTypeName name
-                                            , annotation = Nothing
-                                            }
-                                    )
-                                    (CliMonad.moduleToNamespace Common.Json)
+                                CliMonad.refToDecoder (Common.refTo Common.Schema name)
                     )
 
         Common.Value ->
@@ -2392,17 +2334,7 @@ typeToDecoder type_ =
                 (typeToDecoder t)
 
         Common.Ref ref ->
-            CliMonad.map2
-                (\importFrom name ->
-                    Elm.value
-                        { importFrom = importFrom
-                        , name = "decode" ++ Common.toTypeName name
-                        , annotation = Nothing
-                        }
-                )
-                (CliMonad.moduleToNamespace Common.Json)
-                (refToTypeName ref)
-                |> CliMonad.withPath (Common.UnsafeName (String.join "/" ref))
+            CliMonad.refToDecoder ref
 
         Common.OneOf oneOfName variants ->
             variants
@@ -2420,7 +2352,7 @@ typeToDecoder type_ =
                                             }
                                         )
                                 )
-                                (CliMonad.moduleToNamespace Common.Types)
+                                (CliMonad.moduleToNamespace (Common.Types Common.Schema))
                             |> CliMonad.withPath variant.name
                     )
                 |> CliMonad.map2
@@ -2429,7 +2361,7 @@ typeToDecoder type_ =
                             |> Gen.Json.Decode.oneOf
                             |> Elm.withType (Elm.Annotation.named importFrom oneOfName)
                     )
-                    (CliMonad.moduleToNamespace Common.Types)
+                    (CliMonad.moduleToNamespace (Common.Types Common.Schema))
 
         Common.Bytes ->
             CliMonad.todo "Bytes decoder not implemented yet"

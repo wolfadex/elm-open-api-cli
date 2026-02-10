@@ -1,11 +1,16 @@
 module Common exposing
     ( BasicType(..)
+    , Component(..)
     , ConstValue(..)
     , Field
     , Module(..)
     , Object
     , OneOfData
     , Package(..)
+    , RefTo
+    , RequestBody
+    , Response
+    , Schema
     , Type(..)
     , TypeName
     , UnsafeName(..)
@@ -15,13 +20,20 @@ module Common exposing
     , commonModuleName
     , enum
     , moduleToNamespace
-    , ref
+    , parseRef
+    , parseRequestBodyRef
+    , parseResponseRef
+    , parseSchemaRef
+    , refTo
+    , refToString
     , reservedList
     , toTypeName
     , toValueName
+    , unwrapRef
     , unwrapUnsafe
     )
 
+import Json.Encode
 import NonEmpty
 import Regex
 import Set exposing (Set)
@@ -29,12 +41,24 @@ import String.Extra
 
 
 type Module
-    = Json
-    | Types
+    = Json Component
+    | Types Component
       -- Nothing if we are only generating effects for a single package
     | Api (Maybe Package)
     | Common
     | Servers
+
+
+type Component
+    = Schema
+    | Parameter
+    | SecurityScheme
+    | RequestBody
+    | Response
+    | Header
+    | Example
+    | Link
+    | Callback
 
 
 type Package
@@ -52,11 +76,17 @@ type UnsafeName
 moduleToNamespace : List String -> Module -> List String
 moduleToNamespace namespace moduleName =
     case moduleName of
-        Json ->
+        Json Schema ->
             namespace ++ [ "Json" ]
 
-        Types ->
+        Json component ->
+            namespace ++ [ "Json", componentToModulePiece component ]
+
+        Types Schema ->
             namespace ++ [ "Types" ]
+
+        Types component ->
+            namespace ++ [ "Types", componentToModulePiece component ]
 
         Api package ->
             case package of
@@ -77,6 +107,102 @@ moduleToNamespace namespace moduleName =
 
         Common ->
             commonModuleName
+
+
+componentToModulePiece : Component -> String
+componentToModulePiece component =
+    case component of
+        Schema ->
+            "Schemas"
+
+        Parameter ->
+            "Parameters"
+
+        SecurityScheme ->
+            "SecuritySchemes"
+
+        RequestBody ->
+            "RequestBodies"
+
+        Response ->
+            "Responses"
+
+        Header ->
+            "Headers"
+
+        Example ->
+            "Examples"
+
+        Link ->
+            "Links"
+
+        Callback ->
+            "Callbacks"
+
+
+componentFromString : String -> Maybe Component
+componentFromString component =
+    case component of
+        "schemas" ->
+            Just Schema
+
+        "parameters" ->
+            Just Parameter
+
+        "securitySchemes" ->
+            Just SecurityScheme
+
+        "requestBodies" ->
+            Just RequestBody
+
+        "responses" ->
+            Just Response
+
+        "headers" ->
+            Just Header
+
+        "examples" ->
+            Just Example
+
+        "links" ->
+            Just Link
+
+        "callbacks" ->
+            Just Callback
+
+        _ ->
+            Nothing
+
+
+componentToString : Component -> String
+componentToString component =
+    case component of
+        Schema ->
+            "schemas"
+
+        Parameter ->
+            "parameters"
+
+        SecurityScheme ->
+            "securitySchemes"
+
+        RequestBody ->
+            "requestBodies"
+
+        Response ->
+            "responses"
+
+        Header ->
+            "headers"
+
+        Example ->
+            "examples"
+
+        Link ->
+            "links"
+
+        Callback ->
+            "callbacks"
 
 
 commonModuleName : List String
@@ -336,9 +462,25 @@ type Type
     | OneOf TypeName ( OneOfData, List OneOfData )
     | Enum ( UnsafeName, List UnsafeName )
     | Value
-    | Ref (List String)
+    | Ref (RefTo Schema)
     | Bytes
     | Unit
+
+
+type RefTo r
+    = RefTo Component UnsafeName
+
+
+type Schema
+    = TypeLevelSchema Never
+
+
+type RequestBody
+    = TypeLevelRequestBody Never
+
+
+type Response
+    = TypeLevelResponse Never
 
 
 type BasicType
@@ -397,9 +539,58 @@ type alias Field =
     }
 
 
-ref : String -> Type
-ref str =
-    Ref (String.split "/" str)
+parseRef : String -> Result String (RefTo ())
+parseRef ref =
+    case String.split "/" ref of
+        [ "#", "components", component, name ] ->
+            case componentFromString component of
+                Just c ->
+                    Ok (RefTo c (UnsafeName name))
+
+                Nothing ->
+                    Err ("Invalid component: " ++ component)
+
+        _ ->
+            Err ("Couldn't parse the ref " ++ Json.Encode.encode 0 (Json.Encode.string ref))
+
+
+parseSchemaRef : String -> Result String (RefTo Schema)
+parseSchemaRef ref =
+    parseRef ref
+        |> Result.andThen
+            (\(RefTo component res) ->
+                if component == Schema then
+                    Ok (RefTo Schema res)
+
+                else
+                    Err ("Expected a reference to a schema, found a reference to " ++ ref)
+            )
+
+
+parseRequestBodyRef : String -> Result String (RefTo RequestBody)
+parseRequestBodyRef ref =
+    parseRef ref
+        |> Result.andThen
+            (\(RefTo component res) ->
+                if component == RequestBody then
+                    Ok (RefTo RequestBody res)
+
+                else
+                    Err ("Expected a reference to a schema, found a reference to " ++ ref)
+            )
+
+
+parseResponseRef : String -> Result String (RefTo Response)
+parseResponseRef ref =
+    parseRef ref
+        |> Result.andThen
+            (\(RefTo component res) ->
+                if component == Response then
+                    Ok (RefTo Response res)
+
+                else
+                    Err ("Expected a reference to a schema, found a reference to " ++ ref)
+            )
 
 
 unwrapUnsafe : UnsafeName -> String
@@ -418,3 +609,18 @@ enum variants =
 base64PackageName : String
 base64PackageName =
     "danfishgold/base64-bytes"
+
+
+refToString : RefTo component -> UnsafeName
+refToString (RefTo component (UnsafeName name)) =
+    UnsafeName (String.join "/" [ "#", "components", componentToString component, name ])
+
+
+unwrapRef : RefTo component -> ( Component, UnsafeName )
+unwrapRef (RefTo component ref) =
+    ( component, ref )
+
+
+refTo : Component -> UnsafeName -> RefTo ()
+refTo component name =
+    RefTo component name

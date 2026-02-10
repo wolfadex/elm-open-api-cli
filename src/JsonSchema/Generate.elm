@@ -16,8 +16,8 @@ import NonEmpty
 import SchemaUtils
 
 
-schemaToDeclarations : Common.UnsafeName -> Json.Schema.Definitions.Schema -> CliMonad (List CliMonad.Declaration)
-schemaToDeclarations name schema =
+schemaToDeclarations : Common.Component -> Common.UnsafeName -> Json.Schema.Definitions.Schema -> CliMonad (List CliMonad.Declaration)
+schemaToDeclarations component name schema =
     SchemaUtils.schemaToType [] schema
         |> CliMonad.andThen
             (\{ type_, documentation } ->
@@ -28,7 +28,7 @@ schemaToDeclarations name schema =
                 in
                 case type_ of
                     Common.Enum enumVariants ->
-                        [ { moduleName = Common.Types
+                        [ { moduleName = Common.Types component
                           , name = typeName
                           , declaration =
                                 enumVariants
@@ -46,7 +46,7 @@ schemaToDeclarations name schema =
                           , group = "Enum"
                           }
                             |> CliMonad.succeed
-                        , { moduleName = Common.Types
+                        , { moduleName = Common.Types component
                           , name = Common.toValueName name ++ "ToString"
                           , declaration =
                                 Elm.fn (Elm.Arg.var "value")
@@ -69,7 +69,7 @@ schemaToDeclarations name schema =
                           , group = "Enum"
                           }
                             |> CliMonad.succeed
-                        , { moduleName = Common.Types
+                        , { moduleName = Common.Types component
                           , name = Common.toValueName name ++ "FromString"
                           , declaration =
                                 Elm.fn (Elm.Arg.varWith "value" Elm.Annotation.string)
@@ -99,7 +99,7 @@ schemaToDeclarations name schema =
                           , group = "Enum"
                           }
                             |> CliMonad.succeed
-                        , { moduleName = Common.Types
+                        , { moduleName = Common.Types component
                           , name = Common.toValueName name ++ "Variants"
                           , declaration =
                                 enumVariants
@@ -120,7 +120,7 @@ schemaToDeclarations name schema =
                             |> CliMonad.succeed
                         , CliMonad.map
                             (\importFrom ->
-                                { moduleName = Common.Json
+                                { moduleName = Common.Json component
                                 , name = "decode" ++ typeName
                                 , declaration =
                                     Elm.declaration
@@ -153,10 +153,10 @@ schemaToDeclarations name schema =
                                 , group = "Decoders"
                                 }
                             )
-                            (CliMonad.moduleToNamespace Common.Types)
+                            (CliMonad.moduleToNamespace (Common.Types component))
                         , CliMonad.map
                             (\importFrom ->
-                                { moduleName = Common.Json
+                                { moduleName = Common.Json component
                                 , name = "encode" ++ typeName
                                 , declaration =
                                     Elm.declaration ("encode" ++ typeName)
@@ -178,7 +178,7 @@ schemaToDeclarations name schema =
                                 , group = "Encoders"
                                 }
                             )
-                            (CliMonad.moduleToNamespace Common.Types)
+                            (CliMonad.moduleToNamespace (Common.Types component))
                         ]
                             |> CliMonad.combine
 
@@ -191,7 +191,7 @@ schemaToDeclarations name schema =
                                         CliMonad.succeed []
 
                                     else
-                                        [ { moduleName = Common.Types
+                                        [ { moduleName = Common.Types component
                                           , name = typeName
                                           , declaration =
                                                 Elm.alias typeName annotation
@@ -208,7 +208,7 @@ schemaToDeclarations name schema =
                                             |> CliMonad.succeed
                                         , CliMonad.map2
                                             (\importFrom schemaDecoder ->
-                                                { moduleName = Common.Json
+                                                { moduleName = Common.Json component
                                                 , name = "decode" ++ typeName
                                                 , declaration =
                                                     Elm.declaration
@@ -220,11 +220,11 @@ schemaToDeclarations name schema =
                                                 , group = "Decoders"
                                                 }
                                             )
-                                            (CliMonad.moduleToNamespace Common.Types)
+                                            (CliMonad.moduleToNamespace (Common.Types component))
                                             (schemaToDecoder schema)
                                         , CliMonad.map2
                                             (\importFrom encoder ->
-                                                { moduleName = Common.Json
+                                                { moduleName = Common.Json component
                                                 , name = "encode" ++ typeName
                                                 , declaration =
                                                     Elm.declaration ("encode" ++ typeName)
@@ -235,7 +235,7 @@ schemaToDeclarations name schema =
                                                 , group = "Encoders"
                                                 }
                                             )
-                                            (CliMonad.moduleToNamespace Common.Types)
+                                            (CliMonad.moduleToNamespace (Common.Types component))
                                             (schemaToEncoder schema)
                                         ]
                                             |> CliMonad.combine

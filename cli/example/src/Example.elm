@@ -2,7 +2,7 @@ module Example exposing (..)
 
 import AdditionalProperties.Types
 import AirlineCodeLookupApi.Api
-import AirlineCodeLookupApi.Types
+import AirlineCodeLookupApi.Types.Responses
 import Browser
 import DbFahrplanApi.Api
 import DbFahrplanApi.Types
@@ -14,9 +14,9 @@ import MarioPartyStats.Types
 import NullableEnum.Json
 import OpenApi.Common
 import PatreonApi.Api
-import PatreonApi.Types
+import PatreonApi.Types.Responses
 import RealworldConduitApi.Api
-import RealworldConduitApi.Types
+import RealworldConduitApi.Types.Responses
 import RecursiveAllofRefs.Types
 import SimpleRef.Json
 import SingleEnum.Types
@@ -122,14 +122,14 @@ subscriptions _ =
 
 
 type Msg
-    = ConduitResponse (Result (OpenApi.Common.Error RealworldConduitApi.Types.GenericError String) RealworldConduitApi.Types.SingleArticleResponse)
-    | AmadeusResponse (Result (OpenApi.Common.Error AirlineCodeLookupApi.Types.Getairlines_Error String) AirlineCodeLookupApi.Types.Airlines)
+    = ConduitResponse (Result (OpenApi.Common.Error RealworldConduitApi.Types.Responses.GenericError String) RealworldConduitApi.Types.Responses.SingleArticleResponse)
+    | AmadeusResponse (Result (OpenApi.Common.Error AirlineCodeLookupApi.Types.Responses.Getairlines_Error String) AirlineCodeLookupApi.Types.Responses.Airlines)
       -- | BimResponse (Result (OpenApi.Common.Error BimcloudApi20232AlphaRelease.BlobStoreService10BeginBatchUpload_Error Bytes.Bytes) Bytes.Bytes)
     | GithubResponse (Result (OpenApi.Common.Error () String) GithubV3RestApi.Types.Root)
     | DbFahrplanResponse (Result (OpenApi.Common.Error Never String) DbFahrplanApi.Types.LocationResponse)
     | MarioPartyStatsResponse (Result (OpenApi.Common.Error Never String) (List MarioPartyStats.Types.Boards))
     | TrustmarkTradeCheckResponse (Result (OpenApi.Common.Error Never String) Trustmark.TradeCheck.Types.TradeCheckResponse)
-    | PatreonResponse (Result (OpenApi.Common.Error PatreonApi.Types.GetCampaign_Error String) PatreonApi.Types.CampaignResponse)
+    | PatreonResponse (Result (OpenApi.Common.Error PatreonApi.Types.Responses.GetCampaign_Error String) PatreonApi.Types.Responses.CampaignResponse)
     | TrustmarkResponse (Result (OpenApi.Common.Error Never String) (List String))
 
 

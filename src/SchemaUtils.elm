@@ -12,7 +12,7 @@ module SchemaUtils exposing
     , typeToEncoder
     )
 
-import CliMonad exposing (CliMonad, refToDecoder)
+import CliMonad exposing (CliMonad)
 import Common
 import Dict
 import Elm
@@ -2314,7 +2314,7 @@ typeToDecoder type_ =
                                     |> CliMonad.succeed
 
                             Just name ->
-                                refToDecoder (Common.refTo Common.Schema name)
+                                CliMonad.refToDecoder (Common.refTo Common.Schema name)
                     )
 
         Common.Value ->

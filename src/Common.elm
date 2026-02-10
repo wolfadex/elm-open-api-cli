@@ -18,8 +18,6 @@ module Common exposing
     , base64PackageName
     , basicTypeToString
     , commonModuleName
-    , componentFromString
-    , componentToString
     , enum
     , moduleToNamespace
     , parseRef

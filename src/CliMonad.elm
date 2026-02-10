@@ -8,8 +8,7 @@ module CliMonad exposing
     , withPath, withWarning, withExtendedWarning, withRequiredPackage
     , todo, todoWithDefault
     , withFormat
-    , nameToAnnotation, refToAnnotation, refToDecoder
-    , refToEncoder
+    , nameToAnnotation, refToAnnotation, refToEncoder, refToDecoder
     )
 
 {-|
@@ -27,7 +26,7 @@ module CliMonad exposing
 
 ## Utils
 
-@docs nameToAnnotation, refToAnnotation, refToDecoder
+@docs nameToAnnotation, refToAnnotation, refToEncoder, refToDecoder
 
 -}
 

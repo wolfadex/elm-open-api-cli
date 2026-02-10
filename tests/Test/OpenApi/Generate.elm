@@ -189,194 +189,6 @@ pr267 =
     Test.test "Responses and schemas don't clash" <|
         \() ->
             let
-                jsonFileString : String
-                jsonFileString =
-                    String.Multiline.here """
-                        module Output.Json exposing
-                            ( decodeForbidden, decodeMessage
-                            , encodeForbidden, encodeMessage
-                            )
-
-                        {-|
-                        @docs decodeForbidden, decodeMessage
-
-                        @docs encodeForbidden, encodeMessage
-                        -}
-
-
-                        import Json.Decode
-                        import Json.Encode
-                        import OpenApi.Common
-                        import Output.Types
-
-
-                        {- ## Decoders -}
-
-
-                        decodeForbidden : Json.Decode.Decoder Output.Types.Forbidden
-                        decodeForbidden =
-                            decodeMessage
-
-
-                        decodeMessage : Json.Decode.Decoder Output.Types.Message
-                        decodeMessage =
-                            Json.Decode.succeed
-                                (\\msg -> { msg = msg }) |> OpenApi.Common.jsonDecodeAndMap
-                                                                   (Json.Decode.field
-                                                                            "msg"
-                                                                            Json.Decode.string
-                                                                   )
-
-
-                        {- ## Encoders -}
-
-
-                        encodeForbidden : Output.Types.Forbidden -> Json.Encode.Value
-                        encodeForbidden =
-                            encodeMessage
-
-
-                        encodeMessage : Output.Types.Message -> Json.Encode.Value
-                        encodeMessage rec =
-                            Json.Encode.object [ ( "msg", Json.Encode.string rec.msg ) ]
-                    """
-
-                jsonResponsesFileString : String
-                jsonResponsesFileString =
-                    String.Multiline.here """
-                        module Output.Json.Responses exposing
-                            ( decodeForbidden
-                            , encodeForbidden
-                            )
-
-                        {-|
-                        @docs decodeForbidden
-
-                        @docs encodeForbidden
-                        -}
-
-
-                        import Json.Decode
-                        import Json.Encode
-                        import Output.Json
-                        import Output.Types
-                        import Output.Types.Responses
-
-
-                        {- ## Decoders -}
-
-
-                        decodeForbidden : Json.Decode.Decoder Output.Types.Responses.Forbidden
-                        decodeForbidden =
-                            Output.Json.decodeForbidden
-
-
-                        {- ## Encoders -}
-
-
-                        encodeForbidden : Output.Types.Responses.Forbidden -> Json.Encode.Value
-                        encodeForbidden =
-                            Output.Json.encodeForbidden
-                    """
-
-                apiFileString : String
-                apiFileString =
-                    String.Multiline.here """
-                        module Output.Api exposing ( api, apiTask )
-
-                        {-|
-                        @docs api, apiTask
-                        -}
-
-
-                        import Dict
-                        import Http
-                        import Json.Decode
-                        import OpenApi.Common
-                        import Output.Json.Responses
-                        import Output.Types.Responses
-                        import Task
-                        import Url.Builder
-
-
-                        {- ## Operations -}
-
-
-                        api config =
-                            Http.request
-                                { url = Url.Builder.absolute [ "api" ] []
-                                , method = "GET"
-                                , headers = []
-                                , expect =
-                                    OpenApi.Common.expectJsonCustom
-                                        (Dict.fromList [])
-                                        Output.Json.Responses.decodeForbidden
-                                        config.toMsg
-                                , body = Http.emptyBody
-                                , timeout = Nothing
-                                , tracker = Nothing
-                                }
-
-
-                        apiTask :
-                            {}
-                            -> Task.Task (OpenApi.Common.Error e String) Output.Types.Responses.Forbidden
-                        apiTask config =
-                            Http.task
-                                { url = Url.Builder.absolute [ "api" ] []
-                                , method = "GET"
-                                , headers = []
-                                , resolver =
-                                    OpenApi.Common.jsonResolverCustom
-                                        (Dict.fromList [])
-                                        Output.Json.Responses.decodeForbidden
-                                , body = Http.emptyBody
-                                , timeout = Nothing
-                                }
-                    """
-
-                typesFileString : String
-                typesFileString =
-                    String.Multiline.here """
-                        module Output.Types exposing ( Forbidden, Message )
-
-                        {-|
-                        @docs Forbidden, Message
-                        -}
-
-
-
-                        {- ## Aliases -}
-
-
-                        type alias Forbidden =
-                            Message
-
-
-                        type alias Message =
-                            { msg : String }
-                    """
-
-                typesResponsesFileString : String
-                typesResponsesFileString =
-                    String.Multiline.here """
-                        module Output.Types.Responses exposing ( Forbidden )
-                        
-                        {-|
-                        @docs Forbidden
-                        -}
-                        
-                        
-                        import Output.Types
-                        
-                        
-                        {- ## Aliases -}
-                        
-                        
-                        type alias Forbidden =
-                            Output.Types.Forbidden
-                    """
-
                 oasString : String
                 oasString =
                     String.Multiline.here """
@@ -455,6 +267,195 @@ pr267 =
                         Ok { modules } ->
                             case modules of
                                 [ apiFile, jsonFile, jsonResponsesFile, typesFile, typesResponsesFile ] ->
+                                    let
+                                        jsonFileString : String
+                                        jsonFileString =
+                                            String.Multiline.here """
+                                                module Output.Json exposing
+                                                    ( decodeForbidden, decodeMessage
+                                                    , encodeForbidden, encodeMessage
+                                                    )
+                        
+                                                {-|
+                                                @docs decodeForbidden, decodeMessage
+                        
+                                                @docs encodeForbidden, encodeMessage
+                                                -}
+                        
+                        
+                                                import Json.Decode
+                                                import Json.Encode
+                                                import OpenApi.Common
+                                                import Output.Types
+                        
+                        
+                                                {- ## Decoders -}
+                        
+                        
+                                                decodeForbidden : Json.Decode.Decoder Output.Types.Forbidden
+                                                decodeForbidden =
+                                                    decodeMessage
+                        
+                        
+                                                decodeMessage : Json.Decode.Decoder Output.Types.Message
+                                                decodeMessage =
+                                                    Json.Decode.succeed
+                                                        (\\msg -> { msg = msg }) |> OpenApi.Common.jsonDecodeAndMap
+                                                                                           (Json.Decode.field
+                                                                                                    "msg"
+                                                                                                    Json.Decode.string
+                                                                                           )
+                        
+                        
+                                                {- ## Encoders -}
+                        
+                        
+                                                encodeForbidden : Output.Types.Forbidden -> Json.Encode.Value
+                                                encodeForbidden =
+                                                    encodeMessage
+                        
+                        
+                                                encodeMessage : Output.Types.Message -> Json.Encode.Value
+                                                encodeMessage rec =
+                                                    Json.Encode.object [ ( "msg", Json.Encode.string rec.msg ) ]
+                                            """
+
+                                        jsonResponsesFileString : String
+                                        jsonResponsesFileString =
+                                            String.Multiline.here """
+                                                module Output.Json.Responses exposing
+                                                    ( decodeForbidden
+                                                    , encodeForbidden
+                                                    )
+                        
+                                                {-|
+                                                @docs decodeForbidden
+                        
+                                                @docs encodeForbidden
+                                                -}
+                        
+                        
+                                                import Json.Decode
+                                                import Json.Encode
+                                                import Output.Json
+                                                import Output.Types
+                                                import Output.Types.Responses
+                        
+                        
+                                                {- ## Decoders -}
+                        
+                        
+                                                decodeForbidden : Json.Decode.Decoder Output.Types.Responses.Forbidden
+                                                decodeForbidden =
+                                                    Output.Json.decodeForbidden
+                        
+                        
+                                                {- ## Encoders -}
+                        
+                        
+                                                encodeForbidden : Output.Types.Responses.Forbidden -> Json.Encode.Value
+                                                encodeForbidden =
+                                                    Output.Json.encodeForbidden
+                                            """
+
+                                        apiFileString : String
+                                        apiFileString =
+                                            String.Multiline.here """
+                                                module Output.Api exposing ( api, apiTask )
+                        
+                                                {-|
+                                                @docs api, apiTask
+                                                -}
+                        
+                        
+                                                import Dict
+                                                import Http
+                                                import Json.Decode
+                                                import OpenApi.Common
+                                                import Output.Json.Responses
+                                                import Output.Types.Responses
+                                                import Task
+                                                import Url.Builder
+                        
+                        
+                                                {- ## Operations -}
+                        
+                        
+                                                api config =
+                                                    Http.request
+                                                        { url = Url.Builder.absolute [ "api" ] []
+                                                        , method = "GET"
+                                                        , headers = []
+                                                        , expect =
+                                                            OpenApi.Common.expectJsonCustom
+                                                                (Dict.fromList [])
+                                                                Output.Json.Responses.decodeForbidden
+                                                                config.toMsg
+                                                        , body = Http.emptyBody
+                                                        , timeout = Nothing
+                                                        , tracker = Nothing
+                                                        }
+                        
+                        
+                                                apiTask :
+                                                    {}
+                                                    -> Task.Task (OpenApi.Common.Error e String) Output.Types.Responses.Forbidden
+                                                apiTask config =
+                                                    Http.task
+                                                        { url = Url.Builder.absolute [ "api" ] []
+                                                        , method = "GET"
+                                                        , headers = []
+                                                        , resolver =
+                                                            OpenApi.Common.jsonResolverCustom
+                                                                (Dict.fromList [])
+                                                                Output.Json.Responses.decodeForbidden
+                                                        , body = Http.emptyBody
+                                                        , timeout = Nothing
+                                                        }
+                                            """
+
+                                        typesFileString : String
+                                        typesFileString =
+                                            String.Multiline.here """
+                                                module Output.Types exposing ( Forbidden, Message )
+                        
+                                                {-|
+                                                @docs Forbidden, Message
+                                                -}
+                        
+                        
+                        
+                                                {- ## Aliases -}
+                        
+                        
+                                                type alias Forbidden =
+                                                    Message
+                        
+                        
+                                                type alias Message =
+                                                    { msg : String }
+                                            """
+
+                                        typesResponsesFileString : String
+                                        typesResponsesFileString =
+                                            String.Multiline.here """
+                                                module Output.Types.Responses exposing ( Forbidden )
+                                                
+                                                {-|
+                                                @docs Forbidden
+                                                -}
+                                                
+                                                
+                                                import Output.Types
+                                                
+                                                
+                                                {- ## Aliases -}
+                                                
+                                                
+                                                type alias Forbidden =
+                                                    Output.Types.Forbidden
+                                            """
+                                    in
                                     composeExpectations
                                         [ expectEqualMultiline apiFileString (fileToString apiFile)
                                         , expectEqualMultiline jsonFileString (fileToString jsonFile)

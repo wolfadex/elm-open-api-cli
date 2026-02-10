@@ -1,4 +1,4 @@
-module OpenApi.Generate exposing (ContentSchema(..), Message, Path, Mime, files)
+module OpenApi.Generate exposing (ContentSchema, Message, Path, Mime, files)
 
 {-|
 
@@ -577,6 +577,7 @@ toRequestFunctions server effectTypes method pathUrl operation =
         bodyParams : ContentSchema -> CliMonad (List ( Common.UnsafeName, Elm.Annotation.Annotation ))
         bodyParams contentSchema =
             let
+                annotation : CliMonad (Maybe Elm.Annotation.Annotation)
                 annotation =
                     case contentSchema of
                         EmptyContent ->

@@ -23,7 +23,11 @@
         "wolfadex/elm-open-api": "2.0.0 <= v < 3.0.0"
     },
     "test-dependencies": {
+        "arowM/elm-multiline-string": "1.0.0 <= v < 2.0.0",
         "elm-explorations/test": "2.2.1 <= v < 3.0.0",
-        "miniBill/elm-unicode": "1.1.1 <= v < 2.0.0"
+        "miniBill/elm-diff": "1.1.0 <= v < 2.0.0",
+        "miniBill/elm-unicode": "1.1.1 <= v < 2.0.0",
+        "wolfadex/elm-ansi": "3.0.1 <= v < 4.0.0",
+        "MaybeJustJames/yaml": "2.1.7 <= v < 3.0.0"
     }
 }

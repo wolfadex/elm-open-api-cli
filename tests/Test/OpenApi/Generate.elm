@@ -241,6 +241,12 @@ pr267 =
                             Json.Encode.object [ ( "msg", Json.Encode.string rec.msg ) ]
                     """
 
+                jsonResponsesFileString : String
+                jsonResponsesFileString =
+                    String.Multiline.here """
+                        module
+                    """
+
                 apiFileString : String
                 apiFileString =
                     String.Multiline.here """
@@ -255,8 +261,8 @@ pr267 =
                         import Http
                         import Json.Decode
                         import OpenApi.Common
-                        import Output.Json
-                        import Output.Types
+                        import Output.Json.Responses
+                        import Output.Types.Responses
                         import Task
                         import Url.Builder
 
@@ -280,7 +286,9 @@ pr267 =
                                 }
 
 
-                        apiTask : {} -> Task.Task (OpenApi.Common.Error e String) Output.Types.Forbidden
+                        apiTask :
+                            {}
+                            -> Task.Task (OpenApi.Common.Error e String) Output.Types.Forbidden
                         apiTask config =
                             Http.task
                                 { url = Url.Builder.absolute [ "api" ] []
@@ -295,42 +303,49 @@ pr267 =
                                 }
                     """
 
-                helperFileString : String
-                helperFileString =
+                typesFileString : String
+                typesFileString =
                     String.Multiline.here """
+                        module
+                    """
+
+                typesResponsesFileString : String
+                typesResponsesFileString =
+                    String.Multiline.here """
+                        module
                     """
 
                 oasString : String
                 oasString =
                     String.Multiline.here """
-                    openapi: 3.0.1
-                    info:
-                      title: "Simple Ref"
-                      version: 1.0.0
-                    components:
-                      schemas:
-                        Forbidden:
-                          $ref: "#/components/schemas/Message"
-                        Message:
-                          type: object
-                          properties:
-                            msg:
-                              type: string
-                          required:
-                            - msg
-                      responses:
-                        Forbidden:
-                          description: Wrong credentials
-                          content:
-                            application/json:
-                              schema:
-                                $ref: "#/components/schemas/Forbidden"
-                    paths:
-                      "/api":
-                        get:
+                        openapi: 3.0.1
+                        info:
+                          title: "Simple Ref"
+                          version: 1.0.0
+                        components:
+                          schemas:
+                            Forbidden:
+                              $ref: "#/components/schemas/Message"
+                            Message:
+                              type: object
+                              properties:
+                                msg:
+                                  type: string
+                              required:
+                                - msg
                           responses:
-                            200:
-                              $ref: "#/components/responses/Forbidden"
+                            Forbidden:
+                              description: Wrong credentials
+                              content:
+                                application/json:
+                                  schema:
+                                    $ref: "#/components/schemas/Forbidden"
+                        paths:
+                          "/api":
+                            get:
+                              responses:
+                                200:
+                                  $ref: "#/components/responses/Forbidden"
                     """
             in
             case
@@ -377,11 +392,13 @@ pr267 =
 
                         Ok { modules } ->
                             case modules of
-                                [ apiFile, jsonFile, helperFile ] ->
+                                [ apiFile, jsonFile, jsonResponsesFile, typesFile, typesResponsesFile ] ->
                                     composeExpectations
                                         [ expectEqualMultiline apiFileString (fileToString apiFile)
                                         , expectEqualMultiline jsonFileString (fileToString jsonFile)
-                                        , expectEqualMultiline helperFileString (fileToString helperFile)
+                                        , expectEqualMultiline jsonResponsesFileString (fileToString jsonResponsesFile)
+                                        , expectEqualMultiline typesFileString (fileToString typesFile)
+                                        , expectEqualMultiline typesResponsesFileString (fileToString typesResponsesFile)
                                         ]
 
                                 [] ->

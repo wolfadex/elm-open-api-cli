@@ -1348,31 +1348,126 @@ subschemaToEnumMaybe subSchema =
                                 |> Ok
 
 
-typeToOneOfVariant :
-    { type_ : Common.Type, documentation : Maybe String }
-    -> CliMonad (Maybe { name : Common.UnsafeName, type_ : Common.Type, documentation : Maybe String })
-typeToOneOfVariant { type_, documentation } =
-    type_
-        |> typeToAnnotationWithNullable
-        |> CliMonad.map
-            (\ann ->
-                let
-                    rawName : String
-                    rawName =
-                        ann
-                            |> Elm.ToString.annotation
-                            |> .signature
-                in
-                if String.contains "{" rawName then
-                    Nothing
+type alias VariantInfo =
+    { name : Common.UnsafeName
+    , type_ : Common.Type
+    , documentation : Maybe String
+    }
 
-                else
-                    Just
-                        { name = Common.UnsafeName rawName
-                        , type_ = type_
-                        , documentation = documentation
-                        }
-            )
+
+typeToOneOfVariant : { type_ : Common.Type, documentation : Maybe String } -> CliMonad (Maybe VariantInfo)
+typeToOneOfVariant { type_, documentation } =
+    let
+        wrap : String -> Common.Type -> CliMonad (Maybe VariantInfo)
+        wrap label t =
+            typeToOneOfVariant { type_ = t, documentation = documentation }
+                |> CliMonad.map
+                    (Maybe.map
+                        (\inner ->
+                            { name = Common.UnsafeName (label ++ Common.unwrapUnsafe inner.name)
+                            , type_ = type_
+                            , documentation = documentation
+                            }
+                        )
+                    )
+
+        simple : Common.UnsafeName -> CliMonad (Maybe VariantInfo)
+        simple name =
+            { name = name
+            , type_ = type_
+            , documentation = documentation
+            }
+                |> Just
+                |> CliMonad.succeed
+
+        fromAnnotation : Elm.Annotation.Annotation -> CliMonad (Maybe VariantInfo)
+        fromAnnotation ann =
+            let
+                rawName : String
+                rawName =
+                    ann
+                        |> Elm.ToString.annotation
+                        |> .signature
+            in
+            if String.contains "{" rawName then
+                Nothing
+                    |> CliMonad.succeed
+
+            else
+                { name = Common.UnsafeName rawName
+                , type_ = type_
+                , documentation = documentation
+                }
+                    |> Just
+                    |> CliMonad.succeed
+    in
+    case type_ of
+        Common.Nullable t ->
+            wrap "Nullable" t
+
+        Common.List t ->
+            wrap "List" t
+
+        Common.Dict additionalProperties [] ->
+            wrap "Dict" additionalProperties.type_
+
+        Common.Dict _ _ ->
+            CliMonad.succeed Nothing
+
+        Common.Object _ ->
+            CliMonad.succeed Nothing
+
+        Common.Null ->
+            simple (Common.UnsafeName "()")
+
+        Common.Bytes ->
+            simple (Common.UnsafeName "Bytes")
+
+        Common.Unit ->
+            simple (Common.UnsafeName "()")
+
+        Common.OneOf oneOfName _ ->
+            simple (Common.UnsafeName oneOfName)
+
+        Common.Value ->
+            simple (Common.UnsafeName "JsonEncodeValue")
+
+        Common.Ref ref ->
+            Common.unwrapRef ref
+                |> Tuple.second
+                |> simple
+
+        Common.Enum variants ->
+            CliMonad.enumName (NonEmpty.toList variants)
+                |> CliMonad.andThen
+                    (\maybeName ->
+                        maybeName
+                            |> Maybe.withDefault (Common.UnsafeName "String")
+                            |> simple
+                    )
+
+        Common.Basic basicType { format } ->
+            CliMonad.withFormat basicType format (\{ annotation } -> Just annotation) Nothing
+                |> CliMonad.andThen
+                    (\maybeAnnotation ->
+                        case maybeAnnotation of
+                            Just ann ->
+                                fromAnnotation ann
+
+                            Nothing ->
+                                case basicType of
+                                    Common.String ->
+                                        simple (Common.UnsafeName "String")
+
+                                    Common.Integer ->
+                                        simple (Common.UnsafeName "Int")
+
+                                    Common.Boolean ->
+                                        simple (Common.UnsafeName "Bool")
+
+                                    Common.Number ->
+                                        simple (Common.UnsafeName "Float")
+                    )
 
 
 oneOfType :
@@ -1405,7 +1500,7 @@ oneOfType types =
                             readableName : String
                             readableName =
                                 names
-                                    |> List.map fixOneOfName
+                                    |> List.map Common.toTypeName
                                     |> String.join "_Or_"
                         in
                         { type_ =
@@ -1615,20 +1710,7 @@ oneOfDeclaration ( oneOfName, variants ) =
 
 toVariantName : Common.TypeName -> Common.UnsafeName -> String
 toVariantName oneOfName variantName =
-    oneOfName ++ "__" ++ fixOneOfName variantName
-
-
-{-| When we go from `Elm.Annotation` to `String` it includes the module name if it's an imported type.
-We don't want that for our generated types, so we remove it here.
--}
-fixOneOfName : Common.UnsafeName -> String
-fixOneOfName name =
-    name
-        |> Common.unwrapUnsafe
-        |> String.replace "OpenApi.Nullable" "Nullable"
-        |> String.replace "." ""
-        |> Common.UnsafeName
-        |> Common.toTypeName
+    oneOfName ++ "__" ++ Common.toTypeName variantName
 
 
 {-| Transform an OpenAPI type into an Elm annotation. Nullable values are represented using Nullable.

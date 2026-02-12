@@ -11,6 +11,7 @@ import GithubV3RestApi.Api
 import GithubV3RestApi.Types
 import MarioPartyStats.Api
 import MarioPartyStats.Types
+import MultipartFormData.Json.RequestBodies
 import NullableEnum.Json
 import OpenApi.Common
 import PatreonApi.Api
@@ -45,6 +46,9 @@ init () =
     let
         _ =
             SimpleRef.Json.decodeForbidden
+
+        _ =
+            MultipartFormData.Api.api
     in
     ( {}
     , Cmd.batch

@@ -96,75 +96,97 @@ program =
                     (Cli.Option.optionalKeywordArg "write-merged-to")
                 |> Cli.OptionsParser.with
                     (Cli.Option.flag "no-elm-format")
-                |> Cli.OptionsParser.withDoc """
-version: 0.7.0
-
-options:
-
-  --output-dir                       The directory to output to. Defaults to `generated/`.
-
-  --module-name                      The Elm module name. Defaults to `OAS info.title`.
-
-  --effect-types                     A list of which kind of APIs to generate.
-                                     Each item should be of the form `package.type`.
-                                     If `package` is omitted it defaults to `elm/http`.
-                                     If `type` is omitted it defaults to `cmd,task`.
-                                     If not specified, defaults to `cmd,task` (for elm/http).
-                                     The options for package are:
-                                      - elm/http
-                                      - dillonkearns/elm-pages
-                                      - lamdera/program-test
-                                     The options for type are:
-                                      - cmd: Cmd for elm/http,
-                                             Effect.Command for lamdera/program-test
-                                      - cmdrisky: as above, but using Http.riskyRequest
-                                      - cmdrecord: the input to Http.request
-                                      - task: Task for elm/http
-                                              Effect.Task for lamdera/program-test
-                                              BackendTask for dillonkearns/elm-pages
-                                      - taskrisky: as above, but using Http.riskyTask
-                                                   cannot be used for dillonkearns/elm-pages
-                                      - taskrecord: the input to Http.task
-
-  --server                           The base URL for the OpenAPI server.
-                                     If not specified this will be extracted from the OAS
-                                     or default to root of the web application.
-
-                                     You can pass in an object to define multiple servers, like
-                                     {"dev": "http://localhost", "prod": "https://example.com"}.
-
-                                     This will add a `server` parameter to functions and define
-                                     a `Servers` module with your servers. You can pass in an
-                                     empty object if you have fully dynamic servers.
-
-  --auto-convert-swagger=ask         If a Swagger doc is encountered, ask the user before converting
-                                     it to an Open API file. This is the default.
-
-  --auto-convert-swagger=never       If a Swagger doc is encountered, error out.
-
-  --auto-convert-swagger[=always]    If a Swagger doc is encountered, automatically convert it
-                                     to an Open API file.
-
-  --swagger-conversion-url           The URL to use to convert a Swagger doc to an Open API
-                                     file. Defaults to `https://converter.swagger.io/api/convert`.
-
-  --swagger-conversion-command       Instead of making an HTTP request to convert
-                                     from Swagger to Open API, use this command.
-
-  --swagger-conversion-command-args  Additional arguments to pass to the Swagger conversion command,
-                                     before the contents of the Swagger file are passed in.
-
-  --generateTodos                    Whether to generate TODOs for unimplemented endpoints,
-                                     or fail when something unexpected is encountered.
-                                     Defaults to `no`. To generate `Debug.todo ""`
-                                     instead of failing use one of: `yes`, `y`, `true`.
-
-  --overrides                        Load an additional file to override parts of the original Open API file.
-
-  --write-merged-to                  Write the merged Open API spec to the given file.
-  --no-elm-format                    Don't run elm-format on the outputs.
-"""
+                |> Cli.OptionsParser.withDoc
+                    ([ ""
+                     , """version: 0.7.0"""
+                     , """options:"""
+                     , formatOption "output-dir" [ "The directory to output to. Defaults to `generated/`." ]
+                     , formatOption "module-name" [ "The Elm module name. Defaults to `OAS info.title`." ]
+                     , formatOption "effect-types"
+                        [ "A list of which kind of APIs to generate."
+                        , "Each item should be of the form `package.type`."
+                        , "If `package` is omitted it defaults to `elm/http`."
+                        , "If `type` is omitted it defaults to `cmd,task`."
+                        , "If not specified, defaults to `cmd,task` (for elm/http)."
+                        , "The options for package are:"
+                        , " - elm/http"
+                        , " - dillonkearns/elm-pages"
+                        , " - lamdera/program-test"
+                        , "The options for type are:"
+                        , " - cmd: Cmd for elm/http,"
+                        , "        Effect.Command for lamdera/program-test"
+                        , " - cmdrisky: as above, but using Http.riskyRequest"
+                        , " - cmdrecord: the input to Http.request"
+                        , " - task: Task for elm/http"
+                        , "         Effect.Task for lamdera/program-test"
+                        , "         BackendTask for dillonkearns/elm-pages"
+                        , " - taskrisky: as above, but using Http.riskyTask"
+                        , "              cannot be used for dillonkearns/elm-pages"
+                        , " - taskrecord: the input to Http.task"
+                        ]
+                     , formatOption "server"
+                        [ "The base URL for the OpenAPI server."
+                        , "If not specified this will be extracted from the OAS"
+                        , "or default to root of the web application."
+                        , ""
+                        , "You can pass in an object to define multiple servers, like"
+                        , """{"dev": "http://localhost", "prod": "https://example.com"}."""
+                        , ""
+                        , "This will add a `server` parameter to functions and define"
+                        , "a `Servers` module with your servers. You can pass in an"
+                        , "empty object if you have fully dynamic servers."
+                        ]
+                     , formatOption "auto-convert-swagger=ask"
+                        [ "If a Swagger doc is encountered, ask the user before converting"
+                        , "it to an Open API file. This is the default."
+                        ]
+                     , formatOption "auto-convert-swagger=never" [ "If a Swagger doc is encountered, error out." ]
+                     , formatOption "auto-convert-swagger[=always]"
+                        [ "If a Swagger doc is encountered, automatically convert it"
+                        , "to an Open API file."
+                        ]
+                     , formatOption "swagger-conversion-url"
+                        [ "The URL to use to convert a Swagger doc to an Open API"
+                        , "file. Defaults to `https://converter.swagger.io/api/convert`."
+                        ]
+                     , formatOption "swagger-conversion-command"
+                        [ "Instead of making an HTTP request to convert"
+                        , "from Swagger to Open API, use this command."
+                        ]
+                     , formatOption "swagger-conversion-command-args"
+                        [ "Additional arguments to pass to the Swagger conversion command,"
+                        , "before the contents of the Swagger file are passed in."
+                        ]
+                     , formatOption "generateTodos"
+                        [ "Whether to generate TODOs for unimplemented endpoints,"
+                        , "or fail when something unexpected is encountered."
+                        , "Defaults to `no`. To generate `Debug.todo \"\"`"
+                        , "instead of failing use one of: `yes`, `y`, `true`."
+                        ]
+                     , formatOption "overrides" [ "Load an additional file to override parts of the original Open API file." ]
+                     , formatOption "write-merged-to" [ "Write the merged Open API spec to the given file." ]
+                     , formatOption "no-elm-format" [ "Don't run elm-format on the outputs." ]
+                     ]
+                        |> String.join "\n\n"
+                    )
             )
+
+
+formatOption : String -> List String -> String
+formatOption key descriptionLines =
+    descriptionLines
+        |> List.indexedMap
+            (\i line ->
+                if i == 0 then
+                    "  " ++ String.padRight 35 ' ' ("--" ++ key) ++ line
+
+                else if String.isEmpty line then
+                    ""
+
+                else
+                    "  " ++ String.padRight 35 ' ' "" ++ line
+            )
+        |> String.join "\n"
 
 
 autoConvertValidation : Maybe String -> Result String OpenApi.Config.AutoConvertSwagger

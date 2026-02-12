@@ -226,22 +226,8 @@ schemaToType seen schema =
 
                                 Json.Schema.Definitions.ItemDefinition itemSchema ->
                                     CliMonad.map
-                                        (\{ type_, documentation } ->
-                                            { type_ = Common.List type_
-                                            , documentation =
-                                                [ subSchema.description
-                                                , Maybe.map
-                                                    (\doc ->
-                                                        if String.contains "\n" doc then
-                                                            "A list of:\n" ++ doc
-
-                                                        else
-                                                            "A list of: " ++ doc
-                                                    )
-                                                    documentation
-                                                ]
-                                                    |> joinIfNotEmpty "\n\n"
-                                            }
+                                        (\item ->
+                                            toListType subSchema.description item
                                         )
                                         (schemaToType seen itemSchema)
 
@@ -259,12 +245,7 @@ schemaToType seen schema =
                                         case areAllArrays schemas of
                                             Just innerSchemas ->
                                                 oneOfToType innerSchemas
-                                                    |> CliMonad.map
-                                                        (\t ->
-                                                            { type_ = Common.List t.type_
-                                                            , documentation = t.documentation
-                                                            }
-                                                        )
+                                                    |> CliMonad.map (toListType subSchema.description)
 
                                             Nothing ->
                                                 let
@@ -505,6 +486,31 @@ schemaToType seen schema =
                                 , documentation = documentation
                                 }
                             )
+
+
+toListType :
+    Maybe String
+    ->
+        { type_ : Common.Type
+        , documentation : Maybe String
+        }
+    -> { type_ : Common.Type, documentation : Maybe String }
+toListType description { type_, documentation } =
+    { type_ = Common.List type_
+    , documentation =
+        [ description
+        , Maybe.map
+            (\doc ->
+                if String.contains "\n" doc then
+                    "A list of:\n" ++ doc
+
+                else
+                    "A list of: " ++ doc
+            )
+            documentation
+        ]
+            |> joinIfNotEmpty "\n\n"
+    }
 
 
 areAllArrays : List Json.Schema.Definitions.Schema -> Maybe (List Json.Schema.Definitions.Schema)

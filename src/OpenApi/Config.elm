@@ -46,7 +46,7 @@ module OpenApi.Config exposing
 -}
 
 import Common
-import Dict
+import Dict exposing (Dict)
 import Elm
 import Elm.Annotation
 import Elm.Case
@@ -184,7 +184,7 @@ effectTypeToPackage effectType =
 type Server
     = Default
     | Single String
-    | Multiple (Dict.Dict String String)
+    | Multiple (Dict String String)
 
 
 {-| A custom `format` for basic types.

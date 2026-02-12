@@ -51,6 +51,10 @@ run =
         marioPartyStats =
             OpenApi.Config.inputFrom (OpenApi.Config.File "./example/MarioPartyStats.json")
 
+        multipartFormData : OpenApi.Config.Input
+        multipartFormData =
+            OpenApi.Config.inputFrom (OpenApi.Config.File "./example/multipart-form-data.yaml")
+
         nullableEnum : OpenApi.Config.Input
         nullableEnum =
             OpenApi.Config.inputFrom (OpenApi.Config.File "./example/nullable-enum.yaml")
@@ -127,6 +131,7 @@ run =
                 |> OpenApi.Config.withInput cookieAuth
                 |> OpenApi.Config.withInput ifconfigOvh
                 |> OpenApi.Config.withInput marioPartyStats
+                |> OpenApi.Config.withInput multipartFormData
                 |> OpenApi.Config.withInput nullableEnum
                 |> OpenApi.Config.withInput overridingGlobalSecurity
                 |> OpenApi.Config.withInput realworldConduit

@@ -9,7 +9,6 @@ module Common exposing
     , Package(..)
     , RefTo
     , RequestBody
-    , Response
     , Schema
     , Type(..)
     , TypeName
@@ -22,7 +21,6 @@ module Common exposing
     , moduleToNamespace
     , parseRef
     , parseRequestBodyRef
-    , parseResponseRef
     , parseSchemaRef
     , refTo
     , refToString
@@ -479,10 +477,6 @@ type RequestBody
     = TypeLevelRequestBody Never
 
 
-type Response
-    = TypeLevelResponse Never
-
-
 type BasicType
     = Integer
     | Boolean
@@ -576,20 +570,7 @@ parseRequestBodyRef ref =
                     Ok (RefTo RequestBody res)
 
                 else
-                    Err ("Expected a reference to a request body, found a reference to " ++ ref)
-            )
-
-
-parseResponseRef : String -> Result String (RefTo Response)
-parseResponseRef ref =
-    parseRef ref
-        |> Result.andThen
-            (\(RefTo component res) ->
-                if component == Response then
-                    Ok (RefTo Response res)
-
-                else
-                    Err ("Expected a reference to a response, found a reference to " ++ ref)
+                    Err ("Expected a reference to a requestBody, found a reference to " ++ ref)
             )
 
 

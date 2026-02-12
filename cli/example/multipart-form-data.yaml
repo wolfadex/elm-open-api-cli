@@ -1,0 +1,35 @@
+openapi: 3.0.0
+info:
+    version: 1.0.0
+    title: Multipart form data
+
+paths:
+    "/api":
+        post:
+            responses:
+                200:
+                    description: Response
+            requestBody:
+                $ref: "#/components/requestBodies/Multipart"
+components:
+    requestBodies:
+        Multipart:
+            # https://swagger.io/docs/specification/v3_0/describing-request-body/multipart-requests/
+            content:
+                multipart/form-data: # Media type
+                    schema: # Request payload
+                        type: object
+                        properties: # Request parts
+                            id: # Part 1 (string value)
+                                type: string
+                                format: uuid
+                            address: # Part2 (object)
+                                type: object
+                                properties:
+                                    street:
+                                        type: string
+                                    city:
+                                        type: string
+                            profileImage: # Part 3 (an image)
+                                type: string
+                                format: binary

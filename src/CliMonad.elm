@@ -31,7 +31,7 @@ module CliMonad exposing
 -}
 
 import Common
-import Dict
+import Dict exposing (Dict)
 import Elm
 import Elm.Annotation
 import FastDict
@@ -612,7 +612,7 @@ stepOrFail msg f =
         )
 
 
-combineDict : Dict.Dict comparable (CliMonad a) -> CliMonad (Dict.Dict comparable a)
+combineDict : Dict comparable (CliMonad a) -> CliMonad (Dict comparable a)
 combineDict dict =
     dict
         |> Dict.foldr

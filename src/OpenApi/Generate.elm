@@ -8,7 +8,7 @@ module OpenApi.Generate exposing (ContentSchema, Message, Path, Mime, files)
 
 import CliMonad exposing (CliMonad)
 import Common
-import Dict
+import Dict exposing (Dict)
 import Dict.Extra
 import Elm
 import Elm.Annotation
@@ -421,7 +421,7 @@ responseToDeclarations name reference =
     case OpenApi.Reference.toConcrete reference of
         Just response ->
             let
-                content : Dict.Dict String OpenApi.MediaType.MediaType
+                content : Dict String OpenApi.MediaType.MediaType
                 content =
                     OpenApi.Response.content response
             in
@@ -444,7 +444,7 @@ requestBodyToDeclarations name reference =
     case OpenApi.Reference.toConcrete reference of
         Just requestBody ->
             let
-                content : Dict.Dict String OpenApi.MediaType.MediaType
+                content : Dict String OpenApi.MediaType.MediaType
                 content =
                     OpenApi.RequestBody.content requestBody
             in
@@ -1378,20 +1378,20 @@ operationToAuthorizationInfo : OpenApi.Operation.Operation -> CliMonad Authoriza
 operationToAuthorizationInfo operation =
     let
         step :
-            Maybe (Dict.Dict String (OpenApi.Reference.ReferenceOr OpenApi.SecurityScheme.SecurityScheme))
+            Maybe (Dict String (OpenApi.Reference.ReferenceOr OpenApi.SecurityScheme.SecurityScheme))
             -> ( String, List String )
             ->
-                { headers : Dict.Dict String (Elm.Expression -> Elm.Expression)
-                , paramsAuthorization : Dict.Dict String Elm.Annotation.Annotation
+                { headers : Dict String (Elm.Expression -> Elm.Expression)
+                , paramsAuthorization : Dict String Elm.Annotation.Annotation
                 , scopes : List String
-                , query : Dict.Dict String (Elm.Expression -> Elm.Expression)
+                , query : Dict String (Elm.Expression -> Elm.Expression)
                 }
             ->
                 CliMonad
-                    { headers : Dict.Dict String (Elm.Expression -> Elm.Expression)
-                    , paramsAuthorization : Dict.Dict String Elm.Annotation.Annotation
+                    { headers : Dict String (Elm.Expression -> Elm.Expression)
+                    , paramsAuthorization : Dict String Elm.Annotation.Annotation
                     , scopes : List String
-                    , query : Dict.Dict String (Elm.Expression -> Elm.Expression)
+                    , query : Dict String (Elm.Expression -> Elm.Expression)
                     }
         step securitySchemes e acc =
             case e of
@@ -1572,7 +1572,7 @@ operationToAuthorizationInfo operation =
                     components =
                         OpenApi.components spec
 
-                    securitySchemes : Maybe (Dict.Dict String (OpenApi.Reference.ReferenceOr OpenApi.SecurityScheme.SecurityScheme))
+                    securitySchemes : Maybe (Dict String (OpenApi.Reference.ReferenceOr OpenApi.SecurityScheme.SecurityScheme))
                     securitySchemes =
                         Maybe.map OpenApi.Components.securitySchemes components
                 in
@@ -1665,7 +1665,7 @@ searchForJsonMediaType mediaType _ =
     mediaType == "*/*" || Regex.contains jsonRegex mediaType
 
 
-contentToContentSchema : Dict.Dict String OpenApi.MediaType.MediaType -> CliMonad ContentSchema
+contentToContentSchema : Dict String OpenApi.MediaType.MediaType -> CliMonad ContentSchema
 contentToContentSchema content =
     let
         default : Maybe (CliMonad ContentSchema) -> CliMonad ContentSchema
@@ -2338,7 +2338,7 @@ operationToTypesExpectAndResolver :
     -> CliMonad OperationUtils
 operationToTypesExpectAndResolver functionName operation =
     let
-        responses : Dict.Dict String (OpenApi.Reference.ReferenceOr OpenApi.Response.Response)
+        responses : Dict String (OpenApi.Reference.ReferenceOr OpenApi.Response.Response)
         responses =
             OpenApi.Operation.responses operation
 
@@ -2402,7 +2402,7 @@ operationToTypesExpectAndResolver functionName operation =
         |> CliMonad.andThen
             (\( _, responseOrRef ) ->
                 let
-                    errorResponses : Dict.Dict String (OpenApi.Reference.ReferenceOr OpenApi.Response.Response)
+                    errorResponses : Dict String (OpenApi.Reference.ReferenceOr OpenApi.Response.Response)
                     errorResponses =
                         getErrorResponses responses
                 in
@@ -2535,7 +2535,7 @@ parseReferenceToResponse ref =
         |> CliMonad.fromResult
 
 
-errorResponsesToType : String -> Dict.Dict String (OpenApi.Reference.ReferenceOr OpenApi.Response.Response) -> CliMonad ( Maybe { name : String, declaration : Elm.Declaration, group : String }, Elm.Annotation.Annotation )
+errorResponsesToType : String -> Dict String (OpenApi.Reference.ReferenceOr OpenApi.Response.Response) -> CliMonad ( Maybe { name : String, declaration : Elm.Declaration, group : String }, Elm.Annotation.Annotation )
 errorResponsesToType functionName errorResponses =
     errorResponses
         |> Dict.map
@@ -2610,7 +2610,7 @@ errorResponsesToType functionName errorResponses =
             )
 
 
-errorResponsesToErrorDecoders : String -> Dict.Dict String (OpenApi.Reference.ReferenceOr OpenApi.Response.Response) -> CliMonad Elm.Expression
+errorResponsesToErrorDecoders : String -> Dict String (OpenApi.Reference.ReferenceOr OpenApi.Response.Response) -> CliMonad Elm.Expression
 errorResponsesToErrorDecoders functionName errorResponses =
     case Dict.toList errorResponses of
         [] ->
@@ -2719,13 +2719,13 @@ isSuccessResponseStatus status =
     String.startsWith "2" status || String.startsWith "3" status
 
 
-getFirstSuccessResponse : Dict.Dict String (OpenApi.Reference.ReferenceOr OpenApi.Response.Response) -> Maybe ( String, OpenApi.Reference.ReferenceOr OpenApi.Response.Response )
+getFirstSuccessResponse : Dict String (OpenApi.Reference.ReferenceOr OpenApi.Response.Response) -> Maybe ( String, OpenApi.Reference.ReferenceOr OpenApi.Response.Response )
 getFirstSuccessResponse responses =
     responses
         |> Dict.Extra.find (\code _ -> isSuccessResponseStatus code)
 
 
-getErrorResponses : Dict.Dict String (OpenApi.Reference.ReferenceOr OpenApi.Response.Response) -> Dict.Dict String (OpenApi.Reference.ReferenceOr OpenApi.Response.Response)
+getErrorResponses : Dict String (OpenApi.Reference.ReferenceOr OpenApi.Response.Response) -> Dict String (OpenApi.Reference.ReferenceOr OpenApi.Response.Response)
 getErrorResponses responses =
     responses
         |> Dict.filter (\status _ -> not <| isSuccessResponseStatus status)

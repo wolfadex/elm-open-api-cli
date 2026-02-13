@@ -119,6 +119,7 @@ run =
             -- Slimmed config for profiling
             OpenApi.Config.init "./generated"
                 |> OpenApi.Config.withNoElmFormat True
+                |> OpenApi.Config.withKeepGoing True
                 |> OpenApi.Config.withInput additionalProperties
                 |> OpenApi.Config.withInput recursiveAllofRefs
                 |> OpenApi.Config.withInput overridingGlobalSecurity

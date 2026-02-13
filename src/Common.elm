@@ -576,7 +576,7 @@ parseRequestBodyRef ref =
                     Ok (RefTo RequestBody res)
 
                 else
-                    Err ("Expected a reference to a schema, found a reference to " ++ ref)
+                    Err ("Expected a reference to a request body, found a reference to " ++ ref)
             )
 
 
@@ -589,7 +589,7 @@ parseResponseRef ref =
                     Ok (RefTo Response res)
 
                 else
-                    Err ("Expected a reference to a schema, found a reference to " ++ ref)
+                    Err ("Expected a reference to a response, found a reference to " ++ ref)
             )
 
 

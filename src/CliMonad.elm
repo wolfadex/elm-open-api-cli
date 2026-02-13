@@ -44,6 +44,7 @@ import OpenApi exposing (OpenApi)
 import OpenApi.Config
 import Pretty
 import String.Extra
+import Triple.Extra
 
 
 type alias Message =
@@ -85,6 +86,7 @@ type alias Input =
     , namespace : List String
     , formats : FastDict.Dict InternalFormatName InternalFormat
     , warnOnMissingEnums : Bool
+    , keepGoing : Bool
     }
 
 
@@ -126,6 +128,7 @@ run :
         , namespace : List String
         , formats : List OpenApi.Config.Format
         , warnOnMissingEnums : Bool
+        , keepGoing : Bool
         }
     -> CliMonad (List Declaration)
     ->
@@ -148,6 +151,7 @@ run oneOfDeclarations input (CliMonad x) =
                     |> List.map toInternalFormat
                     |> FastDict.fromList
             , warnOnMissingEnums = input.warnOnMissingEnums
+            , keepGoing = input.keepGoing
             }
 
         res : Result Message ( List Declaration, Output, Cache )
@@ -570,20 +574,28 @@ getApiSpec =
     CliMonad (\input cache -> Ok ( input.openApi, emptyOutput, cache ))
 
 
+{-| If the user has chosen to keep going in the face of errors, this will convert an error into a warning. Otherwise this returns the input
+-}
 errorToWarning : CliMonad a -> CliMonad (Maybe a)
 errorToWarning (CliMonad f) =
     CliMonad
         (\input cache ->
-            case f input cache of
-                Ok ( res, output, cache2 ) ->
-                    Ok ( Just res, output, cache2 )
+            if input.keepGoing then
+                case f input cache of
+                    Ok ( res, output, cache2 ) ->
+                        Ok ( Just res, output, cache2 )
 
-                Err { path, message } ->
-                    ( Nothing
-                    , { emptyOutput | warnings = [ { path = path, message = message, details = Pretty.empty } ] }
-                    , cache
-                    )
-                        |> Ok
+                    Err { path, message } ->
+                        ( Nothing
+                        , { emptyOutput | warnings = [ { path = path, message = message, details = Pretty.empty } ] }
+                        , cache
+                        )
+                            |> Ok
+
+            else
+                Result.map
+                    (Triple.Extra.mapFirst Just)
+                    (f input cache)
         )
 
 

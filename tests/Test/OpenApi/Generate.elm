@@ -129,6 +129,7 @@ fuzzTitle =
                                 , server = OpenApi.Config.Default
                                 , formats = OpenApi.Config.defaultFormats
                                 , warnOnMissingEnums = True
+                                , keepGoing = False
                                 }
                                 oas
                     in
@@ -257,6 +258,7 @@ pr267 =
                                 , server = OpenApi.Config.Default
                                 , formats = OpenApi.Config.defaultFormats
                                 , warnOnMissingEnums = True
+                                , keepGoing = False
                                 }
                                 oas
                     in

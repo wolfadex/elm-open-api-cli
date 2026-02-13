@@ -7,6 +7,13 @@ components:
     Data:
       description: "Data"
       type: string
+  responses:
+    Data:
+      description: "Data"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Data"
   securitySchemes:
     Token:
       type: apiKey
@@ -22,7 +29,7 @@ paths:
       operationId: GetProtectedData
       responses:
         200:
-          $ref: "#/components/schemas/Data"
+          $ref: "#/components/responses/Data"
 
   "/api/unprotected":
     get:
@@ -32,7 +39,7 @@ paths:
       security: []
       responses:
         200:
-          $ref: "#/components/schemas/Data"
+          $ref: "#/components/responses/Data"
     post:
       summary: Unprotected endpoint to store data
       # Whoops! Security should be overridden here like for GET. Let's fix it
@@ -41,7 +48,7 @@ paths:
       operationId: PostUnprotectedData
       responses:
         200:
-          $ref: "#/components/schemas/Data"
+          $ref: "#/components/responses/Data"
     patch:
       summary: Unprotected endpoint to store data (again)
       # Whoops! This is supposed to be unprotected, like GET. Let's fix it
@@ -52,4 +59,4 @@ paths:
       operationId: PatchUnprotectedData
       responses:
         200:
-          $ref: "#/components/schemas/Data"
+          $ref: "#/components/responses/Data"

@@ -209,7 +209,8 @@ type Path
     | Url Url.Url -- https://petstore3.swagger.io/api/v3/openapi.json
 
 
-{-| -}
+{-| Builds a `Path`. If the file is a valid URL, it will be used as such, otherwise it will be interpreted as a local file path.
+-}
 pathFromString : String -> Path
 pathFromString path =
     case Url.fromString path of
@@ -231,7 +232,15 @@ pathToString pathType =
             Url.toString url
 
 
-{-| -}
+{-| Create an empty `Config` with no inputs and a given output directory.
+
+The default options are to:
+
+  - run elm-format;
+  - ask before converting Swagger specs to OpenAPI specs;
+  - fail rather than generating `Debug.todo` or skipping unimplemented paths.
+
+-}
 init : String -> Config
 init initialOutputDirectory =
     { inputs = []
@@ -268,7 +277,16 @@ inputFrom path =
 -------------
 
 
-{-| -}
+{-| The built-in formats:
+
+  - `date-time`
+  - `date`
+  - `uri`
+  - `uuid`
+  - `byte`
+  - `password`
+
+-}
 defaultFormats : List Format
 defaultFormats =
     [ dateTimeFormat

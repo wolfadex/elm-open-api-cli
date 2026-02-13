@@ -842,48 +842,50 @@ declarationGroup :
     OperationUtils
     -> (PerPackage (CliMonad (Elm.Expression -> Elm.Expression)) -> CliMonad (Elm.Expression -> Elm.Expression))
     -> AuthorizationInfo
-    -> ((Elm.Expression -> Elm.Expression) -> a)
+    -> PerPackage (CliMonad (Elm.Expression -> Elm.Expression))
+    -> ((Elm.Expression -> Elm.Expression) -> (Elm.Expression -> Elm.Expression) -> a)
     -> List ( OpenApi.Config.EffectType, a -> ( String, Elm.Expression ) )
     -> CliMonad (List CliMonad.Declaration)
-declarationGroup { expect, isSinglePackage, effectTypes, operation } package auth sharedData list =
+declarationGroup { expect, isSinglePackage, effectTypes, operation } package auth toBodies sharedData list =
     if List.any (\( effectType, _ ) -> List.member effectType effectTypes) list then
-        package expect
-            |> CliMonad.map
-                (\specificExpect ->
-                    let
-                        shared : a
-                        shared =
-                            sharedData specificExpect
-                    in
-                    List.filterMap
-                        (\( effectType, toDeclaration ) ->
-                            if List.member effectType effectTypes then
-                                let
-                                    ( name, expr ) =
-                                        toDeclaration shared
-                                in
-                                { moduleName =
-                                    if isSinglePackage then
-                                        Common.Api Nothing
+        CliMonad.map2
+            (\specificExpect toBody ->
+                let
+                    shared : a
+                    shared =
+                        sharedData specificExpect toBody
+                in
+                List.filterMap
+                    (\( effectType, toDeclaration ) ->
+                        if List.member effectType effectTypes then
+                            let
+                                ( name, expr ) =
+                                    toDeclaration shared
+                            in
+                            { moduleName =
+                                if isSinglePackage then
+                                    Common.Api Nothing
 
-                                    else
-                                        Common.Api (Just (OpenApi.Config.effectTypeToPackage effectType))
-                                , name = name
-                                , declaration =
-                                    expr
-                                        |> Elm.declaration name
-                                        |> Elm.withDocumentation (documentation operation auth)
-                                        |> Elm.expose
-                                , group =
-                                    operationToGroup operation
-                                }
-                                    |> Just
+                                else
+                                    Common.Api (Just (OpenApi.Config.effectTypeToPackage effectType))
+                            , name = name
+                            , declaration =
+                                expr
+                                    |> Elm.declaration name
+                                    |> Elm.withDocumentation (documentation operation auth)
+                                    |> Elm.expose
+                            , group =
+                                operationToGroup operation
+                            }
+                                |> Just
 
-                            else
-                                Nothing
-                        )
-                        list
-                )
+                        else
+                            Nothing
+                    )
+                    list
+            )
+            (package expect)
+            (package toBodies)
 
     else
         CliMonad.succeed []
@@ -899,74 +901,71 @@ elmHttpCommands :
     -> ({ requireToMsg : Bool } -> PerPackage Elm.Annotation.Annotation)
     -> CliMonad (List CliMonad.Declaration)
 elmHttpCommands ({ functionName, method, toMsg } as operationUtils) auth toHeaderParams _ toBodies replaced paramType =
-    CliMonad.andThen
-        (\toBody ->
-            declarationGroup operationUtils
-                .core
-                auth
-                (\specificExpect ->
-                    { cmdArg =
-                        \config ->
-                            Elm.record
-                                [ ( "url", replaced config )
-                                , ( "method", Elm.string method )
-                                , ( "headers"
-                                  , headersFromList Gen.Http.call_.header auth config toHeaderParams
-                                  )
-                                , ( "expect", specificExpect <| toMsg config )
-                                , ( "body", toBody config )
-                                , ( "timeout", Gen.Maybe.make_.nothing )
-                                , ( "tracker", Gen.Maybe.make_.nothing )
-                                ]
-                    , cmdAnnotation =
-                        Elm.Annotation.function
-                            [ (paramType { requireToMsg = True }).core ]
-                            (Elm.Annotation.cmd (Elm.Annotation.var "msg"))
-                    , recordAnnotation =
-                        Elm.Annotation.function
-                            [ (paramType { requireToMsg = True }).core ]
-                            (Elm.Annotation.record
-                                [ ( "method", Elm.Annotation.string )
-                                , ( "headers", Elm.Annotation.list Gen.Http.annotation_.header )
-                                , ( "url", Elm.Annotation.string )
-                                , ( "body", Gen.Http.annotation_.body )
-                                , ( "expect", Gen.Http.annotation_.expect (Elm.Annotation.var "msg") )
-                                , ( "timeout", Elm.Annotation.maybe Elm.Annotation.float )
-                                , ( "tracker", Elm.Annotation.maybe Elm.Annotation.string )
-                                ]
-                            )
-                    }
-                )
-                [ ( OpenApi.Config.ElmHttpCmd
-                  , \{ cmdArg, cmdAnnotation } ->
-                        ( functionName
-                        , Elm.fn
-                            (Elm.Arg.var "config")
-                            (\config -> Gen.Http.call_.request (cmdArg config))
-                            |> Elm.withType cmdAnnotation
-                        )
-                  )
-                , ( OpenApi.Config.ElmHttpCmdRisky
-                  , \{ cmdArg, cmdAnnotation } ->
-                        ( functionName ++ "Risky"
-                        , Elm.fn
-                            (Elm.Arg.var "config")
-                            (\config -> Gen.Http.call_.riskyRequest (cmdArg config))
-                            |> Elm.withType cmdAnnotation
-                        )
-                  )
-                , ( OpenApi.Config.ElmHttpCmdRecord
-                  , \{ cmdArg, recordAnnotation } ->
-                        ( functionName ++ "Record"
-                        , Elm.fn
-                            (Elm.Arg.var "config")
-                            cmdArg
-                            |> Elm.withType recordAnnotation
-                        )
-                  )
-                ]
+    declarationGroup operationUtils
+        .core
+        auth
+        toBodies
+        (\specificExpect toBody ->
+            { cmdArg =
+                \config ->
+                    Elm.record
+                        [ ( "url", replaced config )
+                        , ( "method", Elm.string method )
+                        , ( "headers"
+                          , headersFromList Gen.Http.call_.header auth config toHeaderParams
+                          )
+                        , ( "expect", specificExpect <| toMsg config )
+                        , ( "body", toBody config )
+                        , ( "timeout", Gen.Maybe.make_.nothing )
+                        , ( "tracker", Gen.Maybe.make_.nothing )
+                        ]
+            , cmdAnnotation =
+                Elm.Annotation.function
+                    [ (paramType { requireToMsg = True }).core ]
+                    (Elm.Annotation.cmd (Elm.Annotation.var "msg"))
+            , recordAnnotation =
+                Elm.Annotation.function
+                    [ (paramType { requireToMsg = True }).core ]
+                    (Elm.Annotation.record
+                        [ ( "method", Elm.Annotation.string )
+                        , ( "headers", Elm.Annotation.list Gen.Http.annotation_.header )
+                        , ( "url", Elm.Annotation.string )
+                        , ( "body", Gen.Http.annotation_.body )
+                        , ( "expect", Gen.Http.annotation_.expect (Elm.Annotation.var "msg") )
+                        , ( "timeout", Elm.Annotation.maybe Elm.Annotation.float )
+                        , ( "tracker", Elm.Annotation.maybe Elm.Annotation.string )
+                        ]
+                    )
+            }
         )
-        toBodies.core
+        [ ( OpenApi.Config.ElmHttpCmd
+          , \{ cmdArg, cmdAnnotation } ->
+                ( functionName
+                , Elm.fn
+                    (Elm.Arg.var "config")
+                    (\config -> Gen.Http.call_.request (cmdArg config))
+                    |> Elm.withType cmdAnnotation
+                )
+          )
+        , ( OpenApi.Config.ElmHttpCmdRisky
+          , \{ cmdArg, cmdAnnotation } ->
+                ( functionName ++ "Risky"
+                , Elm.fn
+                    (Elm.Arg.var "config")
+                    (\config -> Gen.Http.call_.riskyRequest (cmdArg config))
+                    |> Elm.withType cmdAnnotation
+                )
+          )
+        , ( OpenApi.Config.ElmHttpCmdRecord
+          , \{ cmdArg, recordAnnotation } ->
+                ( functionName ++ "Record"
+                , Elm.fn
+                    (Elm.Arg.var "config")
+                    cmdArg
+                    |> Elm.withType recordAnnotation
+                )
+          )
+        ]
 
 
 elmHttpTasks :
@@ -979,79 +978,76 @@ elmHttpTasks :
     -> ({ requireToMsg : Bool } -> PerPackage Elm.Annotation.Annotation)
     -> CliMonad (List CliMonad.Declaration)
 elmHttpTasks ({ functionName, method, bodyTypeAnnotation, errorTypeAnnotation, resolver } as operationUtils) auth toHeaderParams successAnnotation toBodies replaced paramType =
-    CliMonad.andThen
-        (\toBody ->
-            declarationGroup operationUtils
-                .core
-                auth
-                (\_ ->
-                    { taskArg =
-                        \config ->
-                            Elm.record
-                                [ ( "url", replaced config )
-                                , ( "method", Elm.string method )
-                                , ( "headers"
-                                  , headersFromList Gen.Http.call_.header auth config toHeaderParams
-                                  )
-                                , ( "resolver", resolver.core )
-                                , ( "body", toBody config )
-                                , ( "timeout", Gen.Maybe.make_.nothing )
-                                ]
-                    , taskAnnotation =
-                        Elm.Annotation.function
-                            [ (paramType { requireToMsg = False }).core ]
-                            (Gen.Task.annotation_.task
+    declarationGroup operationUtils
+        .core
+        auth
+        toBodies
+        (\_ toBody ->
+            { taskArg =
+                \config ->
+                    Elm.record
+                        [ ( "url", replaced config )
+                        , ( "method", Elm.string method )
+                        , ( "headers"
+                          , headersFromList Gen.Http.call_.header auth config toHeaderParams
+                          )
+                        , ( "resolver", resolver.core )
+                        , ( "body", toBody config )
+                        , ( "timeout", Gen.Maybe.make_.nothing )
+                        ]
+            , taskAnnotation =
+                Elm.Annotation.function
+                    [ (paramType { requireToMsg = False }).core ]
+                    (Gen.Task.annotation_.task
+                        (OpenApi.Common.Internal.annotation_.error errorTypeAnnotation bodyTypeAnnotation)
+                        successAnnotation
+                    )
+            , recordAnnotation =
+                Elm.Annotation.function
+                    [ (paramType { requireToMsg = False }).core ]
+                    (Elm.Annotation.record
+                        [ ( "method", Elm.Annotation.string )
+                        , ( "headers", Gen.Http.annotation_.header )
+                        , ( "url", Elm.Annotation.string )
+                        , ( "body", Gen.Http.annotation_.body )
+                        , ( "resolver"
+                          , Gen.Http.annotation_.resolver
                                 (OpenApi.Common.Internal.annotation_.error errorTypeAnnotation bodyTypeAnnotation)
                                 successAnnotation
-                            )
-                    , recordAnnotation =
-                        Elm.Annotation.function
-                            [ (paramType { requireToMsg = False }).core ]
-                            (Elm.Annotation.record
-                                [ ( "method", Elm.Annotation.string )
-                                , ( "headers", Gen.Http.annotation_.header )
-                                , ( "url", Elm.Annotation.string )
-                                , ( "body", Gen.Http.annotation_.body )
-                                , ( "resolver"
-                                  , Gen.Http.annotation_.resolver
-                                        (OpenApi.Common.Internal.annotation_.error errorTypeAnnotation bodyTypeAnnotation)
-                                        successAnnotation
-                                  )
-                                , ( "timeout", Elm.Annotation.maybe Elm.Annotation.float )
-                                ]
-                            )
-                    }
-                )
-                [ ( OpenApi.Config.ElmHttpTask
-                  , \{ taskArg, taskAnnotation } ->
-                        ( functionName ++ "Task"
-                        , Elm.fn
-                            (Elm.Arg.var "config")
-                            (\config -> Gen.Http.call_.task (taskArg config))
-                            |> Elm.withType taskAnnotation
-                        )
-                  )
-                , ( OpenApi.Config.ElmHttpTaskRisky
-                  , \{ taskArg, taskAnnotation } ->
-                        ( functionName ++ "TaskRisky"
-                        , Elm.fn
-                            (Elm.Arg.var "config")
-                            (\config -> Gen.Http.call_.riskyTask (taskArg config))
-                            |> Elm.withType taskAnnotation
-                        )
-                  )
-                , ( OpenApi.Config.ElmHttpTaskRecord
-                  , \{ taskArg, recordAnnotation } ->
-                        ( functionName ++ "TaskRecord"
-                        , Elm.fn
-                            (Elm.Arg.var "config")
-                            taskArg
-                            |> Elm.withType recordAnnotation
-                        )
-                  )
-                ]
+                          )
+                        , ( "timeout", Elm.Annotation.maybe Elm.Annotation.float )
+                        ]
+                    )
+            }
         )
-        toBodies.core
+        [ ( OpenApi.Config.ElmHttpTask
+          , \{ taskArg, taskAnnotation } ->
+                ( functionName ++ "Task"
+                , Elm.fn
+                    (Elm.Arg.var "config")
+                    (\config -> Gen.Http.call_.task (taskArg config))
+                    |> Elm.withType taskAnnotation
+                )
+          )
+        , ( OpenApi.Config.ElmHttpTaskRisky
+          , \{ taskArg, taskAnnotation } ->
+                ( functionName ++ "TaskRisky"
+                , Elm.fn
+                    (Elm.Arg.var "config")
+                    (\config -> Gen.Http.call_.riskyTask (taskArg config))
+                    |> Elm.withType taskAnnotation
+                )
+          )
+        , ( OpenApi.Config.ElmHttpTaskRecord
+          , \{ taskArg, recordAnnotation } ->
+                ( functionName ++ "TaskRecord"
+                , Elm.fn
+                    (Elm.Arg.var "config")
+                    taskArg
+                    |> Elm.withType recordAnnotation
+                )
+          )
+        ]
 
 
 dillonkearnsElmPagesBackendTask :
@@ -1064,74 +1060,71 @@ dillonkearnsElmPagesBackendTask :
     -> ({ requireToMsg : Bool } -> PerPackage Elm.Annotation.Annotation)
     -> CliMonad (List CliMonad.Declaration)
 dillonkearnsElmPagesBackendTask ({ toMsg, method, functionName } as operationUtils) auth toHeaderParams successAnnotation toBodies replaced paramType =
-    CliMonad.andThen
-        (\toBody ->
-            declarationGroup operationUtils
-                .elmPages
-                auth
-                (\specificExpect ->
-                    { taskArg =
-                        \config ->
-                            Elm.record
-                                [ ( "url", replaced config )
-                                , ( "method", Elm.string method )
-                                , ( "headers"
-                                  , headersFromList Elm.tuple auth config toHeaderParams
-                                  )
-                                , ( "body", toBody config )
-                                , ( "retries", Gen.Maybe.make_.nothing )
-                                , ( "timeoutInMs", Gen.Maybe.make_.nothing )
-                                ]
-                    , taskAnnotation =
-                        Elm.Annotation.function
-                            [ (paramType { requireToMsg = False }).elmPages ]
-                            (Gen.BackendTask.annotation_.backendTask
-                                (Elm.Annotation.record
-                                    [ ( "fatal", Gen.FatalError.annotation_.fatalError )
-                                    , ( "recoverable", Gen.BackendTask.Http.annotation_.error )
-                                    ]
-                                )
-                                successAnnotation
-                            )
-                    , recordAnnotation =
-                        Elm.Annotation.function
-                            [ (paramType { requireToMsg = False }).elmPages ]
-                            (Elm.Annotation.tuple
-                                (Elm.Annotation.record
-                                    [ ( "url", Elm.Annotation.string )
-                                    , ( "method", Elm.Annotation.string )
-                                    , ( "headers", Elm.Annotation.list (Elm.Annotation.tuple Elm.Annotation.string Elm.Annotation.string) )
-                                    , ( "body", Gen.BackendTask.Http.annotation_.body )
-                                    , ( "retries", Elm.Annotation.maybe Elm.Annotation.int )
-                                    , ( "timeoutInMs", Elm.Annotation.maybe Elm.Annotation.int )
-                                    ]
-                                )
-                                (Gen.BackendTask.Http.annotation_.expect (Elm.Annotation.var "a"))
-                            )
-                    , specificExpect = specificExpect
-                    }
-                )
-                [ ( OpenApi.Config.DillonkearnsElmPagesTask
-                  , \{ taskArg, taskAnnotation, specificExpect } ->
-                        ( functionName
-                        , Elm.fn
-                            (Elm.Arg.var "config")
-                            (\config -> Gen.BackendTask.Http.call_.request (taskArg config) (specificExpect <| toMsg config))
-                            |> Elm.withType taskAnnotation
+    declarationGroup operationUtils
+        .elmPages
+        auth
+        toBodies
+        (\specificExpect toBody ->
+            { taskArg =
+                \config ->
+                    Elm.record
+                        [ ( "url", replaced config )
+                        , ( "method", Elm.string method )
+                        , ( "headers"
+                          , headersFromList Elm.tuple auth config toHeaderParams
+                          )
+                        , ( "body", toBody config )
+                        , ( "retries", Gen.Maybe.make_.nothing )
+                        , ( "timeoutInMs", Gen.Maybe.make_.nothing )
+                        ]
+            , taskAnnotation =
+                Elm.Annotation.function
+                    [ (paramType { requireToMsg = False }).elmPages ]
+                    (Gen.BackendTask.annotation_.backendTask
+                        (Elm.Annotation.record
+                            [ ( "fatal", Gen.FatalError.annotation_.fatalError )
+                            , ( "recoverable", Gen.BackendTask.Http.annotation_.error )
+                            ]
                         )
-                  )
-                , ( OpenApi.Config.DillonkearnsElmPagesTaskRecord
-                  , \{ taskArg, recordAnnotation, specificExpect } ->
-                        ( functionName
-                        , Elm.fn
-                            (Elm.Arg.var "config")
-                            (\config -> Elm.tuple (taskArg config) (specificExpect <| toMsg config))
-                            |> Elm.withType recordAnnotation
+                        successAnnotation
+                    )
+            , recordAnnotation =
+                Elm.Annotation.function
+                    [ (paramType { requireToMsg = False }).elmPages ]
+                    (Elm.Annotation.tuple
+                        (Elm.Annotation.record
+                            [ ( "url", Elm.Annotation.string )
+                            , ( "method", Elm.Annotation.string )
+                            , ( "headers", Elm.Annotation.list (Elm.Annotation.tuple Elm.Annotation.string Elm.Annotation.string) )
+                            , ( "body", Gen.BackendTask.Http.annotation_.body )
+                            , ( "retries", Elm.Annotation.maybe Elm.Annotation.int )
+                            , ( "timeoutInMs", Elm.Annotation.maybe Elm.Annotation.int )
+                            ]
                         )
-                  )
-                ]
+                        (Gen.BackendTask.Http.annotation_.expect (Elm.Annotation.var "a"))
+                    )
+            , specificExpect = specificExpect
+            }
         )
-        toBodies.elmPages
+        [ ( OpenApi.Config.DillonkearnsElmPagesTask
+          , \{ taskArg, taskAnnotation, specificExpect } ->
+                ( functionName
+                , Elm.fn
+                    (Elm.Arg.var "config")
+                    (\config -> Gen.BackendTask.Http.call_.request (taskArg config) (specificExpect <| toMsg config))
+                    |> Elm.withType taskAnnotation
+                )
+          )
+        , ( OpenApi.Config.DillonkearnsElmPagesTaskRecord
+          , \{ taskArg, recordAnnotation, specificExpect } ->
+                ( functionName
+                , Elm.fn
+                    (Elm.Arg.var "config")
+                    (\config -> Elm.tuple (taskArg config) (specificExpect <| toMsg config))
+                    |> Elm.withType recordAnnotation
+                )
+          )
+        ]
 
 
 lamderaProgramTestCommands :
@@ -1144,55 +1137,52 @@ lamderaProgramTestCommands :
     -> ({ requireToMsg : Bool } -> PerPackage Elm.Annotation.Annotation)
     -> CliMonad (List CliMonad.Declaration)
 lamderaProgramTestCommands ({ toMsg, method, functionName } as operationUtils) auth toHeaderParams _ toBodies replaced paramType =
-    CliMonad.andThen
-        (\toBody ->
-            declarationGroup operationUtils
-                .lamderaProgramTest
-                auth
-                (\specificExpect ->
-                    { cmdArg =
-                        \config ->
-                            Elm.record
-                                [ ( "url", replaced config )
-                                , ( "method", Elm.string method )
-                                , ( "headers"
-                                  , headersFromList Gen.Effect.Http.call_.header auth config toHeaderParams
-                                  )
-                                , ( "expect", specificExpect <| toMsg config )
-                                , ( "body", toBody config )
-                                , ( "timeout", Gen.Maybe.make_.nothing )
-                                , ( "tracker", Gen.Maybe.make_.nothing )
-                                ]
-                    , cmdParam = (paramType { requireToMsg = True }).lamderaProgramTest
-                    }
-                )
-                [ ( OpenApi.Config.LamderaProgramTestCmd
-                  , \{ cmdArg, cmdParam } ->
-                        ( functionName
-                        , Elm.fn
-                            (Elm.Arg.varWith "config" cmdParam)
-                            (\config -> Gen.Effect.Http.call_.request (cmdArg config))
-                        )
-                  )
-                , ( OpenApi.Config.LamderaProgramTestCmdRisky
-                  , \{ cmdArg, cmdParam } ->
-                        ( functionName ++ "Risky"
-                        , Elm.fn
-                            (Elm.Arg.varWith "config" cmdParam)
-                            (\config -> Gen.Effect.Http.call_.riskyRequest (cmdArg config))
-                        )
-                  )
-                , ( OpenApi.Config.LamderaProgramTestCmdRecord
-                  , \{ cmdArg, cmdParam } ->
-                        ( functionName ++ "Record"
-                        , Elm.fn
-                            (Elm.Arg.varWith "config" cmdParam)
-                            cmdArg
-                        )
-                  )
-                ]
+    declarationGroup operationUtils
+        .lamderaProgramTest
+        auth
+        toBodies
+        (\specificExpect toBody ->
+            { cmdArg =
+                \config ->
+                    Elm.record
+                        [ ( "url", replaced config )
+                        , ( "method", Elm.string method )
+                        , ( "headers"
+                          , headersFromList Gen.Effect.Http.call_.header auth config toHeaderParams
+                          )
+                        , ( "expect", specificExpect <| toMsg config )
+                        , ( "body", toBody config )
+                        , ( "timeout", Gen.Maybe.make_.nothing )
+                        , ( "tracker", Gen.Maybe.make_.nothing )
+                        ]
+            , cmdParam = (paramType { requireToMsg = True }).lamderaProgramTest
+            }
         )
-        toBodies.lamderaProgramTest
+        [ ( OpenApi.Config.LamderaProgramTestCmd
+          , \{ cmdArg, cmdParam } ->
+                ( functionName
+                , Elm.fn
+                    (Elm.Arg.varWith "config" cmdParam)
+                    (\config -> Gen.Effect.Http.call_.request (cmdArg config))
+                )
+          )
+        , ( OpenApi.Config.LamderaProgramTestCmdRisky
+          , \{ cmdArg, cmdParam } ->
+                ( functionName ++ "Risky"
+                , Elm.fn
+                    (Elm.Arg.varWith "config" cmdParam)
+                    (\config -> Gen.Effect.Http.call_.riskyRequest (cmdArg config))
+                )
+          )
+        , ( OpenApi.Config.LamderaProgramTestCmdRecord
+          , \{ cmdArg, cmdParam } ->
+                ( functionName ++ "Record"
+                , Elm.fn
+                    (Elm.Arg.varWith "config" cmdParam)
+                    cmdArg
+                )
+          )
+        ]
 
 
 lamderaProgramTestTasks :
@@ -1205,81 +1195,78 @@ lamderaProgramTestTasks :
     -> ({ requireToMsg : Bool } -> PerPackage Elm.Annotation.Annotation)
     -> CliMonad (List CliMonad.Declaration)
 lamderaProgramTestTasks ({ method, functionName, resolver, errorTypeAnnotation, bodyTypeAnnotation } as operationUtils) auth toHeaderParams successAnnotation toBodies replaced paramType =
-    CliMonad.andThen
-        (\toBody ->
-            declarationGroup operationUtils
-                .lamderaProgramTest
-                auth
-                (\_ ->
-                    { taskArg =
-                        \config ->
-                            Elm.record
-                                [ ( "url", replaced config )
-                                , ( "method", Elm.string method )
-                                , ( "headers"
-                                  , headersFromList Gen.Effect.Http.call_.header auth config toHeaderParams
-                                  )
-                                , ( "resolver", resolver.lamderaProgramTest )
-                                , ( "body", toBody config )
-                                , ( "timeout", Gen.Maybe.make_.nothing )
-                                ]
-                    , taskAnnotation =
-                        Elm.Annotation.function
-                            [ (paramType { requireToMsg = False }).lamderaProgramTest ]
-                            (Gen.Effect.Task.annotation_.task
+    declarationGroup operationUtils
+        .lamderaProgramTest
+        auth
+        toBodies
+        (\_ toBody ->
+            { taskArg =
+                \config ->
+                    Elm.record
+                        [ ( "url", replaced config )
+                        , ( "method", Elm.string method )
+                        , ( "headers"
+                          , headersFromList Gen.Effect.Http.call_.header auth config toHeaderParams
+                          )
+                        , ( "resolver", resolver.lamderaProgramTest )
+                        , ( "body", toBody config )
+                        , ( "timeout", Gen.Maybe.make_.nothing )
+                        ]
+            , taskAnnotation =
+                Elm.Annotation.function
+                    [ (paramType { requireToMsg = False }).lamderaProgramTest ]
+                    (Gen.Effect.Task.annotation_.task
+                        (Elm.Annotation.var "restriction")
+                        (OpenApi.Common.Internal.annotation_.error errorTypeAnnotation bodyTypeAnnotation)
+                        successAnnotation
+                    )
+            , recordAnnotation =
+                Elm.Annotation.function
+                    [ (paramType { requireToMsg = False }).lamderaProgramTest ]
+                    (Elm.Annotation.record
+                        [ ( "method", Elm.Annotation.string )
+                        , ( "headers", Elm.Annotation.list Gen.Effect.Http.annotation_.header )
+                        , ( "url", Elm.Annotation.string )
+                        , ( "body", Gen.Effect.Http.annotation_.body )
+                        , ( "resolver"
+                          , Gen.Effect.Http.annotation_.resolver
                                 (Elm.Annotation.var "restriction")
                                 (OpenApi.Common.Internal.annotation_.error errorTypeAnnotation bodyTypeAnnotation)
                                 successAnnotation
-                            )
-                    , recordAnnotation =
-                        Elm.Annotation.function
-                            [ (paramType { requireToMsg = False }).lamderaProgramTest ]
-                            (Elm.Annotation.record
-                                [ ( "method", Elm.Annotation.string )
-                                , ( "headers", Elm.Annotation.list Gen.Effect.Http.annotation_.header )
-                                , ( "url", Elm.Annotation.string )
-                                , ( "body", Gen.Effect.Http.annotation_.body )
-                                , ( "resolver"
-                                  , Gen.Effect.Http.annotation_.resolver
-                                        (Elm.Annotation.var "restriction")
-                                        (OpenApi.Common.Internal.annotation_.error errorTypeAnnotation bodyTypeAnnotation)
-                                        successAnnotation
-                                  )
-                                , ( "timeout", Elm.Annotation.maybe (Elm.Annotation.namedWith [ "Duration" ] "Duration" []) )
-                                ]
-                            )
-                    }
-                )
-                [ ( OpenApi.Config.LamderaProgramTestTask
-                  , \{ taskArg, taskAnnotation } ->
-                        ( functionName ++ "Task"
-                        , Elm.fn
-                            (Elm.Arg.var "config")
-                            (\config -> Gen.Effect.Http.call_.task (taskArg config))
-                            |> Elm.withType taskAnnotation
-                        )
-                  )
-                , ( OpenApi.Config.LamderaProgramTestTaskRisky
-                  , \{ taskArg, taskAnnotation } ->
-                        ( functionName ++ "TaskRisky"
-                        , Elm.fn
-                            (Elm.Arg.var "config")
-                            (\config -> Gen.Effect.Http.call_.riskyTask (taskArg config))
-                            |> Elm.withType taskAnnotation
-                        )
-                  )
-                , ( OpenApi.Config.LamderaProgramTestTaskRecord
-                  , \{ taskArg, recordAnnotation } ->
-                        ( functionName ++ "TaskRecord"
-                        , Elm.fn
-                            (Elm.Arg.var "config")
-                            taskArg
-                            |> Elm.withType recordAnnotation
-                        )
-                  )
-                ]
+                          )
+                        , ( "timeout", Elm.Annotation.maybe (Elm.Annotation.namedWith [ "Duration" ] "Duration" []) )
+                        ]
+                    )
+            }
         )
-        toBodies.lamderaProgramTest
+        [ ( OpenApi.Config.LamderaProgramTestTask
+          , \{ taskArg, taskAnnotation } ->
+                ( functionName ++ "Task"
+                , Elm.fn
+                    (Elm.Arg.var "config")
+                    (\config -> Gen.Effect.Http.call_.task (taskArg config))
+                    |> Elm.withType taskAnnotation
+                )
+          )
+        , ( OpenApi.Config.LamderaProgramTestTaskRisky
+          , \{ taskArg, taskAnnotation } ->
+                ( functionName ++ "TaskRisky"
+                , Elm.fn
+                    (Elm.Arg.var "config")
+                    (\config -> Gen.Effect.Http.call_.riskyTask (taskArg config))
+                    |> Elm.withType taskAnnotation
+                )
+          )
+        , ( OpenApi.Config.LamderaProgramTestTaskRecord
+          , \{ taskArg, recordAnnotation } ->
+                ( functionName ++ "TaskRecord"
+                , Elm.fn
+                    (Elm.Arg.var "config")
+                    taskArg
+                    |> Elm.withType recordAnnotation
+                )
+          )
+        ]
 
 
 multipartPartsToAnnotation : List { name : Common.UnsafeName, required : Bool, part : MultipartPart } -> CliMonad Elm.Annotation.Annotation

@@ -27,42 +27,54 @@ run =
         additionalProperties =
             OpenApi.Config.inputFrom (OpenApi.Config.File "./example/additional-properties.yaml")
 
-        recursiveAllofRefs : OpenApi.Config.Input
-        recursiveAllofRefs =
-            OpenApi.Config.inputFrom (OpenApi.Config.File "./example/recursive-allof-refs.yaml")
+        amadeusAirlineLookup : OpenApi.Config.Input
+        amadeusAirlineLookup =
+            OpenApi.Config.inputFrom (OpenApi.Config.File "./example/amadeus-airline-lookup.json")
+
+        anyOfEnums : OpenApi.Config.Input
+        anyOfEnums =
+            OpenApi.Config.inputFrom (OpenApi.Config.File "./example/anyOfEnums.yaml")
+
+        binaryResponse : OpenApi.Config.Input
+        binaryResponse =
+            OpenApi.Config.inputFrom (OpenApi.Config.File "./example/binary-response.yaml")
+
+        cookieAuth : OpenApi.Config.Input
+        cookieAuth =
+            OpenApi.Config.inputFrom (OpenApi.Config.File "./example/cookie-auth.yaml")
+
+        ifconfigOvh : OpenApi.Config.Input
+        ifconfigOvh =
+            OpenApi.Config.inputFrom (OpenApi.Config.File "./example/ifconfig.ovh.json")
+
+        marioPartyStats : OpenApi.Config.Input
+        marioPartyStats =
+            OpenApi.Config.inputFrom (OpenApi.Config.File "./example/MarioPartyStats.json")
+
+        nullableEnum : OpenApi.Config.Input
+        nullableEnum =
+            OpenApi.Config.inputFrom (OpenApi.Config.File "./example/nullable-enum.yaml")
 
         overridingGlobalSecurity : OpenApi.Config.Input
         overridingGlobalSecurity =
             OpenApi.Config.inputFrom (OpenApi.Config.File "./example/overriding-global-security.yaml")
                 |> OpenApi.Config.withOverrides [ OpenApi.Config.File "./example/overriding-global-security-override.yaml" ]
 
-        singleEnum : OpenApi.Config.Input
-        singleEnum =
-            OpenApi.Config.inputFrom (OpenApi.Config.File "./example/single-enum.yaml")
-
-        patreon : OpenApi.Config.Input
-        patreon =
-            OpenApi.Config.inputFrom (OpenApi.Config.File "./example/patreon.json")
-
         realworldConduit : OpenApi.Config.Input
         realworldConduit =
             OpenApi.Config.inputFrom (OpenApi.Config.File "./example/realworld-conduit.yaml")
 
-        amadeusAirlineLookup : OpenApi.Config.Input
-        amadeusAirlineLookup =
-            OpenApi.Config.inputFrom (OpenApi.Config.File "./example/amadeus-airline-lookup.json")
+        recursiveAllOfRefs : OpenApi.Config.Input
+        recursiveAllOfRefs =
+            OpenApi.Config.inputFrom (OpenApi.Config.File "./example/recursive-allof-refs.yaml")
 
-        dbFahrplanApi : OpenApi.Config.Input
-        dbFahrplanApi =
-            OpenApi.Config.inputFrom (OpenApi.Config.File "./example/db-fahrplan-api-specification.yaml")
+        simpleRef : OpenApi.Config.Input
+        simpleRef =
+            OpenApi.Config.inputFrom (OpenApi.Config.File "./example/simple-ref.yaml")
 
-        marioPartyStats : OpenApi.Config.Input
-        marioPartyStats =
-            OpenApi.Config.inputFrom (OpenApi.Config.File "./example/MarioPartyStats.json")
-
-        viaggiatreno : OpenApi.Config.Input
-        viaggiatreno =
-            OpenApi.Config.inputFrom (OpenApi.Config.File "./example/viaggiatreno.yaml")
+        singleEnum : OpenApi.Config.Input
+        singleEnum =
+            OpenApi.Config.inputFrom (OpenApi.Config.File "./example/single-enum.yaml")
 
         trustmark : OpenApi.Config.Input
         trustmark =
@@ -77,42 +89,30 @@ run =
                 |> OpenApi.Config.withOutputModuleName [ "Trustmark", "TradeCheck" ]
                 |> OpenApi.Config.withEffectTypes [ OpenApi.Config.ElmHttpCmd ]
 
+        viaggiatreno : OpenApi.Config.Input
+        viaggiatreno =
+            OpenApi.Config.inputFrom (OpenApi.Config.File "./example/viaggiatreno.yaml")
+
+        bug : Int -> OpenApi.Config.Input
+        bug n =
+            OpenApi.Config.inputFrom (OpenApi.Config.File ("./example/openapi-generator-bugs/" ++ String.fromInt n ++ ".yaml"))
+
+        dbFahrplanApi : OpenApi.Config.Input
+        dbFahrplanApi =
+            OpenApi.Config.inputFrom (OpenApi.Config.File "./example/db-fahrplan-api-specification.yaml")
+
         gitHub : OpenApi.Config.Input
         gitHub =
             OpenApi.Config.inputFrom (OpenApi.Config.File "./example/github-spec.json")
                 |> OpenApi.Config.withWarnOnMissingEnums False
 
-        ifconfigOvh : OpenApi.Config.Input
-        ifconfigOvh =
-            OpenApi.Config.inputFrom (OpenApi.Config.File "./example/ifconfig.ovh.json")
-
-        anyOfEnums : OpenApi.Config.Input
-        anyOfEnums =
-            OpenApi.Config.inputFrom (OpenApi.Config.File "./example/anyOfEnums.yaml")
-
-        binaryResponse : OpenApi.Config.Input
-        binaryResponse =
-            OpenApi.Config.inputFrom (OpenApi.Config.File "./example/binary-response.yaml")
-
-        nullableEnum : OpenApi.Config.Input
-        nullableEnum =
-            OpenApi.Config.inputFrom (OpenApi.Config.File "./example/nullable-enum.yaml")
-
-        cookieAuth : OpenApi.Config.Input
-        cookieAuth =
-            OpenApi.Config.inputFrom (OpenApi.Config.File "./example/cookie-auth.yaml")
+        patreon : OpenApi.Config.Input
+        patreon =
+            OpenApi.Config.inputFrom (OpenApi.Config.File "./example/patreon.json")
 
         telegramBot : OpenApi.Config.Input
         telegramBot =
             OpenApi.Config.inputFrom (OpenApi.Config.File "./example/telegram-bot.json")
-
-        simpleRef : OpenApi.Config.Input
-        simpleRef =
-            OpenApi.Config.inputFrom (OpenApi.Config.File "./example/simple-ref.yaml")
-
-        bug : Int -> OpenApi.Config.Input
-        bug n =
-            OpenApi.Config.inputFrom (OpenApi.Config.File ("./example/openapi-generator-bugs/" ++ String.fromInt n ++ ".yaml"))
 
         profileConfig : OpenApi.Config.Config
         profileConfig =
@@ -121,21 +121,21 @@ run =
                 |> OpenApi.Config.withNoElmFormat True
                 |> OpenApi.Config.withKeepGoing True
                 |> OpenApi.Config.withInput additionalProperties
-                |> OpenApi.Config.withInput recursiveAllofRefs
-                |> OpenApi.Config.withInput overridingGlobalSecurity
-                |> OpenApi.Config.withInput singleEnum
-                |> OpenApi.Config.withInput realworldConduit
                 |> OpenApi.Config.withInput amadeusAirlineLookup
-                |> OpenApi.Config.withInput marioPartyStats
-                |> OpenApi.Config.withInput viaggiatreno
-                |> OpenApi.Config.withInput trustmark
-                |> OpenApi.Config.withInput trustmarkTradeCheck
-                |> OpenApi.Config.withInput ifconfigOvh
                 |> OpenApi.Config.withInput anyOfEnums
                 |> OpenApi.Config.withInput binaryResponse
-                |> OpenApi.Config.withInput nullableEnum
                 |> OpenApi.Config.withInput cookieAuth
+                |> OpenApi.Config.withInput ifconfigOvh
+                |> OpenApi.Config.withInput marioPartyStats
+                |> OpenApi.Config.withInput nullableEnum
+                |> OpenApi.Config.withInput overridingGlobalSecurity
+                |> OpenApi.Config.withInput realworldConduit
+                |> OpenApi.Config.withInput recursiveAllOfRefs
                 |> OpenApi.Config.withInput simpleRef
+                |> OpenApi.Config.withInput singleEnum
+                |> OpenApi.Config.withInput trustmark
+                |> OpenApi.Config.withInput trustmarkTradeCheck
+                |> OpenApi.Config.withInput viaggiatreno
                 |> OpenApi.Config.withInput (bug 7889)
                 |> OpenApi.Config.withInput (bug 10398)
                 |> OpenApi.Config.withInput (bug 16104)
@@ -145,9 +145,9 @@ run =
         config : OpenApi.Config.Config
         config =
             profileConfig
-                |> OpenApi.Config.withInput patreon
                 |> OpenApi.Config.withInput dbFahrplanApi
                 |> OpenApi.Config.withInput gitHub
+                |> OpenApi.Config.withInput patreon
                 |> OpenApi.Config.withInput telegramBot
                 |> OpenApi.Config.withNoElmFormat False
                 |> OpenApi.Config.withAutoConvertSwagger OpenApi.Config.AlwaysConvert

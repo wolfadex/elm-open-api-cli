@@ -50,6 +50,7 @@ type alias CliOptions =
     , overrides : List OpenApi.Config.Path
     , writeMergedTo : Maybe String
     , noElmFormat : Bool
+    , keepGoing : Bool
     }
 
 
@@ -96,6 +97,8 @@ program =
                     (Cli.Option.optionalKeywordArg "write-merged-to")
                 |> Cli.OptionsParser.with
                     (Cli.Option.flag "no-elm-format")
+                |> Cli.OptionsParser.with
+                    (Cli.Option.flag "keep-going")
                 |> Cli.OptionsParser.withDoc
                     ([ ""
                      , """version: 0.7.0"""
@@ -166,6 +169,7 @@ program =
                      , formatOption "overrides" [ "Load an additional file to override parts of the original Open API file." ]
                      , formatOption "write-merged-to" [ "Write the merged Open API spec to the given file." ]
                      , formatOption "no-elm-format" [ "Don't run elm-format on the outputs." ]
+                     , formatOption "keep-going" [ "If a route can't be generated, skip it instead of erroring out." ]
                      ]
                         |> String.join "\n\n"
                     )
@@ -370,6 +374,7 @@ parseCliOptions cliOptions =
         |> OpenApi.Config.withGenerateTodos cliOptions.generateTodos
         |> OpenApi.Config.withAutoConvertSwagger cliOptions.autoConvertSwagger
         |> OpenApi.Config.withNoElmFormat cliOptions.noElmFormat
+        |> OpenApi.Config.withKeepGoing cliOptions.keepGoing
         |> maybe OpenApi.Config.withSwaggerConversionUrl cliOptions.swaggerConversionUrl
         |> maybe OpenApi.Config.withSwaggerConversionCommand
             (cliOptions.swaggerConversionCommand

@@ -35,9 +35,13 @@ components:
 paths:
   "/api/grand-child":
     summary: Get a GrandChild object.
-    description:
+    description: Example description
     get:
       operationId: getGrandChild
       responses:
         200:
-          $ref: "#/components/schemas/GrandChild"
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GrandChild"

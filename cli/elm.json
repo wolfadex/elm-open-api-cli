@@ -8,8 +8,8 @@
     "dependencies": {
         "direct": {
             "MaybeJustJames/yaml": "2.1.7",
-            "dillonkearns/elm-cli-options-parser": "3.2.0",
-            "dillonkearns/elm-pages": "10.3.0",
+            "dillonkearns/elm-cli-options-parser": "4.0.0",
+            "dillonkearns/elm-pages": "11.0.0",
             "elm/bytes": "1.0.8",
             "elm/core": "1.0.5",
             "elm/json": "1.1.4",

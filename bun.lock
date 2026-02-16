@@ -14,6 +14,7 @@
         "elm-pages": "^3.1.1",
         "elm-review": "^2.13.5",
         "elm-test": "^0.19.1-revision17",
+        "lamdera": "^0.19.1-1.4.0",
         "vite": "^6.0.3",
       },
     },
@@ -140,6 +141,16 @@
     "@jsonjoy.com/json-pointer": ["@jsonjoy.com/json-pointer@1.0.2", "", { "dependencies": { "@jsonjoy.com/codegen": "^1.0.0", "@jsonjoy.com/util": "^1.9.0" }, "peerDependencies": { "tslib": "2" } }, "sha512-Fsn6wM2zlDzY1U+v4Nc8bo3bVqgfNTGcn6dMgs6FjrEnt4ZCe60o6ByKRjOGlI2gow0aE/Q41QOigdTqkyK5fg=="],
 
     "@jsonjoy.com/util": ["@jsonjoy.com/util@1.9.0", "", { "dependencies": { "@jsonjoy.com/buffers": "^1.0.0", "@jsonjoy.com/codegen": "^1.0.0" }, "peerDependencies": { "tslib": "2" } }, "sha512-pLuQo+VPRnN8hfPqUTLTHk126wuYdXVxE6aDmjSeV4NCAgyxWbiOIeNJVtID3h1Vzpoi9m4jXezf73I6LgabgQ=="],
+
+    "@lamdera/compiler-darwin-arm64": ["@lamdera/compiler-darwin-arm64@0.19.1-1.4.0", "", { "os": "darwin", "cpu": "arm64" }, "sha512-zLqkIm5wMtuWyFnWlpgXgN0/nfEYRqvcSXEg9R/SlDL5yb8cle3sJCkR5S7zcqBc3zknjb24gWgpWzd0BSkkZg=="],
+
+    "@lamdera/compiler-darwin-x64": ["@lamdera/compiler-darwin-x64@0.19.1-1.4.0", "", { "os": "darwin", "cpu": "x64" }, "sha512-hMG/uKWeL7hp8EeodmSo9Tg9X1P8Xzshai8E/RNtn2LpLCZ6yeRsIjzxpKqV8cEkVCI9yamnT6QTMywexPceYg=="],
+
+    "@lamdera/compiler-linux-arm64": ["@lamdera/compiler-linux-arm64@0.19.1-1.4.0", "", { "os": "linux", "cpu": "arm64" }, "sha512-ZLO4Z1jCW4O/9Zoa9LXME+DklUGaOOv6JW7ulWYxSdgvu68Lgkfx47HZidM96R9tehX0Q1wZ+fBmZQkU/a7biQ=="],
+
+    "@lamdera/compiler-linux-x64": ["@lamdera/compiler-linux-x64@0.19.1-1.4.0", "", { "os": "linux", "cpu": "x64" }, "sha512-r7tx1p/+dSw9SLUL3K7dSj1RBb/1Y5kmE27i9jarOlTeEUr1pycUqt3FSomD0EbTp8Rcp7jRCaNWvb5IWFathg=="],
+
+    "@lamdera/compiler-win32-x64": ["@lamdera/compiler-win32-x64@0.19.1-1.4.0", "", { "os": "win32", "cpu": "x64" }, "sha512-hLpi1eikdY9BA87ipqhTP8gY0l75yih7kjckD30CrIOMMqEWbgaK/0yr2JxTQJiSt6D2A1VZiUbqjHMiSTbPZg=="],
 
     "@lydell/elm-json": ["@lydell/elm-json@0.2.13-1", "", { "optionalDependencies": { "@lydell/elm-json-darwin-arm64": "0.2.13-0", "@lydell/elm-json-darwin-x64": "0.2.13-0", "@lydell/elm-json-linux-arm": "0.2.13-0", "@lydell/elm-json-linux-x64": "0.2.13-0", "@lydell/elm-json-win32-x64": "0.2.13-0" }, "bin": { "elm-json": "bin/elm-json" } }, "sha512-KPeeeAzKAxZMq7wjPBFCOjQZNuitnE4QrVCsFRf7tHxRDpSVA9gd79WNnPfaHhBfIN3tgbgt4a5T+O1h6Jt6Og=="],
 
@@ -794,6 +805,8 @@
     "kleur": ["kleur@4.1.5", "", {}, "sha512-o+NO+8WrRiQEE4/7nwRJhN1HWpVmJm511pBHUxPLtp0BUISzlBplORYSmTclCnJvQq2tKu/sgl3xVpkc7ZWuQQ=="],
 
     "ky": ["ky@1.14.3", "", {}, "sha512-9zy9lkjac+TR1c2tG+mkNSVlyOpInnWdSMiue4F+kq8TwJSgv6o8jhLRg8Ho6SnZ9wOYUq/yozts9qQCfk7bIw=="],
+
+    "lamdera": ["lamdera@0.19.1-1.4.0", "", { "optionalDependencies": { "@lamdera/compiler-darwin-arm64": "0.19.1-1.4.0", "@lamdera/compiler-darwin-x64": "0.19.1-1.4.0", "@lamdera/compiler-linux-arm64": "0.19.1-1.4.0", "@lamdera/compiler-linux-x64": "0.19.1-1.4.0", "@lamdera/compiler-win32-x64": "0.19.1-1.4.0" }, "bin": { "lamdera": "bin/lamdera" } }, "sha512-F5HqnNJPXulkr6/0XCNhaRhESjewG2iTHc+EKg8mJLj76E2PscuUOVhnBEjPqeFrEZF6RT53qSeWtSYG61fhpQ=="],
 
     "latest-version": ["latest-version@9.0.0", "", { "dependencies": { "package-json": "^10.0.0" } }, "sha512-7W0vV3rqv5tokqkBAFV1LbR7HPOWzXQDpDgEuib/aJ1jsZZx6x3c2mBI+TJhJzOhkGeaLbCKEHXEXLfirtG2JA=="],
 

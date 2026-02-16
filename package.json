@@ -26,7 +26,7 @@
         "elm-codegen": "^0.6.3",
         "elm-format": "0.8.7",
         "elm-optimize-level-2": "0.3.5",
-        "elm-pages": "^3.0.28",
+        "elm-pages": "^3.1.1",
         "elm-review": "^2.13.5",
         "elm-test": "^0.19.1-revision17",
         "vite": "^6.0.3"

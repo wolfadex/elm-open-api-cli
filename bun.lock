@@ -11,7 +11,7 @@
         "elm-codegen": "^0.6.3",
         "elm-format": "0.8.7",
         "elm-optimize-level-2": "0.3.5",
-        "elm-pages": "^3.0.28",
+        "elm-pages": "^3.1.1",
         "elm-review": "^2.13.5",
         "elm-test": "^0.19.1-revision17",
         "vite": "^6.0.3",
@@ -479,7 +479,7 @@
 
     "elm-optimize-level-2": ["elm-optimize-level-2@0.3.5", "", { "dependencies": { "@types/jest": "^27.0.3", "chalk": "^4.1.0", "commander": "^6.0.0", "node-elm-compiler": "^5.0.4", "ts-union": "^2.2.1", "typescript": "^4.5.5" }, "bin": { "elm-optimize-level-2": "bin/elm-optimize-level-2" } }, "sha512-t1xl8zR9UBspdmEMuLBE/qTLP+Ew3L4PzKLhSY/PsO21HU3jZ1ULmKxDtZmJPVG4ciqsY1JSl/GFbaSdQ1sX9Q=="],
 
-    "elm-pages": ["elm-pages@3.0.28", "", { "dependencies": { "@sindresorhus/merge-streams": "^4.0.0", "busboy": "^1.6.0", "chokidar": "^5.0.0", "cli-cursor": "^5.0.0", "commander": "^14.0.2", "connect": "^3.7.0", "cookie-signature": "^1.2.2", "cross-spawn": "7.0.6", "devcert": "^1.2.2", "elm-doc-preview": "^6.0.1", "elm-hot": "^1.1.6", "esbuild": "^0.27.2", "fs-extra": "^11.3.3", "globby": "16.1.0", "gray-matter": "^4.0.3", "jsesc": "^3.1.0", "kleur": "^4.1.5", "make-fetch-happen": "^15.0.3", "memfs": "^4.51.1", "micromatch": "^4.0.8", "serve-static": "^2.2.1", "terser": "^5.44.1", "vite": "^7.3.1", "which": "^6.0.0" }, "optionalDependencies": { "@rollup/rollup-linux-x64-gnu": "4.55.1" }, "bin": { "elm-pages": "generator/src/cli.js" } }, "sha512-gOO6z0/RoWp+eTZq2JgpMUutSaeIILUa1yyyHiSCstyPjyYmrfwsVa4WhpP83b8RMPgfE+qngt9ohsShA6p2Uw=="],
+    "elm-pages": ["elm-pages@3.1.1", "", { "dependencies": { "@sindresorhus/merge-streams": "^4.0.0", "busboy": "^1.6.0", "chokidar": "^5.0.0", "cli-cursor": "^5.0.0", "commander": "^14.0.3", "connect": "^3.7.0", "cookie-signature": "^1.2.2", "cross-spawn": "7.0.6", "devcert": "^1.2.2", "elm-doc-preview": "^6.0.1", "elm-hot": "^1.1.6", "esbuild": "^0.27.3", "fs-extra": "^11.3.3", "globby": "16.1.0", "gray-matter": "^4.0.3", "jsesc": "^3.1.0", "kleur": "^4.1.5", "make-fetch-happen": "^15.0.3", "memfs": "^4.56.10", "micromatch": "^4.0.8", "serve-static": "^2.2.1", "terser": "^5.44.1", "vite": "^7.3.1", "which": "^6.0.1" }, "optionalDependencies": { "@rollup/rollup-linux-x64-gnu": "4.55.1" }, "bin": { "elm-pages": "generator/src/cli.js" } }, "sha512-cikCE5gjJpBjxhkcxbZUynojq/pyWvl+uGwXsWnJsyQNYYCgOY/HcNjwue8T2LlbhOQED4FTnyMSMRuY7dqDuQ=="],
 
     "elm-review": ["elm-review@2.13.5", "", { "dependencies": { "chalk": "^4.0.0", "chokidar": "^3.5.2", "cross-spawn": "^7.0.3", "elm-solve-deps-wasm": "^1.0.2 || ^2.0.0", "fastest-levenshtein": "^1.0.16", "find-up": "^4.1.0 || ^5.0.0", "folder-hash": "^3.3.0", "got": "^11.8.5", "graceful-fs": "^4.2.11", "minimist": "^1.2.6", "ora": "^5.4.0", "path-key": "^3.1.1", "prompts": "^2.2.1", "strip-ansi": "^6.0.0", "terminal-link": "^2.1.1", "tinyglobby": "^0.2.10", "which": "^2.0.2", "wrap-ansi": "^7.0.0" }, "bin": { "elm-review": "bin/elm-review" } }, "sha512-Iw3YztGjmuGyn4nIEVOxqx+dacJialprpB0ZVrBHA0sBBOQ9+QhBaQnQ0tp0G8U8UoIAush0M7XoBqzUN1F/+A=="],
 

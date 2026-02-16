@@ -224,7 +224,7 @@ toTypeName (UnsafeName name) =
         |> String.replace "_" " "
         |> String.trim
         |> String.Extra.toTitleCase
-        |> deSymbolify ' '
+        |> removeSymbols ' '
         |> reduceWith replaceSpacesRegex
             (\match ->
                 case match.submatches of
@@ -269,7 +269,7 @@ toValueName (UnsafeName name) =
         raw =
             name
                 |> String.replace " " "_"
-                |> deSymbolify '_'
+                |> removeSymbols '_'
     in
     if raw == "dollar__" || raw == "empty__" then
         raw
@@ -357,14 +357,14 @@ nameFromStatusCode name =
 {-| Sometimes a word in the schema contains invalid characers for an Elm name.
 We don't want to completely remove them though.
 -}
-deSymbolify : Char -> String -> String
-deSymbolify replacement str =
+removeSymbols : Char -> String -> String
+removeSymbols replacement str =
     if str == "$" then
         "dollar__"
 
     else if String.startsWith "-" str || String.startsWith "+" str then
         -- These were first identified in the GitHub OAS, for the names of emojis
-        deSymbolify replacement
+        removeSymbols replacement
             (str
                 |> String.replace "-" "Minus"
                 |> String.replace "+" "Plus"

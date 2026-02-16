@@ -10,5 +10,6 @@ pkgs.mkShell {
     pkgs.nodejs_20
     pkgs.git
     pkgs.bash
+    pkgs.bun
   ];
 }

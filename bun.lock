@@ -11,9 +11,10 @@
         "elm-codegen": "^0.6.3",
         "elm-format": "0.8.7",
         "elm-optimize-level-2": "0.3.5",
-        "elm-pages": "^3.0.28",
+        "elm-pages": "^3.1.1",
         "elm-review": "^2.13.5",
         "elm-test": "^0.19.1-revision17",
+        "lamdera": "^0.19.1-1.4.0",
         "vite": "^6.0.3",
       },
     },
@@ -140,6 +141,16 @@
     "@jsonjoy.com/json-pointer": ["@jsonjoy.com/json-pointer@1.0.2", "", { "dependencies": { "@jsonjoy.com/codegen": "^1.0.0", "@jsonjoy.com/util": "^1.9.0" }, "peerDependencies": { "tslib": "2" } }, "sha512-Fsn6wM2zlDzY1U+v4Nc8bo3bVqgfNTGcn6dMgs6FjrEnt4ZCe60o6ByKRjOGlI2gow0aE/Q41QOigdTqkyK5fg=="],
 
     "@jsonjoy.com/util": ["@jsonjoy.com/util@1.9.0", "", { "dependencies": { "@jsonjoy.com/buffers": "^1.0.0", "@jsonjoy.com/codegen": "^1.0.0" }, "peerDependencies": { "tslib": "2" } }, "sha512-pLuQo+VPRnN8hfPqUTLTHk126wuYdXVxE6aDmjSeV4NCAgyxWbiOIeNJVtID3h1Vzpoi9m4jXezf73I6LgabgQ=="],
+
+    "@lamdera/compiler-darwin-arm64": ["@lamdera/compiler-darwin-arm64@0.19.1-1.4.0", "", { "os": "darwin", "cpu": "arm64" }, "sha512-zLqkIm5wMtuWyFnWlpgXgN0/nfEYRqvcSXEg9R/SlDL5yb8cle3sJCkR5S7zcqBc3zknjb24gWgpWzd0BSkkZg=="],
+
+    "@lamdera/compiler-darwin-x64": ["@lamdera/compiler-darwin-x64@0.19.1-1.4.0", "", { "os": "darwin", "cpu": "x64" }, "sha512-hMG/uKWeL7hp8EeodmSo9Tg9X1P8Xzshai8E/RNtn2LpLCZ6yeRsIjzxpKqV8cEkVCI9yamnT6QTMywexPceYg=="],
+
+    "@lamdera/compiler-linux-arm64": ["@lamdera/compiler-linux-arm64@0.19.1-1.4.0", "", { "os": "linux", "cpu": "arm64" }, "sha512-ZLO4Z1jCW4O/9Zoa9LXME+DklUGaOOv6JW7ulWYxSdgvu68Lgkfx47HZidM96R9tehX0Q1wZ+fBmZQkU/a7biQ=="],
+
+    "@lamdera/compiler-linux-x64": ["@lamdera/compiler-linux-x64@0.19.1-1.4.0", "", { "os": "linux", "cpu": "x64" }, "sha512-r7tx1p/+dSw9SLUL3K7dSj1RBb/1Y5kmE27i9jarOlTeEUr1pycUqt3FSomD0EbTp8Rcp7jRCaNWvb5IWFathg=="],
+
+    "@lamdera/compiler-win32-x64": ["@lamdera/compiler-win32-x64@0.19.1-1.4.0", "", { "os": "win32", "cpu": "x64" }, "sha512-hLpi1eikdY9BA87ipqhTP8gY0l75yih7kjckD30CrIOMMqEWbgaK/0yr2JxTQJiSt6D2A1VZiUbqjHMiSTbPZg=="],
 
     "@lydell/elm-json": ["@lydell/elm-json@0.2.13-1", "", { "optionalDependencies": { "@lydell/elm-json-darwin-arm64": "0.2.13-0", "@lydell/elm-json-darwin-x64": "0.2.13-0", "@lydell/elm-json-linux-arm": "0.2.13-0", "@lydell/elm-json-linux-x64": "0.2.13-0", "@lydell/elm-json-win32-x64": "0.2.13-0" }, "bin": { "elm-json": "bin/elm-json" } }, "sha512-KPeeeAzKAxZMq7wjPBFCOjQZNuitnE4QrVCsFRf7tHxRDpSVA9gd79WNnPfaHhBfIN3tgbgt4a5T+O1h6Jt6Og=="],
 
@@ -479,7 +490,7 @@
 
     "elm-optimize-level-2": ["elm-optimize-level-2@0.3.5", "", { "dependencies": { "@types/jest": "^27.0.3", "chalk": "^4.1.0", "commander": "^6.0.0", "node-elm-compiler": "^5.0.4", "ts-union": "^2.2.1", "typescript": "^4.5.5" }, "bin": { "elm-optimize-level-2": "bin/elm-optimize-level-2" } }, "sha512-t1xl8zR9UBspdmEMuLBE/qTLP+Ew3L4PzKLhSY/PsO21HU3jZ1ULmKxDtZmJPVG4ciqsY1JSl/GFbaSdQ1sX9Q=="],
 
-    "elm-pages": ["elm-pages@3.0.28", "", { "dependencies": { "@sindresorhus/merge-streams": "^4.0.0", "busboy": "^1.6.0", "chokidar": "^5.0.0", "cli-cursor": "^5.0.0", "commander": "^14.0.2", "connect": "^3.7.0", "cookie-signature": "^1.2.2", "cross-spawn": "7.0.6", "devcert": "^1.2.2", "elm-doc-preview": "^6.0.1", "elm-hot": "^1.1.6", "esbuild": "^0.27.2", "fs-extra": "^11.3.3", "globby": "16.1.0", "gray-matter": "^4.0.3", "jsesc": "^3.1.0", "kleur": "^4.1.5", "make-fetch-happen": "^15.0.3", "memfs": "^4.51.1", "micromatch": "^4.0.8", "serve-static": "^2.2.1", "terser": "^5.44.1", "vite": "^7.3.1", "which": "^6.0.0" }, "optionalDependencies": { "@rollup/rollup-linux-x64-gnu": "4.55.1" }, "bin": { "elm-pages": "generator/src/cli.js" } }, "sha512-gOO6z0/RoWp+eTZq2JgpMUutSaeIILUa1yyyHiSCstyPjyYmrfwsVa4WhpP83b8RMPgfE+qngt9ohsShA6p2Uw=="],
+    "elm-pages": ["elm-pages@3.1.1", "", { "dependencies": { "@sindresorhus/merge-streams": "^4.0.0", "busboy": "^1.6.0", "chokidar": "^5.0.0", "cli-cursor": "^5.0.0", "commander": "^14.0.3", "connect": "^3.7.0", "cookie-signature": "^1.2.2", "cross-spawn": "7.0.6", "devcert": "^1.2.2", "elm-doc-preview": "^6.0.1", "elm-hot": "^1.1.6", "esbuild": "^0.27.3", "fs-extra": "^11.3.3", "globby": "16.1.0", "gray-matter": "^4.0.3", "jsesc": "^3.1.0", "kleur": "^4.1.5", "make-fetch-happen": "^15.0.3", "memfs": "^4.56.10", "micromatch": "^4.0.8", "serve-static": "^2.2.1", "terser": "^5.44.1", "vite": "^7.3.1", "which": "^6.0.1" }, "optionalDependencies": { "@rollup/rollup-linux-x64-gnu": "4.55.1" }, "bin": { "elm-pages": "generator/src/cli.js" } }, "sha512-cikCE5gjJpBjxhkcxbZUynojq/pyWvl+uGwXsWnJsyQNYYCgOY/HcNjwue8T2LlbhOQED4FTnyMSMRuY7dqDuQ=="],
 
     "elm-review": ["elm-review@2.13.5", "", { "dependencies": { "chalk": "^4.0.0", "chokidar": "^3.5.2", "cross-spawn": "^7.0.3", "elm-solve-deps-wasm": "^1.0.2 || ^2.0.0", "fastest-levenshtein": "^1.0.16", "find-up": "^4.1.0 || ^5.0.0", "folder-hash": "^3.3.0", "got": "^11.8.5", "graceful-fs": "^4.2.11", "minimist": "^1.2.6", "ora": "^5.4.0", "path-key": "^3.1.1", "prompts": "^2.2.1", "strip-ansi": "^6.0.0", "terminal-link": "^2.1.1", "tinyglobby": "^0.2.10", "which": "^2.0.2", "wrap-ansi": "^7.0.0" }, "bin": { "elm-review": "bin/elm-review" } }, "sha512-Iw3YztGjmuGyn4nIEVOxqx+dacJialprpB0ZVrBHA0sBBOQ9+QhBaQnQ0tp0G8U8UoIAush0M7XoBqzUN1F/+A=="],
 
@@ -794,6 +805,8 @@
     "kleur": ["kleur@4.1.5", "", {}, "sha512-o+NO+8WrRiQEE4/7nwRJhN1HWpVmJm511pBHUxPLtp0BUISzlBplORYSmTclCnJvQq2tKu/sgl3xVpkc7ZWuQQ=="],
 
     "ky": ["ky@1.14.3", "", {}, "sha512-9zy9lkjac+TR1c2tG+mkNSVlyOpInnWdSMiue4F+kq8TwJSgv6o8jhLRg8Ho6SnZ9wOYUq/yozts9qQCfk7bIw=="],
+
+    "lamdera": ["lamdera@0.19.1-1.4.0", "", { "optionalDependencies": { "@lamdera/compiler-darwin-arm64": "0.19.1-1.4.0", "@lamdera/compiler-darwin-x64": "0.19.1-1.4.0", "@lamdera/compiler-linux-arm64": "0.19.1-1.4.0", "@lamdera/compiler-linux-x64": "0.19.1-1.4.0", "@lamdera/compiler-win32-x64": "0.19.1-1.4.0" }, "bin": { "lamdera": "bin/lamdera" } }, "sha512-F5HqnNJPXulkr6/0XCNhaRhESjewG2iTHc+EKg8mJLj76E2PscuUOVhnBEjPqeFrEZF6RT53qSeWtSYG61fhpQ=="],
 
     "latest-version": ["latest-version@9.0.0", "", { "dependencies": { "package-json": "^10.0.0" } }, "sha512-7W0vV3rqv5tokqkBAFV1LbR7HPOWzXQDpDgEuib/aJ1jsZZx6x3c2mBI+TJhJzOhkGeaLbCKEHXEXLfirtG2JA=="],
 

@@ -1,8 +1,7 @@
 module Gen.BackendTask.Http exposing
     ( expectString, expectJson
     , expectBytes, emptyBody, jsonBody
-    , annotation_
-    , call_
+    , annotation_, call_
     , bytesBody
     )
 
@@ -13,8 +12,8 @@ module Gen.BackendTask.Http exposing
 
 @docs get, expectString, expectJson
 @docs expectBytes, emptyBody, jsonBody
-@docs bytesBodyWithOptions, annotation_
-@docs call_
+@docs bytesBodyWithOptions
+@docs annotation_, call_
 
 -}
 
@@ -187,6 +186,7 @@ annotation_ :
     { expect : Type.Annotation -> Type.Annotation
     , error : Type.Annotation
     , body : Type.Annotation
+    , part : Type.Annotation
     , cacheStrategy : Type.Annotation
     , metadata : Type.Annotation
     }
@@ -201,6 +201,7 @@ annotation_ =
             "Body"
             []
             (Type.namedWith [ "Pages", "Internal", "StaticHttpBody" ] "Body" [])
+    , part = Type.namedWith [ "BackendTask", "Http" ] "Part" []
     , cacheStrategy =
         Type.namedWith [ "BackendTask", "Http" ] "CacheStrategy" []
     , metadata =
@@ -235,6 +236,16 @@ call_ :
     , stringBody : Elm.Expression -> Elm.Expression -> Elm.Expression
     , jsonBody : Elm.Expression -> Elm.Expression
     , bytesBody : Elm.Expression -> Elm.Expression -> Elm.Expression
+    , multipartBody : Elm.Expression -> Elm.Expression
+    , stringPart : Elm.Expression -> Elm.Expression -> Elm.Expression
+    , bytesPart :
+        Elm.Expression -> Elm.Expression -> Elm.Expression -> Elm.Expression
+    , bytesPartWithFilename :
+        Elm.Expression
+        -> Elm.Expression
+        -> Elm.Expression
+        -> Elm.Expression
+        -> Elm.Expression
     , getWithOptions : Elm.Expression -> Elm.Expression
     , withMetadata : Elm.Expression -> Elm.Expression -> Elm.Expression
     }
@@ -542,6 +553,99 @@ call_ =
                     }
                 )
                 [ bytesBodyArg_, bytesBodyArg_0 ]
+    , multipartBody =
+        \multipartBodyArg_ ->
+            Elm.apply
+                (Elm.value
+                    { importFrom = [ "BackendTask", "Http" ]
+                    , name = "multipartBody"
+                    , annotation =
+                        Just
+                            (Type.function
+                                [ Type.list
+                                    (Type.namedWith
+                                        [ "BackendTask", "Http" ]
+                                        "Part"
+                                        []
+                                    )
+                                ]
+                                (Type.namedWith
+                                    [ "BackendTask", "Http" ]
+                                    "Body"
+                                    []
+                                )
+                            )
+                    }
+                )
+                [ multipartBodyArg_ ]
+    , stringPart =
+        \stringPartArg_ stringPartArg_0 ->
+            Elm.apply
+                (Elm.value
+                    { importFrom = [ "BackendTask", "Http" ]
+                    , name = "stringPart"
+                    , annotation =
+                        Just
+                            (Type.function
+                                [ Type.string, Type.string ]
+                                (Type.namedWith
+                                    [ "BackendTask", "Http" ]
+                                    "Part"
+                                    []
+                                )
+                            )
+                    }
+                )
+                [ stringPartArg_, stringPartArg_0 ]
+    , bytesPart =
+        \bytesPartArg_ bytesPartArg_0 bytesPartArg_1 ->
+            Elm.apply
+                (Elm.value
+                    { importFrom = [ "BackendTask", "Http" ]
+                    , name = "bytesPart"
+                    , annotation =
+                        Just
+                            (Type.function
+                                [ Type.string
+                                , Type.string
+                                , Type.namedWith [ "Bytes" ] "Bytes" []
+                                ]
+                                (Type.namedWith
+                                    [ "BackendTask", "Http" ]
+                                    "Part"
+                                    []
+                                )
+                            )
+                    }
+                )
+                [ bytesPartArg_, bytesPartArg_0, bytesPartArg_1 ]
+    , bytesPartWithFilename =
+        \bytesPartWithFilenameArg_ bytesPartWithFilenameArg_0 bytesPartWithFilenameArg_1 bytesPartWithFilenameArg_2 ->
+            Elm.apply
+                (Elm.value
+                    { importFrom = [ "BackendTask", "Http" ]
+                    , name = "bytesPartWithFilename"
+                    , annotation =
+                        Just
+                            (Type.function
+                                [ Type.string
+                                , Type.string
+                                , Type.string
+                                , Type.namedWith [ "Bytes" ] "Bytes" []
+                                ]
+                                (Type.namedWith
+                                    [ "BackendTask", "Http" ]
+                                    "Part"
+                                    []
+                                )
+                            )
+                    }
+                )
+                [ bytesPartWithFilenameArg_
+                , bytesPartWithFilenameArg_0
+                , bytesPartWithFilenameArg_1
+                , bytesPartWithFilenameArg_2
+                ]
     , getWithOptions =
         \getWithOptionsArg_ ->
             Elm.apply

@@ -4,8 +4,6 @@ import Ansi
 import Ansi.Color
 import Ansi.Font
 import BackendTask exposing (BackendTask)
-import BackendTask.Custom
-import BackendTask.Env
 import BackendTask.Extra
 import BackendTask.File
 import BackendTask.Http
@@ -398,9 +396,7 @@ parseCliOptions cliOptions =
 
 
 type alias Step a =
-    ( Pages.Script.Spinner.Steps FatalError a
-    , BackendTask FatalError a
-    )
+    Pages.Script.Spinner.Steps FatalError a
 
 
 withStep :
@@ -408,15 +404,8 @@ withStep :
     -> (a -> BackendTask FatalError b)
     -> Step a
     -> Step b
-withStep label toTask ( steps, task ) =
-    ( Pages.Script.Spinner.withStep label toTask steps
-    , task
-        |> BackendTask.andThen
-            (\input ->
-                Pages.Script.log label
-                    |> BackendTask.andThen (\() -> toTask input)
-            )
-    )
+withStep label toTask steps =
+    Pages.Script.Spinner.withStep label toTask steps
 
 
 withInnerStep :
@@ -426,7 +415,7 @@ withInnerStep :
     -> (a -> BackendTask FatalError b)
     -> Step ( a, c, d )
     -> Step ( b, c, d )
-withInnerStep index total label toTask ( steps, task ) =
+withInnerStep index total label toTask steps =
     let
         fullLabel : String
         fullLabel =
@@ -436,16 +425,9 @@ withInnerStep index total label toTask ( steps, task ) =
         combinedTask ( input, acc1, acc2 ) =
             toTask input |> BackendTask.map (\result -> ( result, acc1, acc2 ))
     in
-    ( Pages.Script.Spinner.withStep fullLabel
+    Pages.Script.Spinner.withStep fullLabel
         combinedTask
         steps
-    , task
-        |> BackendTask.andThen
-            (\( input, acc1, acc2 ) ->
-                Pages.Script.log fullLabel
-                    |> BackendTask.andThen (\() -> combinedTask ( input, acc1, acc2 ))
-            )
-    )
 
 
 withConfig : OpenApi.Config.Config -> BackendTask FatalError ()
@@ -527,10 +509,8 @@ withConfig config =
             )
         )
         ( 1
-        , ( Pages.Script.Spinner.steps
-                |> Pages.Script.Spinner.withStep "Collecting configuration" (\_ -> BackendTask.succeed ( (), [], [] ))
-          , Pages.Script.log "Collecting configuration" |> BackendTask.map (\() -> ( (), [], [] ))
-          )
+        , Pages.Script.Spinner.steps
+            |> Pages.Script.Spinner.withStep "Collecting configuration" (\_ -> BackendTask.succeed ( (), [], [] ))
         )
         (OpenApi.Config.inputs config)
         |> Tuple.second
@@ -546,29 +526,9 @@ withConfig config =
                 withStep "Format with elm-format" (onFirst attemptToFormat)
            )
         |> withStep "Write to disk" (onFirst (writeSdkToDisk (OpenApi.Config.outputDirectory config)))
-        |> (\( steps, task ) ->
-                terminalInfo
-                    |> BackendTask.andThen
-                        (\{ isTTY, noColor } ->
-                            if isTTY && not noColor then
-                                Pages.Script.Spinner.runSteps steps
-
-                            else
-                                task
-                        )
-           )
+        |> Pages.Script.Spinner.runSteps
         |> BackendTask.map convertElmCodegenWarnings
         |> BackendTask.andThen printSuccessMessageAndWarnings
-
-
-terminalInfo : BackendTask FatalError { isTTY : Bool, noColor : Bool }
-terminalInfo =
-    BackendTask.map2 (\isTTY noColor -> { isTTY = isTTY, noColor = noColor })
-        (BackendTask.Custom.run "isTTY" Json.Encode.null Json.Decode.bool
-            |> BackendTask.allowFatal
-            |> BackendTask.quiet
-        )
-        (BackendTask.Env.get "NO_COLOR" |> BackendTask.map (\nc -> nc /= Nothing && nc /= Just ""))
 
 
 convertElmCodegenWarnings :
@@ -806,17 +766,7 @@ convertToSwaggerAndThenDecode config input value =
                 parseOriginal input swagger
                     |> BackendTask.andThen mergeOverrides
             )
-        |> (\task ->
-                terminalInfo
-                    |> BackendTask.andThen
-                        (\{ isTTY, noColor } ->
-                            if isTTY && not noColor then
-                                Pages.Script.Spinner.runTask "Convert Swagger to Open API" task
-
-                            else
-                                task
-                        )
-           )
+        |> Pages.Script.Spinner.runTask "Convert Swagger to Open API"
         |> BackendTask.andThen (\converted -> decodeOpenApiSpecOrFail { hasAttemptedToConvertFromSwagger = True } config input converted)
 
 

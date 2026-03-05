@@ -11,7 +11,7 @@
         "elm-codegen": "^0.6.3",
         "elm-format": "0.8.7",
         "elm-optimize-level-2": "0.3.5",
-        "elm-pages": "^3.1.1",
+        "elm-pages": "^3.2.0",
         "elm-review": "^2.13.5",
         "elm-test": "^0.19.1-revision17",
         "lamdera": "^0.19.1-1.4.0",
@@ -458,7 +458,7 @@
 
     "destroy": ["destroy@1.2.0", "", {}, "sha512-2sJGJTaXIIaR1w4iJSNoN0hnMY7Gpc/n8D4qSCJw8QqFWXf7cuAgnEHxBpweaVcPevC2l3KpjYCx3NypQQgaJg=="],
 
-    "devcert": ["devcert@1.2.2", "", { "dependencies": { "@types/configstore": "^2.1.1", "@types/debug": "^0.0.30", "@types/get-port": "^3.2.0", "@types/glob": "^5.0.34", "@types/lodash": "^4.14.92", "@types/mkdirp": "^0.5.2", "@types/node": "^8.5.7", "@types/rimraf": "^2.0.2", "@types/tmp": "^0.0.33", "application-config-path": "^0.1.0", "command-exists": "^1.2.4", "debug": "^3.1.0", "eol": "^0.9.1", "get-port": "^3.2.0", "glob": "^7.1.2", "is-valid-domain": "^0.1.6", "lodash": "^4.17.4", "mkdirp": "^0.5.1", "password-prompt": "^1.0.4", "rimraf": "^2.6.2", "sudo-prompt": "^8.2.0", "tmp": "^0.0.33", "tslib": "^1.10.0" } }, "sha512-UsLqvtJGPiGwsIZnJINUnFYaWgK7CroreGRndWHZkRD58tPFr3pVbbSyHR8lbh41+azR4jKvuNZ+eCoBZGA5kA=="],
+    "devcert": ["devcert@1.2.3", "", { "dependencies": { "@types/configstore": "^2.1.1", "@types/debug": "^0.0.30", "@types/get-port": "^3.2.0", "@types/glob": "^5.0.34", "@types/lodash": "^4.14.92", "@types/mkdirp": "^0.5.2", "@types/node": "^8.5.7", "@types/rimraf": "^2.0.2", "@types/tmp": "^0.0.33", "application-config-path": "^0.1.0", "command-exists": "^1.2.4", "debug": "^3.1.0", "eol": "^0.9.1", "get-port": "^3.2.0", "glob": "^7.1.2", "is-valid-domain": "^0.1.6", "lodash": "^4.17.4", "mkdirp": "^0.5.1", "password-prompt": "^1.0.4", "rimraf": "^2.6.2", "sudo-prompt": "^8.2.0", "tmp": "^0.0.33", "tslib": "^1.10.0" } }, "sha512-vmLo0hDNHmZ47HED1ZiouJ7cAcamL8HY7qa9YdmCBkXxHEVtdDgT9pN/Xy3ZkcF3pFjF0sqq8WMV93HF2nmHHw=="],
 
     "diff-sequences": ["diff-sequences@27.5.1", "", {}, "sha512-k1gCAXAsNgLwEL+Y8Wvl+M6oEFj5bgazfZULpS5CneoPPXRaCCW7dm+q21Ky2VEE5X+VeRDBVg1Pcvvsr4TtNQ=="],
 
@@ -490,7 +490,7 @@
 
     "elm-optimize-level-2": ["elm-optimize-level-2@0.3.5", "", { "dependencies": { "@types/jest": "^27.0.3", "chalk": "^4.1.0", "commander": "^6.0.0", "node-elm-compiler": "^5.0.4", "ts-union": "^2.2.1", "typescript": "^4.5.5" }, "bin": { "elm-optimize-level-2": "bin/elm-optimize-level-2" } }, "sha512-t1xl8zR9UBspdmEMuLBE/qTLP+Ew3L4PzKLhSY/PsO21HU3jZ1ULmKxDtZmJPVG4ciqsY1JSl/GFbaSdQ1sX9Q=="],
 
-    "elm-pages": ["elm-pages@3.1.1", "", { "dependencies": { "@sindresorhus/merge-streams": "^4.0.0", "busboy": "^1.6.0", "chokidar": "^5.0.0", "cli-cursor": "^5.0.0", "commander": "^14.0.3", "connect": "^3.7.0", "cookie-signature": "^1.2.2", "cross-spawn": "7.0.6", "devcert": "^1.2.2", "elm-doc-preview": "^6.0.1", "elm-hot": "^1.1.6", "esbuild": "^0.27.3", "fs-extra": "^11.3.3", "globby": "16.1.0", "gray-matter": "^4.0.3", "jsesc": "^3.1.0", "kleur": "^4.1.5", "make-fetch-happen": "^15.0.3", "memfs": "^4.56.10", "micromatch": "^4.0.8", "serve-static": "^2.2.1", "terser": "^5.44.1", "vite": "^7.3.1", "which": "^6.0.1" }, "optionalDependencies": { "@rollup/rollup-linux-x64-gnu": "4.55.1" }, "bin": { "elm-pages": "generator/src/cli.js" } }, "sha512-cikCE5gjJpBjxhkcxbZUynojq/pyWvl+uGwXsWnJsyQNYYCgOY/HcNjwue8T2LlbhOQED4FTnyMSMRuY7dqDuQ=="],
+    "elm-pages": ["elm-pages@3.2.0", "", { "dependencies": { "@sindresorhus/merge-streams": "^4.0.0", "busboy": "^1.6.0", "chokidar": "^5.0.0", "cli-cursor": "^5.0.0", "commander": "^14.0.3", "connect": "^3.7.0", "cookie-signature": "^1.2.2", "cross-spawn": "7.0.6", "devcert": "^1.2.3", "elm-doc-preview": "^6.0.1", "elm-hot": "^1.1.6", "esbuild": "^0.27.3", "fs-extra": "^11.3.3", "globby": "16.1.1", "gray-matter": "^4.0.3", "jsesc": "^3.1.0", "kleur": "^4.1.5", "make-fetch-happen": "^15.0.3", "memfs": "^4.56.10", "micromatch": "^4.0.8", "serve-static": "^2.2.1", "terser": "^5.44.1", "vite": "^7.3.1", "which": "^6.0.1" }, "optionalDependencies": { "@rollup/rollup-linux-x64-gnu": "4.55.1" }, "bin": { "elm-pages": "generator/src/cli.js" } }, "sha512-5Q4b4EThcr6vFcZm7gUboZSfYETiPv/pC4n7gWt//jXJ8kjvnnbnL6T7OmuAXihFkvXMsmbXGwUtOpweYCsZXw=="],
 
     "elm-review": ["elm-review@2.13.5", "", { "dependencies": { "chalk": "^4.0.0", "chokidar": "^3.5.2", "cross-spawn": "^7.0.3", "elm-solve-deps-wasm": "^1.0.2 || ^2.0.0", "fastest-levenshtein": "^1.0.16", "find-up": "^4.1.0 || ^5.0.0", "folder-hash": "^3.3.0", "got": "^11.8.5", "graceful-fs": "^4.2.11", "minimist": "^1.2.6", "ora": "^5.4.0", "path-key": "^3.1.1", "prompts": "^2.2.1", "strip-ansi": "^6.0.0", "terminal-link": "^2.1.1", "tinyglobby": "^0.2.10", "which": "^2.0.2", "wrap-ansi": "^7.0.0" }, "bin": { "elm-review": "bin/elm-review" } }, "sha512-Iw3YztGjmuGyn4nIEVOxqx+dacJialprpB0ZVrBHA0sBBOQ9+QhBaQnQ0tp0G8U8UoIAush0M7XoBqzUN1F/+A=="],
 
@@ -634,7 +634,7 @@
 
     "globalthis": ["globalthis@1.0.4", "", { "dependencies": { "define-properties": "^1.2.1", "gopd": "^1.0.1" } }, "sha512-DpLKbNU4WylpxJykQujfCcwYWiV/Jhm50Goo0wrVILAv5jOr9d+H+UR3PhSCD2rCCEIg0uc+G+muBTwD54JhDQ=="],
 
-    "globby": ["globby@16.1.0", "", { "dependencies": { "@sindresorhus/merge-streams": "^4.0.0", "fast-glob": "^3.3.3", "ignore": "^7.0.5", "is-path-inside": "^4.0.0", "slash": "^5.1.0", "unicorn-magic": "^0.4.0" } }, "sha512-+A4Hq7m7Ze592k9gZRy4gJ27DrXRNnC1vPjxTt1qQxEY8RxagBkBxivkCwg7FxSTG0iLLEMaUx13oOr0R2/qcQ=="],
+    "globby": ["globby@16.1.1", "", { "dependencies": { "@sindresorhus/merge-streams": "^4.0.0", "fast-glob": "^3.3.3", "ignore": "^7.0.5", "is-path-inside": "^4.0.0", "slash": "^5.1.0", "unicorn-magic": "^0.4.0" } }, "sha512-dW7vl+yiAJSp6aCekaVnVJxurRv7DCOLyXqEG3RYMYUg7AuJ2jCqPkZTA8ooqC2vtnkaMcV5WfFBMuEnTu1OQg=="],
 
     "gopd": ["gopd@1.2.0", "", {}, "sha512-ZUKRh6/kUFoAiTAtTYPZJ3hw9wNxx+BIBOijnlG9PnrJsCcSjs1wyyD6vJpaYtgnzDrKYRSqf3OO6Rfa93xsRg=="],
 

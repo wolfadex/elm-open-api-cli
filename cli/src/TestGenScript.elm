@@ -76,6 +76,10 @@ run =
         singleEnum =
             OpenApi.Config.inputFrom (OpenApi.Config.File "./example/single-enum.yaml")
 
+        pathLevelParams : OpenApi.Config.Input
+        pathLevelParams =
+            OpenApi.Config.inputFrom (OpenApi.Config.File "./example/path-level-params.yaml")
+
         trustmark : OpenApi.Config.Input
         trustmark =
             OpenApi.Config.inputFrom (OpenApi.Config.File "./example/trustmark.json")
@@ -133,6 +137,7 @@ run =
                 |> OpenApi.Config.withInput recursiveAllOfRefs
                 |> OpenApi.Config.withInput simpleRef
                 |> OpenApi.Config.withInput singleEnum
+                |> OpenApi.Config.withInput pathLevelParams
                 |> OpenApi.Config.withInput trustmark
                 |> OpenApi.Config.withInput trustmarkTradeCheck
                 |> OpenApi.Config.withInput viaggiatreno

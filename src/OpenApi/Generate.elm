@@ -273,6 +273,46 @@ stripTrailingSlash input =
         input
 
 
+{-| Merge path-level parameters with operation-level parameters.
+Per the OpenAPI spec, operation-level parameters override path-level
+parameters with the same name and location.
+-}
+mergeParams :
+    List (OpenApi.Reference.ReferenceOr OpenApi.Parameter.Parameter)
+    -> List (OpenApi.Reference.ReferenceOr OpenApi.Parameter.Parameter)
+    -> List (OpenApi.Reference.ReferenceOr OpenApi.Parameter.Parameter)
+mergeParams pathParams operationParams =
+    let
+        operationParamKeys : FastSet.Set String
+        operationParamKeys =
+            operationParams
+                |> List.filterMap
+                    (\param ->
+                        case OpenApi.Reference.toConcrete param of
+                            Just concrete ->
+                                Just (OpenApi.Parameter.in_ concrete ++ ":" ++ OpenApi.Parameter.name concrete)
+
+                            Nothing ->
+                                Nothing
+                    )
+                |> FastSet.fromList
+
+        nonOverriddenPathParams : List (OpenApi.Reference.ReferenceOr OpenApi.Parameter.Parameter)
+        nonOverriddenPathParams =
+            pathParams
+                |> List.filter
+                    (\param ->
+                        case OpenApi.Reference.toConcrete param of
+                            Just concrete ->
+                                not (FastSet.member (OpenApi.Parameter.in_ concrete ++ ":" ++ OpenApi.Parameter.name concrete) operationParamKeys)
+
+                            Nothing ->
+                                True
+                    )
+    in
+    nonOverriddenPathParams ++ operationParams
+
+
 pathDeclarations : List OpenApi.Config.EffectType -> ServerInfo -> CliMonad (List CliMonad.Declaration)
 pathDeclarations effectTypes server =
     CliMonad.getApiSpec
@@ -294,7 +334,7 @@ pathDeclarations effectTypes server =
                                 |> List.filterMap (\( method, getter ) -> Maybe.map (Tuple.pair method) (getter path))
                                 |> CliMonad.combineMap
                                     (\( method, operation ) ->
-                                        toRequestFunctions server effectTypes method url operation
+                                        toRequestFunctions server effectTypes method url (OpenApi.Path.parameters path) operation
                                             |> CliMonad.errorToWarning
                                     )
                                 |> CliMonad.map (List.filterMap identity >> List.concat)
@@ -462,9 +502,13 @@ requestBodyToDeclarations name reference =
                 |> CliMonad.withPath name
 
 
-toRequestFunctions : ServerInfo -> List OpenApi.Config.EffectType -> String -> String -> OpenApi.Operation.Operation -> CliMonad (List CliMonad.Declaration)
-toRequestFunctions server effectTypes method pathUrl operation =
+toRequestFunctions : ServerInfo -> List OpenApi.Config.EffectType -> String -> String -> List (OpenApi.Reference.ReferenceOr OpenApi.Parameter.Parameter) -> OpenApi.Operation.Operation -> CliMonad (List CliMonad.Declaration)
+toRequestFunctions server effectTypes method pathUrl pathLevelParams operation =
     let
+        allParams : List (OpenApi.Reference.ReferenceOr OpenApi.Parameter.Parameter)
+        allParams =
+            mergeParams pathLevelParams (OpenApi.Operation.parameters operation)
+
         functionName : String
         functionName =
             OpenApi.Operation.operationId operation
@@ -1142,7 +1186,7 @@ toRequestFunctions server effectTypes method pathUrl operation =
                             |> CliMonad.andThen
                                 (\params ->
                                     toConfigParamAnnotation
-                                        { operation = operation
+                                        { allParams = allParams
                                         , successAnnotation = successAnnotation
                                         , errorBodyAnnotation = bodyTypeAnnotation
                                         , errorTypeAnnotation = errorTypeAnnotation
@@ -1152,8 +1196,8 @@ toRequestFunctions server effectTypes method pathUrl operation =
                                         }
                                 )
                         )
-                        (replacedUrl server auth pathUrl operation)
-                        (operationToHeaderParams operation)
+                        (replacedUrl server auth pathUrl allParams)
+                        (operationToHeaderParams allParams)
                 )
                 (operationToContentSchema operation)
                 (operationToAuthorizationInfo operation)
@@ -1181,10 +1225,9 @@ operationToGroup operation =
             "Operations"
 
 
-operationToHeaderParams : OpenApi.Operation.Operation -> CliMonad (List (Elm.Expression -> ( Elm.Expression, Elm.Expression, Bool )))
-operationToHeaderParams operation =
-    operation
-        |> OpenApi.Operation.parameters
+operationToHeaderParams : List (OpenApi.Reference.ReferenceOr OpenApi.Parameter.Parameter) -> CliMonad (List (Elm.Expression -> ( Elm.Expression, Elm.Expression, Bool )))
+operationToHeaderParams params =
+    params
         |> CliMonad.combineMap
             (\param ->
                 toConcreteParam param
@@ -1230,8 +1273,8 @@ operationToHeaderParams operation =
         |> CliMonad.map (List.filterMap identity)
 
 
-replacedUrl : ServerInfo -> AuthorizationInfo -> String -> OpenApi.Operation.Operation -> CliMonad (Elm.Expression -> Elm.Expression)
-replacedUrl server authInfo pathUrl operation =
+replacedUrl : ServerInfo -> AuthorizationInfo -> String -> List (OpenApi.Reference.ReferenceOr OpenApi.Parameter.Parameter) -> CliMonad (Elm.Expression -> Elm.Expression)
+replacedUrl server authInfo pathUrl params =
     let
         pathSegments : List String
         pathSegments =
@@ -1309,8 +1352,7 @@ replacedUrl server authInfo pathUrl operation =
                     MultipleServers _ ->
                         Gen.Url.Builder.call_.crossOrigin (Elm.get "server" config) (Elm.list replacedSegments) allQueryParams
     in
-    operation
-        |> OpenApi.Operation.parameters
+    params
         |> CliMonad.combineMap
             (\param ->
                 toConcreteParam param
@@ -1761,7 +1803,7 @@ contentToContentSchema content =
 
 
 toConfigParamAnnotation :
-    { operation : OpenApi.Operation.Operation
+    { allParams : List (OpenApi.Reference.ReferenceOr OpenApi.Parameter.Parameter)
     , successAnnotation : Elm.Annotation.Annotation
     , errorBodyAnnotation : Elm.Annotation.Annotation
     , errorTypeAnnotation : Elm.Annotation.Annotation
@@ -1820,7 +1862,7 @@ toConfigParamAnnotation options =
             , lamderaProgramTest = toAnnotation toMsgLamderaProgramTest
             }
         )
-        (operationToUrlParams options.operation)
+        (operationToUrlParams options.allParams)
 
 
 type ServerInfo
@@ -1886,13 +1928,8 @@ serverInfo server =
                 |> CliMonad.succeed
 
 
-operationToUrlParams : OpenApi.Operation.Operation -> CliMonad (List ( Common.UnsafeName, Elm.Annotation.Annotation ))
-operationToUrlParams operation =
-    let
-        params : List (OpenApi.Reference.ReferenceOr OpenApi.Parameter.Parameter)
-        params =
-            OpenApi.Operation.parameters operation
-    in
+operationToUrlParams : List (OpenApi.Reference.ReferenceOr OpenApi.Parameter.Parameter) -> CliMonad (List ( Common.UnsafeName, Elm.Annotation.Annotation ))
+operationToUrlParams params =
     if List.isEmpty params then
         CliMonad.succeed []
 

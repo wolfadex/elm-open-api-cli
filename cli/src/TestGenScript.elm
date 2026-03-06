@@ -77,6 +77,10 @@ run =
             OpenApi.Config.inputFrom (OpenApi.Config.File "./example/overriding-global-security.yaml")
                 |> OpenApi.Config.withOverrides [ OpenApi.Config.File "./example/overriding-global-security-override.yaml" ]
 
+        pathLevelParams : OpenApi.Config.Input
+        pathLevelParams =
+            OpenApi.Config.inputFrom (OpenApi.Config.File "./example/path-level-params.yaml")
+
         patreon : OpenApi.Config.Input
         patreon =
             OpenApi.Config.inputFrom (OpenApi.Config.File "./example/patreon.json")
@@ -143,6 +147,7 @@ run =
                 |> OpenApi.Config.withInput multipartFormData
                 |> OpenApi.Config.withInput nullableEnum
                 |> OpenApi.Config.withInput overridingGlobalSecurity
+                |> OpenApi.Config.withInput pathLevelParams
                 |> OpenApi.Config.withInput realworldConduit
                 |> OpenApi.Config.withInput recursiveAllOfRefs
                 |> OpenApi.Config.withInput simpleRef

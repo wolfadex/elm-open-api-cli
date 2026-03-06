@@ -1,4 +1,4 @@
-module Test.OpenApi.Generate exposing (fuzzInputName, fuzzTitle, issue48, pr267)
+module Test.OpenApi.Generate exposing (fuzzInputName, fuzzTitle, issue48, pr267, uuidArrayParam)
 
 import Ansi.Color
 import CliMonad
@@ -478,6 +478,115 @@ pr267 =
                                         )
 
 
+uuidArrayParam : Test
+uuidArrayParam =
+    Test.test "UUID array query params use Uuid.toString" <|
+        \() ->
+            let
+                oasString : String
+                oasString =
+                    String.Multiline.here """
+                        openapi: "3.1.0"
+                        info:
+                          title: "UUID Array Test"
+                          version: "1.0.0"
+                        paths:
+                          /items:
+                            get:
+                              operationId: getItems
+                              parameters:
+                                - in: query
+                                  name: ids
+                                  required: false
+                                  schema:
+                                    type: array
+                                    items:
+                                      type: string
+                                      format: uuid
+                              responses:
+                                "200":
+                                  description: OK
+                                  content:
+                                    application/json:
+                                      schema:
+                                        type: object
+                                        properties:
+                                          count:
+                                            type: integer
+                                        required:
+                                          - count
+                    """
+            in
+            case
+                oasString
+                    |> Yaml.Decode.fromString yamlToJsonValueDecoder
+                    |> Result.mapError Debug.toString
+                    |> Result.andThen
+                        (\json ->
+                            json
+                                |> Json.Decode.decodeValue OpenApi.decode
+                                |> Result.mapError Debug.toString
+                        )
+            of
+                Err e ->
+                    Expect.fail e
+
+                Ok oas ->
+                    let
+                        genFiles :
+                            Result
+                                CliMonad.Message
+                                { modules :
+                                    List
+                                        { moduleName : List String
+                                        , declarations : FastDict.Dict String { group : String, declaration : Elm.Declaration }
+                                        }
+                                , warnings : List CliMonad.Message
+                                , requiredPackages : FastSet.Set String
+                                }
+                        genFiles =
+                            OpenApi.Generate.files
+                                { namespace = [ "Output" ]
+                                , generateTodos = False
+                                , effectTypes = [ OpenApi.Config.ElmHttpCmd ]
+                                , server = OpenApi.Config.Default
+                                , formats = OpenApi.Config.defaultFormats
+                                , warnOnMissingEnums = True
+                                , keepGoing = False
+                                }
+                                oas
+                    in
+                    case genFiles of
+                        Err e ->
+                            Expect.fail ("Error in generation: " ++ Debug.toString e)
+
+                        Ok { modules } ->
+                            case modules of
+                                [ _, apiFile ] ->
+                                    let
+                                        apiFileContents : String
+                                        apiFileContents =
+                                            fileToString apiFile
+                                    in
+                                    Expect.all
+                                        [ \_ -> expectContains "import Uuid" apiFileContents
+                                        , \_ -> expectContains "List Uuid.Uuid" apiFileContents
+                                        , \_ -> expectContains "OpenApi.Common.toParamStringStringUuid" apiFileContents
+                                        ]
+                                        ()
+
+                                [] ->
+                                    Expect.fail "Expected to generate 2 files but found none"
+
+                                _ ->
+                                    Expect.fail
+                                        ("Expected to generate 2 files but found "
+                                            ++ (List.length modules |> String.fromInt)
+                                            ++ ": "
+                                            ++ moduleNames modules
+                                        )
+
+
 yamlToJsonValueDecoder : Yaml.Decode.Decoder Json.Encode.Value
 yamlToJsonValueDecoder =
     Yaml.Decode.oneOf
@@ -532,3 +641,12 @@ expectEqualMultiline exp actual =
                         |> Diff.ToString.diffToString { context = 4, color = True }
                    )
             )
+
+
+expectContains : String -> String -> Expect.Expectation
+expectContains needle haystack =
+    if String.contains needle haystack then
+        Expect.pass
+
+    else
+        Expect.fail ("Expected output to contain: " ++ needle)

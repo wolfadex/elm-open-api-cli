@@ -2085,27 +2085,34 @@ paramToString type_ =
                                     |> Gen.Maybe.andThen (inputToStringToFunction inputToString)
                             )
 
-        Common.List (Common.Basic basicType _) ->
-            { inputToString =
-                InputToString
-                    (\val ->
-                        Elm.ifThen (Gen.List.call_.isEmpty val)
-                            Gen.Maybe.make_.nothing
-                            ((case basicTypeToString basicType of
-                                Identity ->
-                                    val
+        Common.List (Common.Basic basicType basic) ->
+            CliMonad.withFormat
+                basicType
+                basic.format
+                (\{ toParamString } -> InputToString toParamString)
+                (basicTypeToString basicType)
+                |> CliMonad.map
+                    (\elementToString ->
+                        { inputToString =
+                            InputToString
+                                (\val ->
+                                    Elm.ifThen (Gen.List.call_.isEmpty val)
+                                        Gen.Maybe.make_.nothing
+                                        ((case elementToString of
+                                            Identity ->
+                                                val
 
-                                InputToString f ->
-                                    Gen.List.call_.map (Elm.functionReduced "arg" f) val
-                             )
-                                |> Gen.String.call_.join (Elm.string ",")
-                                |> Gen.Maybe.make_.just
-                            )
+                                            InputToString f ->
+                                                Gen.List.call_.map (Elm.functionReduced "arg" f) val
+                                         )
+                                            |> Gen.String.call_.join (Elm.string ",")
+                                            |> Gen.Maybe.make_.just
+                                        )
+                                )
+                        , alwaysJust = False
+                        , isMaybe = False
+                        }
                     )
-            , alwaysJust = False
-            , isMaybe = False
-            }
-                |> CliMonad.succeed
 
         Common.List p ->
             recursive p False <|

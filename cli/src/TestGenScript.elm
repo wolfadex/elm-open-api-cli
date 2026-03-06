@@ -76,6 +76,10 @@ run =
         singleEnum =
             OpenApi.Config.inputFrom (OpenApi.Config.File "./example/single-enum.yaml")
 
+        pathLevelParams : OpenApi.Config.Input
+        pathLevelParams =
+            OpenApi.Config.inputFrom (OpenApi.Config.File "./example/path-level-params.yaml")
+
         uuidArrayParam : OpenApi.Config.Input
         uuidArrayParam =
             OpenApi.Config.inputFrom (OpenApi.Config.File "./example/uuid-array-param.yaml")
@@ -139,6 +143,7 @@ run =
                 |> OpenApi.Config.withInput singleEnum
                 |> OpenApi.Config.withInput trustmark
                 |> OpenApi.Config.withInput trustmarkTradeCheck
+                |> OpenApi.Config.withInput pathLevelParams
                 |> OpenApi.Config.withInput uuidArrayParam
                 |> OpenApi.Config.withInput viaggiatreno
                 |> OpenApi.Config.withInput (bug 7889)

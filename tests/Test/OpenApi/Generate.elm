@@ -1,4 +1,4 @@
-module Test.OpenApi.Generate exposing (fuzzInputName, fuzzTitle, issue48, pr267, uuidArrayParam)
+module Test.OpenApi.Generate exposing (fuzzInputName, fuzzTitle, issue48, pathLevelParams, pr267, uuidArrayParam)
 
 import Ansi.Color
 import CliMonad
@@ -616,6 +616,168 @@ uuidArrayParam =
                                                                             )
                                                                             config.params.ids
                                                                          )
+                                                                     ]
+                                                                )
+                                                        , method = "GET"
+                                                        , headers = []
+                                                        , expect =
+                                                            OpenApi.Common.expectJsonCustom
+                                                                (Dict.fromList [])
+                                                                (Json.Decode.succeed
+                                                                     (\\count -> { count = count }
+                                                                     ) |> OpenApi.Common.jsonDecodeAndMap
+                                                                                  (Json.Decode.field "count" Json.Decode.int)
+                                                                )
+                                                                config.toMsg
+                                                        , body = Http.emptyBody
+                                                        , timeout = Nothing
+                                                        , tracker = Nothing
+                                                        }
+                                            """
+                                    in
+                                    expectEqualMultiline apiFileString (fileToString apiFile)
+
+                                [] ->
+                                    Expect.fail "Expected to generate 2 files but found none"
+
+                                _ ->
+                                    Expect.fail
+                                        ("Expected to generate 2 files but found "
+                                            ++ (List.length modules |> String.fromInt)
+                                            ++ ": "
+                                            ++ moduleNames modules
+                                        )
+
+
+pathLevelParams : Test
+pathLevelParams =
+    Test.test "Path-level parameters are merged into operations" <|
+        \() ->
+            let
+                oasString : String
+                oasString =
+                    String.Multiline.here """
+                        openapi: "3.1.0"
+                        info:
+                          title: "Path Level Params Test"
+                          version: "1.0.0"
+                        paths:
+                          /orgs/{orgId}/items:
+                            parameters:
+                              - in: path
+                                name: orgId
+                                required: true
+                                schema:
+                                  type: string
+                                  format: uuid
+                            get:
+                              operationId: getItems
+                              parameters:
+                                - in: query
+                                  name: status
+                                  required: false
+                                  schema:
+                                    type: string
+                              responses:
+                                "200":
+                                  description: OK
+                                  content:
+                                    application/json:
+                                      schema:
+                                        type: object
+                                        properties:
+                                          count:
+                                            type: integer
+                                        required:
+                                          - count
+                    """
+            in
+            case
+                oasString
+                    |> Yaml.Decode.fromString yamlToJsonValueDecoder
+                    |> Result.mapError Debug.toString
+                    |> Result.andThen
+                        (\json ->
+                            json
+                                |> Json.Decode.decodeValue OpenApi.decode
+                                |> Result.mapError Debug.toString
+                        )
+            of
+                Err e ->
+                    Expect.fail e
+
+                Ok oas ->
+                    let
+                        genFiles :
+                            Result
+                                CliMonad.Message
+                                { modules :
+                                    List
+                                        { moduleName : List String
+                                        , declarations : FastDict.Dict String { group : String, declaration : Elm.Declaration }
+                                        }
+                                , warnings : List CliMonad.Message
+                                , requiredPackages : FastSet.Set String
+                                }
+                        genFiles =
+                            OpenApi.Generate.files
+                                { namespace = [ "Output" ]
+                                , generateTodos = False
+                                , effectTypes = [ OpenApi.Config.ElmHttpCmd ]
+                                , server = OpenApi.Config.Default
+                                , formats = OpenApi.Config.defaultFormats
+                                , warnOnMissingEnums = True
+                                , keepGoing = False
+                                }
+                                oas
+                    in
+                    case genFiles of
+                        Err e ->
+                            Expect.fail ("Error in generation: " ++ Debug.toString e)
+
+                        Ok { modules } ->
+                            case modules of
+                                [ _, apiFile ] ->
+                                    let
+                                        apiFileString : String
+                                        apiFileString =
+                                            String.Multiline.here """
+                                                module Output.Api exposing ( getItems )
+
+                                                {-|
+                                                @docs getItems
+                                                -}
+
+
+                                                import Dict
+                                                import Http
+                                                import Json.Decode
+                                                import OpenApi.Common
+                                                import Url.Builder
+                                                import Uuid
+
+
+                                                {- ## Operations -}
+
+
+                                                getItems :
+                                                    { toMsg : Result (OpenApi.Common.Error e String) { count : Int } -> msg
+                                                    , params : { orgId : Uuid.Uuid, status : Maybe String }
+                                                    }
+                                                    -> Cmd msg
+                                                getItems config =
+                                                    Http.request
+                                                        { url =
+                                                            Url.Builder.absolute
+                                                                [ "orgs"
+                                                                , OpenApi.Common.toParamStringStringUuid config.params.orgId
+                                                                , "items"
+                                                                ]
+                                                                (List.filterMap
+                                                                     Basics.identity
+                                                                     [ Maybe.map
+                                                                         (Url.Builder.string "status")
+                                                                         config.params.status
                                                                      ]
                                                                 )
                                                         , method = "GET"

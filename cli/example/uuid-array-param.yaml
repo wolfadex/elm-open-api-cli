@@ -1,0 +1,29 @@
+openapi: "3.1.0"
+info:
+  title: "UUID Array Test"
+  version: "1.0.0"
+paths:
+  /items:
+    get:
+      operationId: getItems
+      parameters:
+        - in: query
+          name: ids
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+              format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                required:
+                  - count

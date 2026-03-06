@@ -1,4 +1,4 @@
-module Test.OpenApi.Generate exposing (fuzzInputName, fuzzTitle, issue48, pr267)
+module Test.OpenApi.Generate exposing (fuzzInputName, fuzzTitle, issue48, pr267, uuidArrayParam)
 
 import Ansi.Color
 import CliMonad
@@ -478,6 +478,177 @@ pr267 =
                                         )
 
 
+uuidArrayParam : Test
+uuidArrayParam =
+    Test.test "UUID array query params use Uuid.toString" <|
+        \() ->
+            let
+                oasString : String
+                oasString =
+                    String.Multiline.here """
+                        openapi: "3.1.0"
+                        info:
+                          title: "UUID Array Test"
+                          version: "1.0.0"
+                        paths:
+                          /items:
+                            get:
+                              operationId: getItems
+                              parameters:
+                                - in: query
+                                  name: ids
+                                  required: false
+                                  schema:
+                                    type: array
+                                    items:
+                                      type: string
+                                      format: uuid
+                              responses:
+                                "200":
+                                  description: OK
+                                  content:
+                                    application/json:
+                                      schema:
+                                        type: object
+                                        properties:
+                                          count:
+                                            type: integer
+                                        required:
+                                          - count
+                    """
+            in
+            case
+                oasString
+                    |> Yaml.Decode.fromString yamlToJsonValueDecoder
+                    |> Result.mapError Debug.toString
+                    |> Result.andThen
+                        (\json ->
+                            json
+                                |> Json.Decode.decodeValue OpenApi.decode
+                                |> Result.mapError Debug.toString
+                        )
+            of
+                Err e ->
+                    Expect.fail e
+
+                Ok oas ->
+                    let
+                        genFiles :
+                            Result
+                                CliMonad.Message
+                                { modules :
+                                    List
+                                        { moduleName : List String
+                                        , declarations : FastDict.Dict String { group : String, declaration : Elm.Declaration }
+                                        }
+                                , warnings : List CliMonad.Message
+                                , requiredPackages : FastSet.Set String
+                                }
+                        genFiles =
+                            OpenApi.Generate.files
+                                { namespace = [ "Output" ]
+                                , generateTodos = False
+                                , effectTypes = [ OpenApi.Config.ElmHttpCmd ]
+                                , server = OpenApi.Config.Default
+                                , formats = OpenApi.Config.defaultFormats
+                                , warnOnMissingEnums = True
+                                , keepGoing = False
+                                }
+                                oas
+                    in
+                    case genFiles of
+                        Err e ->
+                            Expect.fail ("Error in generation: " ++ Debug.toString e)
+
+                        Ok { modules } ->
+                            case modules of
+                                [ _, apiFile ] ->
+                                    let
+                                        apiFileString : String
+                                        apiFileString =
+                                            String.Multiline.here """
+                                                module Output.Api exposing ( getItems )
+
+                                                {-|
+                                                @docs getItems
+                                                -}
+
+
+                                                import Dict
+                                                import Http
+                                                import Json.Decode
+                                                import OpenApi.Common
+                                                import Url.Builder
+                                                import Uuid
+
+
+                                                {- ## Operations -}
+
+
+                                                getItems :
+                                                    { toMsg : Result (OpenApi.Common.Error e String) { count : Int } -> msg
+                                                    , params : { ids : Maybe (List Uuid.Uuid) }
+                                                    }
+                                                    -> Cmd msg
+                                                getItems config =
+                                                    Http.request
+                                                        { url =
+                                                            Url.Builder.absolute
+                                                                [ "items" ]
+                                                                (List.filterMap
+                                                                     Basics.identity
+                                                                     [ Maybe.map
+                                                                         (Url.Builder.string "ids")
+                                                                         (Maybe.andThen
+                                                                            (\\andThenUnpack ->
+                                                                               if List.isEmpty andThenUnpack then
+                                                                                   Nothing
+
+                                                                               else
+                                                                                   Just
+                                                                                       (String.join
+                                                                                            ","
+                                                                                            (List.map
+                                                                                                 OpenApi.Common.toParamStringStringUuid
+                                                                                                 andThenUnpack
+                                                                                            )
+                                                                                       )
+                                                                            )
+                                                                            config.params.ids
+                                                                         )
+                                                                     ]
+                                                                )
+                                                        , method = "GET"
+                                                        , headers = []
+                                                        , expect =
+                                                            OpenApi.Common.expectJsonCustom
+                                                                (Dict.fromList [])
+                                                                (Json.Decode.succeed
+                                                                     (\\count -> { count = count }
+                                                                     ) |> OpenApi.Common.jsonDecodeAndMap
+                                                                                  (Json.Decode.field "count" Json.Decode.int)
+                                                                )
+                                                                config.toMsg
+                                                        , body = Http.emptyBody
+                                                        , timeout = Nothing
+                                                        , tracker = Nothing
+                                                        }
+                                            """
+                                    in
+                                    expectEqualMultiline apiFileString (fileToString apiFile)
+
+                                [] ->
+                                    Expect.fail "Expected to generate 2 files but found none"
+
+                                _ ->
+                                    Expect.fail
+                                        ("Expected to generate 2 files but found "
+                                            ++ (List.length modules |> String.fromInt)
+                                            ++ ": "
+                                            ++ moduleNames modules
+                                        )
+
+
 yamlToJsonValueDecoder : Yaml.Decode.Decoder Json.Encode.Value
 yamlToJsonValueDecoder =
     Yaml.Decode.oneOf
@@ -511,7 +682,20 @@ fileToString file =
 
 expectEqualMultiline : String -> String -> Expect.Expectation
 expectEqualMultiline exp actual =
-    if exp == actual then
+    let
+        trimTrailingWhitespace : String -> String
+        trimTrailingWhitespace =
+            String.lines >> List.map String.trimRight >> String.join "\n"
+
+        normalizedExp : String
+        normalizedExp =
+            trimTrailingWhitespace exp
+
+        normalizedActual : String
+        normalizedActual =
+            trimTrailingWhitespace actual
+    in
+    if normalizedExp == normalizedActual then
         Expect.pass
 
     else
@@ -527,8 +711,8 @@ expectEqualMultiline exp actual =
                         (Diff.defaultOptions
                             |> Diff.ignoreLeadingWhitespace
                         )
-                        exp
-                        actual
+                        normalizedExp
+                        normalizedActual
                         |> Diff.ToString.diffToString { context = 4, color = True }
                    )
             )

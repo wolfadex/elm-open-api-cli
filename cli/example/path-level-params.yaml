@@ -1,0 +1,41 @@
+openapi: "3.1.0"
+info:
+  title: "Path Level Params Test"
+  version: "1.0.0"
+paths:
+  /orgs/{orgId}/teams/{teamId}/items:
+    parameters:
+      - $ref: '#/components/parameters/orgIdParam'
+      - in: path
+        name: teamId
+        required: true
+        schema:
+          type: string
+    get:
+      operationId: getItems
+      parameters:
+        - in: query
+          name: status
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                required:
+                  - count
+components:
+  parameters:
+    orgIdParam:
+      in: path
+      name: orgId
+      required: true
+      schema:
+        type: string

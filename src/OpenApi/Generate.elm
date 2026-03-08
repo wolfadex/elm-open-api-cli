@@ -289,23 +289,27 @@ mergeParams pathParams operationParams =
                 |> CliMonad.map (\concrete -> OpenApi.Parameter.in_ concrete ++ ":" ++ OpenApi.Parameter.name concrete)
     in
     CliMonad.combineMap paramKey operationParams
-        |> CliMonad.map FastSet.fromList
         |> CliMonad.andThen
-            (\operationParamKeys ->
+            (\operationParamKeysList ->
+                let
+                    operationParamKeys : FastSet.Set String
+                    operationParamKeys =
+                        FastSet.fromList operationParamKeysList
+                in
                 pathParams
-                    |> CliMonad.combineMap
-                        (\param ->
+                    |> CliMonad.foldl
+                        (\param acc ->
                             paramKey param
                                 |> CliMonad.map
                                     (\key ->
                                         if FastSet.member key operationParamKeys then
-                                            Nothing
+                                            acc
 
                                         else
-                                            Just param
+                                            param :: acc
                                     )
                         )
-                    |> CliMonad.map (\filtered -> List.filterMap identity filtered ++ operationParams)
+                        (CliMonad.succeed operationParams)
             )
 
 

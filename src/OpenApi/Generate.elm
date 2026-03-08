@@ -504,15 +504,6 @@ requestBodyToDeclarations name reference =
 
 toRequestFunctions : ServerInfo -> List OpenApi.Config.EffectType -> String -> String -> List (OpenApi.Reference.ReferenceOr OpenApi.Parameter.Parameter) -> OpenApi.Operation.Operation -> CliMonad (List CliMonad.Declaration)
 toRequestFunctions server effectTypes method pathUrl pathLevelParams operation =
-    mergeParams pathLevelParams (OpenApi.Operation.parameters operation)
-        |> CliMonad.andThen
-            (\allParams ->
-                toRequestFunctionsHelp server effectTypes method pathUrl operation allParams
-            )
-
-
-toRequestFunctionsHelp : ServerInfo -> List OpenApi.Config.EffectType -> String -> String -> OpenApi.Operation.Operation -> List (OpenApi.Reference.ReferenceOr OpenApi.Parameter.Parameter) -> CliMonad (List CliMonad.Declaration)
-toRequestFunctionsHelp server effectTypes method pathUrl operation allParams =
     let
         functionName : String
         functionName =
@@ -1160,8 +1151,8 @@ toRequestFunctionsHelp server effectTypes method pathUrl operation allParams =
                           )
                         ]
             in
-            CliMonad.andThen3
-                (\contentSchema auth successAnnotation ->
+            CliMonad.andThen4
+                (\contentSchema auth successAnnotation allParams ->
                     CliMonad.andThen4
                         (\toBody configAnnotation replaced toHeaderParams ->
                             CliMonad.map2 (++)
@@ -1213,6 +1204,7 @@ toRequestFunctionsHelp server effectTypes method pathUrl operation allParams =
                     SuccessReference ref ->
                         CliMonad.refToAnnotation ref
                 )
+                (mergeParams pathLevelParams (OpenApi.Operation.parameters operation))
     in
     operationToTypesExpectAndResolver functionName operation
         |> CliMonad.andThen step

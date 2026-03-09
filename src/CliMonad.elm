@@ -43,6 +43,7 @@ import Json.Encode
 import OpenApi exposing (OpenApi)
 import OpenApi.Config
 import Pretty
+import Result.Extra
 import String.Extra
 import Triple.Extra
 
@@ -629,8 +630,29 @@ combineDict dict =
 
 
 foldl : (a -> b -> CliMonad b) -> CliMonad b -> List a -> CliMonad b
-foldl f init list =
-    List.foldl (\e acc -> andThen (f e) acc) init list
+foldl f (CliMonad init) list =
+    CliMonad
+        (\input initialCache ->
+            init input initialCache
+                |> Result.andThen
+                    (\s ->
+                        Result.Extra.foldlWhileOk
+                            (\e ( y, yo, newCache ) ->
+                                let
+                                    (CliMonad z) =
+                                        f e y
+                                in
+                                case z input newCache of
+                                    Err err ->
+                                        Err err
+
+                                    Ok ( w, wo, cache3 ) ->
+                                        Ok ( w, mergeOutput yo wo, cache3 )
+                            )
+                            s
+                            list
+                    )
+        )
 
 
 moduleToNamespace : Common.Module -> CliMonad (List String)

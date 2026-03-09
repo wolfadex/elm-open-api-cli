@@ -14,7 +14,7 @@
         "elm/json": "1.1.3 <= v < 2.0.0",
         "elm/regex": "1.0.0 <= v < 2.0.0",
         "elm/url": "1.0.0 <= v < 2.0.0",
-        "elmcraft/core-extra": "2.2.0 <= v < 3.0.0",
+        "elmcraft/core-extra": "2.3.0 <= v < 3.0.0",
         "json-tools/json-schema": "1.0.0 <= v < 2.0.0",
         "mdgriffith/elm-codegen": "6.0.1 <= v < 7.0.0",
         "miniBill/elm-fast-dict": "1.2.0 <= v < 2.0.0",

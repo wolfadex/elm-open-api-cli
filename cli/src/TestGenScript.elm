@@ -39,9 +39,22 @@ run =
         binaryResponse =
             OpenApi.Config.inputFrom (OpenApi.Config.File "./example/binary-response.yaml")
 
+        bug : Int -> OpenApi.Config.Input
+        bug n =
+            OpenApi.Config.inputFrom (OpenApi.Config.File ("./example/openapi-generator-bugs/" ++ String.fromInt n ++ ".yaml"))
+
         cookieAuth : OpenApi.Config.Input
         cookieAuth =
             OpenApi.Config.inputFrom (OpenApi.Config.File "./example/cookie-auth.yaml")
+
+        dbFahrplanApi : OpenApi.Config.Input
+        dbFahrplanApi =
+            OpenApi.Config.inputFrom (OpenApi.Config.File "./example/db-fahrplan-api-specification.yaml")
+
+        gitHub : OpenApi.Config.Input
+        gitHub =
+            OpenApi.Config.inputFrom (OpenApi.Config.File "./example/github-spec.json")
+                |> OpenApi.Config.withWarnOnMissingEnums False
 
         ifconfigOvh : OpenApi.Config.Input
         ifconfigOvh =
@@ -60,6 +73,14 @@ run =
             OpenApi.Config.inputFrom (OpenApi.Config.File "./example/overriding-global-security.yaml")
                 |> OpenApi.Config.withOverrides [ OpenApi.Config.File "./example/overriding-global-security-override.yaml" ]
 
+        pathLevelParams : OpenApi.Config.Input
+        pathLevelParams =
+            OpenApi.Config.inputFrom (OpenApi.Config.File "./example/path-level-params.yaml")
+
+        patreon : OpenApi.Config.Input
+        patreon =
+            OpenApi.Config.inputFrom (OpenApi.Config.File "./example/patreon.json")
+
         realworldConduit : OpenApi.Config.Input
         realworldConduit =
             OpenApi.Config.inputFrom (OpenApi.Config.File "./example/realworld-conduit.yaml")
@@ -76,9 +97,9 @@ run =
         singleEnum =
             OpenApi.Config.inputFrom (OpenApi.Config.File "./example/single-enum.yaml")
 
-        uuidArrayParam : OpenApi.Config.Input
-        uuidArrayParam =
-            OpenApi.Config.inputFrom (OpenApi.Config.File "./example/uuid-array-param.yaml")
+        telegramBot : OpenApi.Config.Input
+        telegramBot =
+            OpenApi.Config.inputFrom (OpenApi.Config.File "./example/telegram-bot.json")
 
         trustmark : OpenApi.Config.Input
         trustmark =
@@ -93,30 +114,13 @@ run =
                 |> OpenApi.Config.withOutputModuleName [ "Trustmark", "TradeCheck" ]
                 |> OpenApi.Config.withEffectTypes [ OpenApi.Config.ElmHttpCmd ]
 
+        uuidArrayParam : OpenApi.Config.Input
+        uuidArrayParam =
+            OpenApi.Config.inputFrom (OpenApi.Config.File "./example/uuid-array-param.yaml")
+
         viaggiatreno : OpenApi.Config.Input
         viaggiatreno =
             OpenApi.Config.inputFrom (OpenApi.Config.File "./example/viaggiatreno.yaml")
-
-        bug : Int -> OpenApi.Config.Input
-        bug n =
-            OpenApi.Config.inputFrom (OpenApi.Config.File ("./example/openapi-generator-bugs/" ++ String.fromInt n ++ ".yaml"))
-
-        dbFahrplanApi : OpenApi.Config.Input
-        dbFahrplanApi =
-            OpenApi.Config.inputFrom (OpenApi.Config.File "./example/db-fahrplan-api-specification.yaml")
-
-        gitHub : OpenApi.Config.Input
-        gitHub =
-            OpenApi.Config.inputFrom (OpenApi.Config.File "./example/github-spec.json")
-                |> OpenApi.Config.withWarnOnMissingEnums False
-
-        patreon : OpenApi.Config.Input
-        patreon =
-            OpenApi.Config.inputFrom (OpenApi.Config.File "./example/patreon.json")
-
-        telegramBot : OpenApi.Config.Input
-        telegramBot =
-            OpenApi.Config.inputFrom (OpenApi.Config.File "./example/telegram-bot.json")
 
         profileConfig : OpenApi.Config.Config
         profileConfig =
@@ -133,6 +137,7 @@ run =
                 |> OpenApi.Config.withInput marioPartyStats
                 |> OpenApi.Config.withInput nullableEnum
                 |> OpenApi.Config.withInput overridingGlobalSecurity
+                |> OpenApi.Config.withInput pathLevelParams
                 |> OpenApi.Config.withInput realworldConduit
                 |> OpenApi.Config.withInput recursiveAllOfRefs
                 |> OpenApi.Config.withInput simpleRef

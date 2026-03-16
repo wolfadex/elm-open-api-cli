@@ -1,8 +1,8 @@
 module Gen.Json.Decode exposing
     ( string, bool, int, float
     , list, dict, keyValuePairs, field
-    , oneOf
-    , map
+    , index, oneOf
+    , map, map2, map3
     , value, null
     , succeed, fail, andThen, annotation_
     , call_, values_
@@ -15,8 +15,8 @@ module Gen.Json.Decode exposing
 
 @docs string, bool, int, float
 @docs list, dict, keyValuePairs, field
-@docs oneOf
-@docs map
+@docs index, oneOf
+@docs map, map2, map3
 @docs value, null
 @docs succeed, fail, andThen, annotation_
 @docs call_, values_
@@ -309,6 +309,44 @@ field fieldArg_ fieldArg_0 =
         [ Elm.string fieldArg_, fieldArg_0 ]
 
 
+{-| Decode a JSON array, requiring a particular index.
+
+    json = """[ "alice", "bob", "chuck" ]"""
+
+    decodeString (index 0 string) json  == Ok "alice"
+    decodeString (index 1 string) json  == Ok "bob"
+    decodeString (index 2 string) json  == Ok "chuck"
+    decodeString (index 3 string) json  == Err ...
+
+index: Int -> Json.Decode.Decoder a -> Json.Decode.Decoder a
+
+-}
+index : Int -> Elm.Expression -> Elm.Expression
+index indexArg_ indexArg_0 =
+    Elm.apply
+        (Elm.value
+            { importFrom = [ "Json", "Decode" ]
+            , name = "index"
+            , annotation =
+                Just
+                    (Type.function
+                        [ Type.int
+                        , Type.namedWith
+                            [ "Json", "Decode" ]
+                            "Decoder"
+                            [ Type.var "a" ]
+                        ]
+                        (Type.namedWith
+                            [ "Json", "Decode" ]
+                            "Decoder"
+                            [ Type.var "a" ]
+                        )
+                    )
+            }
+        )
+        [ Elm.int indexArg_, indexArg_0 ]
+
+
 {-| Try a bunch of different decoders. This can be useful if the JSON may come
 in a couple different formats. For example, say you want to read an array of
 numbers, but some of them are `null`.
@@ -403,6 +441,159 @@ map mapArg_ mapArg_0 =
             }
         )
         [ Elm.functionReduced "mapUnpack" mapArg_, mapArg_0 ]
+
+
+{-| Try two decoders and then combine the result. We can use this to decode
+objects with many fields:
+
+
+    type alias Point =
+        { x : Float, y : Float }
+
+    point : Decoder Point
+    point =
+        map2 Point
+            (field "x" float)
+            (field "y" float)
+
+    -- decodeString point """{ "x": 3, "y": 4 }""" == Ok { x = 3, y = 4 }
+
+It tries each individual decoder and puts the result together with the `Point`
+constructor.
+
+map2:
+(a -> b -> value)
+-> Json.Decode.Decoder a
+-> Json.Decode.Decoder b
+-> Json.Decode.Decoder value
+
+-}
+map2 :
+    (Elm.Expression -> Elm.Expression -> Elm.Expression)
+    -> Elm.Expression
+    -> Elm.Expression
+    -> Elm.Expression
+map2 map2Arg_ map2Arg_0 map2Arg_1 =
+    Elm.apply
+        (Elm.value
+            { importFrom = [ "Json", "Decode" ]
+            , name = "map2"
+            , annotation =
+                Just
+                    (Type.function
+                        [ Type.function
+                            [ Type.var "a", Type.var "b" ]
+                            (Type.var "value")
+                        , Type.namedWith
+                            [ "Json", "Decode" ]
+                            "Decoder"
+                            [ Type.var "a" ]
+                        , Type.namedWith
+                            [ "Json", "Decode" ]
+                            "Decoder"
+                            [ Type.var "b" ]
+                        ]
+                        (Type.namedWith
+                            [ "Json", "Decode" ]
+                            "Decoder"
+                            [ Type.var "value" ]
+                        )
+                    )
+            }
+        )
+        [ Elm.functionReduced
+            "map2Unpack"
+            (\functionReducedUnpack ->
+                Elm.functionReduced "unpack" (map2Arg_ functionReducedUnpack)
+            )
+        , map2Arg_0
+        , map2Arg_1
+        ]
+
+
+{-| Try three decoders and then combine the result. We can use this to decode
+objects with many fields:
+
+
+    type alias Person =
+        { name : String, age : Int, height : Float }
+
+    person : Decoder Person
+    person =
+        map3 Person
+            (at [ "name" ] string)
+            (at [ "info", "age" ] int)
+            (at [ "info", "height" ] float)
+
+    -- json = """{ "name": "tom", "info": { "age": 42, "height": 1.8 } }"""
+    -- decodeString person json == Ok { name = "tom", age = 42, height = 1.8 }
+
+Like `map2` it tries each decoder in order and then give the results to the
+`Person` constructor. That can be any function though!
+
+map3:
+(a -> b -> c -> value)
+-> Json.Decode.Decoder a
+-> Json.Decode.Decoder b
+-> Json.Decode.Decoder c
+-> Json.Decode.Decoder value
+
+-}
+map3 :
+    (Elm.Expression -> Elm.Expression -> Elm.Expression -> Elm.Expression)
+    -> Elm.Expression
+    -> Elm.Expression
+    -> Elm.Expression
+    -> Elm.Expression
+map3 map3Arg_ map3Arg_0 map3Arg_1 map3Arg_2 =
+    Elm.apply
+        (Elm.value
+            { importFrom = [ "Json", "Decode" ]
+            , name = "map3"
+            , annotation =
+                Just
+                    (Type.function
+                        [ Type.function
+                            [ Type.var "a", Type.var "b", Type.var "c" ]
+                            (Type.var "value")
+                        , Type.namedWith
+                            [ "Json", "Decode" ]
+                            "Decoder"
+                            [ Type.var "a" ]
+                        , Type.namedWith
+                            [ "Json", "Decode" ]
+                            "Decoder"
+                            [ Type.var "b" ]
+                        , Type.namedWith
+                            [ "Json", "Decode" ]
+                            "Decoder"
+                            [ Type.var "c" ]
+                        ]
+                        (Type.namedWith
+                            [ "Json", "Decode" ]
+                            "Decoder"
+                            [ Type.var "value" ]
+                        )
+                    )
+            }
+        )
+        [ Elm.functionReduced
+            "map3Unpack"
+            (\functionReducedUnpack ->
+                Elm.functionReduced
+                    "unpack"
+                    (\functionReducedUnpack0 ->
+                        Elm.functionReduced
+                            "unpack"
+                            (map3Arg_ functionReducedUnpack
+                                functionReducedUnpack0
+                            )
+                    )
+            )
+        , map3Arg_0
+        , map3Arg_1
+        , map3Arg_2
+        ]
 
 
 {-| Do not do anything with a JSON value, just bring it into Elm as a `Value`.

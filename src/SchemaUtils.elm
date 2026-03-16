@@ -225,11 +225,27 @@ schemaToType seen schema =
                                     CliMonad.todoWithDefault { type_ = Common.Value, documentation = subSchema.description } "Array of items as item definition"
 
                                 Json.Schema.Definitions.ItemDefinition itemSchema ->
-                                    CliMonad.map
-                                        (\item ->
-                                            toListType subSchema.description item
-                                        )
-                                        (schemaToType seen itemSchema)
+                                    case ( subSchema.minItems, subSchema.maxItems ) of
+                                        ( Just 2, Just 2 ) ->
+                                            CliMonad.map
+                                                (\item ->
+                                                    toTupleType subSchema.description item
+                                                )
+                                                (schemaToType seen itemSchema)
+
+                                        ( Just 3, Just 3 ) ->
+                                            CliMonad.map
+                                                (\item ->
+                                                    toTripleType subSchema.description item
+                                                )
+                                                (schemaToType seen itemSchema)
+
+                                        _ ->
+                                            CliMonad.map
+                                                (\item ->
+                                                    toListType subSchema.description item
+                                                )
+                                                (schemaToType seen itemSchema)
 
                 anyOfToType : List Json.Schema.Definitions.Schema -> CliMonad { type_ : Common.Type, documentation : Maybe String }
                 anyOfToType schemas =
@@ -513,6 +529,56 @@ toListType description { type_, documentation } =
     }
 
 
+toTupleType :
+    Maybe String
+    ->
+        { type_ : Common.Type
+        , documentation : Maybe String
+        }
+    -> { type_ : Common.Type, documentation : Maybe String }
+toTupleType description { type_, documentation } =
+    { type_ = Common.Tuple type_ type_
+    , documentation =
+        [ description
+        , Maybe.map
+            (\doc ->
+                if String.contains "\n" doc then
+                    "A list of exactly two:\n" ++ doc
+
+                else
+                    "A list of exactly two: " ++ doc
+            )
+            documentation
+        ]
+            |> joinIfNotEmpty "\n\n"
+    }
+
+
+toTripleType :
+    Maybe String
+    ->
+        { type_ : Common.Type
+        , documentation : Maybe String
+        }
+    -> { type_ : Common.Type, documentation : Maybe String }
+toTripleType description { type_, documentation } =
+    { type_ = Common.Triple type_ type_ type_
+    , documentation =
+        [ description
+        , Maybe.map
+            (\doc ->
+                if String.contains "\n" doc then
+                    "A list of exactly three:\n" ++ doc
+
+                else
+                    "A list of exactly three: " ++ doc
+            )
+            documentation
+        ]
+            |> joinIfNotEmpty "\n\n"
+    }
+
+
 areAllArrays : List Json.Schema.Definitions.Schema -> Maybe (List Json.Schema.Definitions.Schema)
 areAllArrays schemas =
     schemas
@@ -773,6 +839,17 @@ exampleOfType seen type_ =
         Common.List _ ->
             CliMonad.succeed (Json.Encode.list never [])
 
+        Common.Tuple l r ->
+            CliMonad.map2 (\le re -> Json.Encode.list identity [ le, re ])
+                (exampleOfType seen l)
+                (exampleOfType seen r)
+
+        Common.Triple l m r ->
+            CliMonad.map3 (\le me re -> Json.Encode.list identity [ le, me, re ])
+                (exampleOfType seen l)
+                (exampleOfType seen m)
+                (exampleOfType seen r)
+
         Common.Dict _ fields ->
             fields
                 |> CliMonad.combineMap
@@ -924,6 +1001,24 @@ typesIntersection seen lType rType =
             -- Empty lists are not possible to distinguish
             CliMonad.succeed (IntersectionResult.FoundIntersection (Json.Encode.list never []))
 
+        ( Common.List lItem, Common.Tuple rl rr ) ->
+            listTupleIntersection seen lItem [ rl, rr ]
+
+        ( Common.Tuple ll lr, Common.List rItem ) ->
+            listTupleIntersection seen rItem [ ll, lr ]
+
+        ( Common.List lItem, Common.Triple rl rm rr ) ->
+            listTupleIntersection seen lItem [ rl, rm, rr ]
+
+        ( Common.Triple ll lm lr, Common.List rItem ) ->
+            listTupleIntersection seen rItem [ ll, lm, lr ]
+
+        ( Common.Tuple _ _, Common.Triple _ _ _ ) ->
+            CliMonad.succeed IntersectionResult.NoIntersection
+
+        ( Common.Triple _ _ _, Common.Tuple _ _ ) ->
+            CliMonad.succeed IntersectionResult.NoIntersection
+
         ( Common.Basic lbasic lopt, Common.Basic rbasic ropt ) ->
             case
                 ( simplifyForIntersection lbasic lopt.const
@@ -1043,6 +1138,39 @@ typesIntersection seen lType rType =
         _ ->
             CliMonad.succeed IntersectionResult.MayIntersect
                 |> CliMonad.withWarning ("Disjoint check not implemented for types " ++ typeToString lType ++ " and " ++ typeToString rType)
+
+
+listTupleIntersection : List (Common.RefTo Common.Schema) -> Common.Type -> List Common.Type -> CliMonad (IntersectionResult Json.Encode.Value)
+listTupleIntersection seen listItem tupleItems =
+    tupleItems
+        |> CliMonad.combineMap (\tupleItem -> typesIntersection seen listItem tupleItem)
+        |> CliMonad.map
+            (\intersections ->
+                intersections
+                    |> List.foldr
+                        (\e a ->
+                            case ( e, a ) of
+                                ( IntersectionResult.FoundIntersection ei, IntersectionResult.FoundIntersection ai ) ->
+                                    IntersectionResult.FoundIntersection (ei :: ai)
+
+                                ( IntersectionResult.NoIntersection, _ ) ->
+                                    IntersectionResult.NoIntersection
+
+                                ( _, IntersectionResult.NoIntersection ) ->
+                                    IntersectionResult.NoIntersection
+
+                                ( IntersectionResult.MayIntersect, IntersectionResult.MayIntersect ) ->
+                                    IntersectionResult.MayIntersect
+
+                                ( IntersectionResult.MayIntersect, IntersectionResult.FoundIntersection _ ) ->
+                                    IntersectionResult.MayIntersect
+
+                                ( IntersectionResult.FoundIntersection _, IntersectionResult.MayIntersect ) ->
+                                    IntersectionResult.MayIntersect
+                        )
+                        (IntersectionResult.FoundIntersection [])
+                    |> IntersectionResult.map (Json.Encode.list identity)
+            )
 
 
 typesIntersectionOneOf : List (Common.RefTo Common.Schema) -> List Common.OneOfData -> Common.Type -> CliMonad (IntersectionResult Json.Encode.Value)
@@ -1256,6 +1384,12 @@ typeToString type_ =
         Common.List _ ->
             "list"
 
+        Common.Tuple _ _ ->
+            "list of length 2"
+
+        Common.Triple _ _ _ ->
+            "list of length 3"
+
         Common.Dict _ _ ->
             "dict"
 
@@ -1377,6 +1511,35 @@ typeToOneOfVariant { type_, documentation } =
                         )
                     )
 
+        wrap2 : String -> Common.Type -> Common.Type -> CliMonad (Maybe VariantInfo)
+        wrap2 label t1 t2 =
+            CliMonad.map2
+                (Maybe.map2
+                    (\inner1 inner2 ->
+                        { name = Common.UnsafeName (label ++ Common.unwrapUnsafe inner1.name ++ Common.unwrapUnsafe inner2.name)
+                        , type_ = type_
+                        , documentation = documentation
+                        }
+                    )
+                )
+                (typeToOneOfVariant { type_ = t1, documentation = documentation })
+                (typeToOneOfVariant { type_ = t2, documentation = documentation })
+
+        wrap3 : String -> Common.Type -> Common.Type -> Common.Type -> CliMonad (Maybe VariantInfo)
+        wrap3 label t1 t2 t3 =
+            CliMonad.map3
+                (Maybe.map3
+                    (\inner1 inner2 inner3 ->
+                        { name = Common.UnsafeName (label ++ Common.unwrapUnsafe inner1.name ++ Common.unwrapUnsafe inner2.name ++ Common.unwrapUnsafe inner3.name)
+                        , type_ = type_
+                        , documentation = documentation
+                        }
+                    )
+                )
+                (typeToOneOfVariant { type_ = t1, documentation = documentation })
+                (typeToOneOfVariant { type_ = t2, documentation = documentation })
+                (typeToOneOfVariant { type_ = t3, documentation = documentation })
+
         simple : Common.UnsafeName -> CliMonad (Maybe VariantInfo)
         simple name =
             { name = name
@@ -1413,6 +1576,12 @@ typeToOneOfVariant { type_, documentation } =
 
         Common.List t ->
             wrap "List" t
+
+        Common.Tuple l r ->
+            wrap2 "Tuple" l r
+
+        Common.Triple l m r ->
+            wrap3 "Triple" l m r
 
         Common.Dict additionalProperties [] ->
             wrap "Dict" additionalProperties.type_
@@ -1741,6 +1910,17 @@ typeToAnnotationWithNullable type_ =
         Common.List t ->
             CliMonad.map Elm.Annotation.list (typeToAnnotationWithNullable t)
 
+        Common.Tuple l r ->
+            CliMonad.map2 Elm.Annotation.tuple
+                (typeToAnnotationWithNullable l)
+                (typeToAnnotationWithNullable r)
+
+        Common.Triple l m r ->
+            CliMonad.map3 Elm.Annotation.triple
+                (typeToAnnotationWithNullable l)
+                (typeToAnnotationWithNullable m)
+                (typeToAnnotationWithNullable r)
+
         Common.Dict additionalProperties [] ->
             -- We do not use `Elm.Annotation.dict` here because it will NOT
             -- result in `import Dict` being generated in the module, due to
@@ -1813,6 +1993,17 @@ typeToAnnotationWithMaybe type_ =
 
         Common.List t ->
             CliMonad.map Elm.Annotation.list (typeToAnnotationWithMaybe t)
+
+        Common.Tuple l r ->
+            CliMonad.map2 Elm.Annotation.tuple
+                (typeToAnnotationWithMaybe l)
+                (typeToAnnotationWithMaybe r)
+
+        Common.Triple l m r ->
+            CliMonad.map3 Elm.Annotation.triple
+                (typeToAnnotationWithMaybe l)
+                (typeToAnnotationWithMaybe m)
+                (typeToAnnotationWithMaybe r)
 
         Common.Dict additionalProperties [] ->
             -- We do not use `Elm.Annotation.dict` here because it will NOT
@@ -2002,6 +2193,35 @@ typeToEncoder type_ =
                     (\encoder ->
                         Gen.Json.Encode.call_.list (Elm.functionReduced "rec" encoder)
                     )
+
+        Common.Tuple l r ->
+            CliMonad.map2
+                (\lEncoder rEncoder rec ->
+                    Elm.apply
+                        (Elm.fn (Elm.Arg.tuple (Elm.Arg.var "l") (Elm.Arg.var "r")) <|
+                            \( lv, rv ) ->
+                                Elm.list [ lEncoder lv, rEncoder rv ]
+                                    |> Gen.Json.Encode.call_.list Gen.Basics.values_.identity
+                        )
+                        [ rec ]
+                )
+                (typeToEncoder l)
+                (typeToEncoder r)
+
+        Common.Triple l m r ->
+            CliMonad.map3
+                (\lEncoder mEncoder rEncoder rec ->
+                    Elm.apply
+                        (Elm.fn (Elm.Arg.triple (Elm.Arg.var "l") (Elm.Arg.var "m") (Elm.Arg.var "r")) <|
+                            \( lv, mv, rv ) ->
+                                Elm.list [ lEncoder lv, mEncoder mv, rEncoder rv ]
+                                    |> Gen.Json.Encode.call_.list Gen.Basics.values_.identity
+                        )
+                        [ rec ]
+                )
+                (typeToEncoder l)
+                (typeToEncoder m)
+                (typeToEncoder r)
 
         -- An object with additionalProperties (the type of those properties is
         -- `additionalProperties`) and no normal `properties` fields: A simple Dict.
@@ -2212,6 +2432,28 @@ typeToDecoder type_ =
         Common.List t ->
             CliMonad.map Gen.Json.Decode.list
                 (typeToDecoder t)
+
+        Common.Tuple l r ->
+            CliMonad.map2
+                (\lDecoder rDecoder ->
+                    Gen.Json.Decode.map2 Elm.tuple
+                        (Gen.Json.Decode.index 0 lDecoder)
+                        (Gen.Json.Decode.index 1 rDecoder)
+                )
+                (typeToDecoder l)
+                (typeToDecoder r)
+
+        Common.Triple l m r ->
+            CliMonad.map3
+                (\lDecoder mDecoder rDecoder ->
+                    Gen.Json.Decode.map3 Elm.triple
+                        (Gen.Json.Decode.index 0 lDecoder)
+                        (Gen.Json.Decode.index 1 mDecoder)
+                        (Gen.Json.Decode.index 2 rDecoder)
+                )
+                (typeToDecoder l)
+                (typeToDecoder m)
+                (typeToDecoder r)
 
         Common.Dict additionalProperties [] ->
             CliMonad.map Gen.Json.Decode.dict

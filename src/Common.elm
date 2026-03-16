@@ -457,6 +457,8 @@ type Type
         }
     | Null
     | List Type
+    | Tuple Type Type
+    | Triple Type Type Type
       -- The type declared in additionalProperties, and a list of normal properties
     | Dict { type_ : Type, documentation : Maybe String } Object
     | OneOf TypeName ( OneOfData, List OneOfData )

@@ -1,0 +1,37 @@
+openapi: 3.0.0
+info:
+    title: Tuples and Triples
+    version: 1.0.0
+paths:
+    "/tuple":
+        get:
+            responses:
+                200:
+                    description: Ok
+                    content:
+                        application/json:
+                            schema:
+                                "$ref": "#/components/schemas/Tuple"
+    "/triple":
+        get:
+            responses:
+                200:
+                    description: Ok
+                    content:
+                        application/json:
+                            schema:
+                                "$ref": "#/components/schemas/Triple"
+components:
+    schemas:
+        Tuple:
+            type: array
+            items:
+                type: string
+            minItems: 2
+            maxItems: 2
+        Triple:
+            type: array
+            items:
+                type: string
+            minItems: 3
+            maxItems: 3

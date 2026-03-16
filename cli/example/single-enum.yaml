@@ -9,7 +9,7 @@ paths:
             200:
                 description: Ok
                 schema:
-                    "#ref": "#/components/schemas/ValuePropositionSummary"
+                    "$ref": "#/components/schemas/ValuePropositionSummary"
 components:
     schemas:
         ValuePropositionSummary:

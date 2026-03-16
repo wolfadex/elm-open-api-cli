@@ -93,6 +93,11 @@ run =
                 |> OpenApi.Config.withOutputModuleName [ "Trustmark", "TradeCheck" ]
                 |> OpenApi.Config.withEffectTypes [ OpenApi.Config.ElmHttpCmd ]
 
+        tupleTriple : OpenApi.Config.Input
+        tupleTriple =
+            OpenApi.Config.inputFrom (OpenApi.Config.File "./example/tuple-triple.yaml")
+                |> OpenApi.Config.withEffectTypes [ OpenApi.Config.ElmHttpCmd ]
+
         viaggiatreno : OpenApi.Config.Input
         viaggiatreno =
             OpenApi.Config.inputFrom (OpenApi.Config.File "./example/viaggiatreno.yaml")
@@ -139,6 +144,7 @@ run =
                 |> OpenApi.Config.withInput singleEnum
                 |> OpenApi.Config.withInput trustmark
                 |> OpenApi.Config.withInput trustmarkTradeCheck
+                |> OpenApi.Config.withInput tupleTriple
                 |> OpenApi.Config.withInput uuidArrayParam
                 |> OpenApi.Config.withInput viaggiatreno
                 |> OpenApi.Config.withInput (bug 7889)

@@ -1660,9 +1660,14 @@ jsonRegex =
         |> Maybe.withDefault Regex.never
 
 
-searchForJsonMediaType : String -> a -> Bool
-searchForJsonMediaType mediaType _ =
-    mediaType == "*/*" || Regex.contains jsonRegex mediaType
+searchForJsonMediaType : Dict.Dict String OpenApi.MediaType.MediaType -> Maybe OpenApi.MediaType.MediaType
+searchForJsonMediaType dict =
+    Dict.Extra.find
+        (\mediaType _ ->
+            mediaType == "*/*" || Regex.contains jsonRegex mediaType
+        )
+        dict
+        |> Maybe.map Tuple.second
 
 
 contentToContentSchema : Dict String OpenApi.MediaType.MediaType -> CliMonad ContentSchema
@@ -1670,13 +1675,7 @@ contentToContentSchema content =
     let
         default : Maybe (CliMonad ContentSchema) -> CliMonad ContentSchema
         default fallback =
-            let
-                maybeJsonMediaType : Maybe OpenApi.MediaType.MediaType
-                maybeJsonMediaType =
-                    Dict.Extra.find searchForJsonMediaType content
-                        |> Maybe.map Tuple.second
-            in
-            case maybeJsonMediaType of
+            case searchForJsonMediaType content of
                 Just jsonSchema ->
                     CliMonad.succeed jsonSchema
                         |> CliMonad.stepOrFail "The request's application/json content option doesn't have a schema"
@@ -2742,10 +2741,7 @@ responseToSchema : OpenApi.Response.Response -> CliMonad Json.Schema.Definitions
 responseToSchema response =
     CliMonad.succeed response
         |> CliMonad.stepOrFail "The response does not have a json content"
-            (OpenApi.Response.content
-                >> Dict.Extra.find searchForJsonMediaType
-                >> Maybe.map Tuple.second
-            )
+            (OpenApi.Response.content >> searchForJsonMediaType)
         |> CliMonad.stepOrFail "The response's json content option doesn't have a schema"
             OpenApi.MediaType.schema
         |> CliMonad.map OpenApi.Schema.get
@@ -2755,10 +2751,7 @@ requestBodyToSchema : OpenApi.RequestBody.RequestBody -> CliMonad Json.Schema.De
 requestBodyToSchema requestBody =
     CliMonad.succeed requestBody
         |> CliMonad.stepOrFail "The request does not have a json content"
-            (OpenApi.RequestBody.content
-                >> Dict.Extra.find searchForJsonMediaType
-                >> Maybe.map Tuple.second
-            )
+            (OpenApi.RequestBody.content >> searchForJsonMediaType)
         |> CliMonad.stepOrFail "The request body's json content option doesn't have a schema"
             OpenApi.MediaType.schema
         |> CliMonad.map OpenApi.Schema.get

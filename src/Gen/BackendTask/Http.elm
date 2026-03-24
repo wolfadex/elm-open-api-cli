@@ -1,8 +1,7 @@
 module Gen.BackendTask.Http exposing
     ( expectString, expectJson
-    , expectBytes, emptyBody, jsonBody
+    , expectBytes, emptyBody
     , annotation_, call_
-    , bytesBody
     )
 
 {-|
@@ -10,9 +9,8 @@ module Gen.BackendTask.Http exposing
 
 # Generated bindings for BackendTask.Http
 
-@docs get, expectString, expectJson
-@docs expectBytes, emptyBody, jsonBody
-@docs bytesBodyWithOptions
+@docs expectString, expectJson
+@docs expectBytes, emptyBody
 @docs annotation_, call_
 
 -}
@@ -136,50 +134,6 @@ emptyBody =
         , name = "emptyBody"
         , annotation = Just (Type.namedWith [ "BackendTask", "Http" ] "Body" [])
         }
-
-
-{-| Builds a JSON body for a BackendTask.Http request. See [elm/http's `Http.jsonBody`](https://package.elm-lang.org/packages/elm/http/latest/Http#jsonBody).
-
-jsonBody: Json.Encode.Value -> BackendTask.Http.Body
-
--}
-jsonBody : Elm.Expression -> Elm.Expression
-jsonBody jsonBodyArg_ =
-    Elm.apply
-        (Elm.value
-            { importFrom = [ "BackendTask", "Http" ]
-            , name = "jsonBody"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.namedWith [ "Json", "Encode" ] "Value" [] ]
-                        (Type.namedWith [ "BackendTask", "Http" ] "Body" [])
-                    )
-            }
-        )
-        [ jsonBodyArg_ ]
-
-
-{-| Build a body from `Bytes` for a BackendTask.Http request. See [elm/http's `Http.bytesBody`](https://package.elm-lang.org/packages/elm/http/latest/Http#bytesBody).
-
-bytesBody: String -> Bytes.Bytes -> BackendTask.Http.Body
-
--}
-bytesBody : String -> Elm.Expression -> Elm.Expression
-bytesBody bytesBodyArg_ bytesBodyArg_0 =
-    Elm.apply
-        (Elm.value
-            { importFrom = [ "BackendTask", "Http" ]
-            , name = "bytesBody"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.string, Type.namedWith [ "Bytes" ] "Bytes" [] ]
-                        (Type.namedWith [ "BackendTask", "Http" ] "Body" [])
-                    )
-            }
-        )
-        [ Elm.string bytesBodyArg_, bytesBodyArg_0 ]
 
 
 annotation_ :

@@ -44,6 +44,7 @@ exceptCodegenRules =
     , Docs.ReviewLinksAndSections.rule
         |> Rule.ignoreErrorsForDirectories [ "src/Gen" ]
     , Docs.ReviewAtDocs.rule
+        |> Rule.ignoreErrorsForDirectories [ "src/Gen" ]
     , Docs.UpToDateReadmeLinks.rule
     , NoConfusingPrefixOperator.rule
     , NoDebug.Log.rule

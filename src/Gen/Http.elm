@@ -1,9 +1,7 @@
 module Gen.Http exposing
     ( emptyBody
-    , jsonBody, bytesBody
-    , expectBytesResponse, stringResolver, bytesResolver, annotation_
+    , expectBytesResponse, expectStringResponse, stringResolver, bytesResolver, annotation_
     , caseOf_, call_
-    , expectStringResponse
     )
 
 {-|
@@ -12,10 +10,7 @@ module Gen.Http exposing
 # Generated bindings for Http
 
 @docs emptyBody
-@docs jsonBody, bytesBody
-@docs expectString
-@docs trackResponse
-@docs expectBytesResponse, stringResolver, bytesResolver, annotation_
+@docs expectBytesResponse, expectStringResponse, stringResolver, bytesResolver, annotation_
 @docs caseOf_, call_
 
 -}
@@ -46,66 +41,6 @@ emptyBody =
         , name = "emptyBody"
         , annotation = Just (Type.namedWith [ "Http" ] "Body" [])
         }
-
-
-{-| Put some JSON value in the body of your `Request`. This will automatically
-add the `Content-Type: application/json` header.
-
-jsonBody: Json.Encode.Value -> Http.Body
-
--}
-jsonBody : Elm.Expression -> Elm.Expression
-jsonBody jsonBodyArg_ =
-    Elm.apply
-        (Elm.value
-            { importFrom = [ "Http" ]
-            , name = "jsonBody"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.namedWith [ "Json", "Encode" ] "Value" [] ]
-                        (Type.namedWith [ "Http" ] "Body" [])
-                    )
-            }
-        )
-        [ jsonBodyArg_ ]
-
-
-{-| Put some `Bytes` in the body of your `Request`. This allows you to use
-[`elm/bytes`](/packages/elm/bytes/latest) to have full control over the binary
-representation of the data you are sending. For example, you could create an
-`archive.zip` file and send it along like this:
-
-    import Bytes exposing (Bytes)
-
-    zipBody : Bytes -> Body
-    zipBody bytes =
-        bytesBody "application/zip" bytes
-
-The first argument is a [MIME type](https://en.wikipedia.org/wiki/Media_type)
-of the body. In other scenarios you may want to use MIME types like `image/png`
-or `image/jpeg` instead.
-
-**Note:** Use [`track`](#track) to track upload progress.
-
-bytesBody: String -> Bytes.Bytes -> Http.Body
-
--}
-bytesBody : String -> Elm.Expression -> Elm.Expression
-bytesBody bytesBodyArg_ bytesBodyArg_0 =
-    Elm.apply
-        (Elm.value
-            { importFrom = [ "Http" ]
-            , name = "bytesBody"
-            , annotation =
-                Just
-                    (Type.function
-                        [ Type.string, Type.namedWith [ "Bytes" ] "Bytes" [] ]
-                        (Type.namedWith [ "Http" ] "Body" [])
-                    )
-            }
-        )
-        [ Elm.string bytesBodyArg_, bytesBodyArg_0 ]
 
 
 {-| Expect a [`Response`](#Response) with a `String` body. So you could define

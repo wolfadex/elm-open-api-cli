@@ -516,9 +516,9 @@ toRequestFunctions server effectTypes method pathUrl operation =
                                     encoded =
                                         encoder <| Elm.get "body" config
                                 in
-                                { core = Gen.Http.jsonBody encoded
-                                , elmPages = Gen.BackendTask.Http.jsonBody encoded
-                                , lamderaProgramTest = Gen.Effect.Http.jsonBody encoded
+                                { core = Gen.Http.call_.jsonBody encoded
+                                , elmPages = Gen.BackendTask.Http.call_.jsonBody encoded
+                                , lamderaProgramTest = Gen.Effect.Http.call_.jsonBody encoded
                                 }
                             )
 
@@ -539,13 +539,13 @@ toRequestFunctions server effectTypes method pathUrl operation =
                     CliMonad.succeed <|
                         \config ->
                             let
-                                toBody : (String -> Elm.Expression -> Elm.Expression) -> Elm.Expression
+                                toBody : (Elm.Expression -> Elm.Expression -> Elm.Expression) -> Elm.Expression
                                 toBody f =
-                                    f mime (Elm.get "body" config)
+                                    f (Elm.string mime) (Elm.get "body" config)
                             in
-                            { core = toBody Gen.Http.bytesBody
-                            , elmPages = toBody Gen.BackendTask.Http.bytesBody
-                            , lamderaProgramTest = toBody Gen.Effect.Http.bytesBody
+                            { core = toBody Gen.Http.call_.bytesBody
+                            , elmPages = toBody Gen.BackendTask.Http.call_.bytesBody
+                            , lamderaProgramTest = toBody Gen.Effect.Http.call_.bytesBody
                             }
 
                 Base64Content mime ->

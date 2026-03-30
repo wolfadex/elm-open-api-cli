@@ -8,7 +8,7 @@
     "scripts": {
         "dev": "cd cli && elm-pages run src/Cli.elm",
         "docs": "elm make --docs=docs.json",
-        "build": "cd cli && elm-pages bundle-script src/Cli.elm --output ../dist/elm-open-api.js --debug",
+        "build": "cd cli && elm-pages bundle-script src/Cli.elm --output ../dist/elm-open-api.js --optimize=1",
         "review": "elm-review",
         "review:watch": "elm-review --watch --fix",
         "format": "elm-format src tests --validate",

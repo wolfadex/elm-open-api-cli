@@ -778,50 +778,31 @@ toRequestFunctions server effectTypes method pathUrl operation =
                                         , ( "timeout", Gen.Maybe.make_.nothing )
                                         , ( "tracker", Gen.Maybe.make_.nothing )
                                         ]
-                            , cmdAnnotation =
-                                Elm.Annotation.function
-                                    [ (paramType { requireToMsg = True }).core ]
-                                    (Elm.Annotation.cmd (Elm.Annotation.var "msg"))
-                            , recordAnnotation =
-                                Elm.Annotation.function
-                                    [ (paramType { requireToMsg = True }).core ]
-                                    (Elm.Annotation.record
-                                        [ ( "method", Elm.Annotation.string )
-                                        , ( "headers", Elm.Annotation.list Gen.Http.annotation_.header )
-                                        , ( "url", Elm.Annotation.string )
-                                        , ( "body", Gen.Http.annotation_.body )
-                                        , ( "expect", Gen.Http.annotation_.expect (Elm.Annotation.var "msg") )
-                                        , ( "timeout", Elm.Annotation.maybe Elm.Annotation.float )
-                                        , ( "tracker", Elm.Annotation.maybe Elm.Annotation.string )
-                                        ]
-                                    )
+                            , cmdParam = (paramType { requireToMsg = True }).core
                             }
                         )
                         [ ( OpenApi.Config.ElmHttpCmd
-                          , \{ cmdArg, cmdAnnotation } ->
+                          , \{ cmdArg, cmdParam } ->
                                 ( functionName
                                 , Elm.fn
-                                    (Elm.Arg.var "config")
+                                    (Elm.Arg.varWith "config" cmdParam)
                                     (\config -> Gen.Http.call_.request (cmdArg config))
-                                    |> Elm.withType cmdAnnotation
                                 )
                           )
                         , ( OpenApi.Config.ElmHttpCmdRisky
-                          , \{ cmdArg, cmdAnnotation } ->
+                          , \{ cmdArg, cmdParam } ->
                                 ( functionName ++ "Risky"
                                 , Elm.fn
-                                    (Elm.Arg.var "config")
+                                    (Elm.Arg.varWith "config" cmdParam)
                                     (\config -> Gen.Http.call_.riskyRequest (cmdArg config))
-                                    |> Elm.withType cmdAnnotation
                                 )
                           )
                         , ( OpenApi.Config.ElmHttpCmdRecord
-                          , \{ cmdArg, recordAnnotation } ->
+                          , \{ cmdArg, cmdParam } ->
                                 ( functionName ++ "Record"
                                 , Elm.fn
-                                    (Elm.Arg.var "config")
+                                    (Elm.Arg.varWith "config" cmdParam)
                                     cmdArg
-                                    |> Elm.withType recordAnnotation
                                 )
                           )
                         ]
@@ -850,6 +831,7 @@ toRequestFunctions server effectTypes method pathUrl operation =
                                         , ( "body", (toBody config).core )
                                         , ( "timeout", Gen.Maybe.make_.nothing )
                                         ]
+                            , taskParam = (paramType { requireToMsg = False }).core
                             , taskAnnotation =
                                 Elm.Annotation.function
                                     [ (paramType { requireToMsg = False }).core ]
@@ -876,28 +858,28 @@ toRequestFunctions server effectTypes method pathUrl operation =
                             }
                         )
                         [ ( OpenApi.Config.ElmHttpTask
-                          , \{ taskArg, taskAnnotation } ->
+                          , \{ taskArg, taskParam, taskAnnotation } ->
                                 ( functionName ++ "Task"
                                 , Elm.fn
-                                    (Elm.Arg.var "config")
+                                    (Elm.Arg.varWith "config" taskParam)
                                     (\config -> Gen.Http.call_.task (taskArg config))
                                     |> Elm.withType taskAnnotation
                                 )
                           )
                         , ( OpenApi.Config.ElmHttpTaskRisky
-                          , \{ taskArg, taskAnnotation } ->
+                          , \{ taskArg, taskParam, taskAnnotation } ->
                                 ( functionName ++ "TaskRisky"
                                 , Elm.fn
-                                    (Elm.Arg.var "config")
+                                    (Elm.Arg.varWith "config" taskParam)
                                     (\config -> Gen.Http.call_.riskyTask (taskArg config))
                                     |> Elm.withType taskAnnotation
                                 )
                           )
                         , ( OpenApi.Config.ElmHttpTaskRecord
-                          , \{ taskArg, recordAnnotation } ->
+                          , \{ taskArg, taskParam, recordAnnotation } ->
                                 ( functionName ++ "TaskRecord"
                                 , Elm.fn
-                                    (Elm.Arg.var "config")
+                                    (Elm.Arg.varWith "config" taskParam)
                                     taskArg
                                     |> Elm.withType recordAnnotation
                                 )
@@ -928,6 +910,7 @@ toRequestFunctions server effectTypes method pathUrl operation =
                                         , ( "retries", Gen.Maybe.make_.nothing )
                                         , ( "timeoutInMs", Gen.Maybe.make_.nothing )
                                         ]
+                            , taskParam = (paramType { requireToMsg = False }).elmPages
                             , taskAnnotation =
                                 Elm.Annotation.function
                                     [ (paramType { requireToMsg = False }).elmPages ]
@@ -958,19 +941,19 @@ toRequestFunctions server effectTypes method pathUrl operation =
                             }
                         )
                         [ ( OpenApi.Config.DillonkearnsElmPagesTask
-                          , \{ taskArg, taskAnnotation, specificExpect } ->
+                          , \{ taskArg, taskParam, taskAnnotation, specificExpect } ->
                                 ( functionName
                                 , Elm.fn
-                                    (Elm.Arg.var "config")
+                                    (Elm.Arg.varWith "config" taskParam)
                                     (\config -> Gen.BackendTask.Http.call_.request (taskArg config) (specificExpect <| toMsg config))
                                     |> Elm.withType taskAnnotation
                                 )
                           )
                         , ( OpenApi.Config.DillonkearnsElmPagesTaskRecord
-                          , \{ taskArg, recordAnnotation, specificExpect } ->
+                          , \{ taskArg, taskParam, recordAnnotation, specificExpect } ->
                                 ( functionName
                                 , Elm.fn
-                                    (Elm.Arg.var "config")
+                                    (Elm.Arg.varWith "config" taskParam)
                                     (\config -> Elm.tuple (taskArg config) (specificExpect <| toMsg config))
                                     |> Elm.withType recordAnnotation
                                 )
@@ -1055,6 +1038,7 @@ toRequestFunctions server effectTypes method pathUrl operation =
                                         , ( "body", (toBody config).lamderaProgramTest )
                                         , ( "timeout", Gen.Maybe.make_.nothing )
                                         ]
+                            , taskParam = (paramType { requireToMsg = False }).lamderaProgramTest
                             , taskAnnotation =
                                 Elm.Annotation.function
                                     [ (paramType { requireToMsg = False }).lamderaProgramTest ]
@@ -1083,28 +1067,28 @@ toRequestFunctions server effectTypes method pathUrl operation =
                             }
                         )
                         [ ( OpenApi.Config.LamderaProgramTestTask
-                          , \{ taskArg, taskAnnotation } ->
+                          , \{ taskArg, taskParam, taskAnnotation } ->
                                 ( functionName ++ "Task"
                                 , Elm.fn
-                                    (Elm.Arg.var "config")
+                                    (Elm.Arg.varWith "config" taskParam)
                                     (\config -> Gen.Effect.Http.call_.task (taskArg config))
                                     |> Elm.withType taskAnnotation
                                 )
                           )
                         , ( OpenApi.Config.LamderaProgramTestTaskRisky
-                          , \{ taskArg, taskAnnotation } ->
+                          , \{ taskArg, taskParam, taskAnnotation } ->
                                 ( functionName ++ "TaskRisky"
                                 , Elm.fn
-                                    (Elm.Arg.var "config")
+                                    (Elm.Arg.varWith "config" taskParam)
                                     (\config -> Gen.Effect.Http.call_.riskyTask (taskArg config))
                                     |> Elm.withType taskAnnotation
                                 )
                           )
                         , ( OpenApi.Config.LamderaProgramTestTaskRecord
-                          , \{ taskArg, recordAnnotation } ->
+                          , \{ taskArg, taskParam, recordAnnotation } ->
                                 ( functionName ++ "TaskRecord"
                                 , Elm.fn
-                                    (Elm.Arg.var "config")
+                                    (Elm.Arg.varWith "config" taskParam)
                                     taskArg
                                     |> Elm.withType recordAnnotation
                                 )

@@ -383,6 +383,12 @@ pr267 =
                                                 {- ## Operations -}
                         
                         
+                                                api :
+                                                    { toMsg :
+                                                        Result (OpenApi.Common.Error e String) Output.Types.Responses.Forbidden
+                                                        -> msg
+                                                    }
+                                                    -> Cmd msg
                                                 api config =
                                                     Http.request
                                                         { url = Url.Builder.absolute [ "api" ] []

@@ -86,7 +86,6 @@ type ContentSchema
     | StringContent Mime
     | BytesContent Mime
     | Base64Content Mime
-    | ReferenceContent (Common.RefTo Common.RequestBody)
 
 
 type alias AuthorizationInfo =
@@ -572,11 +571,6 @@ contentSchemaToBodyBuilder bodyContent =
                                     |> Gen.Base64.fromBytes
                                     |> Gen.Maybe.withDefault (Elm.string "")
                                 )
-
-                ReferenceContent _ ->
-                    CliMonad.map
-                        (\todo _ -> todo)
-                        (CliMonad.todo "toRequestFunctions:  branch 'ReferenceContent _' not implemented")
     in
     perPackageMap toBody perPackageBindings
 
@@ -656,9 +650,6 @@ contentSchemaToBodyParams contentSchema =
                     CliMonad.succeed (Just Gen.Bytes.annotation_.bytes)
                         |> CliMonad.withRequiredPackage "elm/bytes"
                         |> CliMonad.withRequiredPackage Common.base64PackageName
-
-                ReferenceContent _ ->
-                    CliMonad.fail "toRequestFunctions:  branch 'ReferenceContent _' not implemented"
     in
     annotation
         |> CliMonad.map
@@ -2600,9 +2591,6 @@ operationToTypesExpectAndResolver effectTypes method pathUrl operation =
                                                 , toMsg = toMsg
                                                 }
                                                     |> CliMonad.succeed
-
-                                            ReferenceContent _ ->
-                                                CliMonad.fail "operationToTypesExpectAndResolver: branch 'ReferenceContent _' not implemented"
                                     )
                                     (OpenApi.Response.content response
                                         |> contentToContentSchema
@@ -2680,9 +2668,6 @@ errorResponsesToType functionName errorResponses =
 
                                         Base64Content _ ->
                                             CliMonad.succeed Elm.Annotation.string
-
-                                        ReferenceContent ref ->
-                                            CliMonad.refToAnnotation ref
                                 )
 
                     Nothing ->
@@ -2777,9 +2762,6 @@ errorResponsesToErrorDecoders functionName errorResponses =
 
                                                                     EmptyContent ->
                                                                         CliMonad.succeed (Gen.Json.Decode.succeed Elm.unit)
-
-                                                                    ReferenceContent _ ->
-                                                                        CliMonad.todo "$ref errors are not supported yet"
                                                             )
 
                                                 Nothing ->
@@ -2846,16 +2828,6 @@ responseToSchema response =
         |> CliMonad.stepOrFail "The response does not have a json content"
             (OpenApi.Response.content >> searchForJsonMediaType)
         |> CliMonad.stepOrFail "The response's json content option doesn't have a schema"
-            OpenApi.MediaType.schema
-        |> CliMonad.map OpenApi.Schema.get
-
-
-requestBodyToSchema : OpenApi.RequestBody.RequestBody -> CliMonad Json.Schema.Definitions.Schema
-requestBodyToSchema requestBody =
-    CliMonad.succeed requestBody
-        |> CliMonad.stepOrFail "The request does not have a json content"
-            (OpenApi.RequestBody.content >> searchForJsonMediaType)
-        |> CliMonad.stepOrFail "The request body's json content option doesn't have a schema"
             OpenApi.MediaType.schema
         |> CliMonad.map OpenApi.Schema.get
 

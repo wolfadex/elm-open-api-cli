@@ -1,5 +1,6 @@
 module SchemaUtils exposing
     ( OneOfName
+    , getRequestBody
     , getSchema
     , oneOfDeclarations
     , recordType
@@ -45,6 +46,8 @@ import NonEmpty exposing (NonEmpty)
 import OpenApi
 import OpenApi.Common.Internal
 import OpenApi.Components
+import OpenApi.Reference
+import OpenApi.RequestBody
 import OpenApi.Schema
 import Pretty
 import Result.Extra
@@ -63,6 +66,19 @@ getSchema ref =
         |> CliMonad.stepOrFail ("Could not find component's schema, while looking up " ++ refName)
             (\components -> Dict.get refName (OpenApi.Components.schemas components))
         |> CliMonad.map OpenApi.Schema.get
+
+
+getRequestBody : Common.RefTo Common.RequestBody -> CliMonad (OpenApi.Reference.ReferenceOr OpenApi.RequestBody.RequestBody)
+getRequestBody ref =
+    let
+        ( _, Common.UnsafeName refName ) =
+            Common.unwrapRef ref
+    in
+    CliMonad.getApiSpec
+        |> CliMonad.stepOrFail ("Could not find components in the schema, while looking up " ++ refName)
+            OpenApi.components
+        |> CliMonad.stepOrFail ("Could not find component's schema, while looking up " ++ refName)
+            (\components -> Dict.get refName (OpenApi.Components.requestBodies components))
 
 
 subSchemaAllOfToProperties : List (Common.RefTo Common.Schema) -> Json.Schema.Definitions.SubSchema -> CliMonad (List ( Common.UnsafeName, Common.Field ))

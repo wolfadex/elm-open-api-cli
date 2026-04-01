@@ -301,12 +301,9 @@ pr267 =
                         
                                                 decodeMessage : Json.Decode.Decoder Output.Types.Message
                                                 decodeMessage =
-                                                    Json.Decode.succeed
-                                                        (\\msg -> { msg = msg }) |> OpenApi.Common.jsonDecodeAndMap
-                                                                                           (Json.Decode.field
-                                                                                                    "msg"
-                                                                                                    Json.Decode.string
-                                                                                           )
+                                                    Json.Decode.succeed (\\msg -> { msg = msg })
+                                                        |> OpenApi.Common.jsonDecodeAndMap
+                                                               (Json.Decode.field "msg" Json.Decode.string)
                         
                         
                                                 {- ## Encoders -}
@@ -633,9 +630,7 @@ expectEqualMultiline exp actual =
             (header
                 ++ "\n"
                 ++ (Diff.diffLinesWith
-                        (Diff.defaultOptions
-                            |> Diff.ignoreLeadingWhitespace
-                        )
+                        Diff.defaultOptions
                         exp
                         actual
                         |> Diff.ToString.diffToString { context = 4, color = True }

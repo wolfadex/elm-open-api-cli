@@ -86,6 +86,14 @@ type ContentSchema
     | StringContent Mime
     | BytesContent Mime
     | Base64Content Mime
+    | MultipartContent (List { name : Common.UnsafeName, required : Bool, part : MultipartPart })
+
+
+{-| -}
+type MultipartPart
+    = JsonPart Common.Type
+    | StringPart
+    | BytesPart
 
 
 type alias AuthorizationInfo =
@@ -467,7 +475,13 @@ requestBodyToDeclarations name reference =
                             |> CliMonad.andThen (JsonSchema.Generate.schemaToDeclarations Common.RequestBody name)
 
                     Nothing ->
-                        CliMonad.fail "The request body doesn't contain a json content"
+                        case Dict.get "multipart/form-data" content of
+                            Just formData ->
+                                getSchema "multipart/form-data" formData
+                                    |> CliMonad.andThen (JsonSchema.Generate.multipartFormDataRequestBodyToDeclarations name)
+
+                            Nothing ->
+                                CliMonad.fail "The request body contains neither a json nor a multipart/form-data content"
 
         Nothing ->
             CliMonad.fail "Could not convert reference to concrete value"
@@ -571,8 +585,86 @@ contentSchemaToBodyBuilder bodyContent =
                                     |> Gen.Base64.fromBytes
                                     |> Gen.Maybe.withDefault (Elm.string "")
                                 )
+
+                MultipartContent parts ->
+                    let
+                        allRequired : Bool
+                        allRequired =
+                            List.all .required parts
+                    in
+                    parts
+                        |> CliMonad.combineMap
+                            (\part ->
+                                part
+                                    |> buildPart utils
+                                    |> CliMonad.map
+                                        (\partMaker config ->
+                                            let
+                                                partValue : Elm.Expression
+                                                partValue =
+                                                    config
+                                                        |> Elm.get "body"
+                                                        |> Elm.get (Common.toValueName part.name)
+                                            in
+                                            if allRequired then
+                                                partMaker partValue
+
+                                            else if part.required then
+                                                Elm.maybe (Just (partMaker partValue))
+
+                                            else
+                                                Gen.Maybe.map partMaker partValue
+                                        )
+                            )
+                        |> CliMonad.map
+                            (\fs config ->
+                                if allRequired then
+                                    fs
+                                        |> List.map (\x -> x config)
+                                        |> Elm.list
+                                        |> utils.multipartBody
+
+                                else
+                                    fs
+                                        |> List.map (\x -> x config)
+                                        |> Gen.List.filterMap Gen.Basics.identity
+                                        |> utils.multipartBody
+                            )
     in
     perPackageMap toBody perPackageBindings
+
+
+buildPart : Bindings -> { required : Bool, part : MultipartPart, name : Common.UnsafeName } -> CliMonad (Elm.Expression -> Elm.Expression)
+buildPart utils part =
+    case part.part of
+        JsonPart partType ->
+            SchemaUtils.typeToEncoder partType
+                |> CliMonad.map
+                    (\encoder field ->
+                        field
+                            |> encoder
+                            |> Gen.Json.Encode.call_.encode
+                                (Elm.int 0)
+                            |> utils.stringPart
+                                (Elm.string (Common.toValueName part.name))
+                    )
+
+        StringPart ->
+            CliMonad.succeed
+                (\field ->
+                    utils.stringPart
+                        (Elm.string (Common.toValueName part.name))
+                        field
+                )
+
+        BytesPart ->
+            CliMonad.succeed
+                (\field ->
+                    utils.bytesPart
+                        (Elm.string (Common.toValueName part.name))
+                        (Elm.string "application/octet-stream")
+                        field
+                )
 
 
 type alias Bindings =
@@ -650,6 +742,10 @@ contentSchemaToBodyParams contentSchema =
                     CliMonad.succeed (Just Gen.Bytes.annotation_.bytes)
                         |> CliMonad.withRequiredPackage "elm/bytes"
                         |> CliMonad.withRequiredPackage Common.base64PackageName
+
+                MultipartContent parts ->
+                    multipartPartsToAnnotation parts
+                        |> CliMonad.map Just
     in
     annotation
         |> CliMonad.map
@@ -1183,6 +1279,38 @@ lamderaProgramTestTasks ({ method, functionName, resolver, errorTypeAnnotation, 
                 )
           )
         ]
+
+
+multipartPartsToAnnotation : List { name : Common.UnsafeName, required : Bool, part : MultipartPart } -> CliMonad Elm.Annotation.Annotation
+multipartPartsToAnnotation parts =
+    parts
+        |> CliMonad.combineMap
+            (\{ name, required, part } ->
+                let
+                    partAnnotation : CliMonad Elm.Annotation.Annotation
+                    partAnnotation =
+                        case part of
+                            JsonPart type_ ->
+                                SchemaUtils.typeToAnnotationWithNullable type_
+
+                            StringPart ->
+                                CliMonad.succeed Elm.Annotation.string
+
+                            BytesPart ->
+                                CliMonad.succeed Gen.Bytes.annotation_.bytes
+                                    |> CliMonad.withRequiredPackage "elm/bytes"
+                in
+                CliMonad.map
+                    (\partType ->
+                        if required then
+                            ( Common.toValueName name, partType )
+
+                        else
+                            ( Common.toValueName name, Elm.Annotation.maybe partType )
+                    )
+                    partAnnotation
+            )
+        |> CliMonad.map Elm.Annotation.record
 
 
 operationToGroup : OpenApi.Operation.Operation -> String
@@ -1724,13 +1852,18 @@ contentToContentSchema content =
                                     stringContent "text/plain" htmlSchema
 
                                 Nothing ->
-                                    let
-                                        msg : String
-                                        msg =
-                                            "The content doesn't have an application/json, text/html or text/plain option, it has " ++ String.join ", " (Dict.keys content)
-                                    in
-                                    fallback
-                                        |> Maybe.withDefault (CliMonad.fail msg)
+                                    case Dict.get "multipart/form-data" content of
+                                        Just multipartSchema ->
+                                            multipartContent multipartSchema
+
+                                        Nothing ->
+                                            let
+                                                msg : String
+                                                msg =
+                                                    "The content doesn't have an application/json, multipart/form-data, text/html or text/plain option, it has " ++ String.join ", " (Dict.keys content)
+                                            in
+                                            fallback
+                                                |> Maybe.withDefault (CliMonad.fail msg)
 
         stringContent : String -> OpenApi.MediaType.MediaType -> CliMonad ContentSchema
         stringContent mime htmlSchema =
@@ -1787,6 +1920,48 @@ contentToContentSchema content =
 
         _ ->
             default Nothing
+
+
+multipartContent : OpenApi.MediaType.MediaType -> CliMonad ContentSchema
+multipartContent mediaType =
+    case OpenApi.MediaType.schema mediaType of
+        Nothing ->
+            CliMonad.fail "Missing schema"
+
+        Just schema ->
+            SchemaUtils.schemaToType [] (OpenApi.Schema.get schema)
+                |> CliMonad.andThen
+                    (\{ type_ } ->
+                        case type_ of
+                            Common.Object fields ->
+                                fields
+                                    |> List.map
+                                        (\( fieldName, field ) ->
+                                            { name = fieldName
+                                            , required = field.required
+                                            , part =
+                                                case field.type_ of
+                                                    Common.Basic Common.String { format } ->
+                                                        case format of
+                                                            Just "binary" ->
+                                                                BytesPart
+
+                                                            _ ->
+                                                                StringPart
+
+                                                    Common.Bytes ->
+                                                        BytesPart
+
+                                                    _ ->
+                                                        JsonPart field.type_
+                                            }
+                                        )
+                                    |> MultipartContent
+                                    |> CliMonad.succeed
+
+                            _ ->
+                                CliMonad.fail ("Schema with a type of " ++ SchemaUtils.typeToString type_ ++ " not supported")
+                    )
 
 
 toConfigParamAnnotation :
@@ -2591,6 +2766,9 @@ operationToTypesExpectAndResolver effectTypes method pathUrl operation =
                                                 , toMsg = toMsg
                                                 }
                                                     |> CliMonad.succeed
+
+                                            MultipartContent _ ->
+                                                CliMonad.fail "operationToTypesExpectAndResolver: branch 'MultipartContent _' not implemented"
                                     )
                                     (OpenApi.Response.content response
                                         |> contentToContentSchema
@@ -2668,6 +2846,9 @@ errorResponsesToType functionName errorResponses =
 
                                         Base64Content _ ->
                                             CliMonad.succeed Elm.Annotation.string
+
+                                        MultipartContent parts ->
+                                            multipartPartsToAnnotation parts
                                 )
 
                     Nothing ->
@@ -2762,6 +2943,9 @@ errorResponsesToErrorDecoders functionName errorResponses =
 
                                                                     EmptyContent ->
                                                                         CliMonad.succeed (Gen.Json.Decode.succeed Elm.unit)
+
+                                                                    MultipartContent _ ->
+                                                                        CliMonad.todo "Multipart errors are not supported yet"
                                                             )
 
                                                 Nothing ->

@@ -11,6 +11,7 @@ module SchemaUtils exposing
     , typeToAnnotationWithNullable
     , typeToDecoder
     , typeToEncoder
+    , typeToString
     )
 
 import CliMonad exposing (CliMonad)

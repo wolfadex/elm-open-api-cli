@@ -1,4 +1,4 @@
-module JsonSchema.Generate exposing (schemaToDeclarations)
+module JsonSchema.Generate exposing (multipartFormDataRequestBodyToDeclarations, schemaToDeclarations)
 
 import CliMonad exposing (CliMonad)
 import Common
@@ -14,6 +14,43 @@ import Gen.Maybe
 import Json.Schema.Definitions
 import NonEmpty
 import SchemaUtils
+
+
+multipartFormDataRequestBodyToDeclarations : Common.UnsafeName -> Json.Schema.Definitions.Schema -> CliMonad (List CliMonad.Declaration)
+multipartFormDataRequestBodyToDeclarations name schema =
+    SchemaUtils.schemaToType [] schema
+        |> CliMonad.andThen
+            (\{ type_, documentation } ->
+                type_
+                    |> SchemaUtils.typeToAnnotationWithNullable
+                    |> CliMonad.map
+                        (\annotation ->
+                            let
+                                typeName : Common.TypeName
+                                typeName =
+                                    Common.toTypeName name
+                            in
+                            if (Elm.ToString.annotation annotation).signature == typeName then
+                                []
+
+                            else
+                                [ { moduleName = Common.Types Common.RequestBody
+                                  , name = typeName
+                                  , declaration =
+                                        Elm.alias typeName annotation
+                                            |> (case documentation of
+                                                    Nothing ->
+                                                        identity
+
+                                                    Just doc ->
+                                                        Elm.withDocumentation doc
+                                               )
+                                            |> Elm.expose
+                                  , group = "Aliases"
+                                  }
+                                ]
+                        )
+            )
 
 
 schemaToDeclarations : Common.Component -> Common.UnsafeName -> Json.Schema.Definitions.Schema -> CliMonad (List CliMonad.Declaration)

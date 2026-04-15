@@ -1,4 +1,4 @@
-module Test.OpenApi.Generate exposing (fuzzInputName, fuzzTitle, issue48, pr267, uuidArrayParam)
+module Test.OpenApi.Generate exposing (fuzzInputName, fuzzTitle, issue48, noEnumSort, pr267, uuidArrayParam)
 
 import Ansi.Color
 import CliMonad
@@ -130,6 +130,7 @@ fuzzTitle =
                                 , formats = OpenApi.Config.defaultFormats
                                 , warnOnMissingEnums = True
                                 , keepGoing = False
+                                , noEnumSort = False
                                 }
                                 oas
                     in
@@ -259,6 +260,7 @@ pr267 =
                                 , formats = OpenApi.Config.defaultFormats
                                 , warnOnMissingEnums = True
                                 , keepGoing = False
+                                , noEnumSort = False
                                 }
                                 oas
                     in
@@ -550,6 +552,7 @@ uuidArrayParam =
                                 , formats = OpenApi.Config.defaultFormats
                                 , warnOnMissingEnums = True
                                 , keepGoing = False
+                                , noEnumSort = False
                                 }
                                 oas
                     in
@@ -582,6 +585,139 @@ uuidArrayParam =
                                             ++ ": "
                                             ++ moduleNames modules
                                         )
+
+
+noEnumSort : Test
+noEnumSort =
+    Test.test "Enum variants preserve spec order when noEnumSort is True, and named enums still resolve in query params" <|
+        \() ->
+            let
+                oasString : String
+                oasString =
+                    String.Multiline.here """
+                        openapi: "3.1.0"
+                        info:
+                          title: "Enum Order Test"
+                          version: "1.0.0"
+                        components:
+                          schemas:
+                            Fruit:
+                              type: string
+                              enum:
+                                - cherry
+                                - apple
+                                - banana
+                        paths:
+                          /items:
+                            get:
+                              operationId: getItems
+                              parameters:
+                                - in: query
+                                  name: fruit
+                                  required: false
+                                  schema:
+                                    $ref: "#/components/schemas/Fruit"
+                                - in: query
+                                  name: fruits
+                                  required: false
+                                  schema:
+                                    type: array
+                                    items:
+                                      $ref: "#/components/schemas/Fruit"
+                              responses:
+                                "200":
+                                  description: OK
+                                  content:
+                                    application/json:
+                                      schema:
+                                        type: object
+                                        properties:
+                                          count:
+                                            type: integer
+                                        required:
+                                          - count
+                    """
+            in
+            case
+                oasString
+                    |> Yaml.Decode.fromString yamlToJsonValueDecoder
+                    |> Result.mapError Debug.toString
+                    |> Result.andThen
+                        (\json ->
+                            json
+                                |> Json.Decode.decodeValue OpenApi.decode
+                                |> Result.mapError Debug.toString
+                        )
+            of
+                Err e ->
+                    Expect.fail e
+
+                Ok oas ->
+                    let
+                        generate :
+                            Bool
+                            ->
+                                Result
+                                    CliMonad.Message
+                                    { modules :
+                                        List
+                                            { moduleName : List String
+                                            , declarations : FastDict.Dict String { group : String, declaration : Elm.Declaration }
+                                            }
+                                    , warnings : List CliMonad.Message
+                                    , requiredPackages : FastSet.Set String
+                                    }
+                        generate noEnumSort_ =
+                            OpenApi.Generate.files
+                                { namespace = [ "Output" ]
+                                , generateTodos = False
+                                , effectTypes = [ OpenApi.Config.ElmHttpCmd ]
+                                , server = OpenApi.Config.Default
+                                , formats = OpenApi.Config.defaultFormats
+                                , warnOnMissingEnums = True
+                                , keepGoing = False
+                                , noEnumSort = noEnumSort_
+                                }
+                                oas
+
+                        moduleAsString :
+                            List String
+                            -> List { moduleName : List String, declarations : FastDict.Dict String { group : String, declaration : Elm.Declaration } }
+                            -> String
+                        moduleAsString name modules =
+                            modules
+                                |> List.filter (\m -> m.moduleName == name)
+                                |> List.head
+                                |> Maybe.map fileToString
+                                |> Maybe.withDefault ""
+                    in
+                    case ( generate True, generate False ) of
+                        ( Ok unsorted, Ok sorted ) ->
+                            Expect.all
+                                [ \_ ->
+                                    -- Unsorted: spec order cherry, apple, banana
+                                    moduleAsString [ "Output", "Types" ] unsorted.modules
+                                        |> expectContains "= Fruit__Cherry\n    | Fruit__Apple\n    | Fruit__Banana"
+                                , \_ ->
+                                    -- Sorted: alphabetical apple, banana, cherry
+                                    moduleAsString [ "Output", "Types" ] sorted.modules
+                                        |> expectContains "= Fruit__Apple\n    | Fruit__Banana\n    | Fruit__Cherry"
+                                , \_ ->
+                                    -- Named enum resolves in query params even when --no-enum-sort is set
+                                    moduleAsString [ "Output", "Api" ] unsorted.modules
+                                        |> expectOccurrenceCount 2 "Output.Types.fruitToString"
+                                , \_ ->
+                                    -- And still resolves on the sorted path
+                                    moduleAsString [ "Output", "Api" ] sorted.modules
+                                        |> expectOccurrenceCount 2 "Output.Types.fruitToString"
+                                ]
+                                ()
+
+                        ( Err e, _ ) ->
+                            Expect.fail ("Error generating unsorted: " ++ Debug.toString e)
+
+                        ( _, Err e ) ->
+                            Expect.fail ("Error generating sorted: " ++ Debug.toString e)
 
 
 yamlToJsonValueDecoder : Yaml.Decode.Decoder Json.Encode.Value
@@ -645,3 +781,26 @@ expectContains needle haystack =
 
     else
         Expect.fail ("Expected output to contain: " ++ needle)
+
+
+expectOccurrenceCount : Int -> String -> String -> Expect.Expectation
+expectOccurrenceCount expected needle haystack =
+    let
+        actual : Int
+        actual =
+            haystack
+                |> String.indexes needle
+                |> List.length
+    in
+    if actual == expected then
+        Expect.pass
+
+    else
+        Expect.fail
+            ("Expected output to contain "
+                ++ String.fromInt expected
+                ++ " occurrences of "
+                ++ needle
+                ++ " but found "
+                ++ String.fromInt actual
+            )

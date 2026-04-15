@@ -185,6 +185,23 @@ schemaToType seen schema =
                                     }
                         )
 
+                enumType : NonEmpty String -> CliMonad { type_ : Common.Type, documentation : Maybe String }
+                enumType decodedEnums =
+                    CliMonad.noEnumSort
+                        |> CliMonad.map
+                            (\noSort ->
+                                { type_ =
+                                    Common.enum
+                                        (if noSort then
+                                            decodedEnums
+
+                                         else
+                                            NonEmpty.sort decodedEnums
+                                        )
+                                , documentation = subSchema.description
+                                }
+                            )
+
                 singleTypeToType : Json.Schema.Definitions.SingleType -> CliMonad { type_ : Common.Type, documentation : Maybe String }
                 singleTypeToType singleType =
                     let
@@ -380,10 +397,7 @@ schemaToType seen schema =
                             singleTypeToType Json.Schema.Definitions.StringType
 
                         Ok (Just { decodedEnums, hasNull }) ->
-                            CliMonad.succeed
-                                { type_ = Common.enum decodedEnums
-                                , documentation = subSchema.description
-                                }
+                            enumType decodedEnums
                                 |> (if hasNull then
                                         nullable
 
@@ -466,10 +480,7 @@ schemaToType seen schema =
                                                             CliMonad.succeed { type_ = Common.Value, documentation = subSchema.description }
 
                                                         Ok (Just { decodedEnums, hasNull }) ->
-                                                            CliMonad.succeed
-                                                                { type_ = Common.enum decodedEnums
-                                                                , documentation = subSchema.description
-                                                                }
+                                                            enumType decodedEnums
                                                                 |> (if hasNull then
                                                                         nullable
 
@@ -486,10 +497,7 @@ schemaToType seen schema =
                             nullable (singleTypeToType Json.Schema.Definitions.StringType)
 
                         Ok (Just { decodedEnums }) ->
-                            CliMonad.succeed
-                                { type_ = Common.enum decodedEnums
-                                , documentation = subSchema.description
-                                }
+                            enumType decodedEnums
                                 |> nullable
 
                         Err e ->

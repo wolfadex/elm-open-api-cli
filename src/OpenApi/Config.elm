@@ -1,9 +1,9 @@
 module OpenApi.Config exposing
     ( Config, EffectType(..), effectTypeToPackage, Format, Input, Path(..), Server(..)
     , init, inputFrom, pathFromString
-    , withAutoConvertSwagger, AutoConvertSwagger(..), withEffectTypes, withFormat, withFormats, withGenerateTodos, withInput, withSwaggerConversionCommand, withSwaggerConversionUrl, withNoElmFormat, withKeepGoing
+    , withAutoConvertSwagger, AutoConvertSwagger(..), withEffectTypes, withFormat, withFormats, withGenerateTodos, withInput, withSwaggerConversionCommand, withSwaggerConversionUrl, withNoElmFormat, withKeepGoing, withNoEnumSort
     , withOutputModuleName, withOverrides, withServer, withWriteMergedTo, withWarnOnMissingEnums
-    , autoConvertSwagger, inputs, outputDirectory, swaggerConversionCommand, swaggerConversionUrl, noElmFormat, keepGoing
+    , autoConvertSwagger, inputs, outputDirectory, swaggerConversionCommand, swaggerConversionUrl, noElmFormat, keepGoing, noEnumSort
     , oasPath, overrides, writeMergedTo
     , toGenerationConfig, Generate, pathToString
     , defaultFormats
@@ -20,13 +20,13 @@ module OpenApi.Config exposing
 # Creation
 
 @docs init, inputFrom, pathFromString
-@docs withAutoConvertSwagger, AutoConvertSwagger, withEffectTypes, withFormat, withFormats, withGenerateTodos, withInput, withSwaggerConversionCommand, withSwaggerConversionUrl, withNoElmFormat, withKeepGoing
+@docs withAutoConvertSwagger, AutoConvertSwagger, withEffectTypes, withFormat, withFormats, withGenerateTodos, withInput, withSwaggerConversionCommand, withSwaggerConversionUrl, withNoElmFormat, withKeepGoing, withNoEnumSort
 @docs withOutputModuleName, withOverrides, withServer, withWriteMergedTo, withWarnOnMissingEnums
 
 
 # Config properties
 
-@docs autoConvertSwagger, inputs, outputDirectory, swaggerConversionCommand, swaggerConversionUrl, noElmFormat, keepGoing
+@docs autoConvertSwagger, inputs, outputDirectory, swaggerConversionCommand, swaggerConversionUrl, noElmFormat, keepGoing, noEnumSort
 
 
 # Input properties
@@ -84,6 +84,7 @@ type Config
         , dynamicFormats : List { format : String, basicType : Common.BasicType } -> List Format
         , noElmFormat : Bool
         , keepGoing : Bool
+        , noEnumSort : Bool
         }
 
 
@@ -253,6 +254,7 @@ init initialOutputDirectory =
     , dynamicFormats = \_ -> []
     , noElmFormat = False
     , keepGoing = False
+    , noEnumSort = False
     }
         |> Config
 
@@ -575,6 +577,14 @@ withKeepGoing newKeepGoing (Config config) =
     Config { config | keepGoing = newKeepGoing }
 
 
+{-| When `True`, enum variants are kept in the order they appear in the OpenAPI spec
+instead of being sorted alphabetically. Defaults to `False`.
+-}
+withNoEnumSort : Bool -> Config -> Config
+withNoEnumSort newNoEnumSort (Config config) =
+    Config { config | noEnumSort = newNoEnumSort }
+
+
 
 -------------
 -- Getters --
@@ -623,6 +633,13 @@ keepGoing (Config config) =
     config.keepGoing
 
 
+{-| Whether enum variants should be kept in spec-defined order instead of sorted alphabetically.
+-}
+noEnumSort : Config -> Bool
+noEnumSort (Config config) =
+    config.noEnumSort
+
+
 {-| -}
 oasPath : Input -> Path
 oasPath (Input input) =
@@ -656,6 +673,7 @@ type alias Generate =
     , formats : List Format
     , warnOnMissingEnums : Bool
     , keepGoing : Bool
+    , noEnumSort : Bool
     }
 
 
@@ -690,6 +708,7 @@ toGenerationConfig formatsInput (Config config) augmentedInputs =
               , warnOnMissingEnums = input.warnOnMissingEnums
               , formats = config.staticFormats ++ config.dynamicFormats formatsInput
               , keepGoing = config.keepGoing
+              , noEnumSort = config.noEnumSort
               }
             , spec
             )

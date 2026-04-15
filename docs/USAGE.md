@@ -22,6 +22,10 @@
 -   `[--overrides <file path>]`: Load an additional file to override parts of the original Open API file.
     - This is most commonly used for malformed OAS files (e.g. missing `required` on a required field) but can be used for anything you want
 -   `[--write-merged-to <file path>]`: Write the merged Open API spec to the given file (see `--overrides` for merging).
+-   `[--effect-types <effect types>]`: A list of which kind of APIs to generate. Each item should be of the form `package.type`. If `package` is omitted it defaults to `elm/http`. If `type` is omitted it defaults to `cmd,task`. The options for package are: `elm/http`, `dillonkearns/elm-pages`, `lamdera/program-test`. The options for type are: `cmd`, `cmdrisky`, `cmdrecord`, `task`, `taskrisky`, `taskrecord`.
+-   `[--server <server>]`: The base URL for the OpenAPI server. If not specified this will be extracted from the OAS or default to root of the web application. You can pass in an object to define multiple servers, like `{"dev": "http://localhost", "prod": "https://example.com"}`. This will add a `server` parameter to functions and define a `Servers` module with your servers. You can pass in an empty object if you have fully dynamic servers.
+-   `[--no-elm-format]`: Don't run elm-format on the outputs.
+-   `[--keep-going]`: If a route can't be generated, skip it instead of erroring out.
 ## Example outputs:
 
 Assume we have an OAS file named `my-cool-company-oas.json` and it has a field `"title": "My Coool Company"` and we run the CLI like so

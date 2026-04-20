@@ -807,6 +807,7 @@ pathLevelParams =
                                 , formats = OpenApi.Config.defaultFormats
                                 , warnOnMissingEnums = True
                                 , keepGoing = False
+                                , noEnumSort = False
                                 }
                                 oas
                     in

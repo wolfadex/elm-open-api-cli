@@ -1889,9 +1889,12 @@ contentToContentSchema content =
             let
                 fallback : CliMonad ContentSchema
                 fallback =
-                    CliMonad.succeed
-                        (BytesContent singleKey)
-                        |> CliMonad.withWarning ("Unrecognized mime type: " ++ singleKey ++ ", treating it as bytes")
+                    if singleKey == "application/octet-stream" then
+                        CliMonad.succeed (BytesContent singleKey)
+
+                    else
+                        CliMonad.succeed (BytesContent singleKey)
+                            |> CliMonad.withWarning ("Unrecognized mime type: " ++ singleKey ++ ", treating it as bytes")
             in
             case
                 singleValue

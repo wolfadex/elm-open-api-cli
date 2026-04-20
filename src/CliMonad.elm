@@ -8,6 +8,7 @@ module CliMonad exposing
     , withPath, withWarning, withExtendedWarning, withRequiredPackage
     , todo, todoWithDefault
     , withFormat
+    , noEnumSort
     , nameToAnnotation, refToAnnotation, refToEncoder, refToDecoder
     )
 
@@ -22,6 +23,7 @@ module CliMonad exposing
 @docs withPath, withWarning, withExtendedWarning, withRequiredPackage
 @docs todo, todoWithDefault
 @docs withFormat
+@docs noEnumSort
 
 
 ## Utils
@@ -88,6 +90,7 @@ type alias Input =
     , formats : FastDict.Dict InternalFormatName InternalFormat
     , warnOnMissingEnums : Bool
     , keepGoing : Bool
+    , noEnumSort : Bool
     }
 
 
@@ -130,6 +133,7 @@ run :
         , formats : List OpenApi.Config.Format
         , warnOnMissingEnums : Bool
         , keepGoing : Bool
+        , noEnumSort : Bool
         }
     -> CliMonad (List Declaration)
     ->
@@ -153,6 +157,7 @@ run oneOfDeclarations input (CliMonad x) =
                     |> FastDict.fromList
             , warnOnMissingEnums = input.warnOnMissingEnums
             , keepGoing = input.keepGoing
+            , noEnumSort = input.noEnumSort
             }
 
         res : Result Message ( List Declaration, Output, Cache )
@@ -575,6 +580,11 @@ getApiSpec =
     CliMonad (\input cache -> Ok ( input.openApi, emptyOutput, cache ))
 
 
+noEnumSort : CliMonad Bool
+noEnumSort =
+    CliMonad (\input cache -> Ok ( input.noEnumSort, emptyOutput, cache ))
+
+
 {-| If the user has chosen to keep going in the face of errors, this will convert an error into a warning. Otherwise this returns the input
 -}
 errorToWarning : CliMonad a -> CliMonad (Maybe a)
@@ -664,7 +674,7 @@ enumName : List Common.UnsafeName -> CliMonad (Maybe Common.UnsafeName)
 enumName variants =
     CliMonad
         (\input cache ->
-            case FastDict.get (List.map Common.unwrapUnsafe variants) input.enums of
+            case FastDict.get (List.sort (List.map Common.unwrapUnsafe variants)) input.enums of
                 Just { name } ->
                     Ok ( Just name, emptyOutput, cache )
 

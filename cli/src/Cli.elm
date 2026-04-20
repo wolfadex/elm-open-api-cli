@@ -51,6 +51,7 @@ type alias CliOptions =
     , writeMergedTo : Maybe String
     , noElmFormat : Bool
     , keepGoing : Bool
+    , noEnumSort : Bool
     }
 
 
@@ -185,6 +186,10 @@ program =
                 |> Cli.OptionsParser.with
                     (Cli.Option.flag "keep-going"
                         |> Cli.Option.withDescription "If a route can't be generated, skip it instead of erroring out."
+                    )
+                |> Cli.OptionsParser.with
+                    (Cli.Option.flag "no-enum-sort"
+                        |> Cli.Option.withDescription "Don't sort enum variants alphabetically, preserve the order from the spec."
                     )
             )
 
@@ -388,6 +393,7 @@ parseCliOptions cliOptions =
         |> OpenApi.Config.withAutoConvertSwagger cliOptions.autoConvertSwagger
         |> OpenApi.Config.withNoElmFormat cliOptions.noElmFormat
         |> OpenApi.Config.withKeepGoing cliOptions.keepGoing
+        |> OpenApi.Config.withNoEnumSort cliOptions.noEnumSort
         |> maybe OpenApi.Config.withSwaggerConversionUrl cliOptions.swaggerConversionUrl
         |> maybe OpenApi.Config.withSwaggerConversionCommand
             (cliOptions.swaggerConversionCommand

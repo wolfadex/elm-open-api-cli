@@ -61,21 +61,25 @@ program =
         |> Cli.Program.add
             (Cli.OptionsParser.build CliOptions
                 |> Cli.OptionsParser.with
-                    (Cli.Option.requiredPositionalArg "entryFilePath"
+                    (Cli.Option.requiredPositionalArg "input-file"
+                        |> Cli.Option.withDisplayName "file.json|file.yaml"
                         |> Cli.Option.map OpenApi.Config.pathFromString
                     )
                 |> Cli.OptionsParser.with
                     (Cli.Option.optionalKeywordArg "output-dir"
                         |> Cli.Option.withDefault "generated"
+                        |> Cli.Option.withDisplayName "dir"
                         |> Cli.Option.withDescription "The directory to output to. Defaults to `generated/`."
                     )
                 |> Cli.OptionsParser.with
                     (Cli.Option.optionalKeywordArg "module-name"
+                        |> Cli.Option.withDisplayName "Elm.Module.Name"
                         |> Cli.Option.withDescription "The Elm module name. Defaults to `OAS info.title`."
                     )
                 |> Cli.OptionsParser.with
                     (Cli.Option.optionalKeywordArg "effect-types"
                         |> Cli.Option.validateMap effectTypesValidation
+                        |> Cli.Option.withDisplayName "pkg1.type1,..."
                         |> Cli.Option.withDescription
                             ([ "A list of which kind of APIs to generate."
                              , "Each item should be of the form `package.type`."
@@ -104,79 +108,71 @@ program =
                 |> Cli.OptionsParser.with
                     (Cli.Option.optionalKeywordArg "server"
                         |> Cli.Option.validateMap serverValidation
+                        |> Cli.Option.withDisplayName "https://example.com"
                         |> Cli.Option.withDescription
                             ([ "The base URL for the OpenAPI server."
-                             , "If not specified this will be extracted from the OAS"
-                             , "or default to root of the web application."
+                             , "If not specified this will be extracted from the OAS or default to root of the web application."
                              , ""
                              , "You can pass in an object to define multiple servers, like"
                              , """  {"dev": "http://localhost", "prod": "https://example.com"}."""
                              , ""
-                             , "This will add a `server` parameter to functions and define"
-                             , "a `Servers` module with your servers. You can pass in an"
-                             , "empty object if you have fully dynamic servers."
+                             , "This will add a `server` parameter to functions and define a `Servers` module with your servers. You can pass in an empty object if you have fully dynamic servers."
                              ]
                                 |> formatOptionDescription
                             )
                     )
                 |> Cli.OptionsParser.with
                     (Cli.Option.optionalKeywordArg "auto-convert-swagger"
-                        |> Cli.Option.validateMap autoConvertValidation
+                        |> Cli.Option.withDefault "ask"
+                        |> Cli.Option.oneOf
+                            [ ( "ask", OpenApi.Config.AskBeforeConversion )
+                            , ( "never", OpenApi.Config.NeverConvert )
+                            , ( "always", OpenApi.Config.AlwaysConvert )
+                            ]
                         |> Cli.Option.withDescription
-                            ([ "\"ask\" If a Swagger doc is encountered, ask the user before converting"
-                             , "it to an Open API file. This is the default."
-                             , "\"never\" If a Swagger doc is encountered, error out."
-                             , "\"always\" If a Swagger doc is encountered, automatically convert it"
-                             , "to an Open API file."
+                            ([ "- \"ask\" If a Swagger doc is encountered, ask the user before converting it to an Open API file. This is the default."
+                             , "- \"never\" If a Swagger doc is encountered, error out."
+                             , "- \"always\" If a Swagger doc is encountered, automatically convert it to an Open API file."
                              ]
                                 |> formatOptionDescription
                             )
                     )
                 |> Cli.OptionsParser.with
                     (Cli.Option.optionalKeywordArg "swagger-conversion-url"
+                        |> Cli.Option.withDisplayName "url"
                         |> Cli.Option.withDescription
-                            ([ "The URL to use to convert a Swagger doc to an Open API"
-                             , "file. Defaults to `https://converter.swagger.io/api/convert`."
+                            ([ "The URL to use to convert a Swagger doc to an Open API file."
+                             , "Defaults to `https://converter.swagger.io/api/convert`."
                              ]
                                 |> formatOptionDescription
                             )
                     )
                 |> Cli.OptionsParser.with
                     (Cli.Option.optionalKeywordArg "swagger-conversion-command"
+                        |> Cli.Option.withDisplayName "cmd"
                         |> Cli.Option.withDescription
-                            ([ "Instead of making an HTTP request to convert"
-                             , "from Swagger to Open API, use this command."
-                             ]
-                                |> formatOptionDescription
-                            )
+                            "Instead of making an HTTP request to convert from Swagger to Open API, use this command."
                     )
                 |> Cli.OptionsParser.with
                     (Cli.Option.keywordArgList "swagger-conversion-command-args"
+                        |> Cli.Option.withDisplayName "args"
                         |> Cli.Option.withDescription
-                            ([ "Additional arguments to pass to the Swagger conversion command,"
-                             , "before the contents of the Swagger file are passed in."
-                             ]
-                                |> formatOptionDescription
-                            )
+                            "Additional arguments to pass to the Swagger conversion command, before the contents of the Swagger file are passed in."
                     )
                 |> Cli.OptionsParser.with
                     (Cli.Option.flag "generateTodos"
                         |> Cli.Option.withDescription
-                            ([ "Whether to generate TODOs for unimplemented endpoints,"
-                             , "or fail when something unexpected is encountered."
-                             , "Defaults to `no`. To generate `Debug.todo \"\"`"
-                             , "instead of failing use one of: `yes`, `y`, `true`."
-                             ]
-                                |> formatOptionDescription
-                            )
+                            "Whether to generate `Debug.todo \"\"` instead of failing for unimplemented features."
                     )
                 |> Cli.OptionsParser.with
                     (Cli.Option.keywordArgList "overrides"
+                        |> Cli.Option.withDisplayName "override.json|yaml"
                         |> Cli.Option.map (List.map OpenApi.Config.pathFromString)
                         |> Cli.Option.withDescription "Load an additional file to override parts of the original Open API file."
                     )
                 |> Cli.OptionsParser.with
                     (Cli.Option.optionalKeywordArg "write-merged-to"
+                        |> Cli.Option.withDisplayName "dir"
                         |> Cli.Option.withDescription "Write the merged Open API spec to the given file."
                     )
                 |> Cli.OptionsParser.with
@@ -209,28 +205,6 @@ formatOptionDescription descriptionLines =
                     String.padRight 72 ' ' "" ++ line
             )
         |> String.join "\n"
-
-
-autoConvertValidation : Maybe String -> Result String OpenApi.Config.AutoConvertSwagger
-autoConvertValidation input =
-    case input of
-        Nothing ->
-            Ok OpenApi.Config.AskBeforeConversion
-
-        Just "ask" ->
-            Ok OpenApi.Config.AskBeforeConversion
-
-        Just "" ->
-            Ok OpenApi.Config.AlwaysConvert
-
-        Just "always" ->
-            Ok OpenApi.Config.AlwaysConvert
-
-        Just "never" ->
-            Ok OpenApi.Config.NeverConvert
-
-        Just value ->
-            Err ("Unexpected value for auto-convert-swagger: " ++ value)
 
 
 effectTypesValidation : Maybe String -> Result String (List OpenApi.Config.EffectType)

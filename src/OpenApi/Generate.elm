@@ -1065,7 +1065,7 @@ elmHttpTasks ({ functionName, method, bodyTypeAnnotation, errorTypeAnnotation, r
                     [ (paramType { requireToMsg = False }).core ]
                     (Elm.Annotation.record
                         [ ( "method", Elm.Annotation.string )
-                        , ( "headers", Gen.Http.annotation_.header )
+                        , ( "headers", Elm.Annotation.list Gen.Http.annotation_.header )
                         , ( "url", Elm.Annotation.string )
                         , ( "body", Gen.Http.annotation_.body )
                         , ( "resolver"

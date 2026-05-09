@@ -400,7 +400,7 @@ pr267 =
                         
                                                 apiTask :
                                                     {}
-                                                    -> Task.Task (OpenApi.Common.Error e String) Output.Types.Responses.Forbidden
+                                                    -> Task.Task (OpenApi.Common.Error err String) Output.Types.Responses.Forbidden
                                                 apiTask config =
                                                     Http.task
                                                         { url = Url.Builder.absolute [ "api" ] []

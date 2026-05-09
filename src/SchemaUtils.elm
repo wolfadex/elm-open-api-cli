@@ -803,7 +803,7 @@ exampleOfType seen type_ =
         Common.Nullable _ ->
             CliMonad.succeed Json.Encode.null
 
-        Common.Object fields ->
+        Common.Object _ fields ->
             fields
                 |> CliMonad.combineMap
                     (\( fieldName, field ) ->
@@ -934,7 +934,7 @@ exampleOfType seen type_ =
 
 refToType : List (Common.RefTo Common.Schema) -> Common.RefTo Common.Schema -> CliMonad Common.Type
 refToType seen ref =
-    CliMonad.getOrCache ref
+    CliMonad.getOrCacheType ref
         (\() ->
             getSchema ref
                 |> CliMonad.andThen (schemaToType seen)
@@ -1101,7 +1101,7 @@ typesIntersection seen lType rType =
                 _ ->
                     CliMonad.succeed IntersectionResult.NoIntersection
 
-        ( Common.Object lFields, Common.Object rFields ) ->
+        ( Common.Object _ lFields, Common.Object _ rFields ) ->
             objectsIntersection seen ( lFields, Nothing ) ( rFields, Nothing )
 
         ( Common.Dict lAdditional lFields, Common.Dict rAdditional rFields ) ->
@@ -1136,16 +1136,16 @@ typesIntersection seen lType rType =
         ( Common.Basic Common.String lOptions, Common.Enum rItems ) ->
             stringAndEnumIntersection lOptions rItems
 
-        ( Common.Enum _, Common.Object _ ) ->
+        ( Common.Enum _, Common.Object _ _ ) ->
             CliMonad.succeed IntersectionResult.NoIntersection
 
-        ( Common.Object _, Common.Enum _ ) ->
+        ( Common.Object _ _, Common.Enum _ ) ->
             CliMonad.succeed IntersectionResult.NoIntersection
 
-        ( Common.Basic _ _, Common.Object _ ) ->
+        ( Common.Basic _ _, Common.Object _ _ ) ->
             CliMonad.succeed IntersectionResult.NoIntersection
 
-        ( Common.Object _, Common.Basic _ _ ) ->
+        ( Common.Object _ _, Common.Basic _ _ ) ->
             CliMonad.succeed IntersectionResult.NoIntersection
 
         ( Common.Enum _, Common.Dict _ _ ) ->
@@ -1400,7 +1400,7 @@ typeToString type_ =
         Common.Nullable _ ->
             "nullable"
 
-        Common.Object _ ->
+        Common.Object _ _ ->
             "object"
 
         Common.Basic _ _ ->
@@ -1614,7 +1614,7 @@ typeToOneOfVariant { type_, documentation } =
         Common.Dict _ _ ->
             CliMonad.succeed Nothing
 
-        Common.Object _ ->
+        Common.Object _ _ ->
             CliMonad.succeed Nothing
 
         Common.Null ->
@@ -1726,7 +1726,7 @@ oneOfType types =
 -}
 objectSchemaToTypeHelp : List (Common.RefTo Common.Schema) -> Json.Schema.Definitions.SubSchema -> CliMonad { type_ : Common.Type, documentation : Maybe String }
 objectSchemaToTypeHelp seen subSchema =
-    CliMonad.map2
+    CliMonad.andThen2
         (\schemaProps allOfProps ->
             let
                 ( props, propsDocumentations ) =
@@ -1748,18 +1748,23 @@ objectSchemaToTypeHelp seen subSchema =
                     propsDocumentations
                         |> joinIfNotEmpty "\n"
             in
-            { type_ = Common.Object props
-            , documentation =
-                case propsDocumentation of
-                    Nothing ->
-                        subSchema.description
+            CliMonad.findMap (\( _, c ) -> isTypeRecursive seen c.type_) props
+                |> CliMonad.map
+                    (\isRecursive ->
+                        { type_ =
+                            Common.Object { isRecursive = isRecursive } props
+                        , documentation =
+                            case propsDocumentation of
+                                Nothing ->
+                                    subSchema.description
 
-                    Just _ ->
-                        [ Just (Maybe.withDefault "Fields:" subSchema.description) -- A nonempty line is needed for formatting
-                        , propsDocumentation
-                        ]
-                            |> joinIfNotEmpty "\n\n"
-            }
+                                Just _ ->
+                                    [ Just (Maybe.withDefault "Fields:" subSchema.description) -- A nonempty line is needed for formatting
+                                    , propsDocumentation
+                                    ]
+                                        |> joinIfNotEmpty "\n\n"
+                        }
+                    )
         )
         (subSchemaToProperties seen subSchema)
         (subSchemaAllOfToProperties seen subSchema)
@@ -1777,7 +1782,7 @@ objectSchemaToType seen subSchema =
             CliMonad.andThen2
                 (\declaredProperties_ additionalProperties ->
                     case declaredProperties_.type_ of
-                        Common.Object properties ->
+                        Common.Object _ properties ->
                             { type_ = Common.Dict additionalProperties properties
                             , documentation =
                                 [ declaredProperties_.documentation
@@ -1923,7 +1928,7 @@ typeToAnnotationWithNullable type_ =
                 OpenApi.Common.Internal.annotation_.nullable
                 (typeToAnnotationWithNullable t)
 
-        Common.Object fields ->
+        Common.Object _ fields ->
             objectToAnnotation { useMaybe = False } fields
 
         Common.Basic basicType basic ->
@@ -2007,7 +2012,7 @@ typeToAnnotationWithMaybe type_ =
         Common.Nullable t ->
             CliMonad.map Elm.Annotation.maybe (typeToAnnotationWithMaybe t)
 
-        Common.Object fields ->
+        Common.Object _ fields ->
             objectToAnnotation { useMaybe = True } fields
 
         Common.Basic basicType basic ->
@@ -2166,7 +2171,7 @@ typeToEncoder type_ =
                                 CliMonad.refToEncoder (Common.refTo Common.Schema name)
                     )
 
-        Common.Object properties ->
+        Common.Object _ properties ->
             let
                 allRequired : Bool
                 allRequired =
@@ -2407,7 +2412,7 @@ oneOfAnnotation oneOfName oneOfData =
 typeToDecoder : Common.Type -> CliMonad Elm.Expression
 typeToDecoder type_ =
     case type_ of
-        Common.Object properties ->
+        Common.Object _ properties ->
             List.foldl
                 (\( key, field ) prevExprRes ->
                     CliMonad.map2
@@ -2836,3 +2841,107 @@ constToExpr const =
 
         Common.ConstNumber f ->
             Elm.float f
+
+
+isTypeRecursive : List (Common.RefTo Common.Schema) -> Common.Type -> CliMonad (Maybe Common.UnsafeName)
+isTypeRecursive seen t =
+    case t of
+        Common.Ref r ->
+            CliMonad.getOrCacheIsRecursive r
+                (\() ->
+                    if List.member r seen then
+                        Common.unwrapRef r
+                            |> Tuple.second
+                            |> Just
+                            |> CliMonad.succeed
+
+                    else
+                        let
+                            newSeen : List (Common.RefTo Common.Schema)
+                            newSeen =
+                                r :: seen
+                        in
+                        getSchema r
+                            |> CliMonad.andThen (schemaToType newSeen)
+                            |> CliMonad.andThen (\{ type_ } -> isTypeRecursive newSeen type_)
+                )
+
+        Common.Object { isRecursive } props ->
+            case isRecursive of
+                Just _ ->
+                    CliMonad.succeed isRecursive
+
+                Nothing ->
+                    CliMonad.findMap (\( _, c ) -> isTypeRecursive seen c.type_) props
+
+        Common.Dict { type_ } props ->
+            isTypeRecursive seen type_
+                |> CliMonad.andThen
+                    (\r ->
+                        case r of
+                            Just _ ->
+                                CliMonad.succeed r
+
+                            Nothing ->
+                                CliMonad.findMap (\( _, c ) -> isTypeRecursive seen c.type_) props
+                    )
+
+        Common.OneOf _ alternatives ->
+            CliMonad.findMap (\alternative -> isTypeRecursive seen alternative.type_) (NonEmpty.toList alternatives)
+
+        Common.List c ->
+            isTypeRecursive seen c
+
+        Common.Nullable c ->
+            isTypeRecursive seen c
+
+        Common.Tuple l r ->
+            isTypeRecursive seen l
+                |> CliMonad.andThen
+                    (\lres ->
+                        case lres of
+                            Just _ ->
+                                CliMonad.succeed lres
+
+                            Nothing ->
+                                isTypeRecursive seen r
+                    )
+
+        Common.Triple l m r ->
+            isTypeRecursive seen l
+                |> CliMonad.andThen
+                    (\lres ->
+                        case lres of
+                            Just _ ->
+                                CliMonad.succeed lres
+
+                            Nothing ->
+                                isTypeRecursive seen m
+                                    |> CliMonad.andThen
+                                        (\mres ->
+                                            case mres of
+                                                Just _ ->
+                                                    CliMonad.succeed mres
+
+                                                Nothing ->
+                                                    isTypeRecursive seen r
+                                        )
+                    )
+
+        Common.Basic _ _ ->
+            CliMonad.succeed Nothing
+
+        Common.Null ->
+            CliMonad.succeed Nothing
+
+        Common.Enum _ ->
+            CliMonad.succeed Nothing
+
+        Common.Value ->
+            CliMonad.succeed Nothing
+
+        Common.Bytes ->
+            CliMonad.succeed Nothing
+
+        Common.Unit ->
+            CliMonad.succeed Nothing

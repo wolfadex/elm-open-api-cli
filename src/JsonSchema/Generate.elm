@@ -6,6 +6,8 @@ import Elm
 import Elm.Annotation
 import Elm.Arg
 import Elm.Case
+import Elm.Declare
+import Elm.Extra
 import Elm.Op
 import Elm.ToString
 import Gen.Json.Decode
@@ -256,18 +258,29 @@ nonEnumToDeclarations component name schema documentation type_ =
                     CliMonad.succeed []
 
                 else
+                    let
+                        isRecursive : Bool
+                        isRecursive =
+                            case type_ of
+                                Common.Object r _ ->
+                                    r.isRecursive == Just name
+
+                                _ ->
+                                    False
+                    in
                     [ { moduleName = Common.Types component
                       , name = typeName
                       , declaration =
-                            Elm.alias typeName annotation
-                                |> (case documentation of
-                                        Nothing ->
-                                            identity
+                            (if isRecursive then
+                                Elm.customType typeName
+                                    [ Elm.variantWith typeName [ annotation ]
+                                    ]
 
-                                        Just doc ->
-                                            Elm.withDocumentation doc
-                                   )
-                                |> Elm.expose
+                             else
+                                Elm.alias typeName annotation
+                            )
+                                |> Elm.Extra.withDocumentationMaybe documentation
+                                |> Elm.exposeConstructor
                       , group = "Aliases"
                       }
                         |> CliMonad.succeed
@@ -276,9 +289,25 @@ nonEnumToDeclarations component name schema documentation type_ =
                             { moduleName = Common.Json component
                             , name = "decode" ++ typeName
                             , declaration =
+                                let
+                                    decoder : Elm.Expression
+                                    decoder =
+                                        if isRecursive then
+                                            Gen.Json.Decode.lazy (\_ -> schemaDecoder)
+                                                |> Gen.Json.Decode.call_.map
+                                                    (Elm.value
+                                                        { importFrom = importFrom
+                                                        , name = typeName
+                                                        , annotation = Nothing
+                                                        }
+                                                    )
+
+                                        else
+                                            schemaDecoder
+                                in
                                 Elm.declaration
                                     ("decode" ++ typeName)
-                                    (schemaDecoder
+                                    (decoder
                                         |> Elm.withType (Gen.Json.Decode.annotation_.decoder (Elm.Annotation.named importFrom typeName))
                                     )
                                     |> Elm.expose
@@ -292,11 +321,30 @@ nonEnumToDeclarations component name schema documentation type_ =
                             { moduleName = Common.Json component
                             , name = "encode" ++ typeName
                             , declaration =
-                                Elm.declaration ("encode" ++ typeName)
-                                    (Elm.functionReduced "rec" encoder
-                                        |> Elm.withType (Elm.Annotation.function [ Elm.Annotation.named importFrom typeName ] Gen.Json.Encode.annotation_.value)
-                                    )
-                                    |> Elm.expose
+                                if isRecursive then
+                                    Elm.Declare.fn ("encode" ++ typeName)
+                                        (Elm.Arg.customTypeWith
+                                            { importFrom = importFrom
+                                            , typeName = typeName
+                                            , variantName = typeName
+                                            }
+                                            identity
+                                            |> Elm.Arg.item (Elm.Arg.var "val")
+                                        )
+                                        (\rec ->
+                                            rec
+                                                |> encoder
+                                                |> Elm.withType Gen.Json.Encode.annotation_.value
+                                        )
+                                        |> .declaration
+                                        |> Elm.expose
+
+                                else
+                                    Elm.declaration ("encode" ++ typeName)
+                                        (Elm.functionReduced "rec" encoder
+                                            |> Elm.withType (Elm.Annotation.function [ Elm.Annotation.named importFrom typeName ] Gen.Json.Encode.annotation_.value)
+                                        )
+                                        |> Elm.expose
                             , group = "Encoders"
                             }
                         )

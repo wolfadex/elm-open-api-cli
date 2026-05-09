@@ -3,8 +3,8 @@ module CliMonad exposing
     , run, stepOrFail
     , succeed, succeedWith, fail, fromResult
     , map, map2, map3
-    , andThen, andThen2, andThen3, andThen4, combine, combineDict, combineMap, foldl
-    , errorToWarning, getApiSpec, enumName, moduleToNamespace, getOrCache
+    , andThen, andThen2, andThen3, andThen4, combine, combineDict, combineMap, foldl, any, findMap
+    , errorToWarning, getApiSpec, enumName, moduleToNamespace, getOrCacheIsRecursive, getOrCacheType
     , withPath, withWarning, withExtendedWarning, withRequiredPackage
     , todo, todoWithDefault
     , withFormat
@@ -18,8 +18,8 @@ module CliMonad exposing
 @docs run, stepOrFail
 @docs succeed, succeedWith, fail, fromResult
 @docs map, map2, map3
-@docs andThen, andThen2, andThen3, andThen4, combine, combineDict, combineMap, foldl
-@docs errorToWarning, getApiSpec, enumName, moduleToNamespace, getOrCache
+@docs andThen, andThen2, andThen3, andThen4, combine, combineDict, combineMap, foldl, any, findMap
+@docs errorToWarning, getApiSpec, enumName, moduleToNamespace, getOrCacheIsRecursive, getOrCacheType
 @docs withPath, withWarning, withExtendedWarning, withRequiredPackage
 @docs todo, todoWithDefault
 @docs withFormat
@@ -99,7 +99,9 @@ type CliMonad a
 
 
 type alias Cache =
-    FastDict.Dict String Common.Type
+    { typeCache : FastDict.Dict String Common.Type
+    , isRecursiveCache : FastDict.Dict String (Maybe Common.UnsafeName)
+    }
 
 
 type alias Output =
@@ -200,18 +202,20 @@ run oneOfDeclarations input (CliMonad x) =
 
 emptyCache : Cache
 emptyCache =
-    FastDict.empty
+    { typeCache = FastDict.empty
+    , isRecursiveCache = FastDict.empty
+    }
 
 
-getOrCache : Common.RefTo Common.Schema -> (() -> CliMonad Common.Type) -> CliMonad Common.Type
-getOrCache ref compute =
+getOrCacheType : Common.RefTo Common.Schema -> (() -> CliMonad Common.Type) -> CliMonad Common.Type
+getOrCacheType ref compute =
     let
         (Common.UnsafeName key) =
             Common.refToString ref
     in
     CliMonad
         (\input cache ->
-            case FastDict.get key cache of
+            case FastDict.get key cache.typeCache of
                 Nothing ->
                     let
                         (CliMonad inner) =
@@ -219,7 +223,33 @@ getOrCache ref compute =
                     in
                     case inner input cache of
                         Ok ( computed, output, cache2 ) ->
-                            Ok ( computed, output, FastDict.insert key computed cache2 )
+                            Ok ( computed, output, { cache2 | typeCache = FastDict.insert key computed cache2.typeCache } )
+
+                        Err e ->
+                            Err e
+
+                Just found ->
+                    Ok ( found, emptyOutput, cache )
+        )
+
+
+getOrCacheIsRecursive : Common.RefTo Common.Schema -> (() -> CliMonad (Maybe Common.UnsafeName)) -> CliMonad (Maybe Common.UnsafeName)
+getOrCacheIsRecursive ref compute =
+    let
+        (Common.UnsafeName key) =
+            Common.refToString ref
+    in
+    CliMonad
+        (\input cache ->
+            case FastDict.get key cache.isRecursiveCache of
+                Nothing ->
+                    let
+                        (CliMonad inner) =
+                            compute ()
+                    in
+                    case inner input cache of
+                        Ok ( computed, output, cache2 ) ->
+                            Ok ( computed, output, { cache2 | isRecursiveCache = FastDict.insert key computed cache2.isRecursiveCache } )
 
                         Err e ->
                             Err e
@@ -440,6 +470,49 @@ map4 f (CliMonad x) (CliMonad y) (CliMonad z) (CliMonad w) =
 
                                         Ok ( wr, wo, cache5 ) ->
                                             Ok ( f xr yr zr wr, mergeOutputs [ xo, yo, zo, wo ], cache5 )
+        )
+
+
+any : (a -> CliMonad Bool) -> List a -> CliMonad Bool
+any f xs =
+    CliMonad
+        (\input cache ->
+            Result.Extra.foldlWhileOk
+                (\x ( a, o, c ) ->
+                    if a then
+                        Ok ( a, o, c )
+
+                    else
+                        let
+                            (CliMonad i) =
+                                f x
+                        in
+                        i input c
+                )
+                ( False, emptyOutput, cache )
+                xs
+        )
+
+
+findMap : (a -> CliMonad (Maybe b)) -> List a -> CliMonad (Maybe b)
+findMap f xs =
+    CliMonad
+        (\input cache ->
+            Result.Extra.foldlWhileOk
+                (\x ( a, o, c ) ->
+                    case a of
+                        Just _ ->
+                            Ok ( a, o, c )
+
+                        Nothing ->
+                            let
+                                (CliMonad i) =
+                                    f x
+                            in
+                            i input c
+                )
+                ( Nothing, emptyOutput, cache )
+                xs
         )
 
 

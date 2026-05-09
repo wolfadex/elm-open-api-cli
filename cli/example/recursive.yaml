@@ -1,0 +1,16 @@
+openapi: 3.0.1
+info:
+    title: "Recursive"
+    version: "1"
+components:
+    schemas:
+        Recursive:
+            description: Recursive type
+            type: object
+            properties:
+                date:
+                    type: string
+                    format: date
+                parent:
+                    description: Tag information
+                    $ref: "#/components/schemas/Recursive"

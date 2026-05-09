@@ -1980,7 +1980,7 @@ multipartContent mediaType =
                 |> CliMonad.andThen
                     (\{ type_ } ->
                         case type_ of
-                            Common.Object fields ->
+                            Common.Object _ fields ->
                                 fields
                                     |> List.map
                                         (\( fieldName, field ) ->
@@ -2214,7 +2214,7 @@ queryParameterToUrlBuilderArgument param =
                             Gen.Maybe.map build value
                 in
                 case type_ of
-                    Common.Nullable (Common.Object fields) ->
+                    Common.Nullable (Common.Object _ fields) ->
                         fields
                             |> CliMonad.combineMap
                                 (\( fieldName, field ) ->
@@ -2226,7 +2226,7 @@ queryParameterToUrlBuilderArgument param =
                                         |> CliMonad.withPath (Common.UnsafeName "query params (object)")
                                 )
 
-                    Common.Object fields ->
+                    Common.Object _ fields ->
                         fields
                             |> CliMonad.combineMap
                                 (\( fieldName, field ) ->

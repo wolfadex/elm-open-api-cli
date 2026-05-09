@@ -18,6 +18,8 @@ import PatreonApi.Api
 import PatreonApi.Types.Responses
 import RealworldConduitApi.Api
 import RealworldConduitApi.Types.Responses
+import Recursive.Json
+import Recursive.Types
 import RecursiveAllofRefs.Types
 import SimpleRef.Json
 import SingleEnum.Types
@@ -49,6 +51,9 @@ init () =
 
         _ =
             MultipartFormData.Api.api
+
+        _ =
+            Recursive.Json.encodeRecursive
     in
     ( {}
     , Cmd.batch

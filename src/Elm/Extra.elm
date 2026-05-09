@@ -1,4 +1,4 @@
-module Elm.Extra exposing (functionReduced)
+module Elm.Extra exposing (functionReduced, withDocumentationMaybe)
 
 import Elm
 import Elm.ToString
@@ -12,3 +12,13 @@ functionReduced argName f =
 
     else
         Elm.functionReduced argName f
+
+
+withDocumentationMaybe : Maybe String -> Elm.Declaration -> Elm.Declaration
+withDocumentationMaybe documentation declaration =
+    case documentation of
+        Nothing ->
+            declaration
+
+        Just doc ->
+            Elm.withDocumentation doc declaration

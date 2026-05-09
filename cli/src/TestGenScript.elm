@@ -89,6 +89,10 @@ run =
         realworldConduit =
             OpenApi.Config.inputFrom (OpenApi.Config.File "./example/realworld-conduit.yaml")
 
+        recursive : OpenApi.Config.Input
+        recursive =
+            OpenApi.Config.inputFrom (OpenApi.Config.File "./example/recursive.yaml")
+
         recursiveAllOfRefs : OpenApi.Config.Input
         recursiveAllOfRefs =
             OpenApi.Config.inputFrom (OpenApi.Config.File "./example/recursive-allof-refs.yaml")
@@ -149,6 +153,7 @@ run =
                 |> OpenApi.Config.withInput overridingGlobalSecurity
                 |> OpenApi.Config.withInput pathLevelParams
                 |> OpenApi.Config.withInput realworldConduit
+                |> OpenApi.Config.withInput recursive
                 |> OpenApi.Config.withInput recursiveAllOfRefs
                 |> OpenApi.Config.withInput simpleRef
                 |> OpenApi.Config.withInput singleEnum

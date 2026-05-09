@@ -5,8 +5,6 @@ module Gen.BackendTask exposing (annotation_)
 
 # Generated bindings for BackendTask
 
-@docs map
-@docs map56
 @docs annotation_
 
 -}

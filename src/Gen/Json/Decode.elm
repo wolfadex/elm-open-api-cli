@@ -3,7 +3,7 @@ module Gen.Json.Decode exposing
     , list, dict, keyValuePairs, field
     , index, oneOf
     , map, map2, map3
-    , value, null
+    , lazy, value, null
     , succeed, fail, andThen, annotation_
     , call_, values_
     )
@@ -17,7 +17,7 @@ module Gen.Json.Decode exposing
 @docs list, dict, keyValuePairs, field
 @docs index, oneOf
 @docs map, map2, map3
-@docs value, null
+@docs lazy, value, null
 @docs succeed, fail, andThen, annotation_
 @docs call_, values_
 
@@ -594,6 +594,64 @@ map3 map3Arg_ map3Arg_0 map3Arg_1 map3Arg_2 =
         , map3Arg_1
         , map3Arg_2
         ]
+
+
+{-| Sometimes you have JSON with recursive structure, like nested comments.
+You can use `lazy` to make sure your decoder unrolls lazily.
+
+    type alias Comment =
+        { message : String
+        , responses : Responses
+        }
+
+    type Responses
+        = Responses (List Comment)
+
+    comment : Decoder Comment
+    comment =
+        map2 Comment
+            (field "message" string)
+            (field "responses" (map Responses (list (lazy (\_ -> comment)))))
+
+If we had said `list comment` instead, we would start expanding the value
+infinitely. What is a `comment`? It is a decoder for objects where the
+`responses` field contains comments. What is a `comment` though? Etc.
+
+By using `list (lazy (\_ -> comment))` we make sure the decoder only expands
+to be as deep as the JSON we are given. You can read more about recursive data
+structures [here].
+
+[here]: https://github.com/elm/compiler/blob/master/hints/recursive-alias.md
+
+lazy: (() -> Json.Decode.Decoder a) -> Json.Decode.Decoder a
+
+-}
+lazy : (Elm.Expression -> Elm.Expression) -> Elm.Expression
+lazy lazyArg_ =
+    Elm.apply
+        (Elm.value
+            { importFrom = [ "Json", "Decode" ]
+            , name = "lazy"
+            , annotation =
+                Just
+                    (Type.function
+                        [ Type.function
+                            [ Type.unit ]
+                            (Type.namedWith
+                                [ "Json", "Decode" ]
+                                "Decoder"
+                                [ Type.var "a" ]
+                            )
+                        ]
+                        (Type.namedWith
+                            [ "Json", "Decode" ]
+                            "Decoder"
+                            [ Type.var "a" ]
+                        )
+                    )
+            }
+        )
+        [ Elm.functionReduced "lazyUnpack" lazyArg_ ]
 
 
 {-| Do not do anything with a JSON value, just bring it into Elm as a `Value`.

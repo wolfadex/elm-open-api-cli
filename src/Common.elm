@@ -446,7 +446,7 @@ initialUppercaseWordToLowercase input =
 
 type Type
     = Nullable Type
-    | Object Object
+    | Object { isRecursive : Maybe UnsafeName } Object
     | Basic
         -- This is separate for easier pattern matching
         BasicType

@@ -1126,6 +1126,7 @@ generateFilesFromOpenApiSpecs configs =
                 ( result
                     |> List.concatMap .modules
                     |> Dict.Extra.groupBy .moduleName
+                    |> Dict.update Common.commonModuleName (\v -> v |> Maybe.withDefault [] |> Just)
                     |> Dict.foldr
                         (\moduleName declarations acc ->
                             let

@@ -131,6 +131,12 @@ jobs:
 
       - name: Post a comment with the diff
         uses: JoseThen/comment-pr@v1.2.0
+        continue-on-error: true
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           file_path: "./diff.md"
+
+      - name: Dump the diff into the Github log
+        run: |
+          diff --ignore-all-space --minimal --new-file --recursive \
+            main/cli/generated branch/cli/generated

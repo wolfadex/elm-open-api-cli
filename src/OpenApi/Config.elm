@@ -156,7 +156,7 @@ effectTypeToPackage effectType =
             Common.ElmHttp
 
         DillonkearnsElmPagesTaskRecord ->
-            Common.ElmHttp
+            Common.DillonkearnsElmPages
 
         DillonkearnsElmPagesTask ->
             Common.DillonkearnsElmPages

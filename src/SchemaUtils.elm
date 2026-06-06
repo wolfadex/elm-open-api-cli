@@ -2088,14 +2088,19 @@ typeToAnnotationWithMaybe type_ =
             CliMonad.succeed Elm.Annotation.unit
 
 
-basicTypeToAnnotation : Common.BasicType -> { a | format : Maybe String } -> CliMonad Elm.Annotation.Annotation
-basicTypeToAnnotation basicType { format } =
+basicTypeToAnnotation : Common.BasicType -> { a | format : Maybe String, pattern : Maybe String } -> CliMonad Elm.Annotation.Annotation
+basicTypeToAnnotation basicType { format, pattern } =
     let
         default : Elm.Annotation.Annotation
         default =
             case basicType of
                 Common.String ->
-                    Elm.Annotation.string
+                    case pattern of
+                        Just "^\\d+$" ->
+                            Elm.Annotation.int
+
+                        _ ->
+                            Elm.Annotation.string
 
                 Common.Integer ->
                     Elm.Annotation.int
@@ -2375,14 +2380,19 @@ typeToEncoder type_ =
             CliMonad.succeed (\_ -> Gen.Json.Encode.null)
 
 
-basicTypeToEncoder : Common.BasicType -> { a | format : Maybe String } -> CliMonad (Elm.Expression -> Elm.Expression)
-basicTypeToEncoder basicType { format } =
+basicTypeToEncoder : Common.BasicType -> { a | format : Maybe String, pattern : Maybe String } -> CliMonad (Elm.Expression -> Elm.Expression)
+basicTypeToEncoder basicType { format, pattern } =
     let
         default : Elm.Expression -> Elm.Expression
         default =
             case basicType of
                 Common.String ->
-                    Gen.Json.Encode.call_.string
+                    case pattern of
+                        Just "^\\d+$" ->
+                            \v -> v |> Gen.String.call_.fromInt |> Gen.Json.Encode.call_.string
+
+                        _ ->
+                            Gen.Json.Encode.call_.string
 
                 Common.Integer ->
                     Gen.Json.Encode.call_.int
@@ -2762,7 +2772,7 @@ basicTypeToDecoder basicType { format, const, pattern } =
                                             (Elm.string
                                                 ("Unexpected value: expected "
                                                     ++ constToString expected
-                                                    ++ " got "
+                                                    ++ ", got "
                                                 )
                                             )
                                             (toString actual)
@@ -2776,6 +2786,24 @@ basicTypeToDecoder basicType { format, const, pattern } =
             case basicType of
                 Common.String ->
                     case ( const, pattern ) of
+                        ( Nothing, Just "^\\d+$" ) ->
+                            Gen.Json.Decode.string
+                                |> Gen.Json.Decode.andThen
+                                    (\actual ->
+                                        Elm.Case.maybe (Gen.String.call_.toInt actual)
+                                            { nothing =
+                                                Gen.Json.Decode.call_.fail
+                                                    (Elm.Op.append
+                                                        (Elm.string
+                                                            "Unexpected value: expected a string matching \"^\\\\d+$\", got "
+                                                        )
+                                                        (Gen.Json.Encode.encode 0 (Gen.Json.Encode.call_.string actual))
+                                                    )
+                                            , just = ( "i", \i -> Gen.Json.Decode.succeed i )
+                                            }
+                                    )
+                                |> CliMonad.succeed
+
                         ( Nothing, Just p ) ->
                             Elm.Let.letIn identity
                                 |> Elm.Let.value "regex"
@@ -2793,7 +2821,7 @@ basicTypeToDecoder basicType { format, const, pattern } =
                                                                 (Elm.string
                                                                     ("Unexpected value: expected a string matching "
                                                                         ++ Json.Encode.encode 0 (Json.Encode.string p)
-                                                                        ++ " got "
+                                                                        ++ ", got "
                                                                     )
                                                                 )
                                                                 (Gen.Json.Encode.encode 0 (Gen.Json.Encode.call_.string actual))
@@ -2851,7 +2879,7 @@ basicTypeToDecoder basicType { format, const, pattern } =
                                                         (Elm.string
                                                             ("Unexpected value: expected "
                                                                 ++ boolToString expected
-                                                                ++ " got "
+                                                                ++ ", got "
                                                                 ++ boolToString (not expected)
                                                             )
                                                         )

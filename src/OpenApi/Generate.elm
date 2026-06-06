@@ -1159,7 +1159,7 @@ dillonkearnsElmPagesBackendTask ({ toMsg, method, functionName } as operationUti
                             , ( "timeoutInMs", Elm.Annotation.maybe Elm.Annotation.int )
                             ]
                         )
-                        (Gen.BackendTask.Http.annotation_.expect (Elm.Annotation.var "a"))
+                        (Gen.BackendTask.Http.annotation_.expect successAnnotation)
                     )
             , specificExpect = specificExpect
             }
@@ -1175,7 +1175,7 @@ dillonkearnsElmPagesBackendTask ({ toMsg, method, functionName } as operationUti
           )
         , ( OpenApi.Config.DillonkearnsElmPagesTaskRecord
           , \{ taskArg, recordAnnotation, specificExpect } ->
-                ( functionName
+                ( functionName ++ "Record"
                 , Elm.fn
                     (Elm.Arg.var "config")
                     (\config -> Elm.tuple (taskArg config) (specificExpect <| toMsg config))

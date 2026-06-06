@@ -1219,6 +1219,7 @@ printSuccessMessageAndWarnings ( outputPaths, { requiredPackages, warnings } ) =
                 |> FastSet.insert "elm/json"
                 |> FastSet.insert "elm/url"
                 |> FastSet.insert "elm/bytes"
+                |> FastSet.insert "elm/regex"
                 |> FastSet.toList
 
         toInstall : String -> Pretty.Doc ()

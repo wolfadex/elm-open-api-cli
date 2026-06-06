@@ -2723,6 +2723,7 @@ operationToTypesExpectAndResolver effectTypes method pathUrl operation =
                                                     Common.Basic Common.String
                                                         { const = Nothing
                                                         , format = Nothing
+                                                        , pattern = Nothing
                                                         }
                                                         |> SuccessType
                                                 , bodyTypeAnnotation = Elm.Annotation.string

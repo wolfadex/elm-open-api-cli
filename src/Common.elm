@@ -452,6 +452,7 @@ type Type
         BasicType
         { format : Maybe String
         , const : Maybe ConstValue
+        , pattern : Maybe String
         }
     | Null
     | List Type

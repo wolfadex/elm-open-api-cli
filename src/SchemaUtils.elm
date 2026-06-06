@@ -33,6 +33,7 @@ import Gen.Json.Decode
 import Gen.Json.Encode
 import Gen.List
 import Gen.Maybe
+import Gen.Regex
 import Gen.Result
 import Gen.String
 import IntersectionResult exposing (IntersectionResult)
@@ -51,6 +52,7 @@ import OpenApi.Reference
 import OpenApi.RequestBody
 import OpenApi.Schema
 import Pretty
+import Regex
 import Result.Extra
 import Set exposing (Set)
 
@@ -214,6 +216,7 @@ schemaToType seen schema =
                                         Common.Basic basicType
                                             { const = Maybe.map toConst const
                                             , format = subSchema.format
+                                            , pattern = subSchema.pattern
                                             }
                                     , documentation = subSchema.description
                                     }
@@ -1349,7 +1352,7 @@ objectsIntersection seen ( lFields, lAdditional ) ( rFields, rAdditional ) =
 
 
 stringAndEnumIntersection :
-    { format : Maybe String, const : Maybe Common.ConstValue }
+    { format : Maybe String, const : Maybe Common.ConstValue, pattern : Maybe String }
     -> NonEmpty Common.UnsafeName
     -> CliMonad (IntersectionResult Json.Encode.Value)
 stringAndEnumIntersection rOptions lItems =
@@ -1365,18 +1368,47 @@ stringAndEnumIntersection rOptions lItems =
             CliMonad.fail "Wrong constant type"
 
         Nothing ->
-            case rOptions.format of
-                Nothing ->
-                    lItems
-                        |> Tuple.first
-                        |> Common.unwrapUnsafe
-                        |> Json.Encode.string
-                        |> IntersectionResult.FoundIntersection
-                        |> CliMonad.succeed
+            case rOptions.pattern of
+                Just rPattern ->
+                    case Regex.fromString rPattern of
+                        Nothing ->
+                            CliMonad.fail ("Invalid regex: " ++ rPattern)
 
-                Just rFormat ->
-                    CliMonad.succeed IntersectionResult.MayIntersect
-                        |> CliMonad.withWarning ("Disjoint check not implemented for types enum and string:" ++ rFormat)
+                        Just rRegex ->
+                            case rOptions.format of
+                                Nothing ->
+                                    case
+                                        lItems
+                                            |> NonEmpty.toList
+                                            |> List.Extra.find (\i -> Regex.contains rRegex (Common.unwrapUnsafe i))
+                                    of
+                                        Nothing ->
+                                            CliMonad.succeed IntersectionResult.NoIntersection
+
+                                        Just found ->
+                                            found
+                                                |> Common.unwrapUnsafe
+                                                |> Json.Encode.string
+                                                |> IntersectionResult.FoundIntersection
+                                                |> CliMonad.succeed
+
+                                Just rFormat ->
+                                    CliMonad.succeed IntersectionResult.MayIntersect
+                                        |> CliMonad.withWarning ("Disjoint check not implemented for types enum and string:" ++ rFormat)
+
+                Nothing ->
+                    case rOptions.format of
+                        Nothing ->
+                            lItems
+                                |> Tuple.first
+                                |> Common.unwrapUnsafe
+                                |> Json.Encode.string
+                                |> IntersectionResult.FoundIntersection
+                                |> CliMonad.succeed
+
+                        Just rFormat ->
+                            CliMonad.succeed IntersectionResult.MayIntersect
+                                |> CliMonad.withWarning ("Disjoint check not implemented for types enum and string:" ++ rFormat)
 
 
 stringFormatsIntersection : String -> String -> CliMonad (IntersectionResult Json.Encode.Value)
@@ -2727,14 +2759,21 @@ typeToDecoder type_ =
             CliMonad.todo "Bytes decoder not implemented yet"
 
 
-basicTypeToDecoder : Common.BasicType -> { format : Maybe String, const : Maybe Common.ConstValue } -> CliMonad Elm.Expression
-basicTypeToDecoder basicType { format, const } =
+basicTypeToDecoder :
+    Common.BasicType
+    ->
+        { format : Maybe String
+        , const : Maybe Common.ConstValue
+        , pattern : Maybe String
+        }
+    -> CliMonad Elm.Expression
+basicTypeToDecoder basicType { format, const, pattern } =
     let
-        base : (Elm.Expression -> Elm.Expression) -> Elm.Expression -> Elm.Expression
+        base : (Elm.Expression -> Elm.Expression) -> Elm.Expression -> CliMonad Elm.Expression
         base toString decoder =
             case const of
                 Nothing ->
-                    decoder
+                    decoder |> CliMonad.succeed
 
                 Just expected ->
                     decoder
@@ -2755,57 +2794,104 @@ basicTypeToDecoder basicType { format, const } =
                                         )
                                     )
                             )
+                        |> CliMonad.succeed
 
-        default : Elm.Expression
+        default : CliMonad Elm.Expression
         default =
             case basicType of
                 Common.String ->
-                    base
-                        (\s -> Gen.Json.Encode.encode 0 (Gen.Json.Encode.call_.string s))
-                        Gen.Json.Decode.string
+                    case ( const, pattern ) of
+                        ( Nothing, Just p ) ->
+                            Elm.Let.letIn identity
+                                |> Elm.Let.value "regex"
+                                    (Gen.Regex.fromString p |> Gen.Maybe.withDefault Gen.Regex.never)
+                                |> Elm.Let.withBody
+                                    (\regex ->
+                                        Gen.Json.Decode.string
+                                            |> Gen.Json.Decode.andThen
+                                                (\actual ->
+                                                    Elm.ifThen
+                                                        (Gen.Regex.call_.contains regex actual)
+                                                        (Gen.Json.Decode.succeed actual)
+                                                        (Gen.Json.Decode.call_.fail
+                                                            (Elm.Op.append
+                                                                (Elm.string
+                                                                    ("Unexpected value: expected a string matching "
+                                                                        ++ Json.Encode.encode 0 (Json.Encode.string p)
+                                                                        ++ " got "
+                                                                    )
+                                                                )
+                                                                (Gen.Json.Encode.encode 0 (Gen.Json.Encode.call_.string actual))
+                                                            )
+                                                        )
+                                                )
+                                    )
+                                |> CliMonad.succeed
+
+                        _ ->
+                            base
+                                (\s -> Gen.Json.Encode.encode 0 (Gen.Json.Encode.call_.string s))
+                                Gen.Json.Decode.string
 
                 Common.Integer ->
-                    base Gen.String.call_.fromInt Gen.Json.Decode.int
-
-                Common.Number ->
-                    base Gen.String.call_.fromFloat Gen.Json.Decode.float
-
-                Common.Boolean ->
-                    let
-                        boolToString : Bool -> String
-                        boolToString b =
-                            if b then
-                                "true"
-
-                            else
-                                "false"
-                    in
-                    case const of
-                        Just (Common.ConstBoolean expected) ->
-                            Gen.Json.Decode.bool
-                                |> Gen.Json.Decode.andThen
-                                    (\actual ->
-                                        Elm.ifThen
-                                            (Elm.Op.equal actual (Elm.bool expected))
-                                            (Gen.Json.Decode.succeed actual)
-                                            (Gen.Json.Decode.call_.fail
-                                                (Elm.string
-                                                    ("Unexpected value: expected "
-                                                        ++ boolToString expected
-                                                        ++ " got "
-                                                        ++ boolToString (not expected)
-                                                    )
-                                                )
-                                            )
-                                    )
-
+                    case pattern of
                         Just _ ->
-                            Gen.Json.Decode.bool
+                            CliMonad.todo "Pattern not supported for the integer type"
 
                         Nothing ->
-                            Gen.Json.Decode.bool
+                            base Gen.String.call_.fromInt Gen.Json.Decode.int
+
+                Common.Number ->
+                    case pattern of
+                        Just _ ->
+                            CliMonad.todo "Pattern not supported for the number type"
+
+                        Nothing ->
+                            base Gen.String.call_.fromFloat Gen.Json.Decode.float
+
+                Common.Boolean ->
+                    case pattern of
+                        Just _ ->
+                            CliMonad.todo "Pattern not supported for the boolean type"
+
+                        Nothing ->
+                            let
+                                boolToString : Bool -> String
+                                boolToString b =
+                                    if b then
+                                        "true"
+
+                                    else
+                                        "false"
+                            in
+                            case const of
+                                Just (Common.ConstBoolean expected) ->
+                                    Gen.Json.Decode.bool
+                                        |> Gen.Json.Decode.andThen
+                                            (\actual ->
+                                                Elm.ifThen
+                                                    (Elm.Op.equal actual (Elm.bool expected))
+                                                    (Gen.Json.Decode.succeed actual)
+                                                    (Gen.Json.Decode.call_.fail
+                                                        (Elm.string
+                                                            ("Unexpected value: expected "
+                                                                ++ boolToString expected
+                                                                ++ " got "
+                                                                ++ boolToString (not expected)
+                                                            )
+                                                        )
+                                                    )
+                                            )
+                                        |> CliMonad.succeed
+
+                                Just _ ->
+                                    Gen.Json.Decode.bool |> CliMonad.succeed
+
+                                Nothing ->
+                                    Gen.Json.Decode.bool |> CliMonad.succeed
     in
-    CliMonad.withFormat basicType format .decoder default
+    default
+        |> CliMonad.andThen (CliMonad.withFormat basicType format .decoder)
 
 
 constToString : Common.ConstValue -> String

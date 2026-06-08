@@ -27,6 +27,8 @@ import OpenApi.Config
 import OpenApi.Generate
 import Pages.Script
 import Pages.Script.Spinner
+import Parser
+import Parser.Error
 import Pretty
 import Regex exposing (Regex)
 import Result.Extra
@@ -553,7 +555,7 @@ parseOriginal input original =
     case decodeMaybeYaml (OpenApi.Config.oasPath input) original of
         Err e ->
             e
-                |> parseErrorToFatalError
+                |> parseErrorToFatalError original
                 |> BackendTask.fail
 
         Ok decoded ->
@@ -573,8 +575,11 @@ mergeOverrides ( overrides, original ) =
         )
         (overrides
             |> List.reverse
-            |> Result.Extra.combineMap (\( path, file ) -> decodeMaybeYaml path file)
-            |> Result.mapError parseErrorToFatalError
+            |> Result.Extra.combineMap
+                (\( path, file ) ->
+                    decodeMaybeYaml path file
+                        |> Result.mapError (parseErrorToFatalError file)
+                )
         )
         |> Result.Extra.join
         |> BackendTask.fromResult
@@ -750,17 +755,35 @@ convertToSwaggerAndThenDecode config input value =
         |> BackendTask.andThen (\converted -> decodeOpenApiSpecOrFail { hasAttemptedToConvertFromSwagger = True } config input converted)
 
 
-parseErrorToFatalError : ParseError -> FatalError.FatalError
-parseErrorToFatalError parseError =
+parseErrorToFatalError : String -> ParseError -> FatalError.FatalError
+parseErrorToFatalError source parseError =
     case parseError of
         JsonDecodeError decodeError ->
             jsonErrorToFatalError decodeError
 
-        YamlParseError yamlError ->
-            yamlError
-                |> Yaml.Decode.errorToString
+        YamlParseError (Yaml.Decode.Decoding msg) ->
+            msg
                 |> Ansi.Color.fontColor Ansi.Color.brightRed
                 |> FatalError.fromString
+
+        YamlParseError (Yaml.Decode.Parsing deadEnds) ->
+            parserErrorToString source deadEnds
+                |> FatalError.fromString
+
+
+parserErrorToString : String -> List Parser.DeadEnd -> String
+parserErrorToString src deadEnds =
+    Parser.Error.renderError
+        { text = identity
+        , formatContext = Ansi.Color.fontColor Ansi.Color.cyan
+        , formatCaret = Ansi.Color.fontColor Ansi.Color.red
+        , newline = "\n"
+        , linesOfExtraContext = 3
+        }
+        Parser.Error.forParser
+        src
+        deadEnds
+        |> String.concat
 
 
 jsonErrorToFatalError : Json.Decode.Error -> FatalError.FatalError

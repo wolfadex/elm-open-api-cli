@@ -220,6 +220,7 @@ toTypeName (UnsafeName name) =
         |> Maybe.map (\( first, rest ) -> String.cons first (String.replace "-" " " rest))
         |> Maybe.withDefault ""
         |> String.replace "_" " "
+        |> String.replace "." " "
         |> String.trim
         |> String.Extra.toTitleCase
         |> removeSymbols ' '

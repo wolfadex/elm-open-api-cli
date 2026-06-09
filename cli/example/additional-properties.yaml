@@ -20,6 +20,7 @@ components:
           additionalProperties:
             description: Dictionary of tags, keyed by machine id
             type: object
+            additionalProperties: false
             properties:
               name:
                 description: Name of the tag

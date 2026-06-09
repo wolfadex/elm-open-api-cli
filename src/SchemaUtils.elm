@@ -1256,8 +1256,23 @@ objectsIntersection seen l r =
         (\lkey lField acc ->
             if lField.required then
                 case r.additionalProperties of
-                    Common.AdditionalPropertiesDisallowed ->
+                    Common.AdditionalPropertiesDisallowedExplicitly ->
                         CliMonad.succeed IntersectionResult.NoIntersection
+
+                    Common.AdditionalPropertiesDisallowedImplicitly ->
+                        CliMonad.map2
+                            (\i prev ->
+                                combine
+                                    (IntersectionResult.map
+                                        (\example -> ( lkey, example ))
+                                        i
+                                    )
+                                    prev
+                            )
+                            (typesIntersection seen lField.type_ Common.Value
+                                |> CliMonad.withPath (Common.UnsafeName lkey)
+                            )
+                            acc
 
                     Common.AdditionalPropertiesAllowed rAdditional ->
                         CliMonad.map2
@@ -1296,8 +1311,23 @@ objectsIntersection seen l r =
         (\rkey rField acc ->
             if rField.required then
                 case l.additionalProperties of
-                    Common.AdditionalPropertiesDisallowed ->
+                    Common.AdditionalPropertiesDisallowedExplicitly ->
                         CliMonad.succeed IntersectionResult.NoIntersection
+
+                    Common.AdditionalPropertiesDisallowedImplicitly ->
+                        CliMonad.map2
+                            (\i prev ->
+                                combine
+                                    (IntersectionResult.map
+                                        (\example -> ( rkey, example ))
+                                        i
+                                    )
+                                    prev
+                            )
+                            (typesIntersection seen rField.type_ Common.Value
+                                |> CliMonad.withPath (Common.UnsafeName rkey)
+                            )
+                            acc
 
                     Common.AdditionalPropertiesAllowed lAdditional ->
                         CliMonad.map2
@@ -1782,7 +1812,10 @@ objectSchemaToType seen subSchema =
                                                             ++ String.join "\n    " rest
                                             )
 
-                                Common.AdditionalPropertiesDisallowed ->
+                                Common.AdditionalPropertiesDisallowedImplicitly ->
+                                    Nothing
+
+                                Common.AdditionalPropertiesDisallowedExplicitly ->
                                     Nothing
                             ]
                                 |> joinIfNotEmpty "\n\n"
@@ -1807,7 +1840,7 @@ subSchemaToAdditionalProperties seen subSchema =
     case subSchema.additionalProperties of
         -- Object contains only specified properties, not arbitrary extra ones.
         Just (Json.Schema.Definitions.BooleanSchema False) ->
-            Common.AdditionalPropertiesDisallowed
+            Common.AdditionalPropertiesDisallowedExplicitly
                 |> CliMonad.succeed
 
         -- It's unclear whether "true" is *technically* an acceptable value for
@@ -1822,8 +1855,8 @@ subSchemaToAdditionalProperties seen subSchema =
 
         Nothing ->
             -- By default objects are allowed to have arbitrary additional properties
-            -- Common.AdditionalPropertiesAllowed { type_ = Common.Value, documentation = Nothing }
-            Common.AdditionalPropertiesDisallowed
+            -- But in practice no one sets additionalProperties: false, so we assume they're unused
+            Common.AdditionalPropertiesDisallowedImplicitly
                 |> CliMonad.succeed
 
         -- The object contains an additionalProperties entry that describes the
@@ -1964,7 +1997,10 @@ typeToAnnotationWithNullable type_ =
                     (additionalPropertiesField :: fields)
                         |> objectToAnnotation { useMaybe = False }
 
-                ( Common.AdditionalPropertiesDisallowed, _ ) ->
+                ( Common.AdditionalPropertiesDisallowedImplicitly, _ ) ->
+                    objectToAnnotation { useMaybe = False } fields
+
+                ( Common.AdditionalPropertiesDisallowedExplicitly, _ ) ->
                     objectToAnnotation { useMaybe = False } fields
 
         Common.Enum variants ->
@@ -2055,7 +2091,10 @@ typeToAnnotationWithMaybe type_ =
                     (additionalPropertiesField :: fields)
                         |> objectToAnnotation { useMaybe = True }
 
-                ( Common.AdditionalPropertiesDisallowed, _ ) ->
+                ( Common.AdditionalPropertiesDisallowedImplicitly, _ ) ->
+                    objectToAnnotation { useMaybe = True } fields
+
+                ( Common.AdditionalPropertiesDisallowedExplicitly, _ ) ->
                     objectToAnnotation { useMaybe = True } fields
 
         Common.Enum variants ->
@@ -2207,119 +2246,7 @@ typeToEncoder type_ =
                 (typeToEncoder r)
 
         Common.Object { additionalProperties, fields } ->
-            case ( additionalProperties, fields ) of
-                ( Common.AdditionalPropertiesDisallowed, _ ) ->
-                    let
-                        allRequired : Bool
-                        allRequired =
-                            List.all (\( _, { required } ) -> required) fields
-                    in
-                    fields
-                        |> CliMonad.combineMap
-                            (\( key, field ) ->
-                                typeToEncoder field.type_
-                                    |> CliMonad.map
-                                        (\encoder rec ->
-                                            let
-                                                fieldExpr : Elm.Expression
-                                                fieldExpr =
-                                                    Elm.get (Common.toValueName key) rec
-
-                                                toTuple : Elm.Expression -> Elm.Expression
-                                                toTuple value =
-                                                    Elm.tuple
-                                                        (Elm.string (Common.unwrapUnsafe key))
-                                                        (encoder value)
-                                            in
-                                            if allRequired then
-                                                toTuple fieldExpr
-
-                                            else if field.required then
-                                                Gen.Maybe.make_.just (toTuple fieldExpr)
-
-                                            else
-                                                Gen.Maybe.map toTuple fieldExpr
-                                        )
-                                    |> CliMonad.withPath key
-                            )
-                        |> CliMonad.map
-                            (\toProperties value ->
-                                if allRequired then
-                                    Gen.Json.Encode.object <|
-                                        List.map (\prop -> prop value) toProperties
-
-                                else
-                                    Gen.Json.Encode.call_.object <|
-                                        Gen.List.filterMap Gen.Basics.identity <|
-                                            List.map (\prop -> prop value) toProperties
-                            )
-
-                ( Common.AdditionalPropertiesAllowed additional, [] ) ->
-                    -- An object with additionalProperties (the type of those properties is
-                    -- `additionalProperties.type_`) and no normal `properties` fields: A simple Dict.
-                    typeToEncoder additional.type_
-                        |> CliMonad.map
-                            (\encoder ->
-                                Gen.Json.Encode.call_.dict Gen.Basics.values_.identity (Elm.functionReduced "rec" encoder)
-                            )
-
-                -- An object with additionalProperties *and* normal `properties` fields.
-                ( Common.AdditionalPropertiesAllowed additional, _ ) ->
-                    let
-                        allRequired : Bool
-                        allRequired =
-                            List.all (\( _, { required } ) -> required) fields
-                    in
-                    fields
-                        |> CliMonad.combineMap
-                            (\( key, field ) ->
-                                typeToEncoder field.type_
-                                    |> CliMonad.map
-                                        (\encoder rec ->
-                                            let
-                                                fieldExpr : Elm.Expression
-                                                fieldExpr =
-                                                    Elm.get (Common.toValueName key) rec
-
-                                                toTuple : Elm.Expression -> Elm.Expression
-                                                toTuple value =
-                                                    Elm.tuple
-                                                        (Elm.string (Common.unwrapUnsafe key))
-                                                        (encoder value)
-                                            in
-                                            if allRequired then
-                                                toTuple fieldExpr
-
-                                            else if field.required then
-                                                Gen.Maybe.make_.just (toTuple fieldExpr)
-
-                                            else
-                                                Gen.Maybe.map toTuple fieldExpr
-                                        )
-                                    |> CliMonad.withPath key
-                            )
-                        |> CliMonad.map2
-                            (\additionalPropertyEncoder toProperties ->
-                                \value ->
-                                    Gen.Json.Encode.call_.object
-                                        (Gen.List.call_.append
-                                            (if allRequired then
-                                                Elm.list (List.map (\prop -> prop value) toProperties)
-
-                                             else
-                                                Gen.List.filterMap Gen.Basics.identity (List.map (\prop -> prop value) toProperties)
-                                            )
-                                            (Gen.List.call_.map
-                                                (Elm.fn (Elm.Arg.tuple (Elm.Arg.var "key") (Elm.Arg.var "value"))
-                                                    (\( key, data ) ->
-                                                        Elm.tuple key (additionalPropertyEncoder data)
-                                                    )
-                                                )
-                                                (Gen.Dict.toList (Elm.get "additionalProperties" value))
-                                            )
-                                        )
-                            )
-                            (typeToEncoder additional.type_)
+            objectToEncoder additionalProperties fields
 
         Common.Nullable t ->
             CliMonad.map
@@ -2374,6 +2301,131 @@ typeToEncoder type_ =
 
         Common.Unit ->
             CliMonad.succeed (\_ -> Gen.Json.Encode.null)
+
+
+objectToEncoder : Common.AdditionalProperties -> List ( Common.UnsafeName, Common.Field ) -> CliMonad (Elm.Expression -> Elm.Expression)
+objectToEncoder additionalProperties fields =
+    let
+        withoutAdditionalProperties : () -> CliMonad (Elm.Expression -> Elm.Expression)
+        withoutAdditionalProperties () =
+            let
+                allRequired : Bool
+                allRequired =
+                    List.all (\( _, { required } ) -> required) fields
+            in
+            fields
+                |> CliMonad.combineMap
+                    (\( key, field ) ->
+                        typeToEncoder field.type_
+                            |> CliMonad.map
+                                (\encoder rec ->
+                                    let
+                                        fieldExpr : Elm.Expression
+                                        fieldExpr =
+                                            Elm.get (Common.toValueName key) rec
+
+                                        toTuple : Elm.Expression -> Elm.Expression
+                                        toTuple value =
+                                            Elm.tuple
+                                                (Elm.string (Common.unwrapUnsafe key))
+                                                (encoder value)
+                                    in
+                                    if allRequired then
+                                        toTuple fieldExpr
+
+                                    else if field.required then
+                                        Gen.Maybe.make_.just (toTuple fieldExpr)
+
+                                    else
+                                        Gen.Maybe.map toTuple fieldExpr
+                                )
+                            |> CliMonad.withPath key
+                    )
+                |> CliMonad.map
+                    (\toProperties value ->
+                        if allRequired then
+                            Gen.Json.Encode.object <|
+                                List.map (\prop -> prop value) toProperties
+
+                        else
+                            Gen.Json.Encode.call_.object <|
+                                Gen.List.filterMap Gen.Basics.identity <|
+                                    List.map (\prop -> prop value) toProperties
+                    )
+    in
+    case ( additionalProperties, fields ) of
+        ( Common.AdditionalPropertiesDisallowedImplicitly, _ ) ->
+            withoutAdditionalProperties ()
+
+        ( Common.AdditionalPropertiesDisallowedExplicitly, _ ) ->
+            withoutAdditionalProperties ()
+
+        ( Common.AdditionalPropertiesAllowed additional, [] ) ->
+            -- An object with additionalProperties (the type of those properties is
+            -- `additionalProperties.type_`) and no normal `properties` fields: A simple Dict.
+            typeToEncoder additional.type_
+                |> CliMonad.map
+                    (\encoder ->
+                        Gen.Json.Encode.call_.dict Gen.Basics.values_.identity (Elm.functionReduced "rec" encoder)
+                    )
+
+        -- An object with additionalProperties *and* normal `properties` fields.
+        ( Common.AdditionalPropertiesAllowed additional, _ ) ->
+            let
+                allRequired : Bool
+                allRequired =
+                    List.all (\( _, { required } ) -> required) fields
+            in
+            fields
+                |> CliMonad.combineMap
+                    (\( key, field ) ->
+                        typeToEncoder field.type_
+                            |> CliMonad.map
+                                (\encoder rec ->
+                                    let
+                                        fieldExpr : Elm.Expression
+                                        fieldExpr =
+                                            Elm.get (Common.toValueName key) rec
+
+                                        toTuple : Elm.Expression -> Elm.Expression
+                                        toTuple value =
+                                            Elm.tuple
+                                                (Elm.string (Common.unwrapUnsafe key))
+                                                (encoder value)
+                                    in
+                                    if allRequired then
+                                        toTuple fieldExpr
+
+                                    else if field.required then
+                                        Gen.Maybe.make_.just (toTuple fieldExpr)
+
+                                    else
+                                        Gen.Maybe.map toTuple fieldExpr
+                                )
+                            |> CliMonad.withPath key
+                    )
+                |> CliMonad.map2
+                    (\additionalPropertyEncoder toProperties ->
+                        \value ->
+                            Gen.Json.Encode.call_.object
+                                (Gen.List.call_.append
+                                    (if allRequired then
+                                        Elm.list (List.map (\prop -> prop value) toProperties)
+
+                                     else
+                                        Gen.List.filterMap Gen.Basics.identity (List.map (\prop -> prop value) toProperties)
+                                    )
+                                    (Gen.List.call_.map
+                                        (Elm.fn (Elm.Arg.tuple (Elm.Arg.var "key") (Elm.Arg.var "value"))
+                                            (\( key, data ) ->
+                                                Elm.tuple key (additionalPropertyEncoder data)
+                                            )
+                                        )
+                                        (Gen.Dict.toList (Elm.get "additionalProperties" value))
+                                    )
+                                )
+                    )
+                    (typeToEncoder additional.type_)
 
 
 basicTypeToEncoder : Common.BasicType -> { a | format : Maybe String } -> CliMonad (Elm.Expression -> Elm.Expression)
@@ -2450,7 +2502,7 @@ typeToDecoder type_ =
 
         Common.Object { additionalProperties, fields, isRecursive } ->
             case ( additionalProperties, fields ) of
-                ( Common.AdditionalPropertiesDisallowed, _ ) ->
+                ( Common.AdditionalPropertiesDisallowedExplicitly, _ ) ->
                     CliMonad.decodeComplete
                         |> CliMonad.andThen
                             (\decodeComplete ->
@@ -2516,6 +2568,44 @@ typeToDecoder type_ =
                                             identity
                                         )
                             )
+
+                ( Common.AdditionalPropertiesDisallowedImplicitly, _ ) ->
+                    List.foldl
+                        (\( key, field ) prevExprRes ->
+                            CliMonad.map2
+                                (\internalDecoder prevExpr ->
+                                    Elm.Op.Extra.pipeInto "prev"
+                                        (OpenApi.Common.Internal.commonSubmodule.call.jsonDecodeAndMap
+                                            (if field.required then
+                                                Gen.Json.Decode.field (Common.unwrapUnsafe key) internalDecoder
+
+                                             else
+                                                OpenApi.Common.Internal.commonSubmodule.call.decodeOptionalField
+                                                    (Elm.string (Common.unwrapUnsafe key))
+                                                    internalDecoder
+                                            )
+                                        )
+                                        prevExpr
+                                )
+                                (typeToDecoder field.type_ |> CliMonad.withPath key)
+                                prevExprRes
+                        )
+                        (CliMonad.succeed
+                            (Gen.Json.Decode.succeed
+                                (Elm.function
+                                    (List.map (\( key, _ ) -> ( Common.toValueName key, Nothing )) fields)
+                                    (\args ->
+                                        Elm.record
+                                            (List.map2
+                                                (\( key, _ ) arg -> ( Common.toValueName key, arg ))
+                                                fields
+                                                args
+                                            )
+                                    )
+                                )
+                            )
+                        )
+                        fields
 
                 ( Common.AdditionalPropertiesAllowed additional, [] ) ->
                     typeToDecoder additional.type_
@@ -2972,7 +3062,10 @@ isTypeRecursive seen t =
 
                                     Nothing ->
                                         case additionalProperties of
-                                            Common.AdditionalPropertiesDisallowed ->
+                                            Common.AdditionalPropertiesDisallowedExplicitly ->
+                                                CliMonad.succeed Nothing
+
+                                            Common.AdditionalPropertiesDisallowedImplicitly ->
                                                 CliMonad.succeed Nothing
 
                                             Common.AdditionalPropertiesAllowed additional ->

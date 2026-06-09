@@ -806,7 +806,7 @@ exampleOfType seen type_ =
         Common.Nullable _ ->
             CliMonad.succeed Json.Encode.null
 
-        Common.Object _ fields ->
+        Common.Object { fields } ->
             fields
                 |> CliMonad.combineMap
                     (\( fieldName, field ) ->
@@ -877,28 +877,6 @@ exampleOfType seen type_ =
                 (exampleOfType seen l)
                 (exampleOfType seen m)
                 (exampleOfType seen r)
-
-        Common.Dict _ fields ->
-            fields
-                |> CliMonad.combineMap
-                    (\( fieldName, field ) ->
-                        if field.required then
-                            exampleOfType seen field.type_
-                                |> CliMonad.map
-                                    (\example ->
-                                        Just ( Common.unwrapUnsafe fieldName, example )
-                                    )
-                                |> CliMonad.withPath fieldName
-
-                        else
-                            CliMonad.succeed Nothing
-                    )
-                |> CliMonad.map
-                    (\exampleFields ->
-                        exampleFields
-                            |> Maybe.Extra.values
-                            |> Json.Encode.object
-                    )
 
         Common.OneOf _ ( t, _ ) ->
             exampleOfType seen t.type_
@@ -1104,11 +1082,8 @@ typesIntersection seen lType rType =
                 _ ->
                     CliMonad.succeed IntersectionResult.NoIntersection
 
-        ( Common.Object _ lFields, Common.Object _ rFields ) ->
-            objectsIntersection seen ( lFields, Nothing ) ( rFields, Nothing )
-
-        ( Common.Dict lAdditional lFields, Common.Dict rAdditional rFields ) ->
-            objectsIntersection seen ( lFields, Just lAdditional.type_ ) ( rFields, Just rAdditional.type_ )
+        ( Common.Object l, Common.Object r ) ->
+            objectsIntersection seen l r
 
         ( Common.Enum lItems, Common.Enum rItems ) ->
             let
@@ -1139,28 +1114,16 @@ typesIntersection seen lType rType =
         ( Common.Basic Common.String lOptions, Common.Enum rItems ) ->
             stringAndEnumIntersection lOptions rItems
 
-        ( Common.Enum _, Common.Object _ _ ) ->
+        ( Common.Enum _, Common.Object _ ) ->
             CliMonad.succeed IntersectionResult.NoIntersection
 
-        ( Common.Object _ _, Common.Enum _ ) ->
+        ( Common.Object _, Common.Enum _ ) ->
             CliMonad.succeed IntersectionResult.NoIntersection
 
-        ( Common.Basic _ _, Common.Object _ _ ) ->
+        ( Common.Basic _ _, Common.Object _ ) ->
             CliMonad.succeed IntersectionResult.NoIntersection
 
-        ( Common.Object _ _, Common.Basic _ _ ) ->
-            CliMonad.succeed IntersectionResult.NoIntersection
-
-        ( Common.Enum _, Common.Dict _ _ ) ->
-            CliMonad.succeed IntersectionResult.NoIntersection
-
-        ( Common.Dict _ _, Common.Enum _ ) ->
-            CliMonad.succeed IntersectionResult.NoIntersection
-
-        ( Common.Basic _ _, Common.Dict _ _ ) ->
-            CliMonad.succeed IntersectionResult.NoIntersection
-
-        ( Common.Dict _ _, Common.Basic _ _ ) ->
+        ( Common.Object _, Common.Basic _ _ ) ->
             CliMonad.succeed IntersectionResult.NoIntersection
 
         _ ->
@@ -1241,20 +1204,28 @@ findAnyIntersection =
 
 objectsIntersection :
     List (Common.RefTo Common.Schema)
-    -> ( Common.Object, Maybe Common.Type )
-    -> ( Common.Object, Maybe Common.Type )
+    ->
+        { isRecursive : Maybe Common.UnsafeName
+        , additionalProperties : Common.AdditionalProperties
+        , fields : List ( Common.UnsafeName, Common.Field )
+        }
+    ->
+        { isRecursive : Maybe Common.UnsafeName
+        , additionalProperties : Common.AdditionalProperties
+        , fields : List ( Common.UnsafeName, Common.Field )
+        }
     -> CliMonad (IntersectionResult Json.Encode.Value)
-objectsIntersection seen ( lFields, lAdditional ) ( rFields, rAdditional ) =
+objectsIntersection seen l r =
     let
         lDict : FastDict.Dict String Common.Field
         lDict =
-            lFields
+            l.fields
                 |> List.map (\( k, v ) -> ( Common.unwrapUnsafe k, v ))
                 |> FastDict.fromList
 
         rDict : FastDict.Dict String Common.Field
         rDict =
-            rFields
+            r.fields
                 |> List.map (\( k, v ) -> ( Common.unwrapUnsafe k, v ))
                 |> FastDict.fromList
 
@@ -1283,11 +1254,11 @@ objectsIntersection seen ( lFields, lAdditional ) ( rFields, rAdditional ) =
     FastDict.merge
         (\lkey lField acc ->
             if lField.required then
-                case rAdditional of
-                    Nothing ->
+                case r.additionalProperties of
+                    Common.AdditionalPropertiesDisallowed ->
                         CliMonad.succeed IntersectionResult.NoIntersection
 
-                    Just rAdditionalType ->
+                    Common.AdditionalPropertiesAllowed rAdditional ->
                         CliMonad.map2
                             (\i prev ->
                                 combine
@@ -1297,7 +1268,7 @@ objectsIntersection seen ( lFields, lAdditional ) ( rFields, rAdditional ) =
                                     )
                                     prev
                             )
-                            (typesIntersection seen lField.type_ rAdditionalType
+                            (typesIntersection seen lField.type_ rAdditional.type_
                                 |> CliMonad.withPath (Common.UnsafeName lkey)
                             )
                             acc
@@ -1323,11 +1294,11 @@ objectsIntersection seen ( lFields, lAdditional ) ( rFields, rAdditional ) =
         )
         (\rkey rField acc ->
             if rField.required then
-                case lAdditional of
-                    Nothing ->
+                case l.additionalProperties of
+                    Common.AdditionalPropertiesDisallowed ->
                         CliMonad.succeed IntersectionResult.NoIntersection
 
-                    Just lAdditionalType ->
+                    Common.AdditionalPropertiesAllowed lAdditional ->
                         CliMonad.map2
                             (\i prev ->
                                 combine
@@ -1337,7 +1308,7 @@ objectsIntersection seen ( lFields, lAdditional ) ( rFields, rAdditional ) =
                                     )
                                     prev
                             )
-                            (typesIntersection seen rField.type_ lAdditionalType
+                            (typesIntersection seen rField.type_ lAdditional.type_
                                 |> CliMonad.withPath (Common.UnsafeName rkey)
                             )
                             acc
@@ -1432,7 +1403,7 @@ typeToString type_ =
         Common.Nullable _ ->
             "nullable"
 
-        Common.Object _ _ ->
+        Common.Object _ ->
             "object"
 
         Common.Basic _ _ ->
@@ -1446,9 +1417,6 @@ typeToString type_ =
 
         Common.Triple _ _ _ ->
             "list of length 3"
-
-        Common.Dict _ _ ->
-            "dict"
 
         Common.OneOf _ _ ->
             "oneOf"
@@ -1640,14 +1608,13 @@ typeToOneOfVariant { type_, documentation } =
         Common.Triple l m r ->
             wrap3 "Triple" l m r
 
-        Common.Dict additionalProperties [] ->
-            wrap "Dict" additionalProperties.type_
+        Common.Object { additionalProperties, fields } ->
+            case ( additionalProperties, fields ) of
+                ( Common.AdditionalPropertiesAllowed additional, [] ) ->
+                    wrap "Dict" additional.type_
 
-        Common.Dict _ _ ->
-            CliMonad.succeed Nothing
-
-        Common.Object _ _ ->
-            CliMonad.succeed Nothing
+                _ ->
+                    CliMonad.succeed Nothing
 
         Common.Null ->
             simple (Common.UnsafeName "()")
@@ -1756,10 +1723,10 @@ oneOfType types =
 
 {-| Transform an object schema's named and inherited (via $ref) properties to a type
 -}
-objectSchemaToTypeHelp : List (Common.RefTo Common.Schema) -> Json.Schema.Definitions.SubSchema -> CliMonad { type_ : Common.Type, documentation : Maybe String }
-objectSchemaToTypeHelp seen subSchema =
-    CliMonad.andThen2
-        (\schemaProps allOfProps ->
+objectSchemaToType : List (Common.RefTo Common.Schema) -> Json.Schema.Definitions.SubSchema -> CliMonad { type_ : Common.Type, documentation : Maybe String }
+objectSchemaToType seen subSchema =
+    CliMonad.andThen4
+        (\schemaProps allOfProps additionalProperties _ ->
             let
                 ( props, propsDocumentations ) =
                     listUnion schemaProps allOfProps
@@ -1774,111 +1741,95 @@ objectSchemaToTypeHelp seen subSchema =
                                 )
                             )
                         |> List.unzip
-
-                propsDocumentation : Maybe String
-                propsDocumentation =
-                    propsDocumentations
-                        |> joinIfNotEmpty "\n"
             in
             CliMonad.findMap (\( _, c ) -> isTypeRecursive seen c.type_) props
                 |> CliMonad.map
                     (\isRecursive ->
                         { type_ =
-                            Common.Object { isRecursive = isRecursive } props
+                            Common.Object
+                                { isRecursive = isRecursive
+                                , additionalProperties = additionalProperties
+                                , fields = props
+                                }
                         , documentation =
-                            case propsDocumentation of
-                                Nothing ->
+                            [ case List.filterMap identity propsDocumentations of
+                                [] ->
                                     subSchema.description
 
-                                Just _ ->
-                                    [ Just (Maybe.withDefault "Fields:" subSchema.description) -- A nonempty line is needed for formatting
-                                    , propsDocumentation
+                                nonEmpty ->
+                                    [ Maybe.withDefault "Fields:" subSchema.description -- A nonempty line is needed for formatting
+                                    , String.join "\n" nonEmpty
                                     ]
-                                        |> joinIfNotEmpty "\n\n"
+                                        |> String.join "\n\n"
+                                        |> Just
+                            , case additionalProperties of
+                                Common.AdditionalPropertiesAllowed { documentation } ->
+                                    documentation
+                                        |> Maybe.map
+                                            (\doc ->
+                                                case String.lines doc of
+                                                    [] ->
+                                                        " - additionalProperties"
+
+                                                    first :: [] ->
+                                                        " - additionalProperties: " ++ first
+
+                                                    first :: rest ->
+                                                        " - additionalProperties: "
+                                                            ++ first
+                                                            ++ "\n\n   Each value in the dict is a record of:    "
+                                                            ++ String.join "\n    " rest
+                                            )
+
+                                Common.AdditionalPropertiesDisallowed ->
+                                    Nothing
+                            ]
+                                |> joinIfNotEmpty "\n\n"
                         }
                     )
         )
         (subSchemaToProperties seen subSchema)
         (subSchemaAllOfToProperties seen subSchema)
+        (subSchemaToAdditionalProperties seen subSchema)
+        (case subSchema.patternProperties of
+            Just _ ->
+                CliMonad.succeed ()
+                    |> CliMonad.withWarning "patternProperties not implemented yet"
+
+            Nothing ->
+                CliMonad.succeed ()
+        )
 
 
-objectSchemaToType : List (Common.RefTo Common.Schema) -> Json.Schema.Definitions.SubSchema -> CliMonad { type_ : Common.Type, documentation : Maybe String }
-objectSchemaToType seen subSchema =
-    let
-        declaredProperties : CliMonad { type_ : Common.Type, documentation : Maybe String }
-        declaredProperties =
-            objectSchemaToTypeHelp seen subSchema
+subSchemaToAdditionalProperties : List (Common.RefTo Common.Schema) -> Json.Schema.Definitions.SubSchema -> CliMonad Common.AdditionalProperties
+subSchemaToAdditionalProperties seen subSchema =
+    case subSchema.additionalProperties of
+        -- Object contains only specified properties, not arbitrary extra ones.
+        Just (Json.Schema.Definitions.BooleanSchema False) ->
+            Common.AdditionalPropertiesDisallowed
+                |> CliMonad.succeed
 
-        declaredAndAdditionalProperties : CliMonad { type_ : Common.Type, documentation : Maybe String } -> CliMonad { type_ : Common.Type, documentation : Maybe String }
-        declaredAndAdditionalProperties additionalSchema =
-            CliMonad.andThen2
-                (\declaredProperties_ additionalProperties ->
-                    case declaredProperties_.type_ of
-                        Common.Object _ properties ->
-                            { type_ = Common.Dict additionalProperties properties
-                            , documentation =
-                                [ declaredProperties_.documentation
-                                , additionalProperties.documentation
-                                    |> Maybe.map
-                                        (\doc ->
-                                            case String.lines doc of
-                                                [] ->
-                                                    " - additionalProperties"
-
-                                                first :: [] ->
-                                                    " - additionalProperties: " ++ first
-
-                                                first :: rest ->
-                                                    " - additionalProperties: "
-                                                        ++ first
-                                                        ++ "\n\n   Each value in the dict is a record of:    "
-                                                        ++ String.join "\n    " rest
-                                        )
-                                ]
-                                    |> joinIfNotEmpty "\n\n"
-                            }
-                                |> CliMonad.succeed
-
-                        _ ->
-                            CliMonad.fail "Internal error: non-Object from objectSchemaToTypeHelp"
-                )
-                declaredProperties
-                additionalSchema
-    in
-    (case subSchema.patternProperties of
-        Just _ ->
-            CliMonad.succeed ()
-                |> CliMonad.withWarning "patternProperties not implemented yet"
+        -- It's unclear whether "true" is *technically* an acceptable value for
+        -- additionalProperties, but the GitHub API spec uses it. Since the type
+        -- of the properties could be anything, we keep them as Json Values.
+        Just (Json.Schema.Definitions.BooleanSchema True) ->
+            { type_ = Common.Value
+            , documentation = Just "Arbitrary data whose type is not defined by the API spec"
+            }
+                |> Common.AdditionalPropertiesAllowed
+                |> CliMonad.succeed
 
         Nothing ->
-            CliMonad.succeed ()
-    )
-        |> CliMonad.andThen
-            (\() ->
-                case subSchema.additionalProperties of
-                    -- Object contains only specified properties, not arbitrary extra ones.
-                    Just (Json.Schema.Definitions.BooleanSchema False) ->
-                        declaredProperties
+            -- By default objects are allowed to have arbitrary additional properties
+            Common.AdditionalPropertiesAllowed { type_ = Common.Value, documentation = Nothing }
+                |> CliMonad.succeed
 
-                    -- It's unclear whether "true" is *technically* an acceptable value for
-                    -- additionalProperties, but the GitHub API spec uses it. Since the type
-                    -- of the properties could be anything, we keep them as Json Values.
-                    Just (Json.Schema.Definitions.BooleanSchema True) ->
-                        CliMonad.succeed
-                            { type_ = Common.Value
-                            , documentation = Just "Arbitrary data whose type is not defined by the API spec"
-                            }
-                            |> declaredAndAdditionalProperties
-
-                    -- The object contains an additionalProperties entry that describes the
-                    -- type of the values, which may have arbitrary keys, in the object.
-                    Just additionalPropertiesSchema ->
-                        schemaToType seen additionalPropertiesSchema
-                            |> declaredAndAdditionalProperties
-
-                    Nothing ->
-                        declaredProperties
-            )
+        -- The object contains an additionalProperties entry that describes the
+        -- type of the values, which may have arbitrary keys, in the object.
+        Just (Json.Schema.Definitions.ObjectSchema schema) ->
+            schemaToType seen (Json.Schema.Definitions.ObjectSchema schema)
+                |> CliMonad.map
+                    Common.AdditionalPropertiesAllowed
 
 
 joinIfNotEmpty : String -> List (Maybe String) -> Maybe String
@@ -1960,9 +1911,6 @@ typeToAnnotationWithNullable type_ =
                 OpenApi.Common.Internal.annotation_.nullable
                 (typeToAnnotationWithNullable t)
 
-        Common.Object _ fields ->
-            objectToAnnotation { useMaybe = False } fields
-
         Common.Basic basicType basic ->
             basicTypeToAnnotation basicType basic
 
@@ -1983,29 +1931,39 @@ typeToAnnotationWithNullable type_ =
                 (typeToAnnotationWithNullable m)
                 (typeToAnnotationWithNullable r)
 
-        Common.Dict additionalProperties [] ->
-            -- We do not use `Elm.Annotation.dict` here because it will NOT
-            -- result in `import Dict` being generated in the module, due to
-            -- a bug in elm-codegen.
-            CliMonad.map (Gen.Dict.annotation_.dict Elm.Annotation.string)
-                (typeToAnnotationWithNullable additionalProperties.type_)
+        Common.Object { additionalProperties, fields, isRecursive } ->
+            case ( additionalProperties, fields ) of
+                ( Common.AdditionalPropertiesAllowed additional, [] ) ->
+                    -- We do not use `Elm.Annotation.dict` here because it will NOT
+                    -- result in `import Dict` being generated in the module, due to
+                    -- a bug in elm-codegen.
+                    typeToAnnotationWithNullable additional.type_
+                        |> CliMonad.map (Gen.Dict.annotation_.dict Elm.Annotation.string)
 
-        Common.Dict additionalProperties fields ->
-            let
-                additionalPropertiesField :
-                    ( Common.UnsafeName
-                    , { type_ : Common.Type, required : Bool, documentation : Maybe String }
-                    )
-                additionalPropertiesField =
-                    ( Common.UnsafeName "additionalProperties"
-                    , { type_ = Common.Dict additionalProperties []
-                      , required = True
-                      , documentation = additionalProperties.documentation
-                      }
-                    )
-            in
-            (additionalPropertiesField :: fields)
-                |> objectToAnnotation { useMaybe = False }
+                ( Common.AdditionalPropertiesAllowed additional, _ ) ->
+                    let
+                        additionalPropertiesField :
+                            ( Common.UnsafeName
+                            , { type_ : Common.Type, required : Bool, documentation : Maybe String }
+                            )
+                        additionalPropertiesField =
+                            ( Common.UnsafeName "additionalProperties"
+                            , { type_ =
+                                    Common.Object
+                                        { additionalProperties = additionalProperties
+                                        , fields = []
+                                        , isRecursive = isRecursive
+                                        }
+                              , required = True
+                              , documentation = additional.documentation
+                              }
+                            )
+                    in
+                    (additionalPropertiesField :: fields)
+                        |> objectToAnnotation { useMaybe = False }
+
+                ( Common.AdditionalPropertiesDisallowed, _ ) ->
+                    objectToAnnotation { useMaybe = False } fields
 
         Common.Enum variants ->
             CliMonad.enumName (NonEmpty.toList variants)
@@ -2044,9 +2002,6 @@ typeToAnnotationWithMaybe type_ =
         Common.Nullable t ->
             CliMonad.map Elm.Annotation.maybe (typeToAnnotationWithMaybe t)
 
-        Common.Object _ fields ->
-            objectToAnnotation { useMaybe = True } fields
-
         Common.Basic basicType basic ->
             basicTypeToAnnotation basicType basic
 
@@ -2067,29 +2022,39 @@ typeToAnnotationWithMaybe type_ =
                 (typeToAnnotationWithMaybe m)
                 (typeToAnnotationWithMaybe r)
 
-        Common.Dict additionalProperties [] ->
-            -- We do not use `Elm.Annotation.dict` here because it will NOT
-            -- result in `import Dict` being generated in the module, due to
-            -- a bug in elm-codegen.
-            CliMonad.map (Gen.Dict.annotation_.dict Elm.Annotation.string)
-                (typeToAnnotationWithMaybe additionalProperties.type_)
+        Common.Object { additionalProperties, fields, isRecursive } ->
+            case ( additionalProperties, fields ) of
+                ( Common.AdditionalPropertiesAllowed additional, [] ) ->
+                    -- We do not use `Elm.Annotation.dict` here because it will NOT
+                    -- result in `import Dict` being generated in the module, due to
+                    -- a bug in elm-codegen.
+                    typeToAnnotationWithMaybe additional.type_
+                        |> CliMonad.map (Gen.Dict.annotation_.dict Elm.Annotation.string)
 
-        Common.Dict additionalProperties fields ->
-            let
-                additionalPropertiesField :
-                    ( Common.UnsafeName
-                    , { type_ : Common.Type, required : Bool, documentation : Maybe String }
-                    )
-                additionalPropertiesField =
-                    ( Common.UnsafeName "additionalProperties"
-                    , { type_ = Common.Dict additionalProperties []
-                      , required = True
-                      , documentation = additionalProperties.documentation
-                      }
-                    )
-            in
-            (additionalPropertiesField :: fields)
-                |> objectToAnnotation { useMaybe = True }
+                ( Common.AdditionalPropertiesAllowed additional, _ ) ->
+                    let
+                        additionalPropertiesField :
+                            ( Common.UnsafeName
+                            , { type_ : Common.Type, required : Bool, documentation : Maybe String }
+                            )
+                        additionalPropertiesField =
+                            ( Common.UnsafeName "additionalProperties"
+                            , { type_ =
+                                    Common.Object
+                                        { additionalProperties = additionalProperties
+                                        , fields = []
+                                        , isRecursive = isRecursive
+                                        }
+                              , required = True
+                              , documentation = additional.documentation
+                              }
+                            )
+                    in
+                    (additionalPropertiesField :: fields)
+                        |> objectToAnnotation { useMaybe = True }
+
+                ( Common.AdditionalPropertiesDisallowed, _ ) ->
+                    objectToAnnotation { useMaybe = True } fields
 
         Common.Enum variants ->
             variants
@@ -2143,7 +2108,7 @@ basicTypeToAnnotation basicType { format } =
     CliMonad.withFormat basicType format .annotation default
 
 
-objectToAnnotation : { useMaybe : Bool } -> Common.Object -> CliMonad Elm.Annotation.Annotation
+objectToAnnotation : { useMaybe : Bool } -> List ( Common.UnsafeName, Common.Field ) -> CliMonad Elm.Annotation.Annotation
 objectToAnnotation config fields =
     fields
         |> CliMonad.combineMap
@@ -2203,52 +2168,6 @@ typeToEncoder type_ =
                                 CliMonad.refToEncoder (Common.refTo Common.Schema name)
                     )
 
-        Common.Object _ properties ->
-            let
-                allRequired : Bool
-                allRequired =
-                    List.all (\( _, { required } ) -> required) properties
-            in
-            properties
-                |> CliMonad.combineMap
-                    (\( key, field ) ->
-                        typeToEncoder field.type_
-                            |> CliMonad.map
-                                (\encoder rec ->
-                                    let
-                                        fieldExpr : Elm.Expression
-                                        fieldExpr =
-                                            Elm.get (Common.toValueName key) rec
-
-                                        toTuple : Elm.Expression -> Elm.Expression
-                                        toTuple value =
-                                            Elm.tuple
-                                                (Elm.string (Common.unwrapUnsafe key))
-                                                (encoder value)
-                                    in
-                                    if allRequired then
-                                        toTuple fieldExpr
-
-                                    else if field.required then
-                                        Gen.Maybe.make_.just (toTuple fieldExpr)
-
-                                    else
-                                        Gen.Maybe.map toTuple fieldExpr
-                                )
-                            |> CliMonad.withPath key
-                    )
-                |> CliMonad.map
-                    (\toProperties value ->
-                        if allRequired then
-                            Gen.Json.Encode.object <|
-                                List.map (\prop -> prop value) toProperties
-
-                        else
-                            Gen.Json.Encode.call_.object <|
-                                Gen.List.filterMap Gen.Basics.identity <|
-                                    List.map (\prop -> prop value) toProperties
-                    )
-
         Common.List t ->
             typeToEncoder t
                 |> CliMonad.map
@@ -2285,72 +2204,120 @@ typeToEncoder type_ =
                 (typeToEncoder m)
                 (typeToEncoder r)
 
-        -- An object with additionalProperties (the type of those properties is
-        -- `additionalProperties`) and no normal `properties` fields: A simple Dict.
-        Common.Dict additionalProperties [] ->
-            typeToEncoder additionalProperties.type_
-                |> CliMonad.map
-                    (\encoder ->
-                        Gen.Json.Encode.call_.dict Gen.Basics.values_.identity (Elm.functionReduced "rec" encoder)
-                    )
+        Common.Object { additionalProperties, fields } ->
+            case ( additionalProperties, fields ) of
+                ( Common.AdditionalPropertiesDisallowed, _ ) ->
+                    let
+                        allRequired : Bool
+                        allRequired =
+                            List.all (\( _, { required } ) -> required) fields
+                    in
+                    fields
+                        |> CliMonad.combineMap
+                            (\( key, field ) ->
+                                typeToEncoder field.type_
+                                    |> CliMonad.map
+                                        (\encoder rec ->
+                                            let
+                                                fieldExpr : Elm.Expression
+                                                fieldExpr =
+                                                    Elm.get (Common.toValueName key) rec
 
-        -- An object with additionalProperties *and* normal `properties` fields.
-        Common.Dict additionalProperties properties ->
-            let
-                allRequired : Bool
-                allRequired =
-                    List.all (\( _, { required } ) -> required) properties
-            in
-            properties
-                |> CliMonad.combineMap
-                    (\( key, field ) ->
-                        typeToEncoder field.type_
-                            |> CliMonad.map
-                                (\encoder rec ->
-                                    let
-                                        fieldExpr : Elm.Expression
-                                        fieldExpr =
-                                            Elm.get (Common.toValueName key) rec
+                                                toTuple : Elm.Expression -> Elm.Expression
+                                                toTuple value =
+                                                    Elm.tuple
+                                                        (Elm.string (Common.unwrapUnsafe key))
+                                                        (encoder value)
+                                            in
+                                            if allRequired then
+                                                toTuple fieldExpr
 
-                                        toTuple : Elm.Expression -> Elm.Expression
-                                        toTuple value =
-                                            Elm.tuple
-                                                (Elm.string (Common.unwrapUnsafe key))
-                                                (encoder value)
-                                    in
-                                    if allRequired then
-                                        toTuple fieldExpr
+                                            else if field.required then
+                                                Gen.Maybe.make_.just (toTuple fieldExpr)
 
-                                    else if field.required then
-                                        Gen.Maybe.make_.just (toTuple fieldExpr)
+                                            else
+                                                Gen.Maybe.map toTuple fieldExpr
+                                        )
+                                    |> CliMonad.withPath key
+                            )
+                        |> CliMonad.map
+                            (\toProperties value ->
+                                if allRequired then
+                                    Gen.Json.Encode.object <|
+                                        List.map (\prop -> prop value) toProperties
 
-                                    else
-                                        Gen.Maybe.map toTuple fieldExpr
-                                )
-                            |> CliMonad.withPath key
-                    )
-                |> CliMonad.map2
-                    (\additionalPropertyEncoder toProperties ->
-                        \value ->
-                            Gen.Json.Encode.call_.object
-                                (Gen.List.call_.append
-                                    (if allRequired then
-                                        Elm.list (List.map (\prop -> prop value) toProperties)
+                                else
+                                    Gen.Json.Encode.call_.object <|
+                                        Gen.List.filterMap Gen.Basics.identity <|
+                                            List.map (\prop -> prop value) toProperties
+                            )
 
-                                     else
-                                        Gen.List.filterMap Gen.Basics.identity (List.map (\prop -> prop value) toProperties)
-                                    )
-                                    (Gen.List.call_.map
-                                        (Elm.fn (Elm.Arg.tuple (Elm.Arg.var "key") (Elm.Arg.var "value"))
-                                            (\( key, data ) ->
-                                                Elm.tuple key (additionalPropertyEncoder data)
+                ( Common.AdditionalPropertiesAllowed additional, [] ) ->
+                    -- An object with additionalProperties (the type of those properties is
+                    -- `additionalProperties.type_`) and no normal `properties` fields: A simple Dict.
+                    typeToEncoder additional.type_
+                        |> CliMonad.map
+                            (\encoder ->
+                                Gen.Json.Encode.call_.dict Gen.Basics.values_.identity (Elm.functionReduced "rec" encoder)
+                            )
+
+                -- An object with additionalProperties *and* normal `properties` fields.
+                ( Common.AdditionalPropertiesAllowed additional, _ ) ->
+                    let
+                        allRequired : Bool
+                        allRequired =
+                            List.all (\( _, { required } ) -> required) fields
+                    in
+                    fields
+                        |> CliMonad.combineMap
+                            (\( key, field ) ->
+                                typeToEncoder field.type_
+                                    |> CliMonad.map
+                                        (\encoder rec ->
+                                            let
+                                                fieldExpr : Elm.Expression
+                                                fieldExpr =
+                                                    Elm.get (Common.toValueName key) rec
+
+                                                toTuple : Elm.Expression -> Elm.Expression
+                                                toTuple value =
+                                                    Elm.tuple
+                                                        (Elm.string (Common.unwrapUnsafe key))
+                                                        (encoder value)
+                                            in
+                                            if allRequired then
+                                                toTuple fieldExpr
+
+                                            else if field.required then
+                                                Gen.Maybe.make_.just (toTuple fieldExpr)
+
+                                            else
+                                                Gen.Maybe.map toTuple fieldExpr
+                                        )
+                                    |> CliMonad.withPath key
+                            )
+                        |> CliMonad.map2
+                            (\additionalPropertyEncoder toProperties ->
+                                \value ->
+                                    Gen.Json.Encode.call_.object
+                                        (Gen.List.call_.append
+                                            (if allRequired then
+                                                Elm.list (List.map (\prop -> prop value) toProperties)
+
+                                             else
+                                                Gen.List.filterMap Gen.Basics.identity (List.map (\prop -> prop value) toProperties)
+                                            )
+                                            (Gen.List.call_.map
+                                                (Elm.fn (Elm.Arg.tuple (Elm.Arg.var "key") (Elm.Arg.var "value"))
+                                                    (\( key, data ) ->
+                                                        Elm.tuple key (additionalPropertyEncoder data)
+                                                    )
+                                                )
+                                                (Gen.Dict.toList (Elm.get "additionalProperties" value))
                                             )
                                         )
-                                        (Gen.Dict.toList (Elm.get "additionalProperties" value))
-                                    )
-                                )
-                    )
-                    (typeToEncoder additionalProperties.type_)
+                            )
+                            (typeToEncoder additional.type_)
 
         Common.Nullable t ->
             CliMonad.map
@@ -2444,44 +2411,6 @@ oneOfAnnotation oneOfName oneOfData =
 typeToDecoder : Common.Type -> CliMonad Elm.Expression
 typeToDecoder type_ =
     case type_ of
-        Common.Object _ properties ->
-            List.foldl
-                (\( key, field ) prevExprRes ->
-                    CliMonad.map2
-                        (\internalDecoder prevExpr ->
-                            Elm.Op.Extra.pipeInto "prev"
-                                (OpenApi.Common.Internal.commonSubmodule.call.jsonDecodeAndMap
-                                    (if field.required then
-                                        Gen.Json.Decode.field (Common.unwrapUnsafe key) internalDecoder
-
-                                     else
-                                        OpenApi.Common.Internal.commonSubmodule.call.decodeOptionalField
-                                            (Elm.string (Common.unwrapUnsafe key))
-                                            internalDecoder
-                                    )
-                                )
-                                prevExpr
-                        )
-                        (typeToDecoder field.type_ |> CliMonad.withPath key)
-                        prevExprRes
-                )
-                (CliMonad.succeed
-                    (Gen.Json.Decode.succeed
-                        (Elm.function
-                            (List.map (\( key, _ ) -> ( Common.toValueName key, Nothing )) properties)
-                            (\args ->
-                                Elm.record
-                                    (List.map2
-                                        (\( key, _ ) arg -> ( Common.toValueName key, arg ))
-                                        properties
-                                        args
-                                    )
-                            )
-                        )
-                    )
-                )
-                properties
-
         Common.Basic basicType basic ->
             basicTypeToDecoder basicType basic
 
@@ -2517,18 +2446,14 @@ typeToDecoder type_ =
                 (typeToDecoder m)
                 (typeToDecoder r)
 
-        Common.Dict additionalProperties [] ->
-            CliMonad.map Gen.Json.Decode.dict
-                (typeToDecoder additionalProperties.type_)
-
-        Common.Dict additionalProperties properties ->
-            properties
-                |> List.foldl
-                    (\( key, field ) prevExprRes ->
-                        CliMonad.map2
-                            (\internalDecoder prevExpr ->
-                                prevExpr
-                                    |> Elm.Op.Extra.pipeInto "prev"
+        Common.Object { additionalProperties, fields, isRecursive } ->
+            case ( additionalProperties, fields ) of
+                ( Common.AdditionalPropertiesDisallowed, _ ) ->
+                    List.foldl
+                        (\( key, field ) prevExprRes ->
+                            CliMonad.map2
+                                (\internalDecoder prevExpr ->
+                                    Elm.Op.Extra.pipeInto "prev"
                                         (OpenApi.Common.Internal.commonSubmodule.call.jsonDecodeAndMap
                                             (if field.required then
                                                 Gen.Json.Decode.field (Common.unwrapUnsafe key) internalDecoder
@@ -2539,139 +2464,188 @@ typeToDecoder type_ =
                                                     internalDecoder
                                             )
                                         )
-                            )
-                            (typeToDecoder field.type_ |> CliMonad.withPath key)
-                            prevExprRes
-                    )
-                    (CliMonad.succeed
-                        (Gen.Json.Decode.succeed
-                            (Elm.function
-                                (List.map (\( key, _ ) -> ( Common.toValueName key, Nothing )) properties
-                                    ++ [ ( Common.toValueName (Common.UnsafeName "additionalProperties"), Nothing ) ]
+                                        prevExpr
                                 )
-                                (\args ->
-                                    Elm.record
-                                        (List.map2
-                                            (\( key, _ ) arg -> ( Common.toValueName key, arg ))
-                                            (properties
-                                                ++ [ ( Common.UnsafeName "additionalProperties"
-                                                     , { type_ = additionalProperties.type_
-                                                       , required = True
-                                                       , documentation = Nothing
-                                                       }
-                                                     )
-                                                   ]
-                                            )
-                                            args
-                                        )
-                                )
-                            )
+                                (typeToDecoder field.type_ |> CliMonad.withPath key)
+                                prevExprRes
                         )
-                    )
-                |> CliMonad.map2
-                    (\dictValueDecoder prevExpr ->
-                        prevExpr
-                            |> Elm.Op.Extra.pipeInto "prev"
-                                (OpenApi.Common.Internal.commonSubmodule.call.jsonDecodeAndMap
-                                    (Gen.Json.Decode.keyValuePairs Gen.Json.Decode.value
-                                        |> Elm.Op.Extra.pipeInto "keyValuePairs"
-                                            (Gen.Json.Decode.andThen
-                                                (\keyValuePairs ->
-                                                    Gen.List.call_.filterMap
-                                                        (Elm.fn (Elm.Arg.tuple (Elm.Arg.var "key") (Elm.Arg.var "jsonValue"))
-                                                            (\( key, jsonValue ) ->
-                                                                let
-                                                                    propertyNames : Elm.Expression
-                                                                    propertyNames =
-                                                                        properties
-                                                                            |> List.map (Tuple.first >> Common.unwrapUnsafe >> Elm.string)
-                                                                            |> Elm.list
-                                                                in
-                                                                Elm.ifThen (Elm.apply Gen.List.values_.member [ key, propertyNames ])
-                                                                    Elm.nothing
-                                                                    (Elm.Let.letIn
-                                                                        (\additionalPropertyDecoder ->
-                                                                            Elm.Case.result
-                                                                                (Elm.apply Gen.Json.Decode.values_.decodeValue
-                                                                                    [ additionalPropertyDecoder, jsonValue ]
-                                                                                )
-                                                                                { err =
-                                                                                    ( "decodeError"
-                                                                                    , \decodeError ->
-                                                                                        let
-                                                                                            decoderErrorAsString : Elm.Expression
-                                                                                            decoderErrorAsString =
-                                                                                                Elm.apply Gen.Json.Decode.values_.errorToString
-                                                                                                    [ decodeError ]
-                                                                                        in
-                                                                                        Elm.just
-                                                                                            (Gen.Result.make_.err
-                                                                                                (Elm.Op.Extra.appends
-                                                                                                    [ Elm.string "Field '"
-                                                                                                    , key
-                                                                                                    , Elm.string "': "
-                                                                                                    , decoderErrorAsString
-                                                                                                    ]
-                                                                                                )
-                                                                                            )
-                                                                                    )
-                                                                                , ok =
-                                                                                    ( "decodedValue"
-                                                                                    , \decodedValue ->
-                                                                                        Elm.just
-                                                                                            (Gen.Result.make_.ok (Elm.tuple key decodedValue))
-                                                                                    )
-                                                                                }
-                                                                        )
-                                                                        |> Elm.Let.value "additionalPropertyDecoder" dictValueDecoder
-                                                                        |> Elm.Let.toExpression
-                                                                    )
-                                                            )
-                                                        )
-                                                        keyValuePairs
-                                                        |> Elm.Op.Extra.pipeInto "resultPairs"
-                                                            (\resultPairs ->
-                                                                Elm.Let.letIn
-                                                                    (\fieldErrors ->
-                                                                        Elm.ifThen (Elm.apply Gen.List.values_.isEmpty [ fieldErrors ])
-                                                                            (resultPairs
-                                                                                |> Elm.Op.Extra.pipeInto "prev"
-                                                                                    (Gen.List.call_.filterMap
-                                                                                        Gen.Result.values_.toMaybe
-                                                                                    )
-                                                                                |> Elm.Op.Extra.pipeInto "prev" Gen.Dict.call_.fromList
-                                                                                |> Elm.Op.Extra.pipeInto "prev" Gen.Json.Decode.succeed
-                                                                            )
-                                                                            (Elm.list
-                                                                                [ Elm.string "Errors while decoding additionalProperties:\n- "
-                                                                                , Elm.apply Gen.String.values_.join
-                                                                                    [ Elm.string "\n\n- ", fieldErrors ]
-                                                                                , Elm.string "\n"
-                                                                                ]
-                                                                                |> Elm.Op.Extra.pipeInto "prev" Gen.String.call_.concat
-                                                                                |> Elm.Op.Extra.pipeInto "prev" Gen.Json.Decode.call_.fail
-                                                                            )
-                                                                    )
-                                                                    |> Elm.Let.value "fieldErrors"
-                                                                        (Elm.apply Gen.List.values_.filterMap
-                                                                            [ Elm.fn (Elm.Arg.var "field")
-                                                                                (\field ->
-                                                                                    Elm.Case.result field
-                                                                                        { ok = ( "_", \_ -> Elm.nothing )
-                                                                                        , err = ( "error", \error -> Elm.just error )
-                                                                                        }
-                                                                                )
-                                                                            , resultPairs
-                                                                            ]
-                                                                        )
-                                                                    |> Elm.Let.toExpression
-                                                            )
-                                                )
+                        (CliMonad.succeed
+                            (Gen.Json.Decode.succeed
+                                (Elm.function
+                                    (List.map (\( key, _ ) -> ( Common.toValueName key, Nothing )) fields)
+                                    (\args ->
+                                        Elm.record
+                                            (List.map2
+                                                (\( key, _ ) arg -> ( Common.toValueName key, arg ))
+                                                fields
+                                                args
                                             )
                                     )
                                 )
-                    )
-                    (typeToDecoder additionalProperties.type_)
+                            )
+                        )
+                        fields
+
+                ( Common.AdditionalPropertiesAllowed additional, [] ) ->
+                    typeToDecoder additional.type_
+                        |> CliMonad.map Gen.Json.Decode.dict
+
+                ( Common.AdditionalPropertiesAllowed additional, _ ) ->
+                    fields
+                        |> List.foldl
+                            (\( key, field ) prevExprRes ->
+                                CliMonad.map2
+                                    (\internalDecoder prevExpr ->
+                                        prevExpr
+                                            |> Elm.Op.Extra.pipeInto "prev"
+                                                (OpenApi.Common.Internal.commonSubmodule.call.jsonDecodeAndMap
+                                                    (if field.required then
+                                                        Gen.Json.Decode.field (Common.unwrapUnsafe key) internalDecoder
+
+                                                     else
+                                                        OpenApi.Common.Internal.commonSubmodule.call.decodeOptionalField
+                                                            (Elm.string (Common.unwrapUnsafe key))
+                                                            internalDecoder
+                                                    )
+                                                )
+                                    )
+                                    (typeToDecoder field.type_ |> CliMonad.withPath key)
+                                    prevExprRes
+                            )
+                            (CliMonad.succeed
+                                (Gen.Json.Decode.succeed
+                                    (Elm.function
+                                        (List.map (\( key, _ ) -> ( Common.toValueName key, Nothing )) fields
+                                            ++ [ ( Common.toValueName (Common.UnsafeName "additionalProperties"), Nothing ) ]
+                                        )
+                                        (\args ->
+                                            Elm.record
+                                                (List.map2
+                                                    (\( key, _ ) arg -> ( Common.toValueName key, arg ))
+                                                    (fields
+                                                        ++ [ ( Common.UnsafeName "additionalProperties"
+                                                             , { type_ =
+                                                                    Common.Object
+                                                                        { additionalProperties = additionalProperties
+                                                                        , isRecursive = isRecursive
+                                                                        , fields = []
+                                                                        }
+                                                               , required = True
+                                                               , documentation = Nothing
+                                                               }
+                                                             )
+                                                           ]
+                                                    )
+                                                    args
+                                                )
+                                        )
+                                    )
+                                )
+                            )
+                        |> CliMonad.map2
+                            (\dictValueDecoder prevExpr ->
+                                prevExpr
+                                    |> Elm.Op.Extra.pipeInto "prev"
+                                        (OpenApi.Common.Internal.commonSubmodule.call.jsonDecodeAndMap
+                                            (Gen.Json.Decode.keyValuePairs Gen.Json.Decode.value
+                                                |> Elm.Op.Extra.pipeInto "keyValuePairs"
+                                                    (Gen.Json.Decode.andThen
+                                                        (\keyValuePairs ->
+                                                            Gen.List.call_.filterMap
+                                                                (Elm.fn (Elm.Arg.tuple (Elm.Arg.var "key") (Elm.Arg.var "jsonValue"))
+                                                                    (\( key, jsonValue ) ->
+                                                                        let
+                                                                            propertyNames : Elm.Expression
+                                                                            propertyNames =
+                                                                                fields
+                                                                                    |> List.map (Tuple.first >> Common.unwrapUnsafe >> Elm.string)
+                                                                                    |> Elm.list
+                                                                        in
+                                                                        Elm.ifThen (Elm.apply Gen.List.values_.member [ key, propertyNames ])
+                                                                            Elm.nothing
+                                                                            (Elm.Let.letIn
+                                                                                (\additionalPropertyDecoder ->
+                                                                                    Elm.Case.result
+                                                                                        (Elm.apply Gen.Json.Decode.values_.decodeValue
+                                                                                            [ additionalPropertyDecoder, jsonValue ]
+                                                                                        )
+                                                                                        { err =
+                                                                                            ( "decodeError"
+                                                                                            , \decodeError ->
+                                                                                                let
+                                                                                                    decoderErrorAsString : Elm.Expression
+                                                                                                    decoderErrorAsString =
+                                                                                                        Elm.apply Gen.Json.Decode.values_.errorToString
+                                                                                                            [ decodeError ]
+                                                                                                in
+                                                                                                Elm.just
+                                                                                                    (Gen.Result.make_.err
+                                                                                                        (Elm.Op.Extra.appends
+                                                                                                            [ Elm.string "Field '"
+                                                                                                            , key
+                                                                                                            , Elm.string "': "
+                                                                                                            , decoderErrorAsString
+                                                                                                            ]
+                                                                                                        )
+                                                                                                    )
+                                                                                            )
+                                                                                        , ok =
+                                                                                            ( "decodedValue"
+                                                                                            , \decodedValue ->
+                                                                                                Elm.just
+                                                                                                    (Gen.Result.make_.ok (Elm.tuple key decodedValue))
+                                                                                            )
+                                                                                        }
+                                                                                )
+                                                                                |> Elm.Let.value "additionalPropertyDecoder" dictValueDecoder
+                                                                                |> Elm.Let.toExpression
+                                                                            )
+                                                                    )
+                                                                )
+                                                                keyValuePairs
+                                                                |> Elm.Op.Extra.pipeInto "resultPairs"
+                                                                    (\resultPairs ->
+                                                                        Elm.Let.letIn
+                                                                            (\fieldErrors ->
+                                                                                Elm.ifThen (Elm.apply Gen.List.values_.isEmpty [ fieldErrors ])
+                                                                                    (resultPairs
+                                                                                        |> Elm.Op.Extra.pipeInto "prev"
+                                                                                            (Gen.List.call_.filterMap
+                                                                                                Gen.Result.values_.toMaybe
+                                                                                            )
+                                                                                        |> Elm.Op.Extra.pipeInto "prev" Gen.Dict.call_.fromList
+                                                                                        |> Elm.Op.Extra.pipeInto "prev" Gen.Json.Decode.succeed
+                                                                                    )
+                                                                                    (Elm.list
+                                                                                        [ Elm.string "Errors while decoding additionalProperties:\n- "
+                                                                                        , Elm.apply Gen.String.values_.join
+                                                                                            [ Elm.string "\n\n- ", fieldErrors ]
+                                                                                        , Elm.string "\n"
+                                                                                        ]
+                                                                                        |> Elm.Op.Extra.pipeInto "prev" Gen.String.call_.concat
+                                                                                        |> Elm.Op.Extra.pipeInto "prev" Gen.Json.Decode.call_.fail
+                                                                                    )
+                                                                            )
+                                                                            |> Elm.Let.value "fieldErrors"
+                                                                                (Elm.apply Gen.List.values_.filterMap
+                                                                                    [ Elm.fn (Elm.Arg.var "field")
+                                                                                        (\field ->
+                                                                                            Elm.Case.result field
+                                                                                                { ok = ( "_", \_ -> Elm.nothing )
+                                                                                                , err = ( "error", \error -> Elm.just error )
+                                                                                                }
+                                                                                        )
+                                                                                    , resultPairs
+                                                                                    ]
+                                                                                )
+                                                                            |> Elm.Let.toExpression
+                                                                    )
+                                                        )
+                                                    )
+                                            )
+                                        )
+                            )
+                            (typeToDecoder additional.type_)
 
         Common.Enum variants ->
             variants
@@ -2952,25 +2926,27 @@ isTypeRecursive seen t =
                             |> CliMonad.andThen (\{ type_ } -> isTypeRecursive newSeen type_)
                 )
 
-        Common.Object { isRecursive } props ->
+        Common.Object { isRecursive, fields, additionalProperties } ->
             case isRecursive of
                 Just _ ->
                     CliMonad.succeed isRecursive
 
                 Nothing ->
-                    CliMonad.findMap (\( _, c ) -> isTypeRecursive seen c.type_) props
+                    CliMonad.findMap (\( _, c ) -> isTypeRecursive seen c.type_) fields
+                        |> CliMonad.andThen
+                            (\found ->
+                                case found of
+                                    Just _ ->
+                                        CliMonad.succeed found
 
-        Common.Dict { type_ } props ->
-            isTypeRecursive seen type_
-                |> CliMonad.andThen
-                    (\r ->
-                        case r of
-                            Just _ ->
-                                CliMonad.succeed r
+                                    Nothing ->
+                                        case additionalProperties of
+                                            Common.AdditionalPropertiesDisallowed ->
+                                                CliMonad.succeed Nothing
 
-                            Nothing ->
-                                CliMonad.findMap (\( _, c ) -> isTypeRecursive seen c.type_) props
-                    )
+                                            Common.AdditionalPropertiesAllowed additional ->
+                                                isTypeRecursive seen additional.type_
+                            )
 
         Common.OneOf _ alternatives ->
             CliMonad.findMap (\alternative -> isTypeRecursive seen alternative.type_) (NonEmpty.toList alternatives)

@@ -1821,7 +1821,8 @@ subSchemaToAdditionalProperties seen subSchema =
 
         Nothing ->
             -- By default objects are allowed to have arbitrary additional properties
-            Common.AdditionalPropertiesAllowed { type_ = Common.Value, documentation = Nothing }
+            -- Common.AdditionalPropertiesAllowed { type_ = Common.Value, documentation = Nothing }
+            Common.AdditionalPropertiesDisallowed
                 |> CliMonad.succeed
 
         -- The object contains an additionalProperties entry that describes the

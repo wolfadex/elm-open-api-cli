@@ -262,7 +262,7 @@ nonEnumToDeclarations component name schema documentation type_ =
                         isRecursive : Bool
                         isRecursive =
                             case type_ of
-                                Common.Object r _ ->
+                                Common.Object r ->
                                     r.isRecursive == Just name
 
                                 _ ->

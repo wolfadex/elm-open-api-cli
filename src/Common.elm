@@ -1,10 +1,10 @@
 module Common exposing
-    ( BasicType(..)
+    ( AdditionalProperties(..)
+    , BasicType(..)
     , Component(..)
     , ConstValue(..)
     , Field
     , Module(..)
-    , Object
     , OneOfData
     , Package(..)
     , RefTo
@@ -447,7 +447,11 @@ initialUppercaseWordToLowercase input =
 
 type Type
     = Nullable Type
-    | Object { isRecursive : Maybe UnsafeName } Object
+    | Object
+        { isRecursive : Maybe UnsafeName
+        , additionalProperties : AdditionalProperties
+        , fields : List ( UnsafeName, Field )
+        }
     | Basic
         -- This is separate for easier pattern matching
         BasicType
@@ -459,14 +463,17 @@ type Type
     | List Type
     | Tuple Type Type
     | Triple Type Type Type
-      -- The type declared in additionalProperties, and a list of normal properties
-    | Dict { type_ : Type, documentation : Maybe String } Object
     | OneOf TypeName ( OneOfData, List OneOfData )
     | Enum ( UnsafeName, List UnsafeName )
     | Value
     | Ref (RefTo Schema)
     | Bytes
     | Unit
+
+
+type AdditionalProperties
+    = AdditionalPropertiesAllowed { type_ : Type, documentation : Maybe String }
+    | AdditionalPropertiesDisallowed
 
 
 type RefTo r
@@ -509,10 +516,6 @@ basicTypeToString basicType =
 
         Number ->
             "number"
-
-
-type alias Object =
-    List ( UnsafeName, Field )
 
 
 type alias OneOfData =

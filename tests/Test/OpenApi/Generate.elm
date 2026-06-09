@@ -131,6 +131,7 @@ fuzzTitle =
                                 , warnOnMissingEnums = True
                                 , keepGoing = False
                                 , noEnumSort = False
+                                , decodeComplete = False
                                 }
                                 oas
                     in
@@ -261,6 +262,7 @@ pr267 =
                                 , warnOnMissingEnums = True
                                 , keepGoing = False
                                 , noEnumSort = False
+                                , decodeComplete = False
                                 }
                                 oas
                     in
@@ -553,6 +555,7 @@ uuidArrayParam =
                                 , warnOnMissingEnums = True
                                 , keepGoing = False
                                 , noEnumSort = False
+                                , decodeComplete = False
                                 }
                                 oas
                     in
@@ -677,6 +680,7 @@ noEnumSort =
                                 , warnOnMissingEnums = True
                                 , keepGoing = False
                                 , noEnumSort = noEnumSort_
+                                , decodeComplete = False
                                 }
                                 oas
 
@@ -808,6 +812,7 @@ pathLevelParams =
                                 , warnOnMissingEnums = True
                                 , keepGoing = False
                                 , noEnumSort = False
+                                , decodeComplete = False
                                 }
                                 oas
                     in

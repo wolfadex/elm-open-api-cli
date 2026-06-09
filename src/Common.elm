@@ -473,7 +473,8 @@ type Type
 
 type AdditionalProperties
     = AdditionalPropertiesAllowed { type_ : Type, documentation : Maybe String }
-    | AdditionalPropertiesDisallowed
+    | AdditionalPropertiesDisallowedImplicitly
+    | AdditionalPropertiesDisallowedExplicitly
 
 
 type RefTo r

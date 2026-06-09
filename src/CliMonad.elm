@@ -8,7 +8,7 @@ module CliMonad exposing
     , withPath, withWarning, withExtendedWarning, withRequiredPackage
     , todo, todoWithDefault
     , withFormat
-    , noEnumSort
+    , noEnumSort, decodeComplete
     , nameToAnnotation, refToAnnotation, refToEncoder, refToDecoder
     )
 
@@ -23,7 +23,7 @@ module CliMonad exposing
 @docs withPath, withWarning, withExtendedWarning, withRequiredPackage
 @docs todo, todoWithDefault
 @docs withFormat
-@docs noEnumSort
+@docs noEnumSort, decodeComplete
 
 
 ## Utils
@@ -91,6 +91,7 @@ type alias Input =
     , warnOnMissingEnums : Bool
     , keepGoing : Bool
     , noEnumSort : Bool
+    , decodeComplete : Bool
     }
 
 
@@ -136,6 +137,7 @@ run :
         , warnOnMissingEnums : Bool
         , keepGoing : Bool
         , noEnumSort : Bool
+        , decodeComplete : Bool
         }
     -> CliMonad (List Declaration)
     ->
@@ -160,6 +162,7 @@ run oneOfDeclarations input (CliMonad x) =
             , warnOnMissingEnums = input.warnOnMissingEnums
             , keepGoing = input.keepGoing
             , noEnumSort = input.noEnumSort
+            , decodeComplete = input.decodeComplete
             }
 
         res : Result Message ( List Declaration, Output, Cache )
@@ -656,6 +659,11 @@ getApiSpec =
 noEnumSort : CliMonad Bool
 noEnumSort =
     CliMonad (\input cache -> Ok ( input.noEnumSort, emptyOutput, cache ))
+
+
+decodeComplete : CliMonad Bool
+decodeComplete =
+    CliMonad (\input cache -> Ok ( input.decodeComplete, emptyOutput, cache ))
 
 
 {-| If the user has chosen to keep going in the face of errors, this will convert an error into a warning. Otherwise this returns the input

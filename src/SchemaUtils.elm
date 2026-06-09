@@ -28,6 +28,7 @@ import Elm.ToString
 import FastDict
 import Gen.Basics
 import Gen.Bytes
+import Gen.DecodeComplete
 import Gen.Dict
 import Gen.Json.Decode
 import Gen.Json.Encode
@@ -2450,42 +2451,71 @@ typeToDecoder type_ =
         Common.Object { additionalProperties, fields, isRecursive } ->
             case ( additionalProperties, fields ) of
                 ( Common.AdditionalPropertiesDisallowed, _ ) ->
-                    List.foldl
-                        (\( key, field ) prevExprRes ->
-                            CliMonad.map2
-                                (\internalDecoder prevExpr ->
-                                    Elm.Op.Extra.pipeInto "prev"
-                                        (OpenApi.Common.Internal.commonSubmodule.call.jsonDecodeAndMap
-                                            (if field.required then
-                                                Gen.Json.Decode.field (Common.unwrapUnsafe key) internalDecoder
+                    CliMonad.decodeComplete
+                        |> CliMonad.andThen
+                            (\decodeComplete ->
+                                List.foldl
+                                    (\( key, field ) prevExprRes ->
+                                        CliMonad.map2
+                                            (\internalDecoder prevExpr ->
+                                                Elm.Op.Extra.pipeInto "prev"
+                                                    (if decodeComplete then
+                                                        if field.required then
+                                                            Gen.DecodeComplete.required (Common.unwrapUnsafe key) internalDecoder
 
-                                             else
-                                                OpenApi.Common.Internal.commonSubmodule.call.decodeOptionalField
-                                                    (Elm.string (Common.unwrapUnsafe key))
-                                                    internalDecoder
+                                                        else
+                                                            Gen.DecodeComplete.omissible (Common.unwrapUnsafe key)
+                                                                (Gen.Json.Decode.map
+                                                                    Gen.Maybe.make_.just
+                                                                    internalDecoder
+                                                                )
+                                                                Gen.Maybe.make_.nothing
+
+                                                     else
+                                                        OpenApi.Common.Internal.commonSubmodule.call.jsonDecodeAndMap
+                                                            (if field.required then
+                                                                Gen.Json.Decode.field (Common.unwrapUnsafe key) internalDecoder
+
+                                                             else
+                                                                OpenApi.Common.Internal.commonSubmodule.call.decodeOptionalField
+                                                                    (Elm.string (Common.unwrapUnsafe key))
+                                                                    internalDecoder
+                                                            )
+                                                    )
+                                                    prevExpr
+                                            )
+                                            (typeToDecoder field.type_ |> CliMonad.withPath key)
+                                            prevExprRes
+                                    )
+                                    (CliMonad.succeed
+                                        ((if decodeComplete then
+                                            Gen.DecodeComplete.object
+
+                                          else
+                                            Gen.Json.Decode.succeed
+                                         )
+                                            (Elm.function
+                                                (List.map (\( key, _ ) -> ( Common.toValueName key, Nothing )) fields)
+                                                (\args ->
+                                                    Elm.record
+                                                        (List.map2
+                                                            (\( key, _ ) arg -> ( Common.toValueName key, arg ))
+                                                            fields
+                                                            args
+                                                        )
+                                                )
                                             )
                                         )
-                                        prevExpr
-                                )
-                                (typeToDecoder field.type_ |> CliMonad.withPath key)
-                                prevExprRes
-                        )
-                        (CliMonad.succeed
-                            (Gen.Json.Decode.succeed
-                                (Elm.function
-                                    (List.map (\( key, _ ) -> ( Common.toValueName key, Nothing )) fields)
-                                    (\args ->
-                                        Elm.record
-                                            (List.map2
-                                                (\( key, _ ) arg -> ( Common.toValueName key, arg ))
-                                                fields
-                                                args
-                                            )
                                     )
-                                )
+                                    fields
+                                    |> CliMonad.map
+                                        (if decodeComplete then
+                                            Gen.DecodeComplete.complete
+
+                                         else
+                                            identity
+                                        )
                             )
-                        )
-                        fields
 
                 ( Common.AdditionalPropertiesAllowed additional, [] ) ->
                     typeToDecoder additional.type_

@@ -728,7 +728,7 @@ toGenerationConfig formatsInput (Config config) augmentedInputs =
               , formats = config.staticFormats ++ config.dynamicFormats formatsInput
               , keepGoing = config.keepGoing
               , noEnumSort = config.noEnumSort
-              , decodeComplete = input.decodeComplete
+              , decodeComplete = config.decodeComplete || input.decodeComplete
               }
             , spec
             )

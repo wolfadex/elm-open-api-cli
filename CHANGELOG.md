@@ -7,16 +7,42 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unreleased]
 
+## [0.8.0] - 2026-06-17
+
 ### Fixed
 
 -   [Missing fields with recursive `allOf.$ref` inheritance](https://github.com/wolfadex/elm-open-api-cli/pull/182). [Adam DiCarlo](https://github.com/adamdicarlo0)
+-   Paths security should override global security. [Adam DiCarlo](https://github.com/adamdicarlo0)
+-   Replace "OneOf" type names with hash to reduce the size, to avoid a corrupted cache issue with the Elm compiler [lucamug](https://github.com/lucamug)
 
 ### Added
 
 -   Support for params being passed in the header
--   Support for `type : null`
--   Support for `const : <value>`
+-   Support for oauth2
+-   HTTP BearerToken support
 -   [Support for `additionalProperties` in objects](https://github.com/wolfadex/elm-open-api-cli/pull/184). [Adam DiCarlo](https://github.com/adamdicarlo0)
+-   Support for `application/octet-stream`. [Rónán](https://github.com/ronanyeah)
+-   Support for path-level parameters. [Neyts Zupan](https://github.com/zupo)
+-   [Leonardo Taglialegne](https://github.com/miniBill):
+    -   Support for `type : null`
+    -   Support for `const : <value>`
+    -   Improved error messages
+    -   Warnings for missing formats
+    -   Support for URI format
+    -   Support for the post-authentication token use in oauth2
+    -   Support for object params
+    -   Support for bytes
+    -   Handle duplicate server listings
+    -   Support for UUIDs format
+    -   Improved YAML support
+    -   Support for cookie authentication
+    -   Support for `anyOf` where possible
+    -   Support for `password` format
+    -   Lists of 2 or 3 are now formated as `Tuple`s
+    -   Support for `multipart/form-data`
+    -   Support for recursive types
+    -   Support for regex pattern
+
 
 ## [0.7.0] - 2024-09-23
 

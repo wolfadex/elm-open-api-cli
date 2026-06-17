@@ -1,38 +1,38 @@
 {
-    "name": "elm-open-api",
-    "version": "0.7.0",
-    "description": "A tool for generating Elm SDKs from OpenAPI Specs.",
-    "main": "dist/elm-open-api.js",
-    "bin": "dist/elm-open-api.js",
-    "type": "module",
-    "scripts": {
-        "dev": "cd cli && elm-pages run src/Cli.elm",
-        "docs": "elm make --docs=docs.json",
-        "build": "cd cli && elm-pages bundle-script src/Cli.elm --output ../dist/elm-open-api.js --optimize 1",
-        "review": "elm-review",
-        "review:watch": "elm-review --watch --fix",
-        "format": "elm-format src tests --validate",
-        "test": "elm-test",
-        "test:gen": "cd cli && elm-pages run src/TestGenScript.elm",
-        "test:watch": "elm-test --watch",
-        "pub": "npm run build && npm publish"
-    },
-    "author": "Wolfgang Schuster",
-    "license": "MIT",
-    "devDependencies": {
-        "@lydell/elm-json": "0.2.13-1",
-        "@redocly/cli": "1.11.0",
-        "elm": "0.19.1-6",
-        "elm-codegen": "^0.6.3",
-        "elm-format": "0.8.7",
-        "elm-optimize-level-2": "0.3.5",
-        "elm-pages": "^3.5.0",
-        "elm-review": "^2.13.5",
-        "elm-test": "^0.19.1-revision17",
-        "lamdera": "^0.19.1-1.4.0",
-        "vite": "^6.0.3"
-    },
-    "volta": {
-        "node": "20.11.0"
-    }
+  "name": "elm-open-api",
+  "version": "0.8.0",
+  "description": "A tool for generating Elm SDKs from OpenAPI Specs.",
+  "main": "dist/elm-open-api.js",
+  "bin": "dist/elm-open-api.js",
+  "type": "module",
+  "scripts": {
+    "dev": "cd cli && elm-pages run src/Cli.elm",
+    "docs": "elm make --docs=docs.json",
+    "build": "cd cli && elm-pages bundle-script src/Cli.elm --output ../dist/elm-open-api.js --optimize 1",
+    "review": "elm-review",
+    "review:watch": "elm-review --watch --fix",
+    "format": "elm-format src tests --validate",
+    "test": "elm-test",
+    "test:gen": "cd cli && elm-pages run src/TestGenScript.elm",
+    "test:watch": "elm-test --watch",
+    "pub": "npm run build && npm publish"
+  },
+  "author": "Wolfgang Schuster",
+  "license": "MIT",
+  "devDependencies": {
+    "@lydell/elm-json": "0.2.13-1",
+    "@redocly/cli": "1.11.0",
+    "elm": "0.19.1-6",
+    "elm-codegen": "^0.6.3",
+    "elm-format": "0.8.7",
+    "elm-optimize-level-2": "0.3.5",
+    "elm-pages": "^3.5.0",
+    "elm-review": "^2.13.5",
+    "elm-test": "^0.19.1-revision17",
+    "lamdera": "^0.19.1-1.4.0",
+    "vite": "^6.0.3"
+  },
+  "volta": {
+    "node": "20.11.0"
+  }
 }

@@ -1,9 +1,9 @@
 module OpenApi.Config exposing
     ( Config, EffectType(..), effectTypeToPackage, Format, Input, Path(..), Server(..)
     , init, inputFrom, pathFromString
-    , withAutoConvertSwagger, AutoConvertSwagger(..), withEffectTypes, withFormat, withFormats, withGenerateTodos, withInput, withSwaggerConversionCommand, withSwaggerConversionUrl, withNoElmFormat, withKeepGoing, withNoEnumSort
+    , withAutoConvertSwagger, AutoConvertSwagger(..), withEffectTypes, withFormat, withFormats, withGenerateTodos, withInput, withSwaggerConversionCommand, withSwaggerConversionUrl, withNoElmFormat, withKeepGoing, withNoEnumSort, withDecodeComplete
     , withOutputModuleName, withOverrides, withServer, withWriteMergedTo, withWarnOnMissingEnums
-    , autoConvertSwagger, inputs, outputDirectory, swaggerConversionCommand, swaggerConversionUrl, noElmFormat, keepGoing, noEnumSort
+    , autoConvertSwagger, inputs, outputDirectory, swaggerConversionCommand, swaggerConversionUrl, noElmFormat, keepGoing, noEnumSort, decodeComplete
     , oasPath, overrides, writeMergedTo
     , toGenerationConfig, Generate, pathToString
     , defaultFormats
@@ -20,13 +20,13 @@ module OpenApi.Config exposing
 # Creation
 
 @docs init, inputFrom, pathFromString
-@docs withAutoConvertSwagger, AutoConvertSwagger, withEffectTypes, withFormat, withFormats, withGenerateTodos, withInput, withSwaggerConversionCommand, withSwaggerConversionUrl, withNoElmFormat, withKeepGoing, withNoEnumSort
+@docs withAutoConvertSwagger, AutoConvertSwagger, withEffectTypes, withFormat, withFormats, withGenerateTodos, withInput, withSwaggerConversionCommand, withSwaggerConversionUrl, withNoElmFormat, withKeepGoing, withNoEnumSort, withDecodeComplete
 @docs withOutputModuleName, withOverrides, withServer, withWriteMergedTo, withWarnOnMissingEnums
 
 
 # Config properties
 
-@docs autoConvertSwagger, inputs, outputDirectory, swaggerConversionCommand, swaggerConversionUrl, noElmFormat, keepGoing, noEnumSort
+@docs autoConvertSwagger, inputs, outputDirectory, swaggerConversionCommand, swaggerConversionUrl, noElmFormat, keepGoing, noEnumSort, decodeComplete
 
 
 # Input properties
@@ -85,6 +85,7 @@ type Config
         , noElmFormat : Bool
         , keepGoing : Bool
         , noEnumSort : Bool
+        , decodeComplete : Bool
         }
 
 
@@ -110,6 +111,7 @@ type Input
         , writeMergedTo : Maybe String
         , effectTypes : List EffectType
         , warnOnMissingEnums : Bool
+        , decodeComplete : Bool
         }
 
 
@@ -255,6 +257,7 @@ init initialOutputDirectory =
     , noElmFormat = False
     , keepGoing = False
     , noEnumSort = False
+    , decodeComplete = False
     }
         |> Config
 
@@ -269,6 +272,7 @@ inputFrom path =
     , writeMergedTo = Nothing
     , effectTypes = [ ElmHttpCmd, ElmHttpTask ]
     , warnOnMissingEnums = False
+    , decodeComplete = False
     }
         |> Input
 
@@ -585,6 +589,13 @@ withNoEnumSort newNoEnumSort (Config config) =
     Config { config | noEnumSort = newNoEnumSort }
 
 
+{-| When `True`, use eike/json-decode-complete for decoding objects. Defaults to `False`.
+-}
+withDecodeComplete : Bool -> Input -> Input
+withDecodeComplete newDecodeComplete (Input input) =
+    Input { input | decodeComplete = newDecodeComplete }
+
+
 
 -------------
 -- Getters --
@@ -640,6 +651,13 @@ noEnumSort (Config config) =
     config.noEnumSort
 
 
+{-| Whether to use eike/json-decode-complete to decode objects.
+-}
+decodeComplete : Config -> Bool
+decodeComplete (Config config) =
+    config.decodeComplete
+
+
 {-| -}
 oasPath : Input -> Path
 oasPath (Input input) =
@@ -674,6 +692,7 @@ type alias Generate =
     , warnOnMissingEnums : Bool
     , keepGoing : Bool
     , noEnumSort : Bool
+    , decodeComplete : Bool
     }
 
 
@@ -709,6 +728,7 @@ toGenerationConfig formatsInput (Config config) augmentedInputs =
               , formats = config.staticFormats ++ config.dynamicFormats formatsInput
               , keepGoing = config.keepGoing
               , noEnumSort = config.noEnumSort
+              , decodeComplete = config.decodeComplete || input.decodeComplete
               }
             , spec
             )

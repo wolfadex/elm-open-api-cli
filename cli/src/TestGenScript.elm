@@ -26,6 +26,7 @@ run =
         additionalProperties : OpenApi.Config.Input
         additionalProperties =
             OpenApi.Config.inputFrom (OpenApi.Config.File "./example/additional-properties.yaml")
+                |> OpenApi.Config.withDecodeComplete True
 
         amadeusAirlineLookup : OpenApi.Config.Input
         amadeusAirlineLookup =

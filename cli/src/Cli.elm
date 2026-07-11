@@ -54,6 +54,7 @@ type alias CliOptions =
     , noElmFormat : Bool
     , keepGoing : Bool
     , noEnumSort : Bool
+    , useDecodeComplete : Bool
     }
 
 
@@ -188,6 +189,10 @@ program =
                 |> Cli.OptionsParser.with
                     (Cli.Option.flag "no-enum-sort"
                         |> Cli.Option.withDescription "Don't sort enum variants alphabetically, preserve the order from the spec."
+                    )
+                |> Cli.OptionsParser.with
+                    (Cli.Option.flag "use-decode-complete"
+                        |> Cli.Option.withDescription "Use eike/json-decode-complete for decoding objects with hasAdditionalProperties: false"
                     )
             )
 

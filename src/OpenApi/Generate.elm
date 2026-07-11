@@ -126,7 +126,7 @@ files :
             , warnings : List Message
             , requiredPackages : FastSet.Set String
             }
-files { namespace, generateTodos, effectTypes, server, formats, warnOnMissingEnums, keepGoing, noEnumSort } apiSpec =
+files { namespace, generateTodos, effectTypes, server, formats, warnOnMissingEnums, keepGoing, noEnumSort, decodeComplete } apiSpec =
     case extractEnums apiSpec of
         Err e ->
             Err e
@@ -157,6 +157,7 @@ files { namespace, generateTodos, effectTypes, server, formats, warnOnMissingEnu
                     , warnOnMissingEnums = warnOnMissingEnums
                     , keepGoing = keepGoing
                     , noEnumSort = noEnumSort
+                    , decodeComplete = decodeComplete
                     }
                 |> Result.map
                     (\{ declarations, warnings, requiredPackages } ->

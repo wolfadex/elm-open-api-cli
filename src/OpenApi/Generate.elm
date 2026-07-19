@@ -1970,39 +1970,46 @@ multipartContent mediaType =
             CliMonad.fail "Missing schema"
 
         Just schema ->
+            let
+                finishMultipart : { type_ : Common.Type, documentation : Maybe String } -> CliMonad ContentSchema
+                finishMultipart { type_ } =
+                    case type_ of
+                        Common.Object { fields } ->
+                            fields
+                                |> List.map
+                                    (\( fieldName, field ) ->
+                                        { name = fieldName
+                                        , required = field.required
+                                        , part =
+                                            case field.type_ of
+                                                Common.Basic Common.String { format } ->
+                                                    case format of
+                                                        Just "binary" ->
+                                                            BytesPart
+
+                                                        _ ->
+                                                            StringPart
+
+                                                Common.Bytes ->
+                                                    BytesPart
+
+                                                _ ->
+                                                    JsonPart field.type_
+                                        }
+                                    )
+                                |> MultipartContent
+                                |> CliMonad.succeed
+
+                        Common.Ref ref ->
+                            SchemaUtils.getSchema ref
+                                |> CliMonad.andThen (SchemaUtils.schemaToType [])
+                                |> CliMonad.andThen finishMultipart
+
+                        _ ->
+                            CliMonad.fail ("Schema with a type of " ++ SchemaUtils.typeToString type_ ++ " not supported")
+            in
             SchemaUtils.schemaToType [] (OpenApi.Schema.get schema)
-                |> CliMonad.andThen
-                    (\{ type_ } ->
-                        case type_ of
-                            Common.Object { fields } ->
-                                fields
-                                    |> List.map
-                                        (\( fieldName, field ) ->
-                                            { name = fieldName
-                                            , required = field.required
-                                            , part =
-                                                case field.type_ of
-                                                    Common.Basic Common.String { format } ->
-                                                        case format of
-                                                            Just "binary" ->
-                                                                BytesPart
-
-                                                            _ ->
-                                                                StringPart
-
-                                                    Common.Bytes ->
-                                                        BytesPart
-
-                                                    _ ->
-                                                        JsonPart field.type_
-                                            }
-                                        )
-                                    |> MultipartContent
-                                    |> CliMonad.succeed
-
-                            _ ->
-                                CliMonad.fail ("Schema with a type of " ++ SchemaUtils.typeToString type_ ++ " not supported")
-                    )
+                |> CliMonad.andThen finishMultipart
 
 
 toConfigParamAnnotation :
